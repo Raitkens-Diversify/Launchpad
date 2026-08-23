@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Person Account Merging Project --></label>
+        <name>Person_Account_Merging_Project__c</name>
+    </CustomFieldTranslation>

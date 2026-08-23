@@ -1,0 +1,151 @@
+<!-- Author: Mile Cacanovic -->
+<template>
+    <div>
+    <!-- Key Point header: the field's label promoted to a heading with a small flag icon (the
+         "Key Point" pill lives on the section header). The control below renders with its own label
+         hidden (variant="label-hidden"). -->
+    <template lwc:if={showKeyPointHeader}>
+        <div class="field-keypoint">
+            <span class="field-keypoint__label">{displayLabel}</span>
+            <lightning-icon
+                class="field-keypoint__flag"
+                icon-name="utility:priority"
+                size="x-small"
+                alternative-text="Key Point">
+            </lightning-icon>
+            <template lwc:if={canClear}>
+                <lightning-button
+                    class="env-base-button field-clear"
+                    variant="base"
+                    label="Clear"
+                    onclick={handleClear}>
+                </lightning-button>
+            </template>
+        </div>
+    </template>
+
+    <!-- Common Input (Text, Number, Date, Email, etc.) -->
+    <template if:true={isInput}>
+        <lightning-input
+            type={inputType}
+            label={controlLabel}
+            variant={controlVariant}
+            placeholder={placeholder}
+            value={field.value}
+            checked={field.value}
+            max-length={maxLength}
+            step={numberStep}
+            formatter={numberFormatter}
+            pattern={pattern}
+            message-when-pattern-mismatch={patternMismatchMessage}
+            min={minValue}
+            max={maxValue}
+            message-when-range-underflow={rangeMessage}
+            message-when-range-overflow={rangeMessage}
+            onchange={handleChange}
+            onblur={handleBlur}>
+        </lightning-input>
+    </template>
+
+    <!-- Picklist with few options: radio group (inline when 3 or fewer options). A radio group can't be
+         deselected natively, so the label moves to a row of our own that also hosts a "Clear" link (the
+         control's built-in label is hidden). Key Point radios reuse their header row for the same link. -->
+    <template if:true={isRadioPicklist}>
+        <template lwc:if={showRadioLabelRow}>
+            <div class="field-label-row">
+                <span class="field-label-row__label">{displayLabel}</span>
+                <template lwc:if={canClear}>
+                    <lightning-button
+                        class="env-base-button field-clear"
+                        variant="base"
+                        label="Clear"
+                        onclick={handleClear}>
+                    </lightning-button>
+                </template>
+            </div>
+        </template>
+        <lightning-radio-group
+            class={radioGroupClass}
+            name={field.apiName}
+            label={displayLabel}
+            variant="label-hidden"
+            options={field.picklistOptions}
+            value={field.value}
+            onchange={handleChange}>
+        </lightning-radio-group>
+    </template>
+
+    <!-- Picklist with many options: searchable dropdown -->
+    <template if:true={isSelectPicklist}>
+        <c-envelope-searchable-combobox
+            label={controlLabel}
+            variant={controlVariant}
+            name={field.apiName}
+            value={field.value}
+            placeholder="Select..."
+            options={field.picklistOptions}
+            onchange={handleChange}>
+        </c-envelope-searchable-combobox>
+    </template>
+
+    <!-- Textarea -->
+    <template if:true={isTextarea}>
+        <lightning-textarea
+            label={controlLabel}
+            variant={controlVariant}
+            placeholder={placeholder}
+            value={field.value}
+            max-length={maxLength}
+            onchange={handleChange}
+            onblur={handleBlur}>
+        </lightning-textarea>
+    </template>
+
+    <!-- Multi-select picklist (rendered as a checkbox list) -->
+    <template if:true={isMultiPicklist}>
+        <lightning-checkbox-group
+            name={field.apiName}
+            label={controlLabel}
+            variant={controlVariant}
+            options={field.picklistOptions}
+            value={field.value}
+            onchange={handleChange}>
+        </lightning-checkbox-group>
+    </template>
+
+    <!-- Multi-select picklist rendered as dueling lists, capped at maxSelections -->
+    <template if:true={isDualListbox}>
+        <lightning-dual-listbox
+            name={field.apiName}
+            label={controlLabel}
+            variant={controlVariant}
+            source-label="Available"
+            selected-label="Chosen"
+            options={field.picklistOptions}
+            value={field.value}
+            max={maxSelections}
+            onchange={handleChange}>
+        </lightning-dual-listbox>
+    </template>
+
+    <!-- Fallback: a configured field whose type has no control. Rendered read-only so the gap is
+         visible in the form rather than silently missing. -->
+    <template if:true={isUnsupported}>
+        <lightning-input
+            type="text"
+            label={controlLabel}
+            variant={controlVariant}
+            disabled
+            placeholder={unsupportedMessage}
+            field-level-help={unsupportedMessage}>
+        </lightning-input>
+    </template>
+
+    <!-- Change marker, below whichever control rendered above: this field differs from the value
+         the request started from. -->
+    <template lwc:if={isUpdated}>
+        <p class="field-updated">Updated</p>
+    </template>
+
+    </div>
+</template>

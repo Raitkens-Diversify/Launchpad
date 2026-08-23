@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RecordType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Personal_and_Family</fullName>
+    <active>true</active>
+    <label>Family and Friends</label>
+    <picklistValues>
+        <picklist>Association_Type__c</picklist>
+        <values>
+            <fullName>Member</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Peer</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Role__c</picklist>
+        <values>
+            <fullName>Aunt</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Child</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Friend</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Grandchild %28or Great%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Grandparent %28or Great%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Nephew</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Niece</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Parent</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Sibling</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Spouse %E2%80%94 Current</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Spouse %E2%80%94 Former</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Uncle</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Roles__c</picklist>
+        <values>
+            <fullName>Aunt</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Child</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Friend</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Grandchild %28or Great%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Grandparent %28or Great%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Nephew</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Niece</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Parent</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Sibling</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Spouse %E2%80%94 Current</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Spouse %E2%80%94 Former</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Uncle</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+</RecordType>

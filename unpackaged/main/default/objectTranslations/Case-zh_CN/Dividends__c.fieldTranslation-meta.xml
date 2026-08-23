@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Dividends --></label>
+        <name>Dividends__c</name>
+        <picklistValues>
+            <masterLabel>Reinvested</masterLabel>
+            <translation><!-- Reinvested --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Sent to Cash</masterLabel>
+            <translation><!-- Sent to Cash --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

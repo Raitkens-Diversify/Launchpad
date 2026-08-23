@@ -1,0 +1,125 @@
+<!-- Author: Mile Cacanovic -->
+<template>
+    <div class={tableClass}>
+        <header class="strategy__header">
+            <h4 class="strategy__title">Allocations</h4>
+            <lightning-button
+                label="Add allocation"
+                onclick={handleAdd}>
+            </lightning-button>
+        </header>
+
+        <p class="strategy__hint">{unitHint}</p>
+
+        <template lwc:if={hasRows}>
+            <!-- Column headers once for the table, rather than a label repeated on every row. -->
+            <div class="strategy__columns" aria-hidden="true">
+                <span class="strategy__column-label">Strategy</span>
+                <span class="strategy__column-label">Amount</span>
+                <span class="strategy__column-label">Unit</span>
+                <template lwc:if={showDerived}>
+                    <span class="strategy__column-label">Est. dollars</span>
+                </template>
+                <span></span>
+            </div>
+
+            <div class="strategy__rows">
+                <template for:each={rows} for:item="row">
+                    <div key={row.id} class="strategy__row">
+                        <div class="strategy__cell strategy__cell_strategy">
+                            <!-- Searchable combobox rather than lightning-combobox: it filters/typeaheads
+                                 the strategy list and gates its options behind its open state. `options`
+                                 arrives as a plain, un-proxied copy from envelopeTradeInstructions (see
+                                 pickerOptions there) — passing the deeply-nested reactive proxy here made
+                                 LWC's membrane recurse for seconds on access. -->
+                            <c-envelope-searchable-combobox
+                                variant="label-hidden"
+                                label="Strategy"
+                                placeholder="Select strategy"
+                                value={row.strategy}
+                                options={options}
+                                data-id={row.id}
+                                onchange={handleStrategyChange}>
+                            </c-envelope-searchable-combobox>
+                        </div>
+                        <div class="strategy__cell strategy__cell_value">
+                            <!-- No currency formatter on the dollar input: a formatter rewrites what
+                                 it is handed, so the row could never be bound the exact value it just
+                                 reported — and that equality is what keeps these controlled inputs
+                                 from echoing themselves into a loop. The formatted amount is the
+                                 row's Est. dollars cell. -->
+                            <template lwc:if={row.isDollar}>
+                                <lightning-input
+                                    type="number"
+                                    step="0.01"
+                                    variant="label-hidden"
+                                    label="Amount"
+                                    value={row.value}
+                                    data-id={row.id}
+                                    onchange={handleValueChange}
+                                    onblur={handleValueBlur}>
+                                </lightning-input>
+                            </template>
+                            <template lwc:else>
+                                <lightning-input
+                                    type="number"
+                                    variant="label-hidden"
+                                    label="Target weight"
+                                    value={row.value}
+                                    data-id={row.id}
+                                    onchange={handleValueChange}
+                                    onblur={handleValueBlur}>
+                                </lightning-input>
+                            </template>
+                            <template lwc:if={row.flag}>
+                                <p class={row.flagClass}>{row.flag}</p>
+                            </template>
+                        </div>
+                        <div class="strategy__cell strategy__cell_unit">
+                            <!-- The rule decides the unit: a locked strategy shows it as a badge; only
+                                 an Either strategy renders the actual toggle. -->
+                            <template lwc:if={row.showToggle}>
+                                <lightning-radio-group
+                                    type="button"
+                                    variant="label-hidden"
+                                    label="Unit"
+                                    options={unitOptions}
+                                    value={row.unitValue}
+                                    data-id={row.id}
+                                    onchange={handleUnitChange}>
+                                </lightning-radio-group>
+                            </template>
+                            <template lwc:else>
+                                <span class="strategy__unit-badge" aria-label={row.unitAria}>{row.unitLabel}</span>
+                            </template>
+                        </div>
+                        <template lwc:if={showDerived}>
+                            <div class="strategy__cell strategy__cell_derived">
+                                <template lwc:if={row.derived}>
+                                    <span class="strategy__derived">{row.derived}</span>
+                                </template>
+                            </div>
+                        </template>
+                        <div class="strategy__cell strategy__cell_remove">
+                            <template lwc:if={row.showRemove}>
+                                <lightning-button-icon
+                                    icon-name="utility:close"
+                                    variant="bare"
+                                    alternative-text="Remove allocation"
+                                    title="Remove allocation"
+                                    data-id={row.id}
+                                    onclick={handleRemove}>
+                                </lightning-button-icon>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </template>
+        <template lwc:else>
+            <c-ds-empty-state
+                message="No allocations yet — add each sleeve and give it a target weight, or a set dollar amount where the strategy calls for one.">
+            </c-ds-empty-state>
+        </template>
+    </div>
+</template>

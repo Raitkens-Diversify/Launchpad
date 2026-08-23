@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Funding_Basis__c</fullName>
+    <description>How the advisor expressed this sleeve&#39;s allocation. Dollar sleeves are fixed carve-outs that should not float with account value. Percent sleeves describe the actively traded remainder after all Dollar sleeves on the same Order Ticket and must total 100% across the ticket. Blank on rows created before this field existed (treat as Percent of total, the legacy convention).</description>
+    <inlineHelpText>Dollar = fixed amount that does not float with account value. Percent = share of the remainder after fixed-dollar sleeves.</inlineHelpText>
+    <label>Funding Basis</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Percent</fullName>
+                <default>false</default>
+                <label>Percent</label>
+            </value>
+            <value>
+                <fullName>Dollar</fullName>
+                <default>false</default>
+                <label>Dollar</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Owner in Systems --></label>
+        <name>Owner_in_Systems__c</name>
+    </CustomFieldTranslation>

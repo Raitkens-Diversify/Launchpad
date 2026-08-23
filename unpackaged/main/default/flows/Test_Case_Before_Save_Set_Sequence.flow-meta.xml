@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>61.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <assignments>
+        <name>Set_Sequence</name>
+        <label>Set Sequence</label>
+        <locationX>176</locationX>
+        <locationY>395</locationY>
+        <assignmentItems>
+            <assignToReference>$Record.Sequence__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>NextSequence</elementReference>
+            </value>
+        </assignmentItems>
+    </assignments>
+    <description>Helios UAT: when a Test Case is created without a Sequence, set it to (max Sequence among cases in the same Module) + 1, seeding at 1001 — same numeric convention as the old Excel process. Runs only when Sequence arrives blank, so the New Case modal&#39;s editable suggested sequence wins when provided. Known limit (accepted): bulk creates in one transaction can collide on the same sequence; cases are authored one at a time via the console modal.</description>
+    <environments>Default</environments>
+    <formulas>
+        <name>NextSequence</name>
+        <dataType>Number</dataType>
+        <expression>IF(ISBLANK({!Get_Max_Sequence_Case.Sequence__c}), 1001, {!Get_Max_Sequence_Case.Sequence__c} + 1)</expression>
+        <scale>0</scale>
+    </formulas>
+    <interviewLabel>Test Case Before Save Set Sequence {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Test Case Before Save Set Sequence</label>
+    <processType>AutoLaunchedFlow</processType>
+    <recordLookups>
+        <name>Get_Max_Sequence_Case</name>
+        <label>Get Max Sequence Case</label>
+        <locationX>176</locationX>
+        <locationY>287</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Set_Sequence</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Module__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>$Record.Module__c</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Test_Case__c</object>
+        <queriedFields>Id</queriedFields>
+        <queriedFields>Sequence__c</queriedFields>
+        <sortField>Sequence__c</sortField>
+        <sortOrder>Desc</sortOrder>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Get_Max_Sequence_Case</targetReference>
+        </connector>
+        <filterFormula>ISBLANK({!$Record.Sequence__c})</filterFormula>
+        <object>Test_Case__c</object>
+        <recordTriggerType>Create</recordTriggerType>
+        <triggerType>RecordBeforeSave</triggerType>
+    </start>
+    <status>Active</status>
+</Flow>

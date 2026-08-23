@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Branch --></label>
+        <name>Branch__c</name>
+        <picklistValues>
+            <masterLabel>1031 Investment Services</masterLabel>
+            <translation><!-- 1031 Investment Services --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Advanced Wealth Strategies Group</masterLabel>
+            <translation><!-- Advanced Wealth Strategies Group --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Animas Capital Management</masterLabel>
+            <translation><!-- Animas Capital Management --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Ashland Pacific</masterLabel>
+            <translation><!-- Ashland Pacific --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Boston Wealth Advisor Group</masterLabel>
+            <translation><!-- Boston Wealth Advisor Group --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Bridge Equities</masterLabel>
+            <translation><!-- Bridge Equities --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Butler Financial Advisors</masterLabel>
+            <translation><!-- Butler Financial Advisors --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Caliber Wealth Management</masterLabel>
+            <translation><!-- Caliber Wealth Management --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Capata Financial</masterLabel>
+            <translation><!-- Capata Financial --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Charles Badalamenti</masterLabel>
+            <translation><!-- Charles Badalamenti --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Cipolla Financial</masterLabel>
+            <translation><!-- Cipolla Financial --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>City Center Wealth</masterLabel>
+            <translation><!-- City Center Wealth --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Coughlan &amp; Coughlan Financial Solutions</masterLabel>
+            <translation><!-- Coughlan &amp; Coughlan Financial Solutions --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Diversify - Orem</masterLabel>
+            <translation><!-- Diversify - Orem --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Diversify - Sandy</masterLabel>
+            <translation><!-- Diversify - Sandy --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Dst Properties</masterLabel>
+            <translation><!-- Dst Properties --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Evergreen Advisor Group</masterLabel>
+            <translation><!-- Evergreen Advisor Group --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Financial Foundations Insurance &amp; Investments</masterLabel>
+            <translation><!-- Financial Foundations Insurance &amp; Investments --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Financial Resources</masterLabel>
+            <translation><!-- Financial Resources --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>First Financial Center Of Dallas</masterLabel>
+            <translation><!-- First Financial Center Of Dallas --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Gen 1 Financial</masterLabel>
+            <translation><!-- Gen 1 Financial --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Glide Financial Group</masterLabel>
+            <translation><!-- Glide Financial Group --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Global Wealth Partners Inc</masterLabel>
+            <translation><!-- Global Wealth Partners Inc --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Gomez Corporation</masterLabel>
+            <translation><!-- Gomez Corporation --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Grady Capital Group</masterLabel>
+            <translation><!-- Grady Capital Group --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Griffin Wealth Partners</masterLabel>
+            <translation><!-- Griffin Wealth Partners --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Grove Wealth Advisors</masterLabel>
+            <translation><!-- Grove Wealth Advisors --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Harding Financial and Insurance</masterLabel>
+            <translation><!-- Harding Financial and Insurance --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Home Office</masterLabel>
+            <translation><!-- Home Office --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>INPAC Wealth Solutions</masterLabel>
+            <translation><!-- INPAC Wealth Solutions --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Icona Wealth</masterLabel>
+            <translation><!-- Icona Wealth --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Indepdenent - Gary Warnica</masterLabel>
+            <translation><!-- Indepdenent - Gary Warnica --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Independent - Boo Andersen</masterLabel>
+            <translation><!-- Independent - Boo Andersen --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Independent - Craig Watanabe</masterLabel>
+            <translation><!-- Independent - Craig Watanabe --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Independent - JR Broadbent</masterLabel>
+            <translation><!-- Independent - JR Broadbent --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Independent - Krista Baker</masterLabel>
+            <translation><!-- Independent - Krista Baker --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Independent - Matthew Rigby</masterLabel>
+            <translation><!-- Independent - Matthew Rigby --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Independent - Mike McHugh</masterLabel>
+            <translation><!-- Independent - Mike McHugh --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Independent - Peter Burnham</masterLabel>
+            <translation><!-- Independent - Peter Burnham --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Independent - Sara Hadad-Dembs</masterLabel>
+            <translation><!-- Independent - Sara Hadad-Dembs --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Independent - Stephen Litman</masterLabel>
+            <translation><!-- Independent - Stephen Litman --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Independent - Stephen Wegener</masterLabel>
+            <translation><!-- Independent - Stephen Wegener --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Independent - Tyler Haskell</masterLabel>
+            <translation><!-- Independent - Tyler Haskell --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Inventa Wealth Advisors</masterLabel>
+            <translation><!-- Inventa Wealth Advisors --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>J. Freeman &amp; Associates</masterLabel>
+            <translation><!-- J. Freeman &amp; Associates --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>KLK Capital Management</masterLabel>
+            <translation><!-- KLK Capital Management --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Key Advisors Group</masterLabel>
+            <translation><!-- Key Advisors Group --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Longhorn Investments</masterLabel>
+            <translation><!-- Longhorn Investments --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>March Advisors</masterLabel>
+            <translation><!-- March Advisors --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Nucleus Financial Group</masterLabel>
+            <translation><!-- Nucleus Financial Group --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Parkview Wealth Advisors</masterLabel>
+            <translation><!-- Parkview Wealth Advisors --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Perspective</masterLabel>
+            <translation><!-- Perspective --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Platinum Wealth Group</masterLabel>
+            <translation><!-- Platinum Wealth Group --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Providence Wealth Advisors</masterLabel>
+            <translation><!-- Providence Wealth Advisors --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Rancho Private Wealth</masterLabel>
+            <translation><!-- Rancho Private Wealth --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Regev Group</masterLabel>
+            <translation><!-- Regev Group --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Resilient Wealth</masterLabel>
+            <translation><!-- Resilient Wealth --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Rocky Mountain Wealth Advisors</masterLabel>
+            <translation><!-- Rocky Mountain Wealth Advisors --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Serratelli Financial Group</masterLabel>
+            <translation><!-- Serratelli Financial Group --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Shanley Wealth Management</masterLabel>
+            <translation><!-- Shanley Wealth Management --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Spark Financial Wealth Management</masterLabel>
+            <translation><!-- Spark Financial Wealth Management --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Strong Tower Wealth Management</masterLabel>
+            <translation><!-- Strong Tower Wealth Management --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Summit Group Wealth Advisors</masterLabel>
+            <translation><!-- Summit Group Wealth Advisors --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Vineyard Asset Management</masterLabel>
+            <translation><!-- Vineyard Asset Management --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Westridge Wealth Strategies</masterLabel>
+            <translation><!-- Westridge Wealth Strategies --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

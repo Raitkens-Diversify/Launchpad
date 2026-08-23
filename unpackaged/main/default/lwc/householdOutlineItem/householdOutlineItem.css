@@ -1,0 +1,161 @@
+:host {
+    display: block;
+}
+
+/* One outline row: chevron spacer + leading type icon + stacked text + hover actions. */
+.outline-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--slds-g-spacing-2, 8px);
+    padding: 6px var(--slds-g-spacing-1, 4px) 6px var(--slds-g-spacing-4, 16px);
+    border-radius: var(--slds-g-radius-border-2, 8px);
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+}
+
+/* Add (plus) + more-actions controls. Visually hidden until the row is hovered or holds focus,
+   but always rendered so they stay in the tab order — keyboard users can Tab to them, and the
+   reveal fires on focus as well as hover. (display:none / visibility:hidden would drop them from
+   the tab order entirely; opacity keeps them focusable.) Overlaid on the right-region slot so the
+   reveal swaps in place over the new-item status without reflowing the row; the matching
+   background masks any name text behind them when shown. */
+.outline-item__actions {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-1, 4px);
+    padding-left: var(--slds-g-spacing-2, 8px);
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.outline-item:hover,
+.outline-item:focus-within {
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+
+.outline-item:hover .outline-item__actions,
+.outline-item:focus-within .outline-item__actions {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Right-region slot: the new-item status (badge + dot) and the hover controls share it, swapping
+   in place — status by default, controls on hover. Its height is fixed so the swap never changes
+   the row height, and its content is right-aligned into one column. */
+.outline-item__aside {
+    position: relative;
+    flex: 0 0 auto;
+    align-self: center;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    height: var(--slds-g-sizing-7, 24px);
+}
+
+/* "New" badge + in-progress dot as one tight cluster, 8px apart to match the Figma spacing. */
+.outline-item__status {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 8px);
+}
+
+.outline-item:hover .outline-item__status,
+.outline-item:focus-within .outline-item__status {
+    display: none;
+}
+
+.outline-item__badge {
+    display: inline-flex;
+    align-items: center;
+    height: var(--slds-g-sizing-7, 24px);
+    border-radius: var(--slds-g-radius-border-2, 8px);
+    padding: 0 var(--slds-g-spacing-2, 8px);
+    font-size: var(--slds-g-font-scale-neg-1, 12px);
+    font-weight: var(--slds-g-font-weight-5, 500);
+    line-height: 17px;
+    white-space: nowrap;
+}
+
+.outline-item__badge_new {
+    background: var(--slds-g-color-info-container-1, #e0f2fe);
+    color: var(--slds-g-color-on-info-1, #0369a1);
+}
+
+/* The progress indicator (in-progress dot / completed check) reserves the same 24px trailing
+   box as the hover "more actions" kebab, so the right indicator keeps its place when the row
+   swaps from the default status to the hover controls. */
+.outline-item__dot,
+.outline-item__check {
+    flex: 0 0 var(--slds-g-sizing-7, 24px);
+    height: var(--slds-g-sizing-7, 24px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.outline-item__dot::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--slds-g-color-warning-1, #f59e0b);
+}
+
+.outline-item__check {
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-success-base-50, #16a34a);
+}
+
+/* Reserves the width of an expand chevron so rows align under the group heading. */
+.outline-item__chevron {
+    flex: 0 0 14px;
+    width: 14px;
+    align-self: stretch;
+}
+
+.outline-item__text {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-1, 4px);
+    padding: 2px 0;
+}
+
+.outline-item__name {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: var(--slds-g-font-weight-4, 400);
+    line-height: 19px;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.outline-item__meta {
+    font-size: var(--slds-g-font-size-base, 13px);
+    font-weight: var(--slds-g-font-weight-4, 400);
+    line-height: 18px;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.outline-item__amount {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    line-height: 19px;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.outline-item__icon {
+    flex: 0 0 auto;
+    padding: 4px 0;
+}
+
+/* Type icon colors — same language as envelopeAddCta */
+.outline-item__icon_member {
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-success-base-50, #16a34a);
+}
+
+.outline-item__icon_account {
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-accent-1, #0f406f);
+}

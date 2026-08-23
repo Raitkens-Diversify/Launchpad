@@ -1,0 +1,6 @@
+The following qualified charitable distribution is complete
+
+[!Case.FinServ__FinancialAccount__r.OASP_FSC__Custodian__r.Name]
+Qualified Charitable Distribution sent to [!Case.Name_of_Charity__c]
+**Date funds sent**
+[!Case.Amount__c]

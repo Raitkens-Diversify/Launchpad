@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Platform_Availability_Blank__c</fullName>
+    <description>For Lightning Page for Advisors.</description>
+    <formula>ISBLANK(TEXT(Platform_Availability__c))</formula>
+    <label>Platform Availability Blank</label>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

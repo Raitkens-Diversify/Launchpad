@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AA_Account_Number__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <inlineHelpText>If the Source of Funds is an Advisory Account, and the account is already at the firm, provide the account number.</inlineHelpText>
+    <label>Advisory Account: Account Number</label>
+    <referenceTo>FinServ__FinancialAccount__c</referenceTo>
+    <relationshipLabel>Cases (AA - Account Number)</relationshipLabel>
+    <relationshipName>Cases3</relationshipName>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

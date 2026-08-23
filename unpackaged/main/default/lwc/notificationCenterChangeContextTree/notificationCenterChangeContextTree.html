@@ -1,0 +1,59 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-07-27 -->
+<template>
+  <div class="context-tree" role="tree" aria-label="Change context details">
+    <template lwc:if={parseError}>
+      <p class="context-tree__error" role="alert">{parseError}</p>
+    </template>
+
+    <template lwc:elseif={hasContext}>
+      <template for:each={treeNodes} for:item="node">
+        <div key={node.id} class={node.rowClass} style={node.indentStyle} role="treeitem">
+          <template lwc:if={node.isLeaf}>
+            <div class="context-tree__leaf">
+              <span class="context-tree__label">{node.label}</span>
+              <span class="context-tree__value">
+                <template lwc:if={node.isLink}>
+                  <button
+                    type="button"
+                    class="context-tree__link div-table__link"
+                    data-record-id={node.recordId}
+                    onclick={handleRecordNavigate}
+                    onkeydown={handleRecordNavigateKeyDown}
+                  >
+                    {node.value}
+                  </button>
+                </template>
+                <template lwc:else>
+                  {node.value}
+                </template>
+              </span>
+            </div>
+          </template>
+
+          <template lwc:else>
+            <button
+              type="button"
+              class="context-tree__toggle"
+              data-node-id={node.id}
+              aria-expanded={node.isExpanded}
+              onclick={handleToggleNode}
+              onkeydown={handleToggleNodeKeyDown}
+            >
+              <lightning-icon
+                icon-name={node.toggleIcon}
+                size="xx-small"
+                class="context-tree__toggle-icon"
+                alternative-text="Toggle section"
+              ></lightning-icon>
+              <span class="context-tree__branch-label">{node.label}</span>
+            </button>
+          </template>
+        </div>
+      </template>
+    </template>
+
+    <template lwc:else>
+      <p class="context-tree__empty">No change context recorded for this log entry.</p>
+    </template>
+  </div>
+</template>

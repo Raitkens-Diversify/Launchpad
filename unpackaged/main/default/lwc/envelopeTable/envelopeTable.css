@@ -1,0 +1,292 @@
+/* Author: Hoang Long Vu To | Date: 2026-08-11
+   Compact list layout — no flex gap; tight vertical rhythm like envelopeListV2/Figma.
+   Input chrome from envelopeWizardStyles.css (.env-layout). */
+
+:host {
+  display: block;
+}
+
+.envelope-table {
+  display: block;
+  font-family: var(
+    --ds-font-body,
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif
+  );
+}
+
+.envelope-table__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 12px;
+}
+
+.envelope-table__title {
+  margin: 0;
+  font-family: var(
+    --div-font-family-base,
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif
+  );
+  font-size: var(--div-font-scale-3, 1.25rem);
+  font-weight: var(--div-font-weight-semibold, 600);
+  line-height: 24px;
+  letter-spacing: var(--div-font-letter-spacing-base, 0);
+  color: var(--div-color-on-surface-2, #374151);
+}
+
+/* Toolbar — search left, scope/date/actions right; sits flush above the table. */
+/* Row 1: heading + primary action. Row 2 (.envelope-table__toolbar) is
+   search-left, filter/scope/date-right — kept separate so the heading never
+   reflows when the toolbar's controls wrap on narrow widths. */
+.envelope-table__header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 12px;
+}
+
+.envelope-table__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 0 0 16px;
+}
+
+.envelope-table__toolbar-search {
+  flex: 1 1 260px;
+  max-width: 320px;
+  min-width: 0;
+  margin: 0 12px 0 0;
+}
+
+.envelope-table__toolbar-controls {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.envelope-table__toolbar-controls--end {
+  margin-left: auto;
+}
+
+.envelope-table__toolbar-controls > * {
+  margin: 0 0 0 12px;
+}
+
+.envelope-table__toolbar-scope {
+  flex: 0 0 auto;
+}
+
+.envelope-table__toolbar-date {
+  min-width: 180px;
+}
+
+.envelope-table__table {
+  width: 100%;
+  margin: 0;
+}
+
+.envelope-table__filter-reset {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.envelope-table__loading {
+  position: relative;
+  min-height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.envelope-table__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 24px 40px;
+  background: var(--slds-g-color-surface-1, #ffffff);
+  border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+  border-radius: 10px;
+}
+
+.envelope-table__empty-illustration {
+  width: 177px;
+  height: 177px;
+  margin-bottom: 24px;
+}
+
+.envelope-table__empty-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 36rem;
+  min-width: 21rem;
+  margin-bottom: 24px;
+  text-align: center;
+  color: var(--slds-g-color-palette-neutral-20, #383330);
+}
+
+.envelope-table__empty-text--narrow {
+  max-width: 24.75rem;
+}
+
+.envelope-table__empty-title {
+  margin: 0 0 8px;
+  font-size: var(--slds-g-font-scale-3, 20px);
+  font-weight: 600;
+  line-height: 28px;
+}
+
+.envelope-table__empty-subtitle {
+  margin: 0;
+  font-size: var(--slds-g-font-scale-1, 14px);
+  font-weight: 400;
+  line-height: 19px;
+}
+
+.envelope-table__empty-cta,
+.envelope-table__toolbar-new {
+  --slds-c-button-brand-color-background: var(
+    --slds-g-color-accent-container-1,
+    #0f406f
+  );
+  --slds-c-button-brand-color-border: var(
+    --slds-g-color-accent-container-1,
+    #0f406f
+  );
+  --slds-c-button-brand-color-background-hover: #0c3258;
+  --slds-c-button-brand-color-border-hover: #0c3258;
+}
+
+/* Trim default SLDS vertical padding on toolbar inputs via styling hooks. */
+.envelope-table__toolbar-search lightning-input,
+.envelope-table__toolbar-date {
+  --slds-c-input-spacing-block-end: 0;
+  --slds-c-input-spacing-block-start: 0;
+}
+
+/* Same 36px box, 8px radius, border and label colour as the segmented
+     toggle beside it — the two read as one control group. */
+.envelope-table__filter-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid var(--div-color-border-2, #b6bcc5);
+  border-radius: 8px;
+  background: var(--div-color-white, #ffffff);
+  cursor: pointer;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 19px;
+  color: var(--div-color-blue-1000, #071c31);
+}
+
+.envelope-table__filter-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  display: block;
+  background-color: currentColor;
+  -webkit-mask-image: var(--icon-url);
+  mask-image: var(--icon-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+/* ---- Filter popover -----------------------------------------------------
+ * The Filter button was a no-op; this is the panel it now opens. Same visual
+ * language as the list views' filter menu, anchored under the button.
+ * ------------------------------------------------------------------------ */
+.envelope-table__filter-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 280px;
+  padding: 16px;
+  border: 1px solid var(--div-color-border-1, #d1d5db);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(3, 45, 96, 0.16);
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+}
+
+.envelope-table__filter-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.envelope-table__filter-label {
+  color: var(--div-color-gray-600, #4b5563);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 17px;
+}
+
+.envelope-table__filter-select,
+.envelope-table__filter-input {
+  height: 36px;
+  padding: 0 8px;
+  border: 1px solid var(--div-color-border-2, #b6bcc5);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--div-color-blue-1000, #071c31);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 19px;
+}
+
+.envelope-table__filter-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.envelope-table__filter-action {
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid var(--div-color-border-2, #b6bcc5);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--div-color-blue-1000, #071c31);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 19px;
+  cursor: pointer;
+}
+
+.envelope-table__filter-action--brand {
+  border-color: transparent;
+  background: #032d60;
+  color: #ffffff;
+}

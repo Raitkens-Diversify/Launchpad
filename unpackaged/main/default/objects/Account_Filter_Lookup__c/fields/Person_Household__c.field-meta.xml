@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Person_Household__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Only used in Wizard. Do not add to Page Layouts.</description>
+    <label>Person Household</label>
+    <lookupFilter>
+        <active>true</active>
+        <filterItems>
+            <field>Account.Entity_Type__c</field>
+            <operation>equals</operation>
+            <value />
+        </filterItems>
+        <filterItems>
+            <field>Account.IsPersonAccount</field>
+            <operation>equals</operation>
+            <value>False</value>
+        </filterItems>
+        <isOptional>false</isOptional>
+    </lookupFilter>
+    <referenceTo>Account</referenceTo>
+    <relationshipLabel>Account Filter Lookups (Person Household)</relationshipLabel>
+    <relationshipName>Account_Filter_Lookups_Person</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

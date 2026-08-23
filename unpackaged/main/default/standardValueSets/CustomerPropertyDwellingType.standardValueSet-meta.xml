@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Duplex</fullName>
+        <default>false</default>
+        <label>Duplex</label>
+    </standardValue>
+    <standardValue>
+        <fullName>High rise multiple units</fullName>
+        <default>false</default>
+        <label>High rise multiple units</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Low rise multiple units</fullName>
+        <default>false</default>
+        <label>Low rise multiple units</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Single Family Detached Four Square</fullName>
+        <default>false</default>
+        <label>Single Family Detached Four Square</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Single Family Detached Ranch</fullName>
+        <default>false</default>
+        <label>Single Family Detached Ranch</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Single Family Row Home</fullName>
+        <default>false</default>
+        <label>Single Family Row Home</label>
+    </standardValue>
+</StandardValueSet>

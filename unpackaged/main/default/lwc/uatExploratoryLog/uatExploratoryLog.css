@@ -1,0 +1,185 @@
+/* --slds-g-* declared locally, not inherited: platform-injected SLDS2
+   styling hooks beat values inherited from an ancestor's :host
+   (see nexsHome.css / dsHero.css). */
+:host {
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-accent-3: #071c31;
+    --slds-g-color-on-accent-1: #ffffff;
+}
+
+.uxl {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.uxl__error {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--ds-error-text, #a83232);
+}
+.uxl__hint {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.uxl__crumbs {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.8125rem;
+}
+.uxl__crumb-link {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+    color: var(--ds-medium-blue, #1a76bb);
+}
+.uxl__crumb-link:hover {
+    text-decoration: underline;
+}
+.uxl__crumb-sep {
+    color: var(--ds-gray-4, #9aa1ad);
+}
+.uxl__crumb-current {
+    color: var(--slds-g-color-on-surface-2, #374151);
+    font-weight: 500;
+}
+
+.uxl__toolbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.uxl__form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--ds-medium-blue, #1a76bb);
+    border-radius: var(--ds-radius-lg, 10px);
+}
+.uxl__form-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.uxl__form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.uxl__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.uxl__card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    padding: 1rem 1.25rem;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+}
+.uxl__card-head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+.uxl__meta {
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.uxl__card-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 0.25rem;
+}
+.uxl__block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+.uxl__block-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.uxl__block-text {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--slds-g-color-on-surface-2, #374151);
+    white-space: pre-line;
+}
+.uxl__files {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.uxl__thumb {
+    width: 128px;
+    height: 84px;
+    object-fit: cover;
+    border-radius: var(--ds-radius-sm, 6px);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+.uxl__file-link {
+    font-size: 0.8125rem;
+    color: var(--ds-medium-blue, #1a76bb);
+}
+/* Session chip: which exploratory session logged this finding. */
+.uxl__session-chip {
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: var(--ds-lightest-blue, #e2f8ff);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--slds-g-color-accent-1, #0f406f);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 240px;
+}
+
+/* Source first, then type: since the unification this list carries findings
+   from both flows and where one came from is the first triage question. */
+.uxl__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ds-space-md, 12px);
+    margin-bottom: var(--ds-space-md, 12px);
+}
+.uxl__headline {
+    margin: 0 0 var(--ds-space-xs, 4px);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    overflow-wrap: anywhere;
+}

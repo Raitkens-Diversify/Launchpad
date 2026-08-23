@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Property_Type__c</fullName>
+    <label>Property Type</label>
+    <required>true</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Multifamily</fullName>
+                <default>false</default>
+                <label>Multifamily</label>
+            </value>
+            <value>
+                <fullName>Industrial</fullName>
+                <default>false</default>
+                <label>Industrial</label>
+            </value>
+            <value>
+                <fullName>Multi-Tenant Retail</fullName>
+                <default>false</default>
+                <label>Multi-Tenant Retail</label>
+            </value>
+            <value>
+                <fullName>Singe-Tenant Retail</fullName>
+                <default>false</default>
+                <label>Singe-Tenant Retail</label>
+            </value>
+            <value>
+                <fullName>Hospitality</fullName>
+                <default>false</default>
+                <label>Hospitality</label>
+            </value>
+            <value>
+                <fullName>Multi-Tenant Office</fullName>
+                <default>false</default>
+                <label>Multi-Tenant Office</label>
+            </value>
+            <value>
+                <fullName>Single-Tenant Office</fullName>
+                <default>false</default>
+                <label>Single-Tenant Office</label>
+            </value>
+            <value>
+                <fullName>Self-Storage</fullName>
+                <default>false</default>
+                <label>Self-Storage</label>
+            </value>
+            <value>
+                <fullName>Seniors Housing</fullName>
+                <default>false</default>
+                <label>Seniors Housing</label>
+            </value>
+            <value>
+                <fullName>Student Housing</fullName>
+                <default>false</default>
+                <label>Student Housing</label>
+            </value>
+            <value>
+                <fullName>Single-Family Rental</fullName>
+                <default>false</default>
+                <label>Single-Family Rental</label>
+            </value>
+            <value>
+                <fullName>Other</fullName>
+                <default>false</default>
+                <label>Other</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

@@ -1,0 +1,79 @@
+<aura:component implements="lightning:availableForFlowScreens" access="global">
+	<aura:attribute name="Year1Percent" type="Integer" default="0"/>
+	<aura:attribute name="Year2Percent" type="Integer" default="0"/>
+    <aura:attribute name="Year3Percent" type="Integer" default="0"/>
+    <aura:attribute name="Year4Percent" type="Integer" default="0"/>
+    <aura:attribute name="Year5Percent" type="Integer" default="0"/>
+    <aura:attribute name="Year6Percent" type="Integer" default="0"/>
+    <aura:attribute name="Year7Percent" type="Integer" default="0"/>
+    <aura:attribute name="Year8Percent" type="Integer" default="0"/>
+    <aura:attribute name="Year9Percent" type="Integer" default="0"/>
+    <aura:attribute name="Year10Percent" type="Integer" default="0"/>
+    <aura:attribute name="Year11Percent" type="Integer" default="0"/>
+    <aura:attribute name="Year12Percent" type="Integer" default="0"/>
+    
+    <lightning:card title="Surrender Charge Table">
+        <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+            <thead>
+                <tr>
+                    <th>Years</th>
+                    <th>1</th>
+                    <th>2</th>
+                    <th>3</th>
+                    <th>4</th>
+                    <th>5</th>
+                    <th>6</th>
+                    <th>7</th>
+                    <th>8</th>
+                    <th>9</th>
+                    <th>10</th>
+                    <th>11</th>
+                    <th>12</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="slds-hint-parent">
+                    <td>
+                        <label class="slds-form-element__label" style="margin-right: 0.5rem;">%</label></td>
+                    <td>
+                        <lightning:input type="number" value="{!v.Year1Percent}" name="Year1Percent" variant="label-hidden" formatter="percent-fixed" step="1" max="100"/>
+                    </td>
+                    <td>
+                        <lightning:input type="number" value="{!v.Year2Percent}" name="Year2Percent" variant="label-hidden" formatter="percent-fixed" step="1" max="100"/>
+                    </td>
+                    <td>
+                        <lightning:input type="number" value="{!v.Year3Percent}" name="Year3Percent" variant="label-hidden" formatter="percent-fixed" step="1" max="100"/>
+                    </td>
+                    <td>
+                        <lightning:input type="number" value="{!v.Year4Percent}" name="Year4Percent" variant="label-hidden" formatter="percent-fixed" step="1" max="100"/>
+                    </td>
+                    <td>
+                        <lightning:input type="number" value="{!v.Year5Percent}" name="Year5Percent" variant="label-hidden" formatter="percent-fixed" step="1" max="100"/>
+                    </td>
+                    <td>
+                        <lightning:input type="number" value="{!v.Year6Percent}" name="Year6Percent" variant="label-hidden" formatter="percent-fixed" step="1" max="100"/>
+                    </td>
+                    <td>
+                        <lightning:input type="number" value="{!v.Year7Percent}" name="Year7Percent" variant="label-hidden" formatter="percent-fixed" step="1" max="100"/>
+                    </td>
+                    <td>
+                        <lightning:input type="number" value="{!v.Year8Percent}" name="Year8Percent" variant="label-hidden" formatter="percent-fixed" step="1" max="100"/>
+                    </td>
+                    <td>
+                        <lightning:input type="number" value="{!v.Year9Percent}" name="Year9Percent" variant="label-hidden" formatter="percent-fixed" step="1" max="100"/>
+                    </td>
+                    <td>
+                        <lightning:input type="number" value="{!v.Year10Percent}" name="Year10Percent" variant="label-hidden" formatter="percent-fixed" step="1" max="100"/>
+                    </td>
+                    <td>
+                        <lightning:input type="number" value="{!v.Year11Percent}" name="Year11Percent" variant="label-hidden" formatter="percent-fixed" step="1" max="100"/>
+                    </td>
+                    <td>
+                        <lightning:input type="number" value="{!v.Year12Percent}" name="Year12Percent" variant="label-hidden" formatter="percent-fixed" step="1" max="100"/>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </lightning:card>
+    
+</aura:component>

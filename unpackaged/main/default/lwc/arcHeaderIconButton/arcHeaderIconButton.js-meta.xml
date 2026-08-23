@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>64.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Arc Header Icon Button</masterLabel>
+    <description
+  >Reusable 36x36 header icon button, configurable via design attributes for use in Experience Builder theme header regions.</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property
+        name="icon"
+        type="String"
+        default="gear-six.svg"
+        label="Icon"
+        description="Filename of a Phosphor SVG in the arcicon static resource, e.g. bell.svg or question.svg"
+      />
+            <property
+        name="label"
+        type="String"
+        default=""
+        label="Accessible Label"
+        description="Accessible label / tooltip text for the button"
+      />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

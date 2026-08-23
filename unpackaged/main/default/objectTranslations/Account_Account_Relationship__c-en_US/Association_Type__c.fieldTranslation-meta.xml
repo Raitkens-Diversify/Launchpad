@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Association Type --></label>
+        <name>Association_Type__c</name>
+        <picklistValues>
+            <masterLabel>Member</masterLabel>
+            <translation><!-- Member --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Peer</masterLabel>
+            <translation><!-- Peer --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

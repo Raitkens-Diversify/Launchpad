@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Public Adjuster</fullName>
+        <default>false</default>
+        <label>Public Adjuster</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Insurance Producer</fullName>
+        <default>false</default>
+        <label>Insurance Producer</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Managing General Agent</fullName>
+        <default>false</default>
+        <label>Managing General Agent</label>
+    </standardValue>
+</StandardValueSet>

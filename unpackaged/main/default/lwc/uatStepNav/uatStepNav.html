@@ -1,0 +1,41 @@
+<template>
+    <nav class="usn" aria-label="Test steps">
+        <template if:true={heading}>
+            <h3 class="usn__heading">{heading}</h3>
+        </template>
+        <ol class="usn__list">
+            <template for:each={stepViews} for:item="s">
+                <li key={s.key} class={s.itemClass}>
+                    <template if:true={s.groupLabel}>
+                        <p class="usn__group">{s.groupLabel}</p>
+                    </template>
+                    <button type="button"
+                            class={s.rowClass}
+                            data-index={s.index}
+                            aria-current={s.ariaCurrent}
+                            title={s.title}
+                            onclick={handleSelect}>
+                        <span class={s.markerClass} aria-hidden="true">
+                            <template if:true={s.showIcon}>
+                                <lightning-icon icon-name={s.iconName} size="xx-small"></lightning-icon>
+                            </template>
+                            <template if:false={s.showIcon}>
+                                <span class="usn__num">{s.numberLabel}</span>
+                            </template>
+                        </span>
+                        <span class="usn__text">
+                            <span class="usn__title">{s.title}</span>
+                            <span class="usn__sr">{s.srStatus}</span>
+                        </span>
+                        <template if:true={s.hasEvidence}>
+                            <lightning-icon class="usn__clip"
+                                            icon-name="utility:attach"
+                                            size="xx-small"
+                                            alternative-text="Has evidence"></lightning-icon>
+                        </template>
+                    </button>
+                </li>
+            </template>
+        </ol>
+    </nav>
+</template>

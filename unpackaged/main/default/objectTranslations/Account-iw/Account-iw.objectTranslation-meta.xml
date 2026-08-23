@@ -1,0 +1,623 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <fieldSets>
+        <label><!-- Financial Accounts Summary --></label>
+        <name>FSC_Banker_Profile_Fin_Acct_Summary</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Client_Info --></label>
+        <name>WM_Client_Edit_Section_1</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Phone_and_Email --></label>
+        <name>WM_Client_Edit_Section_2</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Mailing_Address --></label>
+        <name>WM_Client_Edit_Section_3</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Permanent_Address --></label>
+        <name>WM_Client_Edit_Section_31</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Seasonal_Address --></label>
+        <name>WM_Client_Edit_Section_32</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Other_Address --></label>
+        <name>WM_Client_Edit_Section_33</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Client_Services --></label>
+        <name>WM_Client_Edit_Section_4</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Know_Your_Client --></label>
+        <name>WM_Client_Edit_Section_5</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Employment_Info --></label>
+        <name>WM_Client_Edit_Section_6</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- Group Member Details --></label>
+        <name>WM_Client_Groups_Member_Details</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- Group Member Details --></label>
+        <name>WM_Client_Groups_Member_Details_Perspect</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Client_Info --></label>
+        <name>WM_Client_New_Section_1</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Client_Services --></label>
+        <name>WM_Client_New_Section_3</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Know_Your_Client --></label>
+        <name>WM_Client_New_Section_4</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Employment_Info --></label>
+        <name>WM_Client_New_Section_5</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Phone_and_Email --></label>
+        <name>WM_Client_New_Section_6</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Mailing_Address --></label>
+        <name>WM_Client_New_Section_7</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Permanent_Address --></label>
+        <name>WM_Client_New_Section_71</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Seasonal_Address --></label>
+        <name>WM_Client_New_Section_72</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Other_Address --></label>
+        <name>WM_Client_New_Section_73</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Client_Info --></label>
+        <name>WM_Client_Profile_Details_Section_1</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Phone_and_Email --></label>
+        <name>WM_Client_Profile_Details_Section_2</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Addresses --></label>
+        <name>WM_Client_Profile_Details_Section_3</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Client_Services --></label>
+        <name>WM_Client_Profile_Details_Section_4</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Know_Your_Client --></label>
+        <name>WM_Client_Profile_Details_Section_5</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Employment_Info --></label>
+        <name>WM_Client_Profile_Details_Section_6</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Financial_Summary --></label>
+        <name>WM_Client_Profile_Details_Section_7</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_System_Info --></label>
+        <name>WM_Client_Profile_Details_Section_8</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Financial_Accounts_Summary --></label>
+        <name>WM_Client_Profile_Fin_Acct_Summary</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Client_Header --></label>
+        <name>WM_Client_Profile_Header</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Household_Summary --></label>
+        <name>WM_Client_Profile_Relations_HH_Summary</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Relationship_Group_Members --></label>
+        <name>WM_Client_Relationship_Group_Members</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Relationship_Groups --></label>
+        <name>WM_Client_Relationship_Groups</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Household_Info --></label>
+        <name>WM_HH_Profile_Details_Section_1</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Addresses --></label>
+        <name>WM_HH_Profile_Details_Section_2</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Financial_Accounts_Summary --></label>
+        <name>WM_HH_Profile_Fin_Acct_Summary</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Household_Header --></label>
+        <name>WM_HH_Profile_Header</name>
+    </fieldSets>
+    <layouts>
+        <layout>Household Layout</layout>
+        <sections>
+            <label><!-- Financial Information --></label>
+            <section>Financial Information</section>
+        </sections>
+        <sections>
+            <label><!-- Financial Summary --></label>
+            <section>Financial Summary</section>
+        </sections>
+        <sections>
+            <label><!-- Personal Information --></label>
+            <section>Personal Information</section>
+        </sections>
+    </layouts>
+    <quickActions>
+        <label><!-- AML Documentation Information --></label>
+        <name>AML_Documentation_Information</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Add Beneficiary to Policy --></label>
+        <name>Add_Beneficiary_to_Policy</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Add Orion HH ID --></label>
+        <name>Add_Orion_HH_ID</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Child Account --></label>
+        <name>Child_Account</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Create Household Account --></label>
+        <name>Create_Household_Account</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Grant Customization --></label>
+        <name>Grant_Customization</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- IMA, Ex A, Ex B --></label>
+        <name>IMA_Ex_A_Ex_B</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Log a Call --></label>
+        <name>LogACallStandard</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- New Task --></label>
+        <name>NewStandardTask</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- New Opportunity --></label>
+        <name>New_Opportunity</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- New Significant Event --></label>
+        <name>New_Significant_Event</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Send Documents ( Insurance ) --></label>
+        <name>Send_Documents_Insurance</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Send Required Docs --></label>
+        <name>Send_Required_Docs</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Submit Request --></label>
+        <name>Submit_Request</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Update Client Profile --></label>
+        <name>Update_Client_Profile</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Update IMA --></label>
+        <name>Update_IMA</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Update Investment Experience --></label>
+        <name>Update_Investment_Experience</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Update Suitability --></label>
+        <name>Update_Suitability</name>
+    </quickActions>
+    <recordTypes>
+        <label><!-- Business --></label>
+        <name>Business</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- Household --></label>
+        <name>Household</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- Retirement Plan --></label>
+        <name>Retirement_Plan</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- Trusts &amp; Estates --></label>
+        <name>Trust</name>
+    </recordTypes>
+    <validationRules>
+        <errorMessage><!-- To request an update to this field please contact the Ops team or submit an envelope for the change request. --></errorMessage>
+        <name>Prevent_Type_Classification_Edit</name>
+    </validationRules>
+    <validationRules>
+        <errorMessage><!-- If you need to change the financial advisor team, please reach out to your admin or ops teams. --></errorMessage>
+        <name>RestrictFinAdvisorTeamUpdate_HH_PA</name>
+    </validationRules>
+    <validationRules>
+        <errorMessage><!-- Please rank up to three objectives in the order of importance. You cannot select more than three objectives. --></errorMessage>
+        <name>Three_Or_Fewer_Investment_Objectives</name>
+    </validationRules>
+    <validationRules>
+        <errorMessage><!-- Please provide either a Type or Classification. --></errorMessage>
+        <name>Type_OR_Classification_Required</name>
+    </validationRules>
+    <validationRules>
+        <errorMessage><!-- You cannot update Investment Exeperience information from the record. Please update through the Wizard so that paperwork can be generated for the Client to sign. --></errorMessage>
+        <name>Update_Investment_Experience</name>
+    </validationRules>
+    <validationRules>
+        <errorMessage><!-- You cannot update Suitability information from the record.  Please submit an &quot;Update IMA&quot; request so that paperwork can be generated for the Client to sign. --></errorMessage>
+        <name>Update_Suitability</name>
+    </validationRules>
+    <webLinks>
+        <label><!-- Deca1s74000000DhWxAAK --></label>
+        <name>Deca1s74000000DhWxAAK</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- Deca1s74000000Dq90AAC --></label>
+        <name>Deca1s74000000Dq90AAC</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- Deca1s74000000DxAsAAK --></label>
+        <name>Deca1s74000000DxAsAAK</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- Deca2C8X000004T8YOUA0 --></label>
+        <name>Deca2C8X000004T8YOUA0</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- Deca2C8X000004TGsmUAG --></label>
+        <name>Deca2C8X000004TGsmUAG</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- Deca2CTO0000006tRd2AI --></label>
+        <name>Deca2CTO0000006tRd2AI</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- Deca2CTO000000799p2AA --></label>
+        <name>Deca2CTO000000799p2AA</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- Deca2CTO00000079OL2AY --></label>
+        <name>Deca2CTO00000079OL2AY</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- Deca2CTO000000AFVd2AO --></label>
+        <name>Deca2CTO000000AFVd2AO</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- Deca2CTO000000lCgr2AE --></label>
+        <name>Deca2CTO000000lCgr2AE</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- GoogleMaps --></label>
+        <name>GoogleMaps</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- GoogleNews --></label>
+        <name>GoogleNews</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- GoogleSearch --></label>
+        <name>GoogleSearch</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- SendWithDocuSign --></label>
+        <name>SendWithDocuSign</name>
+    </webLinks>
+</CustomObjectTranslation>

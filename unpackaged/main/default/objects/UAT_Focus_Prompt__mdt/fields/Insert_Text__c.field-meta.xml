@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Insert_Text__c</fullName>
+    <description>Exactly what lands in the tester&#39;s running notes when the chip is clicked, e.g. &quot;Observation: &quot; — keep the trailing space, the caret parks right after it. The record&#39;s Label is the chip&#39;s button text. Blank falls back to &quot;&lt;Label&gt;: &quot;.</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Insert Text</label>
+    <length>255</length>
+    <required>false</required>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

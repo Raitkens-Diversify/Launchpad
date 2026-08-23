@@ -1,0 +1,90 @@
+<template>
+    <div class="ds-data-table-v2">
+        <table class="ds-data-table-v2__table" aria-label="Envelopes">
+            <thead>
+                <tr>
+                    <template for:each={headerColumns} for:item="column">
+                        <th
+                            key={column.key}
+                            scope="col"
+                            aria-sort={column.ariaSort}
+                            class="ds-data-table-v2__header">
+                            <template if:true={column.sortable}>
+                                <button
+                                    type="button"
+                                    class="ds-data-table-v2__sort-button"
+                                    data-field={column.key}
+                                    aria-label={column.label}
+                                    onclick={handleSort}
+                                    onkeydown={handleSortKeyDown}>
+                                    <span>{column.label}</span>
+                                    <lightning-icon
+                                        icon-name={column.sortIcon}
+                                        size="xx-small"
+                                        alternative-text="Sort direction"
+                                        class={column.sortIconClass}>
+                                    </lightning-icon>
+                                </button>
+                            </template>
+                            <template if:false={column.sortable}>
+                                <span class="ds-data-table-v2__header-label">{column.label}</span>
+                            </template>
+                        </th>
+                    </template>
+                    <template if:true={hasRowActions}>
+                        <th scope="col" class="ds-data-table-v2__header ds-data-table-v2__header--actions">
+                            <span class="slds-assistive-text">Actions</span>
+                        </th>
+                    </template>
+                </tr>
+            </thead>
+            <tbody>
+                <template for:each={rows} for:item="row">
+                    <tr
+                        key={row.key}
+                        class="ds-data-table-v2__row"
+                        data-id={row.key}
+                        onclick={handleRowClick}>
+                        <template for:each={row.cells} for:item="cell">
+                            <td key={cell.key} data-label={cell.key} class={cell.cellClass}>
+                                <template if:true={cell.isPrimary}>
+                                    <button
+                                        type="button"
+                                        class="ds-data-table-v2__row-link"
+                                        data-id={cell.rowId}
+                                        onclick={handlePrimaryClick}>
+                                        {cell.value}
+                                    </button>
+                                </template>
+                                <template if:false={cell.isPrimary}>
+                                    {cell.value}
+                                </template>
+                            </td>
+                        </template>
+                        <template if:true={hasRowActions}>
+                            <td class="ds-data-table-v2__cell ds-data-table-v2__cell--actions" onclick={handleActionCellClick}>
+                                <lightning-button-menu
+                                    variant="bare"
+                                    icon-name="utility:threedots_vertical"
+                                    menu-alignment="right"
+                                    alternative-text="Show actions"
+                                    title="Show actions"
+                                    data-id={row.key}
+                                    onselect={handleMenuSelect}>
+                                    <template for:each={rowActions} for:item="action">
+                                        <lightning-menu-item
+                                            key={action.name}
+                                            value={action.name}
+                                            label={action.label}
+                                            prefix-icon-name={action.iconName}>
+                                        </lightning-menu-item>
+                                    </template>
+                                </lightning-button-menu>
+                            </td>
+                        </template>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </div>
+</template>

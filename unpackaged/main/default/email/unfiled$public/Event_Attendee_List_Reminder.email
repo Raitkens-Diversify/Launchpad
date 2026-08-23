@@ -1,0 +1,12 @@
+<html>
+<head>
+	<title></title>
+</head>
+<body style="height: auto; min-height: auto;"><em>Hello &lt;&lt;First Name&gt;&gt;,<br />
+<br />
+Please return to Salesforce to upload the Attendee List for &lt;&lt;Event Name&gt;&gt;.<br />
+<br />
+You can access the record here.<br />
+<br />
+Thanks!</em></body>
+</html>

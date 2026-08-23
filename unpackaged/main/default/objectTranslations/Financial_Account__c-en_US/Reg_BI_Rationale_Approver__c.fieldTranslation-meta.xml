@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Reg BI Rationale Approver --></label>
+        <name>Reg_BI_Rationale_Approver__c</name>
+        <relationshipLabel><!-- Financial Accounts (Reg BI Rationale Approver) --></relationshipLabel>
+    </CustomFieldTranslation>

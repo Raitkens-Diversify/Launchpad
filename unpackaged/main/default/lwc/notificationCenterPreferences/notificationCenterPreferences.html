@@ -1,0 +1,253 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-06-16 -->
+<template>
+  <section class="preferences-view">
+    <template lwc:if={isSaving}>
+      <div class="nc-saving-overlay" role="status" aria-live="polite" aria-busy="true">
+        <lightning-spinner alternative-text="Saving preferences" size="medium"></lightning-spinner>
+        <p class="nc-saving-overlay__message">Saving preferences...</p>
+      </div>
+    </template>
+
+    <div class="preferences-view__toolbar">
+      <lightning-button
+        variant="brand"
+        label={saveButtonLabel}
+        icon-name={icons.SAVE}
+        icon-position="left"
+        onclick={handleSave}
+        disabled={isSaveDisabled}
+      ></lightning-button>
+    </div>
+
+    <!-- Preferences info banner temporarily removed
+    <div class="preferences-view__info" role="note">
+      <lightning-icon icon-name={icons.INFO} size="x-small" class="preferences-view__info-icon"></lightning-icon>
+      <p class="preferences-view__info-text">
+        Preferences here are your personal defaults. During
+        <strong> quiet hours</strong>, Immediate notifications convert to Digest automatically — except for
+        <strong> Urgent</strong> rules configured to override quiet hours.
+      </p>
+    </div>
+    -->
+
+    <template lwc:if={errorMessage}>
+      <div class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium" role="alert">
+        <span class="slds-assistive-text">Error</span>
+        <h2>{errorMessage}</h2>
+      </div>
+    </template>
+
+    <template lwc:if={isLoading}>
+      <lightning-spinner alternative-text="Loading preferences" size="medium"></lightning-spinner>
+    </template>
+
+    <template lwc:else>
+      <article class="delivery-card">
+        <div class="delivery-card__header">
+          <h3 class="delivery-card__title">Delivery Mode per Channel</h3>
+          <p class="delivery-card__subtitle">
+            Enable Immediate, Digest, or both for each channel you've activated.
+          </p>
+        </div>
+
+        <div class="delivery-table-wrap">
+          <table class="delivery-table" aria-label="Delivery mode per channel">
+            <thead>
+              <tr>
+                <th scope="col">Channel</th>
+                <th scope="col" class="delivery-table__center">Enabled</th>
+                <th scope="col" class="delivery-table__center delivery-table__header delivery-table__header_immediate">
+                  <span class="delivery-table__header-label">
+                    <lightning-icon
+                      icon-name={modeIcons.IMMEDIATE}
+                      size="x-small"
+                      class="delivery-table__header-icon delivery-table__header-icon_immediate"
+                      aria-hidden="true"
+                    ></lightning-icon>
+                    Immediate
+                  </span>
+                </th>
+                <th scope="col" class="delivery-table__center delivery-table__header delivery-table__header_digest">
+                  <span class="delivery-table__header-label">
+                    <lightning-icon
+                      icon-name={modeIcons.DIGEST}
+                      size="x-small"
+                      class="delivery-table__header-icon delivery-table__header-icon_digest"
+                      aria-hidden="true"
+                    ></lightning-icon>
+                    Digest
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="delivery-row">
+                <td>
+                  <div class="delivery-row__channel">
+                    <span class={inAppChannelMeta.iconClass}>
+                      <lightning-icon icon-name={inAppChannelMeta.icon} size="x-small"></lightning-icon>
+                    </span>
+                    <div>
+                      <div class="delivery-row__label">In-App</div>
+                      <div class="delivery-row__sub">Salesforce bell icon</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="delivery-table__center">
+                  <div class="delivery-row__locked">
+                    <lightning-icon icon-name={icons.LOCK} size="xx-small"></lightning-icon>
+                    <span>Always on</span>
+                  </div>
+                </td>
+                <td class="delivery-table__center">
+                  <button
+                    type="button"
+                    class={inAppImmediateToggleClass}
+                    role="switch"
+                    aria-checked={channelConfig.inApp.immediate}
+                    aria-label="In-app immediate"
+                    onclick={handleInAppImmediateChange}
+                  >
+                    <span class="nc-toggle__thumb" aria-hidden="true"></span>
+                  </button>
+                </td>
+                <td class="delivery-table__center">
+                  <button
+                    type="button"
+                    class={inAppDigestToggleClass}
+                    role="switch"
+                    aria-checked={channelConfig.inApp.digest}
+                    aria-label="In-app digest"
+                    onclick={handleInAppDigestChange}
+                  >
+                    <span class="nc-toggle__thumb" aria-hidden="true"></span>
+                  </button>
+                </td>
+              </tr>
+
+              <tr class={emailRowClass}>
+                <td>
+                  <div class="delivery-row__channel">
+                    <span class={emailChannelMeta.iconClass}>
+                      <lightning-icon icon-name={emailChannelMeta.icon} size="x-small"></lightning-icon>
+                    </span>
+                    <div>
+                      <div class="delivery-row__label">Email</div>
+                      <div class="delivery-row__sub">{emailAddress}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="delivery-table__center">
+                  <button
+                    type="button"
+                    class={emailEnabledToggleClass}
+                    role="switch"
+                    aria-checked={channelConfig.email.enabled}
+                    aria-label="Enable email"
+                    onclick={handleEmailEnabledChange}
+                  >
+                    <span class="nc-toggle__thumb" aria-hidden="true"></span>
+                  </button>
+                </td>
+                <td class="delivery-table__center">
+                  <button
+                    type="button"
+                    class={emailImmediateToggleClass}
+                    role="switch"
+                    aria-checked={channelConfig.email.immediate}
+                    aria-label="Email immediate"
+                    onclick={handleEmailImmediateChange}
+                    disabled={isEmailDeliveryDisabled}
+                  >
+                    <span class="nc-toggle__thumb" aria-hidden="true"></span>
+                  </button>
+                </td>
+                <td class="delivery-table__center">
+                  <button
+                    type="button"
+                    class={emailDigestToggleClass}
+                    role="switch"
+                    aria-checked={channelConfig.email.digest}
+                    aria-label="Email digest"
+                    onclick={handleEmailDigestChange}
+                    disabled={isEmailDeliveryDisabled}
+                  >
+                    <span class="nc-toggle__thumb" aria-hidden="true"></span>
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Zoom channel temporarily disabled
+              <tr class={zoomRowClass}>
+                <td>
+                  <div class="delivery-row__channel">
+                    <span class={zoomChannelMeta.iconClass}>
+                      <lightning-icon icon-name={zoomChannelMeta.icon} size="x-small"></lightning-icon>
+                    </span>
+                    <div>
+                      <div class="delivery-row__label">Zoom</div>
+                      <div class="delivery-row__sub">{zoomUsername}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="delivery-table__center">
+                  <button
+                    type="button"
+                    class={zoomEnabledToggleClass}
+                    role="switch"
+                    aria-checked={channelConfig.zoom.enabled}
+                    aria-label="Enable Zoom"
+                    onclick={handleZoomEnabledChange}
+                  >
+                    <span class="nc-toggle__thumb" aria-hidden="true"></span>
+                  </button>
+                </td>
+                <td class="delivery-table__center">
+                  <button
+                    type="button"
+                    class={zoomImmediateToggleClass}
+                    role="switch"
+                    aria-checked={channelConfig.zoom.immediate}
+                    aria-label="Zoom immediate"
+                    onclick={handleZoomImmediateChange}
+                    disabled={isZoomDeliveryDisabled}
+                  >
+                    <span class="nc-toggle__thumb" aria-hidden="true"></span>
+                  </button>
+                </td>
+                <td class="delivery-table__center">
+                  <button
+                    type="button"
+                    class={zoomDigestToggleClass}
+                    role="switch"
+                    aria-checked={channelConfig.zoom.digest}
+                    aria-label="Zoom digest"
+                    onclick={handleZoomDigestChange}
+                    disabled={isZoomDeliveryDisabled}
+                  >
+                    <span class="nc-toggle__thumb" aria-hidden="true"></span>
+                  </button>
+                </td>
+              </tr>
+              -->
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class={emailSettingsClass}>
+        <div class="delivery-card__header">
+          <h3 class="delivery-card__title">Email Settings</h3>
+        </div>
+        <div class="delivery-card__body">
+          <lightning-input
+            type="email"
+            label="Delivery address"
+            value={emailAddress}
+            disabled
+          ></lightning-input>
+        </div>
+      </article>
+    </template>
+  </section>
+</template>

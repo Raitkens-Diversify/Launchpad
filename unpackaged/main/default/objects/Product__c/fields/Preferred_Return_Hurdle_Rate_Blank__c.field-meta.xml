@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Preferred_Return_Hurdle_Rate_Blank__c</fullName>
+    <description>For Lightning Page for Advisors.</description>
+    <formula>ISBLANK(Preferred_Return_Hurdle_Rate__c)</formula>
+    <label>Preferred Return/Hurdle Rate Blank</label>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Zoom License Attributes --></label>
+        <name>Zoom_License_Attributes__c</name>
+        <picklistValues>
+            <masterLabel>Zoom Meetings Basic</masterLabel>
+            <translation><!-- Zoom Meetings Basic --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Zoom Phone</masterLabel>
+            <translation><!-- Zoom Phone --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Zoom Rooms</masterLabel>
+            <translation><!-- Zoom Rooms --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Zoom Webinars 500</masterLabel>
+            <translation><!-- Zoom Webinars 500 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Zoom Workplace Business</masterLabel>
+            <translation><!-- Zoom Workplace Business --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Zoom Workplace Business Plus with US/CA Unlimited</masterLabel>
+            <translation><!-- Zoom Workplace Business Plus with US/CA Unlimited --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

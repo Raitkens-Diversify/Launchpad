@@ -1,0 +1,28 @@
+<aura:component controller="TypeHeadLookupController" implements="force:appHostable,force:hasRecordId,forceCommunity:availableForAllPageTypes" access="global" >
+    <ltng:require styles="{! $Resource.select2 + '/select2-4.0.3/dist/css/select2.min.css'}" 
+                  scripts="{!join(',', 
+                           $Resource.jquery224 ,  
+                           $Resource.select2 + '/select2-4.0.3/dist/js/select2.js')
+                           }" afterScriptsLoaded="{!c.scriptsLoaded}"/>
+    <aura:attribute name="picklistOptsList" type="String[]"/>
+    <aura:attribute name="objectName" type="String"/>
+    <aura:attribute name="fieldName" type="String"/>
+    <aura:attribute name="roleValue" type="String"/>
+    <aura:attribute name="rankValue" type="String"/>    
+    <aura:attribute name="picklistId" type="String"/>
+    <aura:attribute name="isWorking" type="Boolean"/>
+    
+    <aura:attribute name="class" type="String" access="public" default=""/>
+    
+    <aura:method name="sampleMethod" action="{!c.childSave}" access="public" />
+    <aura:method name="updateAccount" action="{!c.updateAccount}" access="public" />
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+    <div class="slds-form-element">  
+        <select id="{!v.picklistId}" style="width:100%" class="select2Class" multiple="multiple">
+            <aura:iteration items="{!v.picklistOptsList}" var="opts">
+                <option value="{!opts}"> {!opts} </option>
+            </aura:iteration>     
+        </select>
+    </div>
+</aura:component>

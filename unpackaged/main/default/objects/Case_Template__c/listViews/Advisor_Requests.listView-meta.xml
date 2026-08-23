@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Advisor_Requests</fullName>
+    <columns>Case_Template_Testing_Name__c</columns>
+    <columns>NAME</columns>
+    <columns>Signature_Type__c</columns>
+    <columns>Type__c</columns>
+    <columns>Previous_Management_Style__c</columns>
+    <columns>Management_Style__c</columns>
+    <columns>Compliance_Needed__c</columns>
+    <columns>No_SLOA_on_File__c</columns>
+    <columns>Change_Withholdings__c</columns>
+    <columns>Charity_Sponsor__c</columns>
+    <columns>Enough_Cash__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>RECORDTYPE</field>
+        <operation>equals</operation>
+        <value>Case_Template__c.Advisor_Request</value>
+    </filters>
+    <label>Advisor Requests</label>
+</ListView>

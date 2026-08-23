@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Single Life</fullName>
+        <default>false</default>
+        <label>Single Life</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Joint Last-to-Die</fullName>
+        <default>false</default>
+        <label>Joint Last-to-Die</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Joint First-to-Die</fullName>
+        <default>false</default>
+        <label>Joint First-to-Die</label>
+    </standardValue>
+</StandardValueSet>

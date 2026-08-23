@@ -1,0 +1,147 @@
+/*
+ * LWR sites inject real SLDS2 styling hooks under these names into each
+ * component scope, and those beat values inherited from an ancestor's :host —
+ * so the tokens are self-declared here with literal fallbacks, matching
+ * arcSearchBar and the rest of the arc* components.
+ */
+:host {
+  --slds-g-spacing-1: 4px;
+  --slds-g-spacing-2: 8px;
+  --slds-g-spacing-3: 12px;
+  --slds-g-spacing-4: 16px;
+
+  display: block;
+}
+
+.work-items {
+  background: var(--div-color-white, #ffffff);
+  border: 1px solid var(--div-color-neutral-200, #e5e7eb);
+  border-radius: var(--div-radius-lg, 12px);
+  padding: var(--slds-g-spacing-4, 16px);
+}
+
+.work-items__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--slds-g-spacing-3, 12px);
+  margin-bottom: var(--slds-g-spacing-3, 12px);
+}
+
+.work-items__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--div-color-blue-900, #0f406f);
+}
+
+.work-items__tabs {
+  display: flex;
+  gap: var(--slds-g-spacing-1, 4px);
+}
+
+.work-items__tab {
+  border: none;
+  background: transparent;
+  padding: var(--slds-g-spacing-1, 4px) var(--slds-g-spacing-3, 12px);
+  border-radius: var(--div-radius-full, 999px);
+  font: inherit;
+  font-size: 0.8125rem;
+  color: var(--div-color-neutral-500, #838a97);
+  cursor: pointer;
+}
+
+.work-items__tab:hover {
+  color: var(--div-color-blue-700, #1a76bb);
+}
+
+.work-items__tab--active {
+  background: var(--div-color-blue-950, #0b2f51);
+  color: var(--div-color-white, #ffffff);
+}
+
+.work-items__tab--active:hover {
+  color: var(--div-color-white, #ffffff);
+}
+
+.work-items__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.work-items__row + .work-items__row {
+  border-top: 1px solid var(--div-color-neutral-200, #e5e7eb);
+}
+
+.work-items__link {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--slds-g-spacing-3, 12px);
+  padding: var(--slds-g-spacing-2, 8px) 0;
+  border: none;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.work-items__link:hover .work-items__row-title {
+  text-decoration: underline;
+}
+
+.work-items__row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.work-items__row-title {
+  color: var(--div-color-blue-700, #1a76bb);
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.work-items__row-subtitle,
+.work-items__row-detail {
+  color: var(--div-color-neutral-500, #838a97);
+  font-size: 0.75rem;
+}
+
+.work-items__row-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-2, 8px);
+  flex-shrink: 0;
+}
+
+.work-items__row-status {
+  padding: 2px var(--slds-g-spacing-2, 8px);
+  border-radius: var(--div-radius-full, 999px);
+  background: var(--div-color-neutral-100, #f3f4f6);
+  color: var(--div-color-gray-900, #030712);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.work-items__empty,
+.work-items__error {
+  margin: 0;
+  padding: var(--slds-g-spacing-3, 12px) 0;
+  color: var(--div-color-neutral-500, #838a97);
+  font-size: 0.875rem;
+}
+
+.work-items__error {
+  color: var(--div-color-red-700, #b42318);
+}
+
+.work-items__loading {
+  display: flex;
+  justify-content: center;
+  padding: var(--slds-g-spacing-4, 16px) 0;
+}

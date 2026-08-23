@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Platform Fee --></label>
+        <name>Platform_Fee__c</name>
+        <picklistValues>
+            <masterLabel>10 bps</masterLabel>
+            <translation><!-- 10 bps --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>12 bps</masterLabel>
+            <translation><!-- 12 bps --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>12.5 bps</masterLabel>
+            <translation><!-- 12.5 bps --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>15 bps</masterLabel>
+            <translation><!-- 15 bps --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>17 bps</masterLabel>
+            <translation><!-- 17 bps --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>20 bps</masterLabel>
+            <translation><!-- 20 bps --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>8 bps</masterLabel>
+            <translation><!-- 8 bps --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DMS+ Peter Burnham Payout 37.5 bps</masterLabel>
+            <translation><!-- DMS+ Peter Burnham Payout 37.5 bps --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>GWP 20 bps</masterLabel>
+            <translation><!-- GWP 20 bps --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>No Platform Fee</masterLabel>
+            <translation><!-- No Platform Fee --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Not Applicable</masterLabel>
+            <translation><!-- Not Applicable --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Unassigned</masterLabel>
+            <translation><!-- Unassigned --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

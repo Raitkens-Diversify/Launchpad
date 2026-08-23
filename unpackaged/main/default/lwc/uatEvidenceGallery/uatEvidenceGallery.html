@@ -1,0 +1,49 @@
+<template>
+    <template if:true={hasFiles}>
+        <ul class="ueg__grid">
+            <template for:each={tiles} for:item="tile">
+                <li key={tile.key} class="ueg__item">
+                    <template if:true={tile.isImage}>
+                        <button type="button" class="ueg__thumb-btn"
+                                data-index={tile.imageIndex}
+                                title={tile.openLabel}
+                                aria-label={tile.openLabel}
+                                onclick={handleOpen}>
+                            <img class="ueg__thumb" src={tile.thumbnailUrl} alt={tile.title} loading="lazy" />
+                            <span class="ueg__zoom" aria-hidden="true">
+                                <lightning-icon icon-name="utility:expand_alt" size="xx-small"
+                                                variant="inverse"></lightning-icon>
+                            </span>
+                        </button>
+                    </template>
+                    <template if:false={tile.isImage}>
+                        <a class="ueg__doc" href={tile.downloadUrl} target="_blank" rel="noopener"
+                           title={tile.docLabel}>
+                            <lightning-icon icon-name="doctype:attachment" size="small"></lightning-icon>
+                            <span class="ueg__doc-ext">{tile.extensionLabel}</span>
+                        </a>
+                    </template>
+                    <div class="ueg__meta">
+                        <span class="ueg__label" title={tile.title}>{tile.title}</span>
+                        <template if:true={removable}>
+                            <lightning-button variant="base"
+                                              label="Remove"
+                                              disabled={busy}
+                                              data-docid={tile.contentDocumentId}
+                                              data-title={tile.title}
+                                              onclick={handleRemove}></lightning-button>
+                        </template>
+                    </div>
+                </li>
+            </template>
+        </ul>
+    </template>
+    <template if:true={showEmpty}>
+        <p class="ueg__empty">{emptyText}</p>
+    </template>
+
+    <template if:true={previewOpen}>
+        <c-uat-lightbox files={images} index={previewIndex}
+                        onclose={handlePreviewClose}></c-uat-lightbox>
+    </template>
+</template>

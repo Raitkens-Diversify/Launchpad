@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <help><!-- Must match a Strategy Sleeve Classification picklist value exactly, or Default for the fallback rule. --></help>
+        <label><!-- Sleeve Classification --></label>
+        <name>Sleeve_Classification__c</name>
+    </CustomFieldTranslation>

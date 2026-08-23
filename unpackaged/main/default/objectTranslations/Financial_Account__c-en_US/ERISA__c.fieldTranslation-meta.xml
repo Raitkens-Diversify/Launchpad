@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- ERISA Fee Type --></label>
+        <name>ERISA__c</name>
+        <picklistValues>
+            <masterLabel>Annual Fee of % per year</masterLabel>
+            <translation><!-- Annual Fee of % per year --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Flat Fee $ per year</masterLabel>
+            <translation><!-- Flat Fee $ per year --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

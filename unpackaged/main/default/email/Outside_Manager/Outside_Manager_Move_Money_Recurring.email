@@ -1,0 +1,7 @@
+I hope this email finds you well. I'm reaching out today with a confirmation that a recurring request for money movement has successfully been completed for the following account:
+
+Transaction Type: [!Case.Money_Type__c] [!Case.Money_Movement_Direction__c]
+Account: [!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.Name] [!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.OASP_FSC__Registration_Type__r.Name] XXXX[!Case.FinServ__FinancialAccount__r.Account_Number_Last_4__c], [!Case.FinServ__FinancialAccount__r.OASP_FSC__Custodian__r.Name]
+[!Case.Amount__c]
+Date of Transaction: **Date Completed**
+Date of Next Transaction: **Date of Next Transaction**

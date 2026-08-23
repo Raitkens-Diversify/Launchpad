@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Stale_Claim_Days__c</fullName>
+    <defaultValue>7</defaultValue>
+    <description>Days a claim may sit at Not Started before the nightly job returns it to the pool (blank = never auto-release). Cycles created before this field existed have it blank and are unaffected until an admin opts in.</description>
+    <externalId>false</externalId>
+    <label>Stale Claim Days</label>
+    <precision>3</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

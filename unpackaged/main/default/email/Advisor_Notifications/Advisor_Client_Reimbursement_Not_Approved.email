@@ -1,0 +1,12 @@
+Hello [!Case.Financial_Advisor_Team__r.Primary_Financial_Advisor__r.FirstName] [!Case.Financial_Advisor_Team__r.Primary_Financial_Advisor__r.LastName],
+
+Your client reimbursement request was not approved. Please work with the home office for any further clarification.
+
+[!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.Name]
+XXXX[!Case.FinServ__FinancialAccount__r.Account_Number_Last_4__c]
+[!Case.FinServ__FinancialAccount__r.OASP_FSC__Custodian__r.Name]
+
+[!Case.Amount__c]
+[!Case.Reimbursement_Reason__c]
+
+Thanks,

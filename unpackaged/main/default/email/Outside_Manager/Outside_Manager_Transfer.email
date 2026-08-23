@@ -1,0 +1,7 @@
+I hope this email finds you well. I am reaching out today with a confirmation that a transfer of assets has completed, and the funds are now showing in  [!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.Name] [!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.OASP_FSC__Registration_Type__r.Name] XXXX[!Case.FinServ__FinancialAccount__r.Account_Number_Last_4__c]. Below are the details of this transaction:
+
+Receiving Account: [!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.Name] [!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.OASP_FSC__Registration_Type__r.Name] XXXX[!Case.FinServ__FinancialAccount__r.Account_Number_Last_4__c], [!Case.FinServ__FinancialAccount__r.OASP_FSC__Custodian__r.Name]
+Sending Account: [!Case.Transfer_From_Account_Name__c] - [!Case.Transfer_From_Account_Number__c] - [!Case.Custodian__c] - [!Case.Transfer_From_Account_Type__c]
+
+Please don't hesitate to reach out with any follow up questions regarding this transaction.
+Sincerely,

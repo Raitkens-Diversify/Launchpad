@@ -1,0 +1,219 @@
+:host {
+    display: block;
+
+    /* Self-declared token block (mirrors adminConsole/resourceCenter): V2
+       --slds-g-* palette + V1 --ds-* primitives. No dsTokensV2 provider.
+       Children (uatQueue, uatRunner, uatExploratoryLog, uatEvidenceUpload)
+       inherit these through the shadow-DOM cascade. */
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-accent-3: #071c31;
+    --slds-g-color-on-accent-1: #ffffff;
+    --slds-g-font-family-base: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    --slds-g-font-scale-1: 14px;
+    --slds-g-spacing-2: 0.5rem;
+    --slds-g-spacing-3: 0.75rem;
+    --slds-g-spacing-4: 1rem;
+    --slds-g-spacing-5: 24px;
+
+    --ds-medium-blue: #1a76bb;
+    --ds-light-blue: #14bef0;
+    --ds-lightest-blue: #e2f8ff;
+    --ds-font-heading: "Libre Baskerville", Georgia, serif;
+    --ds-space-xs: 4px;
+    --ds-space-sm: 8px;
+    --ds-space-md: 12px;
+    --ds-space-lg: 16px;
+    --ds-space-xl: 24px;
+    --ds-space-2xl: 32px;
+    --ds-radius-sm: 6px;
+    --ds-radius-md: 8px;
+    --ds-radius-lg: 10px;
+    --ds-radius-pill: 20px;
+    --ds-shadow-rest: 0 1px 2px rgba(15, 23, 42, 0.06);
+    --ds-shadow-hover: 0 4px 14px rgba(15, 64, 111, 0.08);
+    --ds-shadow-drop: 0 8px 24px rgba(9, 36, 63, 0.12);
+    /* Upward shadow for bars pinned to the viewport bottom (the runner's
+       nav bar) — the three shadows above are all downward. */
+    --ds-shadow-raised: 0 -4px 12px rgba(9, 36, 63, 0.08);
+
+    /* One content width for the whole app, matching the Help Center's
+       --nexs-content-max. Declared here (like nexsLanding declares it for
+       its children) so uatDashboard inherits it through the shadow cascade.
+       The wide width is the Dashboard's two-column grid. */
+    --uta-content-max: 1040px;
+    --uta-content-max-wide: 1280px;
+
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+    color: var(--slds-g-color-on-surface-2, #374151);
+    /* White base canvas (Exploratory reading view); the nav views and the
+       card-based Runner layer the gray canvas via .uta-shell--canvas. */
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+}
+
+.uta-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+}
+
+/* Gray card canvas for the three nav views (Dashboard/Queue/Pool): all
+   three are white cards on a surface, and the gray is what gives them edge
+   definition (the Help Center browse-page treatment). Runner/Exploratory
+   stay on the white reading canvas. */
+.uta-shell--canvas {
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+
+/* Chrome (replicated from .ac-chrome__* / .rc-chrome__*). The sticky
+   wrapper carries the white brand header AND the navy view band so they
+   pin as one unit. */
+.uta-chrome {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+.uta-chrome__header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--slds-g-spacing-5, 24px);
+    min-height: 64px;
+    box-sizing: border-box;
+    padding: var(--slds-g-spacing-4, 16px) var(--slds-g-spacing-5, 24px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+.uta-chrome__logo {
+    height: 24px;
+    width: auto;
+    display: block;
+}
+.uta-chrome__divider {
+    flex: none;
+    width: 1px;
+    height: 24px;
+    background: var(--slds-g-color-border-1, #d1d5db);
+}
+.uta-chrome__crumb {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: 500;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.uta-chrome__switcher {
+    /* Far right of the brand header (the nexs-chrome__help idiom); the
+       header's flex-wrap drops it to a second row on narrow screens. */
+    margin-left: auto;
+}
+
+/* Inner task pages (Queue/Pool/Runner/Exploratory): centered column. */
+.uta-main {
+    flex: 1 1 auto;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: var(--uta-content-max, 1040px);
+    margin: 0 auto;
+    padding: var(--ds-space-xl, 24px);
+}
+
+/* The Dashboard's operational grid runs fluid — an ops surface should use
+   the screen it's given (the mock's proportions), with breathing room at
+   the edges instead of a capped column that leaves dead gray gutters. */
+.uta-main--wide {
+    max-width: none;
+    padding: var(--ds-space-xl, 24px) clamp(24px, 3vw, 48px);
+}
+
+/* The queue/pool page headers live in c-uat-page-header now (icon tile +
+   h1 + subtitle + brand action) — the old .uta-page-head moved there. */
+
+/* Dashboard | My Queue | Open Pool — a navy view band under the white
+   brand header. White-on-navy is dsTopicNav's active idiom, and the band's
+   dark fill is the dsHero gradient's dark end, so it reads as the same
+   family as the Help Center. Active tab: lighter navy fill + the brand's
+   bright-accent underline (underline as the differentiator, per dsTopicNav).
+   Scrolls horizontally instead of wrapping on narrow screens — the
+   .div-record-tabs mobile behavior. */
+.uta-band {
+    display: flex;
+    align-items: stretch;
+    gap: var(--ds-space-sm, 8px);
+    padding: 0 var(--slds-g-spacing-5, 24px);
+    background: var(--slds-g-color-accent-3, #071c31);
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.uta-band::-webkit-scrollbar {
+    display: none;
+}
+.uta-band__tab {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-sm, 8px);
+    white-space: nowrap;
+    padding: 12px 16px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: 500;
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+    transition: background-color 0.15s ease;
+}
+.uta-band__icon {
+    --sds-c-icon-color-foreground-default: var(--slds-g-color-on-accent-1, #ffffff);
+}
+.uta-band__tab:hover {
+    background: var(--slds-g-color-accent-2, #0b2f51);
+}
+.uta-band__tab--active {
+    background: var(--slds-g-color-accent-1, #0f406f);
+    border-bottom-color: var(--ds-light-blue, #14bef0);
+    font-weight: 600;
+}
+.uta-band__tab:focus-visible {
+    outline: 2px solid var(--ds-light-blue, #14bef0);
+    outline-offset: -2px;
+}
+
+.uta-chrome__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--ds-space-xs, 4px);
+    padding: var(--slds-g-spacing-3, 12px) var(--slds-g-spacing-5, 24px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    font-size: 0.75rem;
+}
+.uta-chrome__footer-brand {
+    font-weight: 600;
+    color: var(--slds-g-color-accent-1, #0f406f);
+}
+
+@media (max-width: 560px) {
+    .uta-main {
+        padding: var(--ds-space-lg, 16px);
+    }
+    .uta-band {
+        padding: 0 var(--ds-space-lg, 16px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .uta-band__tab {
+        transition-duration: 0.01ms;
+    }
+}

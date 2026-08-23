@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Anticipated_Hold_Period_years__c</fullName>
+    <label>Anticipated Hold Period</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>&lt;3 years</fullName>
+                <default>false</default>
+                <label>&lt;3 years</label>
+            </value>
+            <value>
+                <fullName>3-5 years</fullName>
+                <default>false</default>
+                <label>3-5 years</label>
+            </value>
+            <value>
+                <fullName>5-7 years</fullName>
+                <default>false</default>
+                <label>5-7 years</label>
+            </value>
+            <value>
+                <fullName>7-10 years</fullName>
+                <default>false</default>
+                <label>7-10 years</label>
+            </value>
+            <value>
+                <fullName>10+ years</fullName>
+                <default>false</default>
+                <label>10+ years</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSetGroup xmlns="http://soap.sforce.com/2006/04/metadata">
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Full User</label>
+    <permissionSets>General_Advisor_Requests</permissionSets>
+    <permissionSets>Significant_Events_CRED</permissionSets>
+    <permissionSets>ZVC__Zoom_Phone_User</permissionSets>
+    <permissionSets>Zoom_User_Diversify</permissionSets>
+    <permissionSets>dfsle__DocuSign_Sender</permissionSets>
+    <permissionSets>dfsle__DocuSign_User</permissionSets>
+    <permissionSets>efs__EgnyteUser</permissionSets>
+    <status>Updated</status>
+</PermissionSetGroup>

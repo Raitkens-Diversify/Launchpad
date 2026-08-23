@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Queue --></label>
+        <name>Queue__c</name>
+        <picklistValues>
+            <masterLabel>Back Office Operations</masterLabel>
+            <translation><!-- Back Office Operations --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Compliance</masterLabel>
+            <translation><!-- Compliance --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Custodian Submittal</masterLabel>
+            <translation><!-- Custodian Submittal --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DMS</masterLabel>
+            <translation><!-- DMS --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Finance</masterLabel>
+            <translation><!-- Finance --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Principal Review</masterLabel>
+            <translation><!-- Principal Review --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Systems</masterLabel>
+            <translation><!-- Systems --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Trading</masterLabel>
+            <translation><!-- Trading --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

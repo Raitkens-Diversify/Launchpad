@@ -1,0 +1,1132 @@
+/*
+ * envelopeWizardStyles — shared stylesheet that themes Lightning base components
+ * (input/combobox/checkbox, breadcrumb, button) for the V2 envelope flow via SLDS
+ * styling hooks.
+ *
+ * Loaded once high in the tree via loadStyle(), so its rules are global. Hook values
+ * come from the design (Figma) and the tokens defined in :root below. Scope rules
+ * under a context wrapper (e.g. `.shell`) where they should not apply page-wide.
+ *
+ * Template for form controls (uncomment and fill in when a control is added):
+ *
+ * .shell lightning-input {
+ *   --slds-c-input-color-border: var(--slds-g-color-border-1);
+ *   --slds-c-input-radius-border: var(--slds-g-radius-border-2);
+ *   --slds-c-input-text-color: var(--slds-g-color-on-surface-2);
+ * }
+ */
+
+/* Design tokens — single source. :root is the global default; a child component may
+   override a token locally on its own :host (the closer ancestor wins for its subtree). */
+:root {
+  --ds-font-heading: "Libre Baskerville", Georgia, serif;
+  --ds-font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --slds-g-spacing-1: 4px;
+  --slds-g-spacing-2: 0.5rem;
+  --slds-g-spacing-3: 0.75rem;
+  --slds-g-spacing-4: 1rem;
+  --slds-g-spacing-5: 24px;
+  --slds-g-spacing-6: 32px;
+  --slds-g-spacing-7: 40px;
+  --slds-g-spacing-8: 48px;
+  --slds-g-spacing-10: 64px;
+
+  --slds-g-radius-border-1: 0.25rem; /* 4px — small controls (per Figma DS) */
+  --slds-g-radius-border-2: 0.5rem; /* 8px — main controls */
+  --slds-g-radius-border-3: 0.75rem; /* 12px — panels / cards */
+
+  /* Icon-button box scale (Diversify DS "Button Icon / Container"). */
+  --slds-g-sizing-7: 24px;
+  --slds-g-sizing-9: 32px;
+
+  --slds-g-font-family-base: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --slds-g-font-scale-neg-1: 12px;
+  --slds-g-font-scale-1: 14px;
+  --slds-g-font-size-base: 13px;
+  --slds-g-font-scale-2: 0.875rem;
+  --slds-g-font-scale-3: 1.25rem;
+  --slds-g-font-scale-4: 24px;
+  --slds-g-font-lineheight-2: 19px;
+  --slds-g-font-lineheight-4: 24px;
+  --slds-g-font-lineheight-6: 32px;
+  --slds-g-font-weight-4: 400;
+  --slds-g-font-weight-5: 500;
+  --slds-g-font-weight-6: 600;
+  --slds-g-font-weight-7: 700;
+
+  --slds-g-color-surface-1: #ffffff;
+  --slds-g-color-surface-2: #f3f4f6;
+  --slds-g-color-surface-container-1: #ffffff;
+  --slds-g-color-surface-container-2: #f3f4f6;
+  --slds-g-color-surface-container-3: #e5e7eb;
+
+  --slds-g-color-on-surface-1: #4b5563;
+  --slds-g-color-on-surface-2: #374151;
+  --slds-g-color-on-surface-3: #09243f;
+
+  --slds-g-color-border-1: #d1d5db;
+  --slds-g-color-border-2: #b6bcc5;
+  --slds-g-color-border-disabled-1: #d1d5db;
+  --slds-g-color-border-accent-1: #0f406f;
+  --slds-g-color-border-accent-2: #0b2f51;
+  --slds-g-color-border-inverse-2: #09243f;
+
+  --slds-g-color-accent-1: #0f406f;
+  --slds-g-color-accent-2: #0b2f51;
+  --slds-g-color-accent-3: #071c31;
+  --slds-g-color-brand-base-90: #e2f8ff;
+  --slds-g-color-brand-base-95: #f7fbfc;
+  --slds-g-color-accent-container-1: #0f406f;
+  --slds-g-color-accent-container-2: #0b2f51;
+  --slds-g-color-on-accent-1: #ffffff;
+  --slds-g-color-on-accent-2: #ffffff;
+
+  --slds-g-color-neutral-base-50: #6b7280;
+  --slds-g-color-neutral-base-60: #838a97;
+  --slds-g-color-neutral-base-80: #838a97;
+  --slds-g-color-disabled-container-2: #838a97;
+  --slds-g-color-on-disabled-1: #838a97;
+  --slds-g-color-on-disabled-2: #e5e7eb;
+
+  --slds-g-color-success-base-50: #16a34a;
+  --slds-g-color-success-container-1: #dcfce7;
+  --slds-g-color-success-base-80: #86efac;
+  --slds-g-color-on-success-1: #15803d;
+
+  --slds-g-color-warning-1: #f59e0b;
+  --slds-g-color-warning-container-1: #fef3c7;
+  --slds-g-color-on-warning-1: #b45309;
+  --slds-g-color-warning-base-90: #fde68a;
+  --slds-g-color-warning-base-30: #92400e;
+
+  --slds-g-color-info-container-1: #e0f2fe;
+  --slds-g-color-info-base-90: #bae6fd;
+  --slds-g-color-on-info-1: #0369a1;
+
+  --slds-g-color-error-container-1: #dc2626;
+  --slds-g-color-error-container-2: #b91c1c;
+  --slds-g-color-on-error-1: #b91c1c;
+
+  --slds-g-color-on-surface-4: #1a76bb;
+  --slds-g-color-on-surface-inverse-2: #78dcfb;
+}
+
+/* lightning-spinner. The base spinner host carries the .slds-spinner_container class, which paints a
+   translucent white overlay (rgba(255,255,255,0.75)) filling its positioned parent — visible as a
+   white box behind the dots. The V2 loading state sits directly on the page surface, so clear the
+   overlay. Scoped under .env-layout; the class lives on the host element, so this is a compound
+   selector (no descendant space). */
+.env-layout lightning-spinner.slds-spinner_container {
+  background-color: transparent;
+}
+
+/* Busy button — overlay a spinner on a base button while an async action runs and hide the
+   button's label so only the spinner shows (the button keeps its width). Reusable by any V2
+   dialog (rename, delete, future): wrap a single <lightning-button> and a
+   <lightning-spinner lwc:if={isBusy}> in an element with class "env-busy-button". The label
+   hide is keyed off the spinner's presence, so no extra state class is needed. The label rule
+   is global because a component's scoped CSS can't reach the base button internals; the
+   :has() selector outranks the disabled-label color rule below, so it works while the button
+   is disabled too. */
+.env-layout .env-busy-button {
+  position: relative;
+  display: inline-flex;
+}
+
+.env-layout .env-busy-button:has(lightning-spinner) lightning-button .slds-button {
+  color: transparent;
+}
+
+/* Busy-button spinner — recolor the brand spinner's dots to the disabled-button text color
+   so the indicator reads as part of the button's in-progress/disabled state instead of the
+   brand blue. Scoped to .env-busy-button so the standalone page spinner is unaffected. The
+   spinner paints six dots via the ::before/::after pseudo-elements of three elements — the
+   .slds-spinner element itself plus its .slds-spinner__dot-a / __dot-b children — so all
+   three must be overridden (the brand variant colors all of them). */
+.env-layout .env-busy-button lightning-spinner .slds-spinner::before,
+.env-layout .env-busy-button lightning-spinner .slds-spinner::after,
+.env-layout .env-busy-button lightning-spinner .slds-spinner__dot-a::before,
+.env-layout .env-busy-button lightning-spinner .slds-spinner__dot-a::after,
+.env-layout .env-busy-button lightning-spinner .slds-spinner__dot-b::before,
+.env-layout .env-busy-button lightning-spinner .slds-spinner__dot-b::after {
+  background-color: var(--slds-g-color-on-disabled-2, #e5e7eb);
+}
+
+/* lightning-breadcrumb. Scoped under .env-layout (the V2 subtree) so v1 screens are not
+   affected. The breadcrumb anchor exposes part="breadcrumb" and takes its link color from
+   --lwc-brandTextLink; the current crumb is targeted via the semantic [aria-current="page"]
+   attribute. Tokens are inherited from the host where the sheet is loaded. */
+.env-layout lightning-breadcrumb a[part="breadcrumb"] {
+  --lwc-brandTextLink: var(--slds-g-color-accent-2, #0b2f51);
+}
+
+.env-layout lightning-breadcrumb a[part="breadcrumb"][aria-current="page"] {
+  --lwc-brandTextLink: var(--slds-g-color-accent-3, #071c31);
+  font-weight: var(--slds-g-font-weight-5, 500);
+  text-decoration: underline;
+}
+
+/* lightning-button brand. Scoped under .env-layout (the V2 subtree) so v1 buttons are not
+   affected. Values from the design system "Button - Brand". Background/border/text use the
+   standard --slds-c-button-* hooks; radius is set directly on the rendered button (the
+   radius hook is not honored — see below). */
+.env-layout lightning-button {
+  /* default */
+  --slds-c-button-brand-color-background: var(--slds-g-color-accent-container-1, #0f406f);
+  --slds-c-button-brand-color-border: var(--slds-g-color-accent-container-1, #0f406f);
+  --slds-c-button-brand-text-color: var(--slds-g-color-on-accent-1, #ffffff);
+
+  /* hover */
+  --slds-c-button-brand-color-background-hover: var(--slds-g-color-accent-container-2, #0b2f51);
+  --slds-c-button-brand-color-border-hover: var(--slds-g-color-accent-container-2, #0b2f51);
+
+  /* active */
+  --slds-c-button-brand-color-background-active: var(--slds-g-color-accent-container-2, #0b2f51);
+  --slds-c-button-brand-color-border-active: var(--slds-g-color-accent-container-2, #0b2f51);
+
+  /* neutral + text (migrated from dsTokensV2 — used by the V2 modal footers). */
+  --slds-c-button-neutral-color-background: var(--slds-g-color-surface-container-1, #ffffff);
+  --slds-c-button-neutral-color-border: var(--slds-g-color-border-2, #b6bcc5);
+  --slds-c-button-neutral-color-background-hover: var(--slds-g-color-surface-container-1, #ffffff);
+  --slds-c-button-neutral-color-border-hover: var(--slds-g-color-accent-2, #0b2f51);
+  --slds-c-button-neutral-color-background-active: var(--slds-g-color-surface-container-1, #ffffff);
+  --slds-c-button-neutral-color-border-active: var(--slds-g-color-accent-2, #0b2f51);
+  --slds-c-button-text-color: var(--slds-g-color-accent-2, #0b2f51);
+  --slds-c-button-text-color-hover: var(--slds-g-color-accent-2, #0b2f51);
+
+  /* destructive (migrated from dsTokensV2 — delete modal). */
+  --slds-c-button-destructive-color-background: var(--slds-g-color-error-container-1, #dc2626);
+  --slds-c-button-destructive-color-border: var(--slds-g-color-error-container-1, #dc2626);
+  --slds-c-button-destructive-color-background-hover: var(--slds-g-color-error-container-2, #b91c1c);
+  --slds-c-button-destructive-color-border-hover: var(--slds-g-color-error-container-2, #b91c1c);
+  --slds-c-button-destructive-color-background-active: var(--slds-g-color-error-container-2, #b91c1c);
+  --slds-c-button-destructive-color-border-active: var(--slds-g-color-error-container-2, #b91c1c);
+
+  /* disabled — the base button's disabled-brand rule reads --slds-g-color-neutral-base-80
+     (the --slds-c-button-*-disabled hooks are not honored here); that token is set in :root. */
+}
+
+/* Radius: --slds-c-button-radius-border is not honored by the base button, so override the
+   rendered .slds-button directly. The descendant selector reaches it because the base
+   component renders in the same (flat) DOM. */
+.env-layout lightning-button .slds-button {
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  font-weight: var(--slds-g-font-weight-6, 600);
+  font-size: var(--slds-g-font-scale-1, 14px);
+}
+
+/* Focus ring (2px white + 4px electric blue), matching the input and combobox. The base
+   button's outset focus shadow is suppressed in this context, so set it on :focus directly. */
+.env-layout lightning-button .slds-button:focus,
+.env-layout lightning-button .slds-button:focus-visible {
+  box-shadow: 0 0 0 2px var(--slds-g-color-surface-container-1, #ffffff),
+    0 0 0 4px var(--slds-g-color-on-surface-4, #1a76bb);
+}
+
+/* Disabled label color (Figma on-disabled-2). */
+.env-layout lightning-button .slds-button:disabled {
+  color: var(--slds-g-color-on-disabled-2, #e5e7eb);
+}
+
+/* Base-variant text links on the Manage Documents screen — "Back to Envelope" (header) and the
+   per-file "Manage document links" link. Rendered as accent text links with no underline.
+   Weight/size come from the global button rule above; this pins the color (the base variant's
+   default link color is not accent-2) and removes the hover underline. Scoped to each button's
+   class so the rule does not bleed onto the brand/neutral buttons in nested dialogs (e.g. the
+   document-links modal's Accept/Cancel footer, where it overrode the brand button's white text). */
+.env-layout c-envelope-manage-documents .docs__back .slds-button,
+.env-layout c-envelope-manage-documents .docs__back .slds-button:hover,
+.env-layout c-envelope-manage-documents .docs__back .slds-button:focus,
+.env-layout c-envelope-manage-documents .docs__file-link .slds-button,
+.env-layout c-envelope-manage-documents .docs__file-link .slds-button:hover,
+.env-layout c-envelope-manage-documents .docs__file-link .slds-button:focus {
+  color: var(--slds-g-color-accent-2, #0b2f51);
+  text-decoration: none;
+}
+
+/* Disabled neutral button (Figma "Button - Neutral / disabled"). Uses a fixed light surface
+   background so the control looks consistent on any surface it is reused on, with the disabled
+   border and label colors from the design. Scoped to the neutral variant so brand/destructive
+   disabled states are unaffected. */
+.env-layout lightning-button .slds-button_neutral:disabled,
+.env-layout lightning-button .slds-button_neutral[disabled] {
+  background-color: var(--slds-g-color-surface-2, #f3f4f6);
+  border-color: var(--slds-g-color-border-disabled-1, #d1d5db);
+  color: var(--slds-g-color-on-disabled-1, #838a97);
+}
+
+/* Brand hover/active background — the --slds-c-button-brand-*-hover/-active hooks aren't
+   honored here, so set the rendered .slds-button_brand directly (same as radius/disabled). */
+.env-layout lightning-button .slds-button_brand:hover,
+.env-layout lightning-button .slds-button_brand:active {
+  background-color: var(--slds-g-color-accent-container-2, #0b2f51);
+  border-color: var(--slds-g-color-accent-container-2, #0b2f51);
+}
+
+/* Destructive button label/icon color. The generic --slds-c-button-text-color hook above maps
+   button text to accent-2, which overrides the destructive variant's default white; restore white
+   so the label and trash icon stay legible on the red background. */
+.env-layout lightning-button .slds-button_destructive {
+  color: #ffffff;
+}
+
+/* lightning-input (V2 input treatment, e.g. the list search). Scoped under .env-layout.
+   Maps the Figma input design via --slds-c-input-* hooks. As with the button radius, some
+   properties aren't honored via hooks and are set directly on the rendered .slds-input;
+   verify the focus ring / placeholder by inspecting and add direct overrides if needed. */
+.env-layout lightning-input {
+  --slds-c-input-color-background: var(--slds-g-color-surface-container-1, #ffffff);
+  --slds-c-input-color-border: var(--slds-g-color-border-1, #d1d5db);
+  --slds-c-input-color-border-focus: var(--slds-g-color-border-1, #d1d5db);
+  --slds-c-input-text-color: var(--slds-g-color-on-surface-2, #374151);
+  --slds-c-input-radius-border: var(--slds-g-radius-border-2, 8px);
+  --slds-c-input-shadow-focus: 0 0 0 2px var(--slds-g-color-surface-container-1, #ffffff),
+    0 0 0 4px var(--slds-g-color-on-surface-4, #1a76bb);
+}
+
+.env-layout lightning-input .slds-input {
+  min-height: 36px;
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  font-size: var(--slds-g-font-scale-1, 14px);
+  line-height: 19px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.env-layout lightning-input .slds-input::placeholder {
+  color: var(--slds-g-color-neutral-base-60, #838a97);
+}
+
+/* lightning-textarea (V2 multi-line field treatment, e.g. the dynamic-form textarea fields).
+   Mirrors the input box; radius/border aren't honored via hooks, so set on the rendered
+   .slds-textarea directly (same approach/scope as the input). */
+.env-layout lightning-textarea .slds-textarea {
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  border-color: var(--slds-g-color-border-1, #d1d5db);
+  background: var(--slds-g-color-surface-container-1, #ffffff);
+  font-size: var(--slds-g-font-scale-1, 14px);
+  line-height: 19px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.env-layout lightning-textarea .slds-textarea::placeholder {
+  color: var(--slds-g-color-neutral-base-60, #838a97);
+}
+
+.env-layout lightning-textarea .slds-textarea:focus {
+  border-color: var(--slds-g-color-border-1, #d1d5db);
+  box-shadow: 0 0 0 2px var(--slds-g-color-surface-container-1, #ffffff),
+    0 0 0 4px var(--slds-g-color-on-surface-4, #1a76bb);
+}
+
+/* Visible field label (e.g. the create-envelope modal inputs and the add-item Type
+   dropdown). Matches the Figma form-label treatment; label-hidden controls render the
+   label as assistive text, so this only affects controls that show one. */
+.env-layout lightning-input .slds-form-element__label,
+.env-layout lightning-combobox .slds-form-element__label,
+.env-layout lightning-textarea .slds-form-element__label,
+.env-layout lightning-checkbox-group .slds-form-element__label {
+  font-size: var(--slds-g-font-scale-2, 0.875rem);
+  font-weight: var(--slds-g-font-weight-5, 500);
+  line-height: 1.4;
+  color: var(--slds-g-color-on-surface-2, #374151);
+  margin-bottom: var(--slds-g-spacing-2, 0.5rem);
+}
+
+/* Dynamic-form fields drop the required asterisk by convention: required is the unmarked default and
+   optional fields are labelled "(optional)" instead. Hide the base components' .slds-required marker
+   (required is still set, so validation is unaffected). Scoped to the field control. */
+.env-layout c-envelope-field-control .slds-required {
+  display: none;
+}
+
+/* File selector (lightning-file-upload) on the Manage Documents dropzone. Scoped to the
+   .docs__file-input class so only this control is themed. The component's own dashed box
+   (.docs__dropzone) supplies the frame, so the file selector's own dropzone is made transparent
+   and the neutral browse button mirrors the V2 "Button - Neutral" treatment above.
+
+   Make the whole dashed box the drop target. The droppable-zone (primitiveFileDroppableZone) binds
+   its drag handlers to its shadow root, so dragover/preventDefault only fires over its shadow content
+   — the <slot>, which ships display:inline-flex/inline-block and shrink-wraps to the button. Filling
+   the box at each nested level — every wrapper absolutely positioned to cover .docs__file-input —
+   spreads the slot across the box so drops register anywhere and bubble up to the component's own
+   drop handler. The internal chain is lightning-input.slds-form-element →
+   lightning-primitive-input-file → .slds-form-element__control → .slds-file-selector →
+   droppable-zone → slot; the intermediate hosts must be filled explicitly because SLDS makes
+   .slds-form-element position:relative, which would otherwise capture the control's inset and
+   collapse the whole chain to that host's (zero-height) in-flow box. The browse button is anchored
+   at the bottom of the slot; the click-to-open label (.slds-file-selector__body) keeps its natural
+   size, so only the button opens the file dialog. */
+.env-layout .docs__file-input lightning-input,
+.env-layout .docs__file-input lightning-primitive-input-file,
+.env-layout .docs__file-input .slds-form-element__control {
+  position: absolute;
+  inset: 0;
+}
+
+/* lightning-file-upload has no label-hidden variant; keep its label for assistive tech but remove
+   it visually (the dropzone copy states the affordance). */
+.env-layout .docs__file-input .slds-form-element__label {
+  position: absolute;
+  margin: -1px;
+  border: 0;
+  padding: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.env-layout .docs__file-input .slds-file-selector__dropzone {
+  position: absolute;
+  inset: 0;
+  border: none;
+  background: transparent;
+}
+
+.env-layout .docs__file-input .slds-file-selector__dropzone slot {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 0 var(--slds-g-spacing-4, 16px);
+}
+
+.env-layout .docs__file-input .slds-file-selector__button {
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  border: 1px solid var(--slds-g-color-border-2, #b6bcc5);
+  background-color: var(--slds-g-color-surface-container-1, #ffffff);
+  color: var(--slds-g-color-accent-2, #0b2f51);
+  /* Hide the base component's fixed "Upload Files" text node; the label is injected below. */
+  font-size: 0;
+}
+
+.env-layout .docs__file-input .slds-file-selector__button:hover,
+.env-layout .docs__file-input .slds-file-selector__button:focus {
+  border-color: var(--slds-g-color-accent-2, #0b2f51);
+}
+
+/* Focus ring (2px white + 4px electric blue) matching the other V2 controls. Focus lands on the
+   visually-hidden input, so the ring is rendered on the button inside the adjacent label body. */
+.env-layout .docs__file-input
+  .slds-file-selector__input:focus
+  + .slds-file-selector__body
+  .slds-file-selector__button {
+  box-shadow: 0 0 0 2px var(--slds-g-color-surface-container-1, #ffffff),
+    0 0 0 4px var(--slds-g-color-on-surface-4, #1a76bb);
+}
+
+/* Drop the native "Or drop files" text — the dropzone title already states the affordance. */
+.env-layout .docs__file-input .slds-file-selector__text {
+  display: none;
+}
+
+/* Drag-over feedback: tint the drop target with the brand base, echoing the dashed box. The
+   slds-has-drag-over class is toggled on the dropzone element itself. */
+.env-layout .docs__file-input .slds-file-selector__dropzone.slds-has-drag-over {
+  background: var(--slds-g-color-brand-base-90, #e2f8ff);
+  border-radius: var(--slds-g-radius-border-2, 8px);
+}
+
+/* Relabel the button to "Browse file" to match the previous control: hide the leading upload
+   icon and inject the literal. Remove this block + the font-size:0 above to fall back to the
+   base component's default "Upload Files" label if its internal markup changes. */
+.env-layout .docs__file-input .slds-file-selector__button lightning-primitive-icon,
+.env-layout .docs__file-input .slds-file-selector__button .slds-button__icon {
+  display: none;
+}
+
+.env-layout .docs__file-input .slds-file-selector__button::after {
+  content: "Browse file";
+  font-size: var(--slds-g-font-scale-1, 14px);
+  font-weight: var(--slds-g-font-weight-6, 600);
+}
+
+/* lightning-input[type="date"] datepicker calendar. The base lightning-datepicker renders its
+   popover inline within the lightning-input subtree, so these descendant selectors reach it the
+   same way the combobox dropdown is themed. The --slds-c-* datepicker hooks are not honored in this
+   context, so the rendered .slds-datepicker classes are targeted directly. Values map the Figma
+   calendar (container + date-cell states). */
+.env-layout lightning-input .slds-datepicker {
+  border: none;
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  background: var(--slds-g-color-surface-container-1, #ffffff);
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.16), 0 3px 3px 0 rgba(0, 0, 0, 0.16),
+    0 -1px 2px 0 rgba(0, 0, 0, 0.09);
+}
+
+/* Month label and week-day header. */
+.env-layout lightning-input .slds-datepicker__filter h2 {
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.env-layout lightning-input .slds-datepicker thead th {
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
+  color: var(--slds-g-color-on-surface-3, #09243f);
+  font-weight: var(--slds-g-font-weight-4, 400);
+}
+
+/* Day base — square-rounded chips (overriding the default SLDS circle), 12px text. */
+.env-layout lightning-input .slds-datepicker td .slds-day {
+  width: 2rem;
+  height: 2rem;
+  line-height: 2rem;
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+/* Hover. */
+.env-layout lightning-input .slds-datepicker td .slds-day:hover {
+  background-color: var(--slds-g-color-brand-base-90, #e2f8ff);
+  color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+/* Today — light-blue chip, accent text; override the default SLDS today border. */
+.env-layout lightning-input .slds-datepicker td.slds-is-today .slds-day {
+  border: none;
+  background-color: var(--slds-g-color-brand-base-90, #e2f8ff);
+  color: var(--slds-g-color-accent-2, #0b2f51);
+}
+
+/* Selected — navy chip, white text. */
+.env-layout lightning-input .slds-datepicker td.slds-is-selected .slds-day {
+  background-color: var(--slds-g-color-accent-1, #0f406f);
+  color: var(--slds-g-color-on-accent-1, #ffffff);
+}
+
+/* Focus ring (2px white + 4px blue), matching the input/button/combobox. */
+.env-layout lightning-input .slds-datepicker td .slds-day:focus {
+  box-shadow: 0 0 0 2px var(--slds-g-color-surface-container-1, #ffffff),
+    0 0 0 4px var(--slds-g-color-on-surface-4, #1a76bb);
+}
+
+/* Bottom "Today" link in the accent color. */
+.env-layout lightning-input .slds-datepicker .slds-text-link,
+.env-layout lightning-input .slds-datepicker .slds-show--inline-block {
+  color: var(--slds-g-color-accent-2, #0b2f51);
+  font-size: var(--slds-g-font-scale-1, 14px);
+  font-weight: var(--slds-g-font-weight-6, 600);
+}
+
+/* lightning-combobox (V2 picklist treatment, e.g. the toolbar Team filter). Scoped under
+   .env-layout. Mirrors the input box; the trigger renders as .slds-combobox__input. Radius
+   and height aren't honored via hooks, so they're set directly on the trigger (verify the
+   exact trigger class and the chevron/placeholder color by inspecting). */
+.env-layout lightning-combobox .slds-combobox__input {
+  min-height: 36px;
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  border-color: var(--slds-g-color-border-1, #d1d5db);
+  background: var(--slds-g-color-surface-container-1, #ffffff);
+  font-size: var(--slds-g-font-scale-1, 14px);
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.env-layout lightning-combobox .slds-combobox__input:focus {
+  border-color: var(--slds-g-color-border-1, #d1d5db);
+  box-shadow: 0 0 0 2px var(--slds-g-color-surface-container-1, #ffffff),
+    0 0 0 4px var(--slds-g-color-on-surface-4, #1a76bb);
+}
+
+/* Combobox dropdown (the open listbox). It renders inline within the combobox, so the
+   descendant selector reaches it. Matches the Figma listbox container (radius, elevation
+   shadow, no border) and option rows (padding, 13px text). */
+.env-layout lightning-combobox .slds-dropdown {
+  border: none;
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  padding: var(--slds-g-spacing-1, 4px) 0;
+  background: var(--slds-g-color-surface-container-1, #ffffff);
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.16), 0 3px 3px 0 rgba(0, 0, 0, 0.16),
+    0 -1px 2px 0 rgba(0, 0, 0, 0.09);
+}
+
+.env-layout lightning-combobox .slds-listbox__option {
+  padding: 6px var(--slds-g-spacing-3, 12px);
+  font-size: var(--slds-g-font-size-base, 13px);
+  line-height: 18px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.env-layout lightning-combobox .slds-listbox__option:hover,
+.env-layout lightning-combobox .slds-listbox__option.slds-has-focus {
+  background-color: var(--slds-g-color-brand-base-90, #e2f8ff);
+  box-shadow: none;
+}
+
+/* Selected option's check icon in the brand accent color. */
+.env-layout lightning-combobox .slds-listbox__option.slds-is-selected .slds-icon,
+.env-layout lightning-combobox .slds-listbox__option[aria-selected="true"] .slds-icon {
+  fill: var(--slds-g-color-accent-1, #0f406f);
+}
+
+/* Button - Base (text only) — DS all states. Opt-in via .env-base-button; a generic
+   :hover/:active color rule would bleed onto brand/neutral buttons. Focus ring + radius
+   come from the shared .env-layout lightning-button rules above. */
+.env-layout .env-base-button .slds-button {
+  color: var(--slds-g-color-accent-2, #0b2f51);
+}
+
+.env-layout .env-base-button .slds-button:hover {
+  color: var(--slds-g-color-on-surface-3, #09243f);
+  text-decoration: none;
+}
+
+.env-layout .env-base-button .slds-button:active {
+  color: var(--slds-g-color-accent-3, #071c31);
+}
+
+.env-layout .env-base-button .slds-button:disabled,
+.env-layout .env-base-button .slds-button[disabled] {
+  color: var(--slds-g-color-on-disabled-1, #838a97);
+}
+
+/* "Clear" link on a radio field — resets an accidental selection. The .env-base-button rules above
+   supply the accent link color and states; this makes it a compact underlined link sized to sit beside
+   the field label. Base internals aren't reachable from the component's own scoped CSS, so the rendered
+   button is targeted here. The base line-height would otherwise give it a full button's height, and the
+   .env-base-button hover rule drops the underline, so both are re-asserted across the states. */
+.env-layout .field-clear .slds-button,
+.env-layout .field-clear .slds-button:hover,
+.env-layout .field-clear .slds-button:focus {
+  text-decoration: underline;
+  font-size: 0.75rem;
+  font-weight: 400;
+  padding: 0;
+  min-height: 0;
+  line-height: 1.4;
+}
+
+/* lightning-button-icon, "Button Icon / Container" — V2 design-system treatment.
+   Reusable for any container-variant icon button in the flow (e.g. the Household
+   Outline toggle/add). Scoped to .slds-button_icon-container on purpose: icon buttons
+   that base components render internally (the date-picker calendar toggle, etc.) use
+   the bare variant (.slds-button_icon-bare) and are intentionally left untouched.
+   Base internals aren't reachable from a component's own scoped CSS, so the rendered
+   button is targeted directly (LEX synthetic shadow lets this global sheet reach in);
+   states use semantic pseudo-classes. The square box is intrinsic to the size variant
+   (like input height), so it is set here. */
+.env-layout lightning-button-icon .slds-button_icon-container {
+  width: var(--slds-g-sizing-9, 32px);
+  height: var(--slds-g-sizing-9, 32px);
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+  background-color: transparent;
+  border-color: transparent;
+}
+
+.env-layout lightning-button-icon .slds-button_icon-container:hover {
+  background-color: var(--slds-g-color-surface-container-2, #f3f4f6);
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.env-layout lightning-button-icon .slds-button_icon-container:active {
+  background-color: var(--slds-g-color-surface-container-3, #e5e7eb);
+  color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.env-layout lightning-button-icon .slds-button_icon-container:focus,
+.env-layout lightning-button-icon .slds-button_icon-container:focus-visible {
+  background-color: var(--slds-g-color-surface-container-1, #ffffff);
+  box-shadow: 0 0 0 2px var(--slds-g-color-surface-container-1, #ffffff),
+    0 0 0 4px var(--slds-g-color-on-surface-4, #1a76bb);
+}
+
+.env-layout lightning-button-icon .slds-button_icon-container:disabled,
+.env-layout lightning-button-icon .slds-button_icon-container[disabled] {
+  background-color: transparent;
+  color: var(--slds-g-color-on-disabled-1, #838a97);
+}
+
+/* Small size — 24px box, 4px radius (toggle stays Medium default 32px / 8px). */
+.env-layout lightning-button-icon .slds-button_icon-container.slds-button_icon-small {
+  width: var(--slds-g-sizing-7, 24px);
+  height: var(--slds-g-sizing-7, 24px);
+  border-radius: var(--slds-g-radius-border-1, 4px);
+}
+
+/* Household Outline add controls — align the trailing add / cancel icons to one
+   right-hand column. The plain "+" (lightning-button-icon container/small) is already a
+   24px centered box (rule above) and is the reference. Two siblings render differently:
+   the Household Members add menu (lightning-button-menu) renders a wider "-more" trigger
+   with the "+" pushed left (its down-caret is hidden below), and the inline editor's
+   cancel (×) is a narrower bare icon button. Constrain both to the same 24px centered box
+   so their glyph centers line up with the plain "+"; both rows share a 12px right padding. */
+.env-layout .outline__add .slds-button_icon-container-more,
+.env-layout .outline__add-cancel .slds-button_icon-bare {
+  width: var(--slds-g-sizing-7, 24px);
+  height: var(--slds-g-sizing-7, 24px);
+  padding: 0;
+  justify-content: center;
+}
+
+/* Household Outline row "⋮" (more-actions) menu — size only. The default bare trigger renders
+   ~32px; constrain it to the same 24px centered box as the row "+" and the default status dot so
+   the trailing controls share one column. The bare trigger renders .slds-button_icon-bare (with
+   .slds-button_icon-container-more for the down-caret, which is hidden globally above). */
+.env-layout .outline-item__actions lightning-button-menu .slds-button_icon-bare {
+  width: var(--slds-g-sizing-7, 24px);
+  height: var(--slds-g-sizing-7, 24px);
+  padding: 0;
+  justify-content: center;
+}
+
+/* Review & Submit accordion caret — the bare icon button gets no box from the
+   container/border rules above; give it a centered square so its chevron sits on the
+   row's centerline next to Edit (the two-line title otherwise pushes it to the bottom). */
+.env-layout .review__item-caret .slds-button_icon-bare {
+  width: var(--slds-g-sizing-9, 32px);
+  height: var(--slds-g-sizing-9, 32px);
+  padding: 0;
+  justify-content: center;
+}
+
+/* lightning-button-icon border variant — DS "Button Icon - Stateful Dual" (the bordered
+   › caret on the action cards). The container rules above don't reach the border variant,
+   so the rendered .slds-button_icon-border is targeted directly (same scope/approach). */
+.env-layout lightning-button-icon .slds-button_icon-border {
+  width: var(--slds-g-sizing-9, 32px);
+  height: var(--slds-g-sizing-9, 32px);
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  border: 1px solid var(--slds-g-color-border-2, #b6bcc5);
+  background-color: var(--slds-g-color-surface-container-1, #ffffff);
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.env-layout lightning-button-icon .slds-button_icon-border:hover {
+  background-color: var(--slds-g-color-surface-container-2, #f3f4f6);
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.env-layout lightning-button-icon .slds-button_icon-border:active {
+  background-color: var(--slds-g-color-surface-container-3, #e5e7eb);
+  color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.env-layout lightning-button-icon .slds-button_icon-border:focus,
+.env-layout lightning-button-icon .slds-button_icon-border:focus-visible {
+  box-shadow: 0 0 0 2px var(--slds-g-color-surface-container-1, #ffffff),
+    0 0 0 4px var(--slds-g-color-on-surface-4, #1a76bb);
+}
+
+/* Disabled — muted border/icon (the border variant has no disabled rule of its own). Used by the
+   section-nav (envelopeSectionNav) Prev/Next at the first/last section. */
+.env-layout lightning-button-icon .slds-button_icon-border:disabled,
+.env-layout lightning-button-icon .slds-button_icon-border[disabled] {
+  border-color: var(--slds-g-color-border-disabled-1, #d1d5db);
+  background-color: var(--slds-g-color-surface-container-1, #ffffff);
+  color: var(--slds-g-color-on-disabled-1, #838a97);
+}
+
+/* lightning-button-menu — shared overflow (⋮) action menu across the V2 flow: the
+   per-row action menu in dsDataTableV2 (V2 envelope list) and the content-header
+   overflow menu (envelopeContentHeaderV2).
+   This org's button-menu always renders a down-caret plus slds-button_icon-container-more when an
+   icon-name is set, with no attribute to disable it, so the caret is hidden here. The trigger keeps
+   variant="bare" (Figma "Button Icon - Bare"). The panel chrome (radius/border/shadow) is brought to
+   the Figma "⚡ Menu" (node 1338-99667) and the row hover/focus states to the Figma "⚡ Menu Row"
+   (node 2560-74321); remaining row styling stays on the SLDS defaults. Scoped under .env-layout;
+   LEX synthetic shadow lets this global sheet reach the base internals. */
+
+/* Trigger — drop the down-caret so only the three-dots show. */
+.env-layout lightning-button-menu svg[data-key="down"] {
+  display: none;
+}
+
+/* Dropdown panel — container chrome only. */
+.env-layout lightning-button-menu .slds-dropdown {
+  border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.12), 0 7px 7px 0 rgba(0, 0, 0, 0.12),
+    0 -1px 3px 0 rgba(0, 0, 0, 0.07);
+}
+
+/* Menu rows — hover/focus states to Figma "⚡ Menu Row" (node 2560-74321). The focusable row is
+   the <a role="menuitem"> inside each .slds-dropdown__item; override SLDS's default neutral hover
+   and outline. Text color is pinned so the anchor never falls back to SLDS link blue.
+   The button-menu focuses a row on mouse-enter, so a :focus ring would show on plain hover —
+   the ring is therefore reserved for :focus-visible (keyboard) below, and any ring/outline is
+   cleared here so mouse hover/click shows only the light-blue background. */
+.env-layout lightning-button-menu .slds-dropdown__list .slds-dropdown__item > a:hover,
+.env-layout lightning-button-menu .slds-dropdown__list .slds-dropdown__item > a:focus {
+  background-color: var(--slds-g-color-brand-base-90, #e2f8ff);
+  color: var(--slds-g-color-on-surface-2, #374151);
+  box-shadow: none;
+  outline: none;
+}
+
+/* Keyboard focus keeps the inset 2px Electric Blue 65 ring on top of the hover background. */
+.env-layout lightning-button-menu .slds-dropdown__list .slds-dropdown__item > a:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--slds-g-color-on-surface-4, #1a76bb);
+  outline: none;
+}
+
+/* Destructive remove item — red label + trash icon */
+.env-layout lightning-button-menu .env-menu-item_destructive a[role="menuitem"],
+.env-layout lightning-button-menu .env-menu-item_destructive a[role="menuitem"]:hover,
+.env-layout lightning-button-menu .env-menu-item_destructive a[role="menuitem"]:focus {
+  color: var(--slds-g-color-on-error-1, #b91c1c);
+}
+.env-layout lightning-button-menu .env-menu-item_destructive a[role="menuitem"] svg {
+  fill: var(--slds-g-color-on-error-1, #b91c1c);
+}
+
+/* Checkbox theming covers both the single lightning-input checkbox and the multi-select
+   lightning-checkbox-group (the dynamic-form MULTIPICKLIST control), which render the same
+   .slds-checkbox / .slds-checkbox_faux internals. */
+.env-layout lightning-input .slds-checkbox .slds-checkbox_faux,
+.env-layout lightning-checkbox-group .slds-checkbox .slds-checkbox_faux {
+  border-color: var(--slds-g-color-border-2, #b6bcc5);
+  border-radius: var(--slds-g-radius-border-1, 4px);
+}
+
+.env-layout lightning-input .slds-checkbox [type="checkbox"]:checked + .slds-checkbox__label .slds-checkbox_faux,
+.env-layout lightning-checkbox-group .slds-checkbox [type="checkbox"]:checked + .slds-checkbox__label .slds-checkbox_faux {
+  background-color: var(--slds-g-color-accent-container-1, #0f406f);
+  border-color: var(--slds-g-color-accent-container-1, #0f406f);
+  --slds-c-checkbox-mark-color-foreground: var(--slds-g-color-on-accent-1, #ffffff);
+}
+
+/* Focus ring (2px white + 4px electric blue), matching the input/button/combobox. */
+.env-layout lightning-input .slds-checkbox [type="checkbox"]:focus + .slds-checkbox__label .slds-checkbox_faux,
+.env-layout lightning-input .slds-checkbox [type="checkbox"]:focus-visible + .slds-checkbox__label .slds-checkbox_faux,
+.env-layout lightning-checkbox-group .slds-checkbox [type="checkbox"]:focus + .slds-checkbox__label .slds-checkbox_faux,
+.env-layout lightning-checkbox-group .slds-checkbox [type="checkbox"]:focus-visible + .slds-checkbox__label .slds-checkbox_faux {
+  box-shadow: 0 0 0 2px var(--slds-g-color-surface-container-1, #ffffff),
+    0 0 0 4px var(--slds-g-color-on-surface-4, #1a76bb);
+}
+
+/* Disabled + checked keeps the accent fill (the base disabled rule would otherwise grey it);
+   the dim is applied by the consuming context (e.g. the add-action card opacity). */
+.env-layout lightning-input .slds-checkbox [type="checkbox"]:disabled:checked + .slds-checkbox__label .slds-checkbox_faux,
+.env-layout lightning-checkbox-group .slds-checkbox [type="checkbox"]:disabled:checked + .slds-checkbox__label .slds-checkbox_faux {
+  background-color: var(--slds-g-color-accent-container-1, #0f406f);
+  border-color: var(--slds-g-color-accent-container-1, #0f406f);
+}
+
+/* Disabled + unchecked — dashed box, per the Figma read-only state. */
+.env-layout lightning-input .slds-checkbox [type="checkbox"]:disabled:not(:checked) + .slds-checkbox__label .slds-checkbox_faux,
+.env-layout lightning-checkbox-group .slds-checkbox [type="checkbox"]:disabled:not(:checked) + .slds-checkbox__label .slds-checkbox_faux {
+  border-style: dashed;
+}
+
+/* Document-links modal: a document already linked to another file renders disabled + checked as
+   a neutral (grey) checkbox per Figma, distinct from the accent disabled + checked fill used
+   elsewhere (e.g. the add-action modal). The white check mark is inherited from the :checked
+   rule above. */
+.env-layout .doc-links__list lightning-input .slds-checkbox [type="checkbox"]:disabled:checked + .slds-checkbox__label .slds-checkbox_faux {
+  background-color: var(--slds-g-color-border-disabled-1, #d1d5db);
+  border-color: var(--slds-g-color-border-disabled-1, #d1d5db);
+}
+
+/* Review & Submit confirm checkbox — inline 13px semibold label per Figma, overriding the
+   generic form-label rule above (which adds a bottom margin meant for stacked field labels).
+   Laying the label out as a flex row (box + text column) keeps every wrapped line aligned with
+   the first line of text instead of flowing back under the checkbox — the default SLDS checkbox
+   label is inline, which has no hanging indent. */
+.env-layout c-envelope-review-submit .review__confirm lightning-input .slds-checkbox__label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--slds-g-spacing-2, 8px);
+}
+
+.env-layout c-envelope-review-submit .review__confirm lightning-input .slds-checkbox_faux {
+  margin-right: 0;
+  margin-top: 1px;
+}
+
+.env-layout c-envelope-review-submit .review__confirm lightning-input .slds-form-element__label {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0; /* drop the SLDS default top padding that pushes the text below the box */
+  font-size: var(--slds-g-font-size-base, 13px);
+  font-weight: var(--slds-g-font-weight-6, 600);
+  line-height: 18px;
+  margin-bottom: 0;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+/* "Inputs missing" status: paint the warning icon the design's amber. The lightning-icon "warning"
+   variant otherwise renders the stock SLDS warning color; the status text already resolves to
+   --slds-g-color-warning-base-30 via the component's own .missing__status rule. */
+.env-layout c-envelope-review-missing-items .missing__status lightning-icon svg {
+  fill: var(--slds-g-color-warning-1, #f59e0b);
+}
+
+/* "Inputs missing" status on an action-interview form section — same amber warning icon as above. */
+.env-layout c-envelope-form-section .section__status lightning-icon svg {
+  fill: var(--slds-g-color-warning-1, #f59e0b);
+}
+
+/* TOC progressive-save status icons. The lightning-icon utility fill can't be driven by the
+   --slds-c-icon-color-foreground-default hook in this context, so set the rendered svg fill directly. */
+.env-layout c-envelope-toc .toc__status_pending lightning-icon svg {
+  fill: var(--slds-g-color-on-info-1, #0369a1);
+}
+
+.env-layout c-envelope-toc .toc__status_saving lightning-icon svg {
+  fill: var(--slds-g-color-disabled-container-2, #838a97);
+}
+
+.env-layout c-envelope-toc .toc__status_saved lightning-icon svg {
+  fill: var(--slds-g-color-on-success-1, #15803d);
+}
+
+/* TOC completion check: a completed section's green checkmark (the utility icon fill can't be
+   driven by the icon hook in this context, so set the rendered svg fill directly). */
+.env-layout c-envelope-toc .toc__check svg {
+  fill: var(--slds-g-color-success-base-50, #16a34a);
+}
+
+/* "File linked" success badge: the base lightning-badge renders in synthetic shadow, so its
+   inner [part='badge'] span stays display:block and the icon aligns to the text baseline via
+   vertical-align (sitting slightly low). Force flex-centering so the icon sits inline with the
+   label, and set the label to the design's 500 weight (the base component hardcodes 700). */
+.env-layout c-envelope-document-card lightning-badge [part="badge"] {
+  display: inline-flex;
+  align-items: center;
+  font-weight: var(--slds-g-font-weight-5, 500);
+}
+
+/* Strategy list remove (×) — bare icon in the neutral on-surface color. Scoped to the strategy list so
+   other bare icon buttons (e.g. the datepicker toggle) keep their defaults. */
+.env-layout c-envelope-strategy-list lightning-button-icon .slds-button_icon-bare {
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.env-layout c-envelope-strategy-list lightning-button-icon .slds-button_icon-bare:hover {
+  color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+
+/* Inline radio group. The dynamic form (c/envelopeFieldControl) renders a short picklist (3 or fewer
+   options) as a single row of radios instead of the SLDS default vertical stack; the inline modifier
+   class is set by that component. Scoped under .env-layout so v1 radio groups are unaffected. */
+.env-layout lightning-radio-group.field-radio_inline .slds-form-element__control {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--slds-g-spacing-2, 8px) var(--slds-g-spacing-6, 32px);
+}
+
+/* lightning-toast (LightningToast) — V2 flow toasts render in the overlay layer, outside this
+   subtree, so these rules are gated under .env-wizard-toast (set on <html> by envelopeApp while
+   mounted). */
+
+.env-wizard-toast div[data-toast-container].toast-container.slds-is-fixed {
+  transform: none;
+  top: 1rem;
+  right: 1rem;
+  align-items: flex-end;
+}
+
+.env-wizard-toast .slds-notify_toast {
+  border: 1px solid transparent;
+  border-radius: var(--slds-g-radius-border-2, 8px);
+}
+
+.env-wizard-toast .slds-notify_toast .slds-notify__content h2 {
+  font-weight: var(--slds-g-font-weight-6, 600);
+}
+
+.env-wizard-toast .slds-notify_toast.slds-theme_success {
+  background-color: var(--slds-g-color-success-container-1, #dcfce7);
+  border-color: var(--slds-g-color-success-base-80, #86efac);
+}
+.env-wizard-toast .slds-theme_success .slds-notify__content,
+.env-wizard-toast .slds-theme_success lightning-icon svg,
+.env-wizard-toast .slds-theme_success .slds-notify__close lightning-button-icon svg {
+  color: var(--slds-g-color-on-success-1, #15803d);
+  fill: var(--slds-g-color-on-success-1, #15803d);
+}
+
+.env-wizard-toast .slds-notify_toast.slds-theme_error {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+}
+.env-wizard-toast .slds-theme_error .slds-notify__content,
+.env-wizard-toast .slds-theme_error lightning-icon svg,
+.env-wizard-toast .slds-theme_error .slds-notify__close lightning-button-icon svg {
+  color: #b91c1c;
+  fill: #b91c1c;
+}
+
+.env-wizard-toast .slds-notify_toast.slds-theme_info {
+  background-color: var(--slds-g-color-info-container-1, #e0f2fe);
+  border-color: var(--slds-g-color-info-base-90, #bae6fd);
+}
+.env-wizard-toast .slds-theme_info .slds-notify__content,
+.env-wizard-toast .slds-theme_info lightning-icon svg,
+.env-wizard-toast .slds-theme_info .slds-notify__close lightning-button-icon svg {
+  color: var(--slds-g-color-on-info-1, #0369a1);
+  fill: var(--slds-g-color-on-info-1, #0369a1);
+}
+
+/* File-upload dialog ("Upload Files"). lightning-file-upload renders it as an Aura component in the
+   overlay layer, so no component's scoped CSS can reach it and .env-layout does not apply — hence
+   these rules live here, mirroring c/dsModalV2. Scoped by the label id the dialog's own per-file
+   progress bar generates: nothing else in the DOM produces it, so no gating class is needed. This
+   is undocumented platform markup — if it changes the rules stop matching and the stock dialog
+   returns, as does deleting this block. */
+.uiModal:has([aria-labelledby$="-upload-progress-bar"]) {
+  .modal-glass {
+    background: rgba(17, 26, 44, 0.45);
+    backdrop-filter: blur(2px);
+    opacity: 1 !important;
+  }
+
+  .modal-container {
+    width: min(560px, 94vw);
+    max-width: min(560px, 94vw);
+    border-radius: var(--slds-g-radius-border-2, 8px);
+    /* Clips the bottom corners; safe only because the close button moves inside the header. */
+    overflow: hidden;
+  }
+
+  .modal-header {
+    padding: var(--slds-g-spacing-5, 24px);
+    padding-right: 56px; /* clears the close button */
+    border-bottom: none;
+    border-radius: var(--slds-g-radius-border-2, 8px) var(--slds-g-radius-border-2, 8px) 0 0;
+    text-align: left;
+  }
+
+  .modal-header .title {
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+    font-size: var(--slds-g-font-scale-3, 1.25rem);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    line-height: 1.4;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+  }
+
+  /* The platform floats this above the card (top: -40px) as its own white chip — white background
+     plus a shadow — and hard-sets a 2rem box. Aura's own display rule for this button can win over
+     the SLDS inline-flex, which silently voids justify-content and align-items, so the display mode
+     is declared here instead of assumed. Geometry mirrors c/dsModalV2's .ds-modal-v2__close, whose
+     16px glyph inside 0.35rem of padding measures 27px: same box, radius, glyph and hover tint.
+     Sized explicitly rather than by padding — auto sizing here is at the mercy of the platform's own
+     width/height rules. */
+  .slds-modal__close {
+    top: var(--slds-g-spacing-4, 16px);
+    right: var(--slds-g-spacing-4, 16px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    line-height: 1;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: var(--slds-g-radius-border-2, 8px);
+    transition: background 0.15s ease;
+    color: var(--slds-g-color-neutral-base-50, #6b7280);
+
+    lightning-icon,
+    lightning-icon svg {
+      display: block;
+      width: 16px;
+      height: 16px;
+    }
+
+    &:hover,
+    &:active {
+      background: rgba(9, 36, 63, 0.06);
+    }
+
+    &:focus,
+    &:focus-visible {
+      outline: none;
+      box-shadow: none;
+    }
+
+    &:focus-visible {
+      background: rgba(9, 36, 63, 0.06);
+    }
+  }
+
+  .modal-body {
+    padding: 0 var(--slds-g-spacing-5, 24px) var(--slds-g-spacing-5, 24px);
+  }
+
+  .slds-table--bordered {
+    border: none;
+  }
+
+  .modal-body .slds-grid--vertical-align-center {
+    padding: var(--slds-g-spacing-4, 16px);
+  }
+
+  .fileName {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: var(--slds-g-color-on-surface-2, #374151);
+  }
+
+  .fileSize {
+    font-size: var(--slds-g-font-size-base, 13px);
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+  }
+
+  /* The track already resolves from this sheet's :root, but the fill reads
+     --slds-g-color-brand-base-50, which we do not define, so it falls back to the SLDS blue.
+     Recolor it here rather than defining that token — it also drives spinners, links and focus
+     states across the flow. The fill's inline width is the live percentage; leave it alone. */
+  .slds-progress-bar {
+    height: 4px;
+    background: var(--slds-g-color-surface-container-3, #e5e7eb);
+    border-radius: var(--slds-g-radius-border-1, 4px);
+  }
+
+  .slds-progress-bar__value {
+    background: var(--slds-g-color-accent-1, #0f406f);
+    border-radius: var(--slds-g-radius-border-1, 4px);
+  }
+
+  /* A custom property, because a descendant selector cannot cross into the icon's shadow root. */
+  lightning-icon.slds-icon-utility-success {
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-success-base-50, #16a34a);
+  }
+
+  .modal-footer {
+    padding: var(--slds-g-spacing-5, 24px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border-top: none;
+    border-radius: 0 0 var(--slds-g-radius-border-2, 8px) var(--slds-g-radius-border-2, 8px);
+  }
+
+  .footerCmps {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footerCmps .header {
+    font-size: var(--slds-g-font-size-base, 13px);
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+  }
+
+  /* Background and radius already resolve from this sheet's :root through the platform's own
+     .uiButton--brand rule, so only metrics and type need setting. */
+  .footerCmps button.ok {
+    height: 36px;
+    line-height: 34px;
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: var(--slds-g-font-weight-6, 600);
+
+    &:hover,
+    &:focus {
+      background-color: var(--slds-g-color-accent-container-2, #0b2f51);
+    }
+
+    &:focus,
+    &:focus-visible {
+      box-shadow: 0 0 0 2px var(--slds-g-color-surface-container-1, #ffffff),
+        0 0 0 4px var(--slds-g-color-on-surface-4, #1a76bb);
+    }
+  }
+}

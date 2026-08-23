@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Performance Status --></label>
+        <name>Performance_Status__c</name>
+        <picklistValues>
+            <masterLabel>Performing</masterLabel>
+            <translation><!-- Performing --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Under Performing</masterLabel>
+            <translation><!-- Under Performing --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Watch List</masterLabel>
+            <translation><!-- Watch List --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

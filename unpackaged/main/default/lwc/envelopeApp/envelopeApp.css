@@ -1,0 +1,33 @@
+:host {
+    display: block;
+    height: 100%;
+}
+
+.env-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Outermost scroll surface of the wizard. Positioned so any absolutely-positioned descendant
+   without a closer positioned ancestor anchors here and stays clipped, instead of escaping to
+   the page and stretching the LEX document. */
+.env-layout__body {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+/* The mounted view already owns a scrollport (see envelopeApp.bodyClass), so this row must not be a
+   second one over the same content. Both axes rather than just `overflow-y`: when one axis is
+   `visible` and the other is not, the visible one computes to `auto`, which would leave a
+   horizontal scroll container behind. `hidden` rather than `clip` keeps the box programmatically
+   scrollable, so the browser can still bring a focused control into view. The `position: relative`
+   above is what contains stray absolutely-positioned base-component nodes, so dropping the scroll
+   here does not undo that. */
+.env-layout__body_inner-scroll {
+    overflow: hidden;
+}

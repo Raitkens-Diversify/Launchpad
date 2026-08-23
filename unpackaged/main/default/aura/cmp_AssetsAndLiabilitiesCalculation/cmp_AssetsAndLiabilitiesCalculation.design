@@ -1,0 +1,41 @@
+<design:component>
+    <design:attribute name="CashCheckingBalance" label="Cash/Checking:" description="Asset - Cash - Checking Balance(s)" />
+    <design:attribute name="CashSavingsBalance" label="Savings/Money Market/CDs:" description="Asset - Savings/Money Market/CDs Balance(s)" />
+    <design:attribute name="RetirementPlansBalance" label="Stocks, Bonds, &amp; Mutual Funds, etc. through Retirement Plans (401k, IRA, etc. excluding Annuities):" description="Asset - Stocks, Bonds, &amp; Mutual Funds,etc. through Retirement Plans(401k, IRA, etc. excluding Annuities)" />
+    <design:attribute name="ExculdingRetirementPlansBalance" label="Stocks, Bonds, &amp; Mutual Funds, etc. outside Retirement Plans:" description="Asset - Stocks, Bonds, &amp; Mutual Funds, etc. outside Retirement Plans" />
+    <design:attribute name="AnnuitiesBalance" label="Annuities:" description="Asset - Annuities" />
+    <design:attribute name="OtherLiquidAssetsBalance" label="Other Liquid Assets Balance:" description="Asset - Other Liquid Assets Balance(s)" />
+    <design:attribute name="OtherLiquidAssetsDescr" label="Other Liquid Assets Description:" description="Asset - Other Liquid Assets Description" />
+    <design:attribute name="MarketValueOfPR" label="Market Value of Primary Residence:" description="Asset - Market Value of Primary Residence" />
+    <design:attribute name="MarketValueOfNonSecurInv" label="Market Value of Non-Securitized Investment Real Estate Owned:" description="Asset - Market Value of Non-Securitized Investment Real Estate Owned" />
+    <design:attribute name="MarketValueOfSecurInv" label="Market Value of Securitized Investment Real Estate Owned (excluding today’s investments):" description="Asset - Market Value of Securitized Investment Real Estate Owned (excluding today’s investments)" />
+    
+    <design:attribute name="PrivateCreditOwned" label="Private Credit:" description="Asset - Private Credit" />
+    <design:attribute name="PrivateEquityOwned" label="Private Equity:" description="Asset - Private Equity" />
+    <design:attribute name="EnergyPrograms" label="Energy Programs:" description="Asset - Energy Programs" />
+    <design:attribute name="StructuredNotes" label="Structured Notes:" description="Asset - Structured Notes" />
+    <design:attribute name="TotalAlternativeInvestments" label="Total Alternative Investments:" description="Asset - Total Alternative Investments" />
+    
+    <design:attribute name="MarketValueOfNonREAltInv" label="Market Value of Non-Real Estate Alternative Investments (excluding today’s investments):" description="Asset - Market Value of Non-Real Estate Alternative Investments (excluding today’s investments)" />
+    <design:attribute name="MarketValueOfIntervalFunds" label="Interval Funds:" description="Asset - Interval Funds" />
+    <design:attribute name="MarketValueOfBusinessInterest" label="Market Value of Business Interest:" description="Asset - Market Value of Business Interest" />
+    <design:attribute name="ExchangeProceedsatQIBalance" label="Exchange Proceeds at QI:" description="Asset - Exchange Proceeds at QI" />
+    <design:attribute name="LumpSumPensions" label="Lump Sum Pension(s):" description="Asset - Lump Sum Pension(s)" />
+    <design:attribute name="OtherIlliquidAssetsBalance" label="Other Illiquid Assets Balance(s):" description="Asset - Other Illiquid Assets (excluding personal property, i.e. vehicles) Balance(s)" />
+    <design:attribute name="OtherIlliquidAssetsDescr" label="Other Illiquid Assets Description:" description="Asset - Other Illiquid Assets Description" />
+    <design:attribute name="TotalLiquidAssets" label="Total Liquid Assets:" description="Asset - Total Liquid Assets" />
+    <design:attribute name="TotalIlliquidAssets" label="Total Illiquid Assets:" description="Asset - Total Long-Term or Illiquid Assets" />
+    <design:attribute name="TotalAssets" label="Total Assets:" description="Asset - Total Assets" />
+    <design:attribute name="TotalCurrentLiabilities" label="Total Current Liabilities:" description="Liability - Total Current Liabilities" />
+    <design:attribute name="MortgagePayableOnPR" label="Mortgage Payable on Primary Residence:" description="Liability - Mortgage Payable on Primary Residence" />
+    <design:attribute name="MortgagePayableOnNonSecurInv" label="Mortgage Payable on Non-Securitized Investment Real Estate Owned:" description="Liability - Mortgage Payable on Non-Securitized Investment Real Estate Owned" />
+    <design:attribute name="MortgagePayableOnSecurInv" label="Mortgage Payable on Securitized Investment Real Estate Owned:" description="Liability - Mortgage Payable on Securitized Investment Real Estate Owned" />
+    <design:attribute name="DebtSecuredByPersonalProp" label="Debt Secured by Personal Property and/or Vehicles:" description="Liability - Debt Secured by Personal Property and/or Vehicles" />
+    <design:attribute name="DebtFromBusinessInterests" label="Debt from Business Interests:" description="Liability - Debt from Business Interests" />
+    <design:attribute name="OtherLongTermLiabilities" label="Other Long-Term Liabilities:" description="Other Long-Term Liabilities" />
+    <design:attribute name="TotalLongTermLiabilities" label="TOTAL LONG-TERM LIABILITIES:" description="Liabilitiy - Total Long-Term Liabilities" />
+    <design:attribute name="TotalLiabilities" label="TOTAL LIABILITIES:" description="Liability - Total Liabilities" />
+    <design:attribute name="TotalNetWorth" label="TOTAL NET WORTH:" description="Liability - Total Net Worth" />
+    <design:attribute name="TotalNetWorthExcludingPR" label="NET WORTH EXCLUDING PRIMARY RESIDENCE:" description="Liability - Net Worth Excluding Primary Residence:" />
+    
+</design:component>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Client --></label>
+        <lookupFilter>
+            <errorMessage><!-- Client must be a person account. --></errorMessage>
+        </lookupFilter>
+        <name>Client__c</name>
+        <relationshipLabel><!-- Clients --></relationshipLabel>
+    </CustomFieldTranslation>

@@ -1,0 +1,91 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-08-17 -->
+<template>
+  <div
+    class="div-table-shell arc-recently-viewed"
+    aria-labelledby="arc-recently-viewed-title"
+  >
+    <template lwc:if={hasTitle}>
+      <h2 id="arc-recently-viewed-title" class="div-table-title">{title}</h2>
+    </template>
+
+    <div class="div-table-card arc-recently-viewed__card">
+      <div class="arc-recently-viewed__body">
+      <template lwc:if={errorMessage}>
+        <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+          {errorMessage}
+        </div>
+      </template>
+
+      <template lwc:if={isInitialLoading}>
+        <div class="arc-recently-viewed__loading">
+          <lightning-spinner
+            alternative-text="Loading recently viewed records"
+            size="small"
+          ></lightning-spinner>
+        </div>
+      </template>
+
+      <template lwc:elseif={hasItems}>
+        <ul class="arc-recently-viewed__list" aria-label={title}>
+          <template for:each={listItems} for:item="item">
+            <li key={item.id} class="arc-recently-viewed__item">
+              <a
+                href={item.recordUrl}
+                class="arc-recently-viewed__row"
+                data-record-id={item.id}
+                aria-label={item.ariaLabel}
+                onclick={handleRowClick}
+              >
+                <span class="arc-recently-viewed__icon-wrap" aria-hidden="true">
+                  <span
+                    class="arc-recently-viewed__icon arc-recently-viewed__icon--asset"
+                    style={item.iconStyle}
+                  ></span>
+                </span>
+
+                <span class="arc-recently-viewed__content">
+                  <span class="arc-recently-viewed__name">{item.name}</span>
+                  <template lwc:if={item.hasMetadata}>
+                    <span class="arc-recently-viewed__metadata">{item.metadata}</span>
+                  </template>
+                </span>
+
+                <lightning-icon
+                  icon-name="utility:chevronright"
+                  size="x-small"
+                  class="arc-recently-viewed__chevron"
+                  alternative-text=""
+                ></lightning-icon>
+              </a>
+            </li>
+          </template>
+        </ul>
+      </template>
+
+      <template lwc:else>
+        <div class="arc-recently-viewed__empty" role="status">
+          No recently viewed records.
+        </div>
+      </template>
+    </div>
+
+    <footer lwc:if={showViewAllContacts} class="div-table-card__footer arc-recently-viewed__footer">
+      <div class="div-table-pager arc-recently-viewed__footer-pager">
+        <a
+          href={viewAllContactsHref}
+          class="div-table-pager__page-size-label arc-recently-viewed__view-all"
+          onclick={handleViewAllContactsClick}
+        >
+          View All Contacts
+          <lightning-icon
+            icon-name="utility:chevronright"
+            size="xx-small"
+            class="arc-recently-viewed__view-all-icon"
+            alternative-text=""
+          ></lightning-icon>
+        </a>
+      </div>
+    </footer>
+    </div>
+  </div>
+</template>

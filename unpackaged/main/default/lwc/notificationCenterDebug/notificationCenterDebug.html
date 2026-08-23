@@ -1,0 +1,143 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-06-17 -->
+<template>
+  <section class="debug-view">
+    <div class="debug-view__banner div-card div-card--nested">
+      <lightning-icon
+        icon-name={icons.INFO}
+        size="x-small"
+        class="debug-view__banner-icon"
+        aria-hidden="true"
+      ></lightning-icon>
+      <p class="debug-view__banner-text">
+        Debug-only tools for manually retriggering digest notification logs. Each section loads the
+        last 10 digest source records for the current user, including Email and In App
+        channels. Case and Task rows are grouped by assigned record so you can see which
+        channels each record has. Trigger Digest requeues those logs and sends each one as an
+        individual email or in-app notification for testing.
+      </p>
+    </div>
+
+    <template lwc:if={errorMessage}>
+      <div class="debug-view__error" role="alert">{errorMessage}</div>
+    </template>
+
+    <template for:each={objectSections} for:item="section">
+      <article key={section.objectType} class="debug-section div-card div-card--nested">
+        <header class="debug-section__header">
+          <div class="debug-section__heading">
+            <c-notification-center-meta-strip
+              source-type={section.objectType}
+            ></c-notification-center-meta-strip>
+            <h3 class="debug-section__title">{section.label} Digest</h3>
+          </div>
+          <button
+            type="button"
+            class="debug-section__trigger-button"
+            data-object-type={section.objectType}
+            aria-label={section.triggerLabel}
+            disabled={section.isTriggerDisabled}
+            onclick={handleTriggerDigest}
+          >
+            <template lwc:if={section.isTriggering}>
+              Triggering...
+            </template>
+            <template lwc:else>
+              Trigger Digest
+            </template>
+          </button>
+        </header>
+
+        <p class="debug-section__summary">{section.summaryLabel}</p>
+
+        <template lwc:if={section.isLoading}>
+          <div class="debug-section__loading">Loading preview...</div>
+        </template>
+
+        <template lwc:elseif={section.hasItems}>
+          <div class="debug-table" role="table" aria-label={section.tableLabel}>
+            <div class="debug-table__head" role="rowgroup">
+              <template lwc:if={section.isGroupedView}>
+                <div class="debug-table__row debug-table__row_head debug-table__row_grouped" role="row">
+                  <div class="debug-table__cell debug-table__cell_title" role="columnheader">Title</div>
+                  <div class="debug-table__cell debug-table__cell_source" role="columnheader">Source Record</div>
+                  <div class="debug-table__cell debug-table__cell_channels" role="columnheader">Channels</div>
+                  <div class="debug-table__cell debug-table__cell_frequency" role="columnheader">Frequency</div>
+                  <div class="debug-table__cell debug-table__cell_created" role="columnheader">Created</div>
+                </div>
+              </template>
+              <template lwc:else>
+                <div class="debug-table__row debug-table__row_head" role="row">
+                  <div class="debug-table__cell debug-table__cell_title" role="columnheader">Title</div>
+                  <div class="debug-table__cell debug-table__cell_channel" role="columnheader">Channel</div>
+                  <div class="debug-table__cell debug-table__cell_frequency" role="columnheader">Frequency</div>
+                  <div class="debug-table__cell debug-table__cell_status" role="columnheader">Status</div>
+                  <div class="debug-table__cell debug-table__cell_created" role="columnheader">Created</div>
+                </div>
+              </template>
+            </div>
+
+            <div class="debug-table__body" role="rowgroup">
+              <template for:each={section.items} for:item="item">
+                <template lwc:if={section.isGroupedView}>
+                  <div key={item.id} class="debug-table__row debug-table__row_grouped" role="row">
+                    <div class="debug-table__cell debug-table__cell_title" role="cell">
+                      <span class="debug-table__title">{item.titleLabel}</span>
+                      <span class="debug-table__body-text">{item.bodyLabel}</span>
+                    </div>
+                    <div class="debug-table__cell debug-table__cell_source" role="cell">
+                      <span class="debug-table__source-id" title={item.sourceRecordId}>
+                        {item.sourceRecordLabel}
+                      </span>
+                    </div>
+                    <div class="debug-table__cell debug-table__cell_channels" role="cell">
+                      <ul class="debug-channel-list" aria-label={item.channelSummaryLabel}>
+                        <template for:each={item.channelLogs} for:item="channelLog">
+                          <li key={channelLog.id} class="debug-channel-list__item">
+                            <span class={channelLog.channelClass}>{channelLog.channelLabel}</span>
+                            <span class={channelLog.statusClass}>{channelLog.statusLabel}</span>
+                          </li>
+                        </template>
+                      </ul>
+                    </div>
+                    <div class="debug-table__cell debug-table__cell_frequency" role="cell">
+                      <span class={item.frequencyClass}>{item.frequencyLabel}</span>
+                    </div>
+                    <div class="debug-table__cell debug-table__cell_created" role="cell">
+                      {item.createdLabel}
+                    </div>
+                  </div>
+                </template>
+                <template lwc:else>
+                  <div key={item.id} class="debug-table__row" role="row">
+                    <div class="debug-table__cell debug-table__cell_title" role="cell">
+                      <span class="debug-table__title">{item.titleLabel}</span>
+                      <span class="debug-table__body-text">{item.bodyLabel}</span>
+                    </div>
+                    <div class="debug-table__cell debug-table__cell_channel" role="cell">
+                      <template lwc:if={item.showChannelPill}>
+                        <span class={item.channelClass}>{item.channelLabel}</span>
+                      </template>
+                    </div>
+                    <div class="debug-table__cell debug-table__cell_frequency" role="cell">
+                      <span class={item.frequencyClass}>{item.frequencyLabel}</span>
+                    </div>
+                    <div class="debug-table__cell debug-table__cell_status" role="cell">
+                      <span class={item.statusClass}>{item.statusLabel}</span>
+                    </div>
+                    <div class="debug-table__cell debug-table__cell_created" role="cell">
+                      {item.createdLabel}
+                    </div>
+                  </div>
+                </template>
+              </template>
+            </div>
+          </div>
+        </template>
+
+        <template lwc:else>
+          <p class="debug-section__empty">No digest notifications found for {section.label}.</p>
+        </template>
+      </article>
+    </template>
+  </section>
+</template>

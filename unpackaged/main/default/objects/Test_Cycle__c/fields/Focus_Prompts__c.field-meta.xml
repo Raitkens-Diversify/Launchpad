@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Focus_Prompts__c</fullName>
+    <description>Overrides the org-default focus-prompt chips (UAT_Focus_Prompt__mdt) in this cycle&#39;s exploratory-session notes, so a regression cycle can prompt differently than an accessibility one. One prompt per line, &quot;Label | Insert text&quot;; with no pipe the label is used and &quot;: &quot; is appended. Blank lines are ignored, only the first 8 prompts render. BLANK = inherit the org defaults — that is the normal state, not a gap. Resolved in UatSessionController.resolvePrompts.</description>
+    <label>Focus Prompts</label>
+    <length>2000</length>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>5</visibleLines>
+</CustomField>

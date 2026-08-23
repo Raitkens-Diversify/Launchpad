@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Egnyte VF Embed</masterLabel>
+    <description>Embeds the Egnyte Visualforce page in an iframe for LWR Experience sites (VF-in-LWC workaround).</description>
+    <targets>
+        <target>lightning__AppPage</target>
+        <target>lightning__RecordPage</target>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property
+                name="domain"
+                type="String"
+                default="https://arc.diversify.com"
+                label="Domain"
+                description="Published Experience site domain for the Egnyte Visualforce iframe."
+            />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

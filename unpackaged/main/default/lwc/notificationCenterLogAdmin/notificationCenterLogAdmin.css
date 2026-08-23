@@ -1,0 +1,91 @@
+/* Author: Hoang Long Vu To | Date: 2026-07-27 */
+/* Notification log layout and datatable styles live in diversifyStyles.css. */
+
+.div-table__cell--expand {
+  width: 2rem;
+  padding-right: 0;
+}
+
+.div-table__expand-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: none;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: var(--div-color-text-muted, #706e6b);
+  cursor: pointer;
+}
+
+.div-table__expand-button:hover,
+.div-table__expand-button:focus-visible {
+  background: rgba(15, 64, 111, 0.08);
+  color: var(--div-color-selected, #0f406f);
+  outline: none;
+}
+
+.div-table__header-spacer {
+  display: inline-block;
+  width: 1.75rem;
+}
+
+.div-table__detail-row {
+  background: var(--div-color-surface-subtle, #fafaf9);
+}
+
+.div-table__detail-row:hover {
+  background: var(--div-color-surface-subtle, #fafaf9);
+}
+
+.div-table__detail-cell {
+  padding: 0.875rem 1rem 1rem;
+}
+
+.div-table__row--expandable {
+  cursor: pointer;
+}
+
+.div-table__row--expandable:focus-visible {
+  outline: 2px solid var(--div-color-selected, #0f406f);
+  outline-offset: -2px;
+}
+
+.div-table__row--expanded {
+  background: rgba(243, 243, 243, 0.35);
+}
+
+.log-detail__empty {
+  margin: 0;
+  font-size: var(--div-font-scale-sm);
+  color: var(--div-color-text-muted, #706e6b);
+}
+
+.log-table__source-link {
+  display: inline-flex;
+  max-width: 100%;
+  padding: 0;
+  text-align: left;
+}
+
+.log-table__source-link .div-meta-strip__label,
+.log-table__source-link .div-meta-strip__muted,
+.log-table__source-link .div-meta-strip__category {
+  color: var(--div-color-accent-blue, #1b96ff);
+}
+
+.log-table__source-link:hover .div-meta-strip__label,
+.log-table__source-link:hover .div-meta-strip__muted,
+.log-table__source-link:hover .div-meta-strip__category,
+.log-table__source-link:focus-visible .div-meta-strip__label,
+.log-table__source-link:focus-visible .div-meta-strip__muted,
+.log-table__source-link:focus-visible .div-meta-strip__category {
+  text-decoration: underline;
+}
+
+.log-table__record-link {
+  font-size: var(--div-font-scale-xs);
+  line-height: 1.25;
+}

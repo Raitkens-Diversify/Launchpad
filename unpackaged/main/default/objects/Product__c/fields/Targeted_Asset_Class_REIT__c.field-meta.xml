@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Targeted_Asset_Class_REIT__c</fullName>
+    <label>Targeted Asset Class (REIT)</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>MultiselectPicklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Multifamily</fullName>
+                <default>false</default>
+                <label>Multifamily</label>
+            </value>
+            <value>
+                <fullName>Industrial</fullName>
+                <default>false</default>
+                <label>Industrial</label>
+            </value>
+            <value>
+                <fullName>Multi-Tenant Retail</fullName>
+                <default>false</default>
+                <label>Multi-Tenant Retail</label>
+            </value>
+            <value>
+                <fullName>Single-Tenant Retail</fullName>
+                <default>false</default>
+                <label>Single-Tenant Retail</label>
+            </value>
+            <value>
+                <fullName>Hospitality</fullName>
+                <default>false</default>
+                <label>Hospitality</label>
+            </value>
+            <value>
+                <fullName>Multi-Tenant Office</fullName>
+                <default>false</default>
+                <label>Multi-Tenant Office</label>
+            </value>
+            <value>
+                <fullName>Single-Tenant Office</fullName>
+                <default>false</default>
+                <label>Single-Tenant Office</label>
+            </value>
+            <value>
+                <fullName>Self-Storage</fullName>
+                <default>false</default>
+                <label>Self-Storage</label>
+            </value>
+            <value>
+                <fullName>Seniors Housing</fullName>
+                <default>false</default>
+                <label>Seniors Housing</label>
+            </value>
+            <value>
+                <fullName>Student Housing</fullName>
+                <default>false</default>
+                <label>Student Housing</label>
+            </value>
+            <value>
+                <fullName>Single-Family Rental</fullName>
+                <default>false</default>
+                <label>Single-Family Rental</label>
+            </value>
+            <value>
+                <fullName>Manufactured Housing</fullName>
+                <default>false</default>
+                <label>Manufactured Housing</label>
+            </value>
+            <value>
+                <fullName>Land</fullName>
+                <default>false</default>
+                <label>Land</label>
+            </value>
+            <value>
+                <fullName>Other</fullName>
+                <default>false</default>
+                <label>Other</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+    <visibleLines>4</visibleLines>
+</CustomField>

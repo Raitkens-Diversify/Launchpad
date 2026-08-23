@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Testing Surface --></label>
+        <name>Testing_Surface__c</name>
+        <picklistValues>
+            <masterLabel>Client Portal / Experience Cloud</masterLabel>
+            <translation><!-- Client Portal / Experience Cloud --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Integration / API Layer</masterLabel>
+            <translation><!-- Integration / API Layer --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Lightning App (Internal)</masterLabel>
+            <translation><!-- Lightning App (Internal) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Mobile</masterLabel>
+            <translation><!-- Mobile --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Multiple</masterLabel>
+            <translation><!-- Multiple --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

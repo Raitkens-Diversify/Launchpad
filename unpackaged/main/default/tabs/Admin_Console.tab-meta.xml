@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Consolidated admin console for the Help Center/Resource Center content tools and the UAT Testing sections (LWC tab; granted by Resource_Center_Admin and UAT_Admin — the rail scopes per persona via AdminAccessService).</description>
+    <label>Admin Console</label>
+    <lwcComponent>adminConsole</lwcComponent>
+    <motif>Custom57: Building Block</motif>
+</CustomTab>

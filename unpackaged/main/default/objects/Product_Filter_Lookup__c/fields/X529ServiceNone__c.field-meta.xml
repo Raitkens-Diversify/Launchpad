@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>X529ServiceNone__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>WHERE Type__c = &#39;529&#39; AND (Status__c = &#39;Sell/Service&#39; OR Status__c = &#39;Service Only&#39;)</description>
+    <label>529ServiceNone</label>
+    <lookupFilter>
+        <active>true</active>
+        <filterItems>
+            <field>Product__c.Status__c</field>
+            <operation>equals</operation>
+            <value>Sell/Service, Service Only</value>
+        </filterItems>
+        <filterItems>
+            <field>Product__c.Asset_Category__c</field>
+            <operation>equals</operation>
+            <value>529</value>
+        </filterItems>
+        <isOptional>true</isOptional>
+    </lookupFilter>
+    <referenceTo>Product__c</referenceTo>
+    <relationshipLabel>Product Filter Lookups (529ServiceNone)</relationshipLabel>
+    <relationshipName>Product_Filter_Lookups0VO3</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

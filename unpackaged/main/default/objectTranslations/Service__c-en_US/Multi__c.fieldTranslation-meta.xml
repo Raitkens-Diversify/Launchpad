@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Multi-Family Office Services --></label>
+        <name>Multi__c</name>
+        <picklistValues>
+            <masterLabel>Charity &amp; Philanthropy</masterLabel>
+            <translation><!-- Charity &amp; Philanthropy --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Collaboration with Other Advisors</masterLabel>
+            <translation><!-- Collaboration with Other Advisors --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Family Governance</masterLabel>
+            <translation><!-- Family Governance --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Tax Preparation &amp; Tax Planning</masterLabel>
+            <translation><!-- Tax Preparation &amp; Tax Planning --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Trust &amp; Corporate Services</masterLabel>
+            <translation><!-- Trust &amp; Corporate Services --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Wealth Planning</masterLabel>
+            <translation><!-- Wealth Planning --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

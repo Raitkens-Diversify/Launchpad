@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>ShowFlow__c</fullName>
+    <formula>IF(OR( Subject = &quot;Retrieve Death Certificate.&quot;, Subject = &quot;Decide what is being converted.&quot;, Subject = &quot;Determine if Rollover Requires 3-way call.&quot;, Subject = &quot;Approve the Fee Credit.&quot;, Subject = &quot;Schedule Review Meeting or Confirm it&#39;s been Scheduled.&quot;), true, false)</formula>
+    <label>ShowFlow</label>
+    <type>Checkbox</type>
+</CustomField>

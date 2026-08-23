@@ -1,0 +1,177 @@
+:host {
+    display: block;
+}
+
+.toc {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-2, 8px);
+}
+
+.toc__titlebar {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 8px);
+    margin-bottom: var(--slds-g-spacing-1, 4px);
+    padding: 0 var(--slds-g-spacing-4, 16px);
+}
+
+.toc__title {
+    margin: 0;
+    font-weight: var(--slds-g-font-weight-6, 600);
+    font-size: var(--slds-g-font-size-base, 13px);
+    line-height: 18px;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.toc__status {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-1, 4px);
+    font-size: var(--slds-g-font-scale-neg-1, 12px);
+    line-height: 17px;
+    white-space: nowrap;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.toc__status-icon {
+    flex: none;
+    display: inline-flex;
+}
+
+.toc__status_saving .toc__status-icon {
+    animation: toc-spin 1s linear infinite;
+}
+
+@keyframes toc-spin {
+    from {
+        transform: rotate(0);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .toc__status_saving .toc__status-icon {
+        animation: none;
+    }
+}
+
+.toc__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-1, 4px);
+}
+
+/* A row is a full-width, reset button so the whole line is the click target for nav/toggle. */
+.toc__row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 8px);
+    width: 100%;
+    margin: 0;
+    padding: 6px var(--slds-g-spacing-1, 4px) 6px var(--slds-g-spacing-4, 16px);
+    border: none;
+    border-radius: var(--slds-g-radius-border-2, 8px);
+    background: transparent;
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+    font-size: var(--slds-g-font-scale-1, 14px);
+    line-height: 19px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.toc__row:hover {
+    background: var(--slds-g-color-surface-2, #f3f4f6);
+}
+
+.toc__row:focus-visible {
+    outline: 2px solid var(--slds-g-color-border-accent-1, #0f406f);
+    outline-offset: -2px;
+}
+
+/* Parent group: semibold, darkest label; chevron sits at the row's left edge. */
+.toc__row_parent .toc__label {
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+/* Leaf: indented under its parent, link-styled label. */
+.toc__row_leaf {
+    padding-left: var(--slds-g-spacing-8, 48px);
+}
+
+/* Nested parent (depth 1): chevron indents one level in, so its label lands near the leaf indent. */
+.toc__row_depth-1.toc__row_parent {
+    padding-left: var(--slds-g-spacing-5, 24px);
+}
+
+/* Depth-2 leaf: indented one step under its nested parent; the active marker shifts with it. */
+.toc__row_depth-2 {
+    padding-left: 60px;
+}
+
+.toc__row_depth-2.toc__row_active::before {
+    left: 36px;
+}
+
+.toc__row_leaf .toc__label {
+    font-weight: var(--slds-g-font-weight-4, 400);
+    color: var(--slds-g-color-accent-2, #0b2f51);
+}
+
+.toc__row_leaf:hover .toc__label {
+    text-decoration: underline;
+}
+
+/* Active leaf: semibold label plus a left accent marker bar. */
+.toc__row_active .toc__label {
+    font-weight: var(--slds-g-font-weight-6, 600);
+}
+
+.toc__row_active::before {
+    content: "";
+    position: absolute;
+    left: var(--slds-g-spacing-5, 24px);
+    top: 6px;
+    bottom: 6px;
+    width: 4px;
+    border-radius: var(--slds-g-radius-border-1, 4px);
+    background: var(--slds-g-color-border-accent-1, #0f406f);
+}
+
+.toc__chevron {
+    flex: none;
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.toc__label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Fixed slot so the dot and check share one centered, right-aligned icon column. */
+.toc__marker {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+}
+
+.toc__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--slds-g-color-warning-1, #f59e0b);
+}

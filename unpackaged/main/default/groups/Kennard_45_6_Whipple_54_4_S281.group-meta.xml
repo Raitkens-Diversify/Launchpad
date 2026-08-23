@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Group xmlns="http://soap.sforce.com/2006/04/metadata">
+    <doesIncludeBosses>true</doesIncludeBosses>
+    <name>Kennard 45.6 / Whipple 54.4 - S281</name>
+</Group>

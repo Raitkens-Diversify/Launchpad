@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Wealthscape_Owner_Relationship_ID__c</fullName>
+    <description>Wealthscape integration</description>
+    <externalId>false</externalId>
+    <label>Wealthscape Owner Relationship ID</label>
+    <length>30</length>
+    <required>false</required>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

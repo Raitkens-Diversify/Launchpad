@@ -1,0 +1,9 @@
+I hope this email finds you well. I am reaching out today with a confirmation that a grant donation, in the amount of $[!Case.Amount__c], has been successfully sent forward to [!Case.Name_of_Charity__c] [!Case.TIN__c].
+
+Sending Account: [!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.Name] [!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.OASP_FSC__Registration_Type__r.Name] XXXX[!Case.FinServ__FinancialAccount__r.Account_Number_Last_4__c], [!Case.FinServ__FinancialAccount__r.OASP_FSC__Custodian__r.Name]
+Receiving Charity: [!Case.Name_of_Charity__c]
+Amount of Donation: $[!Case.Amount__c]
+
+Let us know if you have any follow up questions.
+
+Sincerely,

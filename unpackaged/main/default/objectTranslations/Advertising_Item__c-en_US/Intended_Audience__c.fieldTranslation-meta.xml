@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Intended Audience --></label>
+        <name>Intended_Audience__c</name>
+        <picklistValues>
+            <masterLabel>Current Clients</masterLabel>
+            <translation><!-- Current Clients --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ERISA Participants</masterLabel>
+            <translation><!-- ERISA Participants --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Professionals</masterLabel>
+            <translation><!-- Professionals --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Prospective Clients</masterLabel>
+            <translation><!-- Prospective Clients --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Multi__c</fullName>
+    <label>Multi-Family Office Services</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>MultiselectPicklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Family Governance</fullName>
+                <default>false</default>
+                <label>Family Governance</label>
+            </value>
+            <value>
+                <fullName>Charity &amp; Philanthropy</fullName>
+                <default>false</default>
+                <label>Charity &amp; Philanthropy</label>
+            </value>
+            <value>
+                <fullName>Tax Preparation &amp; Tax Planning</fullName>
+                <default>false</default>
+                <label>Tax Preparation &amp; Tax Planning</label>
+            </value>
+            <value>
+                <fullName>Trust &amp; Corporate Services</fullName>
+                <default>false</default>
+                <label>Trust &amp; Corporate Services</label>
+            </value>
+            <value>
+                <fullName>Wealth Planning</fullName>
+                <default>false</default>
+                <label>Wealth Planning</label>
+            </value>
+            <value>
+                <fullName>Collaboration with Other Advisors</fullName>
+                <default>false</default>
+                <label>Collaboration with Other Advisors</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+    <visibleLines>4</visibleLines>
+</CustomField>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Source_of_Funds_Formula__c</fullName>
+    <externalId>false</externalId>
+    <formula>IF(INCLUDES(Source_of_Funds__c, &quot;Income&quot;), &quot;Income, &quot;, &quot;&quot;) &amp;
+IF(INCLUDES(Source_of_Funds__c, &quot;Gift/Inheritance&quot;), &quot;Gift/Inheritance, &quot;, &quot;&quot;) &amp;
+IF(INCLUDES(Source_of_Funds__c, &quot;Savings (12+ Months)&quot;), &quot;Savings (12+ Months), &quot;, &quot;&quot;) &amp;
+IF(INCLUDES(Source_of_Funds__c, &quot;Advisory Account&quot;), &quot;Advisory Account, &quot;, &quot;&quot;) &amp;
+IF(INCLUDES(Source_of_Funds__c, &quot;Employer Sponsored Plan&quot;), &quot;Employer Sponsored Plan, &quot;, &quot;&quot;) &amp;
+IF(INCLUDES(Source_of_Funds__c, &quot;Brokerage Packaged Product (Mutual Fund, UIT, etc)&quot;), &quot;Brokerage Packaged Product (Mutual Fund, UIT, etc), &quot;, &quot;&quot;) &amp;
+IF(INCLUDES(Source_of_Funds__c, &quot;Retail Brokerage Account&quot;), &quot;Retail Brokerage Account, &quot;, &quot;&quot;) &amp;
+IF(INCLUDES(Source_of_Funds__c, &quot;Sale of an Annuity (Including 1035)&quot;), &quot;Sale of an Annuity (Including 1035), &quot;, &quot;&quot;) &amp;
+IF(INCLUDES(Source_of_Funds__c, &quot;Sale of a Mutual Fund&quot;), &quot;Sale of a Mutual Fund, &quot;, &quot;&quot;) &amp;
+IF(INCLUDES(Source_of_Funds__c, &quot;Sale of an Insurance Product (Including 1035)&quot;), &quot;Sale of an Insurance Product (Including 1035), &quot;, &quot;&quot;) &amp;
+IF(INCLUDES(Source_of_Funds__c, &quot;Sale of Property (Including 1031)&quot;), &quot;Sale of Property (Including 1031), &quot;, &quot;&quot;) &amp;
+IF(INCLUDES(Source_of_Funds__c, &quot;Full Cycle Alternative Investment&quot;), &quot;Full Cycle Alternative Investment, &quot;, &quot;&quot;) &amp;
+IF(INCLUDES(Source_of_Funds__c, &quot;Maturing Fixed Income Securities&quot;), &quot;Maturing Fixed Income Securities, &quot;, &quot;&quot;) &amp;
+IF(INCLUDES(Source_of_Funds__c, &quot;Sale of Individual Equities/ETFs&quot;), &quot;Sale of Individual Equities/ETFs, &quot;, &quot;&quot;) &amp;
+IF(INCLUDES(Source_of_Funds__c, &quot;Change of Dealer or Investment Advisor&quot;), &quot;Change of Dealer or Investment Advisor, &quot;, &quot;&quot;) &amp;
+IF(INCLUDES(Source_of_Funds__c, &quot;Other&quot;), &quot;Other, &quot;, &quot;&quot;)</formula>
+    <label>Source of Funds Formula</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

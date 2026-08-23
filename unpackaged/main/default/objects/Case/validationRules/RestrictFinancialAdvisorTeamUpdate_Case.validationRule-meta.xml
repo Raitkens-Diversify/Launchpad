@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>RestrictFinancialAdvisorTeamUpdate_Case</fullName>
+    <active>true</active>
+    <description>Restricts edit access for the Financial_Advisor_Team__c field</description>
+    <errorConditionFormula>AND(
+    NOT(ISNEW()),
+    ISCHANGED(Financial_Advisor_Team__c),
+    NOT(
+        OR(
+            $Profile.Name = &#39;System Administrator&#39;,
+            $Permission.Systems_Custom_Permission,
+            $Permission.Senior_Ops
+        )
+    )
+)</errorConditionFormula>
+    <errorDisplayField>Financial_Advisor_Team__c</errorDisplayField>
+    <errorMessage>If you need to change the financial advisor team, please reach out to your admin or ops teams.</errorMessage>
+</ValidationRule>

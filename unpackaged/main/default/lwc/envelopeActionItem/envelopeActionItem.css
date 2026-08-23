@@ -1,0 +1,49 @@
+:host {
+    display: block;
+}
+
+.action-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-2, 8px);
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+}
+
+.action-item__header {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 8px);
+    min-height: 24px;
+}
+
+.action-item__name {
+    font-size: var(--slds-g-font-size-base, 13px);
+    line-height: 18px;
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.action-item__type {
+    font-size: var(--slds-g-font-size-base, 13px);
+    line-height: 18px;
+    font-weight: var(--slds-g-font-weight-4, 400);
+    /* base/muted-foreground from the design; no matching --slds-g token, kept as a literal. */
+    color: #666666;
+}
+
+/* "New" badge — shown until the record is submitted. Same info-container token as the outline. */
+.action-item__badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--slds-g-radius-border-2, 8px);
+    padding: var(--slds-g-spacing-1, 4px) var(--slds-g-spacing-2, 8px);
+    font-size: var(--slds-g-font-scale-neg-1, 12px);
+    font-weight: var(--slds-g-font-weight-5, 500);
+    line-height: 17px;
+    white-space: nowrap;
+}
+
+.action-item__badge_new {
+    background: var(--slds-g-color-info-container-1, #e0f2fe);
+    color: var(--slds-g-color-on-info-1, #0369a1);
+}

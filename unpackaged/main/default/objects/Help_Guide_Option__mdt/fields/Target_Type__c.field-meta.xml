@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Target_Type__c</fullName>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Target Type</label>
+    <required>true</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>node</fullName>
+                <default>true</default>
+                <label>node</label>
+            </value>
+            <value>
+                <fullName>category</fullName>
+                <default>false</default>
+                <label>category</label>
+            </value>
+            <value>
+                <fullName>article</fullName>
+                <default>false</default>
+                <label>article</label>
+            </value>
+            <value>
+                <fullName>resource</fullName>
+                <default>false</default>
+                <label>resource</label>
+            </value>
+            <value>
+                <fullName>case</fullName>
+                <default>false</default>
+                <label>case</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

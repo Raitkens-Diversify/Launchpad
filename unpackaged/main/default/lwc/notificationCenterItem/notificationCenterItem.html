@@ -1,0 +1,32 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-06-16 -->
+<template>
+  <article
+    class={cardClass}
+    role="button"
+    tabindex="0"
+    aria-label={ariaLabel}
+    onclick={handleSelect}
+    onkeydown={handleKeyDown}
+  >
+    <div class="notification-item__layout">
+      <div class="notification-item__status-col" aria-hidden="true">
+        <template lwc:if={isUnread}>
+          <span class="notification-item__unread-dot"></span>
+        </template>
+      </div>
+
+      <div class="notification-item__content">
+        <div class="notification-item__header">
+          <h3 class="notification-item__title">{notification.title}</h3>
+          <span class="notification-item__time">{relativeTime}</span>
+        </div>
+        <p class="notification-item__body">{notification.body}</p>
+        <c-notification-center-meta-strip
+          source-type={notification.sourceType}
+          show-household
+          household-label={householdLabel}
+        ></c-notification-center-meta-strip>
+      </div>
+    </div>
+  </article>
+</template>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Sub-Status --></label>
+        <name>Sub_Status__c</name>
+        <picklistValues>
+            <masterLabel>Approved</masterLabel>
+            <translation><!-- Approved --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Compliance Hold</masterLabel>
+            <translation><!-- Compliance Hold --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Front Office Complete</masterLabel>
+            <translation><!-- Front Office Complete --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>In Progress</masterLabel>
+            <translation><!-- In Progress --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Needs Response</masterLabel>
+            <translation><!-- Needs Response --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>New</masterLabel>
+            <translation><!-- New --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>On Hold</masterLabel>
+            <translation><!-- On Hold --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Ops Complete</masterLabel>
+            <translation><!-- Ops Complete --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Ops Review</masterLabel>
+            <translation><!-- Ops Review --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Pending Advisor Response</masterLabel>
+            <translation><!-- Pending Advisor Response --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Pending Advisor Signature</masterLabel>
+            <translation><!-- Pending Advisor Signature --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Pending Client Response</masterLabel>
+            <translation><!-- Pending Client Response --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Pending Client Signatures</masterLabel>
+            <translation><!-- Pending Client Signatures --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Pending Response</masterLabel>
+            <translation><!-- Pending Response --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Response Received</masterLabel>
+            <translation><!-- Response Received --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Returned for Correction</masterLabel>
+            <translation><!-- Returned for Correction --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Returned from Branch</masterLabel>
+            <translation><!-- Returned from Branch --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Returned from Compliance</masterLabel>
+            <translation><!-- Returned from Compliance --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Returned to Operations</masterLabel>
+            <translation><!-- Returned to Operations --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Supervisory Review</masterLabel>
+            <translation><!-- Supervisory Review --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Arc List View</masterLabel>
+    <description>Salesforce list views for LWR sites — switch views, browse records, create new list views</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property
+                name="objectApiName"
+                type="String"
+                label="Object API Name"
+                description="e.g. Envelope__c"
+                default="Envelope__c"
+            />
+            <property
+                name="tableId"
+                type="String"
+                label="Table ID"
+                description="Required unique id for this list table (e.g. work-cases, work-tasks). Used to store and restore pinned list views."
+                default="arc-list-view"
+                required="true"
+            />
+            <property
+                name="title"
+                type="String"
+                label="Title"
+                default="Envelopes"
+            />
+            <property
+                name="defaultListViewApiName"
+                type="String"
+                label="Default List View API Name"
+                description="Usually All or All_Envelope__c depending on the object"
+                default="All"
+            />
+            <property
+                name="pageSize"
+                type="Integer"
+                label="Page Size"
+                description="Number of rows shown per page in the table."
+                default="25"
+            />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

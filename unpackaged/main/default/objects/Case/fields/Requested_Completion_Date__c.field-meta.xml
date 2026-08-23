@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Requested_Completion_Date__c</fullName>
+    <description>This is the date you would prefer to have your request completed by.</description>
+    <inlineHelpText>This is the date you would prefer to have your request completed by.</inlineHelpText>
+    <label>Requested Completion Date</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Date</type>
+</CustomField>

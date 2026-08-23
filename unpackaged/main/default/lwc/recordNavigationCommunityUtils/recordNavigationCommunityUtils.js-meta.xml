@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>false</isExposed>
+    <masterLabel>Record Navigation Community Utils</masterLabel>
+    <description>Experience Cloud record URL and navigation helpers. Do not import from core Lightning app components.</description>
+</LightningComponentBundle>

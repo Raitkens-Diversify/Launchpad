@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Potential_Service__c</fullName>
+    <label>Potential Service</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>RIA 1099</fullName>
+                <default>false</default>
+                <label>RIA 1099</label>
+            </value>
+            <value>
+                <fullName>RIA W2</fullName>
+                <default>false</default>
+                <label>RIA W2</label>
+            </value>
+            <value>
+                <fullName>RIA 1099 + BD</fullName>
+                <default>false</default>
+                <label>RIA 1099 + BD</label>
+            </value>
+            <value>
+                <fullName>RIA W2 + BD</fullName>
+                <default>false</default>
+                <label>RIA W2 + BD</label>
+            </value>
+            <value>
+                <fullName>Fee Based Wealth Management</fullName>
+                <default>false</default>
+                <label>Fee Based Wealth Management</label>
+            </value>
+            <value>
+                <fullName>Broker Dealer</fullName>
+                <default>false</default>
+                <label>Broker Dealer</label>
+            </value>
+            <value>
+                <fullName>Delaware Statutory Trust (DST)</fullName>
+                <default>false</default>
+                <label>Delaware Statutory Trust (DST)</label>
+            </value>
+            <value>
+                <fullName>Financial Planning</fullName>
+                <default>false</default>
+                <label>Financial Planning</label>
+            </value>
+            <value>
+                <fullName>Retirement Planning or ERISA</fullName>
+                <default>false</default>
+                <label>Retirement Planning or ERISA</label>
+            </value>
+            <value>
+                <fullName>Family Office Service Agreement</fullName>
+                <default>false</default>
+                <label>Family Office Service Agreement</label>
+            </value>
+            <value>
+                <fullName>Tax Services</fullName>
+                <default>false</default>
+                <label>Tax Services</label>
+            </value>
+            <value>
+                <fullName>BD</fullName>
+                <default>false</default>
+                <label>BD</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

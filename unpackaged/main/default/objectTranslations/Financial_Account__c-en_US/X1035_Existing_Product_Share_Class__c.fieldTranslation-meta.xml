@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- 1035 Existing Product Share Class --></label>
+        <name>X1035_Existing_Product_Share_Class__c</name>
+    </CustomFieldTranslation>

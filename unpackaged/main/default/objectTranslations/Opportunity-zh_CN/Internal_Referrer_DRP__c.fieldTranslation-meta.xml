@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <help><!-- Diversify Related Person --></help>
+        <label><!-- Internal Referrer (DRP) --></label>
+        <lookupFilter>
+            <errorMessage><!-- DRP: Record does not exist or does not match filter criteria. --></errorMessage>
+        </lookupFilter>
+        <name>Internal_Referrer_DRP__c</name>
+        <relationshipLabel><!-- Opportunities (Internal Referrer (DRP)) --></relationshipLabel>
+    </CustomFieldTranslation>

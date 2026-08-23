@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Diversify Related Person ID --></label>
+        <name>Diversify_Related_Person_ID__c</name>
+    </CustomFieldTranslation>

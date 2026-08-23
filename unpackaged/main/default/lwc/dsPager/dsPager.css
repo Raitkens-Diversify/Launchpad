@@ -1,0 +1,88 @@
+:host {
+    display: block;
+
+    /* Self-declared --slds-g-* block (canonical values, ui-standards §1):
+       injected SLDS2 hooks beat :host inheritance, so consumers of these
+       names declare their own. */
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-accent-3: #071c31;
+    --slds-g-color-on-accent-1: #ffffff;
+}
+
+.ds-pager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--ds-space-md, 12px);
+}
+
+.ds-pager__caption {
+    font-size: 0.8125rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.ds-pager__controls {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--ds-space-xs, 4px);
+}
+
+.ds-pager__btn {
+    box-sizing: border-box;
+    min-width: 2.25rem;
+    padding: 6px 10px;
+    border-radius: var(--ds-radius-md, 8px);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-2, #374151);
+    text-align: center;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.ds-pager__btn:hover:not(:disabled) {
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+}
+.ds-pager__btn:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+.ds-pager__btn:disabled {
+    cursor: default;
+    opacity: 0.45;
+}
+.ds-pager__btn--current {
+    background: var(--slds-g-color-accent-1, #0f406f);
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+}
+
+.ds-pager__gap {
+    padding: 0 2px;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    font-size: 0.8125rem;
+}
+
+@media (max-width: 640px) {
+    .ds-pager {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ds-pager__btn {
+        transition-duration: 0.01ms;
+    }
+}

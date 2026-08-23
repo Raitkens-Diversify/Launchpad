@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Fee Type --></label>
+        <name>Fee_Type__c</name>
+        <picklistValues>
+            <masterLabel>Flat Fee</masterLabel>
+            <translation><!-- Flat Fee --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Flat Fee + bps</masterLabel>
+            <translation><!-- Flat Fee + bps --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>bps</masterLabel>
+            <translation><!-- bps --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

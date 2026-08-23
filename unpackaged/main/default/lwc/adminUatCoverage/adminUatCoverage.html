@@ -1,0 +1,123 @@
+<template>
+    <div class="aucv">
+        <template if:true={errorMessage}>
+            <p class="aucv__error" role="alert">{errorMessage}</p>
+        </template>
+
+        <template if:true={loading}>
+            <div class="aucv__loading">
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={loading}>
+            <template if:true={hasRows}>
+                <table class="aucv__table">
+                    <thead>
+                        <tr>
+                            <th>Cycle</th>
+                            <th>Audience</th>
+                            <th>Target</th>
+                            <th class="aucv__num">Cases</th>
+                            <th class="aucv__num">Unclaimed</th>
+                            <th class="aucv__num">Oldest seat</th>
+                            <th class="aucv__num">Not started</th>
+                            <th class="aucv__num">In progress</th>
+                            <th class="aucv__num">Complete</th>
+                            <th class="aucv__num">Failed</th>
+                            <th class="aucv__num">Released</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={rows} for:item="row">
+                            <tr key={row.cycleId} class={row.rowClass}
+                                data-id={row.cycleId} data-name={row.cycleName}
+                                onclick={handleRowToggle}>
+                                <td>
+                                    <span class="aucv__name">{row.cycleName}</span>
+                                    <template if:true={row.atRisk}>
+                                        <c-ds-badge label="At risk" variant="error" size="sm"></c-ds-badge>
+                                    </template>
+                                    <span class="aucv__status">{row.status}</span>
+                                </td>
+                                <td>{row.teamLabel}</td>
+                                <td>{row.targetLabel}</td>
+                                <td class="aucv__num">{row.caseCount}</td>
+                                <td class="aucv__num">{row.unclaimedSeats}</td>
+                                <td class="aucv__num">{row.oldestLabel}</td>
+                                <td class="aucv__num">{row.notStartedClaims}</td>
+                                <td class="aucv__num">{row.inProgressClaims}</td>
+                                <td class="aucv__num">{row.completeClaims}</td>
+                                <td class="aucv__num">{row.failedRuns}</td>
+                                <td class="aucv__num">{row.releasedRuns}</td>
+                                <td class="aucv__num">
+                                    <lightning-button-icon icon-name="utility:edit"
+                                                           alternative-text="Open cycle"
+                                                           size="small"
+                                                           data-id={row.cycleId}
+                                                           onclick={handleOpenCycle}></lightning-button-icon>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+
+                <template if:true={openCycleId}>
+                    <section class="aucv__drill">
+                        <h3 class="aucv__drill-title">{openCycleName}</h3>
+                        <template if:true={drillLoading}>
+                            <div class="aucv__loading">
+                                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+                            </div>
+                        </template>
+                        <template if:false={drillLoading}>
+                            <div class="aucv__drill-cols">
+                                <div class="aucv__drill-col">
+                                    <h4 class="aucv__drill-heading">Unclaimed seats</h4>
+                                    <template if:true={drillHasUnclaimed}>
+                                        <ul class="aucv__list">
+                                            <template for:each={drillUnclaimed} for:item="seat">
+                                                <li key={seat.executionId} class="aucv__list-item">
+                                                    <span class="aucv__seat-code">{seat.titleDisplay}</span>
+                                                    <span class="aucv__seat-meta">{seat.caseCode} · {seat.moduleName} · {seat.priority} · sitting {seat.sittingDays}d</span>
+                                                </li>
+                                            </template>
+                                        </ul>
+                                    </template>
+                                    <template if:false={drillHasUnclaimed}>
+                                        <p class="aucv__empty">Every seat is claimed.</p>
+                                    </template>
+                                </div>
+                                <div class="aucv__drill-col">
+                                    <h4 class="aucv__drill-heading">Recent assignment activity</h4>
+                                    <template if:true={drillHasEvents}>
+                                        <ul class="aucv__list">
+                                            <template for:each={drillEvents} for:item="evt">
+                                                <li key={evt.key} class="aucv__list-item">
+                                                    <span class="aucv__seat-code">{evt.line}</span>
+                                                    <span class="aucv__seat-meta">
+                                                        <lightning-formatted-date-time value={evt.timestamp}
+                                                                                       year="numeric" month="short" day="numeric"
+                                                                                       hour="2-digit" minute="2-digit"></lightning-formatted-date-time>
+                                                        <template if:true={evt.reason}> · {evt.reason}</template>
+                                                    </span>
+                                                </li>
+                                            </template>
+                                        </ul>
+                                    </template>
+                                    <template if:false={drillHasEvents}>
+                                        <p class="aucv__empty">No claims, releases, or reassignments yet.</p>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </section>
+                </template>
+            </template>
+            <template if:false={hasRows}>
+                <p class="aucv__empty">No open cycles — pool health appears once a cycle is running.</p>
+            </template>
+        </template>
+    </div>
+</template>

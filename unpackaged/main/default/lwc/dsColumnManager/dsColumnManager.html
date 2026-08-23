@@ -1,0 +1,230 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-07-14 -->
+<template>
+  <template lwc:if={shouldRender}>
+    <section
+      class={rootClass}
+      role={dialogRole}
+      aria-modal={ariaModal}
+      aria-label={title}
+      ondragend={handleDragEnd}
+    >
+      <template lwc:if={isModalMode}>
+        <div class={c.modalBackdrop} onclick={handleDismiss}></div>
+      </template>
+
+      <div class={panelClass}>
+        <template lwc:if={isModalMode}>
+          <header class={c.modalHeader}>
+            <div class={c.modalIntro}>
+              <h2 class={c.modalTitle}>{title}</h2>
+              <p class={c.modalSubtitle}>{subtitle}</p>
+            </div>
+            <button type="button" class={c.btn} onclick={handleReset}>
+              Reset defaults
+            </button>
+          </header>
+        </template>
+
+        <div class={bodyClass}>
+          <div class={c.search}>
+            <lightning-input
+              class={c.searchInput}
+              variant="label-hidden"
+              type="search"
+              label="Search fields"
+              placeholder="Search fields..."
+              value={fieldSearchTerm}
+              onchange={handleFieldSearchChange}
+            ></lightning-input>
+          </div>
+
+          <div class={panelsClass}>
+            <section class={panelAvailablePanelClass}>
+              <header class={c.panelHeader}>
+                <span class={c.panelTitle}>Available</span>
+                <span class={panelCountClassName}>{availableCount}</span>
+              </header>
+              <ul class={c.list} role="list">
+                <template for:each={availableItems} for:item="item">
+                  <li
+                    key={item.key}
+                    class={item.itemClass}
+                    data-key={item.key}
+                    data-source={item.source}
+                    role="button"
+                    tabindex="0"
+                    aria-label={item.actionAriaLabel}
+                    onclick={handleAvailableItemClick}
+                    onkeydown={handleAvailableFieldKeyDown}
+                  >
+                    <span class={c.visibilityIcon} aria-hidden="true">
+                      <lightning-icon
+                        icon-name={item.iconName}
+                        size="xx-small"
+                      ></lightning-icon>
+                    </span>
+                    <div class={c.fieldCopy}>
+                      <span class={c.label}>{item.label}</span>
+                      <template lwc:if={item.apiName}>
+                        <span class={c.apiName}>{item.apiName}</span>
+                      </template>
+                    </div>
+                  </li>
+                </template>
+                <template lwc:if={hasNoAvailableFields}>
+                  <li class={c.empty}>No matching fields</li>
+                </template>
+              </ul>
+            </section>
+
+            <section class={panelActivePanelClass}>
+              <header class={c.panelHeader}>
+                <span class={c.panelTitle}>Selected</span>
+                <span class={panelCountClassName}>{activeCount}</span>
+              </header>
+              <ul
+                class={activeListClass}
+                role="list"
+                data-panel="active"
+                ondragenter={handleActivePanelDragHover}
+                ondragover={handleActivePanelDragHover}
+                ondragleave={handleActiveListDragLeave}
+                ondrop={handleDropOnActivePanel}
+              >
+                <template for:each={activeItems} for:item="item">
+                  <li
+                    key={item.key}
+                    class={item.itemClass}
+                    draggable="true"
+                    data-key={item.key}
+                    data-panel="active"
+                    role="button"
+                    tabindex="0"
+                    aria-label={item.hideAriaLabel}
+                    ondragstart={handleDragStart}
+                    ondragend={handleDragEnd}
+                    ondragover={handleActiveItemDragOver}
+                    ondragleave={handleActiveItemDragLeave}
+                    ondrop={handleDropOnActiveItem}
+                    onclick={handleHideColumn}
+                    onkeydown={handleActiveKeyDown}
+                  >
+                    <span
+                      class={c.dragHandle}
+                      aria-hidden="true"
+                      onclick={handleStopClick}
+                    >
+                      <lightning-icon
+                        icon-name="utility:drag_and_drop"
+                        size="xx-small"
+                      ></lightning-icon>
+                    </span>
+                    <div class={c.fieldCopy}>
+                      <span class={c.label}>{item.label}</span>
+                      <template lwc:if={item.apiName}>
+                        <span class={c.apiName}>{item.apiName}</span>
+                      </template>
+                    </div>
+                    <span class={c.position}>{item.position}</span>
+                    <div class={c.modalActions} onclick={handleStopClick}>
+                      <template lwc:if={item.canMoveUp}>
+                        <button
+                          type="button"
+                          class={c.modalMoveButton}
+                          data-key={item.key}
+                          data-direction="up"
+                          aria-label={item.moveUpAriaLabel}
+                          onclick={handleMoveActive}
+                        >
+                          <lightning-icon
+                            icon-name="utility:arrowup"
+                            size="xx-small"
+                            aria-hidden="true"
+                          ></lightning-icon>
+                        </button>
+                      </template>
+                      <template lwc:if={item.canMoveDown}>
+                        <button
+                          type="button"
+                          class={c.modalMoveButton}
+                          data-key={item.key}
+                          data-direction="down"
+                          aria-label={item.moveDownAriaLabel}
+                          onclick={handleMoveActive}
+                        >
+                          <lightning-icon
+                            icon-name="utility:arrowdown"
+                            size="xx-small"
+                            aria-hidden="true"
+                          ></lightning-icon>
+                        </button>
+                      </template>
+                    </div>
+                  </li>
+                </template>
+                <template lwc:if={hasNoActiveColumns}>
+                  <li class={c.empty}>No active columns</li>
+                </template>
+              </ul>
+            </section>
+
+            <template lwc:if={showHiddenPanel}>
+              <section class={c.panel}>
+                <header class={c.panelHeader}>
+                  <span class={c.panelTitle}>Hidden</span>
+                  <span class={panelCountClassName}>{hiddenCount}</span>
+                </header>
+                <ul
+                  class={c.list}
+                  role="list"
+                  data-panel="hidden"
+                  ondragover={handleDragOver}
+                  ondrop={handleDropOnHiddenPanel}
+                >
+                  <template for:each={hiddenItems} for:item="item">
+                    <li
+                      key={item.key}
+                      class={hiddenItemClass}
+                      draggable="true"
+                      data-key={item.key}
+                      data-panel="hidden"
+                      role="button"
+                      tabindex="0"
+                      aria-label={item.showAriaLabel}
+                      ondragstart={handleDragStart}
+                      ondragend={handleDragEnd}
+                      onclick={handleShowColumn}
+                      onkeydown={handleHiddenKeyDown}
+                    >
+                      <span class={c.visibilityIcon} aria-hidden="true">
+                        <lightning-icon
+                          icon-name="utility:hide"
+                          size="xx-small"
+                        ></lightning-icon>
+                      </span>
+                      <span class={c.label}>{item.label}</span>
+                    </li>
+                  </template>
+                  <template lwc:if={hasNoHiddenColumns}>
+                    <li class={c.empty}>No hidden columns</li>
+                  </template>
+                </ul>
+              </section>
+            </template>
+          </div>
+        </div>
+
+        <template lwc:if={isModalMode}>
+          <footer class={c.modalFooter}>
+            <p class={c.modalFooterHint}>{footerHint}</p>
+            <div class={c.modalFooterActions}>
+              <button type="button" class={c.btnPrimary} onclick={handleSave}>
+                Done
+              </button>
+            </div>
+          </footer>
+        </template>
+      </div>
+    </section>
+  </template>
+</template>

@@ -1,0 +1,101 @@
+<template>
+    <div class="arsl">
+        <div class="arsl__toolbar">
+            <lightning-input type="search"
+                             variant="label-hidden"
+                             label="Search resources"
+                             placeholder="Search by name or slug…"
+                             value={searchTerm}
+                             class="arsl__search"
+                             onchange={handleSearchChange}></lightning-input>
+            <lightning-combobox variant="label-hidden"
+                                label="Type"
+                                value={typeFilter}
+                                options={typeOptions}
+                                onchange={handleTypeChange}></lightning-combobox>
+            <lightning-combobox variant="label-hidden"
+                                label="Category"
+                                value={categoryFilter}
+                                options={categoryOptions}
+                                onchange={handleCategoryChange}></lightning-combobox>
+            <lightning-input type="checkbox"
+                             label="Active only"
+                             checked={activeOnly}
+                             onchange={handleActiveChange}></lightning-input>
+            <lightning-button-icon icon-name="utility:refresh"
+                                   alternative-text="Refresh"
+                                   onclick={handleRefresh}></lightning-button-icon>
+            <lightning-button variant="brand"
+                              label="New resource"
+                              onclick={handleCreate}></lightning-button>
+        </div>
+
+        <template if:true={errorMessage}>
+            <p class="arsl__error" role="alert">{errorMessage}</p>
+        </template>
+
+        <template if:true={loading}>
+            <div class="arsl__loading">
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={loading}>
+            <template if:true={hasRows}>
+                <table class="arsl__table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Category</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Featured</th>
+                            <th scope="col">Downloads</th>
+                            <th scope="col" class="arsl__actions-col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={filteredRows} for:item="row">
+                            <tr key={row.id}>
+                                <td>
+                                    <span class="arsl__title">{row.name}</span>
+                                    <span class="arsl__slug">{row.slug}</span>
+                                </td>
+                                <td>{row.resourceType}</td>
+                                <td>{row.categoryName}</td>
+                                <td><span class={row.statusClass}>{row.statusLabel}</span></td>
+                                <td>
+                                    <template if:true={row.featured}>
+                                        <lightning-icon icon-name="utility:favorite"
+                                                        size="xx-small"
+                                                        alternative-text="Featured"></lightning-icon>
+                                    </template>
+                                </td>
+                                <td>{row.downloadCount}</td>
+                                <td>
+                                    <template if:true={row.copyUrl}>
+                                        <lightning-button-icon icon-name="utility:link"
+                                                               size="small"
+                                                               variant="border-filled"
+                                                               alternative-text="Copy link"
+                                                               title="Copy link"
+                                                               class="arsl__copy"
+                                                               data-url={row.copyUrl}
+                                                               onclick={handleCopyLink}></lightning-button-icon>
+                                    </template>
+                                    <lightning-button label="Edit"
+                                                      size="small"
+                                                      data-id={row.id}
+                                                      onclick={handleEdit}></lightning-button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </template>
+            <template if:false={hasRows}>
+                <p class="arsl__empty">No resources match these filters.</p>
+            </template>
+        </template>
+    </div>
+</template>

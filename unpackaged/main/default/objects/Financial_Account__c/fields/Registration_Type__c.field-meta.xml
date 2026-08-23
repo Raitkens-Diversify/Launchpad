@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Registration_Type__c</fullName>
+    <label>Registration Type</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>403(b)</fullName>
+                <default>false</default>
+                <label>403(b)</label>
+            </value>
+            <value>
+                <fullName>457</fullName>
+                <default>false</default>
+                <label>457</label>
+            </value>
+            <value>
+                <fullName>529 Plan</fullName>
+                <default>false</default>
+                <label>529 Plan</label>
+            </value>
+            <value>
+                <fullName>ABLE</fullName>
+                <default>false</default>
+                <label>ABLE</label>
+            </value>
+            <value>
+                <fullName>Beneficiary IRA</fullName>
+                <default>false</default>
+                <label>Beneficiary IRA</label>
+            </value>
+            <value>
+                <fullName>Brokerage Link</fullName>
+                <default>false</default>
+                <label>Brokerage Link</label>
+            </value>
+            <value>
+                <fullName>C-Corp</fullName>
+                <default>false</default>
+                <label>C-Corp</label>
+            </value>
+            <value>
+                <fullName>Community Property</fullName>
+                <default>false</default>
+                <label>Community Property</label>
+            </value>
+            <value>
+                <fullName>Community Property WROS</fullName>
+                <default>false</default>
+                <label>Community Property WROS</label>
+            </value>
+            <value>
+                <fullName>Conservatorship</fullName>
+                <default>false</default>
+                <label>Conservatorship</label>
+            </value>
+            <value>
+                <fullName>Coverdell ESA</fullName>
+                <default>false</default>
+                <label>Coverdell ESA</label>
+            </value>
+            <value>
+                <fullName>Defined Benefit Plan</fullName>
+                <default>false</default>
+                <label>Defined Benefit Plan</label>
+            </value>
+            <value>
+                <fullName>Defined Contribution Plan</fullName>
+                <default>false</default>
+                <label>Defined Contribution Plan</label>
+            </value>
+            <value>
+                <fullName>Donor Advised Fund</fullName>
+                <default>false</default>
+                <label>Donor Advised Fund</label>
+            </value>
+            <value>
+                <fullName>Estate</fullName>
+                <default>false</default>
+                <label>Estate</label>
+            </value>
+            <value>
+                <fullName>Guardianship</fullName>
+                <default>false</default>
+                <label>Guardianship</label>
+            </value>
+            <value>
+                <fullName>Health Savings Account</fullName>
+                <default>false</default>
+                <label>Health Savings Account</label>
+            </value>
+            <value>
+                <fullName>Individual</fullName>
+                <default>false</default>
+                <label>Individual</label>
+            </value>
+            <value>
+                <fullName>Individual 401(k)</fullName>
+                <default>false</default>
+                <label>Individual 401(k)</label>
+            </value>
+            <value>
+                <fullName>Individual Roth 401(k)</fullName>
+                <default>false</default>
+                <label>Individual Roth 401(k)</label>
+            </value>
+            <value>
+                <fullName>Individual TOD</fullName>
+                <default>false</default>
+                <label>Individual TOD</label>
+            </value>
+            <value>
+                <fullName>Inherited IRA</fullName>
+                <default>false</default>
+                <label>Inherited IRA</label>
+            </value>
+            <value>
+                <fullName>Inherited Roth</fullName>
+                <default>false</default>
+                <label>Inherited Roth</label>
+            </value>
+            <value>
+                <fullName>Irrevocable Trust</fullName>
+                <default>false</default>
+                <label>Irrevocable Trust</label>
+            </value>
+            <value>
+                <fullName>Joint Tenant</fullName>
+                <default>false</default>
+                <label>Joint Tenant</label>
+            </value>
+            <value>
+                <fullName>Joint Tenants by the Entirety</fullName>
+                <default>false</default>
+                <label>Joint Tenants by the Entirety</label>
+            </value>
+            <value>
+                <fullName>Joint Tenants in Common</fullName>
+                <default>false</default>
+                <label>Joint Tenants in Common</label>
+            </value>
+            <value>
+                <fullName>Keogh</fullName>
+                <default>false</default>
+                <label>Keogh</label>
+            </value>
+            <value>
+                <fullName>Limited Liability Company</fullName>
+                <default>false</default>
+                <label>Limited Liability Company</label>
+            </value>
+            <value>
+                <fullName>Non-Profit</fullName>
+                <default>false</default>
+                <label>Non-Profit</label>
+            </value>
+            <value>
+                <fullName>Partnership</fullName>
+                <default>false</default>
+                <label>Partnership</label>
+            </value>
+            <value>
+                <fullName>Personal Choice Retirement Account</fullName>
+                <default>false</default>
+                <label>Personal Choice Retirement Account</label>
+            </value>
+            <value>
+                <fullName>Profit Sharing Plan</fullName>
+                <default>false</default>
+                <label>Profit Sharing Plan</label>
+            </value>
+            <value>
+                <fullName>Revocable Trust</fullName>
+                <default>false</default>
+                <label>Revocable Trust</label>
+            </value>
+            <value>
+                <fullName>Rollover IRA</fullName>
+                <default>false</default>
+                <label>Rollover IRA</label>
+            </value>
+            <value>
+                <fullName>Roth IRA</fullName>
+                <default>false</default>
+                <label>Roth IRA</label>
+            </value>
+            <value>
+                <fullName>SARSEP IRA</fullName>
+                <default>false</default>
+                <label>SARSEP IRA</label>
+            </value>
+            <value>
+                <fullName>S-Corp</fullName>
+                <default>false</default>
+                <label>S-Corp</label>
+            </value>
+            <value>
+                <fullName>SEP IRA</fullName>
+                <default>false</default>
+                <label>SEP IRA</label>
+            </value>
+            <value>
+                <fullName>SIMPLE IRA</fullName>
+                <default>false</default>
+                <label>SIMPLE IRA</label>
+            </value>
+            <value>
+                <fullName>SIMPLE Roth IRA</fullName>
+                <default>false</default>
+                <label>SIMPLE Roth IRA</label>
+            </value>
+            <value>
+                <fullName>Simplified Employee Pension Plan</fullName>
+                <default>false</default>
+                <label>Simplified Employee Pension Plan</label>
+            </value>
+            <value>
+                <fullName>Traditional IRA</fullName>
+                <default>false</default>
+                <label>Traditional IRA</label>
+            </value>
+            <value>
+                <fullName>Uniform Gift to Minors Account</fullName>
+                <default>false</default>
+                <label>Uniform Gift to Minors Account</label>
+            </value>
+            <value>
+                <fullName>Uniform Transfers to Minors Account</fullName>
+                <default>false</default>
+                <label>Uniform Transfers to Minors Account</label>
+            </value>
+            <value>
+                <fullName>Joint Tenants WROS</fullName>
+                <default>false</default>
+                <label>Joint Tenants WROS</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

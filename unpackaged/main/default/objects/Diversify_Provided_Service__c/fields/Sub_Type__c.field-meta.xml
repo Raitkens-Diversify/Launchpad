@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Sub_Type__c</fullName>
+    <label>Sub-Type</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <controllingField>Type__c</controllingField>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>DocuSign</fullName>
+                <default>false</default>
+                <label>DocuSign</label>
+            </value>
+            <value>
+                <fullName>Salesforce</fullName>
+                <default>false</default>
+                <label>Salesforce</label>
+            </value>
+            <value>
+                <fullName>Egnyte</fullName>
+                <default>false</default>
+                <label>Egnyte</label>
+            </value>
+            <value>
+                <fullName>Zoom</fullName>
+                <default>false</default>
+                <label>Zoom</label>
+            </value>
+            <value>
+                <fullName>LastPass</fullName>
+                <default>false</default>
+                <label>LastPass</label>
+            </value>
+            <value>
+                <fullName>Orion Compliance</fullName>
+                <default>false</default>
+                <label>Orion Compliance</label>
+            </value>
+            <value>
+                <fullName>Diversify Asset Management</fullName>
+                <default>false</default>
+                <label>Diversify Asset Management</label>
+            </value>
+            <value>
+                <fullName>Microsoft</fullName>
+                <default>false</default>
+                <label>Microsoft</label>
+            </value>
+            <value>
+                <fullName>IT Managed</fullName>
+                <default>false</default>
+                <label>IT Managed</label>
+            </value>
+            <value>
+                <fullName>Estate Guru</fullName>
+                <default>false</default>
+                <label>Estate Guru</label>
+            </value>
+            <value>
+                <fullName>Integrated Ops</fullName>
+                <default>false</default>
+                <label>Integrated Ops</label>
+            </value>
+            <value>
+                <fullName>Wealthbox</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Wealthbox</label>
+            </value>
+        </valueSetDefinition>
+        <valueSettings>
+            <controllingFieldValue>Software</controllingFieldValue>
+            <valueName>DocuSign</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Software</controllingFieldValue>
+            <valueName>Salesforce</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Software</controllingFieldValue>
+            <valueName>Egnyte</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Software</controllingFieldValue>
+            <valueName>Zoom</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Software</controllingFieldValue>
+            <valueName>LastPass</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Software</controllingFieldValue>
+            <valueName>Microsoft</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Software</controllingFieldValue>
+            <valueName>Estate Guru</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Service</controllingFieldValue>
+            <valueName>Orion Compliance</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Service</controllingFieldValue>
+            <valueName>Diversify Asset Management</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Service</controllingFieldValue>
+            <valueName>IT Managed</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Service</controllingFieldValue>
+            <valueName>Integrated Ops</valueName>
+        </valueSettings>
+    </valueSet>
+</CustomField>

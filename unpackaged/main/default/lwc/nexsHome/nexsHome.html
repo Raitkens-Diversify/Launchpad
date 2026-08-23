@@ -1,0 +1,97 @@
+<template>
+    <!-- Navy hero: shared c-ds-hero (also used by resourceCenterHome and
+         the UAT dashboard), extracted from this file's former inline markup. -->
+    <c-ds-hero eyebrow="Let’s get you answers." headline="How can we help?">
+        <div class="home-hero__search" data-tour-id="nexus-search">
+            <c-nexs-search-bar
+                placeholder="Enter a question or topic…"
+                onselect={handleSuggestionSelect}
+                onsearch={handleSearch}
+            ></c-nexs-search-bar>
+        </div>
+    </c-ds-hero>
+
+    <div class="home-body">
+        <template if:true={showWelcome}>
+            <section class="home-section">
+                <c-nexs-welcome-video oncontinue={handleWelcomeDismiss}></c-nexs-welcome-video>
+            </section>
+        </template>
+
+        <template if:true={hasPopular}>
+            <section class="home-section">
+                <h2 class="home-section__title">Popular help articles</h2>
+                <div class="home-popular" data-tour-id="nexus-featured">
+                    <template for:each={popularColumns} for:item="col">
+                        <ul key={col.key} class="home-popular__col">
+                            <template for:each={col.rows} for:item="a">
+                                <li key={a.id}>
+                                    <a
+                                        href="#"
+                                        class="home-popular__row"
+                                        data-id={a.id}
+                                        data-urlname={a.urlName}
+                                        onclick={handleArticleClick}
+                                        onmouseenter={handlePrefetch}
+                                        onfocus={handlePrefetch}
+                                    >
+                                        <span class="home-popular__title">{a.title}</span>
+                                        <lightning-icon
+                                            icon-name="utility:chevronright"
+                                            size="x-small"
+                                            alternative-text=""
+                                        ></lightning-icon>
+                                    </a>
+                                </li>
+                            </template>
+                        </ul>
+                    </template>
+                </div>
+            </section>
+        </template>
+
+        <template if:true={hasTopics}>
+            <section class="home-section">
+                <div class="home-section__head">
+                    <h2 class="home-section__title">Popular Topics</h2>
+                    <a href="#" class="home-section__link" onclick={handleSeeAllTopics}>See all topics</a>
+                </div>
+                <ul class="home-topics" data-tour-id="nexus-categories">
+                    <template for:each={topicItems} for:item="t">
+                        <li key={t.name}>
+                            <button
+                                type="button"
+                                class="home-topics__card"
+                                data-name={t.name}
+                                data-label={t.label}
+                                onclick={handleTopicClick}
+                            >
+                                <span class="home-topics__icon" aria-hidden="true">
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        focusable="false"
+                                    >
+                                        <path d={t.iconPath}></path>
+                                    </svg>
+                                </span>
+                                <span class="home-topics__label">{t.label}</span>
+                            </button>
+                        </li>
+                    </template>
+                </ul>
+            </section>
+        </template>
+    </div>
+
+    <!-- "Need more help?" contact band — the shared c-resource-help-band
+         (targets come from Resource_Center_Setting__mdt). The wrapper div
+         keeps the nexus-contact tour anchor on this page's own DOM. -->
+    <div data-tour-id="nexus-contact">
+        <c-resource-help-band></c-resource-help-band>
+    </div>
+</template>

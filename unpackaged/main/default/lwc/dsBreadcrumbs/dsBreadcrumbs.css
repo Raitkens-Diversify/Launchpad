@@ -1,0 +1,48 @@
+/* Visuals ported verbatim from nexsArticleBrowser's .nexs__crumb* rules —
+   class names are local to this shadow tree; pixel parity is what matters. */
+:host {
+    display: flex;
+    margin-bottom: var(--slds-g-spacing-4, 16px);
+    min-width: 0;
+}
+.crumbs {
+    display: flex;
+    min-width: 0;
+}
+.crumbs__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 8px);
+    min-width: 0;
+    font-size: var(--slds-g-font-scale-2, 0.875rem);
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.crumbs__item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 8px);
+    min-width: 0;
+}
+.crumbs__link {
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    text-decoration: none;
+    white-space: nowrap;
+}
+.crumbs__link:hover {
+    color: var(--slds-g-color-accent-1, #0f406f);
+    text-decoration: underline;
+}
+.crumbs__sep {
+    color: var(--slds-g-color-border-2, #b6bcc5);
+}
+.crumbs__current {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}

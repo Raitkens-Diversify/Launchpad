@@ -1,0 +1,294 @@
+/*
+ * Author: Hoang Long Vu To
+ * Date: 2026-06-15
+ */
+:host {
+    display: block;
+    --modal-divider: #e5e5e5;
+    --modal-error: #b3261e;
+}
+
+.modal-header__group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.modal-header__breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+}
+
+.modal-header__member-lookup {
+    flex: 1 1 16rem;
+    min-width: 12rem;
+    max-width: 20rem;
+}
+
+.modal-header__member-lookup c-fsc-rel-record-lookup {
+    display: block;
+    width: 100%;
+}
+
+.modal-header__instruction {
+    margin: 0.25rem 0 0;
+    color: #444444;
+}
+
+.modal-body {
+    position: relative;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1 1 auto;
+}
+
+lightning-modal-body.modal-body {
+    overflow: visible;
+}
+
+.modal-body__scroll {
+    overflow-x: auto;
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: calc(90vh - 11rem);
+    -webkit-overflow-scrolling: touch;
+}
+
+.modal-body__scroll:has(c-fsc-rel-record-lookup[data-open="true"]) {
+    overflow: visible;
+}
+
+.modal-loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.modal-table {
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+}
+
+.modal-table__header,
+.modal-table__row {
+    display: grid;
+    grid-template-columns: minmax(720px, 1fr) 80px 36px;
+    gap: 0.75rem;
+    align-items: center;
+    min-width: 900px;
+    overflow: visible;
+}
+
+.modal-table_read-only .modal-table__header,
+.modal-table_read-only .modal-table__row {
+    grid-template-columns: minmax(720px, 1fr) 80px;
+    min-width: 860px;
+}
+
+.modal-table__header {
+    padding: 0.5rem 0;
+    color: #5c5c5c;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.modal-table__row-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.5rem 0;
+    overflow: visible;
+}
+
+.modal-table__row-wrapper_pending-delete {
+    background: #fdecec;
+    border-left: 3px solid var(--modal-error);
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    margin: 0 -0.75rem;
+}
+
+.modal-table__row-wrapper_error {
+    background: #fdecec;
+    border-left: 3px solid var(--modal-error);
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    margin: 0 -0.75rem;
+}
+
+.row-pending {
+    flex: 1 1 auto;
+    min-width: 0;
+    color: var(--modal-error);
+}
+
+.row-pending__name {
+    margin: 0;
+    font-weight: 600;
+    text-decoration: line-through;
+}
+
+.row-pending__hint {
+    margin: 0.1rem 0 0;
+    color: var(--modal-error);
+    font-style: italic;
+}
+
+.row-pending__placeholder {
+    color: #6b6b6b;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.modal-table__row-error {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    color: var(--modal-error);
+    font-size: small;
+    padding: 0.25rem 0 0.1rem 0.25rem;
+}
+
+.modal-table__add {
+    margin-top: 1rem;
+    overflow: visible;
+}
+
+.modal-table_read-only-empty {
+    align-items: center;
+    min-width: auto;
+}
+
+.modal-table__empty {
+    margin: 2.5rem 0;
+    color: #444;
+    text-align: center;
+    width: 100%;
+}
+
+.modal-table__col {
+    display: flex;
+    align-items: center;
+    min-height: 2rem;
+}
+
+.modal-table__col:not(.modal-table__col_relationship) {
+    justify-content: center;
+}
+
+.modal-table__col lightning-input,
+.modal-table__col lightning-button-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-table__col_relationship {
+    min-width: 0;
+    overflow: visible;
+    justify-content: flex-start;
+}
+
+.relationship-sentence {
+    --relationship-subject-width: max-content;
+    --relationship-role-width: 13rem;
+    --relationship-contact-width: minmax(12rem, 1fr);
+    display: grid;
+    grid-template-columns:
+        var(--relationship-subject-width)
+        max-content
+        var(--relationship-role-width)
+        max-content
+        var(--relationship-contact-width)
+        max-content
+        var(--relationship-role-width);
+    column-gap: 0.5rem;
+    row-gap: 0.35rem;
+    align-items: center;
+    min-width: 0;
+    width: 100%;
+    overflow: visible;
+}
+
+.relationship-sentence_client-select {
+    --relationship-subject-width: 14rem;
+}
+
+.relationship-sentence__static {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    font-size: 0.8125rem;
+    line-height: 1.25;
+    color: #181818;
+    white-space: nowrap;
+}
+
+.relationship-sentence__subject {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    width: 100%;
+    overflow: visible;
+    position: relative;
+}
+
+.relationship-sentence__subject c-fsc-rel-record-lookup,
+.relationship-sentence__role c-fsc-rel-record-lookup,
+.relationship-sentence__contact c-fsc-rel-record-lookup {
+    display: block;
+    width: 100%;
+    min-width: 0;
+}
+
+.relationship-sentence__static.relationship-sentence__subject {
+    display: inline-flex;
+    width: auto;
+    min-width: 0;
+    font-weight: 600;
+}
+
+.relationship-sentence_read-only .relationship-sentence__emphasis {
+    font-weight: 600;
+}
+
+.relationship-sentence__role {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    width: 100%;
+    overflow: visible;
+    position: relative;
+}
+
+.relationship-sentence__contact {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    width: 100%;
+    overflow: visible;
+    position: relative;
+}
+
+.row-pending__sentence {
+    margin: 0;
+    font-weight: 600;
+    text-decoration: line-through;
+}
+
+.modal-banner {
+    margin-bottom: 0.75rem;
+}

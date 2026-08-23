@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Aunt</fullName>
+        <default>false</default>
+        <label>Aunt</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Brother</fullName>
+        <default>false</default>
+        <label>Brother</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Brother-in-law</fullName>
+        <default>false</default>
+        <label>Brother-in-law</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Cousin</fullName>
+        <default>false</default>
+        <label>Cousin</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Daughter</fullName>
+        <default>false</default>
+        <label>Daughter</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Daughter-in-law</fullName>
+        <default>false</default>
+        <label>Daughter-in-law</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Ex-husband</fullName>
+        <default>false</default>
+        <label>Ex-husband</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Ex-wife</fullName>
+        <default>false</default>
+        <label>Ex-wife</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Father</fullName>
+        <default>false</default>
+        <label>Father</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Father-in-law</fullName>
+        <default>false</default>
+        <label>Father-in-law</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Granddaughter</fullName>
+        <default>false</default>
+        <label>Granddaughter</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Grandfather</fullName>
+        <default>false</default>
+        <label>Grandfather</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Grandmother</fullName>
+        <default>false</default>
+        <label>Grandmother</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Grandson</fullName>
+        <default>false</default>
+        <label>Grandson</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Half Sister</fullName>
+        <default>false</default>
+        <label>Half Sister</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Have one parent in common</fullName>
+        <default>false</default>
+        <label>Have one parent in common</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Husband</fullName>
+        <default>false</default>
+        <label>Husband</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Mother</fullName>
+        <default>false</default>
+        <label>Mother</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Mother-in-law</fullName>
+        <default>false</default>
+        <label>Mother-in-law</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Nephew</fullName>
+        <default>false</default>
+        <label>Nephew</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Niece</fullName>
+        <default>false</default>
+        <label>Niece</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Sister</fullName>
+        <default>false</default>
+        <label>Sister</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Sister-in-law</fullName>
+        <default>false</default>
+        <label>Sister-in-law</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Son</fullName>
+        <default>false</default>
+        <label>Son</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Son-in-law</fullName>
+        <default>false</default>
+        <label>Son-in-law</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Step Brother</fullName>
+        <default>false</default>
+        <label>Step Brother</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Step Daughter</fullName>
+        <default>false</default>
+        <label>Step Daughter</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Step Father</fullName>
+        <default>false</default>
+        <label>Step Father</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Step Mother</fullName>
+        <default>false</default>
+        <label>Step Mother</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Step Sister</fullName>
+        <default>false</default>
+        <label>Step Sister</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Step Son</fullName>
+        <default>false</default>
+        <label>Step Son</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Uncle</fullName>
+        <default>false</default>
+        <label>Uncle</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Wife</fullName>
+        <default>false</default>
+        <label>Wife</label>
+    </standardValue>
+</StandardValueSet>

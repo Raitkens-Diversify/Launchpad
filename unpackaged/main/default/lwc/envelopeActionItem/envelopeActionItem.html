@@ -1,0 +1,19 @@
+<template>
+    <div class="action-item">
+        <div class="action-item__header">
+            <span class="action-item__name">{entity.name}</span>
+            <span class="action-item__type">{entity.typeLabel}</span>
+            <template lwc:if={showNewBadge}>
+                <span class="action-item__badge action-item__badge_new">New</span>
+            </template>
+        </div>
+        <template for:each={entity.actions} for:item="action">
+            <c-envelope-action-card
+                key={action.id}
+                action={action}
+                oncardmenu={handleCardMenu}
+                onopenitem={handleOpenItem}>
+            </c-envelope-action-card>
+        </template>
+    </div>
+</template>

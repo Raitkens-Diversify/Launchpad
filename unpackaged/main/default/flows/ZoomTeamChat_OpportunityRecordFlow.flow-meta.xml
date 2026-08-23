@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionCalls>
+        <name>opp_close_date_action</name>
+        <label>opp close date action</label>
+        <locationX>842</locationX>
+        <locationY>815</locationY>
+        <actionName>Opportunity.ZoomTeamChat_CDChanged</actionName>
+        <actionType>outboundMessage</actionType>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <nameSegment>Opportunity.ZoomTeamChat_CDChanged</nameSegment>
+    </actionCalls>
+    <actionCalls>
+        <name>opp_is_won_action</name>
+        <label>opp is won action</label>
+        <locationX>314</locationX>
+        <locationY>575</locationY>
+        <actionName>Opportunity.ZoomTeamChat_OpportunityWon</actionName>
+        <actionType>outboundMessage</actionType>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <nameSegment>Opportunity.ZoomTeamChat_OpportunityWon</nameSegment>
+    </actionCalls>
+    <actionCalls>
+        <name>opp_stage_name_change_action</name>
+        <label>opp stage name change action</label>
+        <locationX>578</locationX>
+        <locationY>695</locationY>
+        <actionName>Opportunity.ZoomTeamChat_StageChanged</actionName>
+        <actionType>outboundMessage</actionType>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <nameSegment>Opportunity.ZoomTeamChat_StageChanged</nameSegment>
+    </actionCalls>
+    <apiVersion>55.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <decisions>
+        <name>opp_close_date_decision</name>
+        <label>opp close date decision</label>
+        <locationX>974</locationX>
+        <locationY>695</locationY>
+        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <rules>
+            <name>closeDate_change_outcome</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.CloseDate</leftValueReference>
+                <operator>IsChanged</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>opp_close_date_action</targetReference>
+            </connector>
+            <label>closeDate change outcome</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>opp_is_won_decision</name>
+        <label>opp is won decision</label>
+        <locationX>545</locationX>
+        <locationY>455</locationY>
+        <defaultConnector>
+            <targetReference>opp_stage_name_changed_decision</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <rules>
+            <name>is_won_change_outcome</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.IsWon</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.IsWon</leftValueReference>
+                <operator>IsChanged</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>opp_is_won_action</targetReference>
+            </connector>
+            <label>is won change outcome</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>opp_stage_name_changed_decision</name>
+        <label>opp stage name changed decision</label>
+        <locationX>776</locationX>
+        <locationY>575</locationY>
+        <defaultConnector>
+            <targetReference>opp_close_date_decision</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <rules>
+            <name>stage_name_change_outcome</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.StageName</leftValueReference>
+                <operator>IsChanged</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>opp_stage_name_change_action</targetReference>
+            </connector>
+            <label>stage name change outcome</label>
+        </rules>
+    </decisions>
+    <interviewLabel>opportunityRecordFlow {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>ZoomTeamChat_OpportunityRecordFlow</label>
+    <processType>AutoLaunchedFlow</processType>
+    <start>
+        <locationX>171</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>opp_is_won_decision</targetReference>
+        </connector>
+        <filterLogic>or</filterLogic>
+        <filters>
+            <field>IsWon</field>
+            <operator>IsChanged</operator>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </filters>
+        <filters>
+            <field>StageName</field>
+            <operator>IsChanged</operator>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </filters>
+        <filters>
+            <field>CloseDate</field>
+            <operator>IsChanged</operator>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </filters>
+        <object>Opportunity</object>
+        <recordTriggerType>CreateAndUpdate</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+    </start>
+    <status>Active</status>
+</Flow>

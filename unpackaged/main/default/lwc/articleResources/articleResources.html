@@ -1,0 +1,26 @@
+<template>
+    <template if:true={hasResources}>
+        <section class="ar-card" aria-label="Downloads and resources">
+            <h2 class="ar-card__title">Downloads &amp; Resources</h2>
+            <ul class="ar-list">
+                <template for:each={rows} for:item="row">
+                    <li key={row.id} class="ar-row">
+                        <span class="ar-row__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2" stroke-linecap="round"
+                                 stroke-linejoin="round" focusable="false">
+                                <path d={row.iconPath}></path>
+                            </svg>
+                        </span>
+                        <span class="ar-row__name">{row.name}</span>
+                        <template if:true={row.href}>
+                            <a class="ar-row__link" href={row.href} target={row.target}
+                               download={row.download} data-id={row.id} data-track={row.trackClick}
+                               onclick={handleLinkClick}>{row.action}</a>
+                        </template>
+                    </li>
+                </template>
+            </ul>
+        </section>
+    </template>
+</template>

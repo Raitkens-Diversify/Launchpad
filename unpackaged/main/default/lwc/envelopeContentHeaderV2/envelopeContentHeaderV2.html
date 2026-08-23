@@ -1,0 +1,41 @@
+<template>
+    <header class="content-header">
+        <div class="content-header__copy">
+            <h1 class="content-header__title">{title}</h1>
+            <p class="content-header__subtitle">{subtitle}</p>
+        </div>
+
+        <div class="content-header__actions">
+            <lightning-button
+                variant="secondary"
+                label="Review Missing Items"
+                disabled={reviewDisabled}
+                data-action="reviewMissingItems"
+                onclick={handleActionClick}>
+            </lightning-button>
+            <lightning-button
+                variant="secondary"
+                label="Manage Documents"
+                disabled={manageDocumentsDisabled}
+                data-action="manageDocuments"
+                onclick={handleActionClick}>
+            </lightning-button>
+            <lightning-button-menu
+                variant="bare"
+                icon-name="utility:threedots_vertical"
+                menu-alignment="right"
+                alternative-text="More actions"
+                title="More actions"
+                onselect={handleMenuSelect}>
+                <template for:each={menuActions} for:item="action">
+                    <lightning-menu-item
+                        key={action.name}
+                        value={action.name}
+                        label={action.label}
+                        prefix-icon-name={action.iconName}>
+                    </lightning-menu-item>
+                </template>
+            </lightning-button-menu>
+        </div>
+    </header>
+</template>

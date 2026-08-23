@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <customErrors>
+        <name>Show_Closed_Won_Validation_Error</name>
+        <label>Show Closed Won Validation Error</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <customErrorMessages>
+            <errorMessage>{!fxTxt_ErrorMessageClosedWon}</errorMessage>
+            <fieldSelection>StageName</fieldSelection>
+            <isFieldError>true</isFieldError>
+        </customErrorMessages>
+    </customErrors>
+    <decisions>
+        <name>Validate_Closed_Won</name>
+        <label>Validate Closed Won</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnectorLabel>Validated</defaultConnectorLabel>
+        <rules>
+            <name>Missing_Check_Validate_Closed_Won</name>
+            <conditionLogic>or</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Plan_Type__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Plan_Balance__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Number_of_Participants__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Fee_Type__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Go_Live_Date__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Blackout_Start_Date__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Blackout_End_Date__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Current_Plan_Provider_s__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Show_Closed_Won_Validation_Error</targetReference>
+            </connector>
+            <label>Missing Fields</label>
+        </rules>
+    </decisions>
+    <description>DAN-224</description>
+    <environments>Default</environments>
+    <formulas>
+        <name>fxNum_StageOrder</name>
+        <dataType>Number</dataType>
+        <expression>CASE(
+    TEXT({!$Record.StageName}),
+    &quot;Discovery&quot;, 10,
+    &quot;Proposal&quot;, 20,
+    &quot;Contract&quot;, 30,
+    &quot;Closed Won&quot;, 100,
+    &quot;Closed Lost&quot;, 0,
+    0
+)</expression>
+        <scale>0</scale>
+    </formulas>
+    <formulas>
+        <name>fxTxt_ErrorMessageClosedWon</name>
+        <dataType>String</dataType>
+        <expression>LEFT(
+    &quot;Required before Closed Won: &quot;
+ 
+    &amp;
+    IF(ISPICKVAL({!$Record.Plan_Type__c}, &#39;&#39;), &quot;Plan Type, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Plan_Balance__c}), &quot;Plan Balance, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Number_of_Participants__c}), &quot;# of Participants, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Current_Plan_Provider_s__c}), &quot;Current Plan Provider(s), &quot;, &quot;&quot;)
+    &amp;
+    IF(ISPICKVAL({!$Record.Fee_Type__c}, &#39;&#39;), &quot;Fee Type, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Go_Live_Date__c}), &quot;Go Live Date, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Blackout_Start_Date__c}), &quot;Blackout Start Date, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Blackout_End_Date__c}), &quot;Blackout End Date, &quot;, &quot;&quot;)
+    &amp;
+    &quot;Update missing fields.&quot;,
+    255
+)</expression>
+    </formulas>
+    <interviewLabel>Opportunity: Before Save: Retirement Plans {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Opportunity: Before Save: Retirement Plans Closed Won Required Fields</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Validate_Closed_Won</targetReference>
+        </connector>
+        <filterFormula>AND(
+    {!$Record.RecordType.DeveloperName} = &quot;Retirement_Plan&quot;,
+    ISCHANGED({!$Record.StageName}),
+    TEXT({!$Record.StageName}) = &quot;Closed Won&quot;
+)</filterFormula>
+        <object>Opportunity</object>
+        <recordTriggerType>CreateAndUpdate</recordTriggerType>
+        <triggerType>RecordBeforeSave</triggerType>
+    </start>
+    <status>Active</status>
+</Flow>

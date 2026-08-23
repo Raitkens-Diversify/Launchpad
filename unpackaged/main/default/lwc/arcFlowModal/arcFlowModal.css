@@ -1,0 +1,25 @@
+/**
+ * Author: Hoang Long Vu To
+ * Date: 2026-08-14
+ */
+
+:host {
+  display: contents;
+}
+
+.arc-flow-modal__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75rem;
+  min-height: 1.75rem;
+  padding: 0;
+}
+
+.arc-flow-modal__close lightning-icon {
+  --slds-c-icon-color-foreground-default: var(--div-color-text-muted, #706e6b);
+}
+
+.arc-flow-modal__title {
+  font-size: var(--div-font-scale-lg, 1.125rem);
+}

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>No_Evidence_Reason__c</fullName>
+    <description>The documented escape hatch for a High or Critical defect with no attachment. One of the two must be present or the finding will not save, and the session will not finish — the point is that &quot;no evidence&quot; becomes a deliberate, readable statement rather than an omission. Ignored for every other type and severity.</description>
+    <label>Why No Evidence?</label>
+    <length>2000</length>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>3</visibleLines>
+</CustomField>

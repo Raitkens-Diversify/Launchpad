@@ -1,0 +1,94 @@
+:host {
+    display: block;
+
+    /* Self-declared --slds-g-* set (same values as nexsLanding/nexsArticleBrowser).
+       Declared locally, not inherited: LWR sites inject real SLDS2 styling hooks
+       under these names into each component scope, and those beat values inherited
+       from an ancestor's :host — keeping the two surfaces identical. */
+    --slds-g-spacing-1: 4px;
+    --slds-g-spacing-2: 0.5rem;
+    --slds-g-spacing-3: 0.75rem;
+    --slds-g-spacing-4: 1rem;
+    --slds-g-spacing-5: 24px;
+    --slds-g-radius-border-2: 0.5rem;
+    --slds-g-font-family-base: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    --slds-g-font-scale-1: 14px;
+    --slds-g-font-scale-2: 0.875rem;
+    --slds-g-font-scale-3: 1.25rem;
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-border-2: #b6bcc5;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-accent-3: #071c31;
+    --slds-g-color-on-accent-1: #ffffff;
+    --slds-g-color-accent-container-1: #0f406f;
+}
+
+/* Banner card on the home page: video left, copy right; same card recipe as
+   the rest of the help center (white, border, 10px radius, no shadow). */
+.welcome {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-xl, 24px);
+    padding: var(--slds-g-spacing-5, 24px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+}
+
+.welcome__media {
+    flex: 0 0 40%;
+    min-width: 0;
+}
+
+.welcome__video {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: var(--slds-g-color-accent-3, #071c31);
+    border-radius: var(--ds-radius-md, 8px);
+}
+
+.welcome__content {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.welcome__title {
+    margin: 0;
+    font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+    font-size: 1.5rem;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.welcome__subtitle {
+    margin: var(--slds-g-spacing-2, 8px) 0 var(--slds-g-spacing-4, 16px);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.welcome__actions {
+    /* Brand the lightning-button navy to match the design system. */
+    --slds-c-button-brand-color-background: var(--slds-g-color-accent-1, #0f406f);
+    --slds-c-button-brand-color-border: var(--slds-g-color-accent-1, #0f406f);
+    --slds-c-button-brand-color-background-hover: var(--slds-g-color-accent-2, #0b2f51);
+    --slds-c-button-brand-color-border-hover: var(--slds-g-color-accent-2, #0b2f51);
+}
+
+/* Stack on narrow viewports. */
+@media (max-width: 768px) {
+    .welcome {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .welcome__media {
+        flex-basis: auto;
+    }
+}

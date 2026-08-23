@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AML_Submitted__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>This field is only to know within a flow if an AML Case has already been submitted for this particular person.</description>
+    <label>AML Submitted?</label>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Checkbox</type>
+</CustomField>

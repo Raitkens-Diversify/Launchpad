@@ -1,0 +1,4 @@
+<design:component>
+    <design:attribute name="link" label="Link URL" required="true" />
+    <design:attribute name="label" label="Link Label" required="true" />
+</design:component>

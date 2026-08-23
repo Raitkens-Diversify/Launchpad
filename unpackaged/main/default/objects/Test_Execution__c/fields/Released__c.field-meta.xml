@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Released__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>True = this run was released (by the tester, an admin, or the stale-claim job) after work had been recorded. It is history: occupies no seat, hidden from the tester queue, kept so a later re-claim by the same tester resumes their own partial run instead of merging with anyone else&#39;s.</description>
+    <label>Released</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

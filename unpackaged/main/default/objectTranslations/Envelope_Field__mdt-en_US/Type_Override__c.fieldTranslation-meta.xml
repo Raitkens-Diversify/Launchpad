@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Type Override --></label>
+        <name>Type_Override__c</name>
+        <picklistValues>
+            <masterLabel>Client - Authorized Person</masterLabel>
+            <translation><!-- Client - Authorized Person --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Client - Beneficial Owner</masterLabel>
+            <translation><!-- Client - Beneficial Owner --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Client - Business</masterLabel>
+            <translation><!-- Client - Business --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Client - Individual</masterLabel>
+            <translation><!-- Client - Individual --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Client - Irrevocable Trust</masterLabel>
+            <translation><!-- Client - Irrevocable Trust --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Client - Revocable Trust</masterLabel>
+            <translation><!-- Client - Revocable Trust --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Client - Trust</masterLabel>
+            <translation><!-- Client - Trust --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Client - Trustee</masterLabel>
+            <translation><!-- Client - Trustee --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ISA - Fin Acct</masterLabel>
+            <translation><!-- ISA - Fin Acct --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ISA - Service Agreement</masterLabel>
+            <translation><!-- ISA - Service Agreement --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

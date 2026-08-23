@@ -1,0 +1,133 @@
+<aura:component controller="FlowCreateMultipleController" implements="flexipage:availableForAllPageTypes" access="global">
+     <!-- Attributes specific to Edit Component -->
+    <aura:attribute name="allowCreate" type="Boolean" default="true"/>
+    
+    <aura:attribute name="sObjectName" type="String"/>    
+    <aura:attribute name="fieldsWithDataTypes" type="List"/>
+    <aura:attribute name="listvalue" type="Object"/>
+    <aura:attribute name="temp" type="Object"/>
+    <aura:attribute name="disabled" type="boolean"/>
+    <aura:attribute name="index" type="Integer"/>
+    <aura:attribute name="isCreated" type="Boolean" default="false"/>
+    <aura:attribute name="filter" type="String"/>    
+
+    <!--Attributes for Check Deposit Object -->
+    <aura:attribute name="varhouseholdId" type="String" />
+    <aura:attribute name="conditionFieldName" type="String"/>
+    <aura:attribute name="conditionFieldValue" type="String"/>
+    <aura:attribute name="totalInitialFundingAmount" type="Decimal" />
+
+    <aura:registerEvent name ="customLookUpRowDisable" type ="c:DisableRowForCustomObjectListLookup"/>
+    <aura:registerEvent name ="formDeleteEvent" type = "c:dynamicFormEvent"/>
+    <aura:registerEvent name ="formChangeEvent" type = "c:dynamicFormChangeEvent"/>
+    <aura:registerEvent name="addRow" type="c:dynamicFormAddRowEvent"/>
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler event="c:DisableRow" action="{!c.enableRows}"/>
+    
+    <!-- display input rows for dynamic fields  -->        
+    <tr class="slds-hint-parent" id="{!v.index}">
+        <aura:iteration items="{!v.fieldsWithDataTypes}" var="fieldObj" indexVar="fieldIndex">                 
+            <td role="gridcell" >
+                <div style="{!if(fieldObj.dataType == 'STRING', 'display: block', 'display: flex; justify-content: space-around;')}" name="{!fieldObj.fieldName}" data-fieldType="{!fieldObj.dataType}">
+                    <aura:if isTrue = "{!fieldObj.dataType == 'PICKLIST'}">
+                        <lightning:select aura:id="PicklistId" label="{!fieldObj.fieldName}" name="{!fieldObj.fieldName}" 
+                                          onchange="{!c.handleChange}" disabled="{!or(and(v.remainingTermDisable, fieldObj.fieldName == 'Remaining_Term__c'), or(and(v.isCreated,!fieldObj.isEditable), and(v.disabled,v.allowCreate)))}" variant="label-hidden">
+                            <option value="" text="- None -" />
+                            <aura:iteration items="{!fieldObj.pickListOptions}" var="per">
+                                <aura:if isTrue="{!fieldObj.fieldValue==per}">
+                                    <option value="{!per}" text="{!per}" selected="true"/> 
+                                    <aura:set attribute="else">
+                                        <option value="{!per}" text="{!per}"/> 
+                                    </aura:set>
+                                </aura:if>
+                            </aura:iteration>
+                        </lightning:select>
+                        <aura:set attribute="else">
+                            <aura:if isTrue = "{!fieldObj.dataType == 'REFERENCE'}">
+                                <c:cmp_CustomObjectListLookup 
+                                                              aura:id="referenceId" 
+                                                              childObjectName="{!v.sObjectName}"
+                                                              parentFieldName="{!fieldObj.fieldName}"
+                                                              IconName="standard:contact"
+                                                              itemIndex="{!v.index}"
+                                                              disabled="{!or(and(v.isCreated,!fieldObj.isEditable), and(v.disabled,v.allowCreate))}"
+                                                              conditionFieldName="{!v.conditionFieldName}"
+                                                              conditionFieldValue="{!v.conditionFieldValue}"
+                                                              selectRecordId="{!fieldObj.fieldValue}"
+                                                              customObjectLookupChange="{!c.handleChange}"
+                                                              filter="{!v.filter}"/>
+                                <aura:set attribute="else">
+                                    <aura:if isTrue = "{!fieldObj.dataType == 'CURRENCY'}">
+                                        <lightning:input class="field-name slds-m-top_small"
+                                                         label="{!fieldObj.label}"
+                                                         variant="label-hidden"
+                                                         name="{!fieldObj.fieldName}"
+                                                         formatter="currency" 
+                                                         max="1000000000000000"
+                                                         value="{!fieldObj.fieldValue}"
+                                                         type="number"
+                                                         step=".01"
+                                                         onchange="{!c.handleChange}"
+                                                         disabled="{!or(and(v.isCreated,!fieldObj.isEditable), and(v.disabled,v.allowCreate))}"/>
+                                        <aura:set attribute="else">
+                                            <aura:if isTrue = "{!fieldObj.dataType == 'PERCENT'}">
+                                                <lightning:input class="field-name slds-m-top_small"
+                                                                 label="{!fieldObj.label}"
+                                                                 variant="label-hidden"
+                                                                 name="{!fieldObj.fieldName}"
+                                                                 formatter="percent-fixed"
+                                                                 value="{!fieldObj.fieldValue}"
+                                                                 type="number"
+                                                                 step="0.01"
+                                                                 onchange="{!c.handleChange}"
+                                                                 disabled="{!or(and(v.isCreated,!fieldObj.isEditable), and(v.disabled,v.allowCreate))}"/>
+                                                <aura:set attribute="else">
+                                                    <lightning:input
+                                                                     class="textField slds-m-top_small"
+                                                                     label="{!fieldObj.label}" 
+                                                                     variant="label-hidden" 
+                                                                     name="{!fieldObj.fieldName}"
+                                                                     aura:id="picklistId"
+                                                                     value="{!fieldObj.fieldValue}"
+                                                                     type="{!fieldObj.dataType}"
+                                                                     onchange="{!c.handleChange}"
+                                                                     disabled="{!or(and(v.isCreated,!fieldObj.isEditable), and(v.disabled,v.allowCreate))}"
+                                                                     />
+                                                </aura:set>
+                                            </aura:if>
+                                        </aura:set>
+                                    </aura:if>
+                                </aura:set>
+                            </aura:if>
+                        </aura:set>
+                    </aura:if>
+                </div>
+            </td>  
+        </aura:iteration>
+        <aura:if isTrue="{!v.allowCreate}">
+            <td role="gridcell">
+                <div class="slds-truncate" title="Delete" id = "{!v.index}" onclick="{!c.deleteForm}">
+                    <lightning:icon alternativetext="Delete"  
+                                    iconName="utility:delete"  size="x-small" /> 
+                </div>
+            </td>
+            <td role="gridcell">
+                <div class="slds-truncate " title="Save Button" aura:id="saveIcon" onclick="{!c.saveForm}">
+                    <lightning:icon alternativetext="Save" 
+                                    iconName="utility:save" size="x-small"/>
+                </div>
+            </td>
+            <td role="gridcell">
+                <aura:if isTrue="{!v.disabled}">
+                    <div class="slds-truncate " title="Edit" id="{!v.index}" onclick="{!c.editForm}">
+                        <lightning:icon alternativetext="Edit" 
+                                        iconName="utility:edit" size="x-small" />
+                    </div>
+                </aura:if>
+            </td>
+        </aura:if>
+    </tr>
+    <!--</aura:iteration> -->
+   
+</aura:component>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Bidirectional__c</fullName>
+    <defaultValue>true</defaultValue>
+    <description>When true (default), every term in the group (Term + Synonyms) expands to every other — searching any one finds all. When false, only the Term expands to its synonyms, not the reverse.</description>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Bidirectional</label>
+    <type>Checkbox</type>
+</CustomField>

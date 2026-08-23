@@ -1,0 +1,37 @@
+<template>
+    <nav class="tnav" aria-label={heading}>
+        <h2 class="tnav__title">{heading}</h2>
+        <ul class="tnav__list">
+            <template for:each={itemView} for:item="it">
+                <li key={it.key} class="tnav__group">
+                    <button type="button" class={it.cssClass}
+                            data-key={it.key}
+                            aria-current={it.ariaCurrent}
+                            aria-expanded={it.ariaExpanded}
+                            onclick={handleSelect}>
+                        <span class="tnav__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2" stroke-linecap="round"
+                                 stroke-linejoin="round" focusable="false">
+                                <path d={it.iconPath}></path>
+                            </svg>
+                        </span>
+                        <span class="tnav__label">{it.label}</span>
+                    </button>
+                    <template if:true={it.showChildren}>
+                        <ul class="tnav__children">
+                            <template for:each={it.children} for:item="ch">
+                                <li key={ch.key}>
+                                    <button type="button" class={ch.cssClass}
+                                            data-key={ch.key}
+                                            aria-current={ch.ariaCurrent}
+                                            onclick={handleSelect}>{ch.label}</button>
+                                </li>
+                            </template>
+                        </ul>
+                    </template>
+                </li>
+            </template>
+        </ul>
+    </nav>
+</template>

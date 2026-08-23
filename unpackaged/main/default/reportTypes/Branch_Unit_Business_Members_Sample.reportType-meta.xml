@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ReportType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <baseObject></baseObject>
+    <category>other</category>
+    <deployed>true</deployed>
+    <description>Branch Unit Business Members (Sample)</description>
+    <label>Branch Unit Business Members (Sample)</label>
+    <sections>
+        <masterLabel>Branch Unit Business Members</masterLabel>
+    </sections>
+</ReportType>

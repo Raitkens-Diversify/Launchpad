@@ -1,0 +1,92 @@
+<template>
+    <div class="rd">
+        <template if:true={loading}>
+            <div class="rd__status">
+                <lightning-spinner alternative-text="Loading resource" size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:true={detail}>
+            <c-ds-breadcrumbs items={crumbItems}
+                              oncrumbselect={handleCrumb}></c-ds-breadcrumbs>
+
+            <h1 class="rd__title">{detail.name}</h1>
+            <template if:true={detail.description}>
+                <p class="rd__desc">{detail.description}</p>
+            </template>
+
+            <!-- File-backed (PDF/Form/Template): paged rendition preview + download -->
+            <template if:true={isFileBacked}>
+                <template if:true={showPreview}>
+                    <div class="rd__preview">
+                        <template for:each={previewPages} for:item="p">
+                            <img key={p.key}
+                                 class="rd__preview-page"
+                                 src={p.src}
+                                 alt={p.alt}
+                                 data-index={p.index}
+                                 onload={handlePageLoad}
+                                 onerror={handlePageError} />
+                        </template>
+                    </div>
+                </template>
+                <template if:true={showPreviewFallback}>
+                    <div class="rd__preview-fallback">
+                        <span class="rd__preview-fallback-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                 focusable="false">
+                                <path d={fileIconPath}></path>
+                            </svg>
+                        </span>
+                        <p class="rd__preview-fallback-title">{fileLabel}</p>
+                        <p class="rd__preview-fallback-note">
+                            A preview isn't available for this file — it may still be
+                            generating. Use Download below.
+                        </p>
+                    </div>
+                </template>
+                <a class="rd__btn" href={detail.file.downloadUrl} download onclick={handleDownload}>
+                    {downloadLabel}
+                </a>
+            </template>
+
+            <!-- Video: responsive 16:9 embed -->
+            <template if:true={isVideo}>
+                <div class="rd__video">
+                    <iframe class="rd__video-frame" src={detail.videoEmbedUrl}
+                            title={detail.name} allow="fullscreen"
+                            allowfullscreen></iframe>
+                </div>
+            </template>
+
+            <!-- External link -->
+            <template if:true={isExternal}>
+                <a class="rd__btn" href={detail.externalUrl} target="_blank"
+                   rel="noopener noreferrer">Open link</a>
+            </template>
+
+            <template if:true={hasRelated}>
+                <section class="rd__related">
+                    <h2 class="rd__related-title">Related Articles</h2>
+                    <ul class="rd__related-list">
+                        <template for:each={relatedArticles} for:item="a">
+                            <li key={a.knowledgeArticleId}>
+                                <template if:true={a.href}>
+                                    <a href={a.href} target="_blank" rel="noopener noreferrer">{a.title}</a>
+                                </template>
+                                <template if:false={a.href}>
+                                    <span>{a.title}</span>
+                                </template>
+                            </li>
+                        </template>
+                    </ul>
+                </section>
+            </template>
+        </template>
+
+        <template if:true={error}>
+            <p class="rd__status">{error}</p>
+        </template>
+    </div>
+</template>

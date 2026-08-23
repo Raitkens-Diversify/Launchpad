@@ -1,0 +1,17 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-08-11 -->
+<template>
+  <div class="div-segmented" role="group" aria-label={groupLabel}>
+    <template for:each={decoratedOptions} for:item="option">
+      <button
+        key={option.key}
+        type="button"
+        class={option.cssClass}
+        data-value={option.value}
+        aria-pressed={option.ariaPressed}
+        onclick={handleSelect}
+      >
+        {option.label}
+      </button>
+    </template>
+  </div>
+</template>

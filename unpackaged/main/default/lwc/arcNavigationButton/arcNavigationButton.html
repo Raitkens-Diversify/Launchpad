@@ -1,0 +1,28 @@
+<template>
+  <div class="nav-toggle__wrap">
+    <button
+      type="button"
+      class="nav-toggle"
+      aria-label={toggleLabel}
+      aria-describedby="nav-toggle-tooltip"
+      aria-pressed={collapsed}
+      aria-disabled={isToggleDisabled}
+      disabled={isToggleDisabled}
+      onclick={handleToggleClick}
+      onkeydown={handleToggleKeyDown}
+    >
+      <span
+        class="nav-toggle__icon"
+        style={iconStyle}
+        aria-hidden="true"
+      ></span>
+    </button>
+    <span id="nav-toggle-tooltip" class="nav-toggle__tooltip" role="tooltip">
+      <span class="nav-toggle__tooltip-label">{tooltipLabel}</span>
+      <span class="nav-toggle__tooltip-shortcuts" aria-hidden="true">
+        <span class="nav-toggle__tooltip-keys">⌘.</span>
+        <span class="nav-toggle__tooltip-keys">⊞.</span>
+      </span>
+    </span>
+  </div>
+</template>

@@ -1,0 +1,13 @@
+<design:component>
+	<design:attribute name="MandE" label="Mortality &amp; Expense Risk Fee (M&amp;E)" description=""/>
+	<design:attribute name="AdministrativeFee" label="Administrative Fee" description="" />
+    <design:attribute name="NameOfRider1" label="Rider 1 Name" description=""/>   
+    <design:attribute name="NameOfRider2" label="Rider 2 Name" description="" />
+    <design:attribute name="NameOfRider3" label="Rider 3 Name" description="" />
+    <design:attribute name="Rider1" label="Rider 1 Percent" description="" />
+    <design:attribute name="Rider2" label="Rider 2 Percent" description="" />
+    <design:attribute name="Rider3" label="Rider 3 Percent" description="" />
+    <design:attribute name="OtherText" label="Other Text" description="" />
+    <design:attribute name="OtherPercent" label="Other Percent" description="" />
+    <design:attribute name="Total" label="Total Expenses (Excluding Sub-Accounts)" description="" />
+</design:component>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Actor__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Who performed the action. Same as Tester for self-service claim/release; the admin for Force Unassigned/Reassigned; the scheduled-job runner for Auto Released.</description>
+    <label>Actor</label>
+    <referenceTo>User</referenceTo>
+    <relationshipLabel>UAT Assignment Events (Actor)</relationshipLabel>
+    <relationshipName>UAT_Assignment_Actions</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

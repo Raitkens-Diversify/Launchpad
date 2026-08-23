@@ -1,0 +1,172 @@
+<template>
+    <div class="review">
+        <div class="review__header">
+            <h1 class="review__title">Review &amp; Submit</h1>
+            <p class="review__subtitle">Review final information before submitting the envelope</p>
+        </div>
+
+        <!-- Read-only summary of every action item, one collapsible row each. -->
+        <c-card class="review__card">
+            <div class="review__list">
+                <template for:each={items} for:item="item">
+                    <div key={item.key} class="review__item">
+                        <div class="review__item-header">
+                            <button
+                                class="review__item-toggle"
+                                type="button"
+                                data-key={item.key}
+                                aria-expanded={item.expanded}
+                                onclick={handleToggle}>
+                                <lightning-icon
+                                    class={item.iconClass}
+                                    icon-name={item.iconName}
+                                    size="small"
+                                    alternative-text="">
+                                </lightning-icon>
+                                <span class="review__item-titles">
+                                    <span class="review__item-title">{item.title}</span>
+                                    <span class="review__item-subtitle">{item.subtitle}</span>
+                                </span>
+                            </button>
+                            <div class="review__item-actions">
+                                <lightning-button
+                                    class="env-base-button"
+                                    variant="base"
+                                    label="Edit"
+                                    data-key={item.key}
+                                    onclick={handleEdit}>
+                                </lightning-button>
+                                <lightning-button-icon
+                                    class="review__item-caret"
+                                    variant="bare"
+                                    icon-name={item.caretIcon}
+                                    alternative-text="Toggle details"
+                                    data-key={item.key}
+                                    onclick={handleToggle}>
+                                </lightning-button-icon>
+                            </div>
+                        </div>
+                        <template lwc:if={item.expanded}>
+                            <div class="review__item-body">
+                                <template lwc:if={item.hasSections}>
+                                    <template for:each={item.sections} for:item="section">
+                                        <div key={section.key} class="review__section">
+                                            <h3 class="review__section-title">{section.title}</h3>
+                                            <div class="review__fields">
+                                                <template for:each={section.fields} for:item="field">
+                                                    <div key={field.key} class="review__field">
+                                                        <span class="review__field-label">{field.label}</span>
+                                                        <span class="review__field-value">{field.value}</span>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </template>
+                                <template lwc:else>
+                                    <p class="review__empty-note">No details provided yet.</p>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+        </c-card>
+
+        <!-- Supporting documents and their linked files. -->
+        <c-card class="review__card">
+            <div class="review__card-content">
+                <div class="review__card-header">
+                    <h2 class="review__card-title">Review documents</h2>
+                    <lightning-button
+                        class="env-base-button"
+                        variant="base"
+                        label="Manage Documents"
+                        disabled={manageDocumentsDisabled}
+                        onclick={handleManageDocuments}>
+                    </lightning-button>
+                </div>
+                <!-- The alert references the document list, so the empty note replaces it. -->
+                <template lwc:if={hasDocuments}>
+                    <div class="review__alert review__alert--info" role="status">
+                        <lightning-icon
+                            class="review__alert-icon"
+                            icon-name="utility:info"
+                            size="x-small"
+                            alternative-text="Info">
+                        </lightning-icon>
+                        <p class="review__alert-text">
+                            You can submit without attaching documents. The documents listed below will
+                            need to be provided after submission.
+                        </p>
+                    </div>
+                </template>
+                <template lwc:elseif={showEmptyNote}>
+                    <p class="review__empty-note">No documents are required for this envelope.</p>
+                </template>
+                <div class="review__docs">
+                    <template lwc:if={hasDocuments}>
+                        <template for:each={documents} for:item="doc">
+                            <c-envelope-document-card
+                                key={doc.id}
+                                class="review__doc"
+                                name={doc.name}
+                                signees={doc.signees}
+                                linked-file-name={doc.linkedFileName}>
+                            </c-envelope-document-card>
+                        </template>
+                    </template>
+                </div>
+            </div>
+        </c-card>
+
+        <!-- Final confirmation: acknowledge checkbox gates the submit action. -->
+        <c-card class="review__card review__submit-card">
+            <div class="review__submit-body">
+                <div class="review__submit-header">
+                    <h2 class="review__card-title">Submit envelope</h2>
+                    <p class="review__submit-copy">
+                        Submitting sends this envelope to the home office and creates the tasks to
+                        open and service these accounts.
+                    </p>
+                </div>
+                <div class="review__alert review__alert--warning" role="alert">
+                    <lightning-icon
+                        class="review__alert-icon"
+                        icon-name="utility:warning"
+                        size="x-small"
+                        alternative-text="Warning">
+                    </lightning-icon>
+                    <p class="review__alert-text">
+                        Submitting is final — you won't be able to edit this envelope afterward.
+                        Make sure everything above is correct.
+                    </p>
+                </div>
+            </div>
+            <div class="review__submit-footer">
+                <div class="review__confirm">
+                    <lightning-input
+                        type="checkbox"
+                        label="I've reviewed the information above and understand it can't be changed after submitting."
+                        checked={confirmChecked}
+                        onchange={handleConfirmChange}>
+                    </lightning-input>
+                </div>
+                <div class="review__submit-actions">
+                    <lightning-button
+                        variant="neutral"
+                        label="Cancel"
+                        onclick={handleCancel}>
+                    </lightning-button>
+                    <lightning-button
+                        variant="brand"
+                        label="Submit Envelope"
+                        icon-name="utility:send"
+                        disabled={submitDisabled}
+                        onclick={handleSubmit}>
+                    </lightning-button>
+                </div>
+            </div>
+        </c-card>
+    </div>
+</template>

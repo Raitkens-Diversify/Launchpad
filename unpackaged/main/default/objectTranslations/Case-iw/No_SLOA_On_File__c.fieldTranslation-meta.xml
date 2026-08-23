@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- No SLOA On File --></label>
+        <name>No_SLOA_On_File__c</name>
+    </CustomFieldTranslation>

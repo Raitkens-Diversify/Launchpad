@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>New</fullName>
+        <default>true</default>
+        <label>New</label>
+        <closed>false</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>In Progress</fullName>
+        <default>false</default>
+        <label>In Progress</label>
+        <closed>false</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>On Hold</fullName>
+        <default>false</default>
+        <label>On Hold</label>
+        <closed>false</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Operations Review</fullName>
+        <default>false</default>
+        <label>Operations Review</label>
+        <closed>false</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Operations Hold</fullName>
+        <default>false</default>
+        <label>Operations Hold</label>
+        <closed>false</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Ready for Principal Review</fullName>
+        <default>false</default>
+        <label>Ready for Principal Review</label>
+        <closed>false</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Principal Review</fullName>
+        <default>false</default>
+        <label>Principal Review</label>
+        <closed>false</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Principal Hold</fullName>
+        <default>false</default>
+        <label>Principal Hold</label>
+        <closed>false</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Escalated</fullName>
+        <default>false</default>
+        <label>Escalated</label>
+        <closed>false</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Closed</fullName>
+        <default>false</default>
+        <label>Closed</label>
+        <closed>true</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Returned To Advisor</fullName>
+        <default>false</default>
+        <label>Returned To Advisor</label>
+        <closed>false</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Returned From Advisor</fullName>
+        <default>false</default>
+        <label>Returned From Advisor</label>
+        <closed>false</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Conditionally Approved</fullName>
+        <default>false</default>
+        <label>Conditionally Approved</label>
+        <closed>false</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Waiting for Additional Documentation</fullName>
+        <default>false</default>
+        <label>Waiting for Additional Documentation</label>
+        <closed>false</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Ready for Final Approval</fullName>
+        <default>false</default>
+        <label>Ready for Final Approval</label>
+        <closed>false</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Approved</fullName>
+        <default>false</default>
+        <label>Approved</label>
+        <closed>true</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Rejected</fullName>
+        <default>false</default>
+        <label>Rejected</label>
+        <closed>true</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Duplicate</fullName>
+        <default>false</default>
+        <label>Duplicate</label>
+        <closed>true</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Canceled</fullName>
+        <default>false</default>
+        <label>Canceled</label>
+        <closed>false</closed>
+    </standardValue>
+</StandardValueSet>

@@ -1,0 +1,431 @@
+/*
+ * Styling is matched to the Lightning case page's own computed values, read off
+ * Case_Record_Page in the browser rather than eyeballed: card border #c9c9c9 at
+ * 4px with a 0 2px 2px shadow, header surface #f3f3f3, body text #181818 at
+ * 13px/19.5, field labels #444444 at 12px/18, field values 14px/21, table
+ * headers 13px/700 on #f3f3f3, path steps 32px tall with a 7px gap.
+ *
+ * Every value is written as var(--lwc-token, literal). The SLDS tokens are
+ * present in Lightning Experience and in an LWR site, so the component tracks
+ * the host's theme where there is one; the literal keeps it correct where there
+ * is not. Nothing here depends on the diversifyStyles resource, which does not
+ * resolve on the ARC site — that dependency was why this page looked unlike
+ * its Lightning counterpart.
+ */
+
+.arc-case-detail {
+  font-family: var(
+    --lwc-fontFamily,
+    -apple-system,
+    "system-ui",
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: 13px;
+  line-height: 19.5px;
+  color: var(--lwc-colorTextDefault, #181818);
+}
+
+.arc-case-detail__loading {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 0;
+}
+
+/* ── Page header ────────────────────────────────────────────────────────── */
+
+.arc-case-detail__header {
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+  border: 1px solid var(--lwc-colorBorder, #c9c9c9);
+  border-radius: var(--lwc-borderRadiusMedium, 4px);
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+}
+
+.arc-case-detail__header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.arc-case-detail__title-wrap {
+  min-width: 0;
+}
+
+.arc-case-detail__eyebrow {
+  display: block;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--lwc-colorTextWeak, #444444);
+}
+
+.arc-case-detail__title {
+  margin: 0;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+  color: var(--lwc-colorTextDefault, #181818);
+}
+
+.arc-case-detail__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.arc-case-detail__priority-pill,
+.arc-case-detail__type-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.arc-case-detail__priority-pill {
+  background: #e5e5e5;
+  color: #181818;
+}
+
+.arc-case-detail__priority-pill--high {
+  background: #fef1ee;
+  color: #8c1c04;
+}
+
+.arc-case-detail__priority-pill--medium {
+  background: #fbf3e0;
+  color: #6b4f00;
+}
+
+.arc-case-detail__priority-pill--low {
+  background: #ebf7e6;
+  color: #2e6b2e;
+}
+
+.arc-case-detail__type-pill {
+  background: #eef4ff;
+  color: #0b5cab;
+}
+
+/* Highlights row: a wrapping strip of label-over-value pairs, the way the
+   platform highlights panel reads. */
+
+.arc-case-detail__key-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 32px;
+  margin: 12px 0 0;
+}
+
+.arc-case-detail__key-fact {
+  min-width: 0;
+}
+
+.arc-case-detail__key-fact dt {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--lwc-colorTextWeak, #444444);
+}
+
+.arc-case-detail__key-fact dd {
+  margin: 0;
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--lwc-colorTextDefault, #181818);
+}
+
+.arc-case-detail__key-fact dd a {
+  color: var(--lwc-colorTextLink, #0176d3);
+  text-decoration: none;
+}
+
+.arc-case-detail__key-fact dd a:hover,
+.arc-case-detail__key-fact dd a:focus {
+  text-decoration: underline;
+}
+
+/* ── Status path ────────────────────────────────────────────────────────── */
+
+/* The platform path component is a record-page component and cannot be placed
+   on an Experience Cloud page, so the chevron track is drawn here. The track
+   scrolls rather than compressing: a record type with seven statuses would
+   otherwise squeeze every label past reading. */
+
+.case-path {
+  margin-top: 16px;
+  overflow-x: auto;
+}
+
+.case-path__track {
+  display: flex;
+  align-items: stretch;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: max-content;
+}
+
+.case-path__step {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 8.5rem;
+  height: 32px;
+  margin-right: 7px;
+  padding: 0 8px 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f3f3;
+  color: #181818;
+  font-size: 13px;
+  line-height: 19.5px;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 12px) 0,
+    100% 50%,
+    calc(100% - 12px) 100%,
+    0 100%,
+    12px 50%
+  );
+}
+
+.case-path__step:first-child {
+  padding-left: 12px;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 12px) 0,
+    100% 50%,
+    calc(100% - 12px) 100%,
+    0 100%
+  );
+}
+
+.case-path__step:last-child {
+  margin-right: 0;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 12px 50%);
+}
+
+/* Steps at or behind the case read filled; the one it sits on is also bold, so
+   the position is legible without relying on colour alone. */
+.case-path__step--complete,
+.case-path__step--current {
+  background: #093244;
+  color: #ffffff;
+}
+
+.case-path__step--current {
+  font-weight: 700;
+}
+
+.case-path__label {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Body layout ────────────────────────────────────────────────────────── */
+
+.arc-case-detail__body {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.arc-case-detail__main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.arc-case-detail__side {
+  flex: 0 0 340px;
+  width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (max-width: 64rem) {
+  .arc-case-detail__body {
+    flex-direction: column;
+  }
+
+  .arc-case-detail__side {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+}
+
+/* ── Cards and sections ─────────────────────────────────────────────────── */
+
+/* Native details/summary, so a section opens and closes with no component
+   state to hold and nothing that can throw while rendering. */
+
+.case-section,
+.case-record-form {
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+  border: 1px solid var(--lwc-colorBorder, #c9c9c9);
+  border-radius: var(--lwc-borderRadiusMedium, 4px);
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+}
+
+.case-record-form {
+  padding: 4px 8px 8px;
+}
+
+.case-section__summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 700;
+  color: var(--lwc-colorTextDefault, #181818);
+  cursor: pointer;
+  list-style: none;
+}
+
+.case-section__summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Drawn here rather than by the platform marker so it can rotate with the open
+   state and sit on the correct side. */
+.case-section__summary::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+}
+
+.case-section[open] > .case-section__summary::before {
+  transform: rotate(45deg);
+}
+
+.case-section__body {
+  padding: 0 16px 16px;
+}
+
+.case-section__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 32px;
+  margin: 0;
+}
+
+.case-section__grid--single {
+  grid-template-columns: 1fr;
+}
+
+.case-section__field dt {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--lwc-colorTextWeak, #444444);
+}
+
+.case-section__field dd {
+  margin: 0;
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--lwc-colorTextDefault, #181818);
+}
+
+.case-section__field dd a {
+  color: var(--lwc-colorTextLink, #0176d3);
+  text-decoration: none;
+}
+
+.case-section__field dd a:hover,
+.case-section__field dd a:focus {
+  text-decoration: underline;
+}
+
+@media (max-width: 30rem) {
+  .case-section__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.case-empty {
+  margin: 0;
+  font-size: 13px;
+  line-height: 19.5px;
+  color: var(--lwc-colorTextWeak, #444444);
+}
+
+/* ── Right-rail tabset ──────────────────────────────────────────────────── */
+
+.case-subtabs {
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+  border: 1px solid var(--lwc-colorBorder, #c9c9c9);
+  border-radius: var(--lwc-borderRadiusMedium, 4px);
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+  padding: 0 12px 12px;
+}
+
+.case-tabs {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid var(--lwc-colorBorderSeparatorAlt, #747474);
+  margin-bottom: 8px;
+}
+
+.case-tabs__tab {
+  appearance: none;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  padding: 0 0 8px;
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 40px;
+  font-weight: 400;
+  color: var(--lwc-colorTextWeak, #444444);
+  cursor: pointer;
+}
+
+.case-tabs__tab:hover {
+  color: var(--lwc-colorTextLink, #0176d3);
+}
+
+.case-tabs__tab--active {
+  color: var(--lwc-colorTextDefault, #181818);
+  font-weight: 700;
+  border-bottom-color: var(--lwc-colorTextLink, #0176d3);
+}
+
+/* Header right-hand stack: badges over the record's actions, the way the
+   highlights panel puts its action buttons at the top right. */
+
+.arc-case-detail__header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.arc-case-detail__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}

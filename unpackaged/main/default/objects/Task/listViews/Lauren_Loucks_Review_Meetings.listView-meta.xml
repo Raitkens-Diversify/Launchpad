@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Lauren_Loucks_Review_Meetings</fullName>
+    <columns>SUBJECT</columns>
+    <columns>WHO_NAME</columns>
+    <columns>WHAT_NAME</columns>
+    <columns>DUE_DATE</columns>
+    <columns>CORE.USERS.FULL_NAME</columns>
+    <columns>Financial_Advisor_Team__c</columns>
+    <columns>LAST_UPDATE</columns>
+    <columns>CORE.USERS.ALIAS</columns>
+    <columns>PRIORITY</columns>
+    <columns>STATUS</columns>
+    <columns>UPDATEDBY_USER.ALIAS</columns>
+    <columns>CREATEDBY_USER.ALIAS</columns>
+    <columns>Financial_Account__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>CORE.USERS.FULL_NAME</field>
+        <operation>notContain</operation>
+        <value>unassigned</value>
+    </filters>
+    <filters>
+        <field>STATUS</field>
+        <operation>equals</operation>
+        <value>Open,Not Started,In Progress,NIGO,Waiting on someone else</value>
+    </filters>
+    <filters>
+        <field>Financial_Advisor_Team__c</field>
+        <operation>contains</operation>
+        <value>loucks</value>
+    </filters>
+    <filters>
+        <field>SUBJECT</field>
+        <operation>contains</operation>
+        <value>review meeting</value>
+    </filters>
+    <filters>
+        <field>WHAT_NAME</field>
+        <operation>notContain</operation>
+        <value>000</value>
+    </filters>
+    <label>Lauren Loucks - Review Meeting Tasks</label>
+</ListView>

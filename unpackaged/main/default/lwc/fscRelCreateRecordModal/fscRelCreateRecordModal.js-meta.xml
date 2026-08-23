@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Author: Hoang Long Vu To | Date: 2026-06-08 -->
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>false</isExposed>
+    <masterLabel>FSC Rel Create Record Modal</masterLabel>
+</LightningComponentBundle>

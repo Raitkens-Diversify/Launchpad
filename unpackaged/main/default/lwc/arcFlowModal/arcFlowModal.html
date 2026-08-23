@@ -1,0 +1,71 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-08-14 -->
+<template>
+  <template lwc:if={isOpen}>
+    <section
+      class="div-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label={dialogLabel}
+    >
+      <div class="div-modal__backdrop" onclick={handleBackdropClick}></div>
+
+      <div class="div-modal__panel div-modal__panel--wide">
+        <header class="div-modal__header">
+          <div class="div-modal__intro">
+            <h2 class="div-modal__title arc-flow-modal__title">{title}</h2>
+            <template lwc:if={hasSubtitle}>
+              <p class="div-modal__subtitle">{subtitle}</p>
+            </template>
+          </div>
+          <button
+            type="button"
+            class="div-modal__close arc-flow-modal__close"
+            aria-label="Close"
+            onclick={handleCancel}
+          >
+            <lightning-icon
+              icon-name="utility:close"
+              size="x-small"
+              alternative-text="Close"
+            ></lightning-icon>
+          </button>
+        </header>
+
+        <div class="div-modal__body">
+          <template lwc:if={showFlow}>
+            <lightning-flow
+              key={flowKey}
+              flow-api-name={flowName}
+              flow-input-variables={flowInputVariables}
+              onstatuschange={handleFlowStatusChange}
+            ></lightning-flow>
+          </template>
+        </div>
+
+        <footer class="div-modal__footer">
+          <span></span>
+          <div class="div-modal__footer-actions div-btn-group">
+            <template lwc:if={isFlowFinished}>
+              <button
+                type="button"
+                class="div-btn"
+                onclick={handleClose}
+              >
+                Close
+              </button>
+            </template>
+            <template lwc:else>
+              <button
+                type="button"
+                class="div-btn"
+                onclick={handleCancel}
+              >
+                Cancel
+              </button>
+            </template>
+          </div>
+        </footer>
+      </div>
+    </section>
+  </template>
+</template>

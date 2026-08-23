@@ -1,0 +1,34 @@
+<template>
+    <template if:true={isOpen}>
+        <section class="ds-modal-v2" role="dialog" aria-modal="true" aria-label={title} onclick={handleBackdropClick}>
+            <!-- Focus-trap bookend: catches Shift+Tab off the first control and wraps to the last. -->
+            <span class="ds-modal-v2__sentinel" tabindex="0" aria-hidden="true" onfocus={handleSentinelStart}></span>
+            <div class={containerClass} tabindex="-1" onclick={stopProp}>
+                <header class="ds-modal-v2__header">
+                    <div class="ds-modal-v2__heading">
+                        <slot name="header">
+                            <h2 class="ds-modal-v2__title">{title}</h2>
+                            <template if:true={hasSubtitle}>
+                                <p class="ds-modal-v2__subtitle">{subtitle}</p>
+                            </template>
+                        </slot>
+                    </div>
+                    <button class="ds-modal-v2__close" type="button" onclick={handleClose} aria-label="Close">
+                        <lightning-icon icon-name="utility:close" size="x-small" alternative-text="Close"></lightning-icon>
+                    </button>
+                </header>
+                <div class={bodyClass}>
+                    <slot></slot>
+                </div>
+                <template if:false={hideFooter}>
+                    <footer class="ds-modal-v2__footer">
+                        <slot name="footer"></slot>
+                    </footer>
+                </template>
+            </div>
+            <!-- Focus-trap bookend: catches Tab off the last control and wraps to the first. -->
+            <span class="ds-modal-v2__sentinel" tabindex="0" aria-hidden="true" onfocus={handleSentinelEnd}></span>
+        </section>
+        <div class="ds-modal-v2__backdrop" onclick={handleClose}></div>
+    </template>
+</template>

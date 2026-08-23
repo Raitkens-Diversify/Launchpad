@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightning__AppPage</target>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property name="guideKey" type="String" default="get_help" label="Guide Key"
+                      description="The published guide to run."/>
+            <property name="helpCenterBaseUrl" type="String" label="Help Center Base URL"
+                      description="Absolute Help Center base URL for article targets."/>
+            <property name="caseUrl" type="String" label="Case/Contact URL"
+                      description="Absolute URL of the contact/case-creation page."/>
+            <property name="resourceCenterBaseUrl" type="String" label="Resource Center Base URL"
+                      description="Optional; when set, category/resource targets open the Resource Center site by URL."/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

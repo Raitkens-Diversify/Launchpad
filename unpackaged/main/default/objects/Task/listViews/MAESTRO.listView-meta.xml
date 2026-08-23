@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>MAESTRO</fullName>
+    <booleanFilter>1 AND 2 AND 3</booleanFilter>
+    <columns>SUBJECT</columns>
+    <columns>FinServ__Household__c</columns>
+    <columns>WHAT_NAME</columns>
+    <columns>DUE_DATE</columns>
+    <columns>STATUS</columns>
+    <columns>Financial_Account__c</columns>
+    <columns>CREATED_DATE</columns>
+    <columns>OwnerName__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>STATUS</field>
+        <operation>equals</operation>
+        <value>Open,Not Started,In Progress,NIGO,Waiting on someone else</value>
+    </filters>
+    <filters>
+        <field>SUBJECT</field>
+        <operation>contains</operation>
+        <value>Maestro</value>
+    </filters>
+    <filters>
+        <field>OwnerName__c</field>
+        <operation>contains</operation>
+        <value>oper</value>
+    </filters>
+    <label>MAESTRO</label>
+</ListView>

@@ -1,0 +1,13 @@
+<design:component>
+	<design:attribute name="recordId" label="Record Id" description="Id of the Record to Show the Card for" />
+    <design:attribute name="recordIds" label="Record Ids" description="Ids of the Records to Show the Cards for" />
+    <design:attribute name="sObjectType" label="Object API Name" description="Object API Name" />
+    <design:attribute name="fields" label="Fields to Show" description="What Fields should be shown?"/>
+    <design:attribute name="personOrHousehold" label="Object" description="Is this a Person Account, Household or Financial Account record?" />
+    <design:attribute name="selectedValue" label="Value Returned from the Card" description="Selected  Person Account Record's Id" />
+    <design:attribute name="onlyperson" label="It is only person" description="Person Account is selected" />
+    <design:attribute name="personContactId" label="PersonContactId" description="Selected Person Account ContactId if it is a person account" />
+    <design:attribute name="recordFilter" label="Record Filter" description="Filter text using for filter records" />
+    <design:attribute name="isSelectedValueBlank" label="is Selected Value Blank" description="Check if there no selected account" />
+
+</design:component>

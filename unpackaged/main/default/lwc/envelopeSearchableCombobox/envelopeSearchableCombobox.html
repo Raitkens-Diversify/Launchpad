@@ -1,0 +1,88 @@
+<!-- Author: Mile Cacanovic -->
+<template>
+    <div class="escb slds-form-element" onfocusout={handleFocusOut}>
+        <template if:true={showLabel}>
+            <label class="escb__label slds-form-element__label" for="escb-input">{label}</label>
+        </template>
+
+        <div class="escb__wrap">
+            <div
+                class={controlClass}
+                role="combobox"
+                aria-expanded={ariaExpanded}
+                aria-haspopup="listbox"
+            >
+                <input
+                    id="escb-input"
+                    class="escb__input"
+                    type="text"
+                    autocomplete="off"
+                    aria-label={inputAriaLabel}
+                    aria-autocomplete="list"
+                    aria-controls="escb-listbox"
+                    aria-activedescendant={activeDescendant}
+                    name={name}
+                    placeholder={placeholder}
+                    value={displayValue}
+                    disabled={disabled}
+                    onfocus={handleFocus}
+                    oninput={handleInput}
+                    onkeydown={handleKeydown}
+                />
+                <button
+                    type="button"
+                    class="escb__toggle"
+                    tabindex="-1"
+                    title="Toggle options"
+                    aria-label="Toggle options"
+                    disabled={disabled}
+                    onclick={handleToggle}
+                >
+                    <lightning-icon
+                        icon-name="utility:down"
+                        size="xx-small"
+                        alternative-text="Toggle"
+                    ></lightning-icon>
+                </button>
+            </div>
+
+            <template if:true={isOpen}>
+                <ul
+                    id="escb-listbox"
+                    class={menuClass}
+                    style={menuStyle}
+                    role="listbox"
+                    aria-label={menuAriaLabel}
+                    onmousedown={handleMenuMouseDown}
+                >
+                    <template for:each={filteredOptions} for:item="option">
+                        <li
+                            key={option.value}
+                            id={option.optionId}
+                            class={option.optionClass}
+                            role="option"
+                            aria-selected={option.isSelected}
+                            data-value={option.value}
+                            onclick={handleOptionClick}
+                        >
+                            <span class="escb__option-label slds-truncate" title={option.label}
+                                >{option.label}</span
+                            >
+                            <template if:true={option.isSelected}>
+                                <lightning-icon
+                                    class="escb__check"
+                                    icon-name="utility:check"
+                                    size="xx-small"
+                                    alternative-text="Selected"
+                                ></lightning-icon>
+                            </template>
+                        </li>
+                    </template>
+                    <template if:false={hasOptions}>
+                        <li class="escb__empty" role="presentation">No matches</li>
+                    </template>
+                </ul>
+            </template>
+        </div>
+    </div>
+</template>

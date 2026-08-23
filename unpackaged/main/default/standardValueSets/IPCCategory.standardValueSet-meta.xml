@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Coverage</fullName>
+        <default>false</default>
+        <label>Coverage</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Discount</fullName>
+        <default>false</default>
+        <label>Discount</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Rider</fullName>
+        <default>false</default>
+        <label>Rider</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Clause</fullName>
+        <default>false</default>
+        <label>Clause</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Deductible</fullName>
+        <default>false</default>
+        <label>Deductible</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Limit Component</fullName>
+        <default>false</default>
+        <label>Limit Component</label>
+    </standardValue>
+</StandardValueSet>

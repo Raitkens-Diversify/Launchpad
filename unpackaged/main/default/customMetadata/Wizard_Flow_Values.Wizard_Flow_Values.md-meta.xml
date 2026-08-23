@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Wizard Flow Values</label>
+    <protected>false</protected>
+    <values>
+        <field>Account_Servicing_Principal_Review_RT__c</field>
+        <value xsi:type="xsd:string">0128X000001xl75QAA</value>
+    </values>
+    <values>
+        <field>Assetmark__c</field>
+        <value xsi:type="xsd:string">a1C8X00000JYNN3UAP</value>
+    </values>
+    <values>
+        <field>Authorized_Signer_Reciprocal_Role__c</field>
+        <value xsi:type="xsd:string">a0E8X00001TKZT5UAP</value>
+    </values>
+    <values>
+        <field>Beneficial_Owner_Reciprocal_Role__c</field>
+        <value xsi:type="xsd:string">a0E8X00001TKZTFUA5</value>
+    </values>
+    <values>
+        <field>Brinker__c</field>
+        <value xsi:type="xsd:string">a1C8X00000JWuZTUA1</value>
+    </values>
+    <values>
+        <field>Business_Account_Record_Type__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Case_Acc_Servicing_Principal_Review_RT__c</field>
+        <value xsi:type="xsd:string">0128X000001xl75QAA</value>
+    </values>
+    <values>
+        <field>Case_Account_Opening_Record_Type__c</field>
+        <value xsi:type="xsd:string">0128X000001xl73QAA</value>
+    </values>
+    <values>
+        <field>Case_Account_Servicing_Record_Type__c</field>
+        <value xsi:type="xsd:string">0128X000001xl74QAA</value>
+    </values>
+    <values>
+        <field>Case_Ad_Hoc_Record_Type_Id__c</field>
+        <value xsi:type="xsd:string">012TO0000057j0jYAA</value>
+    </values>
+    <values>
+        <field>Case_Advertising_Review_Record_Type__c</field>
+        <value xsi:type="xsd:string">0128X000001xl76QAA</value>
+    </values>
+    <values>
+        <field>Case_Source_of_Funds_Record_Type__c</field>
+        <value xsi:type="xsd:string">0128X000001xl77QAA</value>
+    </values>
+    <values>
+        <field>Community_National_Bank__c</field>
+        <value xsi:type="xsd:string">a1C8X00000JWuZWUA1</value>
+    </values>
+    <values>
+        <field>Compliance_Queue__c</field>
+        <value xsi:type="xsd:string">00G8X000006eTcM</value>
+    </values>
+    <values>
+        <field>Compliance_Task_Approval_Perm_Set__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>DST__c</field>
+        <value xsi:type="xsd:string">a1C8X00000JWuZXUA1</value>
+    </values>
+    <values>
+        <field>Fidelity_2__c</field>
+        <value xsi:type="xsd:string">a1C8X00000NyQyEUAV</value>
+    </values>
+    <values>
+        <field>Fidelity_Key__c</field>
+        <value xsi:type="xsd:string">a1C8X00000NyQyDUAV</value>
+    </values>
+    <values>
+        <field>Fidelity__c</field>
+        <value xsi:type="xsd:string">a1C8X00000JWuZSUA1</value>
+    </values>
+    <values>
+        <field>Fund_Direct__c</field>
+        <value xsi:type="xsd:string">a1C8X00000JWuZVUA1</value>
+    </values>
+    <values>
+        <field>Household_Record_Type__c</field>
+        <value xsi:type="xsd:string">0128X000001Bu0yQAC</value>
+    </values>
+    <values>
+        <field>Jackson_National_Life__c</field>
+        <value xsi:type="xsd:string">a1C8X00000JWuZQUA1</value>
+    </values>
+    <values>
+        <field>Navigate_to_Send_Documents_URL__c</field>
+        <value xsi:type="xsd:string">https://dfpginvestments.lightning.force.com/lightning/r/Account/{!recordId}/view</value>
+    </values>
+    <values>
+        <field>Operations_Queue__c</field>
+        <value xsi:type="xsd:string">00G8X000006eTcN</value>
+    </values>
+    <values>
+        <field>Opportunity_New_Clients_Record_Type__c</field>
+        <value xsi:type="xsd:string">0128X00000220BMQAY</value>
+    </values>
+    <values>
+        <field>Opportunity_New_Money_Record_Type__c</field>
+        <value xsi:type="xsd:string">0128X00000220BNQAY</value>
+    </values>
+    <values>
+        <field>Pacific_Life__c</field>
+        <value xsi:type="xsd:string">a1C8X00000JWuZUUA1</value>
+    </values>
+    <values>
+        <field>Person_Account_Record_Type__c</field>
+        <value xsi:type="xsd:string">0128X000001Bu0zQAC</value>
+    </values>
+    <values>
+        <field>Principal_Task_Approval_Perm_Set__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Prospect_Record_ID__c</field>
+        <value xsi:type="xsd:string">012TO000003DWQ9YAO</value>
+    </values>
+    <values>
+        <field>Prospect_Record_Type__c</field>
+        <value xsi:type="xsd:string">012TO000003DWQ9YAO</value>
+    </values>
+    <values>
+        <field>RBCDain__c</field>
+        <value xsi:type="xsd:string">a1C8X00000JWuZOUA1</value>
+    </values>
+    <values>
+        <field>Reciprocal_Role_Name_Authorized_Signer__c</field>
+        <value xsi:type="xsd:string">Authorized Signer</value>
+    </values>
+    <values>
+        <field>Reciprocal_Role_Name_Beneficial_Owner__c</field>
+        <value xsi:type="xsd:string">Beneficial Owner</value>
+    </values>
+    <values>
+        <field>Reciprocal_Role_Name_Trustee__c</field>
+        <value xsi:type="xsd:string">Trustee</value>
+    </values>
+    <values>
+        <field>Record_Type_Diversify_Related_Person__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>SEI__c</field>
+        <value xsi:type="xsd:string">a1C8X00000JWuZNUA1</value>
+    </values>
+    <values>
+        <field>Salesforce_URL__c</field>
+        <value xsi:type="xsd:string">https://dfpginvestments.lightning.force.com/</value>
+    </values>
+    <values>
+        <field>Schwab_Cipolla__c</field>
+        <value xsi:type="xsd:string">a1C8X00000JWuZRUA1</value>
+    </values>
+    <values>
+        <field>Schwab_TDA__c</field>
+        <value xsi:type="xsd:string">a1C8X00000JWuZMUA1</value>
+    </values>
+    <values>
+        <field>Schwab__c</field>
+        <value xsi:type="xsd:string">a1C8X00000JWuZPUA1</value>
+    </values>
+    <values>
+        <field>TD_Ameritrade_hist__c</field>
+        <value xsi:type="xsd:string">a1C8X00000NzJDCUA3</value>
+    </values>
+    <values>
+        <field>Trust_Account_Record_Type__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Trustee_Reciprocal_Role__c</field>
+        <value xsi:type="xsd:string">a0E8X00001TKZTAUA5</value>
+    </values>
+    <values>
+        <field>URL_List_View_3rd_Party_Administrato__c</field>
+        <value xsi:type="xsd:string">https://dfpginvestments.lightning.force.com/lightning/o/Third_Party_Administrator__c/list?filterName=All</value>
+    </values>
+    <values>
+        <field>URL_List_View_529_Sell_Service__c</field>
+        <value xsi:type="xsd:string">https://dfpginvestments.lightning.force.com/lightning/o/Product__c/list?filterName=X529_Sell_Service</value>
+    </values>
+    <values>
+        <field>URL_List_View_529_Service__c</field>
+        <value xsi:type="xsd:string">https://dfpginvestments.lightning.force.com/lightning/o/Product__c/list?filterName=X529_Service</value>
+    </values>
+    <values>
+        <field>URL_List_View_All_Financial_Accounts__c</field>
+        <value xsi:type="xsd:string">https://dfpginvestments.lightning.force.com/lightning/o/Wizard_Financial_Account__c/list?filterName=All</value>
+    </values>
+    <values>
+        <field>URL_List_View_All_Households__c</field>
+        <value xsi:type="xsd:string">https://dfpginvestments.lightning.force.com/lightning/o/Account/list?filterName=All_Households</value>
+    </values>
+    <values>
+        <field>URL_List_View_All_Person_Households__c</field>
+        <value xsi:type="xsd:string">https://dfpginvestments.lightning.force.com/lightning/o/Account/list?filterName=All_Person_Households</value>
+    </values>
+    <values>
+        <field>URL_List_View_AltSellServiceAccred__c</field>
+        <value xsi:type="xsd:string">https://dfpginvestments.lightning.force.com/lightning/o/Product__c/list?filterName=Alternatives_Sell_Service_Accredited</value>
+    </values>
+    <values>
+        <field>URL_List_View_AltSellServiceAll__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>URL_List_View_AltSellServiceNone__c</field>
+        <value xsi:type="xsd:string">https://dfpginvestments.lightning.force.com/lightning/o/Product__c/list?filterName=Alternatives_Sell_Service_None</value>
+    </values>
+    <values>
+        <field>URL_List_View_AltSellServiceQual__c</field>
+        <value xsi:type="xsd:string">https://dfpginvestments.lightning.force.com/lightning/o/Product__c/list?filterName=Alternatives_Sell_Service_Qualified</value>
+    </values>
+    <values>
+        <field>URL_List_View_AltSellServiceSuitable__c</field>
+        <value xsi:type="xsd:string">https://dfpginvestments.lightning.force.com/lightning/o/Product__c/list?filterName=Alternatives_Sell_Service_Suitable</value>
+    </values>
+    <values>
+        <field>URL_List_View_AltServiceAccred__c</field>
+        <value xsi:type="xsd:string">https://dfpginvestments.lightning.force.com/lightning/o/Product__c/list?filterName=Alternatives_Service_Accredited</value>
+    </values>
+    <values>
+        <field>URL_List_View_AltServiceAll__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>URL_List_View_AltServiceNone__c</field>
+        <value xsi:type="xsd:string">https://dfpginvestments.lightning.force.com/lightning/o/Product__c/list?filterName=Alternatives_Service_None</value>
+    </values>
+    <values>
+        <field>URL_List_View_AltServiceQual__c</field>
+        <value xsi:type="xsd:string">https://dfpginvestments.lightning.force.com/lightning/o/Product__c/list?filterName=Alternatives_Service_Qualified</value>
+    </values>
+    <values>
+        <field>URL_List_View_AltServiceSuitable__c</field>
+        <value xsi:type="xsd:string">https://dfpginvestments.lightning.force.com/lightning/o/Product__c/list?filterName=Alternatives_Service_Suitable</value>
+    </values>
+    <values>
+        <field>URL_List_View_Contacts__c</field>
+        <value xsi:type="xsd:string">https://dfpginvestments.lightning.force.com/lightning/o/Account/list?filterName=00BTO000008dvJZ2AY</value>
+    </values>
+    <values>
+        <field>URL_List_View_Entity_Households__c</field>
+        <value xsi:type="xsd:string">https://dfpginvestments.lightning.force.com/lightning/o/Account/list?filterName=All_Entity_Households</value>
+    </values>
+    <values>
+        <field>URL_List_View_MutualFundService__c</field>
+        <value xsi:type="xsd:string">https://dfpginvestments.lightning.force.com/lightning/o/Product__c/list?filterName=Mutual_Fund_Service</value>
+    </values>
+    <values>
+        <field>URL_List_View_Outside_Managers__c</field>
+        <value xsi:type="xsd:string">https://dfpginvestments.lightning.force.com/lightning/o/Outside_Manager__c/list?filterName=All</value>
+    </values>
+    <values>
+        <field>URL_List_View_VA_Sell_Service__c</field>
+        <value xsi:type="xsd:string">https://dfpginvestments.lightning.force.com/lightning/o/Product__c/list?filterName=Variable_Annuities_Sell_Service</value>
+    </values>
+    <values>
+        <field>URL_List_View_VA_Service__c</field>
+        <value xsi:type="xsd:string">https://dfpginvestments.lightning.force.com/lightning/o/Product__c/list?filterName=Variable_Annuities_Service</value>
+    </values>
+    <values>
+        <field>URL_List_View_VLI_Sell_Service__c</field>
+        <value xsi:type="xsd:string">https://dfpginvestments.lightning.force.com/lightning/o/Product__c/list?filterName=Variable_Life_Insurance_Sell_Service</value>
+    </values>
+    <values>
+        <field>URL_List_View_VLI_Service__c</field>
+        <value xsi:type="xsd:string">https://dfpginvestments.lightning.force.com/lightning/o/Product__c/list?filterName=Variable_Life_Insurance_Service</value>
+    </values>
+    <values>
+        <field>URL_List_View__c</field>
+        <value xsi:type="xsd:string">https://dfpginvestments.lightning.force.com/lightning/o/Product__c/list?filterName=Mutual_Fund_Sell_Service</value>
+    </values>
+</CustomMetadata>

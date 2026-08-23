@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Tester__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Who owns this session — the ownership anchor for edit/finish rights (master-detail children have no OwnerId). SetNull, never Restrict, on User lookups.</description>
+    <label>Tester</label>
+    <referenceTo>User</referenceTo>
+    <relationshipLabel>Exploratory Sessions</relationshipLabel>
+    <relationshipName>Exploratory_Sessions</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

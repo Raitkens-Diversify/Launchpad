@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Maestro_Account_Type__c</fullName>
+    <externalId>false</externalId>
+    <formula>CASE( FinServ__FinancialAccount__r.Registration_Type__c,
+&#39;401K&#39;, &#39;401&#39;,
+&#39;Individual 401(k)&#39;,&#39;401&#39;,
+&#39;401(k) Plan&#39;,&#39;4PL&#39;,
+&#39;403(b)&#39;,&#39;403&#39;,
+&#39;457(B) Plan&#39;,&#39;457&#39;,
+&#39;529 Plan&#39;,&#39;529&#39;,
+&#39;ROTH&#39;, &#39;RTH&#39;,
+&#39;Trad IRA&#39;, &#39;TRD&#39;,
+&#39;Revocable Trust&#39;,&#39;TRU&#39;,
+&#39;Trust&#39;,&#39;TRU&#39;,
+&#39;UGMA/UTMA&#39;,&#39;UGM&#39;,
+&#39;Tenants in Common&#39;,&#39;TIC&#39;,
+&#39;Traditional IRA&#39;,&#39;TRD&#39;,
+&#39;Simple IRA&#39;,&#39;SMP&#39;,
+&#39;SIMPLE IRA&#39;,&#39;SMP&#39;,
+&#39;SEP IRA&#39;,&#39;SEP&#39;,
+&#39;Roth IRA&#39;,&#39;RTH&#39;,
+&#39;Rollover IRA&#39;,&#39;IRR&#39;,
+&#39;Inherited Roth IRA&#39;,&#39;INR&#39;,
+&#39;Inherited IRA&#39;,&#39;INH&#39;,
+&#39;Individual&#39;,&#39;IND&#39;,
+&#39;HSA&#39;,&#39;HSA&#39;,
+&#39;Coverdell ESA&#39;,&#39;CVR&#39;,
+&#39;Community Property&#39;,&#39;CP&#39;,
+&#39;JTWROS&#39;,&#39;JNT&#39;,
+&#39;Personal Choice Retirement Account (Schwab)&#39;,&#39;PCR&#39;,
+&#39;Personal Choice Retirement Account&#39;,&#39;PCR&#39;,
+&#39;Donor Advised Fund&#39;, &#39;DAF&#39;,
+&quot;NONE&quot;)</formula>
+    <label>Maestro Account Type</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

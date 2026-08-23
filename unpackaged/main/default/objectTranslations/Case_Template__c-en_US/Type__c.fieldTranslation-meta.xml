@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Type --></label>
+        <name>Type__c</name>
+        <picklistValues>
+            <masterLabel>401k Rollover</masterLabel>
+            <translation><!-- 401k Rollover --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Account Closure</masterLabel>
+            <translation><!-- Account Closure --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Account Opening</masterLabel>
+            <translation><!-- Account Opening --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Additional Funding</masterLabel>
+            <translation><!-- Additional Funding --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Cancel Move Money Recurring</masterLabel>
+            <translation><!-- Cancel Move Money Recurring --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Change Management Style</masterLabel>
+            <translation><!-- Change Management Style --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Change of Registration</masterLabel>
+            <translation><!-- Change of Registration --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Client Passed Away</masterLabel>
+            <translation><!-- Client Passed Away --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Client Reimbursement</masterLabel>
+            <translation><!-- Client Reimbursement --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Client Terminated Services</masterLabel>
+            <translation><!-- Client Terminated Services --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DMS - Add/Remove Systematic Withdrawals</masterLabel>
+            <translation><!-- DMS - Add/Remove Systematic Withdrawals --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DMS - Instructions for Future Deposit</masterLabel>
+            <translation><!-- DMS - Instructions for Future Deposit --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DMS - Other</masterLabel>
+            <translation><!-- DMS - Other --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DMS - Raise Cash</masterLabel>
+            <translation><!-- DMS - Raise Cash --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Donation in Kind</masterLabel>
+            <translation><!-- Donation in Kind --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ERISA</masterLabel>
+            <translation><!-- ERISA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Excluded</masterLabel>
+            <translation><!-- Excluded --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Financial Planning</masterLabel>
+            <translation><!-- Financial Planning --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Grant Donation</masterLabel>
+            <translation><!-- Grant Donation --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Journal Between Accounts - On Demand</masterLabel>
+            <translation><!-- Journal Between Accounts - On Demand --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Move Money - One Time</masterLabel>
+            <translation><!-- Move Money - One Time --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Move Money - Recurring</masterLabel>
+            <translation><!-- Move Money - Recurring --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Multi-Family Office</masterLabel>
+            <translation><!-- Multi-Family Office --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Person Account Requested Changes</masterLabel>
+            <translation><!-- Person Account Requested Changes --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Prepare Trades</masterLabel>
+            <translation><!-- Prepare Trades --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Purchase Alternative Investment</masterLabel>
+            <translation><!-- Purchase Alternative Investment --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Qualified Charitable Distribution</masterLabel>
+            <translation><!-- Qualified Charitable Distribution --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Roth Conversion</masterLabel>
+            <translation><!-- Roth Conversion --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Third Party Money Movement</masterLabel>
+            <translation><!-- Third Party Money Movement --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Trade Error</masterLabel>
+            <translation><!-- Trade Error --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Transfer</masterLabel>
+            <translation><!-- Transfer --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Update IMA</masterLabel>
+            <translation><!-- Update IMA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Update Trade Instructions</masterLabel>
+            <translation><!-- Update Trade Instructions --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Variable Annuity Additional Purchase</masterLabel>
+            <translation><!-- Variable Annuity Additional Purchase --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

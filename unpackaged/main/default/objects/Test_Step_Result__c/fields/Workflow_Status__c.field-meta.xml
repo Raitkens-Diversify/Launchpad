@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Workflow_Status__c</fullName>
+    <description>Admin triage disposition for a step failure that has NO Finding — a tester can fail a step without filing one, and those failures need a queue too. When a Finding exists for this step (Source__c = &#39;Test case&#39;, Test_Step_Result__c populated), the Finding&#39;s Workflow_Status__c is the defect&#39;s record; this field does not replace it. Written only by UatReportController.setStepWorkflowStatus behind the UAT_Console gate; UAT_Tester holds it read-only, and UatRunController.saveStepResult never touches it. Values mirror Exploratory_Finding__c.Workflow_Status__c, UatReportController.WORKFLOW_STATUS_VALUES and lwc/uatConstants WORKFLOW_STATUSES — change all together.</description>
+    <label>Workflow Status</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>New</fullName>
+                <default>true</default>
+                <label>New</label>
+            </value>
+            <value>
+                <fullName>Added to Jira</fullName>
+                <default>false</default>
+                <label>Added to Jira</label>
+            </value>
+            <value>
+                <fullName>Added to ClickUp</fullName>
+                <default>false</default>
+                <label>Added to ClickUp</label>
+            </value>
+            <value>
+                <fullName>Not verified</fullName>
+                <default>false</default>
+                <label>Not verified</label>
+            </value>
+            <value>
+                <fullName>Resolved</fullName>
+                <default>false</default>
+                <label>Resolved</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

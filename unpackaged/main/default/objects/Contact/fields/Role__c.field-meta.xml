@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Role__c</fullName>
+    <label>Role</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Producing</fullName>
+                <default>false</default>
+                <label>Producing</label>
+            </value>
+            <value>
+                <fullName>Non-Producing</fullName>
+                <default>false</default>
+                <label>Non-Producing</label>
+            </value>
+            <value>
+                <fullName>Staff</fullName>
+                <default>false</default>
+                <label>Staff</label>
+            </value>
+            <value>
+                <fullName>Advisor</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Advisor</label>
+            </value>
+            <value>
+                <fullName>Non-Registered Support Staff</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Non-Registered Support Staff</label>
+            </value>
+            <value>
+                <fullName>Registered Support Staff</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Registered Support Staff</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

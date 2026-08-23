@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- AML Documentation --></label>
+        <name>AML_Documentation__c</name>
+        <picklistValues>
+            <masterLabel>Background Check</masterLabel>
+            <translation><!-- Background Check --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>State Issued Photo ID</masterLabel>
+            <translation><!-- State Issued Photo ID --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>US Issued Photo ID</masterLabel>
+            <translation><!-- US Issued Photo ID --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

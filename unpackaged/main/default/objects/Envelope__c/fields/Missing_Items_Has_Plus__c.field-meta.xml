@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Missing_Items_Has_Plus__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Marks Missing_Items_Count__c as a lower bound: an unfilled Key Point gates further unknown fields, so the list renders the count with a trailing &#39;+&#39;. Written with the count by WizardEnvelopeStateService.saveEnvelopeState.</description>
+    <label>Missing Items Has Plus</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

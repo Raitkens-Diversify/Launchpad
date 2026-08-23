@@ -1,0 +1,37 @@
+<!-- Author: Mile Cacanovic -->
+<template>
+    <nav class="fab" aria-label="Section navigation">
+        <div class="fab__nav">
+            <span class={previousHintClass} aria-hidden="true">Ctrl + ↑ Up</span>
+            <lightning-button-icon
+                variant="border"
+                icon-name="utility:arrowup"
+                alternative-text="Previous section"
+                disabled={isFirst}
+                onclick={handlePrevious}>
+            </lightning-button-icon>
+        </div>
+
+        <span class="fab__divider" aria-hidden="true"></span>
+
+        <p class="fab__counter">
+            <span class="fab__counter-word">Section</span>
+            <span class="fab__counter-num">{position}</span>
+            <span class="fab__counter-word">of</span>
+            <span class="fab__counter-num">{total}</span>
+        </p>
+
+        <span class="fab__divider" aria-hidden="true"></span>
+
+        <div class="fab__nav">
+            <span class={nextHintClass} aria-hidden="true">Ctrl + ↓ Down</span>
+            <lightning-button-icon
+                variant="border"
+                icon-name="utility:arrowdown"
+                alternative-text="Next section"
+                disabled={isLast}
+                onclick={handleNext}>
+            </lightning-button-icon>
+        </div>
+    </nav>
+</template>

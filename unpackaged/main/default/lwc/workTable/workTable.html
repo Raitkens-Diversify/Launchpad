@@ -1,0 +1,152 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-08-11 -->
+<template>
+  <div class="env-layout work-table">
+    <template lwc:if={errorMessage}>
+      <div
+        class="work-table__error slds-notify slds-notify_alert slds-alert_error"
+        role="alert"
+      >
+        {errorMessage}
+      </div>
+    </template>
+
+    <div class="work-table__header-row">
+      <h1 class="work-table__title">{title}</h1>
+    </div>
+
+    <div class="work-table__toolbar">
+      <template lwc:if={enableSearch}>
+        <div class="work-table__toolbar-search">
+          <lightning-input
+            type="search"
+            variant="label-hidden"
+            label="Search work"
+            placeholder={searchPlaceholder}
+            value={searchTerm}
+            onchange={handleSearchChange}
+          ></lightning-input>
+        </div>
+      </template>
+
+      <div
+        class="work-table__toolbar-controls work-table__toolbar-controls--end"
+      >
+        <template lwc:if={showFilterButton}>
+          <button
+            type="button"
+            class="work-table__filter-button"
+            onclick={handleFilterClick}
+          >
+            <span
+              class="work-table__filter-icon"
+              style={filterIconStyle}
+              aria-hidden="true"
+            ></span>
+            <span>Filter</span>
+          </button>
+          <template lwc:if={showFilterMenu}>
+            <div
+              class="work-table__filter-menu"
+              role="dialog"
+              aria-label="Filter"
+            >
+              <label class="work-table__filter-row">
+                <span class="work-table__filter-label">Field</span>
+                <select
+                  class="work-table__filter-select"
+                  onchange={handleFilterFieldChange}
+                >
+                  <option value="">Select a field…</option>
+                  <template for:each={filterFieldOptions} for:item="option">
+                    <option
+                      key={option.value}
+                      value={option.value}
+                      selected={option.selected}
+                    >
+                      {option.label}
+                    </option>
+                  </template>
+                </select>
+              </label>
+              <label class="work-table__filter-row">
+                <span class="work-table__filter-label">Contains</span>
+                <input
+                  class="work-table__filter-input"
+                  type="text"
+                  value={filterValue}
+                  placeholder="Type a value…"
+                  oninput={handleFilterValueChange}
+                />
+              </label>
+              <div class="work-table__filter-actions">
+                <button
+                  type="button"
+                  class="work-table__filter-action"
+                  onclick={handleFilterClear}
+                >
+                  Clear
+                </button>
+                <button
+                  type="button"
+                  class="work-table__filter-action work-table__filter-action--brand"
+                  onclick={handleFilterApply}
+                >
+                  Apply
+                </button>
+              </div>
+            </div>
+          </template>
+        </template>
+
+        <c-div-segmented-control
+          class="work-table__toolbar-scope"
+          options={scopeOptions}
+          value={scopeFilter}
+          group-label="Record scope"
+          onchange={handleScopeChange}
+        ></c-div-segmented-control>
+      </div>
+    </div>
+
+    <template lwc:if={isLoading}>
+      <div class="work-table__loading">
+        <c-arc-loading-spinner
+          alternative-text="Loading work"
+          size="medium"
+        ></c-arc-loading-spinner>
+      </div>
+    </template>
+
+    <template lwc:else>
+      <div class="work-table__table">
+        <c-styled-data-table
+          aria-label={title}
+          key-field="id"
+          density="comfortable"
+          enable-column-resize
+          column-width-storage-key="workTable.colWidths"
+          enable-column-reorder
+          row-actions={rowActions}
+          onrowaction={handleRowAction}
+          oncolumnreorder={handleColumnReorder}
+          columns={columns}
+          data={tableRows}
+          placeholder="-"
+          default-sort-field={defaultSortField}
+          default-sort-direction={defaultSortDirection}
+          enable-row-click={enableRowClick}
+          enable-row-navigation
+          expanded-row-ids={expandedCaseIds}
+          row-detail-type="workTasks"
+          enable-pagination={enablePagination}
+          show-footer-view-all={showViewAllFooter}
+          view-all-url={viewAllUrl}
+          page-size={pageSize}
+          page-size-options={pageSizeOptions}
+          empty-message="No work records found."
+          onrowclick={handleRowClick}
+        ></c-styled-data-table>
+      </div>
+    </template>
+  </div>
+</template>

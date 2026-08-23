@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Market Value of Interval Funds Owned --></label>
+        <name>Market_Value_of_Interval_Funds_Owned__c</name>
+    </CustomFieldTranslation>

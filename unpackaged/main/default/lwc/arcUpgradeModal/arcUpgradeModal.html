@@ -1,0 +1,35 @@
+<template>
+  <c-ds-modal-v2
+    is-open={isOpen}
+    title="Upgrade to Helios"
+    size="small"
+    hide-footer
+    onclose={handleClose}
+    style="
+      --ds-modal-width: 480px;
+      --ds-modal-backdrop-bg: rgba(9, 15, 28, 0.65);
+      --ds-modal-backdrop-blur: 6px;
+    "
+  >
+    <div slot="header" class="upgrade-modal__logo">
+      <img src={logoUrl} alt="Diversify" />
+    </div>
+    <h2 class="upgrade-modal__title">Upgrade to Helios</h2>
+    <p class="upgrade-modal__message">
+      The functionality you clicked is part of Helios, an upgrade from your
+      current NexS experience. Upgrading from NexS to Helios unlocks
+      branch-level CRM functionality for you, woven in to everything you
+      currently do in NexS. Once you become a Helios user, you no longer need a
+      Redtail or Wealthbox subscription
+    </p>
+    <p class="upgrade-modal__message">
+      For more information, please reach out to Advisor Solutions at the Home
+      Office:
+      <a
+        href="mailto:advisorsolutions@diversify.com"
+        class="upgrade-modal__link"
+        >advisorsolutions@diversify.com</a
+      >.
+    </p>
+  </c-ds-modal-v2>
+</template>

@@ -1,0 +1,79 @@
+:host {
+    display: block;
+
+    /* Self-declared --slds-g-* block (canonical values, ui-standards §1):
+       injected SLDS2 hooks beat :host inheritance, so consumers of these
+       names declare their own. */
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-accent-3: #071c31;
+    --slds-g-color-on-accent-1: #ffffff;
+}
+
+/* Wraps to a second row on narrow screens — horizontal scroll would hide
+   chips with no affordance. */
+.ds-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ds-space-sm, 8px);
+}
+
+/* 999px radius: the blessed full-pill idiom (the 20px --ds-radius-pill
+   can't round elements this tall). */
+.ds-chips__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-sm, 8px);
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-2, #374151);
+    white-space: nowrap;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.ds-chips__chip:hover {
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+}
+.ds-chips__chip:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+.ds-chips__chip--active {
+    background: var(--slds-g-color-accent-1, #0f406f);
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+}
+
+/* Count pill: the dashboard's .ud__count-chip idiom; inverts on the
+   active chip so it stays legible on navy. */
+.ds-chips__count {
+    min-width: 1.25rem;
+    box-sizing: border-box;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: var(--ds-lightest-blue, #e2f8ff);
+    color: var(--slds-g-color-accent-1, #0f406f);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-align: center;
+}
+.ds-chips__chip--active .ds-chips__count {
+    background: var(--slds-g-color-on-accent-1, #ffffff);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ds-chips__chip {
+        transition-duration: 0.01ms;
+    }
+}

@@ -1,0 +1,124 @@
+:host {
+    display: block;
+}
+
+/* --- Hero: rendered by the shared c-ds-hero (replacing this file's former
+   .rc-hero replica of nexsHome's markup). Only the slotted search wrapper
+   and Get Help link below stay owner-styled. --- */
+
+/* Full-column search, same as .home-hero__search on the NexS landing. */
+.rc-hero__search {
+    width: 100%;
+}
+/* Get Help guide entry — quiet link under the hero search. */
+.rc-hero__guide {
+    margin-top: var(--ds-space-md, 12px);
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: var(--slds-g-font-scale-2, 0.875rem);
+    font-weight: 600;
+    color: var(--ds-light-blue, #14bef0);
+}
+.rc-hero__guide:hover {
+    text-decoration: underline;
+}
+
+/* --- Body --- */
+.rc-body {
+    max-width: calc(var(--nexs-content-max, 1040px) + 2 * var(--slds-g-spacing-5, 24px));
+    margin: 0 auto;
+    padding: var(--ds-space-2xl, 32px) var(--slds-g-spacing-5, 24px) var(--ds-space-3xl, 48px);
+}
+.rc-section + .rc-section {
+    margin-top: var(--ds-space-3xl, 48px);
+}
+.rc-section__title {
+    margin: 0 0 var(--slds-g-spacing-5, 24px);
+    font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+    font-size: 1.75rem;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.rc-grid {
+    display: grid;
+    gap: var(--ds-space-lg, 16px);
+}
+.rc-grid--cards {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+/* --- Category tiles (replicated from .home-topics__card) --- */
+.rc-topics {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--slds-g-spacing-4, 16px);
+}
+.rc-topics__card {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--slds-g-spacing-3, 12px);
+    padding: var(--ds-space-2xl, 32px) var(--ds-space-xl, 24px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+.rc-topics__card:hover {
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+    box-shadow: var(--ds-shadow-hover, 0 4px 14px rgba(15, 64, 111, 0.08));
+}
+.rc-topics__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--ds-lightest-blue, #e2f8ff);
+    color: var(--ds-medium-blue, #1a76bb);
+}
+.rc-topics__icon svg {
+    width: 24px;
+    height: 24px;
+}
+.rc-topics__label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.rc-topics__desc {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.rc-topics__count {
+    font-size: 0.75rem;
+    color: var(--ds-medium-blue, #1a76bb);
+}
+
+.rc-status,
+.rc-empty {
+    padding: var(--ds-space-xl, 24px);
+    text-align: center;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+@media (max-width: 1024px) {
+    .rc-topics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+    /* Hero step-down now lives in dsHero.css (at nexsHome's 768px break). */
+    .rc-grid--cards { grid-template-columns: 1fr; }
+    .rc-topics { grid-template-columns: 1fr; }
+}

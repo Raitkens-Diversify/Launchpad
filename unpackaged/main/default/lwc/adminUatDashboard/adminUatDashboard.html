@@ -1,0 +1,66 @@
+<template>
+    <div class="aud">
+        <template if:true={errorMessage}>
+            <p class="audb__error" role="alert">{errorMessage}</p>
+        </template>
+
+        <template if:true={loading}>
+            <c-ds-skeleton variant="card" count="2"></c-ds-skeleton>
+        </template>
+
+        <template if:false={loading}>
+            <template if:true={isEmpty}>
+                <c-ds-empty-state
+                    icon="utility:metrics"
+                    heading="No open cycles"
+                    message="The cycle dashboard fills in once a cycle is running."
+                ></c-ds-empty-state>
+            </template>
+
+            <template if:true={hasHero}>
+                <section class="audb__hero">
+                    <div class="audb__hero-head">
+                        <div>
+                            <p class="audb__hero-eyebrow">Cycle status</p>
+                            <h1 class="audb__hero-title">{hero.cycleName}</h1>
+                        </div>
+                        <div class="audb__hero-actions">
+                            <template if:true={hasHeroDeadline}>
+                                <span class="audb__hero-deadline">{heroDeadlineLabel}</span>
+                            </template>
+                            <lightning-button variant="brand" label="Open cycle" data-id={hero.cycleId}
+                                              onclick={handleOpenCycle}></lightning-button>
+                        </div>
+                    </div>
+                    <c-ds-progress-bar segments={heroSegments} variant="light"
+                                       aria-label={heroProgressAriaLabel}></c-ds-progress-bar>
+                    <p class="audb__hero-summary">{heroSummary}</p>
+                </section>
+
+                <div class="audb__tiles">
+                    <c-ds-stat-tile label="Cycles at risk" value={atRiskCount} variant="error"></c-ds-stat-tile>
+                    <c-ds-stat-tile label="Unclaimed seats" value={unclaimedCount}></c-ds-stat-tile>
+                    <c-ds-stat-tile label="Failed runs" value={failedCount} variant="error"></c-ds-stat-tile>
+                    <c-ds-stat-tile label="Participation" value={participationValue}
+                                    sublabel={participationSublabel}></c-ds-stat-tile>
+                </div>
+
+                <template if:true={hasAtRisk}>
+                    <section class="audb__risklist">
+                        <h2 class="audb__risklist-title">Cycles at risk</h2>
+                        <template for:each={atRisk} for:item="row">
+                            <div key={row.key} class="audb__riskrow">
+                                <span class="audb__riskrow-name">{row.cycleName}</span>
+                                <span class="audb__riskrow-meta">
+                                    {row.unclaimedSeats} unclaimed · {row.deadlineLabel}
+                                </span>
+                                <lightning-button label="Open" size="small" data-id={row.cycleId}
+                                                  onclick={handleOpenCycle}></lightning-button>
+                            </div>
+                        </template>
+                    </section>
+                </template>
+            </template>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- License Type --></label>
+        <name>License_Type__c</name>
+        <picklistValues>
+            <masterLabel>Advisor</masterLabel>
+            <translation><!-- Advisor --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Basic</masterLabel>
+            <translation><!-- Basic --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Enhanced</masterLabel>
+            <translation><!-- Enhanced --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Enhanced - Department Admin</masterLabel>
+            <translation><!-- Enhanced - Department Admin --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Enhanced - Systems Team</masterLabel>
+            <translation><!-- Enhanced - Systems Team --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Metadata Permissions</masterLabel>
+            <translation><!-- Metadata Permissions --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>System Administrator</masterLabel>
+            <translation><!-- System Administrator --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Systems</masterLabel>
+            <translation><!-- Systems --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Wizard Only</masterLabel>
+            <translation><!-- Wizard Only --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

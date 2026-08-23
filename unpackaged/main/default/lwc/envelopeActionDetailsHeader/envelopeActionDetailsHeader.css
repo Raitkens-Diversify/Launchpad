@@ -1,0 +1,77 @@
+:host {
+    display: block;
+}
+
+.action-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-3, 12px);
+    padding-bottom: var(--slds-g-spacing-4, 16px);
+    border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+
+.action-header__back {
+    align-self: flex-start;
+}
+
+.action-header__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--slds-g-spacing-4, 16px);
+}
+
+.action-header__titles {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-3, 12px);
+    min-width: 0;
+}
+
+/* Right cluster: the overflow menu. */
+.action-header__row-right {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-3, 12px);
+    flex-shrink: 0;
+}
+
+.action-header__title {
+    margin: 0;
+    font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    font-size: var(--slds-g-font-scale-4, 24px);
+    line-height: var(--slds-g-font-lineheight-6, 32px);
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+/* Status badge — same treatments as the action card badge ("In Progress" / "Completed" /
+   "Updated"). */
+.action-header__badge {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-1, 4px);
+    border-radius: var(--slds-g-radius-border-2, 8px);
+    padding: var(--slds-g-spacing-1, 4px) var(--slds-g-spacing-2, 8px);
+    font-size: var(--slds-g-font-scale-neg-1, 12px);
+    font-weight: var(--slds-g-font-weight-5, 500);
+    line-height: 17px;
+    white-space: nowrap;
+}
+
+.action-header__badge_warning {
+    background: var(--slds-g-color-warning-container-1, #fef3c7);
+    color: var(--slds-g-color-on-warning-1, #b45309);
+}
+
+/* "Completed" and "Updated" share the success treatment; only the former carries a check icon. */
+.action-header__badge_complete,
+.action-header__badge_updated {
+    background: var(--slds-g-color-success-container-1, #dcfce7);
+    color: var(--slds-g-color-on-success-1, #15803d);
+}
+
+.action-header__badge-icon {
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-on-success-1, #15803d);
+}

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Placement --></label>
+        <name>Placement__c</name>
+        <picklistValues>
+            <masterLabel>auto</masterLabel>
+            <translation><!-- auto --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>bottom</masterLabel>
+            <translation><!-- bottom --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>left</masterLabel>
+            <translation><!-- left --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>right</masterLabel>
+            <translation><!-- right --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>top</masterLabel>
+            <translation><!-- top --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

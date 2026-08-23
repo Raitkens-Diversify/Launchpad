@@ -1,0 +1,67 @@
+<aura:component controller="FlowCreateMultipleController" implements="lightning:availableForFlowScreens" access="global">
+    <aura:attribute name="sObjectName" type="String" default=""/>
+    <aura:attribute name="recordTypeName" type="String" default=""/>
+    <aura:attribute name="sObjectFields" type="String" default=""/>
+    <aura:attribute name="recordId" type="String" />
+    <aura:attribute name="parentRecordId" type="String" default=""/>
+    <aura:attribute name="parentLookupFieldName" type="String" default=""/>
+    <aura:attribute name="MaximumNumberofRecords" type="Integer" default="10"/>
+    <aura:attribute name="LinestoShow" type="Integer" default="4"/>
+    <aura:attribute name="lstLoop" type="List"/>
+    
+    <aura:attribute name="tableHeaderRecords" type="List"/>
+    <aura:attribute name="tableHeaderRows" type="List"/>
+    <aura:attribute name="fieldsWithDataTypes" type="List"/>
+    <aura:attribute name="existingRecords" type="List"/>
+    
+    <aura:attribute name="pendingChanges" type="Object"/>
+    
+    <aura:attribute name="dynamicFormList" type="Aura.Component[]"/>
+    
+    <aura:attribute name="fetchedResult" type="List"/>
+    <aura:attribute name="autoSaving" type="Boolean" default="false"/>
+    
+    <aura:attribute name="ObjectType" type="Object"/>   
+    
+    <aura:attribute name="currentIndex" type="Integer" default="0"/>
+    <aura:attribute name="OpportunityId" type="string" />
+    <aura:attribute name="FinServFinancialAccountIDs" type="String[]"/> 
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+    <aura:handler event = "c:dynamicFormEvent" action = "{!c.handleDeleteForm}"/>
+    <aura:handler event = "c:dynamicFormChangeEvent" action = "{!c.handleFormChange}"/>
+    
+    
+    <div class="container-fluid">    
+        <table class="slds-table slds-table_bordered slds-table_cell-buffer"> 
+            <thead>
+                <tr class="slds-text-title_caps">
+                    <aura:iteration items="{!v.tableHeaderRecords}" var="header">
+                        <th scope="col">
+                            <div class="slds-truncate slds-text-align_center" title="{!header}">{!header}</div>
+                        </th>
+                    </aura:iteration>
+                    <th scope="col">
+                        <div class="slds-truncate slds-text-align_center" title=""> </div>
+                    </th>
+                </tr>
+            </thead>   
+            <tbody>
+                {!v.dynamicFormList}
+            </tbody>
+        </table>
+    <!--    <div class="footer">
+            <div class="footer_btn">
+                <h1 class="slds-text-title_caps">
+                    <lightning:button title="Add Row" label="Add Row" iconName="utility:add" iconPosition="left" onclick="{!c.addRow}"/>
+                </h1>
+            </div>   
+        </div>  -->
+        <aura:if isTrue="{!v.autoSaving}">
+            <span style="display:inline-block;height:30px;vertical-align:middle">Auto Saving...</span><div aura:id="Saving" class="auto-save"><lightning:spinner alternativeText="Auto Saving.." size="small" /></div>
+            <aura:set attribute="else">
+                <span style="display:inline-block;height:30px;vertical-align:middle"></span>
+            </aura:set>
+        </aura:if>
+    </div>
+</aura:component>

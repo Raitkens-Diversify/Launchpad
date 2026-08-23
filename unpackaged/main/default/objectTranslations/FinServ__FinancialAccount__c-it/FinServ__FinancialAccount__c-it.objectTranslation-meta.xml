@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Account finanziario</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Account finanziari</value>
+    </caseValues>
+    <gender>Masculine</gender>
+    <nameFieldLabel>Nome account finanziario</nameFieldLabel>
+    <quickActions>
+        <label><!-- Financial Account Information --></label>
+        <name>Financial_Account_Information</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Financial Account Information for Case --></label>
+        <name>Financial_Account_Information_for_Case</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Financial Account Owner Info --></label>
+        <name>Financial_Account_Owner_Info</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Merge Financial Account --></label>
+        <name>Merge_Financial_Account</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Reg BI Information --></label>
+        <name>Reg_BI_Information</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Submit Request --></label>
+        <name>Submit_Request</name>
+    </quickActions>
+    <startsWith>Vowel</startsWith>
+</CustomObjectTranslation>

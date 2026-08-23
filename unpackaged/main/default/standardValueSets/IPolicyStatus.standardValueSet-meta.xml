@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Initial</fullName>
+        <default>true</default>
+        <label>Initial</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Applied</fullName>
+        <default>false</default>
+        <label>Applied</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Cancelled</fullName>
+        <default>false</default>
+        <label>Cancelled</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Customer Rejected</fullName>
+        <default>false</default>
+        <label>Customer Rejected</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Draft</fullName>
+        <default>false</default>
+        <label>Draft</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Final</fullName>
+        <default>false</default>
+        <label>Final</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Full Life Ending</fullName>
+        <default>false</default>
+        <label>Full Life Ending</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Hypothetical</fullName>
+        <default>false</default>
+        <label>Hypothetical</label>
+    </standardValue>
+    <standardValue>
+        <fullName>In Force</fullName>
+        <default>false</default>
+        <label>In Force</label>
+    </standardValue>
+    <standardValue>
+        <fullName>In Force-change pending</fullName>
+        <default>false</default>
+        <label>In Force-change pending</label>
+    </standardValue>
+    <standardValue>
+        <fullName>In Force with temporary coverage</fullName>
+        <default>false</default>
+        <label>In Force with temporary coverage</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Agreement Premature endings</fullName>
+        <default>false</default>
+        <label>Agreement Premature endings</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Insurer Rejected</fullName>
+        <default>false</default>
+        <label>Insurer Rejected</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Lapsed</fullName>
+        <default>false</default>
+        <label>Lapsed</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Negotiation End</fullName>
+        <default>false</default>
+        <label>Negotiation End</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Not Taken Up</fullName>
+        <default>false</default>
+        <label>Not Taken Up</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Offered</fullName>
+        <default>false</default>
+        <label>Offered</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Quote Abandoned</fullName>
+        <default>false</default>
+        <label>Quote Abandoned</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Quoted</fullName>
+        <default>false</default>
+        <label>Quoted</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Replaced by customer application</fullName>
+        <default>false</default>
+        <label>Replaced by customer application</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Replaced by insurer counter offer</fullName>
+        <default>false</default>
+        <label>Replaced by insurer counter offer</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Suspended</fullName>
+        <default>false</default>
+        <label>Suspended</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Terminated</fullName>
+        <default>false</default>
+        <label>Terminated</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Under negotiation</fullName>
+        <default>false</default>
+        <label>Under negotiation</label>
+    </standardValue>
+</StandardValueSet>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Antique</fullName>
+        <default>false</default>
+        <label>Antique</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Combo</fullName>
+        <default>false</default>
+        <label>Combo</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Apportioned</fullName>
+        <default>false</default>
+        <label>Apportioned</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Commercial</fullName>
+        <default>false</default>
+        <label>Commercial</label>
+    </standardValue>
+    <standardValue>
+        <fullName>SUB</fullName>
+        <default>false</default>
+        <label>SUB</label>
+    </standardValue>
+</StandardValueSet>

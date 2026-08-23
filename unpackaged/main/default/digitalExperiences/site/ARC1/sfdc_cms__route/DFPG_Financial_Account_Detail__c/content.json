@@ -1,0 +1,12 @@
+{
+  "type" : "sfdc_cms__route",
+  "title" : "DFPG Financial Account Detail",
+  "contentBody" : {
+    "activeViewId" : "DFPG_Financial_Account_Detail",
+    "configurationTags" : [ ],
+    "pageAccess" : "UseParent",
+    "routeType" : "detail-Financial_Account__c",
+    "urlPrefix" : "financial-account"
+  },
+  "urlName" : "dfpg-financial-account-detail"
+}

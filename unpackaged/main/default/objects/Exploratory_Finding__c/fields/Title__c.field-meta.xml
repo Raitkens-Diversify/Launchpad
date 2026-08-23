@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Title__c</fullName>
+    <description>One-line headline — what an admin reads in a triage list. Required and at least 10 characters, enforced in UatRunController.saveFinding rather than by a validation rule so the migration can backfill legacy rows first. Promote-to-finding suggests it from the source note&#39;s first line; it stays editable.</description>
+    <externalId>false</externalId>
+    <label>Title</label>
+    <length>255</length>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

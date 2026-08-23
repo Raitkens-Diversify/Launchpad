@@ -1,0 +1,6 @@
+Hello [!Case.Contact.FirstName] [!Case.Contact.LastName],
+
+I hope this email finds you well. I am reaching out today with a confirmation that your 401(k) rollover from [!Case.Custodian__c] to {[!Case.FinServ__FinancialAccount__r.OASP_FSC__Custodian__r.Name] officially completed. Your rollover funds were successfully deposited into your [!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.Name] on **Date of Deposit** and shortly thereafter invested into the strategy you discussed with [!Case.Financial_Advisor_Team__r.Primary_Financial_Advisor__r.FirstName] [!Case.Financial_Advisor_Team__r.Primary_Financial_Advisor__r.LastName].
+
+Please don't hesitate to reach out with any follow up questions regarding this transaction.
+Sincerely,

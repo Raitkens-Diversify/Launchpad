@@ -1,0 +1,74 @@
+<!-- Author: Claude -->
+<template>
+  <div class="related-list">
+    <header class="related-list__header">
+      <h3 class="related-list__title">{cardLabel}</h3>
+      <span class="related-list__count">{countLabel}</span>
+      <!--
+        Opt-in collapse, off by default so the pages already using this component
+        are untouched. Mirrors the caret each related list carries on a Lightning
+        record page.
+      -->
+      <template lwc:if={collapsible}>
+        <button
+          class={toggleClass}
+          type="button"
+          aria-expanded={ariaExpanded}
+          title={toggleLabel}
+          onclick={handleToggle}
+        >
+          <span class="slds-assistive-text">{toggleLabel}</span>
+        </button>
+      </template>
+    </header>
+
+    <template lwc:if={isExpanded}>
+      <template lwc:if={isLoading}>
+        <div class="related-list__loading">
+          <c-arc-loading-spinner
+            alternative-text="Loading records"
+            size="small"
+          ></c-arc-loading-spinner>
+        </div>
+      </template>
+
+      <template lwc:elseif={errorMessage}>
+        <p class="related-list__error" role="alert">{errorMessage}</p>
+      </template>
+
+      <template lwc:elseif={hasRows}>
+        <div class="related-list__scroll">
+          <table class="related-list__table">
+            <thead>
+              <tr>
+                <template for:each={headers} for:item="header">
+                  <th key={header.key} scope="col" class={header.cssClass}>
+                    {header.label}
+                  </th>
+                </template>
+              </tr>
+            </thead>
+            <tbody>
+              <template for:each={rowsView} for:item="row">
+                <tr
+                  key={row.id}
+                  class={row.rowClass}
+                  data-link={row.linkId}
+                  onclick={handleRowClick}
+                >
+                  <template for:each={row.cells} for:item="cell">
+                    <td key={cell.key} class={cell.cssClass}>{cell.value}</td>
+                  </template>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </template>
+
+      <template lwc:else>
+        <p class="related-list__empty">{emptyMessage}</p>
+      </template>
+    </template>
+  </div>
+</template>

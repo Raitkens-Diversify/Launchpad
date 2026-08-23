@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <columns>
+        <field>TagCategory.Topic$Topic</field>
+    </columns>
+    <description>This will show only the interest tags assigned to a household. 
+To pull in other data you will need to run a separate report at this time.</description>
+    <format>Summary</format>
+    <groupingsDown>
+        <dateGranularity>Day</dateGranularity>
+        <field>TagCategory.Topic$Entity</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <name>CRM - Interest Tags Report by Household</name>
+    <params>
+        <name>co</name>
+        <value>1</value>
+    </params>
+    <reportType>Interest_Tags__c</reportType>
+    <scope>organization</scope>
+    <showDetails>true</showDetails>
+    <showGrandTotal>true</showGrandTotal>
+    <showSubTotals>true</showSubTotals>
+    <timeFrameFilter>
+        <dateColumn>TagCategory$CreatedDate</dateColumn>
+        <interval>INTERVAL_CUSTOM</interval>
+    </timeFrameFilter>
+</Report>

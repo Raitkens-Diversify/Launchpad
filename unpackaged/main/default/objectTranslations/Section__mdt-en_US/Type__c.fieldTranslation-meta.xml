@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Type --></label>
+        <name>Type__c</name>
+        <picklistValues>
+            <masterLabel>AML Documentation</masterLabel>
+            <translation><!-- AML Documentation --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Alternative Investment</masterLabel>
+            <translation><!-- Alternative Investment --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Authorized Person</masterLabel>
+            <translation><!-- Authorized Person --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Beneficial Owner</masterLabel>
+            <translation><!-- Beneficial Owner --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Business Related Party</masterLabel>
+            <translation><!-- Business Related Party --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Client - Business</masterLabel>
+            <translation><!-- Client - Business --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Client - Individual</masterLabel>
+            <translation><!-- Client - Individual --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Client - Trust</masterLabel>
+            <translation><!-- Client - Trust --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Control Person</masterLabel>
+            <translation><!-- Control Person --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Grantor - Irrevocable Trust</masterLabel>
+            <translation><!-- Grantor - Irrevocable Trust --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Grantor - Revocable Trust</masterLabel>
+            <translation><!-- Grantor - Revocable Trust --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ISA - DPI</masterLabel>
+            <translation><!-- ISA - DPI --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ISA - Fin Acct</masterLabel>
+            <translation><!-- ISA - Fin Acct --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ISA - Service Agreement</masterLabel>
+            <translation><!-- ISA - Service Agreement --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Trust Related Party</masterLabel>
+            <translation><!-- Trust Related Party --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Trustee</masterLabel>
+            <translation><!-- Trustee --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

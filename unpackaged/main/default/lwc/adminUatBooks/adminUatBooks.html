@@ -1,0 +1,138 @@
+<template>
+    <div class="aub">
+        <template if:true={errorMessage}>
+            <p class="aub__error" role="alert">{errorMessage}</p>
+        </template>
+
+        <template if:true={loading}>
+            <div class="aub__loading">
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={loading}>
+            <template if:true={isList}>
+                <div class="aub__toolbar">
+                    <p class="aub__hint">
+                        A book is a named, reusable, ordered collection of cases — what a cycle
+                        runs. It's independent of the Taxonomy, which is where a case lives.
+                        The order here is the intended run order.
+                    </p>
+                    <lightning-button variant="brand"
+                                      label="New book"
+                                      disabled={busy}
+                                      onclick={handleNewBook}></lightning-button>
+                </div>
+
+                <template if:true={hasRows}>
+                    <ul class="aub__list">
+                        <template for:each={rows} for:item="row">
+                            <li key={row.id} class="aub__card">
+                                <div class="aub__card-text">
+                                    <button type="button"
+                                            class="aub__card-name aub__link"
+                                            data-id={row.id}
+                                            onclick={handleEdit}>{row.name}</button>
+                                    <template if:true={row.description}>
+                                        <span class="aub__card-desc">{row.description}</span>
+                                    </template>
+                                    <span class="aub__card-count">{row.caseCount} case(s)</span>
+                                </div>
+                                <lightning-button label="Edit"
+                                                  size="small"
+                                                  disabled={busy}
+                                                  data-id={row.id}
+                                                  onclick={handleEdit}></lightning-button>
+                                <lightning-button label="Run this book"
+                                                  size="small"
+                                                  variant="brand-outline"
+                                                  disabled={busy}
+                                                  data-id={row.id}
+                                                  data-name={row.name}
+                                                  onclick={handleRunBook}></lightning-button>
+                            </li>
+                        </template>
+                    </ul>
+                </template>
+                <template if:false={hasRows}>
+                    <p class="aub__empty">No test books yet — create the first one.</p>
+                </template>
+            </template>
+
+            <template if:true={isEditor}>
+                <div class="aub__bar">
+                    <lightning-button-icon icon-name="utility:back"
+                                           alternative-text="Back"
+                                           onclick={handleBack}></lightning-button-icon>
+                    <h2 class="aub__title">{editorTitle}</h2>
+                    <template if:true={isExistingBook}>
+                        <lightning-button variant="destructive-text"
+                                          label="Delete book"
+                                          disabled={busy}
+                                          onclick={handleDeleteBook}></lightning-button>
+                    </template>
+                    <lightning-button variant="brand"
+                                      label="Save"
+                                      disabled={busy}
+                                      onclick={handleSave}></lightning-button>
+                </div>
+
+                <div class="aub__fields">
+                    <lightning-input label="Name"
+                                     value={name}
+                                     required
+                                     max-length="120"
+                                     onchange={handleNameChange}></lightning-input>
+                    <lightning-textarea label="Description"
+                                        value={description}
+                                        onchange={handleDescriptionChange}></lightning-textarea>
+                </div>
+
+                <template if:true={hasUsage}>
+                    <div class="aub__usage" role="note">
+                        <lightning-icon icon-name="utility:info" size="x-small"></lightning-icon>
+                        <span>
+                            Used by cycle(s):
+                            <template for:each={detail.usedByCycles} for:item="usage">
+                                <button key={usage.cycleId}
+                                        type="button"
+                                        class="aub__usage-link"
+                                        data-id={usage.cycleId}
+                                        onclick={handleUsageClick}>{usage.cycleName}</button>
+                            </template>
+                            — changes here affect what those cycles show going forward.
+                        </span>
+                    </div>
+                </template>
+
+                <template if:true={isExistingBook}>
+                    <c-admin-uat-dual-picker selected-items={pickerSelected}
+                                             available-items={pickerAvailable}
+                                             system-options={pickerSystemOptions}
+                                             orderable
+                                             busy={busy}
+                                             selected-label="Cases in this book (run order)"
+                                             available-label="All other cases"
+                                             selected-empty-text="No cases yet — add from the right."
+                                             available-empty-text="Nothing matches. Only cases marked Complete can be added to books."
+                                             search-placeholder="Search by Case ID or module…"
+                                             onadd={handlePickerAdd}
+                                             onremove={handlePickerRemove}
+                                             onreorder={handlePickerReorder}></c-admin-uat-dual-picker>
+                </template>
+                <template if:false={isExistingBook}>
+                    <p class="aub__hint">Save the book first, then add cases to it.</p>
+                </template>
+            </template>
+        </template>
+
+        <template if:true={confirmOpen}>
+            <c-admin-confirm-modal header={confirm.header}
+                                   message={confirm.message}
+                                   confirm-label={confirm.confirmLabel}
+                                   busy={saving}
+                                   onconfirm={handleConfirmProceed}
+                                   oncancel={handleConfirmCancel}></c-admin-confirm-modal>
+        </template>
+    </div>
+</template>

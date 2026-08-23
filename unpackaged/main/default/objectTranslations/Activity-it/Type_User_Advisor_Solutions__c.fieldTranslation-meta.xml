@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Type --></label>
+        <name>Type_User_Advisor_Solutions__c</name>
+        <picklistValues>
+            <masterLabel>Call</masterLabel>
+            <translation><!-- Call --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Email</masterLabel>
+            <translation><!-- Email --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>In Person</masterLabel>
+            <translation><!-- In Person --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Video Call</masterLabel>
+            <translation><!-- Video Call --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Zoom Chat</masterLabel>
+            <translation><!-- Zoom Chat --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

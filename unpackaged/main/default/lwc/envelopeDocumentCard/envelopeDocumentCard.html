@@ -1,0 +1,32 @@
+<template>
+    <article class="doc-card">
+        <lightning-icon
+            icon-name="utility:file"
+            size="small"
+            class="doc-card__icon"
+            alternative-text="">
+        </lightning-icon>
+        <div class="doc-card__content">
+            <div class="doc-card__row">
+                <div class="doc-card__info">
+                    <p class="doc-card__name">{name}</p>
+                    <p class="doc-card__signees">
+                        <span class="doc-card__signees-label">Signees:</span>
+                        <template if:true={hasSignees}>{signees}</template>
+                        <template if:false={hasSignees}>To be assigned...</template>
+                    </p>
+                </div>
+                <template if:true={hasLinkedFile}>
+                    <lightning-badge
+                        class="doc-card__badge"
+                        label="File linked"
+                        icon-name="utility:success">
+                    </lightning-badge>
+                </template>
+            </div>
+            <template if:true={hasLinkedFile}>
+                <p class="doc-card__file">{linkedFileName}</p>
+            </template>
+        </div>
+    </article>
+</template>

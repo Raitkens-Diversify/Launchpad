@@ -1,0 +1,26 @@
+/* Author: Hoang Long Vu To | Date: 2026-07-27 */
+/* Confirm modal layout uses rule-modal styles from diversifyStyles.css. */
+
+.rule-modal__panel--confirm {
+  position: relative;
+}
+
+.nc-saving-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.78);
+  border-radius: inherit;
+}
+
+.nc-saving-overlay__message {
+  margin: 0;
+  font-size: var(--div-font-scale-sm);
+  font-weight: 600;
+  color: var(--div-color-text-primary, #181818);
+}

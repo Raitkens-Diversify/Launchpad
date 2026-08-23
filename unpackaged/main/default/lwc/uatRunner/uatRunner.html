@@ -1,0 +1,299 @@
+<template>
+    <div class="ur" onkeydown={handleTemplateKeydown} onclick={handleTemplateClick}>
+        <template if:true={errorMessage}>
+            <p class="ur__error" role="alert">{errorMessage}</p>
+            <lightning-button label="Back to queue" onclick={handleBackToQueue}></lightning-button>
+        </template>
+
+        <template if:true={loading}>
+            <c-ds-skeleton variant="card" count="3"></c-ds-skeleton>
+        </template>
+
+        <template if:false={loading}>
+            <template if:true={runner}>
+                <header class="ur__header">
+                    <c-ds-breadcrumbs items={crumbItems} oncrumbselect={handleBackToQueue}></c-ds-breadcrumbs>
+                    <h1 class="ur__title">{displayTitle}</h1>
+                    <p class="ur__meta">{metaLine}</p>
+                    <template if:true={hasCasePosition}>
+                        <p class="ur__caseposition">{casePositionLabel}</p>
+                    </template>
+                    <!-- The off-script escape hatch, in reach without leaving
+                         the run: it opens a composer, not a new page. -->
+                    <div class="ur__offscript">
+                        <lightning-button label="Note something off-script"
+                                          icon-name="utility:note"
+                                          onclick={handleOffScriptOpen}></lightning-button>
+                    </div>
+                    <div class="ur__progressline">
+                        <div class="ur__progressbar">
+                            <c-ds-progress-bar segments={progressSegments}
+                                               aria-label="Case progress"></c-ds-progress-bar>
+                        </div>
+                        <span class="ur__progress-caption">{progressCaption}</span>
+                    </div>
+                </header>
+
+                <div class="ur__layout">
+                    <div class="ur__main">
+                        <template if:true={hasSteps}>
+                            <section class="ur__step-card" tabindex="-1" aria-label={stepCountLabel}>
+                                <p class="ur__eyebrow">{stepCountLabel}</p>
+                                <h2 class="ur__step-title">{conditionTag}</h2>
+                                <template if:true={currentStep.stepTitle}>
+                                    <p class="ur__step-subtitle">{currentStep.stepTitle}</p>
+                                </template>
+
+                                <template if:true={isScriptedStep}>
+                                    <div class="ur__block">
+                                        <span class="ur__block-label">What to do</span>
+                                        <p class="ur__block-text">{currentStep.description}</p>
+                                    </div>
+                                    <div class="ur__block ur__block--expected">
+                                        <span class="ur__block-label">Expected result</span>
+                                        <p class="ur__block-text">{currentStep.expected}</p>
+                                    </div>
+                                    <div class="ur__results" role="radiogroup" aria-label="Step result">
+                                        <template for:each={resultButtons} for:item="btn">
+                                            <button key={btn.value}
+                                                    type="button"
+                                                    role="radio"
+                                                    aria-checked={btn.ariaChecked}
+                                                    class={btn.cssClass}
+                                                    data-value={btn.value}
+                                                    disabled={busy}
+                                                    onclick={handleResultClick}>
+                                                <lightning-icon icon-name={btn.iconName} size="xx-small"></lightning-icon>
+                                                {btn.value}
+                                                <c-ds-key-hint letter={btn.hintLetter}></c-ds-key-hint>
+                                            </button>
+                                        </template>
+                                    </div>
+                                    <template if:true={needsResult}>
+                                        <p class="ur__needs-result" role="status">Pick a result to finish this step — notes alone leave it unanswered.</p>
+                                    </template>
+                                    <lightning-textarea label="Actual result and notes"
+                                                        field-level-help="Record any unexpected behavior, error messages, or relevant observations."
+                                                        placeholder={actualPlaceholder}
+                                                        value={currentStep.actualResult}
+                                                        data-field="actual"
+                                                        class="ur__actual"
+                                                        onchange={handleActualChange}
+                                                        onblur={persistCurrentStep}></lightning-textarea>
+
+                                    <template if:true={showDefectToggle}>
+                                        <div class="ur__defect">
+                                            <button type="button" class="ur__defect-toggle" onclick={toggleDefect}>{defectToggleLabel}</button>
+                                            <template if:true={isDefectOpen}>
+                                                <div class="ur__defect-fields">
+                                                    <lightning-combobox label="Severity"
+                                                                        value={currentStep.defectSeverity}
+                                                                        options={defectSeverityOptions}
+                                                                        onchange={handleDefectSeverityChange}></lightning-combobox>
+                                                    <lightning-textarea label="Summary"
+                                                                        value={currentStep.defectSummary}
+                                                                        onchange={handleDefectSummaryChange}
+                                                                        onblur={persistCurrentStep}></lightning-textarea>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </template>
+
+                                <template if:true={isExploreStep}>
+                                    <div class="ur__block">
+                                        <span class="ur__block-label">Try this</span>
+                                        <p class="ur__block-text">{currentStep.explorePrompt}</p>
+                                    </div>
+                                    <lightning-textarea label="Notes — what did you try, what did you see?"
+                                                        value={currentStep.exploreNotes}
+                                                        data-field="notes"
+                                                        onchange={handleNotesChange}
+                                                        onblur={persistCurrentStep}></lightning-textarea>
+                                </template>
+
+                                <template if:true={currentResultId}>
+                                    <div class="ur__evidence">
+                                        <template if:true={showEvidenceHint}>
+                                            <p class="ur__evidence-hint">Evidence is recommended when reporting a failure or blocker.</p>
+                                        </template>
+                                        <c-uat-evidence-upload record-id={currentResultId}
+                                                               label="Evidence for this step"
+                                                               onfileschange={handleStepEvidenceChange}></c-uat-evidence-upload>
+                                    </div>
+                                </template>
+                            </section>
+                        </template>
+                        <template if:false={hasSteps}>
+                            <c-ds-empty-state icon="utility:info"
+                                              heading="This case has no steps yet"
+                                              message="Check with the UAT admin."></c-ds-empty-state>
+                        </template>
+                    </div>
+
+                    <aside class="ur__side">
+                        <template if:true={hasPreConditions}>
+                            <section class="ur__panel">
+                                <h3 class="ur__panel-title">Pre-conditions</h3>
+                                <p class="ur__pre-text">{runner.preConditions}</p>
+                            </section>
+                        </template>
+
+                        <template if:true={hasSteps}>
+                            <section class="ur__panel">
+                                <c-uat-step-nav steps={steps}
+                                                current-index={stepIndex}
+                                                onstepselect={handleStepJump}></c-uat-step-nav>
+                            </section>
+                        </template>
+
+                        <section class="ur__panel">
+                            <h3 class="ur__panel-title">Run details</h3>
+                            <dl class="ur__details">
+                                <template for:each={runDetails} for:item="row">
+                                    <div key={row.key} class="ur__detail">
+                                        <dt class="ur__detail-label">{row.label}</dt>
+                                        <dd class={row.valueClass}>{row.value}</dd>
+                                    </div>
+                                </template>
+                            </dl>
+                        </section>
+
+                        <template if:true={hasReferenceMaterials}>
+                            <details class="ur__disclosure">
+                                <summary class="ur__disclosure-summary">Reference material</summary>
+                                <ul class="ur__refs">
+                                    <template for:each={referenceRows} for:item="ref">
+                                        <li key={ref.key} class="ur__ref">
+                                            <span class="ur__ref-label">{ref.displayLabel}</span>
+                                            <template if:true={ref.openUrl}>
+                                                <a class="ur__ref-open" href={ref.openUrl} target="_blank" rel="noopener">Open</a>
+                                            </template>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </details>
+                        </template>
+
+                        <details class="ur__disclosure">
+                            <summary class="ur__disclosure-summary">Run-level evidence</summary>
+                            <p class="ur__disclosure-sub">Files that apply to the whole test case, not one step.</p>
+                            <c-uat-evidence-upload record-id={executionId} label=""></c-uat-evidence-upload>
+                        </details>
+                    </aside>
+                </div>
+
+                <div class="ur__navbar">
+                    <div class="ur__navbar-inner">
+                        <span class={saveIndicatorClass}>
+                            <template if:true={showSaveIndicator}>{saveIndicatorLabel}</template>
+                        </span>
+                        <span class="ur__navhint">P/F/B/N result · ←/→ steps · E notes · S save — shortcuts pause while typing; Esc leaves the field</span>
+                        <div class="ur__navbar-actions">
+                            <lightning-button label="Save &amp; exit"
+                                              disabled={busy}
+                                              onclick={handleSaveExit}></lightning-button>
+                            <lightning-button label="Previous"
+                                              disabled={previousDisabled}
+                                              onclick={handlePrevious}></lightning-button>
+                            <lightning-button variant="brand"
+                                              label={nextLabel}
+                                              disabled={busy}
+                                              onclick={handleNext}></lightning-button>
+                        </div>
+                    </div>
+                </div>
+
+                <c-ds-modal-v2 class="ur__offscript-modal"
+                               is-open={offScriptOpen}
+                               title="Note something off-script"
+                               subtitle="Goes to your ad-hoc log for this cycle. Your place in this test is kept."
+                               size="small"
+                               onclose={handleOffScriptCancel}>
+                    <template if:true={offScriptOpen}>
+                        <lightning-textarea label="What did you notice?"
+                                            placeholder="Anything this test case does not cover."
+                                            value={offScriptText}
+                                            onchange={handleOffScriptChange}></lightning-textarea>
+                    </template>
+                    <div slot="footer" class="ur__review-footer">
+                        <lightning-button label="Cancel"
+                                          disabled={offScriptSaving}
+                                          onclick={handleOffScriptCancel}></lightning-button>
+                        <lightning-button variant="brand"
+                                          label="Add to log"
+                                          disabled={offScriptDisabled}
+                                          onclick={handleOffScriptSave}></lightning-button>
+                    </div>
+                </c-ds-modal-v2>
+
+                <c-ds-modal-v2 class="ur__submit-modal"
+                               is-open={submitModalOpen}
+                               title="Submit test case"
+                               subtitle={displayTitle}
+                               size="medium"
+                               onclose={closeSubmitModal}>
+                    <div class="ur__review">
+                        <p class="ur__review-summary">{reviewSummary}</p>
+
+                        <template if:true={hasUnanswered}>
+                            <div class="ur__review-list ur__review-list--alert" role="alert">
+                                <p class="ur__review-list-title">{unansweredTitle}</p>
+                                <ul class="ur__review-rows">
+                                    <template for:each={unansweredSteps} for:item="row">
+                                        <li key={row.key}>
+                                            <button type="button" class="ur__review-jump" data-index={row.index}
+                                                    onclick={handleReviewJump}>{row.label}</button>
+                                        </li>
+                                    </template>
+                                </ul>
+                                <p class="ur__review-note ur__review-note--alert">Submitting now leaves this case In Progress.</p>
+                            </div>
+                        </template>
+
+                        <template if:true={hasNeedsDetail}>
+                            <div class="ur__review-list ur__review-list--nudge">
+                                <p class="ur__review-list-title">Failed or blocked with no notes or evidence</p>
+                                <ul class="ur__review-rows">
+                                    <template for:each={needsDetailSteps} for:item="row">
+                                        <li key={row.key}>
+                                            <button type="button" class="ur__review-jump" data-index={row.index}
+                                                    onclick={handleReviewJump}>{row.label}</button>
+                                        </li>
+                                    </template>
+                                </ul>
+                                <p class="ur__review-note">Detail is what lets an admin reproduce the problem.</p>
+                            </div>
+                        </template>
+
+                        <div class="ur__review-feedback">
+                            <h3 class="ur__panel-title">How was this experience?</h3>
+                            <p class="ur__panel-sub">About the product itself — separate from whether the test passed.</p>
+                            <div class="ur__ratings" role="group" aria-label="Rating from 1 to 5">
+                                <template for:each={ratingButtons} for:item="btn">
+                                    <button key={btn.value}
+                                            type="button"
+                                            class={btn.cssClass}
+                                            data-value={btn.value}
+                                            onclick={handleRatingClick}>{btn.label}</button>
+                                </template>
+                            </div>
+                            <lightning-textarea label="What would make it better? (optional)"
+                                                value={uxRecommendation}
+                                                onchange={handleRecommendationChange}></lightning-textarea>
+                        </div>
+                    </div>
+                    <div slot="footer" class="ur__review-footer">
+                        <lightning-button label="Keep testing"
+                                          disabled={saving}
+                                          onclick={closeSubmitModal}></lightning-button>
+                        <lightning-button variant="brand"
+                                          label={submitLabel}
+                                          disabled={saving}
+                                          onclick={handleConfirmSubmit}></lightning-button>
+                    </div>
+                </c-ds-modal-v2>
+            </template>
+        </template>
+    </div>
+</template>

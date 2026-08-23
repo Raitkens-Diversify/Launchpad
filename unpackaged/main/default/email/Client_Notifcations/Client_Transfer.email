@@ -1,0 +1,10 @@
+Hello [!Case.Contact.FirstName] [!Case.Contact.LastName],
+
+I hope this email finds you well. I am reaching out today regarding the transfer from **{Sending Firm Name}** to **{Receiving Firm Name}**, in the amount of **{Amount}**. This transfer request has finalized as of **{date of completion}**. 
+
+Sending Account: [!Case.Transfer_From_Account_Name__c] - [!Case.Transfer_From_Account_Number__c] - [!Case.Custodian__c] - [!Case.Transfer_From_Account_Type__c]
+Receiving Account: [!Case.To_Account__r.OASP_FSC__Registration__r.Name] [!Case.To_Account__r.OASP_FSC__Registration__r.OASP_FSC__Registration_Type__r.Name] XXXX[!Case.To_Account__r.Account_Number_Last_4__c], [!Case.To_Account__r.OASP_FSC__Custodian__r.Name]
+
+The funds were allocated into the strategy you previously discussed with [!Case.Financial_Advisor_Team__r.Primary_Financial_Advisor__r.FirstName] [!Case.Financial_Advisor_Team__r.Primary_Financial_Advisor__r.LastName] and this transaction has been completed. I can be reached via phone or email with follow up questions.
+
+Sincerely,

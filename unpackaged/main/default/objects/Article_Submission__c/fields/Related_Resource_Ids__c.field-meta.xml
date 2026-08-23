@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Related_Resource_Ids__c</fullName>
+    <description>Resource__c record Ids to link on promotion, one per line, in display order (written by the console&#39;s resource linker — never hand-typed).</description>
+    <label>Related Resource Ids</label>
+    <length>32768</length>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>4</visibleLines>
+</CustomField>

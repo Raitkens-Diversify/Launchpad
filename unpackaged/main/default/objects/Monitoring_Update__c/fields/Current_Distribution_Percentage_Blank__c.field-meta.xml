@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Current_Distribution_Percentage_Blank__c</fullName>
+    <description>For Lightning Page for Advisors.</description>
+    <formula>ISNULL(Current_Distribution_Percentage__c)</formula>
+    <label>Current Distribution Percentage Blank</label>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Request Allocation Inactivated From --></label>
+        <name>Request_Allocation_Inactivated_From__c</name>
+        <relationshipLabel><!-- Allocations (Request Allocation Inactivated From) --></relationshipLabel>
+    </CustomFieldTranslation>

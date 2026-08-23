@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Site_Url_Path_Prefix__c</fullName>
+    <description>URL path prefix of the LWR Experience site hosting the Resources page (the c:resourceCenter page used for shareable resource links). Blank falls back to &quot;help&quot;.</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Site URL Path Prefix</label>
+    <length>80</length>
+    <required>false</required>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Role --></label>
+        <name>Role__c</name>
+        <picklistValues>
+            <masterLabel>Beneficiary</masterLabel>
+            <translation><!-- Beneficiary --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Custodian</masterLabel>
+            <translation><!-- Custodian --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Joint Owner</masterLabel>
+            <translation><!-- Joint Owner --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Primary Owner</masterLabel>
+            <translation><!-- Primary Owner --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Trusted Contact</masterLabel>
+            <translation><!-- Trusted Contact --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

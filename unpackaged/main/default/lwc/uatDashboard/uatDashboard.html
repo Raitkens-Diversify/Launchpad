@@ -1,0 +1,268 @@
+<template>
+    <div class="ud">
+        <template if:true={errorMessage}>
+            <p class="ud__error" role="alert">{errorMessage}</p>
+        </template>
+
+        <template if:true={loading}>
+            <c-ds-skeleton variant="card" count="3"></c-ds-skeleton>
+        </template>
+
+        <template if:false={loading}>
+            <template if:true={isAllCaughtUp}>
+                <c-ds-empty-state
+                    icon="utility:check"
+                    heading="You're all caught up"
+                    message="Nothing claimed and the open pool is empty right now. Check back later — new cases land here when a cycle opens."
+                    action-label="Go to Open Pool"
+                    show-action
+                    onaction={handleGoToPool}
+                ></c-ds-empty-state>
+            </template>
+
+            <template if:false={isAllCaughtUp}>
+                <div class="ud__grid">
+                    <div class="ud__main">
+                        <template if:true={hasHero}>
+                            <section class="ud__card ud__summary" aria-label="Cycle summary">
+                                <div class="ud__summary-head">
+                                    <div class="ud__summary-title">
+                                        <h1 class="ud__cycle-name">{hero.cycleName}</h1>
+                                        <div class="ud__summary-sub">
+                                            <c-ds-badge label={cycleStatusLabel} variant={cycleStatusVariant} size="sm"></c-ds-badge>
+                                            <template if:true={daysRemainingLabel}>
+                                                <span class="ud__days">{daysRemainingLabel}</span>
+                                            </template>
+                                        </div>
+                                    </div>
+                                    <div class="ud__summary-aside">
+                                        <template if:true={cycleEndsLabel}>
+                                            <span class="ud__ends">
+                                                <lightning-icon class="ud__meta-icon" icon-name="utility:event"
+                                                                size="xx-small" alternative-text=""></lightning-icon>
+                                                {cycleEndsLabel}
+                                            </span>
+                                        </template>
+                                        <!-- The off-script escape hatch. Scoped to whatever
+                                             cycle the switcher currently has selected. -->
+                                        <lightning-button class="ud__adhoc"
+                                                          label="Log something off-script"
+                                                          icon-name="utility:edit"
+                                                          disabled={startingAdHoc}
+                                                          onclick={handleAdHoc}></lightning-button>
+                                    </div>
+                                </div>
+                                <div class="ud__summary-body">
+                                    <c-ds-progress-ring percent={cyclePercent} label="complete"></c-ds-progress-ring>
+                                    <div class="ud__summary-right">
+                                        <div class="ud__stats">
+                                            <template for:each={cycleStats} for:item="stat">
+                                                <div key={stat.key} class="ud__stat">
+                                                    <span class={stat.iconClass}>
+                                                        <lightning-icon icon-name={stat.icon} size="x-small" alternative-text=""></lightning-icon>
+                                                    </span>
+                                                    <span class="ud__stat-text">
+                                                        <span class="ud__stat-value">{stat.value}</span>
+                                                        <span class="ud__stat-label">{stat.label}</span>
+                                                    </span>
+                                                </div>
+                                            </template>
+                                        </div>
+                                        <div class="ud__summary-progress">
+                                            <span class="ud__progress-caption">{testsCaption}</span>
+                                            <c-ds-progress-bar segments={cycleSegments} variant="light"
+                                                               aria-label={cycleProgressAriaLabel}></c-ds-progress-bar>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </template>
+
+                        <section class="ud__card" aria-label="Your active test">
+                            <div class="ud__section-head">
+                                <h2 class="ud__section-title">Your Active Test</h2>
+                            </div>
+                            <template if:true={hasActiveTest}>
+                                <div class="ud__active">
+                                    <div class="ud__active-main">
+                                        <c-ds-badge label="In Progress" variant="info" size="sm"></c-ds-badge>
+                                        <h3 class="ud__active-title" title={activeTest.caseCode}>{activeTest.displayTitle}</h3>
+                                        <template if:true={activeTest.description}>
+                                            <p class="ud__active-desc">{activeTest.description}</p>
+                                        </template>
+                                        <template if:true={activeTest.metaItems.length}>
+                                            <div class="ud__meta-row">
+                                                <template for:each={activeTest.metaItems} for:item="item">
+                                                    <span key={item.key} class="ud__meta-item">
+                                                        <lightning-icon class="ud__meta-icon" icon-name={item.icon}
+                                                                        size="xx-small" alternative-text=""></lightning-icon>
+                                                        {item.label}
+                                                    </span>
+                                                </template>
+                                            </div>
+                                        </template>
+                                        <div class="ud__active-actions">
+                                            <lightning-button variant="brand" label="Resume Testing"
+                                                              data-id={activeTest.executionId}
+                                                              onclick={handleOpenCard}></lightning-button>
+                                        </div>
+                                        <template if:true={moreInProgressLabel}>
+                                            <button type="button" class="ud__link ud__more-link"
+                                                    onclick={handleGoToQueue}>{moreInProgressLabel}</button>
+                                        </template>
+                                    </div>
+                                    <span class="ud__active-visual" aria-hidden="true">
+                                        <lightning-icon icon-name="utility:task" size="medium" alternative-text=""></lightning-icon>
+                                    </span>
+                                </div>
+                            </template>
+                            <template if:false={hasActiveTest}>
+                                <p class="ud__empty-line">No test is currently in progress.
+                                    Claim a test from the available pool to begin.</p>
+                            </template>
+                        </section>
+
+                        <section class="ud__card" aria-label="Available tests">
+                            <div class="ud__section-head">
+                                <h2 class="ud__section-title">Available Tests
+                                    <span class="ud__count-chip">{availableCount}</span>
+                                </h2>
+                                <button type="button" class="ud__link" onclick={handleGoToPool}>View All</button>
+                            </div>
+                            <template if:true={hasAvailable}>
+                                <div class="ud__avail-controls">
+                                    <lightning-input type="search" variant="label-hidden"
+                                                     label="Search available tests"
+                                                     placeholder="Search tests…"
+                                                     value={searchTerm}
+                                                     onchange={handleSearchChange}
+                                                     class="ud__search"></lightning-input>
+                                    <lightning-combobox variant="label-hidden" label="Area"
+                                                        options={areaOptions} value={filterArea}
+                                                        onchange={handleAreaChange}></lightning-combobox>
+                                    <lightning-combobox variant="label-hidden" label="Priority"
+                                                        options={priorityOptions} value={filterPriority}
+                                                        onchange={handlePriorityChange}></lightning-combobox>
+                                    <lightning-input type="checkbox" label="Quick tests only"
+                                                     checked={quickOnly}
+                                                     onchange={handleQuickToggle}
+                                                     class="ud__quick"></lightning-input>
+                                </div>
+                                <template if:true={hasFilteredResults}>
+                                    <div class="ud__avail-grid">
+                                        <template for:each={availableDisplay} for:item="card">
+                                            <article key={card.key} class="ud__pool-card">
+                                                <div class="ud__pool-top">
+                                                    <h3 class="ud__pool-title" title={card.caseCode}>{card.displayTitle}</h3>
+                                                    <c-ds-badge label={card.priority} variant={card.priorityVariant} size="sm"></c-ds-badge>
+                                                </div>
+                                                <template if:true={card.description}>
+                                                    <p class="ud__pool-desc">{card.description}</p>
+                                                </template>
+                                                <div class="ud__meta-row">
+                                                    <template for:each={card.metaItems} for:item="item">
+                                                        <span key={item.key} class="ud__meta-item">
+                                                            <lightning-icon class="ud__meta-icon" icon-name={item.icon}
+                                                                            size="xx-small" alternative-text=""></lightning-icon>
+                                                            {item.label}
+                                                        </span>
+                                                    </template>
+                                                </div>
+                                                <div class="ud__pool-footer">
+                                                    <lightning-button variant="neutral" label="Claim Test"
+                                                                      stretch
+                                                                      disabled={busy}
+                                                                      data-cycleid={card.cycleId}
+                                                                      data-caseid={card.caseId}
+                                                                      data-code={card.claimCode}
+                                                                      onclick={handleClaim}></lightning-button>
+                                                </div>
+                                            </article>
+                                        </template>
+                                    </div>
+                                    <template if:true={hasMoreAvailable}>
+                                        <button type="button" class="ud__link ud__more-link"
+                                                onclick={handleGoToPool}>{viewAllLabel}</button>
+                                    </template>
+                                </template>
+                                <template if:false={hasFilteredResults}>
+                                    <p class="ud__empty-line">Nothing matches those filters.</p>
+                                </template>
+                            </template>
+                            <template if:false={hasAvailable}>
+                                <p class="ud__empty-line">Nothing is waiting to be claimed.
+                                    New cases land here when a cycle opens.</p>
+                            </template>
+                        </section>
+                    </div>
+
+                    <aside class="ud__side">
+                        <section class="ud__card" aria-label="My queue summary">
+                            <div class="ud__section-head">
+                                <h2 class="ud__section-title">My Queue</h2>
+                                <button type="button" class="ud__link" onclick={handleGoToQueue}>View Queue</button>
+                            </div>
+                            <ul class="ud__side-list">
+                                <template for:each={queueStats} for:item="row">
+                                    <li key={row.key} class="ud__side-row">
+                                        <span class={row.iconClass}>
+                                            <lightning-icon icon-name={row.icon} size="x-small" alternative-text=""></lightning-icon>
+                                        </span>
+                                        <span class="ud__side-value">{row.value}</span>
+                                        <span class="ud__side-label">{row.label}</span>
+                                    </li>
+                                </template>
+                            </ul>
+                        </section>
+
+                        <section class="ud__card" aria-label="Cycle activity">
+                            <div class="ud__section-head">
+                                <h2 class="ud__section-title">Cycle Activity</h2>
+                            </div>
+                            <template if:true={hasActivity}>
+                                <ul class="ud__side-list">
+                                    <template for:each={activityRows} for:item="row">
+                                        <li key={row.key} class="ud__activity-row">
+                                            <span class="ud__activity-text">{row.text}</span>
+                                            <span class="ud__time">{row.timeLabel}</span>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </template>
+                            <template if:false={hasActivity}>
+                                <p class="ud__empty-line">No seat activity in this cycle yet.</p>
+                            </template>
+                        </section>
+
+                        <section class="ud__card" aria-label="Recently completed">
+                            <div class="ud__section-head">
+                                <h2 class="ud__section-title">Recently Completed</h2>
+                            </div>
+                            <template if:true={hasRecentlyCompleted}>
+                                <ul class="ud__side-list">
+                                    <template for:each={recentlyCompleted} for:item="row">
+                                        <li key={row.key} class="ud__recent-row">
+                                            <div class="ud__recent-top">
+                                                <span class="ud__recent-title" title={row.caseCode}>{row.displayTitle}</span>
+                                                <c-ds-badge label={row.resultLabel} variant={row.resultVariant} size="sm"></c-ds-badge>
+                                            </div>
+                                            <div class="ud__recent-meta">
+                                                <span class="ud__meta">{row.metaLabel}</span>
+                                                <template if:true={row.timeLabel}>
+                                                    <span class="ud__time">{row.timeLabel}</span>
+                                                </template>
+                                            </div>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </template>
+                            <template if:false={hasRecentlyCompleted}>
+                                <p class="ud__empty-line">Nothing completed yet this cycle.</p>
+                            </template>
+                        </section>
+                    </aside>
+                </div>
+            </template>
+        </template>
+    </div>
+</template>

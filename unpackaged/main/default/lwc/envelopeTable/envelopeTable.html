@@ -1,0 +1,233 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-08-11 -->
+<template>
+  <div class="env-layout envelope-table">
+    <template lwc:if={isLoading}>
+      <div class="envelope-table__header">
+        <h1 class="envelope-table__title">{title}</h1>
+      </div>
+      <div class="envelope-table__loading">
+        <c-arc-loading-spinner
+          alternative-text="Loading envelopes"
+          size="medium"
+        ></c-arc-loading-spinner>
+      </div>
+    </template>
+
+    <template lwc:elseif={hasEnvelopes}>
+      <div class="envelope-table__header-row">
+        <h1 class="envelope-table__title">{title}</h1>
+        <template lwc:if={showToolbarActions}>
+          <lightning-button
+            class="envelope-table__toolbar-new"
+            variant="brand"
+            icon-name="utility:add"
+            label="New Envelope"
+            onclick={handleNewEnvelope}
+          ></lightning-button>
+        </template>
+      </div>
+
+      <div class="envelope-table__toolbar">
+        <template lwc:if={enableSearch}>
+          <div class="envelope-table__toolbar-search">
+            <lightning-input
+              type="search"
+              variant="label-hidden"
+              label="Search envelopes"
+              placeholder={searchPlaceholder}
+              value={searchTerm}
+              onchange={handleSearchChange}
+            ></lightning-input>
+          </div>
+        </template>
+
+        <div
+          class="envelope-table__toolbar-controls envelope-table__toolbar-controls--end"
+        >
+          <template lwc:if={showFilterButton}>
+            <button
+              type="button"
+              class="envelope-table__filter-button"
+              onclick={handleFilterClick}
+            >
+              <span
+                class="envelope-table__filter-icon"
+                style={filterIconStyle}
+                aria-hidden="true"
+              ></span>
+              <span>Filter</span>
+            </button>
+            <template lwc:if={showFilterMenu}>
+              <div
+                class="envelope-table__filter-menu"
+                role="dialog"
+                aria-label="Filter"
+              >
+                <label class="envelope-table__filter-row">
+                  <span class="envelope-table__filter-label">Field</span>
+                  <select
+                    class="envelope-table__filter-select"
+                    onchange={handleFilterFieldChange}
+                  >
+                    <option value="">Select a field…</option>
+                    <template for:each={filterFieldOptions} for:item="option">
+                      <option
+                        key={option.value}
+                        value={option.value}
+                        selected={option.selected}
+                      >
+                        {option.label}
+                      </option>
+                    </template>
+                  </select>
+                </label>
+                <label class="envelope-table__filter-row">
+                  <span class="envelope-table__filter-label">Contains</span>
+                  <input
+                    class="envelope-table__filter-input"
+                    type="text"
+                    value={filterValue}
+                    placeholder="Type a value…"
+                    oninput={handleFilterValueChange}
+                  />
+                </label>
+                <div class="envelope-table__filter-actions">
+                  <button
+                    type="button"
+                    class="envelope-table__filter-action"
+                    onclick={handleFilterClear}
+                  >
+                    Clear
+                  </button>
+                  <button
+                    type="button"
+                    class="envelope-table__filter-action envelope-table__filter-action--brand"
+                    onclick={handleFilterApply}
+                  >
+                    Apply
+                  </button>
+                </div>
+              </div>
+            </template>
+          </template>
+
+          <c-div-segmented-control
+            class="envelope-table__toolbar-scope"
+            options={scopeOptions}
+            value={scopeFilter}
+            group-label="Record scope"
+            onchange={handleScopeChange}
+          ></c-div-segmented-control>
+
+          <template lwc:if={enableLastActivityFilter}>
+            <lightning-input
+              class="envelope-table__toolbar-date"
+              type="date"
+              variant="label-hidden"
+              label={lastActivityFilterPlaceholder}
+              placeholder={lastActivityFilterPlaceholder}
+              value={dateFilter}
+              onchange={handleDateChange}
+            ></lightning-input>
+          </template>
+        </div>
+      </div>
+
+      <div class="envelope-table__table">
+        <c-styled-data-table
+          aria-label={title}
+          key-field="id"
+          density="comfortable"
+          enable-column-resize
+          column-width-storage-key="envelopeTable.colWidths"
+          enable-column-reorder
+          oncolumnreorder={handleColumnReorder}
+          columns={columns}
+          data={tableRows}
+          placeholder="-"
+          default-sort-field={defaultSortField}
+          default-sort-direction={defaultSortDirection}
+          row-actions={effectiveRowActions}
+          empty-message={tableEmptyMessage}
+          enable-row-click
+          enable-row-navigation
+          enable-pagination={enablePagination}
+          show-footer-view-all={showViewAllFooter}
+          view-all-url={viewAllUrl}
+          page-size={pageSize}
+          page-size-options={pageSizeOptions}
+          link-object-api-name-field="objectApiName"
+          link-query-param-object-api-names={linkQueryParamObjectApiNames}
+          onrowaction={handleRowAction}
+          onrowclick={handleRowClick}
+        ></c-styled-data-table>
+      </div>
+
+      <!-- <template lwc:if={showResetFilters}>
+        <div class="envelope-table__filter-reset">
+          <lightning-button
+            variant="neutral"
+            icon-name="utility:undo"
+            label="Reset Filter"
+            onclick={handleResetFilters}
+          ></lightning-button>
+        </div>
+      </template> -->
+    </template>
+
+    <template lwc:else>
+      <div class="envelope-table__empty">
+        <img
+          class="envelope-table__empty-illustration"
+          src={emptyEnvelopeIllustration}
+          alt="No envelopes"
+        />
+
+        <div class="envelope-table__empty-text">
+          <p class="envelope-table__empty-title">No envelopes yet</p>
+          <p class="envelope-table__empty-subtitle">
+            Create an envelope to start preparing work for submission.
+          </p>
+        </div>
+
+        <template lwc:if={showToolbarActions}>
+          <lightning-button
+            class="envelope-table__empty-cta"
+            variant="brand"
+            icon-name="utility:add"
+            label="New Envelope"
+            onclick={handleNewEnvelope}
+          ></lightning-button>
+        </template>
+      </div>
+    </template>
+
+    <template lwc:if={showToolbarActions}>
+      <c-envelope-create-modal-v2
+        is-open={showCreateModal}
+        household-options={householdOptions}
+        advisor-team-options={advisorTeamOptions}
+        onclose={handleCloseCreateModal}
+        oncreated={handleCreateEnvelope}
+      ></c-envelope-create-modal-v2>
+    </template>
+
+    <template lwc:if={hasRowActions}>
+      <c-envelope-rename-modal-v2
+        is-open={showRenameModal}
+        envelope-id={renameEnvelopeId}
+        envelope-name={renameEnvelopeName}
+        onclose={handleCloseRenameModal}
+        onrenamed={handleRenameEnvelope}
+      ></c-envelope-rename-modal-v2>
+
+      <c-envelope-delete-modal-v2
+        is-open={showDeleteModal}
+        envelope-id={deleteEnvelopeId}
+        envelope-name={deleteEnvelopeName}
+        onclose={handleCloseDeleteModal}
+        ondeleted={handleDeleteEnvelope}
+      ></c-envelope-delete-modal-v2>
+    </template>
+  </div>
+</template>

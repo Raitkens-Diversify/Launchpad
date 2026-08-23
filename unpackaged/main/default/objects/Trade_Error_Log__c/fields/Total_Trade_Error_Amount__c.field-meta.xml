@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Total_Trade_Error_Amount__c</fullName>
+    <label>Total Trade Error Amount</label>
+    <summarizedField>Trade_Error_Impacted_Account__c.Trade_Error_Amount__c</summarizedField>
+    <summaryForeignKey>Trade_Error_Impacted_Account__c.Trade_Error_Log__c</summaryForeignKey>
+    <summaryOperation>sum</summaryOperation>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Summary</type>
+</CustomField>

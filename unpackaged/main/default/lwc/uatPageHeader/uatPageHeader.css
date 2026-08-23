@@ -1,0 +1,92 @@
+:host {
+    display: block;
+
+    /* Self-declared --slds-g-* block (canonical values, ui-standards §1):
+       the platform injects real SLDS2 hooks per component scope, and an
+       injected value beats anything inherited from the shell's :host. */
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-accent-3: #071c31;
+    --slds-g-color-on-accent-1: #ffffff;
+}
+
+.uph {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-space-lg, 16px);
+    margin: 0 0 var(--ds-space-xl, 24px);
+}
+
+.uph__lead {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-lg, 16px);
+    min-width: 0;
+}
+
+/* The topic-nav icon-circle idiom at header scale. */
+.uph__icon {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--ds-lightest-blue, #e2f8ff);
+    --sds-c-icon-color-foreground-default: var(--ds-medium-blue, #1a76bb);
+}
+
+.uph__text {
+    min-width: 0;
+}
+
+.uph__title-row {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-sm, 8px);
+}
+
+/* Sans, not serif — operational surface (the shell's .uta-title scale). */
+.uph__title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    overflow-wrap: anywhere;
+}
+
+/* The dashboard's .ud__count-chip idiom. */
+.uph__count {
+    flex: none;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: var(--ds-lightest-blue, #e2f8ff);
+    color: var(--slds-g-color-accent-1, #0f406f);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.uph__subtitle {
+    margin: var(--ds-space-xs, 4px) 0 0;
+    font-size: 0.875rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+@media (max-width: 640px) {
+    .uph {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--ds-space-md, 12px);
+    }
+    .uph__action {
+        display: block;
+    }
+}

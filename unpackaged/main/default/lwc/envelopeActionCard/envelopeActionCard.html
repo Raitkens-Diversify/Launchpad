@@ -1,0 +1,61 @@
+<template>
+    <div class="action-card">
+        <div class="action-card__left">
+            <lightning-icon
+                icon-name={iconName}
+                size="small"
+                class={iconClass}
+                alternative-text={action.title}>
+            </lightning-icon>
+            <div class="action-card__title-group">
+                <span class="action-card__title">{action.title}</span>
+                <span class={badgeClass}>
+                    <template lwc:if={action.isComplete}>
+                        <lightning-icon
+                            icon-name="utility:success"
+                            size="xx-small"
+                            class="action-card__badge-icon">
+                        </lightning-icon>
+                    </template>
+                    {action.statusLabel}
+                </span>
+            </div>
+        </div>
+        <div class="action-card__right">
+            <template lwc:if={action.missingLabel}>
+                <div class="action-card__missing-group">
+                    <lightning-icon
+                        icon-name="utility:warning"
+                        size="x-small"
+                        class="action-card__warn-icon"
+                        alternative-text="Warning">
+                    </lightning-icon>
+                    <span class="action-card__missing">{action.missingLabel}</span>
+                </div>
+            </template>
+            <div class="action-card__actions">
+                <lightning-button-menu
+                    variant="bare"
+                    icon-name="utility:threedots_vertical"
+                    menu-alignment="right"
+                    alternative-text="More actions"
+                    title="More actions"
+                    onselect={handleMenuSelect}>
+                    <lightning-menu-item
+                        value="remove"
+                        label={removeMenuLabel}
+                        prefix-icon-name="utility:delete"
+                        class="env-menu-item_destructive">
+                    </lightning-menu-item>
+                </lightning-button-menu>
+                <lightning-button-icon
+                    icon-name="utility:chevronright"
+                    variant="border"
+                    alternative-text="Open"
+                    title="Open"
+                    onclick={handleOpen}>
+                </lightning-button-icon>
+            </div>
+        </div>
+    </div>
+</template>

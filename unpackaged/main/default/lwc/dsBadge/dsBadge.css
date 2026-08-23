@@ -1,0 +1,42 @@
+.ds-badge {
+    border-radius: var(--ds-radius-pill, 20px);
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--ds-font-body, 'Inter', -apple-system, BlinkMacSystemFont, sans-serif);
+    font-weight: 600;
+}
+
+.ds-badge_md {
+    font-size: 11px;
+    padding: 4px 10px;
+}
+
+.ds-badge_sm {
+    font-size: 10px;
+    padding: 2px 8px;
+}
+
+.ds-badge_default {
+    background: var(--ds-gray-1, #f3f4f6);
+    color: var(--ds-gray-5, #4b5563);
+}
+
+.ds-badge_info {
+    background: var(--ds-lightest-blue, #e2f8ff);
+    color: var(--ds-medium-blue, #1a76bb);
+}
+
+.ds-badge_success {
+    background: var(--ds-success-bg, #e8f5e9);
+    color: var(--ds-success-text, #2d7d46);
+}
+
+.ds-badge_warning {
+    background: var(--ds-warning-bg, #fff8e6);
+    color: var(--ds-warning-text, #b8860b);
+}
+
+.ds-badge_error {
+    background: var(--ds-error-bg, #fdecec);
+    color: var(--ds-error-text, #a83232);
+}

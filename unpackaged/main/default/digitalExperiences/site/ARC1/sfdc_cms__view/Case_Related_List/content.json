@@ -1,0 +1,60 @@
+{
+  "type" : "sfdc_cms__view",
+  "title" : "Case Related List",
+  "contentBody" : {
+    "component" : {
+      "children" : [ {
+        "children" : [ {
+          "attributes" : {
+            "backgroundImageConfig" : "",
+            "backgroundImageOverlay" : "rgba(0,0,0,0)",
+            "componentSpacerSize" : "",
+            "dxpStyle" : { },
+            "layoutDirectionDesktop" : "row",
+            "layoutDirectionMobile" : "column",
+            "layoutDirectionTablet" : "column",
+            "maxContentWidth" : "",
+            "sectionColumnGutterWidth" : "",
+            "sectionConfig" : "{\"UUID\":\"b333984f-c9a0-4e89-85fb-7b22eea8d85c\",\"columns\":[{\"UUID\":\"87df069d-4bc2-415f-b0a2-5958524557de\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":[]}]}",
+            "sectionMinHeight" : "",
+            "sectionVerticalAlign" : "flex-start"
+          },
+          "children" : [ {
+            "id" : "87df069d-4bc2-415f-b0a2-5958524557de",
+            "name" : "col1",
+            "title" : "Column 1",
+            "type" : "region"
+          } ],
+          "definition" : "community_layout:section",
+          "id" : "b333984f-c9a0-4e89-85fb-7b22eea8d85c",
+          "type" : "component"
+        } ],
+        "id" : "371d4694-eaf3-40d5-a735-6df652f3bedb",
+        "name" : "content",
+        "title" : "Content",
+        "type" : "region"
+      }, {
+        "children" : [ {
+          "attributes" : {
+            "dxpStyle" : { },
+            "recordId" : "{!recordId}"
+          },
+          "definition" : "community_builder:seoAssistant",
+          "id" : "5d89e1a7-6356-40f5-a58a-17b24ff3e089",
+          "type" : "component"
+        } ],
+        "id" : "e52714f0-53c8-46ce-9ffb-01c35d60c596",
+        "name" : "sfdcHiddenRegion",
+        "title" : "sfdcHiddenRegion",
+        "type" : "region"
+      } ],
+      "definition" : "community_layout:sldsFlexibleLayout",
+      "id" : "2a4512c6-503c-433d-8919-1db3f18e3020",
+      "type" : "component"
+    },
+    "dataProviders" : [ ],
+    "themeLayoutType" : "OHzbXAVux6mZ7VVDb7Pb8F2YUFBAXR",
+    "viewType" : "relatedlist-500"
+  },
+  "urlName" : "case-related-list"
+}

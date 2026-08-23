@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- 529SellServiceNone --></label>
+        <name>X529SellServiceNone__c</name>
+        <relationshipLabel><!-- Product Filter Lookups (529SellServiceNone) --></relationshipLabel>
+    </CustomFieldTranslation>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Arc Breadcrumb</masterLabel>
+    <description
+  >Dynamic breadcrumb trail for LWR Experience Cloud list and record pages.</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property
+        name="parentLabel"
+        type="String"
+        label="Parent Label"
+        description="Static fallback parent segment when items and nav trail are unavailable."
+      />
+            <property
+        name="currentLabel"
+        type="String"
+        label="Current Label"
+        description="Static fallback current segment when items and nav trail are unavailable."
+      />
+            <property
+        name="parentKey"
+        type="String"
+        label="Parent Key"
+        description="Optional key for the static parent segment; emits crumbselect when clicked."
+      />
+            <property
+        name="objectApiName"
+        type="String"
+        label="Object API Name"
+        description="Used to resolve the record Id from the URL and load the display name."
+        default="Account"
+      />
+            <property
+        name="listLabel"
+        type="String"
+        label="List Label"
+        description="Fallback list label on list pages when no sidebar nav trail is stored."
+      />
+            <property
+        name="listPath"
+        type="String"
+        label="List Path"
+        description="Fallback list route when no sidebar nav trail is stored yet."
+        default="/account/Account/Default?c__tabId=tab1"
+      />
+            <property
+        name="nameField"
+        type="String"
+        label="Name Field"
+        description="Field API name used for the current record segment"
+        default="Name"
+      />
+            <property
+        name="ariaLabel"
+        type="String"
+        label="Aria Label"
+        default="Breadcrumb"
+      />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

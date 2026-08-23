@@ -1,0 +1,64 @@
+<template>
+    <lightning-card title="Home Office Pit Stop Tasks">
+        <template lwc:if={hasTasks}>
+            <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                <thead>
+                    <tr class="slds-line-height_reset">
+                        <th scope="col" style="width: 40%;">
+                            <div class="slds-truncate">Subject</div>
+                        </th>
+                        <th scope="col">
+                            <div class="slds-truncate">Status</div>
+                        </th>
+                        <th scope="col">
+                            <div class="slds-truncate">Owner</div>
+                        </th>
+                        <th scope="col">
+                            <div class="slds-truncate">Completed Date</div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!--
+                        processedRows is pre-flattened in JS: each entry is either
+                        a task row (isTask=true) or a milestone banner (isTask=false).
+                        LWC for:each requires a single keyed <tr> root per iteration.
+                    -->
+                    <template for:each={processedRows} for:item="row">
+                        <tr key={row.key}>
+                            <!-- Task row -->
+                            <template lwc:if={row.isTask}>
+                                <td class="slds-truncate">
+                                    <div class="slds-grid" style="width:250px">
+                                        <div class="slds-grid slds-has-flexi-truncate">
+                                            <a  class="slds-truncate"
+                                                href="javascript:void(0);"
+                                                data-taskid={row.task.Id}
+                                                data-tasksub={row.task.Subject}
+                                                onclick={navigateToTask}>
+                                                {row.task.Subject}
+                                            </a>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{row.task.Status}</td>
+                                <td>{row.task.Owner.Name}</td>
+                                <td>{row.task.Completed_Date__c}</td>
+                            </template>
+
+                            <!-- Milestone banner row -->
+                            <template lwc:else>
+                                <td class="milestone-banner" colspan="4">
+                                    ---- {row.label} ----
+                                </td>
+                            </template>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </template>
+        <template lwc:else>
+            <div class="slds-p-around_medium">No Tasks Found.</div>
+        </template>
+    </lightning-card>
+</template>

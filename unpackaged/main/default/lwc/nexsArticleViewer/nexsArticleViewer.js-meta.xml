@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>NexS Article Viewer</masterLabel>
+    <description>Renders a single Knowledge article&#39;s rich-text body. Works in Experience Cloud and core app.</description>
+    <targets>
+        <target>lightning__AppPage</target>
+        <target>lightningCommunity__Page</target>
+    </targets>
+</LightningComponentBundle>

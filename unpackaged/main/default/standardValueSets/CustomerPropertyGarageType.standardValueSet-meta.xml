@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Attached</fullName>
+        <default>false</default>
+        <label>Attached</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Basement</fullName>
+        <default>false</default>
+        <label>Basement</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Built-In</fullName>
+        <default>false</default>
+        <label>Built-In</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Carport</fullName>
+        <default>false</default>
+        <label>Carport</label>
+    </standardValue>
+</StandardValueSet>

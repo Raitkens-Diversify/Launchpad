@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>User_on_FA_Team__c</fullName>
+    <formula>AND(NOT(ISBLANK(Financial_Advisor_Team__c)),NOT(ISBLANK(Financial_Advisor_Team__r.Users_On_Team__c)),CONTAINS(CASESAFEID($User.Id),Financial_Advisor_Team__r.Users_On_Team__c))</formula>
+    <label>User on FA Team</label>
+    <type>Checkbox</type>
+</CustomField>

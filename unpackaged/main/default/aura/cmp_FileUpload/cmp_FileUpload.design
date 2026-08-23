@@ -1,0 +1,9 @@
+<design:component>
+    <design:attribute name="label" label="File Upload Label" description="The text on the file upload button."/>
+    <design:attribute name="multiple" label="Allow Multiple Files" description="Lets the user upload multiple files." />
+    <design:attribute name="contentVersionIds" label="Content Version IDs" description="The Version IDs of the uploaded files. Store this value in a text collection variable." />
+    <design:attribute name="disabled" label="Disabled" description="Displays the component in a disabled state." /> 
+    <design:attribute name="recordId" label="Related Record ID" description="The ID of the record to associate the files with. If no values is passed, the component is disabled." />
+    <design:attribute name="advertisingType" label="Advertising Type" description="The text value for Advertising Type on Content Version records." />
+    <design:attribute name="flowInterviewId" label="Flow Interview ID" description="The ID of Flow Interview" />
+</design:component>

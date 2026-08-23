@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Advisory Account To Pay From --></label>
+        <name>Advisory_Account_To_Pay_From__c</name>
+    </CustomFieldTranslation>

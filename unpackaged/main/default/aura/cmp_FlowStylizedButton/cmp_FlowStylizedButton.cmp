@@ -1,0 +1,33 @@
+<aura:component implements="lightning:availableForFlowScreens" access="global">
+    <aura:attribute name="ButtonText" type="String" />
+    <aura:attribute name="ButtonType" type="String" />
+    <aura:attribute name="ValueClicked" type="String" />
+    <aura:attribute name="Size" type="String" />
+    <aura:attribute name="Class" type="String" />
+  
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+    <div>
+        <aura:if isTrue="{!v.ButtonType == 'Active Button'}">
+            <lightning:button variant="brand" label="{!v.ButtonText}" class="{!v.Class}" title="{!v.ButtonText}" onclick="{!c.handleClick}"/>
+        </aura:if>
+        <aura:if isTrue="{!v.ButtonType == 'Pause Button'}">
+            <lightning:button variant="brand" label="{!v.ButtonText}" class="{!v.Class}" title="{!v.ButtonText}" onclick="{!c.handlePauseClick}"/>
+        </aura:if>
+        <aura:if isTrue="{!v.ButtonType == 'Link Button'}">
+            <lightning:button variant="brand" label="{!v.ButtonText}" class="{!v.Class}" title="{!v.ButtonText}" onclick="{!c.handleLinkClick}"/>
+        </aura:if>
+        <aura:if isTrue="{!v.ButtonType == 'Inactive Button'}">
+            <lightning:button variant="brand" label="{!v.ButtonText}" class="{!v.Class}" title="{!v.ButtonText}" disabled="true"/>
+        </aura:if>
+        <aura:if isTrue="{!v.ButtonType == 'Selected Button'}">
+            <lightning:button variant="base" label="{!v.ButtonText}" class="{!v.Class}" title="{!v.ButtonText}"/>
+        </aura:if>
+        <aura:if isTrue="{!v.ButtonType == 'Blank Button'}">
+            <lightning:button variant="base" label="{!v.ButtonText}" class="{!v.Class}" title="{!v.ButtonText}"/>
+        </aura:if>
+        <aura:if isTrue="{!v.ButtonType == 'Link'}">
+            <lightning:button variant="base" label="{!v.ButtonText}" class="{!v.Class}" title="{!v.ButtonText}" onclick="{!c.handleClick}"/>
+        </aura:if>
+    </div>
+</aura:component>

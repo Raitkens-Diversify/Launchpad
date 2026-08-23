@@ -1,0 +1,77 @@
+{
+  "type" : "sfdc_cms__view",
+  "title" : "Reset Password",
+  "contentBody" : {
+    "component" : {
+      "children" : [ {
+        "children" : [ {
+          "attributes" : {
+            "backgroundImageConfig" : "",
+            "backgroundImageOverlay" : "rgba(0,0,0,0)",
+            "componentSpacerSize" : "",
+            "dxpStyle" : { },
+            "layoutDirectionDesktop" : "row",
+            "layoutDirectionMobile" : "column",
+            "layoutDirectionTablet" : "column",
+            "maxContentWidth" : "",
+            "sectionColumnGutterWidth" : "",
+            "sectionConfig" : "{\"UUID\":\"731e1824-95e9-4b87-8f91-9b32db78f198\",\"columns\":[{\"UUID\":\"b13e18ee-c4c6-4021-8e22-b116ffeb3398\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":[]}]}",
+            "sectionMinHeight" : "",
+            "sectionVerticalAlign" : "flex-start"
+          },
+          "children" : [ {
+            "children" : [ {
+              "attributes" : {
+                "cancelButtonLabel" : "Cancel",
+                "checkEmailUrl" : "./",
+                "dxpStyle" : { },
+                "instructionsLabel" : "To reset your password, enter your username. We'll send a reset-password link to the email address associated with your account.",
+                "submitButtonLabel" : "Reset",
+                "titleLabel" : "Reset your Password",
+                "usernameLabel" : "Username"
+              },
+              "definition" : "community_login:forgotPassword",
+              "id" : "6bbb40fa-2598-48e0-87ce-2e431cb1587b",
+              "type" : "component"
+            } ],
+            "id" : "b13e18ee-c4c6-4021-8e22-b116ffeb3398",
+            "name" : "col1",
+            "title" : "Column 1",
+            "type" : "region"
+          } ],
+          "definition" : "community_layout:section",
+          "id" : "731e1824-95e9-4b87-8f91-9b32db78f198",
+          "type" : "component"
+        } ],
+        "id" : "127df9b5-a889-4e86-a7ea-a274b97ab377",
+        "name" : "content",
+        "title" : "Content",
+        "type" : "region"
+      }, {
+        "children" : [ {
+          "attributes" : {
+            "customHeadTags" : "",
+            "description" : "",
+            "dxpStyle" : { },
+            "pageTitle" : "Reset Password",
+            "recordId" : "{!recordId}"
+          },
+          "definition" : "community_builder:seoAssistant",
+          "id" : "c9427844-2e83-460b-8e73-5ea4d63f3613",
+          "type" : "component"
+        } ],
+        "id" : "b308ac61-0731-4141-928b-d0200bdff3c1",
+        "name" : "sfdcHiddenRegion",
+        "title" : "sfdcHiddenRegion",
+        "type" : "region"
+      } ],
+      "definition" : "community_layout:sldsFlexibleLayout",
+      "id" : "5a984b2c-5e8a-4c71-8fe9-b96693ffe670",
+      "type" : "component"
+    },
+    "dataProviders" : [ ],
+    "themeLayoutType" : "OHzbXAVux6mZ7VVDb7Pb8F2YUFBAXR",
+    "viewType" : "custom-reset-password"
+  },
+  "urlName" : "reset-password"
+}

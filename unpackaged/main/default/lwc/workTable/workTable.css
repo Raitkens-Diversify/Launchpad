@@ -1,0 +1,205 @@
+/* Author: Hoang Long Vu To | Date: 2026-08-11
+   Input chrome from envelopeWizardStyles.css (.env-layout). */
+
+:host {
+  display: block;
+}
+
+.work-table {
+  display: block;
+  font-family: var(
+    --div-font-family-base,
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif
+  );
+}
+
+.work-table__title {
+  margin: 0;
+  font-family: var(--div-font-family-base);
+  font-size: var(--div-font-scale-3, 1.25rem);
+  font-weight: var(--div-font-weight-semibold, 600);
+  line-height: 24px;
+  letter-spacing: var(--div-font-letter-spacing-base, 0);
+  color: var(--div-color-on-surface-2, #374151);
+}
+
+.work-table__error {
+  margin: 0 0 12px;
+}
+
+/* Row 1: heading. Row 2 (.work-table__toolbar) is search-left,
+   filter/scope-right — kept separate so the heading never reflows when the
+   toolbar's controls wrap on narrow widths. */
+.work-table__header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 12px;
+}
+
+.work-table__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 0 0 16px;
+}
+
+.work-table__toolbar-search {
+  flex: 1 1 260px;
+  max-width: 320px;
+  min-width: 0;
+  margin: 0 12px 0 0;
+}
+
+.work-table__toolbar-controls {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.work-table__toolbar-controls--end {
+  margin-left: auto;
+}
+
+.work-table__toolbar-scope {
+  flex: 0 0 auto;
+}
+
+/* Same 36px box, 8px radius, border and label colour as the segmented
+     toggle beside it — the two read as one control group. */
+.work-table__filter-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid var(--div-color-border-2, #b6bcc5);
+  border-radius: 8px;
+  background: var(--div-color-white, #ffffff);
+  cursor: pointer;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 19px;
+  color: var(--div-color-blue-1000, #071c31);
+}
+
+.work-table__filter-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  display: block;
+  background-color: currentColor;
+  -webkit-mask-image: var(--icon-url);
+  mask-image: var(--icon-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.work-table__loading {
+  position: relative;
+  min-height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.work-table__table {
+  width: 100%;
+}
+
+.work-table__toolbar-search lightning-input {
+  --slds-c-input-spacing-block-end: 0;
+  --slds-c-input-spacing-block-start: 0;
+}
+/* ---- Filter popover -----------------------------------------------------
+ * The Filter button was a no-op; this is the panel it now opens. Same visual
+ * language as the list views' filter menu, anchored under the button.
+ * ------------------------------------------------------------------------ */
+.work-table__filter-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 280px;
+  padding: 16px;
+  border: 1px solid var(--div-color-border-1, #d1d5db);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(3, 45, 96, 0.16);
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+}
+
+.work-table__filter-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.work-table__filter-label {
+  color: var(--div-color-gray-600, #4b5563);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 17px;
+}
+
+.work-table__filter-select,
+.work-table__filter-input {
+  height: 36px;
+  padding: 0 8px;
+  border: 1px solid var(--div-color-border-2, #b6bcc5);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--div-color-blue-1000, #071c31);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 19px;
+}
+
+.work-table__filter-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.work-table__filter-action {
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid var(--div-color-border-2, #b6bcc5);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--div-color-blue-1000, #071c31);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 19px;
+  cursor: pointer;
+}
+
+.work-table__filter-action--brand {
+  border-color: transparent;
+  background: #032d60;
+  color: #ffffff;
+}

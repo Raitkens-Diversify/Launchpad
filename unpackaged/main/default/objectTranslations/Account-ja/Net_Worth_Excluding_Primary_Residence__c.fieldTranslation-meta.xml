@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Net Worth Excluding Primary Residence --></label>
+        <name>Net_Worth_Excluding_Primary_Residence__c</name>
+    </CustomFieldTranslation>

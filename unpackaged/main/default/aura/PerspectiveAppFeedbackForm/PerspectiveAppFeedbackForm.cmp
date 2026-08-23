@@ -1,0 +1,4 @@
+<aura:component implements="flexipage:availableForAllPageTypes" access="global">
+<center><iframe width="700px" height="600px" border="50px" src="https://forms.clickup.com/14212603/f/dhqfv-14037/OTPBMBR8YTS89UIC05?Intake%20Source%20-%20SFP=Perspective%20Feedback%20Form"/></center>
+
+</aura:component>

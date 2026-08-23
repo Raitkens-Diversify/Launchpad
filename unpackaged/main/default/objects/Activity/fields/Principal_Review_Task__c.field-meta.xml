@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Principal_Review_Task__c</fullName>
+    <formula>IF(ISPICKVAL(Task_Template_Item__r.Task_Template__r.Queue__c, &quot;Principal Review&quot;), true, false)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Principal Review Task</label>
+    <type>Checkbox</type>
+</CustomField>

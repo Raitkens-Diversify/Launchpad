@@ -1,0 +1,33 @@
+.upgrade-modal__logo {
+  display: flex;
+  align-items: center;
+}
+
+.upgrade-modal__logo img {
+  height: 24px;
+  width: auto;
+  display: block;
+}
+
+.upgrade-modal__title {
+  margin: 0 0 16px 0;
+  font-family: "Libre Baskerville", serif;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 32px;
+  color: var(--div-color-sidebar-text, #09243f);
+}
+
+.upgrade-modal__message {
+  margin: 0 0 16px 0;
+  font-family: var(--slds-g-font-family-base);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 19px;
+  color: var(--div-color-sidebar-text, #09243f);
+}
+
+.upgrade-modal__link {
+  color: inherit;
+  text-decoration: underline;
+}

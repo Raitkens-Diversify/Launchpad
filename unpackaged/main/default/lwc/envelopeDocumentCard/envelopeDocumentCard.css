@@ -1,0 +1,84 @@
+:host {
+    display: block;
+}
+
+/* Frame hooks (same idiom as c-card's --card-padding): the consumer may strip or reshape
+   the card frame, e.g. Review & Submit renders these as flat divider-separated rows. */
+.doc-card {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--slds-g-spacing-2, 8px);
+    padding: var(--doc-card-padding, var(--slds-g-spacing-4, 16px));
+    background: var(--slds-g-color-surface-1, #ffffff);
+    border: var(--doc-card-border, 1px solid var(--slds-g-color-border-1, #d1d5db));
+    border-radius: var(--doc-card-radius, var(--slds-g-radius-border-3, 12px));
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+}
+
+.doc-card__icon {
+    flex: none;
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.doc-card__content {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-3, 12px);
+}
+
+.doc-card__row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--slds-g-spacing-4, 16px);
+    width: 100%;
+}
+
+.doc-card__info {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-1, 4px);
+}
+
+.doc-card__name {
+    margin: 0;
+    font-size: 16px;
+    line-height: 22px;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.doc-card__signees {
+    margin: 0;
+    font-size: var(--slds-g-font-scale-1, 14px);
+    line-height: 19px;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.doc-card__signees-label {
+    font-weight: var(--slds-g-font-weight-7, 700);
+}
+
+/* Recolor lightning-badge to the success "File linked" state via its styling hooks,
+   which inherit into the badge's shadow. Same idiom as .doc-card__icon above. */
+.doc-card__badge {
+    flex: none;
+    --slds-c-badge-color-background: var(--slds-g-color-success-container-1, #dcfce7);
+    --slds-c-badge-text-color: var(--slds-g-color-on-success-1, #15803d);
+    --slds-c-badge-icon-color-foreground: var(--slds-g-color-on-success-1, #15803d);
+    --slds-c-badge-radius-border: var(--slds-g-radius-border-2, 8px);
+}
+
+.doc-card__file {
+    width: 100%;
+    margin: 0;
+    padding-top: var(--slds-g-spacing-3, 12px);
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    font-size: var(--slds-g-font-scale-1, 14px);
+    line-height: 19px;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    word-break: break-word;
+}

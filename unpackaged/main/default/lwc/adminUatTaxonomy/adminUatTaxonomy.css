@@ -1,0 +1,118 @@
+/* Mirrors adminCategoryManager's pane + modal conventions (.acm__*) so the
+   UAT Taxonomy section is visually indistinguishable from existing sections.
+   Tokens inherit from adminConsole's :host block; literals are fallbacks. */
+
+.aut__error {
+    margin: 0 0 0.75rem;
+    font-size: 0.875rem;
+    color: var(--ds-error-text, #a83232);
+}
+.aut__loading {
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+    min-height: 80px;
+}
+
+.aut__panes {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+.aut__pane {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem 1.25rem;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+}
+.aut__pane-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+.aut__pane-head > div:first-child {
+    flex: 1 1 auto;
+}
+.aut__pane-title {
+    margin: 0;
+    font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+    font-size: 1rem;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.aut__pane-sub {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.aut__bookmodal-copy {
+    margin: 0.75rem 0 0;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+.aut__empty {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.aut__rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+.aut__row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.5rem;
+    border-radius: var(--ds-radius-sm, 6px);
+    cursor: pointer;
+}
+.aut__row:hover {
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+.aut__row--active,
+.aut__row--active:hover {
+    background: var(--ds-lightest-blue, #e2f8ff);
+}
+.aut__row--static {
+    cursor: default;
+}
+.aut__row-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+.aut__row-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--slds-g-color-on-surface-2, #374151);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.aut__row-sub {
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+@media (max-width: 1280px) {
+    .aut__panes {
+        flex-direction: column;
+    }
+    .aut__pane {
+        width: 100%;
+        box-sizing: border-box;
+    }
+}

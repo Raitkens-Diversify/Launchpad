@@ -1,0 +1,37 @@
+<template>
+    <div class="hgne">
+        <h3 class="hgne__title">{title}</h3>
+
+        <lightning-textarea label="Question" value={question}
+                            onchange={handleQuestion}></lightning-textarea>
+        <lightning-input type="checkbox" label="This is the starting (root) question"
+                         checked={isRoot} onchange={handleRoot}
+                         class="hgne__root"></lightning-input>
+
+        <p class="hgne__label">Options</p>
+        <template for:each={options} for:item="opt">
+            <div key={opt._key} class="hgne__opt">
+                <lightning-input label="Button label" value={opt.label}
+                                 data-key={opt._key} data-field="label"
+                                 onchange={handleOptionChange}></lightning-input>
+                <lightning-combobox label="Goes to" value={opt.targetType} options={typeOptions}
+                                    data-key={opt._key} data-field="targetType"
+                                    onchange={handleOptionChange}></lightning-combobox>
+                <lightning-input label="Target value (node key / slug / UrlName)"
+                                 value={opt.targetValue} data-key={opt._key} data-field="targetValue"
+                                 onchange={handleOptionChange}></lightning-input>
+                <lightning-button-icon icon-name="utility:delete" alternative-text="Remove option"
+                                       data-key={opt._key} onclick={removeOption}
+                                       class="hgne__opt-del"></lightning-button-icon>
+            </div>
+        </template>
+        <lightning-button label="Add option" icon-name="utility:add" onclick={addOption}
+                          class="hgne__add"></lightning-button>
+
+        <div class="hgne__actions">
+            <lightning-button label="Cancel" onclick={handleCancel}></lightning-button>
+            <lightning-button variant="brand" label="Save" onclick={handleSave}
+                              disabled={saving}></lightning-button>
+        </div>
+    </div>
+</template>

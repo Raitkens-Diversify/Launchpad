@@ -1,0 +1,57 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-08-11 -->
+<template>
+  <article class="div-card arc-task-metrics" aria-labelledby="arc-task-metrics-title">
+    <header class="arc-task-metrics__header">
+      <div class="arc-task-metrics__header-copy">
+        <div class="arc-task-metrics__title-row">
+          <h2 id="arc-task-metrics-title" class="arc-task-metrics__title">Tasks</h2>
+          <lightning-helptext
+            content="Open tasks grouped by main track and pit stop categories."
+          ></lightning-helptext>
+        </div>
+        <p class="arc-task-metrics__subtitle">Main track vs pit stop</p>
+      </div>
+
+      <c-div-segmented-control
+        options={scopeOptions}
+        value={scope}
+        group-label="Task scope"
+        onchange={handleScopeChange}
+      ></c-div-segmented-control>
+    </header>
+
+    <template lwc:if={errorMessage}>
+      <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+        {errorMessage}
+      </div>
+    </template>
+
+    <template lwc:if={isInitialLoading}>
+      <div class="arc-task-metrics__loading">
+        <lightning-spinner alternative-text="Loading task metrics" size="small"></lightning-spinner>
+      </div>
+    </template>
+
+    <template lwc:else>
+      <div class="div-card__body div-card__body--stack arc-task-metrics__body">
+        <template for:each={metricRows} for:item="row">
+          <div key={row.key} class="arc-task-metrics__row">
+            <div class="arc-task-metrics__row-header">
+              <span class="arc-task-metrics__row-label">{row.label}</span>
+              <span class="arc-task-metrics__row-count">{row.count}</span>
+            </div>
+            <div class="arc-task-metrics__bar" aria-hidden="true">
+              <div
+                class="arc-task-metrics__bar-fill-wrapper"
+                data-bar-key={row.key}
+                data-bar-target-width={row.percent}
+              >
+                <div class={row.barClass}></div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </template>
+  </article>
+</template>

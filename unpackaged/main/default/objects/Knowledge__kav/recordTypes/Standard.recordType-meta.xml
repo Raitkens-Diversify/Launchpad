@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RecordType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Standard</fullName>
+    <active>true</active>
+    <description>Use this record type for all policies &amp; informational articles</description>
+    <label>Core Knowledge</label>
+</RecordType>

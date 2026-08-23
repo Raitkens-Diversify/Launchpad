@@ -1,0 +1,124 @@
+/* Self-declared so the flag colors hold on every surface: the platform injects --slds-g-* hooks per
+   scope, and the --ds-* triads are not injected at all, so inheritance cannot be relied on. */
+:host {
+  display: block;
+  --ds-error-text: #a83232;
+  --ds-warning-text: #b8860b;
+}
+
+.strategy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-3, 12px);
+}
+
+.strategy__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--slds-g-spacing-4, 16px);
+}
+
+.strategy__title {
+  margin: 0;
+  font-weight: var(--slds-g-font-weight-7, 700);
+  font-size: var(--slds-g-font-scale-2, 0.875rem);
+  line-height: 22px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+/* What the $ and % units mean, stated once for the table rather than per row. */
+.strategy__hint {
+  margin: 0;
+  max-width: 80ch;
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
+  line-height: 17px;
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* Rows and the column header strip share one track so they stay aligned. The dollar-equivalent
+   column exists only where a funded amount does, so the track widens with it. */
+.strategy__columns,
+.strategy__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 170px 96px 32px;
+  gap: var(--slds-g-spacing-4, 16px);
+  align-items: start;
+}
+
+.strategy_derived .strategy__columns,
+.strategy_derived .strategy__row {
+  grid-template-columns: minmax(0, 1fr) 170px 96px 110px 32px;
+}
+
+.strategy__column-label {
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
+  line-height: 17px;
+  font-weight: var(--slds-g-font-weight-7, 700);
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.strategy__rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-3, 12px);
+}
+
+.strategy__cell_value {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-1, 4px);
+}
+
+/* The unit column: a static badge where the rule locks the unit, the $/% toggle where it doesn't,
+   and the help icon beside either. */
+.strategy__cell_unit {
+  display: flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-1, 4px);
+  margin-top: 2px;
+}
+
+.strategy__unit-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  padding: 3px 8px;
+  border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+  border-radius: var(--slds-g-radius-border-2, 6px);
+  font-weight: var(--slds-g-font-weight-7, 700);
+  font-size: var(--slds-g-font-scale-1, 14px);
+  line-height: 19px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+  background: var(--slds-g-color-surface-2, #f9fafb);
+}
+
+/* The row's inline note: amber while it simply needs input, red when a stale draft value has to be
+   re-entered in the rule's unit. */
+.strategy__flag {
+  margin: 0;
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
+  line-height: 17px;
+  color: var(--ds-warning-text, #b8860b);
+}
+
+.strategy__flag_error {
+  color: var(--ds-error-text, #a83232);
+}
+
+/* The dollar equivalent is a read-out, not an input: plain text so it can never be mistaken for a
+   second number the advisor is expected to reconcile. */
+.strategy__derived {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
+  line-height: 17px;
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+  font-variant-numeric: tabular-nums;
+}
+
+.strategy__cell_remove {
+  align-self: start;
+  margin-top: 4px;
+}

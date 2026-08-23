@@ -1,0 +1,4 @@
+<aura:event type="APPLICATION" >
+    <aura:attribute name="disabled" type="boolean"/>
+    <aura:attribute name="index" type="String"/>
+</aura:event>

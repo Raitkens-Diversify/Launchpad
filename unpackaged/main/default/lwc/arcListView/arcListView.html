@@ -1,0 +1,535 @@
+<template lwc:render-mode="light">
+  <div class="arc-list-view env-layout">
+    <div class="arc-list-view__header">
+      <h2 class="arc-list-view__title">{title}</h2>
+    </div>
+
+    <div class="arc-list-view__toolbar">
+      <template lwc:if={isSearchEnabled}>
+        <lightning-input
+          class="margin-bottom-0"
+          type="search"
+          variant="label-hidden"
+          label={searchPlaceholder}
+          placeholder={searchPlaceholder}
+          value={searchTerm}
+          onchange={handleSearchChange}
+        ></lightning-input>
+      </template>
+      <div class="arc-list-view__toolbar-actions div-btn-group">
+        <div class="arc-list-view__picker-group">
+          <button
+            class={pinButtonClass}
+            type="button"
+            title={pinButtonTitle}
+            aria-label={pinButtonTitle}
+            aria-pressed={isListViewPinned}
+            disabled={isPinDisabled}
+            onclick={handlePinToggle}
+          >
+            <lightning-icon
+              icon-name={pinIconName}
+              size="x-small"
+              alternative-text={pinButtonTitle}
+            ></lightning-icon>
+          </button>
+          <label class="arc-list-view__picker">
+            <span class="arc-list-view__picker-label">List View</span>
+            <select
+              class="div-select"
+              onchange={handleListViewChange}
+            >
+              <template for:each={listViewOptions} for:item="lv">
+                <option key={lv.value} value={lv.value} selected={lv.selected}>
+                  {lv.label}
+                </option>
+              </template>
+            </select>
+          </label>
+        </div>
+        <button
+          class="div-btn"
+          type="button"
+          onclick={openCreateModal}
+        >
+          New List View
+        </button>
+        <button
+          class="div-btn div-btn--icon"
+          type="button"
+          title="List view settings"
+          aria-label="List view settings"
+          onclick={openSettingsModal}
+        >
+          <lightning-icon
+            icon-name="utility:settings"
+            size="small"
+            alternative-text="List view settings"
+          ></lightning-icon>
+        </button>
+      </div>
+    </div>
+
+    <template lwc:if={showTableIdError}>
+      <div class="arc-list-view__error" role="alert">
+        Table ID is required. Set a unique Table ID in Experience Builder for
+        this table (for example, work-cases or work-tasks) to enable list view
+        pinning.
+      </div>
+    </template>
+
+    <template lwc:if={hasError}>
+      <div class="arc-list-view__error" role="alert">{errorMessage}</div>
+    </template>
+
+    <template lwc:if={hasColumns}>
+        <c-styled-data-table
+          is-loading={isLoading}
+          aria-label={title}
+          key-field="id"
+          columns={tableColumns}
+          data={displayTableRows}
+          use-external-sort
+          external-sorted-by={tableSortField}
+          external-sorted-direction={tableSortDirection}
+          onsort={handleTableSort}
+          placeholder="-"
+          empty-message={tableEmptyMessage}
+          enable-pagination={enableTablePagination}
+          page-size={pageSize}
+          page-size-options={pageSizeOptions}
+          default-link-object-api-name={objectApiName}
+          link-object-api-name-field="objectApiName"
+          link-query-param-object-api-names={linkQueryParamObjectApiNames}
+        ></c-styled-data-table>
+    </template>
+  </div>
+
+  <template lwc:if={showSettingsModal}>
+    <section
+      class="div-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="List view settings"
+    >
+      <div class="div-modal__backdrop" onclick={closeSettingsModal}></div>
+      <div class="div-modal__panel div-modal__panel--wide">
+        <header class="div-modal__header">
+          <div class="div-modal__intro">
+            <h2 class="div-modal__title">List View Settings</h2>
+            <p class="div-modal__subtitle">
+              Configure columns and filters for {currentListViewLabel}.
+            </p>
+          </div>
+          <button
+            type="button"
+            class="div-modal__close arc-list-view__close"
+            aria-label="Close"
+            onclick={closeSettingsModal}
+          >
+            <lightning-icon
+              icon-name="utility:close"
+              size="x-small"
+              alternative-text="Close"
+            ></lightning-icon>
+          </button>
+        </header>
+
+        <div class="div-modal__body">
+          <div class="arc-list-view__tabs" role="tablist">
+        <template for:each={settingsTabs} for:item="tab">
+          <button
+            key={tab.id}
+            class={tab.className}
+            type="button"
+            role="tab"
+            aria-selected={tab.active}
+            data-tab={tab.id}
+            onclick={handleSettingsTabClick}
+          >
+            {tab.label}
+          </button>
+        </template>
+      </div>
+
+      <template lwc:if={isColumnsTab}>
+        <section class="arc-list-view__editor-section">
+          <c-ds-column-manager
+            key={columnManagerKey}
+            embedded
+            panel-count-class="arc-list-view__panel-count"
+            columns={draftManagerColumns}
+            default-columns={defaultManagerColumns}
+            object-api-name={objectApiName}
+            ondraftchange={handleDraftColumnsChange}
+          ></c-ds-column-manager>
+        </section>
+      </template>
+
+      <template lwc:if={isFiltersTab}>
+        <section class="arc-list-view__editor-section">
+          <p class="arc-list-view__section-help">
+            Add filter criteria to narrow the records shown in this list view.
+          </p>
+          <template lwc:if={hasDraftFilters}>
+            <div class="arc-list-view__filter-list">
+              <template for:each={draftFilters} for:item="filter">
+                <div key={filter.key} class="arc-list-view__filter-row">
+                  <span class="arc-list-view__filter-index"
+                    >{filter.index}</span
+                  >
+                  <label class="arc-list-view__filter-field">
+                    <span class="arc-list-view__sr-only">Field</span>
+                    <select
+                      class="div-select"
+                      data-key={filter.key}
+                      onchange={handleFilterFieldChange}
+                    >
+                      <template for:each={filter.fieldOptions} for:item="opt">
+                        <option
+                          key={opt.value}
+                          value={opt.value}
+                          selected={opt.selected}
+                        >
+                          {opt.label}
+                        </option>
+                      </template>
+                    </select>
+                  </label>
+                  <label class="arc-list-view__filter-field">
+                    <span class="arc-list-view__sr-only">Operator</span>
+                    <select
+                      class="div-select"
+                      data-key={filter.key}
+                      onchange={handleFilterOperatorChange}
+                    >
+                      <template
+                        for:each={filter.operatorOptions}
+                        for:item="opt"
+                      >
+                        <option
+                          key={opt.value}
+                          value={opt.value}
+                          selected={opt.selected}
+                        >
+                          {opt.label}
+                        </option>
+                      </template>
+                    </select>
+                  </label>
+                  <label
+                    class="arc-list-view__filter-field arc-list-view__filter-value"
+                  >
+                    <span class="arc-list-view__sr-only">Value</span>
+                    <template lwc:if={filter.isPicklist}>
+                      <select
+                        class="div-select"
+                        data-key={filter.key}
+                        onchange={handleFilterValueChange}
+                      >
+                        <option value="">Select value…</option>
+                        <template
+                          for:each={filter.picklistOptions}
+                          for:item="opt"
+                        >
+                          <option
+                            key={opt.value}
+                            value={opt.value}
+                            selected={opt.selected}
+                          >
+                            {opt.label}
+                          </option>
+                        </template>
+                      </select>
+                    </template>
+                    <template lwc:else>
+                      <input
+                        class="div-input"
+                        type="text"
+                        data-key={filter.key}
+                        value={filter.operandValue}
+                        placeholder="Value"
+                        onchange={handleFilterValueChange}
+                      />
+                    </template>
+                  </label>
+                  <button
+                    class="arc-list-view__text-button"
+                    type="button"
+                    data-key={filter.key}
+                    aria-label="Remove filter {filter.index}"
+                    onclick={handleRemoveFilter}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </template>
+            </div>
+            <label class="arc-list-view__field">
+              <span>Filter Logic</span>
+              <input
+                class="div-input"
+                type="text"
+                value={draftFilterLogic}
+                placeholder="e.g. (1 AND 2) OR 3"
+                onchange={handleFilterLogicChange}
+              />
+            </label>
+            <p class="arc-list-view__hint">
+              Use numbers to reference filters above. Separate multiple values
+              with semicolons.
+            </p>
+          </template>
+          <template lwc:else>
+            <p class="arc-list-view__empty">No filters applied.</p>
+          </template>
+          <button
+            class="div-btn"
+            type="button"
+            onclick={handleAddFilter}
+          >
+            Add Filter
+          </button>
+        </section>
+      </template>
+
+      <template lwc:if={settingsError}>
+        <div class="arc-list-view__error" role="alert">{settingsError}</div>
+      </template>
+        </div>
+
+        <footer class="div-modal__footer">
+          <button
+            class="div-btn arc-list-view__delete-button"
+            type="button"
+            onclick={handleSettingsDeleteClick}
+            disabled={isSettingsActionDisabled}
+            aria-label="Delete list view"
+          >
+            Delete
+          </button>
+          <div class="div-modal__footer-actions div-btn-group">
+          <button
+            class="div-btn"
+            type="button"
+            onclick={closeSettingsModal}
+            disabled={isSettingsActionDisabled}
+          >
+            Cancel
+          </button>
+          <button
+            class="div-btn div-btn--primary"
+            type="button"
+            onclick={handleSettingsSave}
+            disabled={isSettingsActionDisabled}
+          >
+            Save
+          </button>
+        </div>
+      </footer>
+      </div>
+    </section>
+  </template>
+
+  <template lwc:if={showCreateModal}>
+    <section
+      class="div-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Create list view"
+    >
+      <div class="div-modal__backdrop" onclick={closeCreateModal}></div>
+      <div class="div-modal__panel div-modal__panel--wide">
+        <header class="div-modal__header">
+          <div class="div-modal__intro">
+            <h2 class="div-modal__title">New List View</h2>
+            <p class="div-modal__subtitle">
+              Creates a Salesforce list view on {objectApiName} with your chosen
+              columns and filters.
+            </p>
+          </div>
+          <button
+            type="button"
+            class="div-modal__close arc-list-view__close"
+            aria-label="Close"
+            onclick={closeCreateModal}
+          >
+            <lightning-icon
+              icon-name="utility:close"
+              size="x-small"
+              alternative-text="Close"
+            ></lightning-icon>
+          </button>
+        </header>
+
+        <div class="div-modal__body">
+          <label class="arc-list-view__field">
+        <span>List Name</span>
+        <input
+          class="div-input"
+          type="text"
+          value={createLabel}
+          onchange={handleCreateLabelChange}
+          placeholder="Enter list name..."
+        />
+      </label>
+
+      <div class="arc-list-view__tabs" role="tablist">
+        <template for:each={settingsTabs} for:item="tab">
+          <button
+            key={tab.id}
+            class={tab.className}
+            type="button"
+            role="tab"
+            aria-selected={tab.active}
+            data-tab={tab.id}
+            onclick={handleSettingsTabClick}
+          >
+            {tab.label}
+          </button>
+        </template>
+      </div>
+
+      <template lwc:if={isColumnsTab}>
+        <section class="arc-list-view__editor-section">
+          <c-ds-column-manager
+            key={columnManagerKey}
+            embedded
+            panel-count-class="arc-list-view__panel-count"
+            columns={draftManagerColumns}
+            default-columns={defaultManagerColumns}
+            object-api-name={objectApiName}
+            ondraftchange={handleDraftColumnsChange}
+          ></c-ds-column-manager>
+        </section>
+      </template>
+
+      <template lwc:if={isFiltersTab}>
+        <section class="arc-list-view__editor-section">
+          <template lwc:if={hasDraftFilters}>
+            <div class="arc-list-view__filter-list">
+              <template for:each={draftFilters} for:item="filter">
+                <div key={filter.key} class="arc-list-view__filter-row">
+                  <span class="arc-list-view__filter-index"
+                    >{filter.index}</span
+                  >
+                  <select
+                    class="div-select"
+                    data-key={filter.key}
+                    onchange={handleFilterFieldChange}
+                  >
+                    <template for:each={filter.fieldOptions} for:item="opt">
+                      <option
+                        key={opt.value}
+                        value={opt.value}
+                        selected={opt.selected}
+                      >
+                        {opt.label}
+                      </option>
+                    </template>
+                  </select>
+                  <select
+                    class="div-select"
+                    data-key={filter.key}
+                    onchange={handleFilterOperatorChange}
+                  >
+                    <template for:each={filter.operatorOptions} for:item="opt">
+                      <option
+                        key={opt.value}
+                        value={opt.value}
+                        selected={opt.selected}
+                      >
+                        {opt.label}
+                      </option>
+                    </template>
+                  </select>
+                  <template lwc:if={filter.isPicklist}>
+                    <select
+                      class="div-select"
+                      data-key={filter.key}
+                      onchange={handleFilterValueChange}
+                    >
+                      <option value="">Select value…</option>
+                      <template
+                        for:each={filter.picklistOptions}
+                        for:item="opt"
+                      >
+                        <option
+                          key={opt.value}
+                          value={opt.value}
+                          selected={opt.selected}
+                        >
+                          {opt.label}
+                        </option>
+                      </template>
+                    </select>
+                  </template>
+                  <template lwc:else>
+                    <input
+                      class="div-input"
+                      type="text"
+                      data-key={filter.key}
+                      value={filter.operandValue}
+                      onchange={handleFilterValueChange}
+                    />
+                  </template>
+                  <button
+                    class="arc-list-view__text-button"
+                    type="button"
+                    data-key={filter.key}
+                    onclick={handleRemoveFilter}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </template>
+            </div>
+            <label class="arc-list-view__field">
+              <span>Filter Logic</span>
+              <input
+                class="div-input"
+                type="text"
+                value={draftFilterLogic}
+                onchange={handleFilterLogicChange}
+              />
+            </label>
+          </template>
+          <button
+            class="div-btn"
+            type="button"
+            onclick={handleAddFilter}
+          >
+            Add Filter
+          </button>
+        </section>
+      </template>
+
+      <template lwc:if={createError}>
+        <div class="arc-list-view__error" role="alert">{createError}</div>
+      </template>
+        </div>
+
+        <footer class="div-modal__footer">
+          <span></span>
+          <div class="div-modal__footer-actions div-btn-group">
+          <button
+            class="div-btn"
+            type="button"
+            onclick={closeCreateModal}
+          >
+            Cancel
+          </button>
+          <button
+            class="div-btn div-btn--primary"
+            type="button"
+            onclick={handleCreateSave}
+            disabled={isCreating}
+          >
+            Save
+          </button>
+        </div>
+      </footer>
+      </div>
+    </section>
+  </template>
+</template>

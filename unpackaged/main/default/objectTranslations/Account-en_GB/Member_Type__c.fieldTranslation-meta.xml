@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Member Type --></label>
+        <name>Member_Type__c</name>
+        <picklistValues>
+            <masterLabel>Broker Dealer</masterLabel>
+            <translation><!-- Broker Dealer --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DAS NexS Wizard</masterLabel>
+            <translation><!-- DAS NexS Wizard --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DAS Non-Producing</masterLabel>
+            <translation><!-- DAS Non-Producing --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DAS RIA</masterLabel>
+            <translation><!-- DAS RIA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DFPG NexS Wizard</masterLabel>
+            <translation><!-- DFPG NexS Wizard --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DFPG Non-Producing</masterLabel>
+            <translation><!-- DFPG Non-Producing --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DWM Dual Registered</masterLabel>
+            <translation><!-- DWM Dual Registered --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DWM RIA</masterLabel>
+            <translation><!-- DWM RIA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Dual NexS Wizard</masterLabel>
+            <translation><!-- Dual NexS Wizard --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Dual Non-Producing</masterLabel>
+            <translation><!-- Dual Non-Producing --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Dual Registered</masterLabel>
+            <translation><!-- Dual Registered --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>No Membership Fee</masterLabel>
+            <translation><!-- No Membership Fee --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Non-Producing Staff</masterLabel>
+            <translation><!-- Non-Producing Staff --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Registered Producer (Dual)</masterLabel>
+            <translation><!-- Registered Producer (Dual) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Registered Producer (RIA)</masterLabel>
+            <translation><!-- Registered Producer (RIA) --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

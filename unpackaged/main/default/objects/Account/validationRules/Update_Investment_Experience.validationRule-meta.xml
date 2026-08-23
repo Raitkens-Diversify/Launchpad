@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Update_Investment_Experience</fullName>
+    <active>false</active>
+    <description>Investment Experience cannot be edited from the record.</description>
+    <errorConditionFormula>AND(
+  NOT(ISNEW()),
+  Submitted__c = true,
+  NOT($Permission.Senior_Ops),
+  OR(
+    ISCHANGED(Annuities_Investment_Years_Experience__c),
+    ISCHANGED(Bonds_Investment_Years_Experience__c),
+    ISCHANGED(Individual_Stocks_Investment_Years_Exp__c),
+    ISCHANGED(Mutual_Fund_Exch_TF_Investment_Years_Exp__c),
+    ISCHANGED(Options_Investment_Years_Experience__c),
+    ISCHANGED(Other_Investment_Experience_Explanation__c),
+    ISCHANGED(Other_Investment_Years_Experience__c),
+    ISCHANGED(Private_Credit_Years_Experience__c),
+    ISCHANGED(Private_Equity_Investment_Years_Exp__c),
+    ISCHANGED(REIT_Investment_Years_Experience__c),
+    ISCHANGED(Real_Estate_Investment_Years_Experience__c),
+    ISCHANGED(X1031_Exchanges_Investment_Years_Exp__c)
+  ),
+  NOT(ISCHANGED(Flow_Update__c))
+)</errorConditionFormula>
+    <errorMessage>You cannot update Investment Exeperience information from the record. Please update through the Wizard so that paperwork can be generated for the Client to sign.</errorMessage>
+</ValidationRule>

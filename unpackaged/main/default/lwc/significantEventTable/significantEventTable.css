@@ -1,0 +1,28 @@
+/* Author: Hoang Long Vu To | Date: 2026-07-17 */
+
+:host {
+  display: block;
+}
+
+.div-page-header-override {
+  border-bottom: var(--lwc-borderWidthThin, 1px) solid
+    var(
+      --slds-g-color-border-base-1,
+      var(--lwc-colorBorder, rgb(229, 229, 229))
+    ) !important;
+  border-radius: 0 !important;
+}
+
+.significant-event-card {
+  position: relative;
+  overflow: visible;
+}
+
+.significant-event-card__body {
+  padding: 0;
+  overflow: visible;
+}
+
+.significant-event-card__loading {
+  min-height: 3rem;
+}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>60.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Theme Layout with Sidebar</masterLabel>
+    <description>Custom LWR theme layout with header, persistent sidebar, main content, and footer regions.</description>
+    <targets>
+        <target>lightningCommunity__Theme_Layout</target>
+    </targets>
+</LightningComponentBundle>

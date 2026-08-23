@@ -1,0 +1,66 @@
+/* --slds-g-* declared locally, not inherited: platform-injected SLDS2
+   styling hooks beat values inherited from an ancestor's :host
+   (see nexsHome.css / dsHero.css). */
+:host {
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-accent-1: #0f406f;
+}
+
+/* Underline-on-white: level-1 navigation, deliberately distinct from the
+   navy .uta-band chrome above and the navy pill chips below. */
+.ds-tabs {
+    display: flex;
+    gap: var(--ds-space-xs, 4px);
+    border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+
+.ds-tabs__tab {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-sm, 8px);
+    padding: var(--ds-space-sm, 8px) var(--ds-space-lg, 16px);
+    margin-bottom: -1px; /* the active underline sits ON the strip's rule */
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+.ds-tabs__tab:hover {
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.ds-tabs__tab:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: -2px;
+    border-radius: var(--ds-radius-sm, 6px) var(--ds-radius-sm, 6px) 0 0;
+}
+.ds-tabs__tab--active {
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    font-weight: 600;
+    border-bottom-color: var(--slds-g-color-accent-1, #0f406f);
+}
+
+.ds-tabs__count {
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ds-tabs__tab--active .ds-tabs__count {
+    background: var(--ds-lightest-blue, #e2f8ff);
+    color: var(--slds-g-color-accent-1, #0f406f);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ds-tabs__tab {
+        transition-duration: 0.01ms;
+    }
+}

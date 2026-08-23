@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Current Plan Provider(s) --></label>
+        <name>Current_Plan_Provider_s__c</name>
+        <picklistValues>
+            <masterLabel>401Go</masterLabel>
+            <translation><!-- 401Go --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ADP</masterLabel>
+            <translation><!-- ADP --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>American Funds</masterLabel>
+            <translation><!-- American Funds --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Ameritas</masterLabel>
+            <translation><!-- Ameritas --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Ascensus</masterLabel>
+            <translation><!-- Ascensus --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Empower</masterLabel>
+            <translation><!-- Empower --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Fidelity</masterLabel>
+            <translation><!-- Fidelity --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Guideline</masterLabel>
+            <translation><!-- Guideline --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Human Interest</masterLabel>
+            <translation><!-- Human Interest --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>JPMorgan</masterLabel>
+            <translation><!-- JPMorgan --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>John Hancock</masterLabel>
+            <translation><!-- John Hancock --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Lincoln Financial Group</masterLabel>
+            <translation><!-- Lincoln Financial Group --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>NWPS</masterLabel>
+            <translation><!-- NWPS --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Nationwide</masterLabel>
+            <translation><!-- Nationwide --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Other</masterLabel>
+            <translation><!-- Other --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Paychex</masterLabel>
+            <translation><!-- Paychex --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Principal</masterLabel>
+            <translation><!-- Principal --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Schwab</masterLabel>
+            <translation><!-- Schwab --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>T. Rowe Price</masterLabel>
+            <translation><!-- T. Rowe Price --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>TIAA</masterLabel>
+            <translation><!-- TIAA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>The Standard</masterLabel>
+            <translation><!-- The Standard --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Transamerica</masterLabel>
+            <translation><!-- Transamerica --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>VOYA</masterLabel>
+            <translation><!-- VOYA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Vanguard</masterLabel>
+            <translation><!-- Vanguard --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Vestwell</masterLabel>
+            <translation><!-- Vestwell --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

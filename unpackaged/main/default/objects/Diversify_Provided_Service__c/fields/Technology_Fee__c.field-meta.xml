@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Technology_Fee__c</fullName>
+    <externalId>false</externalId>
+    <formula>IF(TEXT(Sub_Type__c) = &quot;LastPass&quot;, TEXT(Sub_Type__c),
+IF(TEXT(Sub_Type__c) = &quot;Orion Compliance&quot;, TEXT(Sub_Type__c),
+IF(TEXT(Sub_Type__c) = &quot;Egnyte&quot;, TEXT(Sub_Type__c) &amp; &quot; &quot; &amp; TEXT(License_Type__c),
+IF(TEXT(Sub_Type__c) = &quot;Microsoft&quot;,
+    TRIM(
+        IF(INCLUDES(Microsoft_License_Attributes__c, &quot;Microsoft 365 Business Premium&quot;), &quot;Microsoft 365 Business Premium; &quot;, &quot;&quot;) &amp;
+        IF(INCLUDES(Microsoft_License_Attributes__c, &quot;Exchange Online (Plan 1)&quot;), &quot;Exchange Online (Plan 1); &quot;, &quot;&quot;) &amp;
+        IF(INCLUDES(Microsoft_License_Attributes__c, &quot;Exchange Online (Plan 2)&quot;), &quot;Exchange Online (Plan 2); &quot;, &quot;&quot;) &amp;
+        IF(INCLUDES(Microsoft_License_Attributes__c, &quot;Power Automate Premium&quot;), &quot;Power Automate Premium; &quot;, &quot;&quot;) &amp;
+        IF(INCLUDES(Microsoft_License_Attributes__c, &quot;Microsoft 365 E5 Information Protection and Governance&quot;), &quot;Microsoft 365 E5 Information Protection and Governance; &quot;, &quot;&quot;)
+    ),
+IF(TEXT(Sub_Type__c) = &quot;Salesforce&quot;, TEXT(Sub_Type__c),
+IF(TEXT(Sub_Type__c) = &quot;IT Managed&quot;, TEXT(Sub_Type__c),
+IF(AND(TEXT(Sub_Type__c) = &quot;Zoom&quot;, INCLUDES(Zoom_License_Attributes__c, &quot;Zoom Phone&quot;)),
+    &quot;Zoom Phone&quot;,
+    TEXT(Sub_Type__c) &amp; &quot; Webinar&quot;
+)))))))</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Technology Fee</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

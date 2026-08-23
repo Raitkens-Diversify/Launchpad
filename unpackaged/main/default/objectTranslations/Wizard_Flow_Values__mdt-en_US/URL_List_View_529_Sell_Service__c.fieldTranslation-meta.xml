@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- URL - List View - 529 Sell/Service --></label>
+        <name>URL_List_View_529_Sell_Service__c</name>
+    </CustomFieldTranslation>

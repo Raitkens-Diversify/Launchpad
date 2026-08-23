@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Fee_Disbursement_Wizard_Account__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <label>Fee Disbursement Wizard Account</label>
+    <referenceTo>Financial_Account__c</referenceTo>
+    <relationshipLabel>Accounts (Fee Disbursement Wizard Account)</relationshipLabel>
+    <relationshipName>Accounts1</relationshipName>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Lookup</type>
+</CustomField>

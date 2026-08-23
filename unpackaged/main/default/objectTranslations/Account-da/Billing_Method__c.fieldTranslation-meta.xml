@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Billing Method --></label>
+        <name>Billing_Method__c</name>
+        <picklistValues>
+            <masterLabel>Branch Allocation</masterLabel>
+            <translation><!-- Branch Allocation --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>External Billing - Diversify Insurance</masterLabel>
+            <translation><!-- External Billing - Diversify Insurance --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>External Billing - FPW CFO Services</masterLabel>
+            <translation><!-- External Billing - FPW CFO Services --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>External Billing - FirstPurpose Tax</masterLabel>
+            <translation><!-- External Billing - FirstPurpose Tax --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Membership Billing</masterLabel>
+            <translation><!-- Membership Billing --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>No Billing</masterLabel>
+            <translation><!-- No Billing --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>No Billing - Home Office</masterLabel>
+            <translation><!-- No Billing - Home Office --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

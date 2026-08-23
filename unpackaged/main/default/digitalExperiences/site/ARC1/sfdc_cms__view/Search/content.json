@@ -1,0 +1,124 @@
+{
+  "type" : "sfdc_cms__view",
+  "title" : "Search",
+  "contentBody" : {
+    "component" : {
+      "children" : [ {
+        "children" : [ {
+          "attributes" : {
+            "backgroundImageConfig" : "",
+            "backgroundImageOverlay" : "rgba(0,0,0,0)",
+            "componentSpacerSize" : "",
+            "dxpStyle" : { },
+            "layoutDirectionDesktop" : "row",
+            "layoutDirectionMobile" : "column",
+            "layoutDirectionTablet" : "column",
+            "maxContentWidth" : "",
+            "sectionColumnGutterWidth" : "",
+            "sectionConfig" : "{\"UUID\":\"ece79617-9d2c-4fe7-8ca5-35788ee0614a\",\"columns\":[{\"UUID\":\"30bf135b-4b26-460b-a28b-70b814fd50fd\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":[]}]}",
+            "sectionMinHeight" : "",
+            "sectionVerticalAlign" : "flex-start"
+          },
+          "children" : [ {
+            "children" : [ {
+              "attributes" : {
+                "addToCartButtonText" : "ADD TO CART",
+                "callToActionButtonBackgroundColor" : "rgb(0, 95, 178)",
+                "callToActionButtonBackgroundHoverColor" : "rgb(0, 73, 137)",
+                "callToActionButtonBorderRadius" : 0,
+                "callToActionButtonTextColor" : "rgb(255, 255, 255)",
+                "callToActionButtonTextHoverColor" : "rgb(255, 255, 255)",
+                "cardAlignment" : "center",
+                "cardBackgroundColor" : "rgb(255, 255, 255)",
+                "cardBorderColor" : "rgba(255, 255, 255, 0)",
+                "cardBorderRadius" : 0,
+                "cardContentMapping" : "[{\"name\":\"Name\",\"showLabel\":false,\"label\":\"Product Name\",\"displayName\":\"Product Name\",\"type\":\"STRING\",\"fontSize\":\"medium\",\"fontColor\":\"rgb(75, 85, 99)\"},{\"name\":\"VariationAttributes\",\"showLabel\":false,\"fontSize\":\"medium\",\"fontColor\":\"rgb(75, 85, 99)\"}]",
+                "cardDividerColor" : "rgb(221, 219, 218)",
+                "descriptionAlignment" : "center",
+                "descriptionColor" : "",
+                "descriptionDisplayInfo" : "{\"headingTag\":\"h3\",\"textStyle\":\"heading-small\"}",
+                "descriptionTextDecoration" : "{}",
+                "dxpStyle" : { },
+                "filterFormContainerSpacing" : "medium",
+                "filterFormHeaderAlignment" : "left",
+                "filterFormHeaderDecoration" : "{\"bold\": true}",
+                "filterFormHeaderFont" : "{\"textStyle\":\"body-regular\",\"headingTag\":\"p\",\"enableOverride\":false}",
+                "filterFormHeaderSpacingHorizontal" : "medium",
+                "filterFormInputSpacing" : "medium",
+                "gridColumnSpacing" : "small",
+                "gridMaxColumnsDisplayed" : 4,
+                "gridRowSpacing" : "large",
+                "isEinsteinSearchEnabled" : "false",
+                "listRowSpacing" : "small",
+                "navBackground" : "",
+                "negotiatedPriceTextColor" : "rgb(0, 0, 0)",
+                "negotiatedPriceTextSize" : "medium",
+                "objectNavPadding" : "none",
+                "objectNavShaded" : true,
+                "originalPriceTextColor" : "rgb(0, 0, 0)",
+                "originalPriceTextSize" : "small",
+                "pageResultsType" : "searchResults",
+                "pageTitleFontColor" : "",
+                "pageTitleFontSize" : "large",
+                "resultsDataSource" : "crm",
+                "resultsLayout" : "grid",
+                "scopesList" : "[{\"name\":\"Account\",\"isPublic\":false},{\"name\":\"Case\",\"isPublic\":false},{\"name\":\"Task\",\"isPublic\":false},{\"name\":\"Financial_Account__c\",\"isPublic\":false}]",
+                "searchConfiguration" : "none option",
+                "showCallToActionButton" : false,
+                "showDescription" : true,
+                "showNegotiatedPrice" : true,
+                "showOriginalPrice" : true,
+                "showProductImage" : true,
+                "showSearchSortingMenu" : true,
+                "showTitle" : true,
+                "siteResultsListRowSpacing" : "small",
+                "siteResultsPageTitleFontColor" : "",
+                "siteResultsPageTitleFontSize" : "large",
+                "titleAlignment" : "center",
+                "titleColor" : "",
+                "titleDisplayInfo" : "{\"headingTag\":\"h3\",\"textStyle\":\"heading-large\"}",
+                "titleTextDecoration" : "{}",
+                "viewOptionsButtonText" : "VIEW OPTIONS"
+              },
+              "definition" : "dxp_search:searchResults",
+              "id" : "60e962aa-e908-4fca-af8d-bf1b084f5b0c",
+              "type" : "component"
+            } ],
+            "id" : "30bf135b-4b26-460b-a28b-70b814fd50fd",
+            "name" : "col1",
+            "title" : "Column 1",
+            "type" : "region"
+          } ],
+          "definition" : "community_layout:section",
+          "id" : "ece79617-9d2c-4fe7-8ca5-35788ee0614a",
+          "type" : "component"
+        } ],
+        "id" : "4897df16-bd93-447a-81ce-6f05c7c70b8e",
+        "name" : "content",
+        "title" : "Content",
+        "type" : "region"
+      }, {
+        "children" : [ {
+          "attributes" : {
+            "dxpStyle" : { },
+            "recordId" : "{!recordId}"
+          },
+          "definition" : "community_builder:seoAssistant",
+          "id" : "c78229e2-7e02-437b-becf-67b76d5f7cc4",
+          "type" : "component"
+        } ],
+        "id" : "92001aad-6a68-40ed-8585-cf28cf294bc2",
+        "name" : "sfdcHiddenRegion",
+        "title" : "sfdcHiddenRegion",
+        "type" : "region"
+      } ],
+      "definition" : "community_layout:sldsFlexibleLayout",
+      "id" : "93290116-e73b-4718-a9d6-e6ea8ddf94d9",
+      "type" : "component"
+    },
+    "dataProviders" : [ ],
+    "themeLayoutType" : "OHzbXAVux6mZ7VVDb7Pb8F2YUFBAXR",
+    "viewType" : "global-search"
+  },
+  "urlName" : "search"
+}

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomPermission xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>This allows users to update Suitability Information at the household level if it is blank and they have paperwork to support it.</description>
+    <isLicensed>false</isLicensed>
+    <label>Update Suitability if Blank</label>
+</CustomPermission>

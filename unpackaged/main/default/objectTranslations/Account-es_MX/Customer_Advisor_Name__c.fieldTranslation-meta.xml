@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <help><!-- - If Billing Method is Membership Billing AND Bill to self is TRUE: Account Name
+- If Billing Method is Membership Billing AND Bill to Group is TRUE: Advisor Group Name
+- If Billing Method is Membership Billing AND Bill to self &amp; group are FALSE: Bill To
+- Everything else: Advisor Group Name --></help>
+        <label><!-- Customer-Advisor Name --></label>
+        <name>Customer_Advisor_Name__c</name>
+    </CustomFieldTranslation>

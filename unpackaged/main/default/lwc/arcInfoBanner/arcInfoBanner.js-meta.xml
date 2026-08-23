@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Arc Info Banner</masterLabel>
+    <description>Reusable informational banner with optional action link for Experience Cloud.</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+        <target>lightning__RecordPage</target>
+        <target>lightning__AppPage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property name="message" type="String" label="Message" description="Banner body text." />
+            <property name="actionLabel" type="String" label="Action label" description="Optional link label shown on the right." />
+            <property name="linkTarget" type="String" label="Link target" default="envelope" description="Use envelope for the wizard route, or custom with link URL." />
+            <property name="linkUrl" type="String" label="Custom link URL" description="Used when link target is custom." />
+            <property name="variant" type="String" label="Variant" default="info" />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

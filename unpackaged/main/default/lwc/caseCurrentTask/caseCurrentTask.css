@@ -1,0 +1,31 @@
+.lookup-dropdown {
+    position: absolute;
+    z-index: 10000;
+    margin-top: 0.25rem;
+    border-radius: 0.25rem;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+.lookup-item {
+    cursor: pointer;
+}
+
+.lookup-item:hover .slds-listbox__option {
+    background-color: #f3f2f2;
+}
+
+.slds-listbox__option {
+    padding: 0.5rem 0.75rem;
+}
+/* push icon to extreme right */
+.edit-icon {
+    margin-left: auto;
+}
+
+/* underline always visible (like detail page) */
+.value-text {
+    border-bottom: 1px solid #dddbda;
+        padding-bottom: 2px;  /* 👈 creates gap */
+    display: inline-block; /* important */
+
+}

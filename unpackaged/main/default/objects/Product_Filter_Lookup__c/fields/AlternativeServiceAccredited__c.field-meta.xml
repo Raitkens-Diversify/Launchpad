@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AlternativeServiceAccredited__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>WHERE Type__c = &#39;Alternative&#39; AND (Status__c = &#39;Sell/Service&#39; OR Status__c = &#39;Service Only&#39;) AND (Accreditation_Status__c = &#39;None&#39; OR Accreditation_Status__c = &#39;Suitable&#39; OR Accreditation_Status__c = &#39;Accredited&#39;)</description>
+    <label>AlternativeServiceAccredited</label>
+    <lookupFilter>
+        <active>true</active>
+        <filterItems>
+            <field>Product__c.Status__c</field>
+            <operation>equals</operation>
+            <value>Sell/Service, Service Only</value>
+        </filterItems>
+        <filterItems>
+            <field>Product__c.Accreditation_Status__c</field>
+            <operation>equals</operation>
+            <value>Suitable, Accredited, None</value>
+        </filterItems>
+        <filterItems>
+            <field>Product__c.Asset_Category__c</field>
+            <operation>equals</operation>
+            <value>Alternative Investment</value>
+        </filterItems>
+        <isOptional>true</isOptional>
+    </lookupFilter>
+    <referenceTo>Product__c</referenceTo>
+    <relationshipLabel>Product Filter Lookups (AlternativeServiceAccredited)</relationshipLabel>
+    <relationshipName>Product_Filter_Lookups6</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

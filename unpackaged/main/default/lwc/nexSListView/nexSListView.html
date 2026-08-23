@@ -1,0 +1,892 @@
+<template lwc:render-mode="light">
+  <div class="nexs-list-view">
+    <template lwc:if={hasOpenPopover}>
+      <div
+        class="nexs-list-view__popover-backdrop"
+        role="presentation"
+        onclick={handleBackdropClick}
+      ></div>
+    </template>
+
+    <template lwc:if={showQuickCreateModal}>
+      <c-arc-quick-create
+        object-api-name={objectApiName}
+        heading-label={createHeadingLabel}
+        field-api-names={quickCreateFields}
+        oncreated={handleCreated}
+        onclose={handleCreateClose}
+      ></c-arc-quick-create>
+    </template>
+
+    <!-- Page Header (Figma 505:67786): title, tagline, primary action, saved-view tabs -->
+    <header class={pageHeaderClass}>
+      <div class="nexs-list-view__page-header-row">
+        <h1 class="nexs-list-view__title">{headingTitle}</h1>
+        <template lwc:if={hasNewRecordAction}>
+          <button
+            class="nexs-list-view__button nexs-list-view__button--brand"
+            type="button"
+            onclick={handleNewRecord}
+          >
+            <span
+              class="nexs-list-view__icon nexs-list-view__icon--plus"
+              aria-hidden="true"
+            ></span>
+            <span>{headingActionLabel}</span>
+          </button>
+        </template>
+      </div>
+
+      <template lwc:if={hasSubtitle}>
+        <p class="nexs-list-view__tagline">{headingSubtitle}</p>
+      </template>
+
+      <template lwc:if={hasViewTabs}>
+        <div
+          class="nexs-list-view__tabs"
+          role="tablist"
+          aria-label="Saved views"
+          onkeydown={handleTabKeyDown}
+        >
+          <template for:each={visibleTabs} for:item="tab">
+            <template lwc:if={tab.showDelete}>
+              <span key={tab.value} class="nexs-list-view__tab-wrap">
+                <button
+                  class={tab.className}
+                  type="button"
+                  role="tab"
+                  aria-selected={tab.isActive}
+                  tabindex={tab.tabIndex}
+                  data-value={tab.value}
+                  onclick={handleTabClick}
+                >
+                  {tab.label}
+                </button>
+                <button
+                  class="nexs-list-view__tab-delete"
+                  type="button"
+                  aria-label={tab.deleteAriaLabel}
+                  title="Delete view"
+                  data-value={tab.value}
+                  data-label={tab.label}
+                  onclick={handleDeleteViewClick}
+                >
+                  <span
+                    class="nexs-list-view__icon nexs-list-view__icon--close"
+                    aria-hidden="true"
+                  ></span>
+                </button>
+              </span>
+            </template>
+            <template lwc:elseif={tab.showUnpromote}>
+              <span key={tab.value} class="nexs-list-view__tab-wrap">
+                <button
+                  class={tab.className}
+                  type="button"
+                  role="tab"
+                  aria-selected={tab.isActive}
+                  tabindex={tab.tabIndex}
+                  data-value={tab.value}
+                  onclick={handleTabClick}
+                >
+                  {tab.label}
+                </button>
+                <button
+                  class="nexs-list-view__tab-delete"
+                  type="button"
+                  aria-label={tab.unpromoteAriaLabel}
+                  title="Remove from tab strip"
+                  data-value={tab.value}
+                  onclick={handleUnpromoteTabClick}
+                >
+                  <span
+                    class="nexs-list-view__icon nexs-list-view__icon--close"
+                    aria-hidden="true"
+                  ></span>
+                </button>
+              </span>
+            </template>
+            <template lwc:else>
+              <button
+                key={tab.value}
+                class={tab.className}
+                type="button"
+                role="tab"
+                aria-selected={tab.isActive}
+                tabindex={tab.tabIndex}
+                data-value={tab.value}
+                onclick={handleTabClick}
+              >
+                {tab.label}
+              </button>
+            </template>
+          </template>
+
+          <template lwc:if={hasOverflowTabs}>
+            <div class="nexs-list-view__tab-more">
+              <button
+                class="nexs-list-view__tab nexs-list-view__tab--more"
+                type="button"
+                data-popover="moreTabs"
+                aria-haspopup="menu"
+                aria-expanded={showMoreTabsMenu}
+                aria-label="More saved views"
+                onclick={handleTogglePopover}
+              >
+                <span>More</span>
+                <span
+                  class="nexs-list-view__icon nexs-list-view__icon--caret"
+                  aria-hidden="true"
+                ></span>
+              </button>
+              <template lwc:if={showMoreTabsMenu}>
+                <div
+                  class="nexs-list-view__menu nexs-list-view__menu--tabs"
+                  role="menu"
+                  aria-label="More saved views"
+                >
+                  <template for:each={overflowTabs} for:item="tab">
+                    <span
+                      key={tab.value}
+                      class="nexs-list-view__menu-item-wrap"
+                    >
+                      <button
+                        class="nexs-list-view__menu-item"
+                        type="button"
+                        role="menuitem"
+                        data-value={tab.value}
+                        data-source="overflow"
+                        onclick={handleTabClick}
+                      >
+                        {tab.label}
+                      </button>
+                      <template lwc:if={tab.showDelete}>
+                        <button
+                          class="nexs-list-view__tab-delete"
+                          type="button"
+                          aria-label={tab.deleteAriaLabel}
+                          title="Delete view"
+                          data-value={tab.value}
+                          data-label={tab.label}
+                          onclick={handleDeleteViewClick}
+                        >
+                          <span
+                            class="nexs-list-view__icon nexs-list-view__icon--close"
+                            aria-hidden="true"
+                          ></span>
+                        </button>
+                      </template>
+                    </span>
+                  </template>
+                </div>
+              </template>
+            </div>
+          </template>
+
+          <span class="nexs-list-view__tab-spacer" aria-hidden="true"></span>
+        </div>
+      </template>
+    </header>
+
+    <div class="nexs-list-view__content">
+      <!-- Actions - Widget Customization (Figma 505:67788) -->
+      <div class="nexs-list-view__actions">
+        <div
+          class="nexs-list-view__segmented"
+          role="group"
+          aria-label="View mode"
+        >
+          <button
+            class={tableSegmentClass}
+            type="button"
+            data-mode="table"
+            aria-pressed={isTableView}
+            onclick={handleViewModeChange}
+          >
+            <span
+              class="nexs-list-view__icon nexs-list-view__icon--sm nexs-list-view__icon--table"
+              aria-hidden="true"
+            ></span>
+            <span>Table</span>
+          </button>
+          <button
+            class={cardsSegmentClass}
+            type="button"
+            data-mode="cards"
+            aria-pressed={isCardsView}
+            onclick={handleViewModeChange}
+          >
+            <span
+              class="nexs-list-view__icon nexs-list-view__icon--sm nexs-list-view__icon--cards"
+              aria-hidden="true"
+            ></span>
+            <span>Cards</span>
+          </button>
+          <button
+            class={chartSegmentClass}
+            type="button"
+            data-mode="chart"
+            aria-pressed={isChartView}
+            onclick={handleViewModeChange}
+          >
+            <span
+              class="nexs-list-view__icon nexs-list-view__icon--sm nexs-list-view__icon--chart"
+              aria-hidden="true"
+            ></span>
+            <span>Chart</span>
+          </button>
+        </div>
+
+        <div class="nexs-list-view__actions-right">
+          <label class="nexs-list-view__search">
+            <span class="nexs-list-view__sr-only">Search {headingTitle}</span>
+            <span
+              class="nexs-list-view__icon nexs-list-view__search-icon nexs-list-view__icon--search"
+              aria-hidden="true"
+            ></span>
+            <input
+              class="nexs-list-view__search-input"
+              type="search"
+              placeholder="Search…"
+              oninput={handleSearchInput}
+            />
+          </label>
+
+          <!-- Group / Dropdown (Figma 532:39348) -->
+          <div class="nexs-list-view__popover-root">
+            <button
+              class={groupButtonClass}
+              type="button"
+              data-popover="group"
+              aria-haspopup="listbox"
+              aria-expanded={showGroupMenu}
+              onclick={handleTogglePopover}
+            >
+              <span
+                class="nexs-list-view__icon nexs-list-view__icon--group"
+                aria-hidden="true"
+              ></span>
+              <span>{groupButtonLabel}</span>
+            </button>
+            <template lwc:if={showGroupMenu}>
+              <div
+                class="nexs-list-view__menu"
+                role="listbox"
+                aria-label="Group by field"
+              >
+                <div class="nexs-list-view__menu-search">
+                  <span
+                    class="nexs-list-view__icon nexs-list-view__search-icon nexs-list-view__icon--search"
+                    aria-hidden="true"
+                  ></span>
+                  <input
+                    class="nexs-list-view__search-input"
+                    type="search"
+                    placeholder="Search…"
+                    aria-label="Search fields"
+                    value={fieldMenuSearch}
+                    oninput={handleFieldMenuSearch}
+                  />
+                </div>
+                <div class="nexs-list-view__menu-list">
+                  <template lwc:if={hasFieldMenuOptions}>
+                    <template for:each={fieldMenuOptions} for:item="option">
+                      <button
+                        key={option.key}
+                        class="nexs-list-view__menu-item"
+                        type="button"
+                        role="option"
+                        data-value={option.value}
+                        aria-selected={option.isSelected}
+                        onclick={handleGroupFieldSelect}
+                      >
+                        <span
+                          class={option.checkClass}
+                          aria-hidden="true"
+                        ></span>
+                        <span>{option.label}</span>
+                      </button>
+                    </template>
+                    <template lwc:if={hasMoreFieldMenuOptions}>
+                      <p class="nexs-list-view__menu-overflow" role="status">
+                        {fieldMenuOverflowLabel}
+                      </p>
+                    </template>
+                  </template>
+                  <template lwc:else>
+                    <p class="nexs-list-view__menu-empty">
+                      No matching fields.
+                    </p>
+                  </template>
+                  <template lwc:if={groupFieldApiName}>
+                    <button
+                      class="nexs-list-view__menu-item nexs-list-view__menu-item--muted"
+                      type="button"
+                      onclick={handleClearGroup}
+                    >
+                      Clear grouping
+                    </button>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <!-- Filters / Dropdown (Figma 622:36631) -->
+          <div class="nexs-list-view__popover-root">
+            <button
+              class="nexs-list-view__button nexs-list-view__button--neutral"
+              type="button"
+              data-popover="filter"
+              aria-haspopup="listbox"
+              aria-expanded={showFilterMenu}
+              onclick={handleTogglePopover}
+            >
+              <span
+                class="nexs-list-view__icon nexs-list-view__icon--filter"
+                aria-hidden="true"
+              ></span>
+              <span>Filter</span>
+            </button>
+            <template lwc:if={showFilterMenu}>
+              <div
+                class="nexs-list-view__menu"
+                role="listbox"
+                aria-label="Add filter field"
+              >
+                <div class="nexs-list-view__menu-search">
+                  <span
+                    class="nexs-list-view__icon nexs-list-view__search-icon nexs-list-view__icon--search"
+                    aria-hidden="true"
+                  ></span>
+                  <input
+                    class="nexs-list-view__search-input"
+                    type="search"
+                    placeholder="Search…"
+                    aria-label="Search fields"
+                    value={fieldMenuSearch}
+                    oninput={handleFieldMenuSearch}
+                  />
+                </div>
+                <div class="nexs-list-view__menu-list">
+                  <template lwc:if={hasFieldMenuOptions}>
+                    <template for:each={fieldMenuOptions} for:item="option">
+                      <button
+                        key={option.key}
+                        class="nexs-list-view__menu-item"
+                        type="button"
+                        role="option"
+                        data-value={option.value}
+                        aria-selected={option.isSelected}
+                        onclick={handleFilterFieldSelect}
+                      >
+                        <span
+                          class={option.checkClass}
+                          aria-hidden="true"
+                        ></span>
+                        <span>{option.label}</span>
+                      </button>
+                    </template>
+                    <template lwc:if={hasMoreFieldMenuOptions}>
+                      <p class="nexs-list-view__menu-overflow" role="status">
+                        {fieldMenuOverflowLabel}
+                      </p>
+                    </template>
+                  </template>
+                  <template lwc:else>
+                    <p class="nexs-list-view__menu-empty">
+                      No matching fields.
+                    </p>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <!-- Save View: modal for a stock view, split menu for one of ours -->
+          <template lwc:if={hasUnsavedViewChanges}>
+            <div class="nexs-list-view__popover-root">
+              <button
+                class="nexs-list-view__button nexs-list-view__button--outline"
+                type="button"
+                aria-haspopup="menu"
+                aria-expanded={showSaveViewMenu}
+                disabled={isSavingView}
+                onclick={handleSaveViewClick}
+              >
+                Save View
+              </button>
+              <template lwc:if={showSaveViewMenu}>
+                <div
+                  class="nexs-list-view__menu nexs-list-view__menu--save"
+                  role="menu"
+                  aria-label="Save view options"
+                >
+                  <button
+                    class="nexs-list-view__menu-item"
+                    type="button"
+                    role="menuitem"
+                    onclick={handleOverwriteView}
+                  >
+                    <span
+                      class="nexs-list-view__icon nexs-list-view__icon--bookmark"
+                      aria-hidden="true"
+                    ></span>
+                    <span>Overwrite This View</span>
+                  </button>
+                  <button
+                    class="nexs-list-view__menu-item"
+                    type="button"
+                    role="menuitem"
+                    onclick={openSaveViewModal}
+                  >
+                    <span
+                      class="nexs-list-view__icon nexs-list-view__icon--plus"
+                      aria-hidden="true"
+                    ></span>
+                    <span>Save as New View</span>
+                  </button>
+                </div>
+              </template>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- Filter chips + Clear Filters (Figma 532:42759) -->
+      <template lwc:if={hasActiveFilters}>
+        <div class="nexs-list-view__chips">
+          <template for:each={filterChips} for:item="chip">
+            <div key={chip.key} class="nexs-list-view__popover-root">
+              <button
+                class="nexs-list-view__chip"
+                type="button"
+                data-key={chip.key}
+                aria-haspopup="dialog"
+                aria-expanded={chip.isOpen}
+                onclick={handleChipClick}
+              >
+                <span>{chip.chipLabel}</span>
+                <span
+                  class="nexs-list-view__icon nexs-list-view__icon--caret"
+                  aria-hidden="true"
+                ></span>
+              </button>
+              <template lwc:if={chip.isOpen}>
+                <div
+                  class="nexs-list-view__menu nexs-list-view__menu--chip"
+                  role="dialog"
+                  aria-label={chip.label}
+                >
+                  <p class="nexs-list-view__chip-title">{chip.label}</p>
+                  <div class="nexs-list-view__chip-row">
+                    <label class="nexs-list-view__chip-control">
+                      <span class="nexs-list-view__sr-only"> Operator </span>
+                      <select
+                        class="nexs-list-view__select"
+                        data-key={chip.key}
+                        onchange={handleChipOperatorChange}
+                      >
+                        <template
+                          for:each={chip.operatorOptions}
+                          for:item="opt"
+                        >
+                          <option
+                            key={opt.value}
+                            value={opt.value}
+                            selected={opt.selected}
+                          >
+                            {opt.label}
+                          </option>
+                        </template>
+                      </select>
+                    </label>
+                    <label
+                      class="nexs-list-view__chip-control nexs-list-view__chip-control--value"
+                    >
+                      <span class="nexs-list-view__sr-only"> Value </span>
+                      <input
+                        class="nexs-list-view__input"
+                        type="text"
+                        placeholder="Type value…"
+                        data-key={chip.key}
+                        value={chip.operandValue}
+                        oninput={handleChipValueChange}
+                      />
+                      <template lwc:if={chip.hasValue}>
+                        <button
+                          class="nexs-list-view__chip-clear"
+                          type="button"
+                          aria-label="Clear value"
+                          data-key={chip.key}
+                          onclick={handleChipValueClear}
+                        >
+                          <span
+                            class="nexs-list-view__icon nexs-list-view__icon--close"
+                            aria-hidden="true"
+                          ></span>
+                        </button>
+                      </template>
+                    </label>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </template>
+
+          <button
+            class="nexs-list-view__link-button"
+            type="button"
+            onclick={handleClearFilters}
+          >
+            Clear Filters
+          </button>
+        </div>
+      </template>
+
+      <template lwc:if={hasError}>
+        <div class="nexs-list-view__error" role="alert">{errorMessage}</div>
+      </template>
+
+      <template lwc:if={hasColumns}>
+        <template lwc:if={isLoading}>
+          <div class="nexs-list-view__status">
+            <c-arc-loading-spinner
+              alternative-text="Loading"
+              size="medium"
+            ></c-arc-loading-spinner>
+          </div>
+        </template>
+        <template lwc:elseif={isTableView}>
+          <div class="nexs-list-view__table-wrap">
+            <c-styled-data-table
+              aria-label={title}
+              key-field="id"
+              columns={tableColumns}
+              data={visibleRows}
+              group-field={groupFieldApiName}
+              density="comfortable"
+              max-page-buttons="5"
+              row-actions={rowActions}
+              onrowaction={handleRowAction}
+              enable-row-navigation
+              show-column-settings
+              column-settings-icon-url={columnSettingsIconUrl}
+              avatar-icon-url={avatarIconUrl}
+              placeholder="-"
+              empty-message={tableEmptyMessage}
+              enable-pagination={enableTablePagination}
+              page-size={pageSizeNumber}
+              page-size-options={tablePageSizeOptions}
+              default-link-object-api-name={objectApiName}
+              link-object-api-name-field="objectApiName"
+              link-query-param-object-api-names={linkQueryParamObjectApiNames}
+              enable-column-reorder
+              enable-column-resize
+              column-width-storage-key={columnWidthStorageKey}
+              oncolumnsettings={openColumnsMenu}
+              oncolumnreorder={handleColumnReorder}
+            ></c-styled-data-table>
+
+            <!-- Table Columns / Dropdown (Figma 532:39223) -->
+            <template lwc:if={showColumnsMenu}>
+              <div
+                class="nexs-list-view__columns-menu"
+                role="dialog"
+                aria-label="Table Columns"
+              >
+                <p class="nexs-list-view__columns-title">Table Columns</p>
+                <div class="nexs-list-view__columns-search-row">
+                  <label class="nexs-list-view__menu-search">
+                    <span class="nexs-list-view__sr-only">Search columns</span>
+                    <span
+                      class="nexs-list-view__icon nexs-list-view__icon--search nexs-list-view__search-icon"
+                      aria-hidden="true"
+                    ></span>
+                    <input
+                      class="nexs-list-view__search-input"
+                      type="search"
+                      placeholder="Search…"
+                      value={columnMenuSearch}
+                      oninput={handleColumnMenuSearch}
+                    />
+                  </label>
+                </div>
+
+                <template lwc:if={hasColumnMenuItems}>
+                  <template for:each={columnMenuItems} for:item="item">
+                    <button
+                      key={item.value}
+                      class="nexs-list-view__columns-row"
+                      type="button"
+                      role="switch"
+                      aria-checked={item.checked}
+                      disabled={item.isLocked}
+                      data-field={item.value}
+                      onclick={handleColumnToggle}
+                    >
+                      <span class="nexs-list-view__columns-label"
+                        >{item.label}</span
+                      >
+                      <span class={item.trackClass}>
+                        <span
+                          class="nexs-list-view__toggle-glyph"
+                          aria-hidden="true"
+                        ></span>
+                        <span
+                          class="nexs-list-view__toggle-thumb"
+                          aria-hidden="true"
+                        ></span>
+                      </span>
+                    </button>
+                  </template>
+                </template>
+                <template lwc:else>
+                  <p class="nexs-list-view__menu-empty">No columns match.</p>
+                </template>
+              </div>
+            </template>
+          </div>
+        </template>
+        <template lwc:elseif={isCardsView}>
+          <div class="nexs-list-view__cards">
+            <template for:each={cardRows} for:item="card">
+              <article key={card.key} class="nexs-list-view__card">
+                <header class="nexs-list-view__card-head">
+                  <span class="nexs-list-view__card-avatar" aria-hidden="true"
+                    >{card.initials}</span
+                  >
+                  <span class="nexs-list-view__card-heading">
+                    <a
+                      href="#"
+                      class="nexs-list-view__card-title"
+                      data-id={card.recordId}
+                      onclick={handleCardOpen}
+                      >{card.title}</a
+                    >
+                    <span class="nexs-list-view__card-meta"
+                      >{card.populatedCount}</span
+                    >
+                  </span>
+                </header>
+                <dl class="nexs-list-view__card-fields">
+                  <template for:each={card.fields} for:item="field">
+                    <div key={field.key} class="nexs-list-view__card-field">
+                      <dt>{field.label}</dt>
+                      <dd>{field.value}</dd>
+                    </div>
+                  </template>
+                </dl>
+                <template lwc:if={card.hasExtra}>
+                  <button
+                    type="button"
+                    class="nexs-list-view__card-toggle"
+                    data-id={card.recordId}
+                    aria-expanded={card.isExpanded}
+                    onclick={handleCardToggle}
+                  >
+                    <span>{card.toggleLabel}</span>
+                    <span
+                      class={card.toggleIconClass}
+                      aria-hidden="true"
+                    ></span>
+                  </button>
+                </template>
+              </article>
+            </template>
+          </div>
+          <template lwc:if={hasMoreCards}>
+            <div class="nexs-list-view__cards-more">
+              <button
+                type="button"
+                class="nexs-list-view__button nexs-list-view__button--neutral"
+                onclick={handleShowMoreCards}
+              >
+                {moreCardsLabel}
+              </button>
+            </div>
+          </template>
+        </template>
+        <template lwc:else>
+          <section class="nexs-list-view__chart">
+            <header class="nexs-list-view__chart-head">
+              <div>
+                <h3 class="nexs-list-view__chart-title">
+                  Records by {chartFieldLabel}
+                </h3>
+                <p class="nexs-list-view__chart-summary">{chartSummary}</p>
+              </div>
+              <label class="nexs-list-view__chart-picker">
+                <span class="nexs-list-view__chart-picker-label"
+                  >Break down by</span
+                >
+                <select
+                  class="nexs-list-view__chart-select"
+                  onchange={handleChartFieldChange}
+                >
+                  <template for:each={chartFieldOptions} for:item="option">
+                    <option
+                      key={option.value}
+                      value={option.value}
+                      selected={option.selected}
+                    >
+                      {option.label}
+                    </option>
+                  </template>
+                </select>
+              </label>
+            </header>
+
+            <template lwc:if={hasChartData}>
+              <ul class="nexs-list-view__chart-bars">
+                <template for:each={chartBars} for:item="bar">
+                  <li key={bar.key} class="nexs-list-view__chart-row">
+                    <span class="nexs-list-view__chart-label" title={bar.label}
+                      >{bar.label}</span
+                    >
+                    <span class="nexs-list-view__chart-track">
+                      <span
+                        class="nexs-list-view__chart-bar"
+                        style={bar.barStyle}
+                      ></span>
+                    </span>
+                    <span class="nexs-list-view__chart-value">
+                      <strong>{bar.count}</strong>
+                      <span class="nexs-list-view__chart-percent"
+                        >{bar.percent}</span
+                      >
+                    </span>
+                  </li>
+                </template>
+              </ul>
+            </template>
+            <template lwc:else>
+              <div class="nexs-list-view__status" role="status">
+                Nothing to chart — no records match the current filters.
+              </div>
+            </template>
+          </section>
+        </template>
+      </template>
+    </div>
+  </div>
+
+  <!-- Modal / Save View (Figma 505:59111) -->
+  <template lwc:if={showSaveViewModal}>
+    <div class="nexs-list-view__backdrop" onclick={closeSaveViewModal}></div>
+    <div
+      class="nexs-list-view__modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Save View"
+    >
+      <div class="nexs-list-view__modal-header">
+        <div>
+          <h2 class="nexs-list-view__modal-title">Save View</h2>
+          <p class="nexs-list-view__modal-help">
+            Enter name of the view that you wish to save.
+          </p>
+        </div>
+        <button
+          class="nexs-list-view__modal-close"
+          type="button"
+          aria-label="Close"
+          onclick={closeSaveViewModal}
+        >
+          <span
+            class="nexs-list-view__icon nexs-list-view__icon--close"
+            aria-hidden="true"
+          ></span>
+        </button>
+      </div>
+
+      <div class="nexs-list-view__modal-body">
+        <input
+          class="nexs-list-view__input"
+          type="text"
+          aria-label="View name"
+          value={saveViewName}
+          oninput={handleSaveViewNameChange}
+        />
+        <template lwc:if={saveViewError}>
+          <div class="nexs-list-view__error" role="alert">{saveViewError}</div>
+        </template>
+      </div>
+
+      <footer class="nexs-list-view__modal-footer">
+        <button
+          class="nexs-list-view__button nexs-list-view__button--outline"
+          type="button"
+          onclick={closeSaveViewModal}
+        >
+          Cancel
+        </button>
+        <button
+          class="nexs-list-view__button nexs-list-view__button--brand"
+          type="button"
+          disabled={isSavingView}
+          onclick={handleSaveViewConfirm}
+        >
+          Save
+        </button>
+      </footer>
+    </div>
+  </template>
+
+  <!-- Modal / Delete View -->
+  <template lwc:if={showDeleteViewModal}>
+    <div class="nexs-list-view__backdrop" onclick={closeDeleteViewModal}></div>
+    <div
+      class="nexs-list-view__modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Delete View"
+    >
+      <div class="nexs-list-view__modal-header">
+        <div>
+          <h2 class="nexs-list-view__modal-title">Delete View</h2>
+          <p class="nexs-list-view__modal-help">
+            Delete "{deleteViewTargetLabel}"? This can't be undone.
+          </p>
+        </div>
+        <button
+          class="nexs-list-view__modal-close"
+          type="button"
+          aria-label="Close"
+          onclick={closeDeleteViewModal}
+        >
+          <span
+            class="nexs-list-view__icon nexs-list-view__icon--close"
+            aria-hidden="true"
+          ></span>
+        </button>
+      </div>
+
+      <template lwc:if={deleteViewError}>
+        <div class="nexs-list-view__modal-body">
+          <div class="nexs-list-view__error" role="alert">
+            {deleteViewError}
+          </div>
+        </div>
+      </template>
+
+      <footer class="nexs-list-view__modal-footer">
+        <button
+          class="nexs-list-view__button nexs-list-view__button--outline"
+          type="button"
+          onclick={closeDeleteViewModal}
+        >
+          Cancel
+        </button>
+        <button
+          class="nexs-list-view__button nexs-list-view__button--brand"
+          type="button"
+          disabled={isDeletingView}
+          onclick={handleDeleteViewConfirm}
+        >
+          Delete
+        </button>
+      </footer>
+    </div>
+  </template>
+</template>

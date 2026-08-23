@@ -1,0 +1,11 @@
+Hello [!Case.Contact.FirstName] [!Case.Contact.LastName],
+
+I hope this email finds you well. This email is to notify you that your recurring money movement occurred at [!Case.FinServ__FinancialAccount__r.OASP_FSC__Custodian__r.Name] as of {Date of Transaction}. Included below is a summary of the transaction. This transaction will continue with the following frequency: [!Case.Recurring_Transfer_Frequency__c].
+
+Sending Account: [!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.Name] [!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.OASP_FSC__Registration_Type__r.Name], XXXX[!Case.FinServ__FinancialAccount__r.Account_Number_Last_4__c], [!Case.FinServ__FinancialAccount__r.OASP_FSC__Custodian__r.Name]
+Receiving Account: **{SLOA Bank Name} XXXX{Last four of bank account number for SLOA}**
+Amount: [!Case.Amount__c]
+
+If you need to adjust these transactions at any point, please call our office and ask to speak with a member of [!Case.Financial_Advisor_Team__r.Primary_Financial_Advisor__r.FirstName] [!Case.Financial_Advisor_Team__r.Primary_Financial_Advisor__r.LastName]'s team. I can be reached via phone or email with follow up questions.
+
+Sincerely,

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Mark-Up to Purchase --></label>
+        <name>Mark_Up_to_Purchase__c</name>
+    </CustomFieldTranslation>

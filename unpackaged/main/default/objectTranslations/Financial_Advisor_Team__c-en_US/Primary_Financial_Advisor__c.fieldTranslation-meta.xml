@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Primary Financial Advisor --></label>
+        <name>Primary_Financial_Advisor__c</name>
+        <relationshipLabel><!-- Financial Advisor Teams --></relationshipLabel>
+    </CustomFieldTranslation>

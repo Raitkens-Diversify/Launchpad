@@ -1,0 +1,293 @@
+/* --slds-g-* declared locally, not inherited: platform-injected SLDS2
+   styling hooks beat values inherited from an ancestor's :host
+   (see nexsHome.css / dsHero.css). */
+:host {
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-accent-1: #0f406f;
+}
+
+.usl__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-space-lg, 16px);
+    flex-wrap: wrap;
+    margin-bottom: var(--ds-space-lg, 16px);
+}
+.usl__chips {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.usl__toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-md, 12px);
+    flex: none;
+}
+.usl__log-link {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--ds-medium-blue, #1a76bb);
+    white-space: nowrap;
+}
+.usl__log-link:hover {
+    text-decoration: underline;
+}
+.usl__log-link:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+
+/* ---- Featured active-session card (the queue's featured-card language) ------ */
+
+.usl__featured {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-space-xl, 24px);
+    padding: var(--ds-space-xl, 24px);
+    margin-bottom: var(--ds-space-lg, 16px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+    box-shadow: var(--ds-shadow-rest, 0 1px 2px rgba(15, 23, 42, 0.06));
+}
+.usl__featured-main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--ds-space-sm, 8px);
+}
+.usl__featured-badges {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-md, 12px);
+}
+.usl__featured-cycle {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.usl__featured-title {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--ds-medium-blue, #1a76bb);
+    overflow-wrap: anywhere;
+}
+.usl__featured-title:hover {
+    text-decoration: underline;
+}
+.usl__featured-title:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+.usl__featured-charter {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+.usl__featured-meta {
+    font-size: 0.8125rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.usl__featured-actions {
+    margin-top: var(--ds-space-sm, 8px);
+}
+.usl__featured-visual {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: var(--ds-lightest-blue, #e2f8ff);
+    --sds-c-icon-color-foreground-default: var(--ds-medium-blue, #1a76bb);
+}
+
+/* ---- Dense session list (the queue's column-header grid grammar) ------------
+   No overflow anywhere on rows — same kebab-safety rule as uatQueue, and the
+   header row is decorative (aria-hidden). */
+
+.usl__table {
+    /* Fixed action track (not auto) — same header-vs-row grid divergence as
+       uatQueue: auto is 0px under the empty header cell but button-width in
+       rows, shearing the columns after it. */
+    --usl-cols: minmax(0, 1fr) minmax(110px, 150px) 110px 130px 90px 80px 36px;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+}
+.usl__thead,
+.usl__tr {
+    display: grid;
+    grid-template-columns: var(--usl-cols);
+    align-items: center;
+    column-gap: var(--ds-space-lg, 16px);
+    padding: var(--ds-space-md, 12px) var(--ds-space-lg, 16px);
+}
+.usl__thead {
+    padding-top: var(--ds-space-sm, 8px);
+    padding-bottom: var(--ds-space-sm, 8px);
+}
+.usl__th {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.usl__tr {
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    transition: background-color 0.15s ease;
+}
+.usl__tr:hover {
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+
+.usl__td {
+    min-width: 0;
+}
+.usl__td--session {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.usl__row-title {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--ds-medium-blue, #1a76bb);
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.usl__row-title:hover {
+    text-decoration: underline;
+}
+.usl__row-title:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+.usl__row-meta {
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.usl__td--cycle {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    overflow-wrap: anywhere;
+}
+.usl__td--findings {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.8125rem;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+.usl__row-files {
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.usl__td--updated {
+    font-size: 0.8125rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    white-space: nowrap;
+}
+.usl__td--action {
+    display: flex;
+    justify-content: flex-end;
+}
+.usl__td--kebab {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.usl__pager {
+    margin-top: var(--ds-space-lg, 16px);
+}
+
+.usl__start-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-md, 12px);
+}
+.usl__start-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--ds-space-sm, 8px);
+}
+
+/* ---- Responsive ------------------------------------------------------------ */
+
+@media (max-width: 1024px) {
+    .usl__table {
+        --usl-cols: minmax(0, 1fr) minmax(100px, 140px) 100px 110px 80px 36px;
+    }
+    .usl__th--updated,
+    .usl__td--updated {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .usl__thead {
+        display: none;
+    }
+    .usl__tr {
+        grid-template-columns: minmax(0, 1fr) auto auto;
+        grid-template-areas:
+            "session action kebab"
+            "cycle status status"
+            "findings findings findings";
+        row-gap: var(--ds-space-sm, 8px);
+    }
+    .usl__td--session { grid-area: session; }
+    .usl__td--cycle { grid-area: cycle; }
+    .usl__td--findings { grid-area: findings; }
+    .usl__td--action { grid-area: action; align-self: start; }
+    .usl__td--kebab { grid-area: kebab; align-self: start; }
+    .usl__tr .usl__td:nth-child(3) { grid-area: status; justify-self: end; }
+
+    .usl__toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .usl__toolbar-actions {
+        justify-content: space-between;
+    }
+    .usl__featured-visual {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .usl__tr {
+        transition-duration: 0.01ms;
+    }
+}

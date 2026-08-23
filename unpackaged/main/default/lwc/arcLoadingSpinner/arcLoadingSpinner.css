@@ -1,0 +1,58 @@
+/* Mirrors lightning-spinner's positioning contract: absolutely centered
+   within the nearest positioned ancestor, which every existing loading
+   container already provides (position:relative + a min-height). */
+:host {
+  display: contents;
+}
+
+.arc-loading-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arc-loading-spinner__icon {
+  display: block;
+}
+
+.arc-loading-spinner__icon--xx-small {
+  width: 24px;
+  height: 24px;
+}
+
+.arc-loading-spinner__icon--x-small {
+  width: 32px;
+  height: 32px;
+}
+
+.arc-loading-spinner__icon--small {
+  width: 40px;
+  height: 40px;
+}
+
+.arc-loading-spinner__icon--medium {
+  width: 56px;
+  height: 56px;
+}
+
+.arc-loading-spinner__icon--large {
+  width: 80px;
+  height: 80px;
+}
+
+.arc-loading-spinner__assistive-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

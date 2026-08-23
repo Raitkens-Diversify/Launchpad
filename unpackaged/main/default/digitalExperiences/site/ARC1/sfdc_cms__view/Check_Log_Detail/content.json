@@ -1,0 +1,109 @@
+{
+  "type" : "sfdc_cms__view",
+  "title" : "Check Log Detail",
+  "contentBody" : {
+    "component" : {
+      "children" : [ {
+        "children" : [ {
+          "attributes" : {
+            "backgroundImageConfig" : "",
+            "backgroundImageOverlay" : "rgba(0,0,0,0)",
+            "componentSpacerSize" : "",
+            "dxpStyle" : { },
+            "layoutDirectionDesktop" : "row",
+            "layoutDirectionMobile" : "column",
+            "layoutDirectionTablet" : "column",
+            "maxContentWidth" : "",
+            "sectionColumnGutterWidth" : "",
+            "sectionConfig" : "{\"UUID\":\"453d7b14-3d24-4c1b-ba64-46af3c61d889\",\"columns\":[{\"UUID\":\"85b77750-c7ae-4d0d-be5a-32a2957facfe\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":[]}]}",
+            "sectionMinHeight" : "",
+            "sectionVerticalAlign" : "flex-start"
+          },
+          "children" : [ {
+            "children" : [ {
+              "attributes" : {
+                "ariaLabel" : "Breadcrumb",
+                "currentLabel" : "",
+                "dxpStyle" : { },
+                "listLabel" : "",
+                "listPath" : "/account/Account/Default?c__tabId=tab1",
+                "nameField" : "Name",
+                "objectApiName" : "Account",
+                "parentKey" : "",
+                "parentLabel" : ""
+              },
+              "definition" : "c:arcBreadcrumb",
+              "id" : "43bec90a-6d1c-4808-ae00-580b66142270",
+              "type" : "component"
+            }, {
+              "attributes" : {
+                "backgroundColor" : "",
+                "dxpStyle" : { },
+                "layout" : "{!Item._layout}",
+                "mainTitlePaddingHorizontal" : "none",
+                "mainTitlePaddingVertical" : "none",
+                "mainTitleText" : "Your text",
+                "mainTitleTextDisplayInfo" : "{}",
+                "metadata" : "{!Item._metadata._context}",
+                "recordIdFromDataProvider" : "{!Item.Id}",
+                "showTitle" : false
+              },
+              "children" : [ {
+                "children" : [ {
+                  "attributes" : {
+                    "dxpStyle" : { }
+                  },
+                  "definition" : "dxp_page_layout:placeHolder",
+                  "id" : "dc18f0a4-565e-4b91-9584-0997cbb6af2d",
+                  "type" : "component"
+                } ],
+                "id" : "35c6ba26-2551-46c5-9435-f51ef6cfdcb9",
+                "name" : "placeholder",
+                "title" : "placeholder",
+                "type" : "region"
+              } ],
+              "definition" : "dxp_records:detailPanel",
+              "id" : "8ab1e9d2-f7b4-4b97-b84e-2379f1ccff1c",
+              "type" : "component"
+            } ],
+            "id" : "85b77750-c7ae-4d0d-be5a-32a2957facfe",
+            "name" : "col1",
+            "title" : "Column 1",
+            "type" : "region"
+          } ],
+          "definition" : "community_layout:section",
+          "id" : "453d7b14-3d24-4c1b-ba64-46af3c61d889",
+          "type" : "component"
+        } ],
+        "id" : "47b21645-0780-4f8a-a34d-cb99623b3208",
+        "name" : "content",
+        "title" : "Content",
+        "type" : "region"
+      }, {
+        "children" : [ {
+          "attributes" : {
+            "customHeadTags" : "",
+            "description" : "",
+            "dxpStyle" : { },
+            "pageTitle" : "{!Record._Object}: {!Record._Title}",
+            "recordId" : "{!recordId}"
+          },
+          "definition" : "community_builder:seoAssistant",
+          "id" : "ade801e6-66a6-4324-b0ec-a6296c7e951c",
+          "type" : "component"
+        } ],
+        "id" : "d3090f84-cc05-4cf0-bd89-7bc31e554d41",
+        "name" : "sfdcHiddenRegion",
+        "title" : "sfdcHiddenRegion",
+        "type" : "region"
+      } ],
+      "definition" : "community_layout:sldsFlexibleLayout",
+      "id" : "2a15d190-c532-4504-9a0a-085e1c9c7929",
+      "type" : "component"
+    },
+    "dataProviders" : [ ],
+    "themeLayoutType" : "OHzbXAVux6mZ7VVDb7Pb8F2YUFBAXR",
+    "viewType" : "detail-Check_Log__c"
+  },
+  "urlName" : "check-log-detail"
+}

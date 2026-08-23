@@ -1,0 +1,81 @@
+<!-- Author: Hoang Long Vu To -->
+<template>
+    <div class="rdf">
+        <template lwc:if={isTextInput}>
+            <input
+                class={inputClass}
+                type={inputType}
+                value={stringValue}
+                placeholder={placeholder}
+                maxlength={maxLength}
+                min={minValue}
+                max={maxValue}
+                step={numberStep}
+                pattern={pattern}
+                disabled={isUnsupported}
+                aria-label={ariaLabel}
+                aria-invalid={hasValidationError}
+                oninput={handleInputChange}
+                onblur={handleBlur}>
+        </template>
+
+        <template lwc:elseif={isTextarea}>
+            <textarea
+                class={textareaClass}
+                value={textareaValue}
+                placeholder={placeholder}
+                maxlength={maxLength}
+                aria-label={ariaLabel}
+                aria-invalid={hasValidationError}
+                oninput={handleInputChange}
+                onblur={handleBlur}>
+            </textarea>
+        </template>
+
+        <template lwc:elseif={isPicklist}>
+            <select
+                class={selectClass}
+                value={selectValue}
+                aria-label={ariaLabel}
+                aria-invalid={hasValidationError}
+                onchange={handleSelectChange}
+                onblur={handleBlur}>
+                <option value="">Select...</option>
+                <template for:each={picklistOptionsWithSelection} for:item="option">
+                    <option key={option.value} value={option.value} selected={option.isSelected}>{option.label}</option>
+                </template>
+            </select>
+        </template>
+
+        <template lwc:elseif={isMultiPicklist}>
+            <div class="rdf-multi" role="group" aria-label={ariaLabel}>
+                <template for:each={multiPicklistOptions} for:item="option">
+                    <label key={option.value} class="rdf-multi__item">
+                        <input
+                            class="rdf-multi__checkbox"
+                            type="checkbox"
+                            value={option.value}
+                            checked={option.checked}
+                            onchange={handleMultiChange}>
+                        <span class="rdf-multi__label">{option.label}</span>
+                    </label>
+                </template>
+            </div>
+        </template>
+
+        <template lwc:elseif={isBoolean}>
+            <label class="rdf-boolean">
+                <input
+                    class="rdf-checkbox"
+                    type="checkbox"
+                    checked={isChecked}
+                    aria-label={ariaLabel}
+                    onchange={handleCheckboxChange}>
+            </label>
+        </template>
+
+        <template lwc:if={showValidationMessage}>
+            <p class="div-field-error" role="alert">{validationMessage}</p>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,157 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-06-16 -->
+<template>
+  <section class="dashboard-view">
+    <template lwc:if={errorMessage}>
+      <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">{errorMessage}</div>
+    </template>
+
+    <template lwc:if={isLoading}></template>
+
+    <template lwc:else>
+      <div class="kpi-cards-row">
+        <template for:each={kpiCards} for:item="kpi">
+          <article key={kpi.id} class="kpi-card">
+            <div class={kpi.iconClass}>
+              <lightning-icon icon-name={kpi.icon} size="x-small"></lightning-icon>
+            </div>
+            <div class="kpi-card__content">
+              <div class="kpi-card__value div-text-body-lg">{kpi.value}</div>
+              <div class="kpi-card__label div-text-body-xs">{kpi.label}</div>
+              <template lwc:if={kpi.subtext}>
+                <div class="kpi-card__subtext div-text-body-xs">{kpi.subtext}</div>
+              </template>
+            </div>
+          </article>
+        </template>
+      </div>
+
+      <div class="dashboard-grid">
+        <article class="div-card">
+          <header class="div-card__header div-card__header--meta">
+            <h3 class="div-card__title">Recent Notification Events</h3>
+            <span class="div-card__meta">Latest activity</span>
+          </header>
+
+          <template lwc:if={hasRecentEvents}>
+            <ul class="activity-list div-text-body-xs" role="list">
+              <template for:each={recentEvents} for:item="item">
+                <li key={item.id} class={item.rowClass}>
+                  <template lwc:if={item.hasRecordLink}>
+                    <button
+                      type="button"
+                      class="activity-row__link"
+                      data-record-id={item.relatedRecordId}
+                      aria-label={item.rowAriaLabel}
+                      onclick={handleRecentEventNavigate}
+                      onkeydown={handleRecentEventNavigateKeyDown}
+                    >
+                      <div class="activity-row__content">
+                        <div class="activity-row__summary">
+                          <c-notification-center-meta-strip
+                            source-type={item.sourceType}
+                            change-type-label={item.changeTypeLabel}
+                            show-change-type
+                            frequency={item.frequency}
+                            show-household={item.showHouseholdContext}
+                            household-label={item.contextLabel}
+                          ></c-notification-center-meta-strip>
+                        </div>
+                      </div>
+
+                      <div class="activity-row__status">
+                        <lightning-icon
+                          icon-name={item.statusIcon}
+                          size="xx-small"
+                          class={item.statusIconClass}
+                        ></lightning-icon>
+                        <template lwc:if={item.showChannelPills}>
+                          <div
+                            class="activity-row__channel-pills"
+                            aria-label={item.channelSummaryLabel}
+                          >
+                            <template for:each={item.channelPills} for:item="pill">
+                              <span key={pill.id} class={pill.cssClass}>{pill.label}</span>
+                            </template>
+                          </div>
+                        </template>
+                        <span class="activity-row__time">{item.timeLabel}</span>
+                      </div>
+                    </button>
+                  </template>
+
+                  <template lwc:else>
+                    <div class="activity-row__static">
+                      <div class="activity-row__content">
+                        <div class="activity-row__summary">
+                          <c-notification-center-meta-strip
+                            source-type={item.sourceType}
+                            change-type-label={item.changeTypeLabel}
+                            show-change-type
+                            frequency={item.frequency}
+                            show-household={item.showHouseholdContext}
+                            household-label={item.contextLabel}
+                          ></c-notification-center-meta-strip>
+                        </div>
+                      </div>
+
+                      <div class="activity-row__status">
+                        <lightning-icon
+                          icon-name={item.statusIcon}
+                          size="xx-small"
+                          class={item.statusIconClass}
+                        ></lightning-icon>
+                        <template lwc:if={item.showChannelPills}>
+                          <div
+                            class="activity-row__channel-pills"
+                            aria-label={item.channelSummaryLabel}
+                          >
+                            <template for:each={item.channelPills} for:item="pill">
+                              <span key={pill.id} class={pill.cssClass}>{pill.label}</span>
+                            </template>
+                          </div>
+                        </template>
+                        <span class="activity-row__time">{item.timeLabel}</span>
+                      </div>
+                    </div>
+                  </template>
+                </li>
+              </template>
+            </ul>
+          </template>
+
+          <template lwc:else>
+            <p class="div-card__empty">No recent notifications to display.</p>
+          </template>
+        </article>
+
+        <div class="dashboard-sidebar">
+          <article class="div-card">
+            <header class="div-card__header">
+              <h3 class="div-card__title">Channel Delivery (Today)</h3>
+            </header>
+            <div class="div-card__body div-card__body--stack">
+              <template for:each={deliveryRows} for:item="row">
+                <div key={row.channelKey} class="delivery-row">
+                  <div class="delivery-row__header">
+                    <div class="delivery-row__label-wrap">
+                      <lightning-icon
+                        icon-name={row.icon}
+                        size="xx-small"
+                        class={row.iconClass}
+                      ></lightning-icon>
+                      <span class="delivery-row__label">{row.label}</span>
+                    </div>
+                    <span class="delivery-row__count">{row.count}</span>
+                  </div>
+                  <div class="delivery-row__bar">
+                    <div class={row.barClass} style={row.barStyle}></div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </article>
+        </div>
+      </div>
+    </template>
+  </section>
+</template>

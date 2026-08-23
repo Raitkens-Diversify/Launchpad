@@ -1,0 +1,68 @@
+<template>
+    <div class="nexs-search">
+        <div class="nexs-search__field" role="combobox" aria-haspopup="listbox"
+             aria-expanded={ariaExpanded} aria-owns={listboxId}>
+            <lightning-icon icon-name="utility:search" size="x-small"
+                alternative-text="Search" class="nexs-search__icon"></lightning-icon>
+            <input
+                type="text"
+                class="nexs-search__input"
+                placeholder={placeholder}
+                value={term}
+                role="combobox"
+                autocomplete="off"
+                aria-autocomplete="list"
+                aria-controls={listboxId}
+                aria-expanded={ariaExpanded}
+                aria-activedescendant={activeDescendant}
+                oninput={handleInput}
+                onkeydown={handleKeydown}
+                onblur={handleBlur}
+                onfocus={handleFocus} />
+            <template if:true={showClear}>
+                <button type="button" class="nexs-search__clear" onclick={handleClear}
+                    aria-label="Clear search">
+                    <lightning-icon icon-name="utility:close" size="xx-small"
+                        alternative-text="Clear"></lightning-icon>
+                </button>
+            </template>
+        </div>
+
+        <ul class="nexs-search__menu" role="listbox" id={listboxId}
+            aria-label="Search suggestions" if:true={showMenu}>
+            <template if:true={hasSuggestions}>
+                <li class="nexs-search__menu-header" role="presentation">Top suggestions:</li>
+                <template for:each={suggestionsView} for:item="s">
+                    <li
+                        key={s.id}
+                        id={s.optionId}
+                        class={s.cssClass}
+                        role="option"
+                        aria-selected={s.ariaSelected}
+                        data-id={s.id}
+                        onclick={handleOptionClick}
+                        onmousedown={handleOptionMousedown}
+                    >
+                        <span class="nexs-search__item-title">
+                            <template for:each={s.titleSegments} for:item="seg">
+                                <template if:true={seg.match}
+                                    ><strong key={seg.key}>{seg.text}</strong></template>
+                                <template if:false={seg.match}
+                                    ><span key={seg.key}>{seg.text}</span></template>
+                            </template>
+                        </span>
+                    </li>
+                </template>
+            </template>
+            <template if:false={hasSuggestions}>
+                <li class="nexs-search__empty" role="presentation">
+                    No matching titles &mdash; press Enter to search everything.
+                </li>
+            </template>
+            <li class="nexs-search__view-all" role="option" aria-selected="false"
+                onclick={handleSeeAll} onmousedown={handleOptionMousedown}>
+                See all results for &ldquo;{term}&rdquo;
+            </li>
+        </ul>
+    </div>
+</template>

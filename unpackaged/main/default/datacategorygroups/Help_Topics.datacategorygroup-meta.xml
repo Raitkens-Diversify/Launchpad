@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DataCategoryGroup xmlns="http://soap.sforce.com/2006/04/metadata">
+    <active>true</active>
+    <dataCategory>
+        <dataCategory>
+            <dataCategory>
+                <label>The Basics</label>
+                <name>The_Basics</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Help Center Tips</label>
+                <name>Help_Center_Tips</name>
+            </dataCategory>
+            <label>Getting Started</label>
+            <name>Getting_Started</name>
+        </dataCategory>
+        <dataCategory>
+            <dataCategory>
+                <label>Creating Cases</label>
+                <name>Creating_Cases</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Working Tasks</label>
+                <name>Working_Tasks</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Case Templates</label>
+                <name>Case_Templates</name>
+            </dataCategory>
+            <label>Cases and Tasks</label>
+            <name>Cases_and_Tasks</name>
+        </dataCategory>
+        <dataCategory>
+            <dataCategory>
+                <label>Households</label>
+                <name>Households</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Members and Entities</label>
+                <name>Members_and_Entities</name>
+            </dataCategory>
+            <label>Households and Clients</label>
+            <name>Households_and_Clients</name>
+        </dataCategory>
+        <dataCategory>
+            <dataCategory>
+                <label>Using the Wizard</label>
+                <name>Using_the_Wizard</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Envelope Errors</label>
+                <name>Envelope_Errors</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Envelope Templates</label>
+                <name>Envelope_Templates</name>
+            </dataCategory>
+            <label>Wizard and Envelopes</label>
+            <name>Wizard_and_Envelopes</name>
+        </dataCategory>
+        <dataCategory>
+            <dataCategory>
+                <label>ISAs</label>
+                <name>ISAs</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Investment Accounts</label>
+                <name>Investment_Accounts</name>
+            </dataCategory>
+            <label>ISAs and Investments</label>
+            <name>ISAs_and_Investments</name>
+        </dataCategory>
+        <dataCategory>
+            <dataCategory>
+                <label>Cosmos Systems</label>
+                <name>Cosmos_Systems</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Activity, Tasks &amp; Cases</label>
+                <name>Activity_Tasks_and_Cases</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Investments &amp; Service Agreements</label>
+                <name>Investments_and_Service_Agreements</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Clients &amp; Households</label>
+                <name>Clients_and_Households</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Related Parties &amp; Roles</label>
+                <name>Related_Parties_and_Roles</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Key Definitions</label>
+                <name>Key_Definitions</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Core Objects</label>
+                <name>Core_Objects</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Guides</label>
+                <name>Guides</name>
+            </dataCategory>
+            <label>Cosmos Vocab &amp; Data Structure</label>
+            <name>Data_Model</name>
+        </dataCategory>
+        <label>All</label>
+        <name>All</name>
+    </dataCategory>
+    <description>Topic taxonomy for the Nexus help center. Top level = topics (left nav); second level = subtopics (section headers within a topic, Hulu-style). Categories mirror our internal Cosmos domains.</description>
+    <label>Help Topics</label>
+    <objectUsage>
+        <object>KnowledgeArticleVersion</object>
+    </objectUsage>
+</DataCategoryGroup>

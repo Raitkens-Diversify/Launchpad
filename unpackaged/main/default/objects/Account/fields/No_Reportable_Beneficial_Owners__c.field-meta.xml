@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>No_Reportable_Beneficial_Owners__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Set from the envelope wizard when a business has no individuals meeting the beneficial-owner reporting threshold. Satisfies the Beneficial Owner related-party requirement in place of naming a person, so the requirement is met by either at least one beneficial owner or this affirmation.</description>
+    <inlineHelpText>Select if there are no reportable beneficial owners for this business.</inlineHelpText>
+    <label>No Reportable Beneficial Owners</label>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Checkbox</type>
+</CustomField>

@@ -1,0 +1,153 @@
+<template>
+    <div class="autm">
+        <template if:true={errorMessage}>
+            <p class="autm__error" role="alert">{errorMessage}</p>
+        </template>
+
+        <template if:true={loading}>
+            <div class="autm__loading">
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={loading}>
+            <div class="autm__toolbar">
+                <p class="autm__hint">
+                    Teams group testers; cycles are assigned to a team. A team can be
+                    deleted once none of its cycles are open.
+                </p>
+                <lightning-button variant="brand"
+                                  label="New team"
+                                  disabled={busy}
+                                  onclick={handleNewTeam}></lightning-button>
+            </div>
+
+            <template if:true={hasTeams}>
+                <ul class="autm__list">
+                    <template for:each={teamRows} for:item="team">
+                        <li key={team.id} class="autm__card">
+                            <div class="autm__card-text">
+                                <button type="button"
+                                        class="autm__card-name autm__link"
+                                        data-id={team.id}
+                                        onclick={handleManage}>{team.name}</button>
+                                <div class="autm__chips">
+                                    <template for:each={team.chips} for:item="chip">
+                                        <span key={chip.key} class="autm__chip">{chip.label}</span>
+                                    </template>
+                                    <template if:false={team.memberCount}>
+                                        <span class="autm__chip autm__chip--empty">No members yet</span>
+                                    </template>
+                                </div>
+                            </div>
+                            <div class="autm__card-actions">
+                                <lightning-button label="Manage"
+                                                  size="small"
+                                                  disabled={busy}
+                                                  data-id={team.id}
+                                                  onclick={handleManage}></lightning-button>
+                                <lightning-button variant="destructive-text"
+                                                  label="Delete"
+                                                  size="small"
+                                                  disabled={busy}
+                                                  data-id={team.id}
+                                                  onclick={handleDeleteTeam}></lightning-button>
+                            </div>
+                        </li>
+                    </template>
+                </ul>
+            </template>
+            <template if:false={hasTeams}>
+                <p class="autm__empty">No teams yet — create the first one.</p>
+            </template>
+        </template>
+
+        <!-- Outer guard: the slot bindings dereference {modal.*}, which is
+             null until the modal opens — mount the dialog only when open. -->
+        <template if:true={modalOpen}>
+        <c-ds-modal-v2 is-open={modalOpen} title={modalTitle} size="small" onclose={handleModalCancel}>
+                    <lightning-input label="Team name"
+                                     value={modal.name}
+                                     required
+                                     max-length="80"
+                                     onchange={handleNameChange}></lightning-input>
+
+                    <div class="autm-modal__section">
+                        <h3 class="autm-modal__subtitle">Members</h3>
+                        <template if:true={hasChecklist}>
+                            <ul class="autm__checklist">
+                                <template for:each={checklistRows} for:item="row">
+                                    <li key={row.userId}>
+                                        <lightning-input type="checkbox"
+                                                         label={row.label}
+                                                         checked={row.checked}
+                                                         data-id={row.userId}
+                                                         onchange={handleMemberToggle}></lightning-input>
+                                    </li>
+                                </template>
+                            </ul>
+                        </template>
+                        <template if:false={hasChecklist}>
+                            <p class="autm__empty">
+                                No testers in the pool yet — add one below.
+                            </p>
+                        </template>
+                    </div>
+
+                    <div class="autm-modal__section">
+                        <h3 class="autm-modal__subtitle">Add a new tester</h3>
+                        <p class="autm__hint">
+                            Makes an existing internal user a tester (assigns the UAT Tester
+                            permission set) — it can’t create new Salesforce users.
+                        </p>
+                        <lightning-input type="search"
+                                         label="Find a user"
+                                         variant="label-hidden"
+                                         placeholder="Search users by name…"
+                                         value={searchTerm}
+                                         onchange={handleSearchChange}></lightning-input>
+                        <template if:true={searching}>
+                            <div class="autm__loading autm__loading--inline">
+                                <lightning-spinner alternative-text="Searching" size="x-small"></lightning-spinner>
+                            </div>
+                        </template>
+                        <template if:true={hasSearchResults}>
+                            <ul class="autm__results">
+                                <template for:each={searchResults} for:item="result">
+                                    <li key={result.value} class="autm__result">
+                                        <span class="autm__result-label">{result.label}</span>
+                                        <lightning-button label="+ Add"
+                                                          size="small"
+                                                          disabled={busy}
+                                                          data-id={result.value}
+                                                          data-label={result.label}
+                                                          onclick={handleAddTester}></lightning-button>
+                                    </li>
+                                </template>
+                            </ul>
+                        </template>
+                    </div>
+
+                    <lightning-button slot="footer"
+                                      label="Cancel"
+                                      disabled={saving}
+                                      onclick={handleModalCancel}></lightning-button>
+                    <lightning-button slot="footer"
+                                      variant="brand"
+                                      label="Save"
+                                      disabled={saving}
+                                      onclick={handleModalSave}></lightning-button>
+        </c-ds-modal-v2>
+        </template>
+
+        <template if:true={confirmOpen}>
+            <c-admin-confirm-modal header={confirm.header}
+                                   message={confirm.message}
+                                   confirm-label={confirm.confirmLabel}
+                                   variant={confirm.variant}
+                                   busy={saving}
+                                   onconfirm={handleConfirmProceed}
+                                   oncancel={handleConfirmCancel}></c-admin-confirm-modal>
+        </template>
+    </div>
+</template>

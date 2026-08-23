@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomPermission xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Create Diversify Related Person records - used in code to redirect from wizard</description>
+    <isLicensed>false</isLicensed>
+    <label>Create DRP Standard</label>
+</CustomPermission>

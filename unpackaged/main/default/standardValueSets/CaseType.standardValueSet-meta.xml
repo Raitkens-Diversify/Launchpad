@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Problem</fullName>
+        <default>false</default>
+        <label>Problem</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Feature Request</fullName>
+        <default>false</default>
+        <label>Feature Request</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Question</fullName>
+        <default>false</default>
+        <label>Question</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Systems</fullName>
+        <default>false</default>
+        <label>Systems</label>
+    </standardValue>
+    <standardValue>
+        <fullName>AML Document Approval</fullName>
+        <default>false</default>
+        <label>AML Document Approval</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Third Party Money Movement</fullName>
+        <default>false</default>
+        <label>Third Party Money Movement</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Change of Registration</fullName>
+        <default>false</default>
+        <label>Change of Registration</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Variable Annuity Additional Purchase</fullName>
+        <default>false</default>
+        <label>Variable Annuity Additional Purchase</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Place Trade Request</fullName>
+        <default>false</default>
+        <label>Place Trade Request</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Move Money - Recurring</fullName>
+        <default>false</default>
+        <label>Move Money - Recurring</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Move Money - One Time</fullName>
+        <default>false</default>
+        <label>Move Money - One Time</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Cancel Move Money Recurring</fullName>
+        <default>false</default>
+        <label>Cancel Move Money Recurring</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Transfer</fullName>
+        <default>false</default>
+        <label>Transfer</label>
+    </standardValue>
+    <standardValue>
+        <fullName>401k Rollover</fullName>
+        <default>false</default>
+        <label>401k Rollover</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Journal Between Accounts - On Demand</fullName>
+        <default>false</default>
+        <label>Journal Between Accounts - On Demand</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Client Terminated Services</fullName>
+        <default>false</default>
+        <label>Client Terminated Services</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Review Meeting</fullName>
+        <default>false</default>
+        <label>Review Meeting</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Grant Donation</fullName>
+        <default>false</default>
+        <label>Grant Donation</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Donation in Kind</fullName>
+        <default>false</default>
+        <label>Donation in Kind</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Qualified Charitable Distribution</fullName>
+        <default>false</default>
+        <label>Qualified Charitable Distribution</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Roth Conversion</fullName>
+        <default>false</default>
+        <label>Roth Conversion</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Prepare Trades</fullName>
+        <default>false</default>
+        <label>Prepare Trades</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Trade Error</fullName>
+        <default>false</default>
+        <label>Trade Error</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Client Reimbursement</fullName>
+        <default>false</default>
+        <label>Client Reimbursement</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Change Management Style</fullName>
+        <default>false</default>
+        <label>Change Management Style</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Update IMA</fullName>
+        <default>false</default>
+        <label>Update IMA</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Deposit Check</fullName>
+        <default>false</default>
+        <label>Deposit Check</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Client Passed Away</fullName>
+        <default>false</default>
+        <label>Client Passed Away</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Draft and Submit - Alt Investment</fullName>
+        <default>false</default>
+        <label>Draft and Submit - Alt Investment</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Draft and Submit - New Account</fullName>
+        <default>false</default>
+        <label>Draft and Submit - New Account</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Tax Return</fullName>
+        <default>false</default>
+        <label>Tax Return</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Additional Funding</fullName>
+        <default>false</default>
+        <label>Additional Funding</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Account Closure</fullName>
+        <default>false</default>
+        <label>Account Closure</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Financial Planning</fullName>
+        <default>false</default>
+        <label>Financial Planning</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Multi-Family Office</fullName>
+        <default>false</default>
+        <label>Multi-Family Office</label>
+    </standardValue>
+    <standardValue>
+        <fullName>ERISA</fullName>
+        <default>false</default>
+        <label>ERISA</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Person Account Requested Changes</fullName>
+        <default>false</default>
+        <label>Person Account Requested Changes</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Update DMS Instructions</fullName>
+        <default>false</default>
+        <label>Update DMS Instructions</label>
+    </standardValue>
+    <standardValue>
+        <fullName>New Advisor Request</fullName>
+        <default>false</default>
+        <label>New Advisor Request</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Draft and Submit - Form</fullName>
+        <default>false</default>
+        <label>Draft and Submit - Form</label>
+    </standardValue>
+    <standardValue>
+        <fullName>New Financial Account</fullName>
+        <default>false</default>
+        <label>New Financial Account</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Purchase Alternative Investment</fullName>
+        <default>false</default>
+        <label>Purchase Alternative Investment</label>
+    </standardValue>
+</StandardValueSet>

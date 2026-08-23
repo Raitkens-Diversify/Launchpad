@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CompactLayout xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Insurance_Sample</fullName>
+    <fields>Name</fields>
+    <fields>EffectiveDate</fields>
+    <fields>ExpirationDate</fields>
+    <fields>Status</fields>
+    <fields>GrossWrittenPremium</fields>
+    <label>Insurance(Sample)</label>
+</CompactLayout>

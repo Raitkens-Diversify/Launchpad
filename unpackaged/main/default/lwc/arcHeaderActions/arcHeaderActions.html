@@ -1,0 +1,17 @@
+<template>
+  <div class="arc-header-actions">
+    <c-arc-header-search></c-arc-header-search>
+    <c-arc-notification-bell></c-arc-notification-bell>
+    <c-arc-header-icon-button
+      icon="question.svg"
+      label="Help"
+      onclick={handleHelpClick}
+    ></c-arc-header-icon-button>
+    <c-arc-header-icon-button
+      icon="gear-six.svg"
+      label="Settings"
+      onclick={handleSettingsClick}
+    ></c-arc-header-icon-button>
+    <c-arc-header-avatar></c-arc-header-avatar>
+  </div>
+</template>

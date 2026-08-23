@@ -1,0 +1,35 @@
+<template>
+    <!-- Author: Hoang Long Vu To | Date: 2026-06-08 -->
+    <lightning-modal-header label={modalHeaderLabel}></lightning-modal-header>
+
+    <lightning-modal-body class="create-record-body">
+        <template if:true={objectApiName}>
+            <template if:true={hasRecordTypeId}>
+                <lightning-record-form
+                    object-api-name={objectApiName}
+                    record-type-id={recordTypeId}
+                    layout-type={layoutType}
+                    mode="create"
+                    columns={formColumns}
+                    onsuccess={handleSuccess}
+                    onerror={handleError}
+                    oncancel={handleCancel}
+                ></lightning-record-form>
+            </template>
+            <template if:false={hasRecordTypeId}>
+                <lightning-record-form
+                    object-api-name={objectApiName}
+                    layout-type={layoutType}
+                    mode="create"
+                    columns={formColumns}
+                    onsuccess={handleSuccess}
+                    onerror={handleError}
+                    oncancel={handleCancel}
+                ></lightning-record-form>
+            </template>
+        </template>
+        <template if:false={objectApiName}>
+            <p class="slds-text-color_error slds-p-around_medium">Object API name is required to create a record.</p>
+        </template>
+    </lightning-modal-body>
+</template>

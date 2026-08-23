@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Rep Code Type --></label>
+        <name>Rep_Code_Type__c</name>
+        <picklistValues>
+            <masterLabel>G-Number</masterLabel>
+            <translation><!-- G-Number --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Master Account Number</masterLabel>
+            <translation><!-- Master Account Number --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Orion ID</masterLabel>
+            <translation><!-- Orion ID --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Rep Number</masterLabel>
+            <translation><!-- Rep Number --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

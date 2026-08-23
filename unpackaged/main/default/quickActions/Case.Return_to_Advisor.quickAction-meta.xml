@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QuickAction xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Return Case to the Advisor (Case Created By user)</description>
+    <flowDefinition>Case_Return_Case_to_Advisor</flowDefinition>
+    <label>Return to Advisor</label>
+    <optionsCreateFeedItem>false</optionsCreateFeedItem>
+    <type>Flow</type>
+</QuickAction>

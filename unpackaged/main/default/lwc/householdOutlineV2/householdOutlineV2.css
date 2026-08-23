@@ -1,0 +1,168 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+/* Root rail: vertical flex on a white surface, fills the nav column height so the
+   groups list below can take the remaining space and scroll. */
+.outline {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    gap: var(--slds-g-spacing-1, 4px);
+    padding-top: var(--slds-g-spacing-2, 8px);
+    background: var(--slds-g-color-surface-1, #ffffff);
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+}
+
+.outline__header {
+    display: flex;
+    flex-direction: column;
+    /* 14px has no spacing token — Figma "Header - Search" inner gap. */
+    gap: 14px;
+    padding-left: var(--slds-g-spacing-2, 8px);
+}
+
+.outline__heading-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--slds-g-spacing-2, 8px) var(--slds-g-spacing-2, 8px)
+        var(--slds-g-spacing-2, 8px) var(--slds-g-spacing-4, 16px);
+    border-radius: var(--slds-g-radius-border-2, 8px);
+}
+
+.outline__heading-title {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    line-height: 19px;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+/* Search field wrapper */
+.outline__search {
+    padding: 0 var(--slds-g-spacing-4, 16px) var(--slds-g-spacing-3, 12px);
+}
+
+.outline__search-input {
+    display: block;
+}
+
+/* Scrollable group list — takes the remaining height under the header. Positioned so it is the
+   containing block for any absolutely-positioned descendant without a closer positioned ancestor
+   (e.g. a row icon's .slds-assistive-text) — otherwise such a box anchors outside this scroll
+   container, escapes its clip, and stretches the LEX page once the list gets long. */
+.outline__groups {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    list-style: none;
+    margin: 0;
+    padding-left: var(--slds-g-spacing-2, 8px);
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-1, 4px);
+}
+
+/* A group stacks its heading row and (when adding) the inline add editor. */
+.outline__group {
+    display: flex;
+    flex-direction: column;
+}
+
+.outline__group-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 40px;
+    padding: var(--slds-g-spacing-2, 8px) var(--slds-g-spacing-3, 12px)
+        var(--slds-g-spacing-2, 8px) var(--slds-g-spacing-4, 16px);
+    border-radius: var(--slds-g-radius-border-2, 8px);
+}
+
+/* Existing entities listed under a group heading. */
+.outline__items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-1, 4px);
+    padding-right: var(--slds-g-spacing-2, 8px);
+}
+
+/* Empty-state row shown under a section heading when a search yields no matches. */
+.outline__no-results {
+    padding: var(--slds-g-spacing-2, 8px) var(--slds-g-spacing-3, 12px)
+        var(--slds-g-spacing-2, 8px) var(--slds-g-spacing-4, 16px);
+    font-size: var(--slds-g-font-size-base, 13px);
+    font-weight: var(--slds-g-font-weight-4, 400);
+    line-height: 18px;
+    color: var(--slds-g-color-neutral-base-50, #6b7280);
+}
+
+/* Inline add editor — nickname input + cancel (X), indented under the group row. */
+.outline__add-row {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-4, 16px);
+    padding: var(--slds-g-spacing-1, 4px) var(--slds-g-spacing-3, 12px)
+        var(--slds-g-spacing-1, 4px) var(--slds-g-spacing-4, 16px);
+}
+
+.outline__add-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.outline__add-spinner {
+    position: relative;
+    flex: none;
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.outline__group-label {
+    font-size: var(--slds-g-font-size-base, 13px);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    line-height: 18px;
+    color: var(--slds-g-color-neutral-base-50, #6b7280);
+}
+
+/* Accordion heading toggle: a plain button (label + caret) so the whole heading collapses
+   its group. lightning-button can't express a text header with a trailing caret. */
+.outline__group-toggle {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-1, 4px);
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+}
+
+.outline__group-toggle:focus-visible {
+    outline: none;
+    border-radius: var(--slds-g-radius-border-1, 4px);
+    box-shadow: 0 0 0 2px var(--slds-g-color-on-surface-4, #1a76bb);
+}
+
+.outline__group-caret {
+    flex: 0 0 auto;
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-neutral-base-50, #6b7280);
+}
+
+.outline--collapsed .outline__heading-title,
+.outline--collapsed .outline__search,
+.outline--collapsed .outline__groups {
+    display: none;
+}
+
+.outline--collapsed .outline__heading-row {
+    justify-content: flex-end;
+}

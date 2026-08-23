@@ -1,0 +1,35 @@
+/* --slds-g-* declared locally, not inherited: platform-injected SLDS2
+   styling hooks beat values inherited from an ancestor's :host
+   (see nexsHome.css / dsHero.css). */
+:host {
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-3: #09243f;
+}
+
+.ds-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--ds-space-sm, 8px);
+    padding: var(--ds-space-2xl, 32px) var(--ds-space-xl, 24px);
+}
+
+.ds-empty__icon {
+    margin-bottom: var(--ds-space-xs, 4px);
+}
+
+.ds-empty__heading {
+    margin: 0;
+    font-family: var(--ds-font-heading, 'Libre Baskerville', Georgia, serif);
+    font-size: 1.0625rem;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.ds-empty__message {
+    margin: 0;
+    max-width: 32ch;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}

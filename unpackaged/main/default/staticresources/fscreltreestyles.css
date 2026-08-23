@@ -1,0 +1,105 @@
+/*
+ * Author: Hoang Long Vu To
+ * Date: 2026-06-01
+ */
+.tree-shell {
+  --tree-card-width: 250px;
+  --tree-column-gap: 2rem;
+  --tree-line-color: #d1d1d1;
+  position: relative;
+  padding: 1.5rem;
+  min-height: 35rem;
+  max-width: calc(
+    (var(--tree-card-width) * 3) + (var(--tree-column-gap) * 2) + 3rem
+  );
+  margin: 0 auto;
+}
+
+.tree-shell_single-card {
+  max-width: calc(var(--tree-card-width) + 3rem);
+}
+
+.tree-shell__spinner {
+  min-height: 4rem;
+}
+
+.tree-shell__root {
+  width: var(--tree-card-width);
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.tree-shell__vertical-line {
+  width: 2px;
+  min-width: 2px;
+  height: var(--tree-stem-height, 1.25rem);
+  background-color: var(--tree-line-color, #d1d1d1);
+  margin: 0 auto;
+}
+
+.tree-shell__horizontal-line {
+  width: var(--tree-horizontal-width, 0px);
+  min-height: 2px;
+  height: 2px;
+  background-color: var(--tree-line-color, #d1d1d1);
+  margin: 0 auto;
+}
+
+.tree-shell__branch-area {
+  width: var(--tree-branches-width, 250px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tree-shell__branch-line {
+  width: 2px;
+  min-width: 2px;
+  height: var(--tree-drop-height, 1.25rem);
+  background-color: var(--tree-line-color, #d1d1d1);
+  margin: 0 auto;
+}
+
+.tree-shell__branches {
+  width: calc((var(--tree-card-width) * 3) + (var(--tree-column-gap) * 2));
+  display: flex;
+  justify-content: center;
+  gap: var(--tree-column-gap);
+  margin: 0 auto;
+  position: relative;
+}
+
+.tree-shell__branch-column {
+  width: var(--tree-card-width);
+  flex: 0 0 var(--tree-card-width);
+  position: relative;
+}
+
+@media (max-width: 920px) {
+  .tree-shell {
+    max-width: calc(var(--tree-card-width) + 2rem);
+  }
+
+  .tree-shell__root {
+    width: var(--tree-card-width);
+  }
+
+  .tree-shell__horizontal-line {
+    display: none;
+  }
+
+  .tree-shell__branches {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    width: var(--tree-card-width);
+    max-width: var(--tree-card-width);
+  }
+
+  .tree-shell__branch-column {
+    width: var(--tree-card-width);
+    flex: initial;
+  }
+}

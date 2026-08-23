@@ -1,0 +1,212 @@
+/**
+ * Author: Hoang Long Vu To
+ * Date: 2026-08-12
+ */
+:host {
+  display: block;
+  --slds-g-font-scale-2: 1rem;
+  --slds-g-color-on-surface-3: #09243f;
+  --div-record-field-height: 2.25rem;
+}
+
+.record-section {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.record-section__saving {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.record-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--slds-g-spacing-4, 16px);
+  padding-bottom: var(--slds-g-spacing-4, 16px);
+}
+
+.record-section__title-group {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--div-space-2, 0.5rem);
+  min-width: 0;
+}
+
+.record-section__title {
+  margin: 0;
+  font-family: var(
+    --div-font-family-base,
+    var(--ds-font-body, "Inter", -apple-system, BlinkMacSystemFont, sans-serif)
+  );
+  font-style: normal;
+  font-weight: var(--div-font-weight-semibold, var(--slds-g-font-weight-6, 600));
+  font-size: var(--div-font-scale-lg, 1.125rem);
+  letter-spacing: 0;
+  color: var(--div-color-text-primary, var(--slds-g-color-on-surface-3, #09243f));
+}
+
+.record-section__info-icon {
+  flex-shrink: 0;
+  --slds-c-icon-color-foreground-default: var(--arc-color-blue-600, var(--div-color-blue-600, #0369a1));
+}
+
+.record-section__edit {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--div-space-2, 0.5rem);
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--div-font-family-base, "Inter", -apple-system, BlinkMacSystemFont, sans-serif);
+  font-size: var(--slds-g-font-scale-2, 1rem);
+  font-weight: var(--div-font-weight-semibold, 600);
+  color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.record-section__edit:hover,
+.record-section__edit:focus-visible {
+  color: var(--div-color-accent-2, #0e3c67);
+}
+
+.record-section__edit:focus-visible {
+  outline: 2px solid var(--div-color-accent-2, #1a76bb);
+  outline-offset: 2px;
+  border-radius: var(--slds-g-radius-border-1, 2px);
+}
+
+.record-section__edit-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.record-section__edit-icon path {
+  fill: currentColor;
+}
+
+.record-section__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-3, 12px);
+  flex-shrink: 0;
+}
+
+.record-section__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-top: var(--div-space-2, 0.5rem);
+  border-top: 1px solid var(--div-color-gray-100, #f3f4f6);
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: var(--div-space-4, 1rem);
+  align-items: start;
+  padding: var(--div-space-2, 0.5rem) 0;
+}
+
+.field-row__label {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--div-space-1, 0.25rem);
+}
+
+.field-row__label-heading {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--div-space-1, 0.25rem);
+  min-width: 0;
+}
+
+.field-row__lock-icon {
+  flex-shrink: 0;
+  width: 0.6875rem;
+  height: 0.75rem;
+  color: var(--slds-g-color-neutral-base-50, #838a97);
+}
+
+.field-row__lock-icon path {
+  fill: currentColor;
+}
+
+.field-row__label-text {
+  font-family: var(--div-font-family-base, var(--ds-font-body, "Inter", -apple-system, BlinkMacSystemFont, sans-serif));
+  font-size: var(--arc-record-detail-label-font-size, inherit);
+  font-weight: 300;
+  letter-spacing: 0;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.field-row__control {
+  min-width: 0;
+  align-self: start;
+}
+
+.field-row__control c-arc-record-detail-field {
+  display: block;
+  width: 100%;
+}
+
+.field-row__value {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: var(--div-record-field-height, 2.25rem);
+  font-family: var(--div-font-family-base, var(--ds-font-body, "Inter", -apple-system, BlinkMacSystemFont, sans-serif));
+  font-size: var(--arc-record-detail-value-font-size, inherit);
+  font-weight: var(--div-font-weight-semibold, 600);
+  letter-spacing: 0;
+  color: var(--slds-g-color-on-surface-3, #09243f);
+  text-align: right;
+}
+
+.field-row__link {
+  text-decoration: none;
+  color: var(--div-color-accent-2, #0e3c67);
+}
+
+.field-row__link:hover,
+.field-row__link:focus-visible {
+  text-decoration: underline;
+  outline: none;
+}
+
+@media (max-width: 640px) {
+  .record-section__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .record-section__actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .field-row {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--div-space-2, 0.5rem);
+  }
+
+  .field-row__control {
+    width: 100%;
+  }
+
+  .field-row__value {
+    justify-content: flex-start;
+    text-align: left;
+  }
+}

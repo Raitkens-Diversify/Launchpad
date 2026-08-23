@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Due_Date__c</fullName>
+    <label>Due Date</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Days from Previous Task Completion</fullName>
+                <default>false</default>
+                <label>Days from Previous Task Completion</label>
+            </value>
+            <value>
+                <fullName>Days from Case Creation</fullName>
+                <default>false</default>
+                <label>Days from Case Creation</label>
+            </value>
+            <value>
+                <fullName>Immediate</fullName>
+                <default>false</default>
+                <label>Immediate</label>
+            </value>
+            <value>
+                <fullName>After Referenced Field</fullName>
+                <default>false</default>
+                <label>After Referenced Field</label>
+            </value>
+            <value>
+                <fullName>Before Referenced Field</fullName>
+                <default>false</default>
+                <label>Before Referenced Field</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

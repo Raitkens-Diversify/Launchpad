@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- RIA Affiliation --></label>
+        <name>RIA_Affiliation__c</name>
+        <picklistValues>
+            <masterLabel>DAS</masterLabel>
+            <translation><!-- DAS --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DWM</masterLabel>
+            <translation><!-- DWM --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>DWM_Financial_Advisor_Teams</fullName>
+    <columns>NAME</columns>
+    <columns>Number_of_Active_Advisors__c</columns>
+    <columns>Related_Advisors__c</columns>
+    <columns>Orion_ID__c</columns>
+    <columns>Rep_ID__c</columns>
+    <columns>X4268__c</columns>
+    <columns>CREATED_DATE</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>X4268__c</field>
+        <operation>equals</operation>
+        <value>1</value>
+    </filters>
+    <label>DWM Financial Advisor Teams</label>
+    <sharedTo>
+        <group>Kelby_McMullin_LJ02</group>
+    </sharedTo>
+</ListView>

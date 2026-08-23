@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Branch__c</fullName>
+    <label>Branch</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>1031 Investment Services</fullName>
+                <default>false</default>
+                <label>1031 Investment Services</label>
+            </value>
+            <value>
+                <fullName>Advanced Wealth Strategies Group</fullName>
+                <default>false</default>
+                <label>Advanced Wealth Strategies Group</label>
+            </value>
+            <value>
+                <fullName>Animas Capital Management</fullName>
+                <default>false</default>
+                <label>Animas Capital Management</label>
+            </value>
+            <value>
+                <fullName>Ashland Pacific</fullName>
+                <default>false</default>
+                <label>Ashland Pacific</label>
+            </value>
+            <value>
+                <fullName>Boston Wealth Advisor Group</fullName>
+                <default>false</default>
+                <label>Boston Wealth Advisor Group</label>
+            </value>
+            <value>
+                <fullName>Bridge Equities</fullName>
+                <default>false</default>
+                <label>Bridge Equities</label>
+            </value>
+            <value>
+                <fullName>Butler Financial Advisors</fullName>
+                <default>false</default>
+                <label>Butler Financial Advisors</label>
+            </value>
+            <value>
+                <fullName>Caliber Wealth Management</fullName>
+                <default>false</default>
+                <label>Caliber Wealth Management</label>
+            </value>
+            <value>
+                <fullName>Capata Financial</fullName>
+                <default>false</default>
+                <label>Capata Financial</label>
+            </value>
+            <value>
+                <fullName>Charles Badalamenti</fullName>
+                <default>false</default>
+                <label>Charles Badalamenti</label>
+            </value>
+            <value>
+                <fullName>Cipolla Financial</fullName>
+                <default>false</default>
+                <label>Cipolla Financial</label>
+            </value>
+            <value>
+                <fullName>City Center Wealth</fullName>
+                <default>false</default>
+                <label>City Center Wealth</label>
+            </value>
+            <value>
+                <fullName>Coughlan &amp; Coughlan Financial Solutions</fullName>
+                <default>false</default>
+                <label>Coughlan &amp; Coughlan Financial Solutions</label>
+            </value>
+            <value>
+                <fullName>Diversify - Orem</fullName>
+                <default>false</default>
+                <label>Diversify - Orem</label>
+            </value>
+            <value>
+                <fullName>Diversify - Sandy</fullName>
+                <default>false</default>
+                <label>Diversify - Sandy</label>
+            </value>
+            <value>
+                <fullName>Dst Properties</fullName>
+                <default>false</default>
+                <label>Dst Properties</label>
+            </value>
+            <value>
+                <fullName>Evergreen Advisor Group</fullName>
+                <default>false</default>
+                <label>Evergreen Advisor Group</label>
+            </value>
+            <value>
+                <fullName>Financial Foundations Insurance &amp; Investments</fullName>
+                <default>false</default>
+                <label>Financial Foundations Insurance &amp; Investments</label>
+            </value>
+            <value>
+                <fullName>Financial Resources</fullName>
+                <default>false</default>
+                <label>Financial Resources</label>
+            </value>
+            <value>
+                <fullName>First Financial Center Of Dallas</fullName>
+                <default>false</default>
+                <label>First Financial Center Of Dallas</label>
+            </value>
+            <value>
+                <fullName>Gen 1 Financial</fullName>
+                <default>false</default>
+                <label>Gen 1 Financial</label>
+            </value>
+            <value>
+                <fullName>Glide Financial Group</fullName>
+                <default>false</default>
+                <label>Glide Financial Group</label>
+            </value>
+            <value>
+                <fullName>Global Wealth Partners Inc</fullName>
+                <default>false</default>
+                <label>Global Wealth Partners Inc</label>
+            </value>
+            <value>
+                <fullName>Gomez Corporation</fullName>
+                <default>false</default>
+                <label>Gomez Corporation</label>
+            </value>
+            <value>
+                <fullName>Grady Capital Group</fullName>
+                <default>false</default>
+                <label>Grady Capital Group</label>
+            </value>
+            <value>
+                <fullName>Grove Wealth Advisors</fullName>
+                <default>false</default>
+                <label>Grove Wealth Advisors</label>
+            </value>
+            <value>
+                <fullName>Home Office</fullName>
+                <default>false</default>
+                <label>Home Office</label>
+            </value>
+            <value>
+                <fullName>Independent - Craig Watanabe</fullName>
+                <default>false</default>
+                <label>Independent - Craig Watanabe</label>
+            </value>
+            <value>
+                <fullName>INPAC Wealth Solutions</fullName>
+                <default>false</default>
+                <label>INPAC Wealth Solutions</label>
+            </value>
+            <value>
+                <fullName>Inventa Wealth Advisors</fullName>
+                <default>false</default>
+                <label>Inventa Wealth Advisors</label>
+            </value>
+            <value>
+                <fullName>J. Freeman &amp; Associates</fullName>
+                <default>false</default>
+                <label>J. Freeman &amp; Associates</label>
+            </value>
+            <value>
+                <fullName>Key Advisors Group</fullName>
+                <default>false</default>
+                <label>Key Advisors Group</label>
+            </value>
+            <value>
+                <fullName>March Advisors</fullName>
+                <default>false</default>
+                <label>March Advisors</label>
+            </value>
+            <value>
+                <fullName>Nucleus Financial Group</fullName>
+                <default>false</default>
+                <label>Nucleus Financial Group</label>
+            </value>
+            <value>
+                <fullName>Parkview Wealth Advisors</fullName>
+                <default>false</default>
+                <label>Parkview Wealth Advisors</label>
+            </value>
+            <value>
+                <fullName>Platinum Wealth Group</fullName>
+                <default>false</default>
+                <label>Platinum Wealth Group</label>
+            </value>
+            <value>
+                <fullName>Providence Wealth Advisors</fullName>
+                <default>false</default>
+                <label>Providence Wealth Advisors</label>
+            </value>
+            <value>
+                <fullName>Rancho Private Wealth</fullName>
+                <default>false</default>
+                <label>Rancho Private Wealth</label>
+            </value>
+            <value>
+                <fullName>Regev Group</fullName>
+                <default>false</default>
+                <label>Regev Group</label>
+            </value>
+            <value>
+                <fullName>Serratelli Financial Group</fullName>
+                <default>false</default>
+                <label>Serratelli Financial Group</label>
+            </value>
+            <value>
+                <fullName>Shanley Wealth Management</fullName>
+                <default>false</default>
+                <label>Shanley Wealth Management</label>
+            </value>
+            <value>
+                <fullName>Strong Tower Wealth Management</fullName>
+                <default>false</default>
+                <label>Strong Tower Wealth Management</label>
+            </value>
+            <value>
+                <fullName>Summit Group Wealth Advisors</fullName>
+                <default>false</default>
+                <label>Summit Group Wealth Advisors</label>
+            </value>
+            <value>
+                <fullName>Vineyard Asset Management</fullName>
+                <default>false</default>
+                <label>Vineyard Asset Management</label>
+            </value>
+            <value>
+                <fullName>Westridge Wealth Strategies</fullName>
+                <default>false</default>
+                <label>Westridge Wealth Strategies</label>
+            </value>
+            <value>
+                <fullName>Griffin Wealth Partners</fullName>
+                <default>false</default>
+                <label>Griffin Wealth Partners</label>
+            </value>
+            <value>
+                <fullName>Harding Financial and Insurance</fullName>
+                <default>false</default>
+                <label>Harding Financial and Insurance</label>
+            </value>
+            <value>
+                <fullName>Icona Wealth</fullName>
+                <default>false</default>
+                <label>Icona Wealth</label>
+            </value>
+            <value>
+                <fullName>Indepdenent - Gary Warnica</fullName>
+                <default>false</default>
+                <label>Indepdenent - Gary Warnica</label>
+            </value>
+            <value>
+                <fullName>Independent - Boo Andersen</fullName>
+                <default>false</default>
+                <label>Independent - Boo Andersen</label>
+            </value>
+            <value>
+                <fullName>Independent - JR Broadbent</fullName>
+                <default>false</default>
+                <label>Independent - JR Broadbent</label>
+            </value>
+            <value>
+                <fullName>Independent - Krista Baker</fullName>
+                <default>false</default>
+                <label>Independent - Krista Baker</label>
+            </value>
+            <value>
+                <fullName>Independent - Matthew Rigby</fullName>
+                <default>false</default>
+                <label>Independent - Matthew Rigby</label>
+            </value>
+            <value>
+                <fullName>Independent - Mike McHugh</fullName>
+                <default>false</default>
+                <label>Independent - Mike McHugh</label>
+            </value>
+            <value>
+                <fullName>Independent - Peter Burnham</fullName>
+                <default>false</default>
+                <label>Independent - Peter Burnham</label>
+            </value>
+            <value>
+                <fullName>Independent - Sara Hadad-Dembs</fullName>
+                <default>false</default>
+                <label>Independent - Sara Hadad-Dembs</label>
+            </value>
+            <value>
+                <fullName>Independent - Stephen Litman</fullName>
+                <default>false</default>
+                <label>Independent - Stephen Litman</label>
+            </value>
+            <value>
+                <fullName>Independent - Stephen Wegener</fullName>
+                <default>false</default>
+                <label>Independent - Stephen Wegener</label>
+            </value>
+            <value>
+                <fullName>Independent - Tyler Haskell</fullName>
+                <default>false</default>
+                <label>Independent - Tyler Haskell</label>
+            </value>
+            <value>
+                <fullName>Longhorn Investments</fullName>
+                <default>false</default>
+                <label>Longhorn Investments</label>
+            </value>
+            <value>
+                <fullName>Perspective</fullName>
+                <default>false</default>
+                <label>Perspective</label>
+            </value>
+            <value>
+                <fullName>Resilient Wealth</fullName>
+                <default>false</default>
+                <label>Resilient Wealth</label>
+            </value>
+            <value>
+                <fullName>Rocky Mountain Wealth Advisors</fullName>
+                <default>false</default>
+                <label>Rocky Mountain Wealth Advisors</label>
+            </value>
+            <value>
+                <fullName>Spark Financial Wealth Management</fullName>
+                <default>false</default>
+                <label>Spark Financial Wealth Management</label>
+            </value>
+            <value>
+                <fullName>KLK Capital Management</fullName>
+                <default>false</default>
+                <label>KLK Capital Management</label>
+            </value>
+            <value>
+                <fullName>DFPG Stitch</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>DFPG Stitch</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

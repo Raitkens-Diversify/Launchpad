@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Case Type --></label>
+        <name>Case_Type__c</name>
+        <picklistValues>
+            <masterLabel>401k Rollover</masterLabel>
+            <translation><!-- 401k Rollover --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Cancel Move Money Recurring</masterLabel>
+            <translation><!-- Cancel Move Money Recurring --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Change Management Style</masterLabel>
+            <translation><!-- Change Management Style --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Client Onboarding</masterLabel>
+            <translation><!-- Client Onboarding --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Client Passed Away</masterLabel>
+            <translation><!-- Client Passed Away --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Client Reimbursement</masterLabel>
+            <translation><!-- Client Reimbursement --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Client Terminated Services</masterLabel>
+            <translation><!-- Client Terminated Services --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Deposit Check</masterLabel>
+            <translation><!-- Deposit Check --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Donation in Kind</masterLabel>
+            <translation><!-- Donation in Kind --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Draft and Submit - Alt Investment</masterLabel>
+            <translation><!-- Draft and Submit - Alt Investment --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Draft and Submit - New Account</masterLabel>
+            <translation><!-- Draft and Submit - New Account --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Grant Donation</masterLabel>
+            <translation><!-- Grant Donation --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Journal Between Accounts - On Demand</masterLabel>
+            <translation><!-- Journal Between Accounts - On Demand --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Move Money - One Time</masterLabel>
+            <translation><!-- Move Money - One Time --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Move Money - Recurring</masterLabel>
+            <translation><!-- Move Money - Recurring --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Prepare Trades</masterLabel>
+            <translation><!-- Prepare Trades --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Qualified Charitable Distribution</masterLabel>
+            <translation><!-- Qualified Charitable Distribution --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Review Meeting</masterLabel>
+            <translation><!-- Review Meeting --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Roth Conversion</masterLabel>
+            <translation><!-- Roth Conversion --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Trade Error</masterLabel>
+            <translation><!-- Trade Error --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Transfer</masterLabel>
+            <translation><!-- Transfer --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Update IMA</masterLabel>
+            <translation><!-- Update IMA --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

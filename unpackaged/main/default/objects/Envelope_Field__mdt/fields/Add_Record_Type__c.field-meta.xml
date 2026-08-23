@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Add_Record_Type__c</fullName>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Add Record Type</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Authorized Person</fullName>
+                <default>false</default>
+                <label>Authorized Person</label>
+            </value>
+            <value>
+                <fullName>Beneficial Owner</fullName>
+                <default>false</default>
+                <label>Beneficial Owner</label>
+            </value>
+            <value>
+                <fullName>Trustee</fullName>
+                <default>false</default>
+                <label>Trustee</label>
+            </value>
+            <value>
+                <fullName>Grantor</fullName>
+                <default>false</default>
+                <label>Grantor</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

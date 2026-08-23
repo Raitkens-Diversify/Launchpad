@@ -1,0 +1,397 @@
+:host {
+  display: flex;
+  flex: 0 0 auto;
+  position: relative;
+}
+
+.arc-header-search {
+  position: relative;
+  /* Reserves the default box's footprint in the flex row even while the
+     expanded box is pulled out of flow (position: absolute), so icons to
+     the right don't shift when the search box grows leftward. Height is
+     explicit too, since an absolutely-positioned box no longer contributes
+     to this wrapper's normal-flow height — without it the dropdown's
+     `top: 100%` anchor would collapse to 0. */
+  width: 320px;
+  height: 36px;
+}
+
+/* Always absolute + right-anchored, in both the resting and expanded states
+   (resting width exactly matches the wrapper's reserved footprint, so it
+   looks identical to normal in-flow positioning at rest). Growing width from
+   a left-anchored box always extends rightward, but the free space is to the
+   left (the gap between the logo and this header-actions cluster) — right-
+   anchoring lets it grow left over that space instead, without disturbing
+   the icons/avatar to its right. Keeping the box absolute in BOTH states
+   (rather than toggling position on/off) means only `width` ever animates;
+   toggling position too caused a one-frame flash where the box briefly
+   rendered at the wrong (in-flow, left-anchored) size before the width
+   transition caught up. */
+.arc-header-search__box {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 320px;
+  height: 36px;
+  min-height: 32px;
+  max-height: 36px;
+  padding: 0 8px;
+  border: 1px solid var(--div-color-border-2, #b6bcc5);
+  border-radius: 8px;
+  background: var(--div-color-white, #ffffff);
+  box-sizing: border-box;
+  z-index: 25;
+  transition: width 0.15s ease;
+}
+
+.arc-header-search__box--expanded {
+  width: 582px;
+}
+
+/* Same focus-ring token used app-wide (arcNavigationButton, arcHeaderIconButton,
+   etc): a white ring flush against the box, then the blue ring further out —
+   that inner white band is what reads as a gap between the box and the
+   highlight, rather than the highlight sitting flush against the border. */
+.arc-header-search__box:focus-within {
+  border-color: var(--div-color-focus, #1a76bb);
+  box-shadow: var(--div-input-focus-ring, 0 0 0 2px #ffffff, 0 0 0 4px #1a76bb);
+}
+
+.arc-header-search__icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.arc-header-search__icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+  background-color: currentColor;
+  color: var(--div-color-gray-600, #4b5563);
+  -webkit-mask-image: var(--icon-url);
+  mask-image: var(--icon-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.arc-header-search__clear-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.arc-header-search__clear-button:hover {
+  background: var(--div-color-gray-100, #f3f4f6);
+}
+
+.arc-header-search__clear-icon {
+  width: 12px;
+  height: 12px;
+  display: block;
+  background-color: currentColor;
+  color: var(--div-color-gray-600, #4b5563);
+  -webkit-mask-image: var(--icon-url);
+  mask-image: var(--icon-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.arc-header-search__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 19px;
+  color: var(--div-color-sidebar-text, #071c31);
+}
+
+.arc-header-search__input::placeholder {
+  color: var(--div-color-neutral-500, #838a97);
+}
+
+/* ── Autosuggest dropdown ─────────────────────────────────────────── */
+
+.arc-search-autosuggest {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 320px;
+  max-height: 493px;
+  display: flex;
+  flex-direction: column;
+  background: var(--div-color-white, #ffffff);
+  border: 1px solid var(--div-color-border-1, #d1d5db);
+  border-radius: 8px;
+  box-shadow:
+    0px 20px 25px -5px rgba(0, 0, 0, 0.07),
+    0px 8px 10px -6px rgba(0, 0, 0, 0.07);
+  padding: 4px 0;
+  z-index: 20;
+  overflow: hidden;
+  transition: width 0.15s ease;
+}
+
+.arc-search-autosuggest--expanded {
+  left: auto;
+  right: 0;
+  width: 582px;
+}
+
+.arc-search-autosuggest__tabs {
+  display: flex;
+  align-items: stretch;
+  overflow-x: auto;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--div-color-border-1, #d1d5db);
+}
+
+.arc-search-autosuggest__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 40px;
+  padding: 0 12px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 19px;
+  color: var(--div-color-gray-600, #4b5563);
+}
+
+.arc-search-autosuggest__tab--active {
+  border-bottom-color: var(--div-color-accent-2, #0b2f51);
+  color: var(--div-color-accent-2, #0b2f51);
+}
+
+.arc-search-autosuggest__tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--div-color-gray-200, #e5e7eb);
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--div-color-gray-600, #4b5563);
+}
+
+.arc-search-autosuggest__results {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+  overflow-y: auto;
+}
+
+.arc-search-autosuggest__category {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
+}
+
+.arc-search-autosuggest__category + .arc-search-autosuggest__category {
+  border-top: 1px solid var(--div-color-border-1, #d1d5db);
+  margin-top: 8px;
+  padding-top: 12px;
+}
+
+.arc-search-autosuggest__category-header {
+  padding: 4px 12px;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--div-color-gray-600, #4b5563);
+}
+
+.arc-search-autosuggest__divider {
+  height: 1px;
+  margin: 8px 0;
+  background: var(--div-color-border-1, #d1d5db);
+}
+
+.arc-search-autosuggest__row {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 12px;
+  padding-right: 150px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.arc-search-autosuggest__row:hover,
+.arc-search-autosuggest__row:focus-visible,
+.arc-search-autosuggest__row--highlighted {
+  background: var(--div-color-search-highlight, #e0f2fe);
+  text-decoration: none;
+  outline: none;
+}
+
+.arc-search-autosuggest__row:hover .arc-search-autosuggest__row-hint,
+.arc-search-autosuggest__row:focus-visible .arc-search-autosuggest__row-hint,
+.arc-search-autosuggest__row--highlighted .arc-search-autosuggest__row-hint {
+  opacity: 1;
+}
+
+.arc-search-autosuggest__row--search-for {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding-right: 12px;
+}
+
+.arc-search-autosuggest__row--search-for .arc-search-autosuggest__row-hint {
+  opacity: 1;
+  position: static;
+  transform: none;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.arc-search-autosuggest__row-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  display: block;
+  background-color: currentColor;
+  color: var(--div-color-gray-600, #4b5563);
+  -webkit-mask-image: var(--icon-url);
+  mask-image: var(--icon-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.arc-search-autosuggest__row-title {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 19px;
+  color: var(--div-color-sidebar-text, #09243f);
+}
+
+.arc-search-autosuggest__row-title b {
+  font-weight: 600;
+}
+
+.arc-search-autosuggest__highlight {
+  background: transparent;
+  color: inherit;
+  font-weight: 700;
+  padding: 0;
+}
+
+.arc-search-autosuggest__row-subtitle {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--div-color-gray-600, #4b5563);
+}
+
+.arc-search-autosuggest__row-hint {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  opacity: 0;
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--div-color-gray-600, #4b5563);
+  transition: opacity 0.1s ease;
+}
+
+.arc-search-autosuggest__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 24px 12px;
+  text-align: center;
+}
+
+.arc-search-autosuggest__empty-title {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 22px;
+  color: var(--div-color-sidebar-text, #383330);
+}
+
+.arc-search-autosuggest__empty-subtitle {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 19px;
+  color: var(--div-color-sidebar-text, #383330);
+}
+
+.arc-search-autosuggest__status {
+  padding: 16px 12px;
+  text-align: center;
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--div-color-gray-600, #4b5563);
+}
+
+.arc-search-autosuggest__footer {
+  margin-top: 8px;
+  padding: 8px 12px 0;
+  border-top: 1px solid var(--div-color-border-1, #d1d5db);
+  text-align: center;
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--div-color-gray-600, #4b5563);
+}

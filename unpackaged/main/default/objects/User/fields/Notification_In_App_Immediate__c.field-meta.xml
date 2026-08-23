@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Notification_In_App_Immediate__c</fullName>
+    <defaultValue>true</defaultValue>
+    <description>Whether this user receives immediate in-app notifications.</description>
+    <label>Notification In-App Immediate</label>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Checkbox</type>
+</CustomField>

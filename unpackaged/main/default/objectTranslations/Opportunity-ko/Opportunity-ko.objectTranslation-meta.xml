@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <quickActions>
+        <label><!-- Log a Call --></label>
+        <name>LogACallStandard</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- New Task --></label>
+        <name>NewStandardTask</name>
+    </quickActions>
+    <recordTypes>
+        <label><!-- Existing Client --></label>
+        <name>Existing_Client_Wallet_Share</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- Independent --></label>
+        <name>Independent</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- New Client --></label>
+        <name>New_Client_s</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- New Money --></label>
+        <name>New_Money</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- Partner --></label>
+        <name>Partner</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- Retirement Plan --></label>
+        <name>Retirement_Plan</name>
+    </recordTypes>
+    <validationRules>
+        <errorMessage><!-- Closed Lost Opportunity requires a Loss Reason --></errorMessage>
+        <name>Closed_Lost_Requires_Loss_Reason</name>
+    </validationRules>
+    <webLinks>
+        <label><!-- Launch_Wizard --></label>
+        <name>Launch_Wizard</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- Schwab --></label>
+        <name>Schwab</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- Wealthscape --></label>
+        <name>Wealthscape</name>
+    </webLinks>
+</CustomObjectTranslation>

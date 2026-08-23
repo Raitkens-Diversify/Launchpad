@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Entity Type --></label>
+        <name>Entity_Type__c</name>
+        <picklistValues>
+            <masterLabel>C-Corp</masterLabel>
+            <translation><!-- C-Corp --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ERISA Retirement Plan</masterLabel>
+            <translation><!-- ERISA Retirement Plan --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Irrevocable Trust</masterLabel>
+            <translation><!-- Irrevocable Trust --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>LLC</masterLabel>
+            <translation><!-- LLC --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Partnership</masterLabel>
+            <translation><!-- Partnership --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Revocable Trust</masterLabel>
+            <translation><!-- Revocable Trust --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>S-Corp</masterLabel>
+            <translation><!-- S-Corp --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Sole Proprietorship</masterLabel>
+            <translation><!-- Sole Proprietorship --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Unincorporated Business</masterLabel>
+            <translation><!-- Unincorporated Business --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

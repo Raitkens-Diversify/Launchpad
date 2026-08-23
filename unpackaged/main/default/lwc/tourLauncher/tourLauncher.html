@@ -1,0 +1,18 @@
+<template>
+    <template lwc:if={overlayRendered}>
+        <c-tour-overlay
+            target-element={currentTarget}
+            step-title={currentTitle}
+            step-body={currentBody}
+            placement={currentPlacement}
+            step-index={stepIndex}
+            step-count={stepCount}
+            advance-on={currentAdvanceOn}
+            active={overlayActive}
+            onnext={handleNext}
+            onback={handleBack}
+            onskip={handleSkip}
+            onfinish={handleFinish}
+        ></c-tour-overlay>
+    </template>
+</template>

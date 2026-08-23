@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RecordType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Troubleshooting</fullName>
+    <active>true</active>
+    <description>Problem/symptom and resolution articles for diagnosing and fixing issues.</description>
+    <label>Troubleshooting</label>
+</RecordType>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Rep_ID_for_Commission_in_Maestro__c</fullName>
+    <externalId>false</externalId>
+    <formula>IF( ISBLANK(Rep_Code_for_Transaction__c), FinServ__FinancialAccount__r.Rep_Code__c, Rep_Code_for_Transaction__c)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <inlineHelpText>If this value is not correct after you have corrected any issues, reach out to Rachel/Kelby.</inlineHelpText>
+    <label>Rep ID for Commission in Maestro</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

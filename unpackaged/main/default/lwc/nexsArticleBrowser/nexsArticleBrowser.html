@@ -1,0 +1,159 @@
+<template>
+    <div class={nexsClass}>
+        <!-- Topics sidebar hides on the article view — the article gets its own
+             page layout (breadcrumb + article + Suggested Articles), like Hulu. -->
+        <template if:false={showViewer}>
+        <aside class="nexs__nav">
+            <c-ds-topic-nav heading="All topics"
+                            items={navItems}
+                            onnavselect={handleNavSelect}></c-ds-topic-nav>
+        </aside>
+        </template>
+
+        <main class="nexs__main">
+            <!-- Breadcrumb (all views): Help Center › topic [› article] -->
+            <c-ds-breadcrumbs items={crumbItems}
+                              oncrumbselect={handleCrumbSelect}></c-ds-breadcrumbs>
+
+            <!-- Article detail (inline) -->
+            <template if:true={showViewer}>
+                <div class={articleLayoutClass}>
+                    <c-nexs-article-viewer
+                        article-id={selectedArticleId}
+                        onarticleload={handleArticleLoad}
+                    ></c-nexs-article-viewer>
+                    <!-- Right rail: always mounted so articleResources can report
+                         whether the article has resources (it renders nothing when
+                         empty); the grid collapses to one column when the whole
+                         rail is empty. -->
+                    <aside class="nexs__rail">
+                        <template if:true={hasSuggested}>
+                            <div class="nexs__related">
+                                <h2 class="nexs__related-title">Suggested Articles</h2>
+                                <ul class="nexs__related-list">
+                                    <template for:each={suggestedArticles} for:item="r">
+                                        <li key={r.id}>
+                                            <a
+                                                href="#"
+                                                class="nexs__row-link"
+                                                data-id={r.id}
+                                                data-urlname={r.urlName}
+                                                onclick={handleArticleClick}
+                                                onmouseenter={handlePrefetch}
+                                                onfocus={handlePrefetch}
+                                            >{r.title}</a>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </div>
+                        </template>
+                        <c-article-resources
+                            article-id={selectedArticleId}
+                            onresourcesload={handleResourcesLoad}
+                        ></c-article-resources>
+                    </aside>
+                </div>
+            </template>
+
+            <!-- Collapsible sections of article links -->
+            <template if:false={showViewer}>
+                <template if:true={loadingArticles}>
+                    <lightning-spinner alternative-text="Loading articles" size="small"></lightning-spinner>
+                </template>
+
+                <template if:true={showFuzzyBanner}>
+                    <p class="nexs__fuzzy">
+                        Showing results for <strong>{corrected}</strong>.
+                        <a href="#" class="nexs__fuzzy-link" onclick={handleSearchOriginal}>Search for &ldquo;{searchTerm}&rdquo; instead</a>
+                    </p>
+                </template>
+
+                <template if:true={hasSections}>
+                    <ul class="nexs__sections">
+                        <template for:each={sectionView} for:item="sec">
+                            <li key={sec.key} class="nexs__section">
+                                <button
+                                    class="nexs__section-head"
+                                    type="button"
+                                    data-key={sec.key}
+                                    aria-expanded={sec.ariaExpanded}
+                                    onclick={handleSectionToggle}
+                                >
+                                    <span class="nexs__section-title">{sec.title}</span>
+                                    <lightning-icon
+                                        icon-name={sec.iconName}
+                                        size="x-small"
+                                        alternative-text="Toggle section"
+                                    ></lightning-icon>
+                                </button>
+                                <ul class={sec.bodyClass}>
+                                    <template for:each={sec.articles} for:item="a">
+                                        <li key={a.id} class="nexs__row">
+                                            <a
+                                                href="#"
+                                                class="nexs__row-link"
+                                                data-id={a.id}
+                                                data-urlname={a.urlName}
+                                                onclick={handleArticleClick}
+                                                onmouseenter={handlePrefetch}
+                                                onfocus={handlePrefetch}
+                                            >
+                                                <span class="nexs__row-title"
+                                                    ><template for:each={a.titleSegments} for:item="seg"
+                                                        ><template if:true={seg.match}><strong key={seg.key}>{seg.text}</strong></template
+                                                        ><template if:false={seg.match}><span key={seg.key}>{seg.text}</span></template
+                                                    ></template
+                                                ></span>
+                                                <template if:true={a.showSummary}>
+                                                    <span class="nexs__row-summary">{a.summary}</span>
+                                                </template>
+                                            </a>
+                                            <template if:true={a.featured}>
+                                                <c-ds-badge label="Featured" variant="info"></c-ds-badge>
+                                            </template>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </li>
+                        </template>
+                    </ul>
+                </template>
+
+                <template if:true={showEmpty}>
+                    <p class="nexs__empty">No articles here yet.</p>
+                </template>
+
+                <template if:true={showZeroResults}>
+                    <div class="nexs__zero">
+                        <p class="nexs__zero-lead">No results for &ldquo;{searchTerm}&rdquo;.</p>
+                        <template if:true={hasFallback}>
+                            <p class="nexs__zero-sub">Popular articles</p>
+                            <ul class="nexs__zero-list">
+                                <template for:each={fallbackView} for:item="f">
+                                    <li key={f.id} class="nexs__row">
+                                        <a
+                                            href="#"
+                                            class="nexs__row-link"
+                                            data-id={f.id}
+                                            data-urlname={f.urlName}
+                                            onclick={handleArticleClick}
+                                            onmouseenter={handlePrefetch}
+                                            onfocus={handlePrefetch}
+                                        >{f.title}</a>
+                                    </li>
+                                </template>
+                            </ul>
+                        </template>
+                        <template lwc:if={zeroCtaUrl}>
+                            <a class="nexs__zero-cta" href={zeroCtaUrl}>{contactSupportLabel}</a>
+                        </template>
+                    </div>
+                </template>
+            </template>
+        </main>
+    </div>
+
+    <!-- "Need more help?" contact band — the shared c-resource-help-band
+         (targets come from Resource_Center_Setting__mdt). -->
+    <c-resource-help-band></c-resource-help-band>
+</template>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WebLink xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Deca1s74000000DhWxAAK</fullName>
+    <availability>online</availability>
+    <displayType>button</displayType>
+    <encodingKey>UTF-8</encodingKey>
+    <linkType>url</linkType>
+    <masterLabel>Send IMA Exhibit B</masterLabel>
+    <openType>replace</openType>
+    <protected>false</protected>
+    <url>{!URLFOR(IF($Site.prefix == &#39;/s&#39;,&#39;/apex/dfsle__sending&#39;, $Site.Prefix +&#39;/apex/dfsle__sending&#39;), null, [sId = Account.Id, sendingExperience = &#39;null&#39;, isEmbedded = false, templateId = &#39;a1s74000000DhWxAAK&#39;, recordId = Account.Id, title = &#39;Send IMA Exhibit B&#39;])}</url>
+</WebLink>

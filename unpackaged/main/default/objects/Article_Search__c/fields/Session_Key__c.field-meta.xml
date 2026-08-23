@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Session_Key__c</fullName>
+    <description>Anonymous per-tab correlation key generated client-side (sessionStorage), used to stitch a search to the click(s) that followed it. NOT a user identifier and never derived from one — safe for guest sessions.</description>
+    <externalId>false</externalId>
+    <label>Session Key</label>
+    <length>64</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

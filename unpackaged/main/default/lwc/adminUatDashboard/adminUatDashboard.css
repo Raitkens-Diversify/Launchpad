@@ -1,0 +1,149 @@
+/* --slds-g-* declared locally, not inherited: platform-injected SLDS2
+   styling hooks beat values inherited from an ancestor's :host
+   (see nexsHome.css / dsHero.css) — inheritance made this hero's gradient
+   render the platform theme blue instead of brand navy in the console. */
+:host {
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-accent-3: #071c31;
+    --slds-g-color-on-accent-1: #ffffff;
+}
+
+.aud {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-xl, 24px);
+}
+
+.audb__error {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--ds-error-text, #a83232);
+}
+
+/* Exact nexsHome .home-hero treatment — same rationale as uatDashboard's
+   hero: contained rounded card (this shell is a centered column, not a
+   full-width page), navy gradient, light-blue eyebrow, white serif title. */
+.audb__hero {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-md, 12px);
+    padding: var(--ds-space-2xl, 32px);
+    background: linear-gradient(135deg, var(--slds-g-color-accent-3, #071c31), var(--slds-g-color-accent-1, #0f406f));
+    border-radius: var(--ds-radius-lg, 10px);
+}
+
+.audb__hero-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ds-space-sm, 8px);
+    flex-wrap: wrap;
+}
+
+.audb__hero-eyebrow {
+    margin: 0 0 4px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ds-light-blue, #14bef0);
+}
+
+.audb__hero-title {
+    margin: 0;
+    font-family: var(--ds-font-heading, 'Libre Baskerville', Georgia, serif);
+    font-size: 2.5rem;
+    line-height: 1.2;
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+}
+
+.audb__hero-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-md, 12px);
+}
+
+.audb__hero-deadline {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--ds-light-blue, #14bef0);
+}
+
+.audb__hero-summary {
+    margin: 0;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+@media (max-width: 560px) {
+    .audb__hero-title {
+        font-size: 2rem;
+    }
+}
+
+.audb__tiles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ds-space-md, 12px);
+}
+
+.audb__tiles > * {
+    flex: 1 1 160px;
+    min-width: 160px;
+}
+
+.audb__risklist {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-sm, 8px);
+}
+
+/* Matches dsCardRow's real pattern (nexsHome's .home-section__title) —
+   not the tiny eyebrow-caps label this used to mirror. */
+.audb__risklist-title {
+    margin: 0;
+    font-family: var(--ds-font-heading, 'Libre Baskerville', Georgia, serif);
+    font-size: 1.75rem;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.audb__riskrow {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-md, 12px);
+    padding: 0.75rem 1rem;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-md, 8px);
+    box-shadow: inset 3px 0 0 var(--ds-error, #d94545);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.audb__riskrow:hover {
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+    box-shadow: inset 3px 0 0 var(--ds-error, #d94545), var(--ds-shadow-hover, 0 4px 14px rgba(15, 64, 111, 0.08));
+}
+
+.audb__riskrow-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.audb__riskrow-meta {
+    font-size: 0.8125rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+@media (max-width: 700px) {
+    .audb__riskrow {
+        flex-wrap: wrap;
+    }
+}

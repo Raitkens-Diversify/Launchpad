@@ -1,0 +1,73 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-07-08 -->
+<template>
+  <template lwc:if={isOpen}>
+    <section
+      class={modalClass}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="confirm-modal-title"
+      onkeydown={handleKeyDown}
+    >
+      <div class="rule-modal__backdrop" onclick={handleBackdropClick}></div>
+      <div class="rule-modal__panel rule-modal__panel--confirm" onclick={handlePanelClick}>
+        <template lwc:if={isBusy}>
+          <div class="nc-saving-overlay" role="status" aria-live="polite" aria-busy="true">
+            <lightning-spinner alternative-text="Saving..." size="medium"></lightning-spinner>
+            <p class="nc-saving-overlay__message">Saving...</p>
+          </div>
+        </template>
+        <header class="rule-modal__header">
+          <div class="rule-modal__header-copy">
+            <h3 id="confirm-modal-title" class="rule-modal__title">{title}</h3>
+            <template lwc:if={message}>
+              <p class="rule-modal__subtitle">{message}</p>
+            </template>
+          </div>
+          <button
+            type="button"
+            class="slds-button slds-button_icon slds-button_icon-container rule-modal__close"
+            aria-label="Close dialog"
+            title="Close"
+            disabled={isCancelDisabled}
+            onclick={handleCancel}
+          >
+            <lightning-icon icon-name={closeIcon} size="xx-small"></lightning-icon>
+            <span class="slds-assistive-text">Close</span>
+          </button>
+        </header>
+
+        <div class="rule-modal__body rule-modal__body--confirm">
+          <template lwc:if={hasListItems}>
+            <div class="rule-modal__confirm-section">
+              <p class="rule-modal__confirm-label">{listLabel}</p>
+              <ul class="rule-modal__confirm-list" role="list">
+                <template for:each={decoratedListItems} for:item="item">
+                  <li key={item.id} class="rule-modal__confirm-list-item">{item.label}</li>
+                </template>
+              </ul>
+            </div>
+          </template>
+        </div>
+
+        <footer class="rule-modal__footer slds-modal__footer">
+          <button
+            type="button"
+            class="slds-button slds-button_outline-brand"
+            disabled={isCancelDisabled}
+            onclick={handleCancel}
+          >
+            {cancelLabel}
+          </button>
+          <button
+            type="button"
+            class="slds-button slds-button_brand"
+            disabled={isConfirmDisabled}
+            onclick={handleConfirm}
+          >
+            {confirmLabel}
+          </button>
+        </footer>
+      </div>
+    </section>
+  </template>
+</template>

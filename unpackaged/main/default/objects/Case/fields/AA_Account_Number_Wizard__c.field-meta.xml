@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AA_Account_Number_Wizard__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <label>AA - Account Number - Wizard</label>
+    <referenceTo>Financial_Account__c</referenceTo>
+    <relationshipLabel>Cases (AA - Account Number - Wizard)</relationshipLabel>
+    <relationshipName>Cases1</relationshipName>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

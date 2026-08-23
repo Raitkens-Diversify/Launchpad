@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSetGroup xmlns="http://soap.sforce.com/2006/04/metadata">
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Wizard Users</label>
+    <permissionSets>FinServ__ApexAuraAccess</permissionSets>
+    <permissionSets>Wizard_Only_Case_Access</permissionSets>
+    <permissionSets>Wizard_Only_Custom_Metadata_Type_Access</permissionSets>
+    <permissionSets>Wizard_User_Lightning_Page_Visibility</permissionSets>
+    <permissionSets>dfsle__DocuSign_Sender</permissionSets>
+    <permissionSets>dfsle__DocuSign_User</permissionSets>
+    <permissionSets>efs__EgnyteUser</permissionSets>
+    <status>Updated</status>
+</PermissionSetGroup>

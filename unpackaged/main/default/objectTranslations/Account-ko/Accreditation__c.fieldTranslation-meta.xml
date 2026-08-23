@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Accreditation --></label>
+        <name>Accreditation__c</name>
+        <picklistValues>
+            <masterLabel>Accredited</masterLabel>
+            <translation><!-- Accredited --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Not Qualified</masterLabel>
+            <translation><!-- Not Qualified --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Qualified Purchaser</masterLabel>
+            <translation><!-- Qualified Purchaser --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Suitable</masterLabel>
+            <translation><!-- Suitable --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

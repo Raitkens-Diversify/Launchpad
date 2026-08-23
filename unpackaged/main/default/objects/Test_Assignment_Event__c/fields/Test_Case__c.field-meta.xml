@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Test_Case__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Durable context: kept even if the execution row is later removed (pristine releases delete their execution). SetNull so audit rows never block a delete.</description>
+    <label>Test Case</label>
+    <referenceTo>Test_Case__c</referenceTo>
+    <relationshipLabel>Assignment Events</relationshipLabel>
+    <relationshipName>Assignment_Events</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

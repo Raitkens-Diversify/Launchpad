@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workflow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <outboundMessages>
+        <fullName>ZoomTeamChat_CDChanged</fullName>
+        <apiVersion>55.0</apiVersion>
+        <endpointUrl>https://applications.zoom.us/addon/v3/webhooks/salesforceBot/9lg9zVNJTDytjIYcWGTZ4A?sig=c98562dc4a26b5fda9a44fdb4323dc2d01d89157f022ccc6b552d909e69cba21&amp;rnd=1743025397822</endpointUrl>
+        <fields>Id</fields>
+        <includeSessionId>false</includeSessionId>
+        <integrationUser>scarlson@diversify.com</integrationUser>
+        <name>ZoomTeamChat_OpportunityCloseDateChanged</name>
+        <protected>false</protected>
+        <useDeadLetterQueue>false</useDeadLetterQueue>
+    </outboundMessages>
+    <outboundMessages>
+        <fullName>ZoomTeamChat_OpportunityWon</fullName>
+        <apiVersion>55.0</apiVersion>
+        <endpointUrl>https://applications.zoom.us/addon/v3/webhooks/salesforceBot/-KPLQ0sHQY6YcMQEyIQw0A?sig=c8ffd6e7da5a014f778a1a5b597377e05165f8bb3d3775af5534ade570657c88&amp;rnd=1743025394397</endpointUrl>
+        <fields>Id</fields>
+        <includeSessionId>false</includeSessionId>
+        <integrationUser>scarlson@diversify.com</integrationUser>
+        <name>ZoomTeamChat_OpportunityIsWon</name>
+        <protected>false</protected>
+        <useDeadLetterQueue>false</useDeadLetterQueue>
+    </outboundMessages>
+    <outboundMessages>
+        <fullName>ZoomTeamChat_StageChanged</fullName>
+        <apiVersion>55.0</apiVersion>
+        <endpointUrl>https://applications.zoom.us/addon/v3/webhooks/salesforceBot/S2d6upGrRWu-yyijQ4AcVA?sig=80a9b0f10f2f6981b720dfbf64a7266ddd8b19831b0fa512270c27337eb9d535&amp;rnd=1743025396742</endpointUrl>
+        <fields>Id</fields>
+        <includeSessionId>false</includeSessionId>
+        <integrationUser>scarlson@diversify.com</integrationUser>
+        <name>ZoomTeamChat_OpportunityStageChanged</name>
+        <protected>false</protected>
+        <useDeadLetterQueue>false</useDeadLetterQueue>
+    </outboundMessages>
+</Workflow>

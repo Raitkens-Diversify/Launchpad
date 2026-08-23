@@ -1,0 +1,37 @@
+<template>
+    <!-- Author: Hoang Long Vu To | Date: 2026-06-15 -->
+    <lightning-modal-header label={modalHeaderLabel}></lightning-modal-header>
+
+    <lightning-modal-body class="modal-body">
+        <template if:true={hasBanner}>
+            <div class={bannerClass} role="alert">
+                <span>{bannerMessage}</span>
+            </div>
+        </template>
+
+        <div class="slds-form slds-form_stacked">
+            <lightning-input
+                label="Role"
+                value={role}
+                required
+                disabled={isSaving}
+                onchange={handleRoleChange}
+            ></lightning-input>
+        </div>
+    </lightning-modal-body>
+
+    <lightning-modal-footer>
+        <lightning-button
+            label={cancelButtonLabel}
+            onclick={handleCancel}
+            disabled={isSaving}
+        ></lightning-button>
+        <lightning-button
+            class="slds-m-left_x-small"
+            variant="brand"
+            label={saveButtonLabel}
+            onclick={handleSave}
+            disabled={isSaveDisabled}
+        ></lightning-button>
+    </lightning-modal-footer>
+</template>

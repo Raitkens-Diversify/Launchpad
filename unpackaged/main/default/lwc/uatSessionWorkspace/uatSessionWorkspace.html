@@ -1,0 +1,391 @@
+<template>
+    <div class="ues">
+        <nav class="ues__crumbs" aria-label="Breadcrumb">
+            <button type="button" class="ues__crumb-link" onclick={handleExit}>
+                <span class="ues__crumb-arrow" aria-hidden="true">←</span>My Queue
+            </button>
+        </nav>
+
+        <template if:true={errorMessage}>
+            <p class="ues__error" role="alert">{errorMessage}</p>
+        </template>
+
+        <template if:true={loading}>
+            <c-ds-skeleton variant="card" count="3"></c-ds-skeleton>
+        </template>
+
+        <template if:false={loading}>
+            <template if:true={session}>
+                <header class="ues__head">
+                    <p class="ues__eyebrow">Ad-hoc session</p>
+                    <h1 class="ues__title">{session.title}</h1>
+                    <template if:true={session.areaText}>
+                        <p class="ues__lookingat">{session.areaText}</p>
+                    </template>
+                    <div class="ues__head-meta">
+                        <c-ds-badge label={session.status} variant={statusVariant} size="sm"></c-ds-badge>
+                        <span class="ues__head-code">{headMetaLine}</span>
+                        <template if:false={session.isMine}>
+                            <span class="ues__head-owner">{session.testerName}'s session — read-only</span>
+                        </template>
+                    </div>
+                </header>
+
+                <div class="ues__layout">
+                    <div class="ues__main">
+                        <!-- The log. Oldest first, so it reads top-to-bottom
+                             like a record of what happened. -->
+                        <section class="ues__card">
+                            <div class="ues__card-head">
+                                <h2 class="ues__card-title">Session log</h2>
+                            </div>
+
+                            <template if:true={hasNotes}>
+                                <ul class="ues__timeline">
+                                    <template for:each={noteRows} for:item="note">
+                                        <li key={note.id} class="ues__entry">
+                                            <div class="ues__entry-gutter">
+                                                <span class="ues__entry-time">{note.timeLabel}</span>
+                                            </div>
+                                            <div class="ues__entry-body">
+                                                <div class="ues__entry-head">
+                                                    <template if:true={note.hasTag}>
+                                                        <span class="ues__entry-tag">{note.tag}</span>
+                                                    </template>
+                                                    <template if:true={note.fromRun}>
+                                                        <span class="ues__entry-run" title={note.caseTitle}>from a test run</span>
+                                                    </template>
+                                                    <span class="ues__entry-author">{note.authorName}</span>
+                                                    <template if:true={note.isPromoted}>
+                                                        <span class="ues__entry-promoted">→ {note.findingName}</span>
+                                                    </template>
+                                                    <template if:true={note.canEdit}>
+                                                        <span class="ues__entry-actions">
+                                                            <template if:true={note.canPromote}>
+                                                                <button type="button" class="ues__entry-action ues__entry-action--promote"
+                                                                        data-id={note.id}
+                                                                        disabled={saving}
+                                                                        onclick={handlePromote}>Promote to finding</button>
+                                                            </template>
+                                                            <button type="button" class="ues__entry-action"
+                                                                    data-id={note.id}
+                                                                    disabled={saving}
+                                                                    onclick={handleEditNote}>Edit</button>
+                                                            <button type="button" class="ues__entry-action ues__entry-action--danger"
+                                                                    data-id={note.id}
+                                                                    disabled={saving}
+                                                                    onclick={handleDeleteNoteClick}>Delete</button>
+                                                        </span>
+                                                    </template>
+                                                </div>
+
+                                                <template if:false={note.isEditing}>
+                                                    <p class="ues__entry-text">{note.text}</p>
+                                                </template>
+                                                <template if:true={note.isEditing}>
+                                                    <div class="ues__entry-edit">
+                                                        <textarea class="ues__entry-input"
+                                                                  aria-label="Edit entry"
+                                                                  rows="3"
+                                                                  oninput={handleEditChange}></textarea>
+                                                        <div class="ues__entry-edit-actions">
+                                                            <lightning-button label="Cancel"
+                                                                              disabled={saving}
+                                                                              onclick={handleEditCancel}></lightning-button>
+                                                            <lightning-button variant="brand"
+                                                                              label="Save"
+                                                                              disabled={saving}
+                                                                              onclick={handleEditSave}></lightning-button>
+                                                        </div>
+                                                    </div>
+                                                </template>
+
+                                                <!-- Evidence belongs to THIS entry, so what it
+                                                     is evidence for is never in doubt. -->
+                                                <template if:true={note.hasFiles}>
+                                                    <div class="ues__entry-files">
+                                                        <c-uat-evidence-upload record-id={note.id}
+                                                                               label=""
+                                                                               view-only={readonly}
+                                                                               onfileschange={handleNoteFilesChange}></c-uat-evidence-upload>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </template>
+                            <template if:false={hasNotes}>
+                                <p class="ues__muted">Nothing logged yet — write the first entry below.</p>
+                            </template>
+
+                            <!-- Composer, at the foot of the log where the next
+                                 entry will land. -->
+                            <template if:true={canWork}>
+                                <div class="ues__composer">
+                                    <textarea class="ues__composer-input"
+                                              aria-label="Add an entry"
+                                              rows="3"
+                                              placeholder="What did you just see? Enter to add, Shift+Enter for a new line."
+                                              onkeydown={handleDraftKeyDown}
+                                              oninput={handleDraftChange}></textarea>
+                                    <div class="ues__composer-bar">
+                                        <template if:true={hasTags}>
+                                            <span class="ues__composer-tags">
+                                                <template for:each={tagChips} for:item="chip">
+                                                    <button key={chip.key}
+                                                            type="button"
+                                                            class={chip.cssClass}
+                                                            data-value={chip.value}
+                                                            onclick={handleTagPick}>{chip.label}</button>
+                                                </template>
+                                            </span>
+                                        </template>
+                                        <span class="ues__composer-actions">
+                                            <lightning-button label="Attach"
+                                                              icon-name="utility:attach"
+                                                              onclick={handleToggleAttach}></lightning-button>
+                                            <lightning-button variant="brand"
+                                                              label="Add"
+                                                              disabled={addDisabled}
+                                                              onclick={handleAddNote}></lightning-button>
+                                        </span>
+                                    </div>
+                                    <!-- Staged on the session: the entry does not
+                                         exist until Add, and lightning-file-upload
+                                         needs a record id. Claimed onto the entry
+                                         the moment it is created. -->
+                                    <div class={composerEvidenceClass}>
+                                        <c-uat-evidence-upload class="ues__composer-evidence"
+                                                               staging-record-id={sessionId}
+                                                               label="Attach to this entry"></c-uat-evidence-upload>
+                                    </div>
+                                </div>
+                            </template>
+                        </section>
+
+                        <section class="ues__card">
+                            <div class="ues__card-head">
+                                <h2 class="ues__card-title">Findings</h2>
+                                <template if:true={canWork}>
+                                    <lightning-button variant="brand"
+                                                      label="Add finding"
+                                                      disabled={saving}
+                                                      onclick={handleAddOpen}></lightning-button>
+                                </template>
+                            </div>
+
+                            <template if:true={hasFindings}>
+                                <ul class="ues__findings">
+                                    <template for:each={findingRows} for:item="row">
+                                        <li key={row.id}>
+                                            <details class="ues__finding">
+                                                <summary class="ues__finding-summary">
+                                                    <c-ds-badge label={row.type} variant={row.typeVariant} size="sm"></c-ds-badge>
+                                                    <template if:true={row.hasSeverity}>
+                                                        <c-ds-badge label={row.severity} variant={row.severityVariant} size="sm"></c-ds-badge>
+                                                    </template>
+                                                    <span class="ues__finding-headline">{row.headline}</span>
+                                                    <span class="ues__finding-meta">{row.metaLine}</span>
+                                                </summary>
+                                                <div class="ues__finding-body">
+                                                    <!-- Shared with the Cycle Report's finding viewer: one
+                                                         renderer, so an admin reading a finding sees what the
+                                                         tester wrote it into. The summary above stays here —
+                                                         the component is the body only. -->
+                                                    <c-uat-finding-detail finding={row}
+                                                                          show-actions={row.canEdit}
+                                                                          busy={saving}
+                                                                          view-only-evidence={readonly}
+                                                                          onedit={handleEditFinding}
+                                                                          ondelete={handleDeleteClick}></c-uat-finding-detail>
+                                                </div>
+                                            </details>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </template>
+                            <template if:false={hasFindings}>
+                                <c-ds-empty-state icon="utility:knowledge_base"
+                                                  heading="No findings yet"
+                                                  message="Promote an entry from the log, or add one directly. A finding is anything worth someone else's attention — a defect, a suggestion, or a question."
+                                                  action-label="Add finding"
+                                                  show-action={canWork}
+                                                  onaction={handleAddOpen}></c-ds-empty-state>
+                            </template>
+                        </section>
+                    </div>
+
+                    <aside class="ues__side">
+                        <section class="ues__card ues__overview">
+                            <h2 class="ues__card-title">Session overview</h2>
+                            <dl class="ues__details">
+                                <template for:each={overviewRows} for:item="row">
+                                    <div key={row.key} class="ues__detail-row">
+                                        <dt>{row.label}</dt>
+                                        <dd>{row.value}</dd>
+                                    </div>
+                                </template>
+                            </dl>
+
+                            <template if:true={canWork}>
+                                <div class="ues__checklist">
+                                    <span class="ues__block-label">Before finishing</span>
+                                    <ul class="ues__checks">
+                                        <template for:each={checklistRows} for:item="row">
+                                            <li key={row.key} class={row.itemClass}>
+                                                <span class="ues__check-mark" aria-hidden="true">{row.mark}</span>
+                                                <span>{row.label}</span>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
+
+                            <template if:true={canDelete}>
+                                <details class="ues__danger">
+                                    <summary class="ues__danger-summary">Session actions</summary>
+                                    <button type="button" class="ues__delete-link"
+                                            disabled={saving}
+                                            onclick={handleDeleteSessionClick}>Delete session</button>
+                                </details>
+                            </template>
+                        </section>
+                    </aside>
+                </div>
+
+                <div class="ues__navbar">
+                    <div class="ues__navbar-inner">
+                        <span class="ues__navbar-state" aria-live="polite">{finishBlockedLabel}</span>
+                        <div class="ues__navbar-actions">
+                            <template if:true={canWork}>
+                                <lightning-button label="Exit session"
+                                                  disabled={saving}
+                                                  onclick={handleExit}></lightning-button>
+                                <lightning-button variant="brand"
+                                                  label="Finish session"
+                                                  disabled={finishDisabled}
+                                                  onclick={handleFinishClick}></lightning-button>
+                            </template>
+                            <template if:false={canWork}>
+                                <lightning-button label="Back to My Queue"
+                                                  onclick={handleExit}></lightning-button>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </template>
+
+        <c-ds-modal-v2 is-open={formOpen}
+                       title={formTitle}
+                       size="medium"
+                       allow-overflow
+                       onclose={handleFormCancel}>
+            <template if:true={formOpen}>
+                <div class="ues__form">
+                    <lightning-input label="Title"
+                                     required
+                                     max-length="255"
+                                     field-level-help="What someone triaging this will read first."
+                                     value={form.title}
+                                     data-field="title"
+                                     onchange={handleFormField}></lightning-input>
+                    <lightning-combobox label="What kind of finding is this?"
+                                        options={typeOptions}
+                                        value={form.type}
+                                        data-field="type"
+                                        dropdown-alignment="auto"
+                                        onchange={handleFormPick}></lightning-combobox>
+                    <!-- Severity describes a defect. For the other three types
+                         it is hidden, and the server clears it. -->
+                    <template if:true={formIsDefect}>
+                        <lightning-combobox label="Severity"
+                                            required
+                                            options={severityOptions}
+                                            value={form.severity}
+                                            data-field="severity"
+                                            dropdown-alignment="auto"
+                                            onchange={handleFormPick}></lightning-combobox>
+                    </template>
+                    <lightning-textarea label="What happened?"
+                                        required
+                                        field-level-help="Include the steps to reproduce."
+                                        value={form.whatHappened}
+                                        data-field="whatHappened"
+                                        onchange={handleFormField}></lightning-textarea>
+                    <lightning-textarea label="What did you expect? (optional)"
+                                        value={form.whatExpected}
+                                        data-field="whatExpected"
+                                        onchange={handleFormField}></lightning-textarea>
+                    <c-uat-evidence-upload record-id={form.id}
+                                           staging-record-id={sessionId}
+                                           label="Evidence"></c-uat-evidence-upload>
+                    <template if:true={formNeedsEvidence}>
+                        <div class="ues__form-gate">
+                            <p class="ues__form-gate-hint">{formEvidenceHint}</p>
+                            <lightning-textarea label="Why is there no screenshot?"
+                                                value={form.noEvidenceReason}
+                                                data-field="noEvidenceReason"
+                                                onchange={handleFormField}></lightning-textarea>
+                        </div>
+                    </template>
+                </div>
+            </template>
+            <div slot="footer" class="ues__form-actions">
+                <lightning-button label="Cancel"
+                                  disabled={saving}
+                                  onclick={handleFormCancel}></lightning-button>
+                <lightning-button variant="brand"
+                                  label="Save finding"
+                                  disabled={saving}
+                                  onclick={handleFormSave}></lightning-button>
+            </div>
+        </c-ds-modal-v2>
+
+        <template if:true={noteConfirmOpen}>
+            <c-admin-confirm-modal header="Delete entry"
+                                   message="The entry and anything attached to it are deleted. A finding promoted from it is kept."
+                                   confirm-label="Delete"
+                                   busy={saving}
+                                   onconfirm={handleNoteConfirmProceed}
+                                   oncancel={handleNoteConfirmCancel}></c-admin-confirm-modal>
+        </template>
+
+        <template if:true={confirmOpen}>
+            <c-admin-confirm-modal header="Delete finding"
+                                   message="The finding and its evidence are deleted for the whole team and cannot be recovered."
+                                   confirm-label="Delete"
+                                   busy={saving}
+                                   onconfirm={handleConfirmProceed}
+                                   oncancel={handleConfirmCancel}></c-admin-confirm-modal>
+        </template>
+
+        <template if:true={finishOpen}>
+            <c-admin-confirm-modal header="Finish session"
+                                   message={finishMessage}
+                                   confirm-label="Finish session"
+                                   busy={saving}
+                                   onconfirm={handleFinishConfirm}
+                                   oncancel={handleFinishCancel}></c-admin-confirm-modal>
+        </template>
+
+        <template if:true={discardOpen}>
+            <c-admin-confirm-modal header="Discard this finding?"
+                                   message={discardMessage}
+                                   confirm-label="Discard"
+                                   busy={saving}
+                                   onconfirm={handleDiscardConfirm}
+                                   oncancel={handleDiscardCancel}></c-admin-confirm-modal>
+        </template>
+
+        <template if:true={deleteSessionOpen}>
+            <c-admin-confirm-modal header="Delete session"
+                                   message={deleteSessionMessage}
+                                   confirm-label="Delete"
+                                   busy={saving}
+                                   onconfirm={handleDeleteSessionConfirm}
+                                   oncancel={handleDeleteSessionCancel}></c-admin-confirm-modal>
+        </template>
+    </div>
+</template>

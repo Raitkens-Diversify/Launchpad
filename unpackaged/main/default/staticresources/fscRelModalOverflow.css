@@ -1,0 +1,54 @@
+/*
+ * Author: Hoang Long Vu To
+ * Date: 2026-06-25
+ *
+ * Loaded by FSC relationship modals so lookup/combobox dropdowns are not
+ * clipped by lightning-modal overflow containers, while keeping the modal
+ * within the viewport and scrolling long table content.
+ *
+ * Opt-in overflow uses aria-description marker "fsc-rel-allow-overflow"
+ * (see buildFscRelModalDescription in fscRelUtils).
+ */
+[aria-description*="fsc-rel-allow-overflow"] .slds-modal__container,
+.slds-modal__container:has(c-fsc-rel-record-lookup),
+.slds-modal__container:has(c-fsc-rel-multi-select-combobox) {
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    overflow: hidden;
+}
+
+[aria-description*="fsc-rel-allow-overflow"] .slds-modal__header,
+.slds-modal__container:has(c-fsc-rel-record-lookup) .slds-modal__header,
+.slds-modal__container:has(c-fsc-rel-multi-select-combobox) .slds-modal__header {
+    flex-shrink: 0;
+}
+
+[aria-description*="fsc-rel-allow-overflow"] .slds-modal__footer,
+.slds-modal__container:has(c-fsc-rel-record-lookup) .slds-modal__footer,
+.slds-modal__container:has(c-fsc-rel-multi-select-combobox) .slds-modal__footer {
+    flex-shrink: 0;
+}
+
+[aria-description*="fsc-rel-allow-overflow"] .slds-modal__content,
+.slds-modal__content:has(c-fsc-rel-record-lookup),
+.slds-modal__content:has(c-fsc-rel-multi-select-combobox) {
+    overflow: visible !important;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-body__scroll {
+    overflow-x: auto;
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: calc(90vh - 11rem);
+    -webkit-overflow-scrolling: touch;
+}
+
+.modal-body__scroll:has(c-fsc-rel-record-lookup[data-open="true"]) {
+    overflow: visible;
+}

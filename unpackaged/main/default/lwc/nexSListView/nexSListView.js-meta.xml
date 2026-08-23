@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>NexS List View</masterLabel>
+    <description
+  >Salesforce list views for LWR sites — saved-view tabs, search, group-by, filter chips, and save/overwrite view</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property
+        name="objectApiName"
+        type="String"
+        label="Object API Name"
+        description="e.g. Envelope__c"
+        default="Envelope__c"
+      />
+            <property
+        name="title"
+        type="String"
+        label="Title"
+        default="Envelopes"
+      />
+            <property
+        name="subtitle"
+        type="String"
+        label="Supporting Text"
+        description="Line shown under the title"
+      />
+            <property
+        name="newRecordLabel"
+        type="String"
+        label="Primary Action Label"
+        description="Label of the header button, e.g. Add Contact. Leave blank to hide it."
+      />
+            <property
+        name="viewTabs"
+        type="String"
+        label="Tab Views"
+        description="Tab strip contents. JSON array of {view,label,title,subtitle,action} for per-tab headings, or the short form apiName=Label,apiName=Label. Blank shows only this view plus views the user saves."
+      />
+            <property
+        name="pillFields"
+        type="String"
+        label="Pill Columns"
+        description="Comma-separated field API names shown as colour-coded pills, e.g. BillingState. Each distinct value gets its own tone."
+      />
+            <property
+        name="defaultColumns"
+        type="String"
+        label="Default Columns"
+        description="Ordered, comma-separated field API names shown by default, e.g. Name,RecordType.Name,Type. Other columns the list view returns start switched off in Choose columns rather than being dropped. Blank keeps the list view's own columns and order. A tab's own &quot;columns&quot; entry in View Tabs overrides this."
+      />
+            <property
+        name="availableColumns"
+        type="String"
+        label="Available Columns"
+        description="Comma-separated field API names added to Choose columns but switched off by default, e.g. Custodian__c,Product_Type__c. Lets a user reach fields the list view does not carry. Needs Default Columns set, and each name is fetched eagerly, so keep it curated."
+      />
+            <property
+        name="defaultListViewApiName"
+        type="String"
+        label="Default List View API Name"
+        description="Usually All or All_Envelope__c depending on the object"
+        default="All"
+      />
+            <property
+        name="defaultChartFieldApiName"
+        type="String"
+        label="Default Chart Field"
+        description="Chart tab's initial 'Break down by' field, e.g. Status. Blank falls back to the first column with repeating values, which can land on a mostly-blank relationship column."
+      />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Grants access to Egnyte embed components (VF bridge and direct record viewer).</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Egnyte Iframe Access</label>
+    <classAccesses>
+        <apexClass>EgnyteController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>EgnyteOAuthController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>EgnyteVfEmbedController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <pageAccesses>
+        <apexPage>EgnyteLwrEmbed</apexPage>
+        <enabled>true</enabled>
+    </pageAccesses>
+    <pageAccesses>
+        <apexPage>EgnyteOAuthCallback</apexPage>
+        <enabled>true</enabled>
+    </pageAccesses>
+    <pageAccesses>
+        <apexPage>EgnyteOAuthConnect</apexPage>
+        <enabled>true</enabled>
+    </pageAccesses>
+    <pageAccesses>
+        <apexPage>Egnyte_integration_page</apexPage>
+        <enabled>true</enabled>
+    </pageAccesses>
+    <pageAccesses>
+        <apexPage>efs__MyEgnyte</apexPage>
+        <enabled>true</enabled>
+    </pageAccesses>
+</PermissionSet>

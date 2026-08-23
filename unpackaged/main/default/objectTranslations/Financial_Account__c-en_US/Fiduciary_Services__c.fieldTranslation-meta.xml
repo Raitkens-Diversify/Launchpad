@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Fiduciary Services --></label>
+        <name>Fiduciary_Services__c</name>
+        <picklistValues>
+            <masterLabel>Assistance in monitoring investment options</masterLabel>
+            <translation><!-- Assistance in monitoring investment options --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Assistance in the development of an investment policy statement (IPS)</masterLabel>
+            <translation><!-- Assistance in the development of an investment policy statement (IPS) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Assistance with the selection of a broad range of investment options</masterLabel>
+            <translation><!-- Assistance with the selection of a broad range of investment options --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Meeting with Client</masterLabel>
+            <translation><!-- Meeting with Client --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>NONE</masterLabel>
+            <translation><!-- NONE --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Non-discretionary investment advice</masterLabel>
+            <translation><!-- Non-discretionary investment advice --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Non-discretionary investment advice to the Client</masterLabel>
+            <translation><!-- Non-discretionary investment advice to the Client --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

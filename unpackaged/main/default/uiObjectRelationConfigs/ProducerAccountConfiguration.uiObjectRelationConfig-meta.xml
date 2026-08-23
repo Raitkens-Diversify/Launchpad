@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<UIObjectRelationConfig xmlns="http://soap.sforce.com/2006/04/metadata">
+    <UIObjectRelationFieldConfigs>
+        <displayLabel>Title:</displayLabel>
+        <queryText>{&quot;fieldNode&quot;:{&quot;fieldEnumOrId&quot;:&quot;Title&quot;},&quot;startNode&quot;:{&quot;initialObject&quot;:&quot;RelatedObject&quot;},&quot;traversalNodes&quot;:[]}</queryText>
+        <rowOrder>1</rowOrder>
+    </UIObjectRelationFieldConfigs>
+    <UIObjectRelationFieldConfigs>
+        <displayLabel>Email:</displayLabel>
+        <queryText>{&quot;fieldNode&quot;:{&quot;fieldEnumOrId&quot;:&quot;Email&quot;},&quot;startNode&quot;:{&quot;initialObject&quot;:&quot;RelatedObject&quot;},&quot;traversalNodes&quot;:[]}</queryText>
+        <rowOrder>2</rowOrder>
+    </UIObjectRelationFieldConfigs>
+    <UIObjectRelationFieldConfigs>
+        <displayLabel>Producer ID:</displayLabel>
+        <queryText>{&quot;fieldNode&quot;:{&quot;fieldEnumOrId&quot;:&quot;Name&quot;},&quot;startNode&quot;:{&quot;initialObject&quot;:&quot;IndirectRelationshipObject&quot;},&quot;traversalNodes&quot;:[]}</queryText>
+        <rowOrder>3</rowOrder>
+    </UIObjectRelationFieldConfigs>
+    <UIObjectRelationFieldConfigs>
+        <displayLabel>Producer Type:</displayLabel>
+        <queryText>{&quot;fieldNode&quot;:{&quot;fieldEnumOrId&quot;:&quot;Type&quot;},&quot;startNode&quot;:{&quot;initialObject&quot;:&quot;IndirectRelationshipObject&quot;},&quot;traversalNodes&quot;:[]}</queryText>
+        <rowOrder>4</rowOrder>
+    </UIObjectRelationFieldConfigs>
+    <UIObjectRelationFieldConfigs>
+        <displayLabel>License Class:</displayLabel>
+        <queryText>{&quot;fieldNode&quot;:{&quot;fieldEnumOrId&quot;:&quot;LicenseClass&quot;},&quot;startNode&quot;:{&quot;initialObject&quot;:&quot;RelatedObject&quot;},&quot;traversalNodes&quot;:[{&quot;destinationObjectEnumOrId&quot;:&quot;BusinessLicense&quot;,&quot;fieldEnumOrId&quot;:&quot;ContactId&quot;,&quot;traversalDirection&quot;:&quot;child&quot;}]}</queryText>
+        <rowOrder>5</rowOrder>
+    </UIObjectRelationFieldConfigs>
+    <UIObjectRelationFieldConfigs>
+        <displayLabel>Licensed LOA:</displayLabel>
+        <queryText>{&quot;fieldNode&quot;:{&quot;fieldEnumOrId&quot;:&quot;LineOfAuthority&quot;},&quot;startNode&quot;:{&quot;initialObject&quot;:&quot;RelatedObject&quot;},&quot;traversalNodes&quot;:[{&quot;destinationObjectEnumOrId&quot;:&quot;BusinessLicense&quot;,&quot;fieldEnumOrId&quot;:&quot;ContactId&quot;,&quot;traversalDirection&quot;:&quot;child&quot;}]}</queryText>
+        <rowOrder>6</rowOrder>
+    </UIObjectRelationFieldConfigs>
+    <UIObjectRelationFieldConfigs>
+        <displayLabel>Authorized LOA:</displayLabel>
+        <queryText>{&quot;fieldNode&quot;:{&quot;fieldEnumOrId&quot;:&quot;LineOfAuthority&quot;},&quot;startNode&quot;:{&quot;initialObject&quot;:&quot;RelatedObject&quot;},&quot;traversalNodes&quot;:[{&quot;destinationObjectEnumOrId&quot;:&quot;DistributorAuthorization&quot;,&quot;fieldEnumOrId&quot;:&quot;ContactId&quot;,&quot;traversalDirection&quot;:&quot;child&quot;},{&quot;destinationObjectEnumOrId&quot;:&quot;BusinessLicense&quot;,&quot;fieldEnumOrId&quot;:&quot;LicenseId&quot;,&quot;traversalDirection&quot;:&quot;parent&quot;}]}</queryText>
+        <rowOrder>7</rowOrder>
+    </UIObjectRelationFieldConfigs>
+    <contextObject>Account</contextObject>
+    <indirectObjectContextField>AccountId</indirectObjectContextField>
+    <indirectObjectRelatedField>ContactId</indirectObjectRelatedField>
+    <indirectRelationshipObject>Producer</indirectRelationshipObject>
+    <isActive>true</isActive>
+    <masterLabel>Producer Account Configuration</masterLabel>
+    <relatedObject>Contact</relatedObject>
+    <relationshipType>Indirect</relationshipType>
+</UIObjectRelationConfig>

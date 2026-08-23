@@ -1,0 +1,156 @@
+<template>
+    <div class="acm">
+        <template if:true={errorMessage}>
+            <p class="acm__error" role="alert">{errorMessage}</p>
+        </template>
+
+        <template if:true={loading}>
+            <div class="acm__loading">
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={loading}>
+            <div class="acm__panes">
+                <section class="acm__pane">
+                    <div class="acm__pane-head">
+                        <div>
+                            <h3 class="acm__pane-title">Resource categories</h3>
+                            <p class="acm__pane-sub">Editable — organizes the Resource Center.</p>
+                        </div>
+                        <lightning-button-icon icon-name="utility:refresh"
+                                               alternative-text="Refresh"
+                                               onclick={handleRefresh}></lightning-button-icon>
+                        <lightning-button variant="brand"
+                                          label="New category"
+                                          disabled={categoriesBusy}
+                                          onclick={handleNew}></lightning-button>
+                    </div>
+
+                    <template if:true={hasRows}>
+                        <c-admin-sortable-tree items={categoryItems}
+                                               editable
+                                               busy={categoriesBusy}
+                                               allow-add-child
+                                               edit-label="Edit"
+                                               add-child-label="Add subtopic"
+                                               onreorder={handleCategoryReorder}
+                                               onedit={handleEdit}
+                                               onaddchild={handleAddSubcategory}></c-admin-sortable-tree>
+                    </template>
+                    <template if:false={hasRows}>
+                        <p class="acm__empty">No resource categories yet.</p>
+                    </template>
+                </section>
+
+                <section class="acm__pane">
+                    <div class="acm__pane-head">
+                        <div>
+                            <h3 class="acm__pane-title">Help topics (Knowledge)</h3>
+                            <p class="acm__pane-sub">{topicsSubtitle}</p>
+                        </div>
+                        <template if:true={topicsEditable}>
+                            <lightning-button variant="brand"
+                                              label="New topic"
+                                              disabled={topicsBusy}
+                                              onclick={handleTopicNew}></lightning-button>
+                        </template>
+                    </div>
+                    <div class="acm__note">
+                        Renames change the display label only — article filing stays intact.
+                        Deleting topics still happens in Setup → Data Category Setup. A new
+                        topic shows a generic icon on the Help Center until a developer maps
+                        it in nexsTopicIcons (needs a deploy).
+                    </div>
+                    <template if:true={hasHelpTopics}>
+                        <c-admin-sortable-tree items={helpTopicItems}
+                                               editable={topicsEditable}
+                                               busy={topicsBusy}
+                                               allow-add-child
+                                               edit-label="Rename"
+                                               add-child-label="Add subtopic"
+                                               onreorder={handleTopicReorder}
+                                               onedit={handleTopicRename}
+                                               onaddchild={handleSubtopicNew}></c-admin-sortable-tree>
+                    </template>
+                    <template if:false={hasHelpTopics}>
+                        <p class="acm__empty">Help topics unavailable (needs Knowledge read access).</p>
+                    </template>
+                </section>
+            </div>
+        </template>
+
+        <c-ds-modal-v2 is-open={modalOpen} title={modalTitle} size="small" allow-overflow onclose={handleModalCancel}>
+                    <lightning-input label="Name"
+                                     value={formName}
+                                     required
+                                     max-length="80"
+                                     onchange={handleNameChange}></lightning-input>
+                    <lightning-input label="URL slug"
+                                     field-level-help="Becomes part of the category link. Auto-suggested from the name."
+                                     value={formSlug}
+                                     required
+                                     max-length="80"
+                                     onchange={handleSlugChange}
+                                     onblur={handleSlugBlur}></lightning-input>
+                    <template if:true={slugError}>
+                        <p class="acm__field-error">{slugError}</p>
+                    </template>
+                    <lightning-combobox label="Parent category"
+                                        value={formParentId}
+                                        options={parentOptions}
+                                        disabled={parentDisabled}
+                                        field-level-help={parentHelp}
+                                        onchange={handleParentChange}></lightning-combobox>
+                    <fieldset class="acm-icons">
+                        <legend class="acm-icons__legend">Icon — shown on the category tile</legend>
+                        <div class="acm-icons__grid" role="radiogroup" aria-label="Category icon">
+                            <button type="button"
+                                    class={noIconClass}
+                                    title="No icon"
+                                    aria-pressed={noIconSelected}
+                                    onclick={handleIconClear}>
+                                <span class="acm-icons__none">—</span>
+                            </button>
+                            <template for:each={iconOptions} for:item="opt">
+                                <button key={opt.value}
+                                        type="button"
+                                        class={opt.cssClass}
+                                        title={opt.label}
+                                        aria-pressed={opt.selected}
+                                        data-value={opt.value}
+                                        onclick={handleIconPick}>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                         stroke-width="2" stroke-linecap="round"
+                                         stroke-linejoin="round" focusable="false">
+                                        <path d={opt.path}></path>
+                                    </svg>
+                                </button>
+                            </template>
+                        </div>
+                    </fieldset>
+                    <lightning-input type="checkbox"
+                                     label="Active"
+                                     checked={formActive}
+                                     onchange={handleActiveChange}></lightning-input>
+                    <lightning-button slot="footer" label="Cancel" onclick={handleModalCancel}></lightning-button>
+                    <lightning-button slot="footer" variant="brand" label="Save"
+                                      onclick={handleModalSave}></lightning-button>
+        </c-ds-modal-v2>
+
+        <c-ds-modal-v2 is-open={topicModalOpen} title={topicModalTitle} size="small" onclose={handleTopicModalCancel}>
+                    <lightning-input label={topicModalInputLabel}
+                                     value={topicModalValue}
+                                     required
+                                     max-length="80"
+                                     onchange={handleTopicModalChange}></lightning-input>
+                    <lightning-button slot="footer"
+                                      label="Cancel"
+                                      disabled={topicsBusy}
+                                      onclick={handleTopicModalCancel}></lightning-button>
+                    <lightning-button slot="footer" variant="brand" label="Save"
+                                      disabled={topicsBusy}
+                                      onclick={handleTopicModalSave}></lightning-button>
+        </c-ds-modal-v2>
+    </div>
+</template>

@@ -1,0 +1,27 @@
+<!-- Author: Hoang Long Vu To -->
+<template>
+  <div class="record-summary">
+    <template lwc:if={isLoading}>
+      <div class="record-summary__loading">
+        <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+      </div>
+    </template>
+
+    <template lwc:elseif={errorMessage}>
+      <div class="record-summary__error" role="alert">{errorMessage}</div>
+    </template>
+
+    <template lwc:elseif={hasSummary}>
+      <section class="record-summary__section">
+        <c-card class="record-summary__card">
+          <c-arc-record-detail-section
+            section={section}
+            summary-mode
+            info-tooltip="Key record details for this contact."
+          >
+          </c-arc-record-detail-section>
+        </c-card>
+      </section>
+    </template>
+  </div>
+</template>

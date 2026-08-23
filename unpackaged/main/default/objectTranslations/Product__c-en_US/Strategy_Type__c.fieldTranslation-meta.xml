@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Strategy Type --></label>
+        <name>Strategy_Type__c</name>
+        <picklistValues>
+            <masterLabel>Development</masterLabel>
+            <translation><!-- Development --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Diversified Middle-Market</masterLabel>
+            <translation><!-- Diversified Middle-Market --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Lending</masterLabel>
+            <translation><!-- Lending --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Sector Specific Middle Market</masterLabel>
+            <translation><!-- Sector Specific Middle Market --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Stablized - Existing</masterLabel>
+            <translation><!-- Stablized - Existing --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Value-Add - Existing</masterLabel>
+            <translation><!-- Value-Add - Existing --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Value-Add - Existing &amp; Development</masterLabel>
+            <translation><!-- Value-Add - Existing &amp; Development --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

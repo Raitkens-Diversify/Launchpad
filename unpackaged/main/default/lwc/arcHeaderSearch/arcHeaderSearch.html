@@ -1,0 +1,164 @@
+<template>
+  <div
+    class="arc-header-search"
+    onfocusout={handleFocusOut}
+    onkeydown={handleKeyDown}
+  >
+    <div class={boxClass}>
+      <button
+        type="button"
+        class="arc-header-search__icon-button"
+        aria-label="Search"
+        onclick={handleIconClick}
+      >
+        <span
+          class="arc-header-search__icon"
+          style={iconStyle}
+          aria-hidden="true"
+        ></span>
+      </button>
+      <input
+        type="text"
+        class="arc-header-search__input"
+        placeholder="Search…"
+        value={term}
+        onfocus={handleFocus}
+        oninput={handleInput}
+        role="combobox"
+        aria-expanded={isOpen}
+        aria-autocomplete="list"
+      />
+      <template lwc:if={showClearButton}>
+        <button
+          type="button"
+          class="arc-header-search__clear-button"
+          aria-label="Clear search"
+          onclick={handleClearClick}
+        >
+          <span
+            class="arc-header-search__clear-icon"
+            style={clearIconStyle}
+            aria-hidden="true"
+          ></span>
+        </button>
+      </template>
+    </div>
+
+    <template lwc:if={isOpen}>
+      <div class={dropdownClass} role="listbox">
+        <div class="arc-search-autosuggest__tabs">
+          <template for:each={tabs} for:item="tab">
+            <button
+              key={tab.key}
+              type="button"
+              class={tab.className}
+              data-key={tab.key}
+              onclick={handleTabClick}
+            >
+              <span class="arc-search-autosuggest__tab-label">{tab.label}</span>
+              <span class="arc-search-autosuggest__tab-count">{tab.count}</span>
+            </button>
+          </template>
+        </div>
+
+        <div class="arc-search-autosuggest__results">
+          <template if:true={isLoading}>
+            <div class="arc-search-autosuggest__status">Searching…</div>
+          </template>
+
+          <template if:false={isLoading}>
+            <template if:true={showSearchForRow}>
+              <a
+                href="#"
+                class={searchForRowClass}
+                data-flat-index="0"
+                onclick={handleSearchForClick}
+              >
+                <span
+                  class="arc-search-autosuggest__row-icon"
+                  style={iconStyle}
+                  aria-hidden="true"
+                ></span>
+                <span class="arc-search-autosuggest__row-title"
+                  >Search for '<b>{normalizedTerm}</b>'</span
+                >
+                <span class="arc-search-autosuggest__row-hint"
+                  >Click here or press Enter ↵</span
+                >
+              </a>
+              <div class="arc-search-autosuggest__divider"></div>
+            </template>
+
+            <template if:true={showGlobalEmptyState}>
+              <div class="arc-search-autosuggest__empty">
+                <p class="arc-search-autosuggest__empty-title">
+                  No results found
+                </p>
+                <p class="arc-search-autosuggest__empty-subtitle">
+                  We can't find any item matching your search
+                </p>
+              </div>
+            </template>
+
+            <template if:true={showCategoryEmptyState}>
+              <div class="arc-search-autosuggest__empty">
+                <p class="arc-search-autosuggest__empty-title">
+                  No results found in this category
+                </p>
+                <p class="arc-search-autosuggest__empty-subtitle">
+                  We can't find any item matching your search
+                </p>
+              </div>
+            </template>
+
+            <template for:each={renderGroups} for:item="category">
+              <div key={category.key} class="arc-search-autosuggest__category">
+                <div class="arc-search-autosuggest__category-header">
+                  {category.label}
+                </div>
+                <template for:each={category.items} for:item="item">
+                  <a
+                    key={item.key}
+                    href="#"
+                    class={item.rowClass}
+                    data-id={item.id}
+                    data-object-api-name={item.objectApiName}
+                    data-flat-index={item.flatIndex}
+                    onclick={handleResultClick}
+                  >
+                    <span class="arc-search-autosuggest__row-title">
+                      <template for:each={item.titleParts} for:item="part">
+                        <template if:true={part.isMatch}>
+                          <mark
+                            key={part.key}
+                            class="arc-search-autosuggest__highlight"
+                            >{part.text}</mark
+                          >
+                        </template>
+                        <template if:false={part.isMatch}>
+                          <span key={part.key}>{part.text}</span>
+                        </template>
+                      </template>
+                    </span>
+                    <template if:true={item.subtitle}>
+                      <span class="arc-search-autosuggest__row-subtitle"
+                        >{item.subtitle}</span
+                      >
+                    </template>
+                    <span class="arc-search-autosuggest__row-hint"
+                      >Press Enter ↵</span
+                    >
+                  </a>
+                </template>
+              </div>
+            </template>
+
+            <template if:true={hasResults}>
+              <div class="arc-search-autosuggest__footer">{resultsSummary}</div>
+            </template>
+          </template>
+        </div>
+      </div>
+    </template>
+  </div>
+</template>

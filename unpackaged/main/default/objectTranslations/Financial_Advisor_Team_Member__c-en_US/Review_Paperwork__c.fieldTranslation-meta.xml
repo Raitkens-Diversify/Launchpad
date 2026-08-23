@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <help><!-- This is the person on your team who will review all paperwork. This may be the same person who drafted it. --></help>
+        <label><!-- Review Paperwork --></label>
+        <name>Review_Paperwork__c</name>
+    </CustomFieldTranslation>

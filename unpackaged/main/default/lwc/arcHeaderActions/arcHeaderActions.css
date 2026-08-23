@@ -1,0 +1,21 @@
+:host {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.arc-header-actions {
+  display: flex;
+  align-items: center;
+  width: 556px;
+  height: 36px;
+  padding: 0 16px;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+.arc-header-actions c-arc-header-icon-button,
+.arc-header-actions c-arc-notification-bell,
+.arc-header-actions c-arc-header-avatar {
+  flex: 0 0 auto;
+}

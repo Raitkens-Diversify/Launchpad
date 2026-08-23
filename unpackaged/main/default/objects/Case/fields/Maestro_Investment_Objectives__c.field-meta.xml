@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Maestro_Investment_Objectives__c</fullName>
+    <externalId>false</externalId>
+    <formula>IF(LEFT(FinServ__Household__r.Investment_Objective_Ranked__c, 5) = &#39;Growt&#39;, &#39;R&#39;, IF(LEFT(FinServ__Household__r.Investment_Objective_Ranked__c, 5) = &#39;Incom&#39;, &#39;I&#39;, IF(LEFT(FinServ__Household__r.Investment_Objective_Ranked__c, 5) = &#39;Balan&#39;, &#39;L&#39;, IF(LEFT(FinServ__Household__r.Investment_Objective_Ranked__c, 5) = &#39;Specu&#39;, &#39;S&#39;, IF(LEFT(FinServ__Household__r.Investment_Objective_Ranked__c, 5) = &#39;Wealt&#39;, &#39;W&#39;,
+IF(LEFT(FinServ__Household__r.Investment_Objective_Ranked__c, 5) = &#39;Prese&#39;, &#39;P&#39;,&#39;&#39;))))))</formula>
+    <label>Maestro Investment Objectives</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

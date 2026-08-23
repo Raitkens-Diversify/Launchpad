@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Embed_URL__c</fullName>
+    <description>Optional https:// embed link; maps to Knowledge__kav.Embed_URL__c on promotion.</description>
+    <label>Embed URL</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Url</type>
+</CustomField>

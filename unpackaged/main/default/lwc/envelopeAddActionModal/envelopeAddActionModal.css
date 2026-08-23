@@ -1,0 +1,49 @@
+/* Two-column grid of action-type cards (Figma "Add action item" body). The columns flex to
+   the modal width; the medium shell yields two side-by-side cards. */
+.add-action__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--slds-g-spacing-4, 1rem);
+    width: 100%;
+}
+
+/* A selectable card: a bordered box holding the checkbox + its label. */
+.add-action__card {
+    display: flex;
+    align-items: flex-start;
+    padding: var(--slds-g-spacing-4, 1rem);
+    background: var(--slds-g-color-surface-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+}
+
+/* Selected — tinted surface + accent border (the checkbox fill is themed in the shared
+   sheet). */
+.add-action__card_selected {
+    background: var(--slds-g-color-brand-base-95, #f7fbfc);
+    border-color: var(--slds-g-color-border-inverse-2, #09243f);
+}
+
+/* Hover — tint the surface (border unchanged: light when unselected, accent when selected).
+   Disabled rows don't respond. */
+.add-action__card:not(.add-action__card_disabled):hover {
+    background: var(--slds-g-color-brand-base-95, #f7fbfc);
+    cursor: pointer;
+}
+
+/* Disabled (an already-added action) — dim the whole card; it keeps the selected look. */
+.add-action__card_disabled {
+    opacity: 0.5;
+}
+
+.add-action__card lightning-input {
+    width: 100%;
+    pointer-events: none;
+}
+
+.add-action__footer {
+    display: flex;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    justify-content: flex-end;
+    width: 100%;
+}

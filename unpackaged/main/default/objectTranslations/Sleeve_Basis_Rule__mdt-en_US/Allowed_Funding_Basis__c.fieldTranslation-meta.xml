@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <help><!-- Dollar Only = fixed carve-out. Percent Only = traded model weight. Either = the advisor chooses. --></help>
+        <label><!-- Allowed Funding Basis --></label>
+        <name>Allowed_Funding_Basis__c</name>
+        <picklistValues>
+            <masterLabel>Dollar Only</masterLabel>
+            <translation><!-- Dollar Only --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Either</masterLabel>
+            <translation><!-- Either --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Percent Only</masterLabel>
+            <translation><!-- Percent Only --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

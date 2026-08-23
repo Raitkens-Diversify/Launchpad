@@ -1,0 +1,91 @@
+<!-- Author: Mile Cacanovic -->
+<template>
+    <!-- Full-width scroll container: the whole page scrolls as one, with a single scrollbar at the
+         viewport edge. Only the app bar above (outside this component) stays fixed. -->
+    <div class="action-details__scroll">
+        <div class="action-details">
+            <!-- Scrolls away with the page; the TOC below sticks under the app bar in its place. -->
+            <div class="action-details__header">
+                <c-envelope-action-details-header
+                    title={title}
+                    status-label={statusLabel}
+                    status-variant={statusVariant}
+                    remove-label={removeMenuLabel}
+                    onback={handleBack}
+                    onheaderaction={handleHeaderAction}>
+                </c-envelope-action-details-header>
+            </div>
+
+            <template lwc:if={hasFields}>
+                <div class="action-details__body">
+                    <!-- Table of Contents rail — sticky once it reaches the top; navigates the form. -->
+                    <aside class="action-details__toc">
+                        <div class="action-details__toc-scroll">
+                            <c-envelope-toc
+                                items={tocItems}
+                                active-key={activeKey}
+                                save-status={saveStatus}
+                                onselect={handleTocSelect}>
+                            </c-envelope-toc>
+                        </div>
+                    </aside>
+
+                    <!-- Metadata-driven groups → sections → fields. -->
+                    <div class="action-details__content">
+                        <template for:each={groups} for:item="group">
+                            <div key={group.key} class="action-details__group">
+                                <h2 class="action-details__group-title">
+                                    {group.label}
+                                </h2>
+                                <c-card class="action-details__card">
+                                    <div class="action-details__sections">
+                                        <template
+                                            for:each={group.sections}
+                                            for:item="section">
+                                            <c-envelope-form-section
+                                                key={section.key}
+                                                data-section-key={section.key}
+                                                section={section}
+                                                active-key={activeKey}
+                                                onvaluechange={handleFieldChange}>
+                                            </c-envelope-form-section>
+                                        </template>
+                                    </div>
+                                </c-card>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+
+            <template lwc:else>
+                <p class="action-details__empty">
+                    No fields configured for this type.
+                </p>
+            </template>
+
+            <!-- Floating section-nav — sticks near the bottom of the scroll viewport, right-aligned
+                 within the content column so its right edge matches the content cards. -->
+            <template lwc:if={hasFields}>
+                <template lwc:if={showSectionNav}>
+                    <c-envelope-section-nav
+                        class="action-details__fab"
+                        total={sectionTotal}
+                        active-index={activeSectionIndex}
+                        onprevious={handleSectionPrevious}
+                        onnext={handleSectionNext}>
+                    </c-envelope-section-nav>
+                </template>
+            </template>
+        </div>
+    </div>
+
+    <!-- Confirmation raised before a Key Point change that would discard answers already given: the
+         edit is held back until the user accepts that the questions below it will be rebuilt and
+         cleared. -->
+    <c-envelope-key-point-change-modal
+        lwc:ref="keyPointModal"
+        onconfirm={handleKeyPointConfirm}
+        onclose={handleKeyPointCancel}>
+    </c-envelope-key-point-change-modal>
+</template>

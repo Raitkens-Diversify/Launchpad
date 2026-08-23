@@ -1,0 +1,46 @@
+<!-- Author: Mile Cacanovic -->
+<template>
+    <header class="action-header">
+        <lightning-button
+            class="env-base-button action-header__back"
+            variant="base"
+            icon-name="utility:back"
+            label="Back to Envelope"
+            onclick={handleBack}>
+        </lightning-button>
+
+        <div class="action-header__row">
+            <div class="action-header__titles">
+                <h1 class="action-header__title">{title}</h1>
+                <template lwc:if={hasStatus}>
+                    <span class={badgeClass}>
+                        <template lwc:if={statusComplete}>
+                            <lightning-icon
+                                icon-name="utility:success"
+                                size="xx-small"
+                                class="action-header__badge-icon">
+                            </lightning-icon>
+                        </template>
+                        {statusLabel}
+                    </span>
+                </template>
+            </div>
+            <div class="action-header__row-right">
+                <lightning-button-menu
+                    variant="bare"
+                    icon-name="utility:threedots_vertical"
+                    menu-alignment="right"
+                    alternative-text="More actions"
+                    title="More actions"
+                    onselect={handleMenuSelect}>
+                    <lightning-menu-item
+                        value="remove"
+                        label={removeLabel}
+                        prefix-icon-name="utility:delete"
+                        class="env-menu-item_destructive">
+                    </lightning-menu-item>
+                </lightning-button-menu>
+            </div>
+        </div>
+    </header>
+</template>

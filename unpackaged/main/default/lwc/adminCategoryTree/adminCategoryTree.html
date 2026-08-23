@@ -1,0 +1,31 @@
+<template>
+    <template if:true={isEmpty}>
+        <p class="act-empty">No categories found.</p>
+    </template>
+    <ul class="act-list">
+        <template for:each={viewNodes} for:item="topic">
+            <li key={topic.name}>
+                <label class={topic.cssClass}>
+                    <input type="checkbox"
+                           data-name={topic.name}
+                           checked={topic.checked}
+                           onchange={handleToggle} />
+                    <span class="act-item__label act-item__label--topic">{topic.label}</span>
+                </label>
+                <ul class="act-children">
+                    <template for:each={topic.children} for:item="sub">
+                        <li key={sub.name}>
+                            <label class={sub.cssClass}>
+                                <input type="checkbox"
+                                       data-name={sub.name}
+                                       checked={sub.checked}
+                                       onchange={handleToggle} />
+                                <span class="act-item__label">{sub.label}</span>
+                            </label>
+                        </li>
+                    </template>
+                </ul>
+            </li>
+        </template>
+    </ul>
+</template>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <columns>
+        <field>Case$CaseNumber</field>
+    </columns>
+    <columns>
+        <field>Case$FinServ__FinancialAccount__c.Account_Number_for_Report__c</field>
+    </columns>
+    <columns>
+        <field>Case.Financial_Account_Related_Products__r$Maestro_Product_Code__c</field>
+    </columns>
+    <columns>
+        <aggregateTypes>Sum</aggregateTypes>
+        <field>Case$FinServ__FinancialAccount__c.Principal_Review_Complete__c</field>
+    </columns>
+    <columns>
+        <field>Case$FinServ__FinancialAccount__c.Principal_Review_Completed_Date_Maestro__c</field>
+    </columns>
+    <columns>
+        <aggregateTypes>Sum</aggregateTypes>
+        <field>Case$FinServ__FinancialAccount__c.Is_Account_Number_Populated__c</field>
+    </columns>
+    <columns>
+        <field>Case$FinServ__FinancialAccount__c.Account_Number_Populated_Date_Maestro__c</field>
+    </columns>
+    <filter>
+        <criteriaItems>
+            <column>Case.Financial_Account_Related_Products__r$Product__c.Type__c</column>
+            <columnToColumn>false</columnToColumn>
+            <isUnlocked>true</isUnlocked>
+            <operator>equals</operator>
+            <value>Alternative Investment,Variable Annuity</value>
+        </criteriaItems>
+    </filter>
+    <format>Tabular</format>
+    <name>Trade Audit Report</name>
+    <params>
+        <name>co</name>
+        <value>1</value>
+    </params>
+    <reportType>Cases_with_Related_Products__c</reportType>
+    <scope>organization</scope>
+    <showDetails>true</showDetails>
+    <showGrandTotal>true</showGrandTotal>
+    <showSubTotals>true</showSubTotals>
+    <sortColumn>Case$FinServ__FinancialAccount__c.Principal_Review_Completed_Date_Maestro__c</sortColumn>
+    <sortOrder>Desc</sortOrder>
+    <timeFrameFilter>
+        <dateColumn>Case$CreatedDate</dateColumn>
+        <interval>INTERVAL_CURRENT</interval>
+    </timeFrameFilter>
+</Report>

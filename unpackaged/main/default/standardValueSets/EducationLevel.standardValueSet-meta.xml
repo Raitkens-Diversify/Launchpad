@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Fellowship</fullName>
+        <default>true</default>
+        <label>Fellowship</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Residency</fullName>
+        <default>false</default>
+        <label>Residency</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Internship</fullName>
+        <default>false</default>
+        <label>Internship</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Medical School</fullName>
+        <default>false</default>
+        <label>Medical School</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Undergraduate Degree</fullName>
+        <default>false</default>
+        <label>Undergraduate Degree</label>
+    </standardValue>
+</StandardValueSet>

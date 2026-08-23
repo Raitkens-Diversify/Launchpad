@@ -1,0 +1,13 @@
+<aura:component controller="DocuSign_OppEnvelopes" implements="flexipage:availableForAllPageTypes,lightning:availableForFlowScreens,force:hasRecordId" access="global">
+	<aura:attribute name="recordId" type="String" /> 
+    <aura:attribute name="loading" type="Boolean" default="false"/>
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+    <aura:if isTrue="{! v.loading }">
+        <lightning:spinner alternativeText="Loading" />
+    </aura:if>
+    <div>
+        <lightning:button variant="brand" label="Send DocuSign Envelope(s)" onclick="{!c.handleSendDocuSignEnvs}"/>
+    </div>
+</aura:component>

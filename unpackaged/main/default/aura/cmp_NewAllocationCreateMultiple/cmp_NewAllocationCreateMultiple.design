@@ -1,0 +1,12 @@
+<design:component>
+    <!--<design:attribute name="sObjectName" label="sObject Name" description="API name of the Object that the records will be." />-->
+    <design:attribute name="MaximumNumberofRecords" label="Maximum Number of Records" description="If there is a maximum number of records, put that value here." />
+    <design:attribute name="LinestoShow" label="Lines to Show" description="Number of lines to show initially." />
+    <design:attribute name="allocationId" label="Allocation ID" description="ID of the original Allocation." />
+    <!--<design:attribute name="parentLookupFieldName" label="Parent Lookup Field Name" description="API Name of the parent lookup." />-->
+    <design:attribute name="sObjectFields" label="Fields" description="API names of Fields separated by commas." />
+    <design:attribute name="BondLadder" label="Bond Ladder" description="To pass back a boolean value." />
+    <design:attribute name="ShortTermCashManagement" label="ShortTermCashManagement" description="To pass back a boolean value."/>
+    <design:attribute name="isInstructions" label="Is this Instructions for Future Deposit?" description="To check that the allocation changed."/>
+    <design:attribute name="wizFinId" label="Wizard Financial Account Id" description="The ID of the Wizard Financial Account for the Order Ticket to relate to."/>
+</design:component>

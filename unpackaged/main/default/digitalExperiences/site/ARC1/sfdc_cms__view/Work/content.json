@@ -1,0 +1,76 @@
+{
+  "type" : "sfdc_cms__view",
+  "title" : "Work",
+  "contentBody" : {
+    "component" : {
+      "children" : [ {
+        "children" : [ {
+          "attributes" : {
+            "backgroundImageConfig" : "",
+            "backgroundImageOverlay" : "rgba(0,0,0,0)",
+            "componentSpacerSize" : "",
+            "dxpStyle" : { },
+            "layoutDirectionDesktop" : "row",
+            "layoutDirectionMobile" : "column",
+            "layoutDirectionTablet" : "column",
+            "maxContentWidth" : "",
+            "sectionColumnGutterWidth" : "",
+            "sectionConfig" : "{\"UUID\":\"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\"columns\":[{\"UUID\":\"b2c3d4e5-f6a7-8901-bcde-f12345678901\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":[]}]}",
+            "sectionMinHeight" : "",
+            "sectionVerticalAlign" : "flex-start"
+          },
+          "children" : [ {
+            "children" : [ {
+              "attributes" : {
+                "dxpStyle" : { },
+                "enablePagination" : true,
+                "enableSearch" : true,
+                "pageSize" : 10,
+                "searchPlaceholder" : "Search work...",
+                "title" : "Work"
+              },
+              "definition" : "c:workTable",
+              "id" : "c3d4e5f6-a7b8-9012-cdef-123456789012",
+              "type" : "component"
+            } ],
+            "id" : "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+            "name" : "col1",
+            "title" : "Column 1",
+            "type" : "region"
+          } ],
+          "definition" : "community_layout:section",
+          "id" : "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+          "type" : "component"
+        } ],
+        "id" : "d4e5f6a7-b8c9-0123-def0-234567890123",
+        "name" : "content",
+        "title" : "Content",
+        "type" : "region"
+      }, {
+        "children" : [ {
+          "attributes" : {
+            "customHeadTags" : "",
+            "description" : "",
+            "dxpStyle" : { },
+            "pageTitle" : "Work",
+            "recordId" : "{!recordId}"
+          },
+          "definition" : "community_builder:seoAssistant",
+          "id" : "e5f6a7b8-c9d0-1234-ef01-345678901234",
+          "type" : "component"
+        } ],
+        "id" : "f6a7b8c9-d0e1-2345-f012-456789012345",
+        "name" : "sfdcHiddenRegion",
+        "title" : "sfdcHiddenRegion",
+        "type" : "region"
+      } ],
+      "definition" : "community_layout:sldsFlexibleLayout",
+      "id" : "a7b8c9d0-e1f2-3456-0123-567890123456",
+      "type" : "component"
+    },
+    "dataProviders" : [ ],
+    "themeLayoutType" : "n4XOgjPQfZfzQSHKRqH2V6iupFBUNG",
+    "viewType" : "custom-work"
+  },
+  "urlName" : "work"
+}

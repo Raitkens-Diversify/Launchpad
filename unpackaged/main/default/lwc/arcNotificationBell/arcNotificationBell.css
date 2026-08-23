@@ -1,0 +1,132 @@
+/**
+ * Author: Hoang Long Vu To
+ * Date: 2026-08-18
+ *
+ * Layout and component-specific overrides only.
+ * Shared visuals come from diversifyStyles (.div-btn, .div-popover, typography utilities).
+ */
+:host {
+  display: inline-flex;
+}
+
+.notification-bell {
+  position: relative;
+  display: inline-flex;
+}
+
+.notification-bell__trigger.div-btn {
+  position: relative;
+  border: 0;
+  background: transparent;
+  color: var(--div-color-on-surface-1, var(--div-color-gray-600));
+}
+
+.notification-bell__trigger.div-btn--active {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.notification-bell__icon {
+  width: 1.125rem;
+  height: 1.25rem;
+  display: block;
+  background-color: currentColor;
+  -webkit-mask-image: var(--icon-url);
+  mask-image: var(--icon-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.notification-bell__badge {
+  position: absolute;
+  top: var(--div-space-1, 0.25rem);
+  right: var(--div-space-1, 0.25rem);
+}
+
+.notification-bell__panel {
+  position: absolute;
+  top: calc(100% + var(--div-space-2, 0.5rem));
+  right: 0;
+  z-index: 200;
+  width: min(20.5625rem, calc(100vw - var(--div-space-6, 1.5rem)));
+  padding: 0;
+  overflow: hidden;
+}
+
+.notification-bell__list {
+  display: flex;
+  flex-direction: column;
+  max-height: 26.25rem;
+  overflow-y: auto;
+}
+
+.notification-bell__state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 7.5rem;
+  padding: var(--div-space-4, 1rem);
+  color: var(--div-color-text-muted);
+}
+
+.notification-bell__state_error {
+  color: var(--div-status-error);
+}
+
+.notification-bell__row {
+  gap: var(--div-space-3, 0.75rem);
+  padding: 0.875rem var(--div-space-4, 1rem);
+  border-bottom: 1px solid var(--div-color-gray-100);
+  border-radius: 0;
+}
+
+.notification-bell__row:last-child {
+  border-bottom: 0;
+}
+
+.notification-bell__row:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--div-color-border-focus);
+}
+
+.notification-bell__status-dot {
+  flex-shrink: 0;
+  width: var(--div-space-2, 0.5rem);
+  height: var(--div-space-2, 0.5rem);
+  margin-top: 0.375rem;
+  border-radius: 50%;
+}
+
+.notification-bell__status-dot_unread {
+  background: var(--div-action-focus-ring);
+}
+
+.notification-bell__row-content {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--div-space-1, 0.125rem);
+}
+
+.notification-bell__row-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--div-space-3, 0.75rem);
+}
+
+.notification-bell__title {
+  margin-bottom: var(--div-space-1, 0.25rem);
+  font-weight: var(--div-font-weight-semibold);
+  line-height: 1.3;
+}
+
+.notification-bell__time {
+  flex-shrink: 0;
+  line-height: 1.3;
+  color: var(--div-color-gray-400);
+}

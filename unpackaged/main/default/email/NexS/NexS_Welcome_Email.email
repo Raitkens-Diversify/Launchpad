@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+  <title>Welcome to Arc</title>
+  <style type="text/css">
+    body, table, td, a { -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }
+    table, td { mso-table-lspace:0pt; mso-table-rspace:0pt; border-collapse:collapse; }
+    img { -ms-interpolation-mode:bicubic; border:0; height:auto; line-height:100%; outline:none; text-decoration:none; display:block; }
+    a[x-apple-data-detectors] { color:inherit !important; text-decoration:none !important; font-size:inherit !important; font-family:inherit !important; font-weight:inherit !important; line-height:inherit !important; }
+    @media only screen and (max-width:620px) {
+      .email-container { width:100% !important; }
+      .px-mob { padding-left:24px !important; padding-right:24px !important; }
+      .hero-h1 { font-size:30px !important; line-height:1.2 !important; }
+    }
+  </style>
+</head>
+<body style="margin:0; padding:0; background-color:#FBF9F4;">
+
+<center style="width:100%; background-color:#FBF9F4;">
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#FBF9F4;">
+  <tr>
+    <td align="center" style="padding:32px 16px;">
+
+      <!-- Preheader -->
+      <div style="display:none; font-size:1px; color:#FBF9F4; line-height:1px; max-height:0; max-width:0; opacity:0; overflow:hidden; mso-hide:all;">
+        Activate your Arc account to access Diversify resources and support.
+      </div>
+
+      <!-- ===== EMAIL CONTAINER ===== -->
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" class="email-container" style="width:600px; max-width:600px; background-color:#FFFFFF; border-radius:6px; overflow:hidden;">
+
+        <!-- LOGO BAR -->
+        <tr>
+          <td align="center" class="px-mob" style="padding:36px 48px 24px 48px; background-color:#FFFFFF;">
+            <img src="https://static.wixstatic.com/media/21b42f_7e80d85c3fd6412693f827990658c322~mv2.png/v1/fill/w_574,h_84,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/DiversifyLogo_2x.png" alt="Diversify" width="170" style="width:170px; max-width:170px; height:auto; display:block; margin:0 auto;">
+          </td>
+        </tr>
+
+        <!-- Brand divider -->
+        <tr>
+          <td style="padding:0 48px;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+              <tr><td style="height:1px; line-height:1px; font-size:0; background-color:#E2F8FC;">&nbsp;</td></tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- HERO (enhancement: gradient accent band) -->
+        <tr>
+          <td align="center" class="px-mob"
+              style="padding:48px 48px 8px 48px;
+                     background-color:#EBF7FC;
+                     background-image:linear-gradient(160deg,#E2F8FC 0%,#FFFFFF 55%);">
+            <!--[if mso]><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"><tr><td style="background-color:#EBF7FC; padding:0;"><![endif]-->
+            <p style="margin:0 0 12px 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:12px; letter-spacing:2px; text-transform:uppercase; color:#1A76B8; font-weight:600;">
+              Welcome to {!Network.Name}
+            </p>
+            <h1 class="hero-h1" style="margin:0; font-family:'Libre Baskerville',Georgia,'Times New Roman',serif; font-size:36px; line-height:1.15; color:#0F406C; font-weight:700; letter-spacing:-0.2px;">
+              Welcome,<br><em style="font-style:italic; color:#0F406C;">{!Receiving_User.FirstName}</em>.
+            </h1>
+            <!--[if mso]></td></tr></table><![endif]-->
+          </td>
+        </tr>
+
+        <!-- BODY COPY (centered) -->
+        <tr>
+          <td class="px-mob" style="padding:28px 48px 8px 48px; background-color:#FFFFFF; text-align:center;">
+            <p style="margin:0 0 16px 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:15px; line-height:1.65; color:#333333;">
+              Your Arc account is ready. Arc is your home for Diversify resources, tools, and support &mdash; so you can spend more time with clients and less time chasing answers.
+            </p>
+            <p style="margin:0 0 24px 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:15px; line-height:1.65; color:#333333;">
+              Activate your account to get started.
+            </p>
+          </td>
+        </tr>
+
+        <!-- CTA BUTTON -->
+        <tr>
+          <td align="center" class="px-mob" style="padding:8px 48px 4px 48px; background-color:#FFFFFF;">
+            <!--[if mso]>
+              <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{!Community_Url}" style="height:52px;v-text-anchor:middle;width:260px;" arcsize="8%" stroke="f" fillcolor="#0F406C">
+                <w:anchorlock/>
+                <center style="color:#FFFFFF;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;letter-spacing:0.4px;">Activate Your Account</center>
+              </v:roundrect>
+            <![endif]-->
+            <!--[if !mso]><!-- -->
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+              <tr>
+                <td align="center" style="border-radius:4px; background-color:#0F406C;">
+                  <a href="{!Community_Url}" target="_blank" style="background-color:#0F406C; color:#FFFFFF; text-decoration:none; display:inline-block; padding:16px 36px; border-radius:4px; font-family:'Inter',Helvetica,Arial,sans-serif; font-weight:600; font-size:15px; letter-spacing:0.4px;">
+                    Activate Your Account
+                  </a>
+                </td>
+              </tr>
+            </table>
+            <!--<![endif]-->
+          </td>
+        </tr>
+
+        <!-- Activation deadline nudge (enhancement) -->
+        <tr>
+          <td align="center" class="px-mob" style="padding:10px 48px 4px 48px; background-color:#FFFFFF;">
+            <p style="margin:0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:12px; line-height:1.5; color:#999999;">
+              This link expires in <strong style="color:#666666; font-weight:600;">7 days</strong>.
+            </p>
+          </td>
+        </tr>
+
+        <!-- Username helper -->
+        <tr>
+          <td align="center" class="px-mob" style="padding:18px 48px 8px 48px; background-color:#FFFFFF;">
+            <p style="margin:0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:13px; line-height:1.55; color:#666666;">
+              Your username:
+              <span style="color:#0F406C; font-weight:600;">{!Receiving_User.Username}</span>
+            </p>
+          </td>
+        </tr>
+
+        <!-- Backup link -->
+        <tr>
+          <td align="center" class="px-mob" style="padding:8px 48px 36px 48px; background-color:#FFFFFF;">
+            <p style="margin:0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:12px; line-height:1.55; color:#999999;">
+              Button not working? Copy and paste this link into your browser:<br>
+              <a href="{!Community_Url}" style="color:#1A76B8; text-decoration:underline; word-break:break-all;">{!Community_Url}</a>
+            </p>
+          </td>
+        </tr>
+
+        <!-- Divider -->
+        <tr>
+          <td style="padding:0 48px;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+              <tr><td style="height:1px; line-height:1px; font-size:0; background-color:#E2F8FC;">&nbsp;</td></tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- WHAT'S INSIDE -->
+        <tr>
+          <td class="px-mob" style="padding:36px 48px 8px 48px; background-color:#FFFFFF;">
+            <p style="margin:0 0 18px 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#1A76B8; font-weight:600;">
+              What you&rsquo;ll find in Arc
+            </p>
+            <h2 style="margin:0 0 22px 0; font-family:'Libre Baskerville',Georgia,'Times New Roman',serif; font-size:22px; line-height:1.25; color:#0F406C; font-weight:700;">
+              Built around your practice.
+            </h2>
+          </td>
+        </tr>
+
+        <!-- Feature 1 -->
+        <tr>
+          <td class="px-mob" style="padding:0 48px 18px 48px; background-color:#FFFFFF;">
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+              <tr>
+                <td valign="top" width="36" style="padding-right:14px;">
+                  <div style="width:28px; height:28px; line-height:28px; text-align:center; background-color:#E2F8FC; color:#0F406C; border-radius:50%; font-family:'Inter',Arial,sans-serif; font-weight:700; font-size:13px;">1</div>
+                </td>
+                <td valign="top">
+                  <p style="margin:2px 0 4px 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:15px; font-weight:600; color:#0F406C; line-height:1.35;">Resources and tools</p>
+                  <p style="margin:0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:14px; line-height:1.6; color:#666666;">Access the platform resources and tools designed to support your practice and reduce day-to-day friction.</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Feature 2 -->
+        <tr>
+          <td class="px-mob" style="padding:0 48px 18px 48px; background-color:#FFFFFF;">
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+              <tr>
+                <td valign="top" width="36" style="padding-right:14px;">
+                  <div style="width:28px; height:28px; line-height:28px; text-align:center; background-color:#E2F8FC; color:#0F406C; border-radius:50%; font-family:'Inter',Arial,sans-serif; font-weight:700; font-size:13px;">2</div>
+                </td>
+                <td valign="top">
+                  <p style="margin:2px 0 4px 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:15px; font-weight:600; color:#0F406C; line-height:1.35;">Personalized support</p>
+                  <p style="margin:0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:14px; line-height:1.6; color:#666666;">Submit a request, ask a question, or reach your team. You have a real partner here &mdash; not a ticket number.</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Feature 3 -->
+        <tr>
+          <td class="px-mob" style="padding:0 48px 28px 48px; background-color:#FFFFFF;">
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+              <tr>
+                <td valign="top" width="36" style="padding-right:14px;">
+                  <div style="width:28px; height:28px; line-height:28px; text-align:center; background-color:#E2F8FC; color:#0F406C; border-radius:50%; font-family:'Inter',Arial,sans-serif; font-weight:700; font-size:13px;">3</div>
+                </td>
+                <td valign="top">
+                  <p style="margin:2px 0 4px 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:15px; font-weight:600; color:#0F406C; line-height:1.35;">Ongoing updates</p>
+                  <p style="margin:0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:14px; line-height:1.6; color:#666666;">We continue to invest in the tools and support that help advisors run and grow their practices.</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- QUOTE BLOCK -->
+        <tr>
+          <td class="px-mob" style="padding:12px 48px 40px 48px; background-color:#FFFFFF;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#FBF9F4; border-left:3px solid #1A76B8; border-radius:2px;">
+              <tr>
+                <td style="padding:22px 24px;">
+                  <p style="margin:0 0 10px 0; font-family:'Libre Baskerville',Georgia,'Times New Roman',serif; font-style:italic; font-size:16px; line-height:1.55; color:#333333;">
+                    &ldquo;If the advisor is happy, we&rsquo;ve done our job.&rdquo;
+                  </p>
+                  <p style="margin:0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:12px; line-height:1.4; color:#666666;">
+                    Jordan Hammer, VP, Advisor Solutions
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- SUPPORT -->
+        <tr>
+          <td class="px-mob" style="padding:0 48px 40px 48px; background-color:#FFFFFF; text-align:center;">
+            <p style="margin:0 0 6px 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:13px; line-height:1.55; color:#666666;">
+              Questions? Reach out anytime.
+            </p>
+            <p style="margin:0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:13px; line-height:1.55; color:#666666;">
+              Email <a href="mailto:support@diversify.com" style="color:#1A76B8; text-decoration:none; font-weight:500;">support@diversify.com</a>
+              or call <a href="tel:+18018389999" style="color:#1A76B8; text-decoration:none; font-weight:500;">801.838.9999</a>.
+            </p>
+          </td>
+        </tr>
+
+      </table>
+      <!-- ===== /EMAIL CONTAINER ===== -->
+
+      <!-- FOOTER -->
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" class="email-container" style="width:600px; max-width:600px;">
+        <tr>
+          <td align="center" class="px-mob" style="padding:24px 48px 8px 48px;">
+            <p style="margin:0 0 6px 0; font-family:'Libre Baskerville',Georgia,serif; font-size:13px; font-style:italic; color:#0F406C;">
+              Institutional resources, boutique experience.
+            </p>
+            <p style="margin:0 0 14px 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:12px; line-height:1.6; color:#999999;">
+             10876 S River Front Pkwy, Ste. 600 &middot; South Jordan, UT 84095 &middot; <a href="https://www.diversify.com" style="color:#999999; text-decoration:underline;">www.diversify.com</a>
+            </p>
+            <p style="margin:0 0 18px 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:11px; line-height:1.6; color:#BBBBBB;">
+              You&rsquo;re receiving this email because an account was created for you on {!Network.Name}. If you weren&rsquo;t expecting this, contact us at <a href="mailto:support@diversify.com" style="color:#BBBBBB; text-decoration:underline;">support@diversify.com</a>.
+            </p>
+            <p style="margin:0 0 24px 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:10px; line-height:1.55; color:#BBBBBB;">
+              Investment advisory services are offered through investment advisor representatives of Diversify, collectively Diversify Advisory Services, LLC (&ldquo;DAS&rdquo;) and Diversify Wealth Management, LLC (&ldquo;DWM&rdquo;). Both DAS and DWM are SEC registered investment advisors. Securities offered through DFPG Investments, LLC, member FINRA/SIPC.
+            </p>
+          </td>
+        </tr>
+      </table>
+
+    </td>
+  </tr>
+</table>
+</center>
+
+</body>
+</html>

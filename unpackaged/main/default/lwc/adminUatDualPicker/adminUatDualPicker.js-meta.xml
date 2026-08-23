@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>61.0</apiVersion>
+    <isExposed>false</isExposed>
+    <description>Reusable UAT add/remove list manager (attached pane + searchable available pane), with optional drag-and-drop ordering via adminSortableTree. Used by the Books and Cycles console sections.</description>
+</LightningComponentBundle>

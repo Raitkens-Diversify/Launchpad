@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Exploratory_Session__c</fullName>
+    <description>Owning ad-hoc session. Master-detail, not reparentable: an entry belongs to the session it was logged in, for good. Deleting the session deletes its entries — a Finding promoted from one survives (Source_Note__c is SetNull) but loses its origin trail.</description>
+    <label>Session</label>
+    <referenceTo>Exploratory_Session__c</referenceTo>
+    <relationshipLabel>Session Notes</relationshipLabel>
+    <relationshipName>Session_Notes</relationshipName>
+    <relationshipOrder>0</relationshipOrder>
+    <reparentableMasterDetail>false</reparentableMasterDetail>
+    <trackTrending>false</trackTrending>
+    <type>MasterDetail</type>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+</CustomField>

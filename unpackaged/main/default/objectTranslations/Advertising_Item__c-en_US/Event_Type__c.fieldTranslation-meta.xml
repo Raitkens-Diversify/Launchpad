@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Event Type --></label>
+        <name>Event_Type__c</name>
+        <picklistValues>
+            <masterLabel>Accredited Investor Association</masterLabel>
+            <translation><!-- Accredited Investor Association --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Customer Appreciation</masterLabel>
+            <translation><!-- Customer Appreciation --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>General Alternative Investment Education</masterLabel>
+            <translation><!-- General Alternative Investment Education --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Medicare</masterLabel>
+            <translation><!-- Medicare --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Private Placement Seminar</masterLabel>
+            <translation><!-- Private Placement Seminar --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Professional Education</masterLabel>
+            <translation><!-- Professional Education --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Retirement</masterLabel>
+            <translation><!-- Retirement --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Social Security</masterLabel>
+            <translation><!-- Social Security --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

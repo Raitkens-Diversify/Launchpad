@@ -1,0 +1,37 @@
+<template>
+  <!-- Author: Hoang Long Vu To | Date: 2026-06-12 -->
+  <div
+    class={panelClass}
+    role="dialog"
+    aria-label={memberName}
+    style={panelStyle}
+  >
+    <header
+      class={headerClass}
+      onmousedown={handleDragStart}
+    >
+      <p class="member-panel__title slds-text-heading_small slds-truncate" title={memberName}>
+        {memberName}
+      </p>
+      <lightning-button-icon
+        icon-name="utility:close"
+        variant="bare"
+        alternative-text="Close preview"
+        title="Close preview"
+        onclick={handleCloseClick}
+      ></lightning-button-icon>
+    </header>
+    <div class="member-panel__body slds-p-horizontal_small slds-p-bottom_small">
+      <template lwc:if={recordId}>
+        <lightning-record-form
+          record-id={recordId}
+          object-api-name={objectApiName}
+          layout-type="Compact"
+          mode="readonly"
+          columns="2"
+        >
+        </lightning-record-form>
+      </template>
+    </div>
+  </div>
+</template>

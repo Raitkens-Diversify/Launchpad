@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Asset Class --></label>
+        <name>Asset_Class__c</name>
+        <picklistValues>
+            <masterLabel>Energy Programs</masterLabel>
+            <translation><!-- Energy Programs --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Interval Funds</masterLabel>
+            <translation><!-- Interval Funds --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Not Applicable</masterLabel>
+            <translation><!-- Not Applicable --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Private Credit</masterLabel>
+            <translation><!-- Private Credit --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Private Equity</masterLabel>
+            <translation><!-- Private Equity --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Private Real Estate</masterLabel>
+            <translation><!-- Private Real Estate --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Structured Notes</masterLabel>
+            <translation><!-- Structured Notes --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

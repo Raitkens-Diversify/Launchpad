@@ -1,0 +1,288 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-08-06 -->
+<template>
+  <section class="log-view">
+    <div class="log-view__filter-panel">
+      <div class="log-view__filter-row log-view__filter-row_search-group">
+        <div class="log-view__search-field log-view__filter-field">
+          <label class="log-view__field-label" for="subject-search-input"
+            >Subject</label
+          >
+          <div class="div-filter__search">
+            <lightning-icon
+              icon-name="utility:search"
+              size="xx-small"
+              class="div-filter__search-icon"
+              aria-hidden="true"
+            ></lightning-icon>
+            <input
+              id="subject-search-input"
+              type="search"
+              class="div-filter__search-input"
+              placeholder="Search subject..."
+              value={filters.subjectSearch}
+              aria-label="Search subject"
+              oninput={handleSubjectSearchChange}
+              onkeydown={handleSubjectSearchKeyDown}
+            />
+          </div>
+        </div>
+
+        <div class="log-view__picklist-row">
+          <div class="log-view__picklist-field">
+            <c-div-multi-select
+              label="Household"
+              placeholder="Search households..."
+              variant="search"
+              chip-placement="below"
+              options={householdOptions}
+              value={filters.selectedHouseholdIds}
+              empty-message="No households match your search."
+              onchange={handleHouseholdFilterChange}
+            ></c-div-multi-select>
+          </div>
+          <div class="log-view__picklist-field">
+            <c-div-multi-select
+              label="Branch"
+              placeholder="Search branches..."
+              variant="search"
+              chip-placement="below"
+              options={branchOptions}
+              value={filters.selectedBranchNames}
+              empty-message="No branches match your search."
+              onchange={handleBranchFilterChange}
+            ></c-div-multi-select>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="log-view__filter-row log-view__filter-row_controls div-filter div-filter--toolbar"
+      >
+        <div class="log-view__filter-controls-start">
+          <div class="log-view__filter-field log-view__filter-field_type">
+            <span class="log-view__field-label" id="record-type-filter-label"
+              >Type</span
+            >
+            <div
+              class="div-filter__group"
+              role="group"
+              aria-labelledby="record-type-filter-label"
+            >
+              <template for:each={recordTypeFilterButtons} for:item="filter">
+                <button
+                  key={filter.value}
+                  class={filter.cssClass}
+                  type="button"
+                  data-filter={filter.value}
+                  aria-pressed={filter.ariaPressed}
+                  onclick={handleRecordTypeFilter}
+                >
+                  {filter.label}
+                </button>
+              </template>
+            </div>
+          </div>
+
+          <div
+            class="log-view__date-range"
+            role="group"
+            aria-label="Filter by date range"
+          >
+            <div class="log-view__filter-field log-view__filter-field_date">
+              <label class="log-view__field-label" for="log-start-date"
+                >From</label
+              >
+              <lightning-input
+                type="date"
+                variant="label-hidden"
+                label="From"
+                name="log-start-date"
+                value={filters.startDate}
+                onchange={handleStartDateChange}
+              ></lightning-input>
+            </div>
+            <div class="log-view__filter-field log-view__filter-field_date">
+              <label class="log-view__field-label" for="log-end-date">To</label>
+              <lightning-input
+                type="date"
+                variant="label-hidden"
+                label="To"
+                name="log-end-date"
+                value={filters.endDate}
+                onchange={handleEndDateChange}
+              ></lightning-input>
+            </div>
+          </div>
+        </div>
+
+        <div class="log-view__filter-actions log-view__filter-actions_clear">
+          <button
+            type="button"
+            class="div-table-filters__clear"
+            onclick={handleClearFilters}
+            disabled={isClearFiltersDisabled}
+            aria-disabled={isClearFiltersDisabled}
+          >
+            Clear filters
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <template lwc:if={errorMessage}>
+      <div
+        class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium"
+        role="alert"
+      >
+        <h2>{errorMessage}</h2>
+      </div>
+    </template>
+
+    <div class="div-table-card">
+      <template lwc:if={isLoading}>
+        <div class="div-table-card__loading" role="status" aria-live="polite" aria-busy="true"></div>
+      </template>
+
+      <template lwc:elseif={hasRows}>
+        <div class="div-table-scroll">
+          <table class="div-table log-table" aria-label="Notification log">
+            <thead>
+              <tr>
+                <template for:each={tableColumns} for:item="column">
+                  <th
+                    key={column.fieldName}
+                    scope="col"
+                    class="div-table__header"
+                  >
+                    {column.label}
+                  </th>
+                </template>
+              </tr>
+            </thead>
+            <tbody>
+              <template for:each={tableRows} for:item="row">
+                <tr key={row.id} class={row.rowClass}>
+                  <template lwc:if={row.isDayHeader}>
+                    <td colspan={columnCount} class="log-table__day-cell">
+                      {row.dayLabel}
+                    </td>
+                  </template>
+                  <template lwc:else>
+                    <td>
+                      <template lwc:if={row.hasSourceRecordLink}>
+                        <a
+                          class="div-table__link"
+                          href={row.sourceRecordUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={row.subjectLinkAriaLabel}
+                        >
+                          {row.subjectLabel}
+                        </a>
+                      </template>
+                      <template lwc:else>
+                        <span class="div-table-cell__text"
+                          >{row.subjectLabel}</span
+                        >
+                      </template>
+                    </td>
+                    <td>{row.sourceTypeLabel}</td>
+                    <td>
+                      <span class="log-table__multiline"
+                        >{row.changeMadeLabel}</span
+                      >
+                    </td>
+                    <td>{row.assignedToLabel}</td>
+                    <td>{row.changeDateLabel}</td>
+                    <td>
+                      <template lwc:if={row.hasHouseholdLink}>
+                        <a
+                          class="div-table__link"
+                          href={row.householdUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={row.householdLinkAriaLabel}
+                        >
+                          {row.householdLabel}
+                        </a>
+                      </template>
+                      <template lwc:else>
+                        <span class="div-table-cell__text"
+                          >{row.householdLabel}</span
+                        >
+                      </template>
+                    </td>
+                    <td>
+                      <template lwc:if={row.hasBranchLink}>
+                        <a
+                          class="div-table__link"
+                          href={row.branchUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={row.branchLinkAriaLabel}
+                        >
+                          {row.branchLabel}
+                        </a>
+                      </template>
+                      <template lwc:else>
+                        <span class="div-table-cell__text">{row.branchLabel}</span>
+                      </template>
+                    </td>
+                    <td>
+                      <template lwc:if={row.hasFinancialAdvisorTeamLink}>
+                        <a
+                          class="div-table__link"
+                          href={row.financialAdvisorTeamUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={row.financialAdvisorTeamLinkAriaLabel}
+                        >
+                          {row.financialAdvisorTeamLabel}
+                        </a>
+                      </template>
+                      <template lwc:else>
+                        <span class="div-table-cell__text"
+                          >{row.financialAdvisorTeamLabel}</span
+                        >
+                      </template>
+                    </td>
+                    <td>
+                      <span class={row.statusPillClass}>{row.statusLabel}</span>
+                    </td>
+                  </template>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+
+        <template lwc:if={canLoadMore}>
+          <div class="div-table-card__load-more">
+            <lightning-button
+              variant="neutral"
+              label="Load more"
+              onclick={handleLoadMore}
+              disabled={isLoadingMore}
+            ></lightning-button>
+          </div>
+        </template>
+      </template>
+
+      <template lwc:else>
+        <div class="div-table-card__empty">
+          <h3 class="slds-text-heading_small">
+            No notifications found
+          </h3>
+          <p class="slds-text-body_regular slds-m-top_x-small">
+            Adjust your filters or search criteria to view notification log
+            entries.
+          </p>
+        </div>
+      </template>
+
+      <footer class="div-table-card__footer">
+        <span>{footerSummary}</span>
+      </footer>
+    </div>
+  </section>
+</template>

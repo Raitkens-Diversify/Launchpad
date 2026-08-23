@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Notification_Zoom_Respect_DND__c</fullName>
+    <defaultValue>true</defaultValue>
+    <description>Whether Zoom Do Not Disturb is respected for this user&#39;s notifications.</description>
+    <label>Notification Zoom Respect DND</label>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Checkbox</type>
+</CustomField>

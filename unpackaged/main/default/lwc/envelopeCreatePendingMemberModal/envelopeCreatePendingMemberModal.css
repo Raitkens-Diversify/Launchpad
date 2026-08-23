@@ -1,0 +1,68 @@
+.create-member {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-4, 16px);
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+}
+
+.create-member__info {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--slds-g-spacing-2, 8px);
+    padding: var(--slds-g-spacing-2, 8px) 12px;
+    background: var(--slds-g-color-info-container-1, #e0f2fe);
+    border: 1px solid var(--slds-g-color-info-base-90, #bae6fd);
+    border-radius: var(--slds-g-radius-border-2, 8px);
+}
+
+.create-member__info-icon {
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-on-info-1, #0369a1);
+    flex: none;
+    margin-top: 1px;
+}
+
+.create-member__info-text {
+    margin: 0;
+    font-size: var(--slds-g-font-size-base, 13px);
+    line-height: 18px;
+    color: var(--slds-g-color-on-info-1, #0369a1);
+}
+
+.create-member__rows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-4, 16px);
+}
+
+.create-member__row {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: var(--slds-g-spacing-4, 16px);
+}
+
+.create-member__row > lightning-input,
+.create-member__row > c-envelope-searchable-combobox {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.create-member__row-action {
+    flex: none;
+    width: var(--slds-g-sizing-9, 32px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.create-member__actions {
+    display: flex;
+}
+
+.create-member__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--slds-g-spacing-5, 24px);
+    width: 100%;
+    font-weight: 600;
+}

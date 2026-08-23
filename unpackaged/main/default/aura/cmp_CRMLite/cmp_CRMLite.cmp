@@ -1,0 +1,7 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes" access="global">
+    <aura:handler name="init" value="{!this}" action="{!c.init}"/>
+    <lightning:card>
+        <img src="{!$Resource.DiversifyLogo}"/>
+        <lightning:flow aura:id="flowData"/>
+    </lightning:card>
+</aura:component>

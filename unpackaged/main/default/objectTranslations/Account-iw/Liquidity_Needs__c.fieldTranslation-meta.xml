@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Liquidity Needs --></label>
+        <name>Liquidity_Needs__c</name>
+        <picklistValues>
+            <masterLabel>Not Important</masterLabel>
+            <translation><!-- Not Important --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Somewhat Important</masterLabel>
+            <translation><!-- Somewhat Important --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Very Important</masterLabel>
+            <translation><!-- Very Important --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

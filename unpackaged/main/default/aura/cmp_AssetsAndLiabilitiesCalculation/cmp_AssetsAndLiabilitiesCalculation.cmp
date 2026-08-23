@@ -1,0 +1,281 @@
+<aura:component implements="lightning:availableForFlowScreens" access="global">
+    <aura:attribute name="CashCheckingBalance" type="Integer" default="0"/>
+    <aura:attribute name="CashSavingsBalance" type="Integer" default="0"/>
+    <aura:attribute name="RetirementPlansBalance" type="Integer" default="0"/>
+    <aura:attribute name="ExculdingRetirementPlansBalance" type="Integer" default="0"/>
+    <aura:attribute name="AnnuitiesBalance" type="Integer" default="0"/>
+    <aura:attribute name="OtherLiquidAssetsBalance" type="Integer" default="0"/>
+    <aura:attribute name="OtherLiquidAssetsDescr" type="String" default=""/>    
+    <aura:attribute name="MarketValueOfPR" type="Integer" default="0"/>
+    <aura:attribute name="MarketValueOfNonSecurInv" type="Integer" default="0"/>
+    <aura:attribute name="MarketValueOfSecurInv" type="Integer" default="0"/>
+    <aura:attribute name="PrivateCreditOwned" type="Integer" default="0"/>
+    <aura:attribute name="PrivateEquityOwned" type="Integer" default="0"/>
+    <aura:attribute name="EnergyPrograms" type="Integer" default="0"/>
+    <aura:attribute name="MarketValueOfNonREAltInv" type="Integer" default="0"/>
+    <aura:attribute name="MarketValueOfIntervalFunds" type="Integer" default="0"/>
+    <aura:attribute name="StructuredNotes" type="Integer" default="0"/>
+    <aura:attribute name="TotalAlternativeInvestments" type="Integer" default="0"/>
+    <aura:attribute name="MarketValueOfBusinessInterest" type="Integer" default="0"/>
+    <aura:attribute name="ExchangeProceedsatQIBalance" type="Integer" default="0"/>
+    <aura:attribute name="LumpSumPensions" type="Integer" default="0"/>
+    <aura:attribute name="OtherIlliquidAssetsBalance" type="Integer" default="0"/>
+    <aura:attribute name="OtherIlliquidAssetsDescr" type="String" default=""/>  
+    <aura:attribute name="TotalLiquidAssets" type="Integer" default="0"/>
+    <aura:attribute name="TotalIlliquidAssets" type="Integer" default="0"/>
+    <aura:attribute name="TotalAssets" type="Integer" default="0"/>  
+    <aura:attribute name="TotalCurrentLiabilities" type="Integer" default="0"/>
+    <aura:attribute name="MortgagePayableOnPR" type="Integer" default="0"/>
+    <aura:attribute name="MortgagePayableOnNonSecurInv" type="Integer" default="0"/>
+    <aura:attribute name="MortgagePayableOnSecurInv" type="Integer" default="0"/>
+    <aura:attribute name="DebtSecuredByPersonalProp" type="Integer" default="0"/>
+    <aura:attribute name="DebtFromBusinessInterests" type="Integer" default="0"/>
+    <aura:attribute name="OtherLongTermLiabilities" type="Integer" default="0"/>
+    <aura:attribute name="TotalLongTermLiabilities" type="Integer" default="0"/>
+    <aura:attribute name="TotalLiabilities" type="Integer" default="0"/>
+    <aura:attribute name="TotalNetWorth" type="Integer" default="0"/>
+    <aura:attribute name="TotalNetWorthExcludingPR" type="Integer" default="0"/>
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doinit}" />
+    
+    <lightning:card>
+        <lightning:layout>
+            <lightning:layoutItem size="6">
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                    <thead>
+                        <tr>
+                            <th>Assets</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <div class="slds-p-left_large slds-p-top_x-small slds-p-bottom_x-small">
+                            <label class="slds-form-element__label boldText" style="margin-right: 0.5rem;">Liquid Assets:</label>
+                            <lightning:helptext content="Assets that can be liquidated within 30 days"/>
+                        </div>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Cash/Checking:</label>
+                                <lightning:input type="number" value="{!v.CashCheckingBalance}" name="CashCheckingBalance" label="Cash/Checking:" onchange="{!c.totalLiquidAssets}" formatter="currency" currencyCode="USD" variant="label-hidden" step="1"/>
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Savings/Money Market/CDs:</label>
+                                <lightning:input type="number" value="{!v.CashSavingsBalance}" name="CashSavingsBalance" label="Savings/Money Market/CDs:" onchange="{! c.totalLiquidAssets }" formatter="currency" currencyCode="USD" variant="label-hidden" step="1"/>
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Stocks, Bonds, &amp; Mutual Funds,etc. through Retirement Plans(401k, IRA, etc. excluding Annuities):</label>
+                                <lightning:input type="number" value="{!v.RetirementPlansBalance}" name="RetirementPlansBalance" label="Stocks, Bonds, &amp; Mutual Funds,etc. through Retirement Plans(401k, IRA, etc. excluding Annuities):" onchange="{! c.totalLiquidAssets }" formatter="currency" currencyCode="USD" variant="label-hidden" step="1"/>
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Stocks, Bonds, &amp; Mutual Funds, etc. outside Retirement Plans:</label>
+                                <lightning:input type="number" value="{!v.ExculdingRetirementPlansBalance}" name="ExculdingRetirementPlansBalance" label="Stocks, Bonds, &amp; Mutual Funds, etc. outside Retirement Plans:" onchange="{! c.totalLiquidAssets }" formatter="currency" currencyCode="USD" variant="label-hidden" step="1"/>
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Annuities:</label>
+                                <lightning:input type="number" value="{!v.AnnuitiesBalance}" name="AnnuitiesBalance" label="Annuities:" onchange="{! c.totalLiquidAssets }" formatter="currency" currencyCode="USD" variant="label-hidden" step="1"/>
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Other Liquid Assets (describe below):</label>
+                                <lightning:input type="number" value="{!v.OtherLiquidAssetsBalance}" name="OtherLiquidAssetsBalance" label="Other Liquid Assets Balance(s):" onchange="{! c.totalLiquidAssets }" formatter="currency" currencyCode="USD" variant="label-hidden" step="1"/>
+                                <lightning:textarea name="OtherLiquidAssetsDescr" value="{!v.OtherLiquidAssetsDescr}" variant="label-hidden"/>
+                                
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <lightning:input type="number" label="Total Liquid Assets:" value="{!v.TotalLiquidAssets}" formatter="currency" currencyCode="USD" disabled="true" step="1"/>
+                            </td>
+                        </tr>
+                         <div class="slds-border_top slds-p-left_large slds-p-top_x-small slds-p-bottom_x-small">
+                            <label class="slds-form-element__label boldText" style="margin-right: 0.5rem;">Long-Term or Illiquid Assets:</label>
+                        </div>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Market Value of Primary Residence:</label>
+                                <lightning:input type="number" value="{!v.MarketValueOfPR}" name="MarketValueOfPR" label="Market Value of Primary Residence:" onchange="{! c.totalIlliquidAssets }" formatter="currency" currencyCode="USD" variant="label-hidden" step="1"/>
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Market Value of Non-Securitized Investment Real Estate Owned:</label>
+                                <lightning:input type="number" value="{!v.MarketValueOfNonSecurInv}" name="MarketValueOfNonSecurInv" label="Market Value of Non-Securitized Investment Real Estate Owned:" onchange="{! c.totalIlliquidAssets }" formatter="currency" currencyCode="USD" variant="label-hidden" step="1"/>
+                            </td>
+                        </tr>
+                        <div class="slds-border_top slds-p-left_large slds-p-top_x-small slds-p-bottom_x-small">
+                            <label class="slds-form-element__label boldText" style="margin-right: 0.5rem;">Alternative Investments (excluding today's investment):</label>
+                        </div>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Securitized Real Estate Owned:</label>
+                                <lightning:input type="number" value="{!v.MarketValueOfSecurInv}" name="MarketValueOfSecurInv" label="Securitized Real Estate Owned:" onchange="{! c.totalAlternativeInvestments }" formatter="currency" currencyCode="USD" variant="label-hidden" step="1"/>
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Private Credit Owned:</label>
+                                <lightning:input type="number" value="{!v.PrivateCreditOwned}" name="PrivateCreditOwned" label="Private Credit Owned:" onchange="{! c.totalAlternativeInvestments }" formatter="currency" currencyCode="USD" variant="label-hidden" step="1"/>
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Private Equity Owned:</label>
+                                <lightning:input type="number" value="{!v.PrivateEquityOwned}" name="PrivateEquityOwned" label="Private Equity Owned:" onchange="{! c.totalAlternativeInvestments }" formatter="currency" currencyCode="USD" variant="label-hidden" step="1"/>
+                            </td>
+                        </tr>
+                         <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Energy Programs:</label>
+                                <lightning:input type="number" value="{!v.EnergyPrograms}" name="EnergyPrograms" label="Energy Programs:" onchange="{! c.totalAlternativeInvestments }" formatter="currency" currencyCode="USD" variant="label-hidden" step="1"/>
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Interval Funds Owned:</label>
+                                <lightning:input type="number" value="{!v.MarketValueOfIntervalFunds}" name="MarketValueOfIntervalFunds" label="Interval Funds:" onchange="{! c.totalAlternativeInvestments }" formatter="currency" currencyCode="USD" variant="label-hidden" step="1"/>
+                            </td>
+                        </tr>
+                         <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Structured Notes:</label>
+                                <lightning:input type="number" value="{!v.StructuredNotes}" name="StructuredNotes" label="Structured Notes:" onchange="{! c.totalAlternativeInvestments }" formatter="currency" currencyCode="USD" variant="label-hidden" step="1"/>
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <lightning:input type="number" label="Total Value of All Alternative Investments:" value="{!v.TotalAlternativeInvestments}" formatter="currency" currencyCode="USD" disabled="true" step="1"/>
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Market Value of Business Interest:</label>
+                                <lightning:input type="number" value="{!v.MarketValueOfBusinessInterest}" name="MarketValueOfBusinessInterest" label="Market Value of Business Interest:" onchange="{! c.totalIlliquidAssets }" formatter="currency" currencyCode="USD" variant="label-hidden" step="1"/>
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Exchange Proceeds at QI:</label>
+                                <lightning:input type="number" value="{!v.ExchangeProceedsatQIBalance}" name="ExchangeProceedsatQIBalance" label="Exchange Proceeds at QI:" onchange="{! c.totalIlliquidAssets }" formatter="currency" currencyCode="USD" variant="label-hidden" step="1"/>
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Lump Sum Pension(s):</label>
+                                <lightning:input type="number" value="{!v.LumpSumPensions}" name="LumpSumPensions" label="Lump Sum Pension(s):" onchange="{! c.totalIlliquidAssets }" formatter="currency" currencyCode="USD" variant="label-hidden" step="1"/>
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Other Illiquid Assets (excluding personal property, i.e. vehicles. Please describe below):</label>
+                                <lightning:input type="number" value="{!v.OtherIlliquidAssetsBalance}" name="OtherIlliquidAssetsBalance" label="Other Illiquid Assets Balance(s):" onchange="{! c.totalIlliquidAssets }" formatter="currency" currencyCode="USD" variant="label-hidden" step="1"/>
+                                <lightning:textarea value="{!v.OtherIlliquidAssetsDescr}" name="OtherIlliquidAssetsDescr" label="Other Illiquid Assets Description:" variant="label-hidden"/>                  
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <lightning:input type="number" label="TOTAL LONG-TERM or ILLIQUID ASSETS:" value="{!v.TotalIlliquidAssets}" formatter="currency" currencyCode="USD" disabled="true" step="1"/>
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <lightning:input type="number" label="TOTAL ASSETS:" value="{!v.TotalAssets}" formatter="currency" currencyCode="USD" disabled="true" step="1"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </lightning:layoutItem>
+            <lightning:layoutItem size="6">
+                <table  class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+                    <thead>
+                        <tr>
+                            <th>Liabilities</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <div class="slds-p-left_large slds-p-top_x-small slds-p-bottom_x-small">
+                            <label class="slds-form-element__label boldText" style="margin-right: 0.5rem;">Current Liabilities:</label>
+                            <lightning:helptext content="Due within 12 months, i.e. credit card debt"/>
+                        </div>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">TOTAL CURRENT LIABILITIES:</label>
+                                <lightning:input type="number" value="{!v.TotalCurrentLiabilities}" name="TotalCurrentLiabilities" label="TOTAL CURRENT LIABILITIES:" onchange="{! c.totalLiabilities }" formatter="currency" currencyCode="USD" variant="label-hidden" step="1"/>
+                            </td>
+                        </tr>
+                        <div class="slds-border_top slds-p-left_large slds-p-top_x-small slds-p-bottom_x-small">
+                            <label class="slds-form-element__label boldText" style="margin-right: 0.5rem;">Long-Term Liabilities:</label>
+                        </div>    
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Mortgage Payable on Primary Residence:</label>
+                                <lightning:input type="number" value="{!v.MortgagePayableOnPR}" name="MortgagePayableOnPR" label="Mortgage Payable on Primary Residence:" onchange="{! c.totalLongTermLiabilities }" formatter="currency" currencyCode="USD" variant="label-hidden" step="1"/>
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Mortgage Payable on Non-Securitized Investment Real Estate Owned:</label>
+                                <lightning:input type="number" value="{!v.MortgagePayableOnNonSecurInv}" name="MortgagePayableOnNonSecurInv" label="Mortgage Payable on Non-Securitized Investment Real Estate Owned:" onchange="{! c.totalLongTermLiabilities }" formatter="currency" currencyCode="USD" variant="label-hidden" step="1"/>
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Mortgage Payable on Securitized Investment Real Estate Owned:</label>
+                                <lightning:input type="number" value="{!v.MortgagePayableOnSecurInv}" name="MortgagePayableOnSecurInv" label="Mortgage Payable on Securitized Investment Real Estate Owned:" onchange="{! c.totalLongTermLiabilities }" formatter="currency" currencyCode="USD" variant="label-hidden" step="1"/>
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Debt Secured by Personal Property and/or Vehicles:</label>
+                                <lightning:input type="number" value="{!v.DebtSecuredByPersonalProp}" name="DebtSecuredByPersonalProp" label="Debt Secured by Personal Property and/or Vehicles:" onchange="{! c.totalLongTermLiabilities }" formatter="currency" currencyCode="USD" variant="label-hidden" step="1"/>
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Debt from Business Interests:</label>
+                                <lightning:input type="number" value="{!v.DebtFromBusinessInterests}" name="DebtFromBusinessInterests" label="Debt from Business Interests:" onchange="{! c.totalLongTermLiabilities }" formatter="currency" currencyCode="USD" variant="label-hidden" step="1"/>
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Other Long-Term Liabilities:</label>
+                                <lightning:input type="number" value="{!v.OtherLongTermLiabilities}" name="OtherLongTermLiabilities" label="Other Long-Term Liabilities:" onchange="{! c.totalLongTermLiabilities }" formatter="currency" currencyCode="USD" variant="label-hidden" step="1"/>
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <lightning:input type="number" label="TOTAL LONG-TERM LIABILITIES:" value="{!v.TotalLongTermLiabilities}" formatter="currency" currencyCode="USD" disabled="true" step="1"/>
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <lightning:input type="number" label="TOTAL LIABILITIES:" value="{!v.TotalLiabilities}" formatter="currency" currencyCode="USD" disabled="true" step="1"/>
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">TOTAL NET WORTH:</label>
+                                <lightning:helptext content="Total assets minus total liabilities"/> 
+                                <lightning:input type="number" label="TOTAL NET WORTH:" value="{!v.TotalNetWorth}" formatter="currency" currencyCode="USD" disabled="true" step="1"  variant="label-hidden"/>
+                            </td>
+                        </tr>
+                        <tr class="slds-hint-parent">
+                            <td>
+                                <label class="slds-form-element__label" style="margin-right: 0.5rem;">NET WORTH EXCLUDING PRIMARY RESIDENCE:</label>
+                                <lightning:helptext content="Total net worth minus equity value of primary residence"/> 
+                                <lightning:input type="number" label="NET WORTH EXCLUDING PRIMARY RESIDENCE:" value="{!v.TotalNetWorthExcludingPR}" formatter="currency" currencyCode="USD" disabled="true" step="1" variant="label-hidden"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </lightning:layoutItem>
+        </lightning:layout>
+    </lightning:card>
+</aura:component>

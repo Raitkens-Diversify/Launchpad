@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Silver</fullName>
+        <default>false</default>
+        <label>Silver</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Gold</fullName>
+        <default>false</default>
+        <label>Gold</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Platinum</fullName>
+        <default>false</default>
+        <label>Platinum</label>
+    </standardValue>
+</StandardValueSet>

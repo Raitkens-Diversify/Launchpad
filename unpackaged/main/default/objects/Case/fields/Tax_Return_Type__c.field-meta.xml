@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Tax_Return_Type__c</fullName>
+    <label>Tax Return Type</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>1040</fullName>
+                <default>false</default>
+                <label>1040</label>
+            </value>
+            <value>
+                <fullName>1120</fullName>
+                <default>false</default>
+                <label>1120</label>
+            </value>
+            <value>
+                <fullName>1065</fullName>
+                <default>false</default>
+                <label>1065</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

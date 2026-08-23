@@ -1,0 +1,147 @@
+{
+  "type" : "sfdc_cms__view",
+  "title" : "DFPG Financial Account List",
+  "contentBody" : {
+    "component" : {
+      "children" : [ {
+        "children" : [ {
+          "attributes" : {
+            "backgroundImageConfig" : "",
+            "backgroundImageOverlay" : "rgba(0,0,0,0)",
+            "componentSpacerSize" : "",
+            "dxpStyle" : { },
+            "layoutDirectionDesktop" : "row",
+            "layoutDirectionMobile" : "column",
+            "layoutDirectionTablet" : "column",
+            "maxContentWidth" : "",
+            "sectionColumnGutterWidth" : "",
+            "sectionConfig" : "{\"UUID\":\"ac34a2cc-8c89-4215-8f00-1cd4af2e1eb9\",\"columns\":[{\"UUID\":\"19e75959-76e4-486d-8a4a-ec36ea836eee\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":[]}]}",
+            "sectionMinHeight" : "",
+            "sectionVerticalAlign" : "flex-start"
+          },
+          "children" : [ {
+            "children" : [ {
+              "attributes" : {
+                "activeTabBorderHighlightWeight" : "2px",
+                "activeTabTextEmphasis" : "{\"bold\":true}",
+                "activeTabTextStyle" : "{\"textStyle\":\"paragraph1\",\"headingTag\":\"p\"}",
+                "borderColor" : "",
+                "borderRadius" : "0px",
+                "borderWeight" : "0px",
+                "dxpStyle" : { },
+                "enableOverflowMenu" : false,
+                "imageFit" : "cover",
+                "imagePosition" : "center center",
+                "overflowIconColor" : "rgb(116,116,116)",
+                "overflowIconStyle" : "down-arrow",
+                "overflowMenuLabel" : "More",
+                "tabAlignment" : "left",
+                "tabBorderColor" : "",
+                "tabBorderRadius" : "0px",
+                "tabBorderWeight" : "0px",
+                "tabHoverBorderHighlightWeight" : "1px",
+                "tabLayout" : "horizontal",
+                "tabPadding" : "12px",
+                "tabTextStyle" : "{\"textStyle\":\"paragraph1\",\"headingTag\":\"p\"}",
+                "tabsetConfig" : "{\"UUID\":\"d1251730-c0f0-4d89-acee-8b8ae0907b47\",\"activeTab\":null,\"useOverflowMenu\":null,\"tabs\":[{\"UUID\":\"2597f776-3ccf-424c-8336-3f4df268a229\",\"tabName\":\"All Investments & Services\",\"tabKey\":\"tab1\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"cd2ebfb2-bf1f-4bb0-81f5-0d9d9663c18e\",\"tabName\":\"Accounts\",\"tabKey\":\"705bc\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"0e8252a9-dac9-48f8-980f-e0255111e786\",\"tabName\":\"DPIs\",\"tabKey\":\"12a0e\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"e3aeb3dc-ced5-4073-bec1-05a2b18275ba\",\"tabName\":\"Services\",\"tabKey\":\"f5d45\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"3835a881-037d-4cf3-863c-a443009e60ed\",\"tabName\":\"Approved Products\",\"tabKey\":\"tab2\",\"locked\":false,\"allowGuestUser\":false}]}",
+                "width" : "100%"
+              },
+              "children" : [ {
+                "children" : [ {
+                  "attributes" : {
+                    "defaultListViewApiName" : "All",
+                    "dxpStyle" : { },
+                    "objectApiName" : "Financial_Account__c",
+                    "tableId" : "isa-all",
+                    "title" : ""
+                  },
+                  "definition" : "c:arcListView",
+                  "id" : "b513d9c6-424e-4b47-b8bb-a5728bb7cb16",
+                  "type" : "component"
+                } ],
+                "id" : "2597f776-3ccf-424c-8336-3f4df268a229",
+                "name" : "tab1",
+                "title" : "All Investments & Services",
+                "type" : "region"
+              }, {
+                "id" : "cd2ebfb2-bf1f-4bb0-81f5-0d9d9663c18e",
+                "name" : "705bc",
+                "title" : "Accounts",
+                "type" : "region"
+              }, {
+                "id" : "0e8252a9-dac9-48f8-980f-e0255111e786",
+                "name" : "12a0e",
+                "title" : "DPIs",
+                "type" : "region"
+              }, {
+                "id" : "e3aeb3dc-ced5-4073-bec1-05a2b18275ba",
+                "name" : "f5d45",
+                "title" : "Services",
+                "type" : "region"
+              }, {
+                "children" : [ {
+                  "attributes" : {
+                    "defaultListViewApiName" : "All",
+                    "dxpStyle" : { },
+                    "objectApiName" : "Product__c",
+                    "tableId" : "isa-product",
+                    "title" : ""
+                  },
+                  "definition" : "c:arcListView",
+                  "id" : "6b53f72f-031a-437b-9fd1-c353b6d3cc38",
+                  "type" : "component"
+                } ],
+                "id" : "3835a881-037d-4cf3-863c-a443009e60ed",
+                "name" : "tab2",
+                "title" : "Approved Products",
+                "type" : "region"
+              } ],
+              "definition" : "dxp_layout:tabs",
+              "id" : "d1251730-c0f0-4d89-acee-8b8ae0907b47",
+              "type" : "component"
+            }, {
+              "attributes" : {
+                "dxpStyle" : { }
+              },
+              "definition" : "c:lwrTabUrlHandler",
+              "id" : "22fb7e5c-a537-4377-b7ac-b7e1a8ee8ffb",
+              "type" : "component"
+            } ],
+            "id" : "19e75959-76e4-486d-8a4a-ec36ea836eee",
+            "name" : "col1",
+            "title" : "Column 1",
+            "type" : "region"
+          } ],
+          "definition" : "community_layout:section",
+          "id" : "ac34a2cc-8c89-4215-8f00-1cd4af2e1eb9",
+          "type" : "component"
+        } ],
+        "id" : "d4265525-c046-42a9-8ecb-0c5c5fece126",
+        "name" : "content",
+        "title" : "Content",
+        "type" : "region"
+      }, {
+        "children" : [ {
+          "attributes" : {
+            "dxpStyle" : { },
+            "recordId" : "{!recordId}"
+          },
+          "definition" : "community_builder:seoAssistant",
+          "id" : "53be5832-fd98-4d10-85e5-2dd016a36432",
+          "type" : "component"
+        } ],
+        "id" : "2ca51777-7e00-4e16-bbcf-b7f3e6b45f59",
+        "name" : "sfdcHiddenRegion",
+        "title" : "sfdcHiddenRegion",
+        "type" : "region"
+      } ],
+      "definition" : "community_layout:sldsFlexibleLayout",
+      "id" : "6ad3d4fb-d1c1-4882-a5b4-af678e945981",
+      "type" : "component"
+    },
+    "dataProviders" : [ ],
+    "themeLayoutType" : "OHzbXAVux6mZ7VVDb7Pb8F2YUFBAXR",
+    "viewType" : "list-Financial_Account__c"
+  },
+  "urlName" : "dfpg-financial-account-list"
+}

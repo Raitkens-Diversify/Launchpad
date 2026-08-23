@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Required_Document__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <label>Required Document</label>
+    <referenceTo>Required_Documents__c</referenceTo>
+    <relationshipLabel>Signee</relationshipLabel>
+    <relationshipName>Signee</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

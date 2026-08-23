@@ -1,0 +1,6 @@
+The following roth conversion is complete:
+
+Traditional IRA Account: [!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.Name] [!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.OASP_FSC__Registration_Type__r.Name] XXXX[!Case.FinServ__FinancialAccount__r.Account_Number_Last_4__c], [!Case.FinServ__FinancialAccount__r.OASP_FSC__Custodian__r.Name]
+ROTH IRA Account:  [!Case.To_Account__r.OASP_FSC__Registration__r.Name] [!Case.To_Account__r.OASP_FSC__Registration__r.OASP_FSC__Registration_Type__r.Name] XXXX[!Case.To_Account__r.Account_Number_Last_4__c], [!Case.To_Account__r.OASP_FSC__Custodian__r.Name]
+Tax Year: **Current/Prior Year**
+[!Case.Amount__c]

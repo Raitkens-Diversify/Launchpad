@@ -1,0 +1,65 @@
+/* Positioning (fixed/absolute/sticky) is owned by the host screen, not the pill itself. */
+:host {
+    display: block;
+}
+
+.fab {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-4, 16px);
+    padding: var(--slds-g-spacing-3, 12px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--slds-g-radius-border-3, 12px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+}
+
+.fab__nav {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 8px);
+}
+
+.fab__hint {
+    font-size: var(--slds-g-font-scale-neg-1, 12px);
+    font-weight: var(--slds-g-font-weight-5, 500);
+    line-height: 17px;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    white-space: nowrap;
+}
+
+.fab__hint_disabled {
+    color: var(--slds-g-color-on-disabled-1, #838a97);
+}
+
+.fab__divider {
+    align-self: stretch;
+    width: 1px;
+    background: var(--slds-g-color-border-1, #d1d5db);
+}
+
+.fab__counter {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-1, 4px);
+    font-size: var(--slds-g-font-scale-1, 14px);
+    line-height: 19px;
+    color: #6b7280;
+    white-space: nowrap;
+    /* Uniform digit advance so the counter width never changes as the numbers update. */
+    font-variant-numeric: tabular-nums;
+}
+
+.fab__counter-word {
+    font-weight: var(--slds-g-font-weight-4, 400);
+}
+
+.fab__counter-num {
+    font-weight: var(--slds-g-font-weight-6, 600);
+    display: inline-block;
+    min-width: 3ch;
+    text-align: center;
+}

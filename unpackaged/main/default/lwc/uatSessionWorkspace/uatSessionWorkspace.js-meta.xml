@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>61.0</apiVersion>
+    <isExposed>false</isExposed>
+    <description>One exploratory session as a working surface: charter rail with timebox, autosaved running notes, findings with severity and evidence, Finish action. Embedded by uatTesterApp.</description>
+</LightningComponentBundle>

@@ -1,0 +1,86 @@
+/* Declarations moved verbatim from uatSessionWorkspace.css (.ues__finding-body,
+ * .ues__finding-origin, .ues__finding-actions, .ues__block-text and the summary's
+ * headline/meta) so the tester surface renders identically after the extraction.
+ * LWC scopes styles per component, so the child has to carry its own copy —
+ * inheriting the host's rules is not an option.
+ *
+ * --slds-g-* hooks are self-declared per docs/ui-standards.md: they are injected
+ * per scope by the platform and beat inheritance, so a child that relies on the
+ * parent's values silently loses them. */
+:host {
+    display: block;
+}
+
+.ufd__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-sm, 8px);
+}
+
+/* Only rendered when the host has no summary line of its own (the report's
+ * modal); the session workspace's own <summary> keeps carrying these. */
+.ufd__head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--ds-space-sm, 8px);
+}
+.ufd__headline {
+    flex: 1 1 16rem;
+    min-width: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.ufd__meta {
+    flex: 0 0 auto;
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.ufd__origin {
+    margin: 0;
+    font-size: 0.75rem;
+    font-style: italic;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.ufd__block-label {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ufd__block-text {
+    margin: 2px 0 0;
+    font-size: 0.875rem;
+    color: var(--slds-g-color-on-surface-2, #374151);
+    white-space: pre-wrap;
+}
+
+.ufd__actions {
+    display: flex;
+    gap: var(--ds-space-xs, 4px);
+}
+
+/* Triage state: badge + ticket ref on one line. The ref may be a full URL —
+ * it breaks rather than widening the modal. */
+.ufd__status-line {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--ds-space-sm, 8px);
+}
+
+.ufd__status-ref {
+    font-size: 0.8125rem;
+    color: var(--slds-g-color-on-surface-2, #374151);
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+a.ufd__status-ref {
+    color: var(--ds-medium-blue, #1a76bb);
+}

@@ -1,0 +1,398 @@
+<template>
+    <div class="aan">
+        <div class="aan__toolbar">
+            <p class="aan__hint">
+                How the Help Center is used: what people read, how they vote, what
+                they search — and searches that found nothing (write those articles!).
+            </p>
+            <lightning-combobox variant="label-hidden"
+                                label="Surface"
+                                value={surface}
+                                options={surfaceOptions}
+                                onchange={handleSurfaceChange}></lightning-combobox>
+            <lightning-button-icon icon-name="utility:refresh"
+                                   alternative-text="Refresh"
+                                   onclick={handleRefresh}></lightning-button-icon>
+        </div>
+
+        <template if:true={errorMessage}>
+            <p class="aan__error" role="alert">{errorMessage}</p>
+        </template>
+
+        <!-- ============================= Summary ============================= -->
+        <template if:true={isSummary}>
+            <template if:true={loading}>
+                <div class="aan__loading">
+                    <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+                </div>
+            </template>
+
+            <template if:true={ready}>
+                <div class="aan__grid">
+                    <section class="aan__card">
+                        <div class="aan__card-head">
+                            <h3 class="aan__card-title">Most viewed</h3>
+                            <button type="button" class="aan__link"
+                                    onclick={handleOpenViews}>View all views</button>
+                        </div>
+                        <template if:true={hasViews}>
+                            <ol class="aan__list">
+                                <template for:each={topViewedRows} for:item="item">
+                                    <li key={item.label} class="aan__row">
+                                        <template if:true={item.clickable}>
+                                            <button type="button"
+                                                    class="aan__link aan__row-label"
+                                                    data-id={item.key}
+                                                    onclick={handleArticleClick}>{item.label}</button>
+                                        </template>
+                                        <template if:false={item.clickable}>
+                                            <span class="aan__row-label">{item.label}</span>
+                                        </template>
+                                        <span class="aan__row-count">{item.count}</span>
+                                    </li>
+                                </template>
+                            </ol>
+                        </template>
+                        <template if:false={hasViews}>
+                            <p class="aan__empty">No views recorded yet.</p>
+                        </template>
+                    </section>
+
+                    <section class="aan__card">
+                        <h3 class="aan__card-title">Feedback</h3>
+                        <p class="aan__votes">{voteSummary}</p>
+                        <template if:true={hasComments}>
+                            <ul class="aan__list">
+                                <template for:each={feedbackRows} for:item="item">
+                                    <li key={item.rowKey} class="aan__comment">
+                                        <span class="aan__comment-head">
+                                            <template if:true={item.clickable}>
+                                                <button type="button" class="aan__link"
+                                                        data-id={item.articleId}
+                                                        onclick={handleArticleClick}>{item.articleTitle}</button>
+                                            </template>
+                                            <template if:false={item.clickable}>
+                                                {item.articleTitle}
+                                            </template>
+                                            · {item.voteType}
+                                        </span>
+                                        <span class="aan__comment-meta">
+                                            {item.who} ·
+                                            <lightning-formatted-date-time value={item.createdDate}
+                                                                           year="numeric" month="short" day="numeric"
+                                                                           hour="2-digit" minute="2-digit"></lightning-formatted-date-time>
+                                        </span>
+                                        <span class="aan__comment-body">{item.comment}</span>
+                                    </li>
+                                </template>
+                            </ul>
+                        </template>
+                        <template if:false={hasComments}>
+                            <p class="aan__empty">No comments yet.</p>
+                        </template>
+                    </section>
+
+                    <section class="aan__card">
+                        <div class="aan__card-head">
+                            <h3 class="aan__card-title">Top searches</h3>
+                            <button type="button" class="aan__link"
+                                    onclick={handleOpenSearches}>View all searches</button>
+                        </div>
+                        <template if:true={hasSearches}>
+                            <ol class="aan__list">
+                                <template for:each={summary.topSearches} for:item="item">
+                                    <li key={item.label} class="aan__row">
+                                        <span class="aan__row-label">{item.label}</span>
+                                        <span class="aan__row-count">{item.count}</span>
+                                    </li>
+                                </template>
+                            </ol>
+                        </template>
+                        <template if:false={hasSearches}>
+                            <p class="aan__empty">No searches recorded yet.</p>
+                        </template>
+                    </section>
+
+                    <section class="aan__card aan__card--gap">
+                        <div class="aan__card-head">
+                            <h3 class="aan__card-title">Zero-result searches</h3>
+                            <button type="button" class="aan__link"
+                                    onclick={handleOpenGaps}>View all</button>
+                        </div>
+                        <p class="aan__hint">Each of these is an article someone looked for and didn’t find.</p>
+                        <template if:true={hasGaps}>
+                            <ol class="aan__list">
+                                <template for:each={summary.zeroResultSearches} for:item="item">
+                                    <li key={item.label} class="aan__row">
+                                        <span class="aan__row-label">{item.label}</span>
+                                        <span class="aan__row-count">{item.count}</span>
+                                    </li>
+                                </template>
+                            </ol>
+                        </template>
+                        <template if:false={hasGaps}>
+                            <p class="aan__empty">No knowledge gaps — every search found something.</p>
+                        </template>
+                    </section>
+                </div>
+            </template>
+        </template>
+
+        <!-- ============================= All searches ============================= -->
+        <template if:true={isSearchesView}>
+            <div class="aan__subhead">
+                <button type="button" class="aan__link" onclick={handleBackToSummary}>← Summary</button>
+                <h3 class="aan__sub-title">Search log</h3>
+            </div>
+            <div class="aan__filters">
+                <lightning-input type="search"
+                                 variant="label-hidden"
+                                 label="Filter by term"
+                                 placeholder="Filter by term…"
+                                 value={searchTerm}
+                                 onchange={handleSearchTermChange}></lightning-input>
+                <lightning-input type="toggle"
+                                 label="Zero-result only"
+                                 checked={zeroOnly}
+                                 message-toggle-active=""
+                                 message-toggle-inactive=""
+                                 onchange={handleZeroOnlyChange}></lightning-input>
+            </div>
+            <template if:true={hasSearchRows}>
+                <div class="aan__table-wrap">
+                    <table class="aan__table">
+                        <thead>
+                            <tr>
+                                <th scope="col">When</th>
+                                <th scope="col">Who</th>
+                                <th scope="col">Term</th>
+                                <th scope="col">Results</th>
+                                <th scope="col">Clicked article</th>
+                                <th scope="col">Surface</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={searchTableRows} for:item="row">
+                                <tr key={row.id} class={row.rowClass}>
+                                    <td class="aan__nowrap">
+                                        <lightning-formatted-date-time value={row.createdDate}
+                                                                       year="numeric" month="short" day="numeric"
+                                                                       hour="2-digit" minute="2-digit"></lightning-formatted-date-time>
+                                    </td>
+                                    <td>{row.who}</td>
+                                    <td>{row.term}</td>
+                                    <td>{row.resultCount}</td>
+                                    <td>
+                                        <template if:true={row.clickable}>
+                                            <button type="button" class="aan__link"
+                                                    data-id={row.clickedArticleId}
+                                                    onclick={handleArticleClick}>{row.clickedLabel}</button>
+                                        </template>
+                                        <template if:false={row.clickable}>
+                                            <span>{row.clickedLabel}</span>
+                                        </template>
+                                    </td>
+                                    <td>{row.surface}</td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+            <template if:true={showSearchesEmpty}>
+                <p class="aan__empty">No searches match.</p>
+            </template>
+            <div class="aan__footer">
+                <template if:true={searchesLoading}>
+                    <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+                </template>
+                <template if:true={canLoadMoreSearches}>
+                    <lightning-button label="Load more" onclick={handleLoadMoreSearches}></lightning-button>
+                </template>
+            </div>
+        </template>
+
+        <!-- ============================= All views ============================= -->
+        <template if:true={isViewsView}>
+            <div class="aan__subhead">
+                <button type="button" class="aan__link" onclick={handleBackToSummary}>← Summary</button>
+                <h3 class="aan__sub-title">View log</h3>
+                <p class="aan__hint">One row per reader per article; views accumulate on the row.</p>
+            </div>
+            <template if:true={hasViewRows}>
+                <div class="aan__table-wrap">
+                    <table class="aan__table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Last viewed</th>
+                                <th scope="col">Who</th>
+                                <th scope="col">Article</th>
+                                <th scope="col">Views</th>
+                                <th scope="col">Surface</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={viewTableRows} for:item="row">
+                                <tr key={row.rowKey} class="aan__tr">
+                                    <td class="aan__nowrap">
+                                        <lightning-formatted-date-time value={row.lastViewed}
+                                                                       year="numeric" month="short" day="numeric"
+                                                                       hour="2-digit" minute="2-digit"></lightning-formatted-date-time>
+                                    </td>
+                                    <td>{row.who}</td>
+                                    <td>
+                                        <template if:true={row.clickable}>
+                                            <button type="button" class="aan__link"
+                                                    data-id={row.articleId}
+                                                    onclick={handleArticleClick}>{row.articleTitle}</button>
+                                        </template>
+                                        <template if:false={row.clickable}>
+                                            <span>{row.articleTitle}</span>
+                                        </template>
+                                    </td>
+                                    <td>{row.viewCount}</td>
+                                    <td>{row.surface}</td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+            <template if:true={showViewsEmpty}>
+                <p class="aan__empty">No views recorded yet.</p>
+            </template>
+            <div class="aan__footer">
+                <template if:true={viewsLoading}>
+                    <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+                </template>
+                <template if:true={canLoadMoreViews}>
+                    <lightning-button label="Load more" onclick={handleLoadMoreViews}></lightning-button>
+                </template>
+            </div>
+        </template>
+
+        <!-- ============================= Article detail ============================= -->
+        <template if:true={isArticleView}>
+            <div class="aan__subhead">
+                <button type="button" class="aan__link" onclick={handleArticleBack}>← Back</button>
+            </div>
+            <template if:true={articleLoading}>
+                <div class="aan__loading">
+                    <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+                </div>
+            </template>
+            <template if:true={articleReady}>
+                <div class="aan__article-head">
+                    <h3 class="aan__sub-title">{articleDetail.title}</h3>
+                    <span class="aan__pill">{articleDetail.totalViews} views</span>
+                    <span class="aan__pill">{articleVoteSummary}</span>
+                </div>
+
+                <section class="aan__card aan__card--block">
+                    <h4 class="aan__card-title">Viewers</h4>
+                    <template if:true={hasArticleViewers}>
+                        <div class="aan__table-wrap">
+                            <table class="aan__table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Who</th>
+                                        <th scope="col">Views</th>
+                                        <th scope="col">Last viewed</th>
+                                        <th scope="col">Surface</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={articleViewers} for:item="row">
+                                        <tr key={row.rowKey} class="aan__tr">
+                                            <td>{row.who}</td>
+                                            <td>{row.viewCount}</td>
+                                            <td class="aan__nowrap">
+                                                <lightning-formatted-date-time value={row.lastViewed}
+                                                                               year="numeric" month="short" day="numeric"
+                                                                               hour="2-digit" minute="2-digit"></lightning-formatted-date-time>
+                                            </td>
+                                            <td>{row.surface}</td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
+                    <template if:false={hasArticleViewers}>
+                        <p class="aan__empty">No views recorded for this article.</p>
+                    </template>
+                </section>
+
+                <section class="aan__card aan__card--block">
+                    <h4 class="aan__card-title">Feedback</h4>
+                    <template if:true={hasArticleFeedback}>
+                        <div class="aan__table-wrap">
+                            <table class="aan__table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Who</th>
+                                        <th scope="col">Vote</th>
+                                        <th scope="col">Comment</th>
+                                        <th scope="col">When</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={articleFeedback} for:item="row">
+                                        <tr key={row.rowKey} class="aan__tr">
+                                            <td>{row.who}</td>
+                                            <td>{row.voteType}</td>
+                                            <td>{row.commentLabel}</td>
+                                            <td class="aan__nowrap">
+                                                <lightning-formatted-date-time value={row.createdDate}
+                                                                               year="numeric" month="short" day="numeric"
+                                                                               hour="2-digit" minute="2-digit"></lightning-formatted-date-time>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
+                    <template if:false={hasArticleFeedback}>
+                        <p class="aan__empty">No feedback yet for this article.</p>
+                    </template>
+                </section>
+
+                <section class="aan__card aan__card--block">
+                    <h4 class="aan__card-title">Searches that led here</h4>
+                    <template if:true={hasArticleSearches}>
+                        <div class="aan__table-wrap">
+                            <table class="aan__table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Term</th>
+                                        <th scope="col">Who</th>
+                                        <th scope="col">When</th>
+                                        <th scope="col">Surface</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={articleSearches} for:item="row">
+                                        <tr key={row.id} class="aan__tr">
+                                            <td>{row.term}</td>
+                                            <td>{row.who}</td>
+                                            <td class="aan__nowrap">
+                                                <lightning-formatted-date-time value={row.createdDate}
+                                                                               year="numeric" month="short" day="numeric"
+                                                                               hour="2-digit" minute="2-digit"></lightning-formatted-date-time>
+                                            </td>
+                                            <td>{row.surface}</td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
+                    <template if:false={hasArticleSearches}>
+                        <p class="aan__empty">No search clicks recorded for this article.</p>
+                    </template>
+                </section>
+            </template>
+        </template>
+    </div>
+</template>

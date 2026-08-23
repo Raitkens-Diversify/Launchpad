@@ -1,0 +1,23 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-08-06 -->
+<template>
+  <div class="nc-skeleton" role="status" aria-live="polite" aria-busy="true" aria-label={label}>
+    <span class="nc-skeleton__sr-only">{label}</span>
+
+    <div class="nc-skeleton__content">
+      <span class="nc-skeleton__block nc-skeleton__block_search"></span>
+
+      <div class="nc-skeleton__toolbar" aria-hidden="true">
+        <template for:each={toolbarItems} for:item="item">
+          <span key={item.id} class="nc-skeleton__block nc-skeleton__block_pill"></span>
+        </template>
+      </div>
+
+      <div class="nc-skeleton__card">
+        <span class="nc-skeleton__block nc-skeleton__block_table-head"></span>
+        <template for:each={contentRows} for:item="item">
+          <span key={item.id} class="nc-skeleton__block nc-skeleton__block_row"></span>
+        </template>
+      </div>
+    </div>
+  </div>
+</template>

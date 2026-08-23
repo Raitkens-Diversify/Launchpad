@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <help><!-- If the Source of Funds is an Advisory Account, and the account is already at the firm, but the account was unable to be found. --></help>
+        <label><!-- Advisory Account: Account Not Found --></label>
+        <name>AA_Account_Number_Not_Found__c</name>
+    </CustomFieldTranslation>

@@ -1,0 +1,949 @@
+<template>
+    <div class="aur">
+        <template if:true={errorMessage}>
+            <p class="aur__error" role="alert">{errorMessage}</p>
+        </template>
+
+        <template if:true={loading}>
+            <c-ds-skeleton variant="card" count="2"></c-ds-skeleton>
+        </template>
+
+        <template if:false={loading}>
+            <div class="aur__toolbar">
+                <lightning-combobox class="aur__scope"
+                                    label="Report scope"
+                                    variant="label-hidden"
+                                    options={scopeOptions}
+                                    value={scope}
+                                    onchange={handleScopeChange}></lightning-combobox>
+                <div class="aur__toolbar-actions">
+                    <lightning-button label={exportTabLabel}
+                                      icon-name="utility:download"
+                                      disabled={reportLoading}
+                                      onclick={handleExportTab}></lightning-button>
+                    <lightning-button variant="brand"
+                                      label={workbookLabel}
+                                      icon-name="utility:file"
+                                      disabled={exporting}
+                                      onclick={handleExportWorkbook}></lightning-button>
+                </div>
+            </div>
+
+            <template if:true={reportLoading}>
+                <c-ds-skeleton variant="card" count="2"></c-ds-skeleton>
+            </template>
+
+            <template if:false={reportLoading}>
+                <template if:true={isEmpty}>
+                    <c-ds-empty-state icon="utility:page"
+                                      heading="Nothing to report yet"
+                                      message="This scope has no test cases, runs, findings, sessions, or assignment events."></c-ds-empty-state>
+                </template>
+
+                <template if:true={hasReport}>
+                    <!-- ---- Summary ---------------------------------------- -->
+                    <section class="aur__summary" aria-label="Report summary">
+                        <div class="aur__summary-head">
+                            <div>
+                                <p class="aur__eyebrow">{scopeLabel}</p>
+                                <h2 class="aur__summary-title">{summaryTitle}</h2>
+                            </div>
+                            <template if:true={hasCycleHeader}>
+                                <div class="aur__summary-meta">
+                                    <c-ds-badge label={statusBadge.label} variant={statusBadge.variant}
+                                                size="sm"></c-ds-badge>
+                                    <span class="aur__target">{targetLabel}</span>
+                                    <lightning-button label="Open cycle" onclick={handleOpenCycle}></lightning-button>
+                                </div>
+                            </template>
+                        </div>
+
+                        <template if:true={hasDataQualityFlags}>
+                            <ul class="aur__flags">
+                                <template for:each={dataQualityFlags} for:item="flag">
+                                    <li key={flag.key} class="aur__flag">
+                                        <lightning-icon icon-name="utility:warning" size="xx-small"></lightning-icon>
+                                        <span class="aur__flag-text">{flag.message}</span>
+                                        <span class="aur__flag-detail">{flag.detail}</span>
+                                    </li>
+                                </template>
+                            </ul>
+                        </template>
+
+                        <template if:true={hasTruncation}>
+                            <p class="aur__truncation" role="status">{truncationSentence}</p>
+                        </template>
+
+                        <div class="aur__headline">
+                            <template if:true={hasCases}>
+                                <div class="aur__headline-block">
+                                    <p class="aur__headline-value">{caseProgressLabel}</p>
+                                    <ul class="aur__spread-list">
+                                        <template for:each={caseSpread} for:item="item">
+                                            <li key={item.key} class="aur__spread-item">
+                                                <span class="aur__spread-count">{item.count}</span>
+                                                <span class="aur__spread-label">{item.label}</span>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
+
+                            <template if:true={hasDefectSpread}>
+                                <div class="aur__headline-block">
+                                    <h3 class="aur__spread-title">Defects by severity</h3>
+                                    <ul class="aur__spread-list">
+                                        <template for:each={defectSpread} for:item="item">
+                                            <li key={item.key} class="aur__spread-item">
+                                                <span class="aur__spread-count">{item.count}</span>
+                                                <span class="aur__spread-label">{item.label}</span>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
+                        </div>
+
+                        <template if:true={hasSessionLine}>
+                            <p class="aur__session-line">{sessionLine}</p>
+                        </template>
+
+                        <template if:true={hasTesterActivity}>
+                            <div class="aur__table-wrap aur__table-wrap--tight">
+                                <table class="aur__table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Tester</th>
+                                            <th scope="col" class="aur__num aur__w-60">Assigned</th>
+                                            <th scope="col" class="aur__num aur__w-60">Complete</th>
+                                            <template if:true={showReleasedColumn}>
+                                                <th scope="col" class="aur__num aur__w-60">Released</th>
+                                            </template>
+                                            <th scope="col" class="aur__num aur__w-60">Steps</th>
+                                            <th scope="col" class="aur__num aur__w-60">Findings</th>
+                                            <th scope="col" class="aur__num aur__w-60">Notes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={testerActivity} for:item="t">
+                                            <tr key={t.key}>
+                                                <td class="aur__trunc" title={t.testerName}>{t.testerName}</td>
+                                                <td class="aur__num">{t.assigned}</td>
+                                                <td class="aur__num">{t.complete}</td>
+                                                <template if:true={showReleasedColumn}>
+                                                    <td class="aur__num">{t.released}</td>
+                                                </template>
+                                                <td class="aur__num">{t.steps}</td>
+                                                <td class="aur__num">{t.findings}</td>
+                                                <td class="aur__num">{t.notes}</td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+                    </section>
+
+                    <!-- ---- Tabs ------------------------------------------- -->
+                    <c-ds-tabs class="aur__tabs" tabs={tabs} selected={activeTab}
+                               label="Report grain" ontabchange={handleTabChange}></c-ds-tabs>
+                    <p class="aur__export-note">{exportTabNote}</p>
+
+                    <!-- ---- Test Results ---------------------------------- -->
+                    <template if:true={isTestResultsTab}>
+                        <div role="tabpanel" aria-label="Test Results">
+                            <div class="aur__filters">
+                                <c-ds-filter-chips class="aur__chips"
+                                                   chips={caseVerdictChips}
+                                                   selected={caseVerdict}
+                                                   group-label="Filter by case verdict"
+                                                   onselect={handleCaseVerdictChip}></c-ds-filter-chips>
+                                <div class="aur__filters-controls">
+                                    <lightning-input class="aur__search" type="search"
+                                                     label="Search test results" variant="label-hidden"
+                                                     placeholder="Search cases, runs, steps, or what happened…"
+                                                     value={caseSearch}
+                                                     onchange={handleCaseSearch}></lightning-input>
+                                    <lightning-combobox label="Tester" variant="label-hidden"
+                                                        options={caseTesterOptions} value={caseTester}
+                                                        onchange={handleCaseTester}></lightning-combobox>
+                                    <lightning-combobox label="Step result" variant="label-hidden"
+                                                        options={caseStepResultOptions} value={caseStepResult}
+                                                        onchange={handleCaseStepResult}></lightning-combobox>
+                                    <lightning-combobox label="Sort by" variant="label-hidden"
+                                                        options={caseSortOptions} value={caseSort}
+                                                        onchange={handleCaseSort}></lightning-combobox>
+                                </div>
+                            </div>
+
+                            <template if:true={caseHasRows}>
+                                <div class="aur__table-wrap">
+                                    <table class="aur__table aur__tree aur__table--wide">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Test case</th>
+                                                <th scope="col" class="aur__w-120">Module</th>
+                                                <th scope="col" class="aur__w-75">Verdict</th>
+                                                <th scope="col" class="aur__w-110">Tester(s)</th>
+                                                <th scope="col" class="aur__num aur__w-90">Steps</th>
+                                                <th scope="col" class="aur__num aur__w-75">Untriaged</th>
+                                                <th scope="col" class="aur__num aur__w-60">Findings</th>
+                                                <th scope="col" class="aur__num aur__w-45">Files</th>
+                                                <th scope="col" class="aur__w-45"><span class="aur__sr">Export</span></th>
+                                            </tr>
+                                        </thead>
+                                        <template for:each={caseRows} for:item="c">
+                                            <tbody key={c.key}>
+                                                <tr class="aur__case-row">
+                                                    <td class="aur__case-cell">
+                                                        <button type="button" class="aur__disclose"
+                                                                data-id={c.caseId}
+                                                                aria-expanded={c.expanded}
+                                                                onclick={handleCaseToggle}>
+                                                            <lightning-icon icon-name={c.chevronIcon}
+                                                                            size="xx-small"></lightning-icon>
+                                                            <span class="aur__case-stack">
+                                                                <span class="aur__case-title" title={c.titleDisplay}>{c.titleDisplay}</span>
+                                                                <span class="aur__case-code" title={c.caseCode}>{c.caseCode}</span>
+                                                            </span>
+                                                        </button>
+                                                        <template if:true={c.noRunCreated}>
+                                                            <span class="aur__marker">No run created</span>
+                                                        </template>
+                                                        <template if:true={c.outOfScope}>
+                                                            <span class="aur__marker">Not in cycle scope</span>
+                                                        </template>
+                                                    </td>
+                                                    <td class="aur__trunc" title={c.modulePathDisplay}>{c.modulePathDisplay}</td>
+                                                    <td>
+                                                        <c-ds-badge label={c.verdictDisplay}
+                                                                    variant={c.verdictVariant}
+                                                                    size="sm"></c-ds-badge>
+                                                    </td>
+                                                    <td class="aur__trunc" title={c.testerFull}>{c.testerShort}</td>
+                                                    <td class="aur__mono aur__num aur__trunc" title={c.stepsDisplay}>{c.stepsDisplay}</td>
+                                                    <td class={c.untriagedClass}>{c.untriagedDisplay}</td>
+                                                    <td class="aur__num">
+                                                        <template if:true={c.hasFindings}>
+                                                            <button type="button" class="aur__link aur__countlink"
+                                                                    data-id={c.caseId}
+                                                                    aria-label={c.findingsLabel}
+                                                                    onclick={handleOpenCaseFindings}>{c.findingCountLabel}</button>
+                                                        </template>
+                                                        <template if:false={c.hasFindings}>
+                                                            <span>{c.findingCountLabel}</span>
+                                                        </template>
+                                                    </td>
+                                                    <td class="aur__num">{c.evidenceCountLabel}</td>
+                                                    <td class="aur__evidence-cell">
+                                                        <button type="button" class="aur__rowaction"
+                                                                data-id={c.caseId}
+                                                                data-code={c.caseCode}
+                                                                title="Export case"
+                                                                aria-label={c.exportLabel}
+                                                                disabled={exporting}
+                                                                onclick={handleExportCase}>
+                                                            <lightning-icon icon-name="utility:download"
+                                                                            size="xx-small"></lightning-icon>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+
+                                                <template if:true={c.isOpen}>
+                                                    <tr class="aur__subrow">
+                                                        <td colspan="9">
+                                                            <template if:true={c.hasRuns}>
+                                                                <ul class="aur__runs">
+                                                                    <template for:each={c.runRows} for:item="run">
+                                                                        <li key={run.key} class="aur__run">
+                                                                            <div class="aur__run-head">
+                                                                                <button type="button" class="aur__disclose"
+                                                                                        data-id={run.executionId}
+                                                                                        aria-expanded={run.expanded}
+                                                                                        onclick={handleRunToggle}>
+                                                                                    <lightning-icon icon-name={run.chevronIcon}
+                                                                                                    size="xx-small"></lightning-icon>
+                                                                                    <span class="aur__mono">{run.name}</span>
+                                                                                </button>
+                                                                                <span class="aur__run-meta">{run.metaDisplay}</span>
+                                                                                <template if:true={run.hasResult}>
+                                                                                    <c-ds-badge label={run.resultDisplay}
+                                                                                                variant={run.resultVariant}
+                                                                                                size="sm"></c-ds-badge>
+                                                                                </template>
+                                                                                <template if:true={run.released}>
+                                                                                    <c-ds-badge label="Released" variant="default"
+                                                                                                size="sm"></c-ds-badge>
+                                                                                </template>
+                                                                                <template if:true={run.hasEvidence}>
+                                                                                    <button type="button" class="aur__clip"
+                                                                                            data-key={run.key}
+                                                                                            aria-expanded={run.evidenceExpanded}
+                                                                                            aria-label={run.evidenceAria}
+                                                                                            onclick={handleEvidenceToggle}>
+                                                                                        <lightning-icon icon-name="utility:attach"
+                                                                                                        size="xx-small"></lightning-icon>
+                                                                                        <span class="aur__clip-count">{run.evidenceLabel}</span>
+                                                                                    </button>
+                                                                                </template>
+                                                                            </div>
+
+                                                                            <template if:true={run.isEvidenceOpen}>
+                                                                                <ul class="aur__evidence-grid">
+                                                                                    <template for:each={run.evidenceFilesView} for:item="file">
+                                                                                        <li key={file.key} class="aur__evidence-item">
+                                                                                            <template if:true={file.isImage}>
+                                                                                                <a href={file.downloadUrl} target="_blank" rel="noopener">
+                                                                                                    <img class="aur__evidence-thumb"
+                                                                                                         src={file.thumbnailUrl}
+                                                                                                         alt={file.title} />
+                                                                                                </a>
+                                                                                            </template>
+                                                                                            <template if:false={file.isImage}>
+                                                                                                <a class="aur__evidence-open" href={file.downloadUrl}
+                                                                                                   target="_blank" rel="noopener">{file.title}</a>
+                                                                                            </template>
+                                                                                            <span class="aur__evidence-label">{file.title}</span>
+                                                                                        </li>
+                                                                                    </template>
+                                                                                </ul>
+                                                                            </template>
+
+                                                                            <template if:true={run.isOpen}>
+                                                                                <template if:true={run.hasRecommendation}>
+                                                                                    <p class="aur__run-note">{run.recommendationDisplay}</p>
+                                                                                </template>
+                                                                                <template if:true={run.hasSteps}>
+                                                                                    <ol class="aur__steps">
+                                                                                        <template for:each={run.stepRows} for:item="step">
+                                                                                            <li key={step.key} class="aur__step-row">
+                                                                                                <div class="aur__step-head">
+                                                                                                    <span class="aur__step-no">{step.stepLabel}</span>
+                                                                                                    <c-ds-badge label={step.resultDisplay}
+                                                                                                                variant={step.resultVariant}
+                                                                                                                size="sm"></c-ds-badge>
+                                                                                                    <template if:true={step.showStatusChip}>
+                                                                                                        <button type="button"
+                                                                                                                class="aur__link aur__status-chip aur__step-status-chip"
+                                                                                                                data-id={step.resultId}
+                                                                                                                title={step.statusTitle}
+                                                                                                                onclick={handleStepStatusChipClick}>
+                                                                                                            <c-ds-badge label={step.statusDisplay}
+                                                                                                                        variant={step.statusVariant}
+                                                                                                                        size="sm"></c-ds-badge>
+                                                                                                            <lightning-icon icon-name="utility:chevrondown"
+                                                                                                                            size="xx-small"></lightning-icon>
+                                                                                                        </button>
+                                                                                                    </template>
+                                                                                                    <template if:true={step.hasEvidence}>
+                                                                                                        <button type="button" class="aur__clip"
+                                                                                                                data-key={step.key}
+                                                                                                                aria-expanded={step.evidenceExpanded}
+                                                                                                                aria-label={step.evidenceAria}
+                                                                                                                onclick={handleEvidenceToggle}>
+                                                                                                            <lightning-icon icon-name="utility:attach"
+                                                                                                                            size="xx-small"></lightning-icon>
+                                                                                                            <span class="aur__clip-count">{step.evidenceLabel}</span>
+                                                                                                        </button>
+                                                                                                    </template>
+                                                                                                </div>
+                                                                                                <template if:true={step.hasDescription}>
+                                                                                                    <p class="aur__step-desc">{step.descriptionDisplay}</p>
+                                                                                                </template>
+                                                                                                <template if:true={step.hasNarrative}>
+                                                                                                    <p class="aur__step-text">{step.narrativeDisplay}</p>
+                                                                                                </template>
+                                                                                                <template if:true={step.isEvidenceOpen}>
+                                                                                                    <ul class="aur__evidence-grid">
+                                                                                                        <template for:each={step.evidenceFilesView} for:item="file">
+                                                                                                            <li key={file.key} class="aur__evidence-item">
+                                                                                                                <template if:true={file.isImage}>
+                                                                                                                    <a href={file.downloadUrl} target="_blank" rel="noopener">
+                                                                                                                        <img class="aur__evidence-thumb"
+                                                                                                                             src={file.thumbnailUrl}
+                                                                                                                             alt={file.title} />
+                                                                                                                    </a>
+                                                                                                                </template>
+                                                                                                                <template if:false={file.isImage}>
+                                                                                                                    <a class="aur__evidence-open" href={file.downloadUrl}
+                                                                                                                       target="_blank" rel="noopener">{file.title}</a>
+                                                                                                                </template>
+                                                                                                                <span class="aur__evidence-label">{file.title}</span>
+                                                                                                            </li>
+                                                                                                        </template>
+                                                                                                    </ul>
+                                                                                                </template>
+                                                                                            </li>
+                                                                                        </template>
+                                                                                    </ol>
+                                                                                </template>
+                                                                                <template if:false={run.hasSteps}>
+                                                                                    <p class="aur__empty">No step results on this run yet.</p>
+                                                                                </template>
+                                                                            </template>
+                                                                        </li>
+                                                                    </template>
+                                                                </ul>
+                                                            </template>
+                                                            <template if:false={c.hasRuns}>
+                                                                <p class="aur__empty">
+                                                                    This case is in the cycle but has no run record. Nobody
+                                                                    can pick it up until a seat is created.
+                                                                </p>
+                                                            </template>
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </template>
+                                    </table>
+                                </div>
+                                <c-ds-pager page={clampedCasePage} page-size={pageSize}
+                                            total={totalCases} item-label="test cases"
+                                            onpagechange={handleCasePage}></c-ds-pager>
+                            </template>
+                            <template if:false={caseHasRows}>
+                                <c-ds-empty-state icon="utility:filter" heading="No test cases match"
+                                                  message="Clear a filter or widen the search."></c-ds-empty-state>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- ---- Findings -------------------------------------- -->
+                    <template if:true={isFindingsTab}>
+                        <div role="tabpanel" aria-label="Findings">
+                            <div class="aur__filters">
+                                <c-ds-filter-chips class="aur__chips"
+                                                   chips={findingTypeChips}
+                                                   selected={findingType}
+                                                   group-label="Filter by finding type"
+                                                   onselect={handleFindingTypeChip}></c-ds-filter-chips>
+                                <c-ds-filter-chips class="aur__chips"
+                                                   chips={findingStatusChips}
+                                                   selected={findingStatus}
+                                                   group-label="Filter by workflow status"
+                                                   onselect={handleFindingStatusChip}></c-ds-filter-chips>
+                                <div class="aur__filters-controls">
+                                    <lightning-input class="aur__search" type="search"
+                                                     label="Search findings" variant="label-hidden"
+                                                     placeholder="Search by number, title, or tester…"
+                                                     value={findingSearch}
+                                                     onchange={handleFindingSearch}></lightning-input>
+                                    <lightning-combobox label="Severity" variant="label-hidden"
+                                                        options={findingSeverityOptions} value={findingSeverity}
+                                                        onchange={handleFindingSeverity}></lightning-combobox>
+                                    <lightning-combobox label="Source" variant="label-hidden"
+                                                        options={findingSourceOptions} value={findingSource}
+                                                        onchange={handleFindingSource}></lightning-combobox>
+                                    <lightning-combobox label="Sort by" variant="label-hidden"
+                                                        options={findingSortOptions} value={findingSort}
+                                                        onchange={handleFindingSort}></lightning-combobox>
+                                </div>
+                            </div>
+
+                            <template if:true={findingHasRows}>
+                                <div class="aur__table-wrap">
+                                    <table class="aur__table aur__table--wide">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" class="aur__w-60">Finding</th>
+                                                <th scope="col">Title</th>
+                                                <th scope="col" class="aur__w-90">Type</th>
+                                                <th scope="col" class="aur__w-75">Severity</th>
+                                                <th scope="col" class="aur__w-100">Status</th>
+                                                <th scope="col" class="aur__w-120">Source</th>
+                                                <th scope="col" class="aur__w-90">Tester</th>
+                                                <th scope="col" class="aur__w-75">Date</th>
+                                            </tr>
+                                        </thead>
+                                        <template for:each={pagedFindings} for:item="row">
+                                            <tbody key={row.key}>
+                                                <tr class="aur__row-click"
+                                                    data-id={row.findingId}
+                                                    onclick={handleFindingRowClick}>
+                                                    <td class="aur__mono aur__trunc">{row.name}</td>
+                                                    <td class="aur__trunc">
+                                                        <button type="button" class="aur__link aur__findinglink"
+                                                                data-id={row.findingId}
+                                                                title={row.titleDisplay}
+                                                                onclick={handleOpenFinding}>{row.titleDisplay}</button>
+                                                    </td>
+                                                    <td>
+                                                        <c-ds-badge label={row.findingType} variant={row.typeVariant}
+                                                                    size="sm"></c-ds-badge>
+                                                    </td>
+                                                    <td>
+                                                        <div class="aur__cellflex">
+                                                            <template if:true={row.hasSeverity}>
+                                                                <c-ds-badge label={row.severityDisplay}
+                                                                            variant={row.severityVariant}
+                                                                            size="sm"></c-ds-badge>
+                                                            </template>
+                                                            <template if:false={row.hasSeverity}>
+                                                                <span>{row.severityDisplay}</span>
+                                                            </template>
+                                                            <template if:true={row.flaggedNoEvidence}>
+                                                                <lightning-icon icon-name="utility:warning" size="xx-small"
+                                                                                title="High/Critical defect with no evidence and no stated reason"></lightning-icon>
+                                                            </template>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <button type="button" class="aur__link aur__status-chip"
+                                                                data-id={row.findingId}
+                                                                title={row.statusTitle}
+                                                                onclick={handleStatusChipClick}>
+                                                            <c-ds-badge label={row.statusDisplay} variant={row.statusVariant}
+                                                                        size="sm"></c-ds-badge>
+                                                            <lightning-icon icon-name="utility:chevrondown"
+                                                                            size="xx-small"></lightning-icon>
+                                                        </button>
+                                                    </td>
+                                                    <td>
+                                                        <div class="aur__cellflex">
+                                                            <c-ds-badge label={row.source} variant={row.sourceVariant}
+                                                                        size="sm"></c-ds-badge>
+                                                            <template if:true={row.hasCaseLink}>
+                                                                <button type="button" class="aur__link aur__caselink aur__trunc"
+                                                                        data-id={row.caseId}
+                                                                        data-code={row.caseCode}
+                                                                        title={row.sourceRefFull}
+                                                                        onclick={handleJumpToCase}>{row.sourceRef}</button>
+                                                            </template>
+                                                            <template if:false={row.hasCaseLink}>
+                                                                <span class="aur__trunc" title={row.sourceRefFull}>{row.sourceRef}</span>
+                                                            </template>
+                                                        </div>
+                                                    </td>
+                                                    <td class="aur__trunc" title={row.testerDisplay}>{row.testerDisplay}</td>
+                                                    <td class="aur__trunc" title={row.reportedDisplay}>{row.reportedDisplay}</td>
+                                                </tr>
+                                            </tbody>
+                                        </template>
+                                    </table>
+                                </div>
+                                <c-ds-pager page={clampedFindingPage} page-size={pageSize}
+                                            total={totalFindings} item-label="findings"
+                                            onpagechange={handleFindingPage}></c-ds-pager>
+                            </template>
+                            <template if:false={findingHasRows}>
+                                <c-ds-empty-state icon="utility:filter" heading="No findings match"
+                                                  message="Clear a filter or widen the search."></c-ds-empty-state>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- ---- Sessions & notes ------------------------------- -->
+                    <template if:true={isSessionsTab}>
+                        <div role="tabpanel" aria-label="Sessions and notes">
+                            <div class="aur__filters">
+                                <div class="aur__filters-controls">
+                                    <lightning-input class="aur__search" type="search"
+                                                     label="Search sessions" variant="label-hidden"
+                                                     placeholder="Search by title, area, tester, or entry text…"
+                                                     value={sessionSearch}
+                                                     onchange={handleSessionSearch}></lightning-input>
+                                    <lightning-combobox label="Status" variant="label-hidden"
+                                                        options={sessionStatusOptions} value={sessionStatus}
+                                                        onchange={handleSessionStatus}></lightning-combobox>
+                                    <lightning-combobox label="Tester" variant="label-hidden"
+                                                        options={sessionTesterOptions} value={sessionTester}
+                                                        onchange={handleSessionTester}></lightning-combobox>
+                                    <lightning-combobox label="Sort by" variant="label-hidden"
+                                                        options={sessionSortOptions} value={sessionSort}
+                                                        onchange={handleSessionSort}></lightning-combobox>
+                                </div>
+                            </div>
+
+                            <template if:true={sessionHasRows}>
+                                <div class="aur__table-wrap">
+                                    <table class="aur__table">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" class="aur__w-90">Session</th>
+                                                <th scope="col">Title</th>
+                                                <th scope="col" class="aur__w-110">Tester</th>
+                                                <th scope="col" class="aur__w-90">Status</th>
+                                                <th scope="col" class="aur__w-90">Started</th>
+                                                <th scope="col" class="aur__w-75">Duration</th>
+                                                <th scope="col" class="aur__num aur__w-60">Entries</th>
+                                            </tr>
+                                        </thead>
+                                        <template for:each={pagedSessions} for:item="s">
+                                            <tbody key={s.key}>
+                                                <tr>
+                                                    <td class="aur__mono">
+                                                        <button type="button" class="aur__disclose"
+                                                                data-id={s.sessionId}
+                                                                aria-expanded={s.expanded}
+                                                                onclick={handleSessionToggle}>
+                                                            <lightning-icon icon-name={s.chevronIcon}
+                                                                            size="xx-small"></lightning-icon>
+                                                            <span>{s.name}</span>
+                                                        </button>
+                                                    </td>
+                                                    <td class="aur__trunc" title={s.titleDisplay}>{s.titleDisplay}</td>
+                                                    <td class="aur__trunc" title={s.testerDisplay}>{s.testerDisplay}</td>
+                                                    <td>
+                                                        <c-ds-badge label={s.statusDisplay} variant={s.statusVariant}
+                                                                    size="sm"></c-ds-badge>
+                                                    </td>
+                                                    <td class="aur__trunc" title={s.startedTitle}>{s.startedDisplay}</td>
+                                                    <td class={s.durationClass} title={s.durationTitle}>{s.durationDisplay}</td>
+                                                    <td class="aur__num">{s.noteCountLabel}</td>
+                                                </tr>
+                                                <template if:true={s.isOpen}>
+                                                    <tr class="aur__subrow">
+                                                        <td colspan="7">
+                                                            <template if:true={s.hasNotes}>
+                                                                <ol class="aur__timeline">
+                                                                    <template for:each={s.noteRows} for:item="note">
+                                                                        <li key={note.key} class="aur__note">
+                                                                            <div class="aur__note-head">
+                                                                                <span class="aur__mono">{note.name}</span>
+                                                                                <span class="aur__note-when">{note.loggedDisplay}</span>
+                                                                                <span class="aur__note-who">{note.authorDisplay}</span>
+                                                                                <template if:true={note.hasTag}>
+                                                                                    <c-ds-badge label={note.tag} variant="default"
+                                                                                                size="sm"></c-ds-badge>
+                                                                                </template>
+                                                                                <template if:true={note.hasRunLink}>
+                                                                                    <span class="aur__note-run">from {note.executionName}</span>
+                                                                                </template>
+                                                                                <template if:true={note.hasPromotedFinding}>
+                                                                                    <button type="button" class="aur__jump"
+                                                                                            data-id={note.promotedFindingId}
+                                                                                            data-finding={note.promotedFindingName}
+                                                                                            onclick={handleOpenPromotedFinding}>
+                                                                                        <c-ds-badge label={note.promotedFindingName}
+                                                                                                    variant="error" size="sm"></c-ds-badge>
+                                                                                    </button>
+                                                                                </template>
+                                                                                <template if:true={note.hasEvidence}>
+                                                                                    <button type="button" class="aur__clip"
+                                                                                            data-key={note.key}
+                                                                                            aria-expanded={note.evidenceExpanded}
+                                                                                            aria-label={note.evidenceAria}
+                                                                                            onclick={handleEvidenceToggle}>
+                                                                                        <lightning-icon icon-name="utility:attach"
+                                                                                                        size="xx-small"></lightning-icon>
+                                                                                        <span class="aur__clip-count">{note.evidenceLabel}</span>
+                                                                                    </button>
+                                                                                </template>
+                                                                            </div>
+                                                                            <p class="aur__note-text">{note.text}</p>
+                                                                            <template if:true={note.isEvidenceOpen}>
+                                                                                <ul class="aur__evidence-grid">
+                                                                                    <template for:each={note.evidenceFilesView} for:item="file">
+                                                                                        <li key={file.key} class="aur__evidence-item">
+                                                                                            <template if:true={file.isImage}>
+                                                                                                <a href={file.downloadUrl} target="_blank" rel="noopener">
+                                                                                                    <img class="aur__evidence-thumb"
+                                                                                                         src={file.thumbnailUrl}
+                                                                                                         alt={file.title} />
+                                                                                                </a>
+                                                                                            </template>
+                                                                                            <template if:false={file.isImage}>
+                                                                                                <a class="aur__evidence-open" href={file.downloadUrl}
+                                                                                                   target="_blank" rel="noopener">{file.title}</a>
+                                                                                            </template>
+                                                                                            <span class="aur__evidence-label">{file.title}</span>
+                                                                                        </li>
+                                                                                    </template>
+                                                                                </ul>
+                                                                            </template>
+                                                                        </li>
+                                                                    </template>
+                                                                </ol>
+                                                            </template>
+                                                            <template if:false={s.hasNotes}>
+                                                                <p class="aur__empty">No log entries on this session.</p>
+                                                            </template>
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </template>
+                                    </table>
+                                </div>
+                                <c-ds-pager page={clampedSessionPage} page-size={pageSize}
+                                            total={totalSessions} item-label="sessions"
+                                            onpagechange={handleSessionPage}></c-ds-pager>
+                            </template>
+                            <template if:false={sessionHasRows}>
+                                <c-ds-empty-state icon="utility:filter" heading="No sessions match"
+                                                  message="Clear a filter or widen the search."></c-ds-empty-state>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- ---- Assignment history (audit trail, collapsed) ---- -->
+                    <template if:true={hasAssignmentHistory}>
+                        <section class="aur__audit" aria-label="Assignment history">
+                            <button type="button" class="aur__disclose aur__audit-toggle"
+                                    aria-expanded={assignmentExpanded}
+                                    onclick={handleAssignmentToggle}>
+                                <lightning-icon icon-name={assignmentChevron} size="xx-small"></lightning-icon>
+                                <span>{assignmentLabel}</span>
+                            </button>
+
+                            <template if:true={assignmentOpen}>
+                                <div class="aur__filters">
+                                    <div class="aur__filters-controls">
+                                        <lightning-input class="aur__search" type="search"
+                                                         label="Search the assignment log" variant="label-hidden"
+                                                         placeholder="Search by tester, actor, case, or reason…"
+                                                         value={eventSearch}
+                                                         onchange={handleEventSearch}></lightning-input>
+                                        <lightning-combobox label="Action" variant="label-hidden"
+                                                            options={eventActionOptions} value={eventAction}
+                                                            onchange={handleEventAction}></lightning-combobox>
+                                        <lightning-combobox label="Sort by" variant="label-hidden"
+                                                            options={eventSortOptions} value={eventSort}
+                                                            onchange={handleEventSort}></lightning-combobox>
+                                        <lightning-button label="Export"
+                                                          icon-name="utility:download"
+                                                          onclick={handleExportEvents}></lightning-button>
+                                    </div>
+                                </div>
+                                <p class="aur__export-note">{assignmentExportNote}</p>
+
+                                <template if:true={eventHasRows}>
+                                    <div class="aur__table-wrap">
+                                        <table class="aur__table">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col" class="aur__w-75">Event</th>
+                                                    <th scope="col" class="aur__w-90">Action</th>
+                                                    <th scope="col" class="aur__w-100">Tester</th>
+                                                    <th scope="col" class="aur__w-100">Actor</th>
+                                                    <th scope="col" class="aur__w-120">Case</th>
+                                                    <th scope="col">Reason</th>
+                                                    <th scope="col" class="aur__w-90">When</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <template for:each={pagedEvents} for:item="row">
+                                                    <tr key={row.key}>
+                                                        <td class="aur__mono aur__trunc">{row.name}</td>
+                                                        <td class="aur__trunc" title={row.action}>{row.action}</td>
+                                                        <td class="aur__trunc" title={row.testerDisplay}>{row.testerDisplay}</td>
+                                                        <td class="aur__trunc" title={row.actorDisplay}>{row.actorDisplay}</td>
+                                                        <td class="aur__mono aur__trunc" title={row.caseDisplay}>{row.caseDisplay}</td>
+                                                        <td class="aur__trunc" title={row.reasonDisplay}>{row.reasonDisplay}</td>
+                                                        <td class="aur__trunc" title={row.occurredTitle}>{row.occurredDisplay}</td>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <c-ds-pager page={clampedEventPage} page-size={pageSize}
+                                                total={totalEvents} item-label="events"
+                                                onpagechange={handleEventPage}></c-ds-pager>
+                                </template>
+                                <template if:false={eventHasRows}>
+                                    <c-ds-empty-state icon="utility:filter" heading="No events match"
+                                                      message="Clear a filter or widen the search."></c-ds-empty-state>
+                                </template>
+                            </template>
+                        </section>
+                    </template>
+                </template>
+            </template>
+        </template>
+
+        <!-- Finding viewer. The body is c-uat-finding-detail, the same component
+             the session workspace renders, so an admin reads a finding exactly
+             as its tester wrote it. Everything here comes from the report
+             payload already on the client; only Edit and Delete call the server,
+             through the endpoints the tester surface already uses. -->
+        <template if:true={viewerOpen}>
+            <c-ds-modal-v2 is-open={viewerOpen}
+                           title={viewerTitle}
+                           size="medium"
+                           allow-overflow
+                           onclose={handleViewerClose}>
+                <template if:true={viewerListMode}>
+                    <ul class="aur__viewer-list">
+                        <template for:each={viewerRows} for:item="row">
+                            <li key={row.key}>
+                                <button type="button" class="aur__viewer-pick"
+                                        data-id={row.findingId}
+                                        onclick={handleViewerSelect}>
+                                    <span class="aur__viewer-pick-badges">
+                                        <c-ds-badge label={row.type} variant={row.typeVariant}
+                                                    size="sm"></c-ds-badge>
+                                        <template if:true={row.hasSeverity}>
+                                            <c-ds-badge label={row.severity} variant={row.severityVariant}
+                                                        size="sm"></c-ds-badge>
+                                        </template>
+                                    </span>
+                                    <span class="aur__viewer-pick-title">{row.titleDisplay}</span>
+                                    <span class="aur__viewer-pick-meta">{row.name} · {row.metaDisplay}</span>
+                                </button>
+                            </li>
+                        </template>
+                    </ul>
+                </template>
+
+                <template if:false={viewerListMode}>
+                    <template if:true={viewerHasFinding}>
+                        <template if:true={viewerCanGoBack}>
+                            <button type="button" class="aur__link aur__viewer-back"
+                                    onclick={handleViewerBack}>← All findings on this case</button>
+                        </template>
+
+                        <template if:false={viewerIsEditing}>
+                            <c-uat-finding-detail finding={viewerFinding}
+                                                  show-header
+                                                  show-actions
+                                                  allow-status-edit
+                                                  busy={viewerBusy}
+                                                  view-only-evidence
+                                                  onedit={handleViewerEdit}
+                                                  ondelete={handleViewerDeleteClick}
+                                                  onstatusedit={handleViewerStatusEdit}></c-uat-finding-detail>
+
+                            <template if:true={viewerConfirm}>
+                                <div class="aur__viewer-confirm" role="alertdialog" aria-label="Delete finding">
+                                    <p class="aur__viewer-confirm-text">{viewerDeleteWarning}</p>
+                                    <span class="aur__viewer-confirm-actions">
+                                        <lightning-button label="Cancel"
+                                                          disabled={viewerBusy}
+                                                          onclick={handleViewerDeleteCancel}></lightning-button>
+                                        <lightning-button variant="destructive" label="Delete finding"
+                                                          disabled={viewerBusy}
+                                                          onclick={handleViewerDeleteConfirm}></lightning-button>
+                                    </span>
+                                </div>
+                            </template>
+
+                            <template if:true={viewerContextRows.length}>
+                                <dl class="aur__viewer-context">
+                                    <template for:each={viewerContextRows} for:item="row">
+                                        <div key={row.key} class="aur__viewer-context-row">
+                                            <dt>{row.label}</dt>
+                                            <dd>{row.value}</dd>
+                                        </div>
+                                    </template>
+                                </dl>
+                            </template>
+                        </template>
+
+                        <template if:true={viewerIsEditing}>
+                            <div class="aur__viewer-form">
+                                <lightning-input label="Title"
+                                                 required
+                                                 max-length="255"
+                                                 value={viewerForm.title}
+                                                 data-field="title"
+                                                 onchange={handleViewerFormField}></lightning-input>
+                                <lightning-combobox label="What kind of finding is this?"
+                                                    options={viewerTypeOptions}
+                                                    value={viewerForm.type}
+                                                    onchange={handleViewerFormType}></lightning-combobox>
+                                <lightning-textarea label="What were you testing?"
+                                                    value={viewerForm.whatTesting}
+                                                    data-field="whatTesting"
+                                                    onchange={handleViewerFormField}></lightning-textarea>
+                                <lightning-textarea label="What did you expect?"
+                                                    value={viewerForm.whatExpected}
+                                                    data-field="whatExpected"
+                                                    onchange={handleViewerFormField}></lightning-textarea>
+                                <lightning-textarea label="What happened?"
+                                                    required
+                                                    value={viewerForm.whatHappened}
+                                                    data-field="whatHappened"
+                                                    onchange={handleViewerFormField}></lightning-textarea>
+                                <template if:true={viewerFormIsDefect}>
+                                    <lightning-combobox label="Severity"
+                                                        required
+                                                        options={viewerSeverityOptions}
+                                                        value={viewerForm.severity}
+                                                        onchange={handleViewerFormSeverity}></lightning-combobox>
+                                </template>
+                                <template if:true={viewerFormNeedsEvidence}>
+                                    <lightning-textarea label="Why is there no screenshot?"
+                                                        field-level-help="A severe defect needs evidence, or a note saying why there isn't any."
+                                                        value={viewerForm.noEvidenceReason}
+                                                        data-field="noEvidenceReason"
+                                                        onchange={handleViewerFormField}></lightning-textarea>
+                                </template>
+                            </div>
+                        </template>
+                    </template>
+                </template>
+
+                <span slot="footer" class="aur__viewer-footer">
+                    <template if:true={viewerIsEditing}>
+                        <lightning-button label="Cancel"
+                                          disabled={viewerBusy}
+                                          onclick={handleViewerFormCancel}></lightning-button>
+                        <lightning-button variant="brand" label="Save finding"
+                                          disabled={viewerBusy}
+                                          onclick={handleViewerFormSave}></lightning-button>
+                    </template>
+                    <template if:false={viewerIsEditing}>
+                        <template if:true={viewerHasCase}>
+                            <lightning-button label="Show in report"
+                                              title="Open this finding's case in the Test Results tree"
+                                              onclick={handleViewerShowInReport}></lightning-button>
+                            <lightning-button label="Open test case"
+                                              title="Leave the report and open the test case itself"
+                                              onclick={handleViewerOpenCase}></lightning-button>
+                        </template>
+                        <lightning-button label="Close" onclick={handleViewerClose}></lightning-button>
+                    </template>
+                </span>
+            </c-ds-modal-v2>
+        </template>
+
+        <!-- Workflow-status picker. A dialog, not a dropdown: a menu inside
+             .aur__table-wrap would be clipped by its overflow (the reason the
+             viewer form runs on ds-modal-v2 too). Non-tracker statuses save on
+             click; Added-to-* first asks for the ticket ref, skippably. -->
+        <template if:true={statusPromptOpen}>
+            <c-ds-modal-v2 is-open={statusPromptOpen}
+                           title={statusPromptTitle}
+                           size="small"
+                           onclose={handleStatusPromptCancel}>
+                <div class="aur__status-options" role="group" aria-label="Workflow status">
+                    <template for:each={statusPromptOptions} for:item="opt">
+                        <button key={opt.value} type="button" class="aur__status-option"
+                                data-status={opt.value}
+                                aria-pressed={opt.pressed}
+                                disabled={statusBusy}
+                                onclick={handleStatusPromptPick}>
+                            <c-ds-badge label={opt.label} variant={opt.variant} size="sm"></c-ds-badge>
+                            <template if:true={opt.isCurrent}>
+                                <span class="aur__status-current">current</span>
+                            </template>
+                        </button>
+                    </template>
+                </div>
+                <template if:true={statusPromptNeedsRef}>
+                    <lightning-input class="aur__status-ref"
+                                     label="Ticket ref (key or URL, optional)"
+                                     placeholder="e.g. DIV-123 or a ticket URL"
+                                     max-length="255"
+                                     value={statusPromptRef}
+                                     onchange={handleStatusPromptRef}></lightning-input>
+                    <p class="aur__status-hint">Skip keeps the status change and leaves the ref as it was.</p>
+                </template>
+                <span slot="footer" class="aur__viewer-footer">
+                    <lightning-button label="Cancel"
+                                      disabled={statusBusy}
+                                      onclick={handleStatusPromptCancel}></lightning-button>
+                    <template if:true={statusPromptNeedsRef}>
+                        <lightning-button label="Skip"
+                                          disabled={statusBusy}
+                                          onclick={handleStatusPromptSkip}></lightning-button>
+                        <lightning-button variant="brand" label="Save"
+                                          disabled={statusBusy}
+                                          onclick={handleStatusPromptSave}></lightning-button>
+                    </template>
+                </span>
+            </c-ds-modal-v2>
+        </template>
+    </div>
+</template>

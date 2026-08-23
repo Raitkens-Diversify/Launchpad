@@ -1,0 +1,34 @@
+<template>
+  <!-- Author: Hoang Long Vu To | Date: 2026-06-25 -->
+  <div class="relationship-groups">
+    <template for:each={groupViewModels} for:item="group">
+      <div key={group.id} class="map-node-row map-node-row_nested relationship-groups__item">
+        <div class="map-node-row__card">
+          <section class="map-relationship-group" data-anchor-id={group.id}>
+            <div class="map-relationship-group__header">
+              <h3 class="map-relationship-group__label">{group.label}</h3>
+              <span
+                class="map-relationship-group__count"
+                aria-label={group.countLabel}
+                title={group.countLabel}
+              >
+                {group.contactCount}
+              </span>
+            </div>
+            <div class="map-relationship-group__cards">
+              <template for:each={group.children} for:item="relatedContact">
+                <div key={relatedContact.id} class="map-relationship-group__card">
+                  <c-fsc-rel-map-card
+                    node={relatedContact}
+                    active-preview-source-id={activePreviewSourceId}
+                    oncardaction={handleCardAction}
+                  ></c-fsc-rel-map-card>
+                </div>
+              </template>
+            </div>
+          </section>
+        </div>
+      </div>
+    </template>
+  </div>
+</template>

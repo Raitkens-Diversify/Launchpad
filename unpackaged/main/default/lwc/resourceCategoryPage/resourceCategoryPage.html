@@ -1,0 +1,74 @@
+<template>
+    <div class="rc-cat">
+        <aside class="rc-cat__nav">
+            <c-ds-topic-nav heading="All topics"
+                            items={navItems}
+                            onnavselect={handleNavSelect}></c-ds-topic-nav>
+        </aside>
+
+        <main class="rc-cat__main">
+            <template if:true={loading}>
+                <div class="rc-cat__status">
+                    <lightning-spinner alternative-text="Loading category" size="small"></lightning-spinner>
+                </div>
+            </template>
+
+            <template if:true={detail}>
+                <c-ds-breadcrumbs items={crumbItems}
+                                  oncrumbselect={handleCrumb}></c-ds-breadcrumbs>
+
+                <h1 class="rc-cat__title">{detail.name}</h1>
+                <template if:true={detail.description}>
+                    <p class="rc-cat__desc">{detail.description}</p>
+                </template>
+
+                <template if:true={useSections}>
+                    <ul class="rc-sections">
+                        <template for:each={sectionView} for:item="sec">
+                            <li key={sec.key} class="rc-section">
+                                <button class="rc-section__head" type="button"
+                                        data-key={sec.key}
+                                        aria-expanded={sec.ariaExpanded}
+                                        onclick={handleSectionToggle}>
+                                    <span class="rc-section__title">{sec.title}</span>
+                                    <span class="rc-section__meta">
+                                        <span class="rc-section__count">{sec.countLabel}</span>
+                                        <lightning-icon icon-name={sec.iconName}
+                                                        size="x-small"
+                                                        alternative-text="Toggle section"></lightning-icon>
+                                    </span>
+                                </button>
+                                <div class={sec.bodyClass}>
+                                    <div class="rc-grid">
+                                        <template for:each={sec.resources} for:item="r">
+                                            <c-resource-card key={r.id} resource={r}></c-resource-card>
+                                        </template>
+                                    </div>
+                                </div>
+                            </li>
+                        </template>
+                    </ul>
+                </template>
+
+                <template if:false={useSections}>
+                    <template if:true={hasGridResources}>
+                        <div class="rc-grid">
+                            <template for:each={gridResources} for:item="r">
+                                <c-resource-card key={r.id} resource={r}></c-resource-card>
+                            </template>
+                        </div>
+                    </template>
+                </template>
+
+                <template if:true={isEmpty}>
+                    <p class="rc-cat__empty">There are no resources here yet. Check back soon.</p>
+                </template>
+            </template>
+
+            <template if:true={error}>
+                <p class="rc-cat__empty">{error}</p>
+            </template>
+        </main>
+    </div>
+    <c-resource-help-band></c-resource-help-band>
+</template>

@@ -1,0 +1,24 @@
+<apex:page controller="EgnyteOAuthController" action="{!handleCallback}" showHeader="true" sidebar="false" title="Egnyte OAuth Callback">
+    <apex:pageMessages />
+    <div style="font-family: Arial, sans-serif; max-width: 48rem; margin: 2rem auto; line-height: 1.5;">
+        <h1>Egnyte Connection</h1>
+
+        <apex:outputPanel rendered="{!tokensIssued}">
+            <p>
+                Save these values in
+                <strong>Setup &gt; Custom Metadata Types &gt; Egnyte Settings &gt; Manage Records &gt; Default</strong>.
+            </p>
+            <p><strong>Refresh Token</strong></p>
+            <p><code>{!issuedRefreshToken}</code></p>
+            <p><strong>Access Token</strong></p>
+            <p><code>{!issuedAccessToken}</code></p>
+            <p>
+                The refresh token is the important one. After saving it, folder mapping will work for any Salesforce record Id.
+            </p>
+        </apex:outputPanel>
+
+        <p>
+            <a href="{!connectUrl}">Connect Egnyte again</a>
+        </p>
+    </div>
+</apex:page>

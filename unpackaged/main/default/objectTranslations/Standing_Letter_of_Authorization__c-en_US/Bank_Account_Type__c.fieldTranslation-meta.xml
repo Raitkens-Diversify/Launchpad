@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Bank Account Type --></label>
+        <name>Bank_Account_Type__c</name>
+        <picklistValues>
+            <masterLabel>CORPCHK</masterLabel>
+            <translation><!-- CORPCHK --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>CORPSAV</masterLabel>
+            <translation><!-- CORPSAV --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Checking</masterLabel>
+            <translation><!-- Checking --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Savings</masterLabel>
+            <translation><!-- Savings --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

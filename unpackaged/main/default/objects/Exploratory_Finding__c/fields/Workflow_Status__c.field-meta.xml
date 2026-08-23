@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Workflow_Status__c</fullName>
+    <description>Admin triage disposition — has this finding been pushed to the external tracker? Orthogonal to Type__c (what kind of thing) and Severity__c (how bad). Written ONLY by UatReportController.setFindingWorkflowStatus behind the UAT_Console gate; UAT_Tester holds this field read-only, and UatRunController.saveFinding never touches it. Client mirror: lwc/uatConstants WORKFLOW_STATUSES.</description>
+    <label>Workflow Status</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>New</fullName>
+                <default>true</default>
+                <label>New</label>
+            </value>
+            <value>
+                <fullName>Added to Jira</fullName>
+                <default>false</default>
+                <label>Added to Jira</label>
+            </value>
+            <value>
+                <fullName>Added to ClickUp</fullName>
+                <default>false</default>
+                <label>Added to ClickUp</label>
+            </value>
+            <value>
+                <fullName>Not verified</fullName>
+                <default>false</default>
+                <label>Not verified</label>
+            </value>
+            <value>
+                <fullName>Resolved</fullName>
+                <default>false</default>
+                <label>Resolved</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

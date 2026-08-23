@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>My_Clients_Tasks_Completed</fullName>
+    <columns>SUBJECT</columns>
+    <columns>FinServ__Household__c</columns>
+    <columns>Financial_Advisor_Team__c</columns>
+    <columns>WHAT_NAME</columns>
+    <columns>DUE_DATE</columns>
+    <columns>CORE.USERS.ALIAS</columns>
+    <columns>STATUS</columns>
+    <columns>PRIORITY</columns>
+    <filterScope>Mine</filterScope>
+    <filters>
+        <field>STATUS</field>
+        <operation>equals</operation>
+        <value>Completed</value>
+    </filters>
+    <label>My Clients&#39; Tasks - Completed</label>
+    <sharedTo>
+        <group>All_Advisor_Group_Users</group>
+    </sharedTo>
+</ListView>

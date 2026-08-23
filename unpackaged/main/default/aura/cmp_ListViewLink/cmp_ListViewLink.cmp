@@ -1,0 +1,8 @@
+<aura:component implements="lightning:availableForFlowScreens" access="global">
+    <!-- Attributes to receive input from the flow -->
+    <aura:attribute name="link" type="String" />
+    <aura:attribute name="label" type="String" />
+    
+    <!-- Lightning component to render the link -->
+    <lightning:formattedUrl value="{!v.link}" label="{!v.label}" target="_blank"/>
+</aura:component>

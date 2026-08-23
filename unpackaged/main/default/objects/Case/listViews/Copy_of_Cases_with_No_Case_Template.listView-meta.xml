@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Copy_of_Cases_with_No_Case_Template</fullName>
+    <booleanFilter>1 AND 2 AND 3 AND 4 AND 5 AND 6 AND 7 AND 8</booleanFilter>
+    <columns>CASES.CASE_NUMBER</columns>
+    <columns>NAME</columns>
+    <columns>CASES.SUBJECT</columns>
+    <columns>CASES.STATUS</columns>
+    <columns>CASES.PRIORITY</columns>
+    <columns>OWNER_NAME</columns>
+    <columns>CASES.CREATED_DATE</columns>
+    <columns>FinServ__FinancialAccount__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Case_Template__c</field>
+        <operation>equals</operation>
+    </filters>
+    <filters>
+        <field>CASES.STATUS</field>
+        <operation>notEqual</operation>
+        <value>Closed,Approved</value>
+    </filters>
+    <filters>
+        <field>Record_Type_Name__c</field>
+        <operation>notEqual</operation>
+        <value>Advertising Review</value>
+    </filters>
+    <filters>
+        <field>Record_Type_Name__c</field>
+        <operation>notEqual</operation>
+        <value>Ad Hoc</value>
+    </filters>
+    <filters>
+        <field>Record_Type_Name__c</field>
+        <operation>notEqual</operation>
+        <value>Email to Case</value>
+    </filters>
+    <filters>
+        <field>CASES.SUBJECT</field>
+        <operation>notContain</operation>
+        <value>Closure</value>
+    </filters>
+    <filters>
+        <field>CASES.SUBJECT</field>
+        <operation>notContain</operation>
+        <value>Move Person</value>
+    </filters>
+    <filters>
+        <field>CASES.SUBJECT</field>
+        <operation>notContain</operation>
+        <value>transition</value>
+    </filters>
+    <label>OPS - No Case Template</label>
+</ListView>

@@ -1,0 +1,11 @@
+<template>
+    <section class="ds-hero">
+        <div class="ds-hero__inner">
+            <template if:true={eyebrow}>
+                <p class="ds-hero__eyebrow">{eyebrow}</p>
+            </template>
+            <h1 class="ds-hero__headline">{headline}</h1>
+            <slot></slot>
+        </div>
+    </section>
+</template>

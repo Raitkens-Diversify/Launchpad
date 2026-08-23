@@ -1,0 +1,54 @@
+<!-- Author: Mile Cacanovic -->
+<template>
+    <nav class="toc" aria-label={title}>
+        <div class="toc__titlebar">
+            <p class="toc__title">{title}</p>
+            <template lwc:if={saveIndicator}>
+                <span class={saveIndicator.statusClass} role="status" aria-live="polite">
+                    <lightning-icon
+                        icon-name={saveIndicator.iconName}
+                        size="x-small"
+                        class="toc__status-icon">
+                    </lightning-icon>
+                    <span class="toc__status-label">{saveIndicator.label}</span>
+                </span>
+            </template>
+        </div>
+        <ul class="toc__list">
+            <template for:each={rows} for:item="row">
+                <li key={row.key} class="toc__item">
+                    <button
+                        type="button"
+                        class={row.rowClass}
+                        data-key={row.key}
+                        data-role={row.role}
+                        aria-expanded={row.ariaExpanded}
+                        aria-current={row.ariaCurrent}
+                        onclick={handleRowClick}>
+                        <template lwc:if={row.isParent}>
+                            <lightning-icon
+                                icon-name={row.chevronIcon}
+                                size="xx-small"
+                                class="toc__chevron">
+                            </lightning-icon>
+                        </template>
+                        <span class="toc__label">{row.label}</span>
+                        <span class="toc__marker">
+                            <template lwc:if={row.showDot}>
+                                <span class="toc__dot" aria-hidden="true"></span>
+                            </template>
+                            <template lwc:elseif={row.showCheck}>
+                                <lightning-icon
+                                    icon-name="utility:check"
+                                    size="x-small"
+                                    alternative-text="Completed"
+                                    class="toc__check">
+                                </lightning-icon>
+                            </template>
+                        </span>
+                    </button>
+                </li>
+            </template>
+        </ul>
+    </nav>
+</template>

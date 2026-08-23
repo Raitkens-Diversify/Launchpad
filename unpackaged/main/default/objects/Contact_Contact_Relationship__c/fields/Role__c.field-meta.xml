@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Role__c</fullName>
+    <label>Role</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Attorney</fullName>
+                <default>false</default>
+                <label>Attorney</label>
+            </value>
+            <value>
+                <fullName>Aunt / Uncle</fullName>
+                <default>false</default>
+                <label>Aunt / Uncle</label>
+            </value>
+            <value>
+                <fullName>Child</fullName>
+                <default>false</default>
+                <label>Child</label>
+            </value>
+            <value>
+                <fullName>Client</fullName>
+                <default>false</default>
+                <label>Client</label>
+            </value>
+            <value>
+                <fullName>Client Entity</fullName>
+                <default>false</default>
+                <label>Client Entity</label>
+            </value>
+            <value>
+                <fullName>CPA</fullName>
+                <default>false</default>
+                <label>CPA</label>
+            </value>
+            <value>
+                <fullName>Dependent</fullName>
+                <default>false</default>
+                <label>Dependent</label>
+            </value>
+            <value>
+                <fullName>Domestic Partner</fullName>
+                <default>false</default>
+                <label>Domestic Partner</label>
+            </value>
+            <value>
+                <fullName>Employee</fullName>
+                <default>false</default>
+                <label>Employee</label>
+            </value>
+            <value>
+                <fullName>Employer</fullName>
+                <default>false</default>
+                <label>Employer</label>
+            </value>
+            <value>
+                <fullName>Ex-Spouse</fullName>
+                <default>false</default>
+                <label>Ex-Spouse</label>
+            </value>
+            <value>
+                <fullName>Friend</fullName>
+                <default>false</default>
+                <label>Friend</label>
+            </value>
+            <value>
+                <fullName>Grandchild</fullName>
+                <default>false</default>
+                <label>Grandchild</label>
+            </value>
+            <value>
+                <fullName>Grandparent</fullName>
+                <default>false</default>
+                <label>Grandparent</label>
+            </value>
+            <value>
+                <fullName>In-Law</fullName>
+                <default>false</default>
+                <label>In-Law</label>
+            </value>
+            <value>
+                <fullName>Life Partner</fullName>
+                <default>false</default>
+                <label>Life Partner</label>
+            </value>
+            <value>
+                <fullName>Nephew</fullName>
+                <default>false</default>
+                <label>Nephew</label>
+            </value>
+            <value>
+                <fullName>Niece / Nephew</fullName>
+                <default>false</default>
+                <label>Niece / Nephew</label>
+            </value>
+            <value>
+                <fullName>Other</fullName>
+                <default>false</default>
+                <label>Other</label>
+            </value>
+            <value>
+                <fullName>Parent</fullName>
+                <default>false</default>
+                <label>Parent</label>
+            </value>
+            <value>
+                <fullName>Power of Attorney</fullName>
+                <default>false</default>
+                <label>Power of Attorney</label>
+            </value>
+            <value>
+                <fullName>Sibling</fullName>
+                <default>false</default>
+                <label>Sibling</label>
+            </value>
+            <value>
+                <fullName>Spouse</fullName>
+                <default>false</default>
+                <label>Spouse</label>
+            </value>
+            <value>
+                <fullName>Trusted Contact</fullName>
+                <default>false</default>
+                <label>Trusted Contact</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

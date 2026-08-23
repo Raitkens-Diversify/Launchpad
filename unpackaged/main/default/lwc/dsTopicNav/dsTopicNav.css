@@ -1,0 +1,117 @@
+/* Visuals ported verbatim from nexsArticleBrowser's .nexs__nav-* rules —
+   class names are local to this shadow tree; pixel parity is what matters.
+   Rows became real <button>s, so each carries a full button reset. */
+.tnav__title {
+    margin: 0 0 var(--slds-g-spacing-4, 16px);
+    font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+    font-size: 1.5rem;
+    line-height: 1.2;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.tnav__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-md, 8px);
+    overflow: hidden;
+}
+.tnav__group + .tnav__group {
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+.tnav__item {
+    width: 100%;
+    box-sizing: border-box;
+    background: none;
+    border: none;
+    font-family: inherit;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-3, 12px);
+    padding: var(--slds-g-spacing-4, 16px);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-2, #374151);
+    cursor: pointer;
+}
+.tnav__item:hover {
+    background: var(--slds-g-color-accent-1, #0f406f);
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+}
+.tnav__icon {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--ds-lightest-blue, #e2f8ff);
+    color: var(--ds-medium-blue, #1a76bb);
+}
+.tnav__icon svg {
+    width: 20px;
+    height: 20px;
+}
+/* Active topic: solid navy fill with white label (underline distinguishes
+   the selected topic from a hovered one, which shares the fill). */
+.tnav__item--active {
+    background: var(--slds-g-color-accent-1, #0f406f);
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+}
+.tnav__item--active .tnav__label {
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+    text-decoration: underline;
+}
+.tnav__item--active:hover {
+    background: var(--slds-g-color-accent-2, #0b2f51);
+}
+
+/* Accordion subtopic rows (Resource Center; the Help Center passes none).
+   64px indent = 16 row padding + 36 icon + 12 gap, aligning under the label. */
+.tnav__children {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+.tnav__children li + li {
+    border-top: 1px solid var(--slds-g-color-border-3, #e5e7eb);
+}
+.tnav__child {
+    width: 100%;
+    box-sizing: border-box;
+    background: none;
+    border: none;
+    font-family: inherit;
+    display: block;
+    padding: 12px var(--slds-g-spacing-4, 16px) 12px 64px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--slds-g-color-on-surface-2, #374151);
+    text-align: left;
+    cursor: pointer;
+}
+.tnav__child:hover {
+    background: var(--slds-g-color-accent-1, #0f406f);
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+}
+.tnav__child--active {
+    background: var(--slds-g-color-accent-1, #0f406f);
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+    text-decoration: underline;
+}
+.tnav__child--active:hover {
+    background: var(--slds-g-color-accent-2, #0b2f51);
+}
+
+/* Real buttons get keyboard focus the old <li> rows never had — make it
+   visible without shifting the layout. */
+.tnav__item:focus-visible,
+.tnav__child:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: -2px;
+}

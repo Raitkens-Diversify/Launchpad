@@ -1,0 +1,134 @@
+/* Author: Hoang Long Vu To | Date: 2026-07-27 */
+/* Rules list, cards, and modal styles live in diversifyStyles.css. */
+
+.rules-view {
+  position: relative;
+}
+
+.rule-modal__panel {
+  position: relative;
+}
+
+.nc-saving-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.78);
+  border-radius: inherit;
+}
+
+.nc-saving-overlay__message {
+  margin: 0;
+  font-size: var(--div-font-scale-sm);
+  font-weight: 600;
+  color: var(--div-color-text-primary, #181818);
+}
+
+.rule-modal__channel-grid .div-select-tile--disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.rule-modal__channel-grid .div-select-tile--disabled.div-option--selected {
+  opacity: 0.65;
+}
+
+.rule-modal__channel-grid .div-select-tile--disabled:focus-visible {
+  outline: none;
+}
+
+.rule-modal__digest-help {
+  margin: -0.25rem 0 0;
+  font-size: var(--div-font-scale-xs);
+  line-height: 1.4;
+}
+
+.rules-view__filter-toolbar {
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.rules-view__filter-start,
+.rules-view__filter-end {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.rules-view__filter-end {
+  margin-left: auto;
+}
+
+.rules-view__filter-start .div-filter__search {
+  width: 24rem;
+  max-width: 100%;
+}
+
+.rules-channel-prefs {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.375rem 0.625rem;
+  border: 1px solid var(--div-color-border, #dddbda);
+  border-radius: 999px;
+  background: #ffffff;
+}
+
+.rules-channel-prefs__heading {
+  font-size: calc(var(--div-font-root-size) * 0.6875);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--div-color-text-muted, #706e6b);
+  white-space: nowrap;
+}
+
+.rules-channel-prefs__list {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.rules-channel-pref {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.rules-channel-pref--disabled {
+  opacity: 0.72;
+}
+
+.rules-channel-pref__badge--disabled {
+  opacity: 0.55;
+}
+
+.rules-channel-pref__disabled-label {
+  font-size: calc(var(--div-font-root-size) * 0.6875);
+  font-weight: 600;
+  color: var(--div-color-text-muted, #706e6b);
+}
+
+.rules-channel-pref__mode {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rules-channel-pref__mode--on {
+  color: var(--div-color-primary, #0176d3);
+}
+
+.rules-channel-pref__mode--in-app {
+  color: #16325c;
+}
+
+.rules-channel-pref__mode--email {
+  color: #04844b;
+}

@@ -1,0 +1,40 @@
+.THIS .auto-save 
+{
+    margin-left:10px !important;
+    position: relative !important;
+    display: inline-block !important;
+    width: 20px !important;
+    height: 20px !important;
+}
+.THIS .Class{
+    background-color: #5aaadc;
+    padding-bottom: 4px;
+    padding-top: 4px;
+    display: block;
+  	margin-left: auto;
+  	margin-right: auto;
+  	width: 20%;
+    font-size: 18px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+
+.THIS .Class:hover{
+    background-color: #58595b;
+}
+
+.THIS .slds-size--2-of-7{
+    width: 27%;
+}
+
+.THIS .footer{
+    text-align: center;
+}
+
+.THIS .headerWrap{
+    white-space: break-spaces !important;
+}
+
+.THIS .inputStyle{
+    display: inline-flex;
+}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Session_Notes__c</fullName>
+    <description>DEPRECATED 2026-08-06 - superseded by the Session_Note__c timeline. Was one 32k blob with no structure, so nothing could attach evidence to a moment or be promoted to a finding. Each non-blank value migrated to a single Session_Note__c entry back-dated to the session&#39;s start. Kept for rollback; no longer read or written.</description>
+    <label>Session Notes</label>
+    <length>32768</length>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>10</visibleLines>
+</CustomField>

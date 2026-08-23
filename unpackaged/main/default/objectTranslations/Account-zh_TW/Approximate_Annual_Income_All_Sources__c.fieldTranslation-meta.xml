@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Approximate Annual Income (All Sources) --></label>
+        <name>Approximate_Annual_Income_All_Sources__c</name>
+    </CustomFieldTranslation>

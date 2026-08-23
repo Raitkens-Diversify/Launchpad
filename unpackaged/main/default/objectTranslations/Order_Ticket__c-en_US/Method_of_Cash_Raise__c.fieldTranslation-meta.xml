@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Method of Cash Raise --></label>
+        <name>Method_of_Cash_Raise__c</name>
+        <picklistValues>
+            <masterLabel>Custom</masterLabel>
+            <translation><!-- Custom --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Pro-rata</masterLabel>
+            <translation><!-- Pro-rata --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Claim_Limit_Per_Tester__c</fullName>
+    <description>How many incomplete claims one tester may hold in this cycle at once (blank = unlimited). Completing or releasing a run frees headroom — the cap throttles pool-draining, not throughput.</description>
+    <externalId>false</externalId>
+    <label>Claim Limit Per Tester</label>
+    <precision>3</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

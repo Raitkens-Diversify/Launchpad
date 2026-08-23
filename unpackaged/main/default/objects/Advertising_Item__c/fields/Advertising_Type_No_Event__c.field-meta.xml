@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Advertising_Type_No_Event__c</fullName>
+    <label>Advertising Type (No Event)</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Brochure/Worksheet/Pamphlet</fullName>
+                <default>false</default>
+                <label>Brochure/Worksheet/Pamphlet</label>
+            </value>
+            <value>
+                <fullName>Business Card</fullName>
+                <default>false</default>
+                <label>Business Card</label>
+            </value>
+            <value>
+                <fullName>Business Envelope</fullName>
+                <default>false</default>
+                <label>Business Envelope</label>
+            </value>
+            <value>
+                <fullName>Email Signature</fullName>
+                <default>false</default>
+                <label>Email Signature</label>
+            </value>
+            <value>
+                <fullName>Fax Coversheet</fullName>
+                <default>false</default>
+                <label>Fax Coversheet</label>
+            </value>
+            <value>
+                <fullName>Form Letter</fullName>
+                <default>false</default>
+                <label>Form Letter</label>
+            </value>
+            <value>
+                <fullName>Group Email</fullName>
+                <default>false</default>
+                <label>Group Email</label>
+            </value>
+            <value>
+                <fullName>Letterhead</fullName>
+                <default>false</default>
+                <label>Letterhead</label>
+            </value>
+            <value>
+                <fullName>Newsletter/Circular</fullName>
+                <default>false</default>
+                <label>Newsletter/Circular</label>
+            </value>
+            <value>
+                <fullName>Periodical Print/Reprint</fullName>
+                <default>false</default>
+                <label>Periodical Print/Reprint</label>
+            </value>
+            <value>
+                <fullName>Postcard</fullName>
+                <default>false</default>
+                <label>Postcard</label>
+            </value>
+            <value>
+                <fullName>Presentation</fullName>
+                <default>false</default>
+                <label>Presentation</label>
+            </value>
+            <value>
+                <fullName>Press Release</fullName>
+                <default>false</default>
+                <label>Press Release</label>
+            </value>
+            <value>
+                <fullName>Public Appearance</fullName>
+                <default>false</default>
+                <label>Public Appearance</label>
+            </value>
+            <value>
+                <fullName>Radio/TV Ad</fullName>
+                <default>false</default>
+                <label>Radio/TV Ad</label>
+            </value>
+            <value>
+                <fullName>Seminar Handout</fullName>
+                <default>false</default>
+                <label>Seminar Handout</label>
+            </value>
+            <value>
+                <fullName>Social Media Content</fullName>
+                <default>false</default>
+                <label>Social Media Content</label>
+            </value>
+            <value>
+                <fullName>Social Media Profile</fullName>
+                <default>false</default>
+                <label>Social Media Profile</label>
+            </value>
+            <value>
+                <fullName>Sponsorship</fullName>
+                <default>false</default>
+                <label>Sponsorship</label>
+            </value>
+            <value>
+                <fullName>Video/Audio</fullName>
+                <default>false</default>
+                <label>Video/Audio</label>
+            </value>
+            <value>
+                <fullName>Website</fullName>
+                <default>false</default>
+                <label>Website</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

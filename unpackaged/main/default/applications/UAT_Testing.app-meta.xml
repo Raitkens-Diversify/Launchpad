@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomApplication xmlns="http://soap.sforce.com/2006/04/metadata">
+    <brand>
+        <headerColor>#0F406F</headerColor>
+        <shouldOverrideOrgTheme>false</shouldOverrideOrgTheme>
+    </brand>
+    <description>Helios UAT Testing — tester queue, step-by-step runner, evidence, and exploratory testing. Admins additionally see the Admin Console tab (UAT sections live there).</description>
+    <formFactors>Small</formFactors>
+    <formFactors>Large</formFactors>
+    <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
+    <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
+    <isNavTabPersistenceDisabled>false</isNavTabPersistenceDisabled>
+    <isOmniPinnedViewEnabled>false</isOmniPinnedViewEnabled>
+    <label>UAT Testing</label>
+    <navType>Standard</navType>
+    <tabs>UAT_Testing</tabs>
+    <tabs>Admin_Console</tabs>
+    <tabs>Test_Execution__c</tabs>
+    <tabs>Exploratory_Finding__c</tabs>
+    <uiType>Lightning</uiType>
+</CustomApplication>

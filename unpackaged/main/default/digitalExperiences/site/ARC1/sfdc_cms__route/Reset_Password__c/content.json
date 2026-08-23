@@ -1,0 +1,12 @@
+{
+  "type" : "sfdc_cms__route",
+  "title" : "Reset Password",
+  "contentBody" : {
+    "activeViewId" : "Reset_Password",
+    "configurationTags" : [ ],
+    "pageAccess" : "UseParent",
+    "routeType" : "custom-reset-password",
+    "urlPrefix" : "reset-password"
+  },
+  "urlName" : "reset-password"
+}

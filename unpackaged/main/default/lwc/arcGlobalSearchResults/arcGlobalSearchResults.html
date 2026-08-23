@@ -1,0 +1,155 @@
+<template>
+  <div class="arc-search-results">
+    <div class="arc-search-results__sticky-header">
+      <div class="arc-search-results__page-header">
+        <h1 class="arc-search-results__title">{pageTitle}</h1>
+        <p class="arc-search-results__subtitle">{resultsTotalLabel}</p>
+        <div class="arc-search-results__tabs">
+          <template for:each={tabs} for:item="tab">
+            <button
+              key={tab.key}
+              type="button"
+              class={tab.className}
+              data-key={tab.key}
+              onclick={handleTabClick}
+            >
+              <span class="arc-search-results__tab-label">{tab.label}</span>
+              <span class="arc-search-results__tab-count">{tab.count}</span>
+            </button>
+          </template>
+        </div>
+      </div>
+
+      <div class={headerRowClass}>
+        <template if:true={isAllTab}>
+          <p class="arc-search-results__header-title">{resultsHeaderLabel}</p>
+        </template>
+        <template if:true={showFiltersButton}>
+          <button type="button" class="arc-search-results__filters-button">
+            <span
+              class="arc-search-results__filters-icon"
+              style={filtersIconStyle}
+              aria-hidden="true"
+            ></span>
+            <span>Filters</span>
+          </button>
+        </template>
+      </div>
+    </div>
+
+    <div class="arc-search-results__body">
+      <template if:true={isLoading}>
+        <div class="arc-search-results__status">Searching…</div>
+      </template>
+
+      <template if:false={isLoading}>
+        <template if:true={showGlobalEmptyState}>
+          <div class="arc-search-results__empty">
+            <img
+              src={emptySearchIllustrationUrl}
+              alt=""
+              class="arc-search-results__empty-illustration"
+            />
+            <div class="arc-search-results__empty-content">
+              <p class="arc-search-results__empty-title">No results found</p>
+              <p class="arc-search-results__empty-subtitle">
+                We can't find any item matching your search '{term}'
+              </p>
+            </div>
+            <a
+              href="#"
+              class="arc-search-results__empty-button"
+              onclick={handleBackToHome}
+            >
+              <span
+                class="arc-search-results__empty-button-icon"
+                style={arrowLeftIconStyle}
+                aria-hidden="true"
+              ></span>
+              <span>Back to Home Page</span>
+            </a>
+          </div>
+        </template>
+
+        <template if:true={showCategoryEmptyState}>
+          <div class="arc-search-results__empty">
+            <img
+              src={emptySearchIllustrationUrl}
+              alt=""
+              class="arc-search-results__empty-illustration"
+            />
+            <div class="arc-search-results__empty-content">
+              <p class="arc-search-results__empty-title">
+                No results found in this category
+              </p>
+              <p class="arc-search-results__empty-subtitle">
+                We can't find any item matching your search
+              </p>
+            </div>
+          </div>
+        </template>
+
+        <div class="arc-search-results__categories">
+          <template for:each={visibleGroups} for:item="category">
+            <div key={category.key} class="arc-search-results__category">
+              <div class="arc-search-results__category-header">
+                <div class="arc-search-results__category-header-left">
+                  <p class="arc-search-results__category-title">
+                    {category.label}
+                  </p>
+                  <template if:true={category.showCount}>
+                    <p class="arc-search-results__category-count">
+                      Showing {category.shownCount} out of
+                      {category.totalCount} results
+                    </p>
+                  </template>
+                </div>
+                <template if:true={category.showViewAll}>
+                  <button
+                    type="button"
+                    class="arc-search-results__view-all-button"
+                    data-key={category.key}
+                    onclick={handleViewAllClick}
+                  >
+                    <span>View all</span>
+                    <span
+                      class="arc-search-results__view-all-icon"
+                      style={caretIconStyle}
+                      aria-hidden="true"
+                    ></span>
+                  </button>
+                </template>
+              </div>
+              <div class="arc-search-results__list">
+                <template for:each={category.items} for:item="item">
+                  <a
+                    key={item.key}
+                    href="#"
+                    class="arc-search-results__row"
+                    data-id={item.id}
+                    data-object-api-name={item.objectApiName}
+                    onclick={handleResultClick}
+                  >
+                    <div class="arc-search-results__row-content">
+                      <p class="arc-search-results__row-title">{item.title}</p>
+                      <template if:true={item.subtitle}>
+                        <p class="arc-search-results__row-subtitle">
+                          {item.subtitle}
+                        </p>
+                      </template>
+                    </div>
+                    <span
+                      class="arc-search-results__row-caret"
+                      style={caretIconStyle}
+                      aria-hidden="true"
+                    ></span>
+                  </a>
+                </template>
+              </div>
+            </div>
+          </template>
+        </div>
+      </template>
+    </div>
+  </div>
+</template>

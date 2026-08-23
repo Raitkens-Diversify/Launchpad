@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Top_Result_Title__c</fullName>
+    <description>Title snapshot of the rank-1 result at search time, denormalized server-side so reports read without joining back to Knowledge (titles can change on republish).</description>
+    <externalId>false</externalId>
+    <label>Top Result Title</label>
+    <length>255</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Permission set for validation rule that only allows a task to be set to approved if they are a part of the the Principal Approver Queue</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Principal Approver Task Approval</label>
+    <customPermissions>
+        <enabled>true</enabled>
+        <name>Principal_Approver_Task_Approval</name>
+    </customPermissions>
+</PermissionSet>

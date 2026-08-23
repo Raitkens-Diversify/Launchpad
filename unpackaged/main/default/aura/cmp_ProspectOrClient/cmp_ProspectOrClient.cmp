@@ -1,0 +1,8 @@
+<aura:component controller="ProspectOrClientController" implements="force:appHostable,flexipage:availableForAllPageTypes,lightning:actionOverride,force:lightningQuickActionWithoutHeader,lightning:isUrlAddressable" access="global">
+    <aura:attribute name="recordTypeId" type="String" />
+    <aura:handler name="init" value="{!this}" action="{!c.init}" />
+    <lightning:card>
+        <img src="{!$Resource.DFPGLogo}" />
+        <lightning:flow aura:id="flowData" />
+    </lightning:card>
+</aura:component>

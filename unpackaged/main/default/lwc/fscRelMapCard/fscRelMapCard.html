@@ -1,0 +1,271 @@
+<!-- sldsValidatorIgnore -->
+<template>
+  <article
+    class={cardClass}
+    aria-label={cardAriaLabel}
+    onclick={handleToggleClick}
+  >
+    <div class="map-card__media slds-media">
+      <div class="slds-media__figure map-card__figure">
+        <span class="map-card__icon" aria-hidden="true">
+          <lightning-icon
+            icon-name={node.iconName}
+            size="small"
+            alternative-text=""
+          ></lightning-icon>
+        </span>
+      </div>
+
+      <div class="slds-media__body map-card__body">
+        <template lwc:if={showRecordLink}>
+          <span class="map-card__label-row">
+            <a
+              class="map-card__label map-card__label_link"
+              href={recordLinkUrl}
+              title={node.label}
+              onclick={handleRecordClick}
+            >
+              {node.label}
+            </a>
+            <lightning-button-icon
+              class="map-card__preview-button"
+              icon-name="utility:preview"
+              variant={previewButtonVariant}
+              size="x-small"
+              alternative-text={previewButtonLabel}
+              title={previewButtonLabel}
+              aria-pressed={isPreviewActive}
+              onclick={handlePreviewClick}
+            ></lightning-button-icon>
+          </span>
+        </template>
+        <template lwc:else>
+          <p class="map-card__label" title={node.label}>{node.label}</p>
+        </template>
+      </div>
+
+      <template lwc:if={showActionsMenu}>
+        <lightning-button-menu
+          icon-name="utility:down"
+          variant="bare"
+          icon-size="x-small"
+          alternative-text={actionsMenuLabel}
+          onclick={handleActionClickStop}
+          onopen={handleMenuOpen}
+          onclose={handleMenuClose}
+          onselect={handleMenuSelect}
+        >
+          <template for:each={menuActions} for:item="menuAction">
+            <lightning-menu-item
+              key={menuAction.name}
+              value={menuAction.name}
+              label={menuAction.label}
+            ></lightning-menu-item>
+          </template>
+        </lightning-button-menu>
+      </template>
+    </div>
+
+    <template lwc:if={hasRelationshipDetails}>
+      <div class="map-card__relationship-section">
+        <button
+          type="button"
+          class="map-card__relationship-toggle"
+          aria-expanded={relationshipDetailsAriaExpanded}
+          aria-label={relationshipDetailsToggleLabel}
+          onclick={handleRelationshipDetailsToggle}
+        >
+          <lightning-icon
+            class="map-card__relationship-toggle-icon"
+            icon-name={relationshipDetailsChevronIcon}
+            size="xx-small"
+            alternative-text=""
+          ></lightning-icon>
+          <span class="map-card__relationship-toggle-label">
+            {relationshipDetailsSummaryLabel}
+          </span>
+        </button>
+
+        <template lwc:if={showRelationshipDetailsContent}>
+          <template lwc:if={showRelationshipLinks}>
+            <ul class="map-card__relationship-links">
+              <template for:each={relationshipLinkGroups} for:item="party">
+                <li key={party.key} class={party.partyClass}>
+                  <template lwc:if={party.hasMultiplePairings}>
+                    <div class="map-card__relationship-party-header">
+                      <a
+                        class="map-card__relationship-name map-card__label_link"
+                        href={party.recordUrl}
+                        aria-label={party.relatedToName}
+                        data-related-to-account-id={party.relatedToAccountId}
+                        data-related-to-name={party.relatedToName}
+                        onclick={handleRelationshipLinkClick}
+                      >
+                        {party.relatedToName}
+                      </a>
+                    </div>
+                  </template>
+                  <template for:each={party.pairings} for:item="pairing">
+                    <div key={pairing.key} class={pairing.rowClass}>
+                      <div class="map-card__relationship-start">
+                        <template lwc:if={pairing.showRelatedToInverseRole}>
+                          <span
+                            class="map-card__role-pill map-card__pill"
+                            data-tooltip={pairing.relatedToInverseRole}
+                            tabindex="0"
+                            onmouseenter={handleTooltipShow}
+                            onmouseleave={handleTooltipHide}
+                            onfocus={handleTooltipShow}
+                            onblur={handleTooltipHide}
+                            onclick={handleTooltipTargetClick}
+                          >
+                            <span class="map-card__pill-text">{pairing.relatedToInverseRole}</span>
+                          </span>
+                        </template>
+                      </div>
+                      <div class="map-card__relationship-end">
+                        <div class="map-card__relationship-target">
+                          <template lwc:if={pairing.showPartyName}>
+                            <a
+                              class="map-card__relationship-name map-card__label_link"
+                              href={party.recordUrl}
+                              aria-label={pairing.rowAriaLabel}
+                              data-related-to-account-id={party.relatedToAccountId}
+                              data-related-to-name={party.relatedToName}
+                              data-relation-id={pairing.relationId}
+                              onclick={handleRelationshipLinkClick}
+                            >
+                              {party.relatedToName}
+                            </a>
+                          </template>
+                          <template lwc:if={pairing.showRelationshipRole}>
+                            <span
+                              class="map-card__member-role-pill map-card__pill"
+                              data-tooltip={pairing.relationshipRole}
+                              tabindex="0"
+                              onmouseenter={handleTooltipShow}
+                              onmouseleave={handleTooltipHide}
+                              onfocus={handleTooltipShow}
+                              onblur={handleTooltipHide}
+                              onclick={handleTooltipTargetClick}
+                            >
+                              <span class="map-card__pill-text">{pairing.relationshipRole}</span>
+                            </span>
+                          </template>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </li>
+              </template>
+            </ul>
+          </template>
+          <template lwc:elseif={showRelatedToSubline}>
+            <div class="map-card__related-to-section">
+              <div class="map-card__relationship-row map-card__relationship-row_single">
+                <div class="map-card__relationship-start">
+                  <template lwc:if={showRelatedToInverseRole}>
+                    <span
+                      class="map-card__role-pill map-card__pill"
+                      data-tooltip={node.relatedToInverseRole}
+                      tabindex="0"
+                      onmouseenter={handleTooltipShow}
+                      onmouseleave={handleTooltipHide}
+                      onfocus={handleTooltipShow}
+                      onblur={handleTooltipHide}
+                      onclick={handleTooltipTargetClick}
+                    >
+                      <span class="map-card__pill-text">{node.relatedToInverseRole}</span>
+                    </span>
+                  </template>
+                </div>
+                <div class="map-card__relationship-end">
+                  <div class="map-card__relationship-target">
+                    <a
+                      class="map-card__relationship-name map-card__label_link"
+                      href={relatedToRecordLinkUrl}
+                      onclick={handleRelatedToRecordClick}
+                    >
+                      {node.relatedToName}
+                    </a>
+                    <template lwc:if={showRelatedToMemberRole}>
+                      <span
+                        class="map-card__member-role-pill map-card__pill"
+                        data-tooltip={node.relationshipRole}
+                        tabindex="0"
+                        onmouseenter={handleTooltipShow}
+                        onmouseleave={handleTooltipHide}
+                        onfocus={handleTooltipShow}
+                        onblur={handleTooltipHide}
+                        onclick={handleTooltipTargetClick}
+                      >
+                        <span class="map-card__pill-text">{node.relationshipRole}</span>
+                      </span>
+                    </template>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+        </template>
+      </div>
+    </template>
+
+    <template lwc:if={showFooter}>
+      <div class={footerClass}>
+        <template lwc:if={showFooterStart}>
+          <div class="map-card__footer-start">
+            <template lwc:if={showPrimaryPill}>
+              <span class="map-card__primary-pill">Primary</span>
+            </template>
+            <template lwc:if={showRecordTypeFooterPill}>
+              <span
+                class="map-card__primary-pill map-card__pill"
+                data-tooltip={node.sub}
+                tabindex="0"
+                onmouseenter={handleTooltipShow}
+                onmouseleave={handleTooltipHide}
+                onfocus={handleTooltipShow}
+                onblur={handleTooltipHide}
+                onclick={handleTooltipTargetClick}
+              >
+                <span class="map-card__pill-text">{node.sub}</span>
+              </span>
+            </template>
+            <template lwc:if={showRoleFooterPill}>
+              <span
+                class="map-card__role-pill map-card__role-pill_footer map-card__pill"
+                data-tooltip={node.sub}
+                tabindex="0"
+                onmouseenter={handleTooltipShow}
+                onmouseleave={handleTooltipHide}
+                onfocus={handleTooltipShow}
+                onblur={handleTooltipHide}
+                onclick={handleTooltipTargetClick}
+              >
+                <span class="map-card__pill-text">{node.sub}</span>
+              </span>
+            </template>
+          </div>
+        </template>
+        <template lwc:if={showFooterBadge}>
+          <button
+            type="button"
+            class="map-card__badge-toggle map-card__badge slds-badge"
+            aria-expanded={cardAriaExpanded}
+            aria-label={badgeToggleLabel}
+            onclick={handleBadgeToggle}
+          >
+            {node.badgeLabel}
+          </button>
+        </template>
+      </div>
+    </template>
+
+    <template lwc:if={showTooltip}>
+      <div class="map-card__tooltip" style={tooltipStyle} role="tooltip">
+        {tooltipText}
+      </div>
+    </template>
+  </article>
+</template>

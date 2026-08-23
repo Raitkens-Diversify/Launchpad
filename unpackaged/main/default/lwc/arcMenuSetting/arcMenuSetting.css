@@ -1,0 +1,55 @@
+/**
+ * Author: Hoang Long Vu To
+ * Date: 2026-08-18
+ *
+ * Layout and component-specific overrides only.
+ * Shared visuals come from diversifyStyles (.div-btn, .div-popover, typography utilities).
+ */
+:host {
+  display: inline-flex;
+}
+
+.menu-setting {
+  position: relative;
+  display: inline-flex;
+}
+
+.menu-setting__trigger.div-btn {
+  position: relative;
+  border: 0;
+  background: transparent;
+  color: var(--div-color-on-surface-1, var(--div-color-gray-600));
+}
+
+.menu-setting__trigger.div-btn--active {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.menu-setting__icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  display: block;
+  background-color: currentColor;
+  -webkit-mask-image: var(--icon-url);
+  mask-image: var(--icon-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.menu-setting__panel {
+  position: absolute;
+  top: calc(100% + var(--div-space-2, 0.5rem));
+  right: 0;
+  z-index: 200;
+}
+
+.menu-setting__panel .div-popover__option,
+.menu-setting__panel .div-popover__option:hover,
+.menu-setting__panel .div-popover__option:focus-visible {
+  text-decoration: none;
+}

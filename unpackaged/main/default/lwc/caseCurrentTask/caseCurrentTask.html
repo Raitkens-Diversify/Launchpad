@@ -1,0 +1,277 @@
+<template>
+
+    <lightning-card>
+
+        <!-- ================= TASK AVAILABLE ================= -->
+
+        <template if:true={hasTask}>
+
+            <div class="slds-p-around_small">
+
+                <!-- HEADER -->
+
+                <div class="slds-media slds-m-bottom_medium slds-align_absolute-center">
+
+                    <div class="slds-media__figure">
+
+                        <lightning-icon
+                            icon-name="standard:task"
+                            size="small">
+                        </lightning-icon>
+
+                    </div>
+
+                    <div class="slds-media__body">
+
+                        <h2 class="slds-text-heading_small">
+                            CURRENT TASK
+                        </h2>
+
+                        <p class="slds-text-heading_medium slds-text-title_bold">
+                            {task.Subject}
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- ================= ASSIGNED TO ================= -->
+
+                <div class="slds-m-bottom_medium">
+
+                    <label class="slds-form-element__label">
+                        Assigned To
+                    </label>
+
+                    <template if:false={isEditingOwner}>
+
+                        <div class="slds-grid slds-grid_vertical-align-center field-container">
+
+                            <div class="slds-grow">
+
+                                <span class="slds-form-element__static">
+                                    {task.Owner.Name}
+                                </span>
+
+                            </div>
+
+                            <template if:true={isOwnedByCurrentUser}>
+
+                                <lightning-button-icon
+                                    icon-name="utility:edit"
+                                    variant="bare"
+                                    alternative-text="Edit Assignee"
+                                    onclick={editOwner}>
+                                </lightning-button-icon>
+
+                            </template>
+
+                        </div>
+
+                    </template>
+
+                    <template if:true={isEditingOwner}>
+
+                        <lightning-input
+                            type="search"
+                            variant="label-hidden"
+                            value={assigneeSearchTerm}
+                            onchange={handleAssigneeSearch}>
+                        </lightning-input>
+
+                        <template if:true={isAssigneeDropdownOpen}>
+
+                            <div class="slds-dropdown slds-dropdown_fluid slds-dropdown_length-5 lookup-dropdown">
+
+                                <ul class="slds-listbox slds-listbox_vertical">
+
+                                    <template
+                                        for:each={assigneeSearchResults}
+                                        for:item="item">
+
+                                        <li
+                                            key={item.value}
+                                            class="slds-listbox__item"
+                                            data-value={item.value}
+                                            data-label={item.label}
+                                            onclick={handleAssigneeSelect}>
+
+                                            <div class="slds-media slds-listbox__option slds-media_small">
+
+                                                <span class="slds-media__figure">
+
+                                                    <lightning-icon
+                                                        icon-name={item.icon}
+                                                        size="x-small">
+                                                    </lightning-icon>
+
+                                                </span>
+
+                                                <span class="slds-media__body">
+                                                    {item.label}
+                                                </span>
+
+                                            </div>
+
+                                        </li>
+
+                                    </template>
+
+                                </ul>
+
+                            </div>
+
+                        </template>
+
+                    </template>
+
+                </div>
+
+                <!-- ================= DUE DATE ================= -->
+
+                <div class="slds-m-bottom_medium">
+
+                    <label class="slds-form-element__label">
+                        Due Date
+                    </label>
+
+                    <template if:false={isEditingDueDate}>
+
+                        <div class="slds-grid slds-grid_vertical-align-center field-container">
+
+                            <div class="slds-grow">
+
+                                <span class="slds-form-element__static">
+                                    {task.ActivityDate}
+                                </span>
+
+                            </div>
+
+                            <template if:true={isOwnedByCurrentUser}>
+
+                                <lightning-button-icon
+                                    icon-name="utility:edit"
+                                    variant="bare"
+                                    alternative-text="Edit Due Date"
+                                    onclick={editDueDate}>
+                                </lightning-button-icon>
+
+                            </template>
+
+                        </div>
+
+                    </template>
+
+                    <template if:true={isEditingDueDate}>
+
+                        <lightning-input
+                            type="date"
+                            variant="label-hidden"
+                            value={editedDueDate}
+                            onchange={handleDueDateChange}>
+                        </lightning-input>
+
+                    </template>
+
+                </div>
+
+                <!-- ================= DESCRIPTION ================= -->
+
+                <div class="slds-m-bottom_medium">
+
+                    <label class="slds-form-element__label">
+                        Description
+                    </label>
+
+                    <div class="description-box">
+
+                        <lightning-formatted-rich-text
+                            value={task.Description}>
+                        </lightning-formatted-rich-text>
+
+                    </div>
+
+                </div>
+
+                <!-- ================= ACTIONS ================= -->
+
+                <div class="slds-align_absolute-center">
+
+                    <!-- EDIT MODE -->
+
+                    <template if:true={isAnyFieldEditing}>
+
+                        <div class="slds-m-right_small">
+
+                            <lightning-button
+                                label="Cancel"
+                                variant="neutral"
+                                onclick={handleCancel}>
+                            </lightning-button>
+
+                        </div>
+
+                        <lightning-button
+                            label="Save"
+                            variant="brand"
+                            onclick={handleSave}>
+                        </lightning-button>
+
+                    </template>
+
+                    <!-- NORMAL MODE -->
+
+                    <template if:false={isAnyFieldEditing}>
+
+                        <!-- ASSIGN TO ME -->
+
+                        <template if:true={canAssignToMe}>
+
+                            <div class="slds-m-right_small">
+
+                                <lightning-button
+                                    label="Assign to Me"
+                                    variant="brand"
+                                    onclick={handleAssignToMe}>
+                                </lightning-button>
+
+                            </div>
+
+                        </template>
+
+                        <!-- MARK COMPLETE -->
+
+                        <template if:true={isOwnedByCurrentUser}>
+
+                            <lightning-button
+                                label="Mark Complete"
+                                variant="brand"
+                                onclick={handleMarkComplete}
+                                disabled={isCompleted}>
+                            </lightning-button>
+
+                        </template>
+
+                    </template>
+
+                </div>
+
+            </div>
+
+        </template>
+
+        <!-- ================= NO TASK ================= -->
+
+        <template if:false={hasTask}>
+
+            <div class="slds-p-around_medium slds-text-align_center">
+
+                No current task available.
+
+            </div>
+
+        </template>
+
+    </lightning-card>
+
+</template>

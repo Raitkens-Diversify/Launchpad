@@ -1,0 +1,85 @@
+/* Author: Hoang Long Vu To | Date: 2026-08-11
+   Input chrome from envelopeWizardStyles.css (.env-layout). */
+
+:host {
+  display: block;
+}
+
+.work-datatable {
+  display: block;
+  font-family: var(--div-font-family-base, "Inter", -apple-system, BlinkMacSystemFont, sans-serif);
+}
+
+.work-datatable__header {
+  margin: 0 0 12px;
+}
+
+.work-datatable__title {
+  margin: 0;
+  font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 2rem;
+  color: #374151;
+}
+
+.work-datatable__error {
+  margin: 0 0 12px;
+}
+
+.work-datatable__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin: 0 0 12px;
+}
+
+.work-datatable__toolbar-search {
+  flex: 1 1 260px;
+  max-width: 320px;
+  min-width: 0;
+  margin: 0 12px 0 0;
+}
+
+.work-datatable__toolbar-controls {
+  display: flex;
+  align-items: center;
+}
+
+.work-datatable__toolbar-scope {
+  flex: 0 0 auto;
+}
+
+.work-datatable__loading {
+  position: relative;
+  min-height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.work-datatable__table {
+  width: 100%;
+}
+
+.work-datatable__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.75rem 0;
+  font-size: var(--div-font-scale-base, 1rem);
+  color: #4b5563;
+}
+
+.work-datatable__footer-view-all {
+  color: #0250d9;
+  font-weight: 600;
+  cursor: default;
+}
+
+.work-datatable__toolbar-search lightning-input {
+  --slds-c-input-spacing-block-end: 0;
+  --slds-c-input-spacing-block-start: 0;
+}

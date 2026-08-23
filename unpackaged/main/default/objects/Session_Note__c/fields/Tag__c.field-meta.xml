@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Tag__c</fullName>
+    <description>Optional one-word label chosen from the tag chips (Observation, Question, Unexpected, Follow-up by default). Deliberately TEXT, not a picklist: the available tags come from UAT_Focus_Prompt__mdt and a cycle can override them via Test_Cycle__c.Focus_Prompts__c, so the value set is config and must not be pinned in schema. Blank is valid — tagging is entirely optional.</description>
+    <externalId>false</externalId>
+    <label>Tag</label>
+    <length>80</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

@@ -1,0 +1,13 @@
+<aura:component implements="lightning:availableForFlowScreens" access="global" controller="SelectPrimaryAndJointController">
+    <aura:attribute name="householdMembers" type="List" default="[]"/>
+    <aura:attribute name="householdMembersMinusPrimary" type="List" default="[]"/>
+    <aura:attribute name="householdId" type="String"/>
+    <aura:attribute name="selectedPrimaryOwnerId" type="String" />
+    <aura:attribute name="selectedJointOwnerId" type="String" />
+    <aura:attribute name="disabled" type="Boolean" default="true"/>
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+    <lightning:combobox name="primaryOwner" label="Who is the Primary Owner of the Account?" placeholder="--None--" options="{!v.householdMembers}" onchange="{!c.handleChange}" required="true"/>
+	<lightning:combobox name="jointOwner" label="Who is the Joint Owner of the Account?" placeholder="--None--" options="{!v.householdMembersMinusPrimary}" onchange="{!c.handleChangeMinusPrimary}" disabled="{!v.disabled}" required="true"/>
+</aura:component>

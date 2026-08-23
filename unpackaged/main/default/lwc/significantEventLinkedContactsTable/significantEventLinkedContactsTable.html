@@ -1,0 +1,104 @@
+<!-- sldsValidatorIgnore -->
+<!-- Author: Hoang Long Vu To | Date: 2026-07-14 -->
+<template>
+  <article
+    class="linked-contacts-card slds-card slds-card_boundary"
+    data-preview-canvas
+  >
+    <div class="slds-page-header slds-page-header_joined div-page-header-override">
+      <div>
+        <div class="slds-grid slds-grid_vertical-align-start">
+          <div class="slds-col slds-grid slds-grid_vertical-align-center">
+            <div class="slds-media__figure">
+              <lightning-icon
+                icon-name={headerIconName}
+                size="small"
+                alternative-text={title}
+              ></lightning-icon>
+            </div>
+            <div class="slds-media__body">
+              <div>
+                <h2 class="slds-card__header-title">
+                  <a
+                    href="#"
+                    class="slds-card__header-link"
+                    onclick={handleHeaderLinkClick}
+                  >
+                    <span class="slds-truncate" title={title}>{title}</span>
+                    <template lwc:if={showHeaderCount}>
+                      <span class="slds-truncate" title={headerCountLabel}
+                        >{headerCountLabel}</span
+                      >
+                    </template>
+                  </a>
+                </h2>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <lightning-button
+              class="slds-m-right_x-small"
+              label="New"
+              title="New"
+              onclick={handleNew}
+            ></lightning-button>
+            <lightning-button-icon
+              icon-name="utility:refresh"
+              variant="border-filled"
+              alternative-text="Refresh"
+              title="Refresh"
+              onclick={handleRefresh}
+            ></lightning-button-icon>
+          </div>
+        </div>
+        <template lwc:if={showStatusLine}>
+          <div>
+            <p class="slds-text-body--small">
+              <span class="countSortedByFilteredBy" role="status"
+                >{statusCountLabel}{statusSortedByLabel}{statusUpdatedLabel}</span
+              >
+            </p>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <template lwc:if={showCardBody}>
+      <div class="linked-contacts-card__body">
+        <lightning-datatable
+          key-field="rowKey"
+          data={datatableRows}
+          columns={datatableColumns}
+          sorted-by={datatableSortedBy}
+          sorted-direction={sortedDirection}
+          hide-checkbox-column
+          show-row-number-column
+          onsort={handleDatatableSort}
+          onrowaction={handleRowAction}
+        ></lightning-datatable>
+      </div>
+    </template>
+
+    <template lwc:if={showViewAll}>
+      <footer class="slds-card__footer slds-text-align_center">
+        <a href="#" class="slds-card__footer-action" onclick={handleViewAll}
+          >View All</a
+        >
+      </footer>
+    </template>
+
+    <template lwc:if={showPreviewPanel}>
+      <c-fsc-rel-member-popover
+        record-id={previewPanel.recordId}
+        member-name={previewPanel.memberName}
+        object-api-name="Account"
+        left={previewPanel.left}
+        top={previewPanel.top}
+        use-fixed-position={previewPanel.useFixedPosition}
+        disable-drag
+        onclose={handlePreviewClose}
+      ></c-fsc-rel-member-popover>
+    </template>
+  </article>
+</template>

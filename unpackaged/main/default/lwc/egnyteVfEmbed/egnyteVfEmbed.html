@@ -1,0 +1,55 @@
+<template>
+    <section class="egnyte-vf" aria-label={iframeTitle}>
+        <template if:true={showOpenFullPageLink}>
+            <template if:false={isPreviewHost}>
+                <div class="egnyte-vf__toolbar">
+                    <a
+                        class="egnyte-vf__open-link"
+                        href={vfPageUrl}
+                        onclick={handleOpenFullPage}
+                        aria-label="Open Egnyte in full page"
+                    >
+                        Open in full page
+                    </a>
+                </div>
+            </template>
+        </template>
+
+        <template if:true={showPreviewFallback}>
+            <div class="egnyte-vf__preview" role="region" aria-label="Egnyte preview placeholder">
+                <p class="egnyte-vf__preview-text">
+                    Visualforce is not available in Experience Builder preview. Open Egnyte on the published site to test the full experience.
+                </p>
+                <lightning-button
+                    label="Open Egnyte"
+                    title="Open Egnyte on the published site in a new tab"
+                    onclick={handleOpenEgnyteNewTab}
+                ></lightning-button>
+            </div>
+        </template>
+
+        <template if:true={showStatusSpinner}>
+            <div class="egnyte-vf__status">
+                <lightning-spinner alternative-text="Loading Egnyte" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:true={error}>
+            <div class="egnyte-vf__error" role="alert">{error}</div>
+        </template>
+
+        <template if:true={showIframe}>
+            <iframe
+                allowtransparency="true"
+                frameborder="0"
+                class="egnyte-vf__frame"
+                src={vfPageUrl}
+                title={iframeTitle}
+                style={iframeStyle}
+                sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-downloads"
+                onload={handleIframeLoad}
+                onerror={handleIframeError}
+            ></iframe>
+        </template>
+    </section>
+</template>

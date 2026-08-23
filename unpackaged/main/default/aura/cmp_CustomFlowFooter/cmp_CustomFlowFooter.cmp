@@ -1,0 +1,33 @@
+<aura:component access="global" implements="lightning:availableForFlowScreens">
+    <aura:attribute name="canPause" type="boolean"/>
+    <aura:attribute name="canBack" type="boolean"/>
+    <aura:attribute name="canNext" type="boolean"/>
+    <aura:attribute name="canFinish" type="boolean"/>
+    <aura:attribute name="availableActions" type="String[]"/>
+    
+    <aura:registerEvent name="navigateFlow" type="c:evt_navigateFlow"/>
+    <aura:handler name="init" value="{!this}" action="{!c.inIt}"/>
+    
+    <div aura:id="actionButtonBar" class="slds-clearfix slds-p-top_medium"/>
+    <div class="slds-float_left">
+        <aura:if isTrue="{!v.canPause}">
+        <lightning:button aura:id="PAUSE" label="Pause"
+                          variant="neutral" onclick="{!c.buttonPressed}"/>
+        </aura:if>
+    </div>
+    <div class="slds-float_right">
+    <aura:if isTrue="{!v.canBack}">
+        <lightning:button aura:id="BACK" label="Previous"
+                          variant="neutral" onclick="{!c.buttonPressed}"/>
+        </aura:if>
+        <aura:if isTrue="{!v.canNext}">
+        <lightning:button aura:id="NEXT" label="Next"
+                          variant="brand" onclick="{!c.buttonPressed}"/>
+        </aura:if>
+        <aura:if isTrue="{!v.canFinish}">
+        <lightning:button aura:id="FINISH" label="Finish"
+                          variant="brand" onclick="{!c.buttonPressed}"/>
+        </aura:if>
+    </div>
+   
+</aura:component>

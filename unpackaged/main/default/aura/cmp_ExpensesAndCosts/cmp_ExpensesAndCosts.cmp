@@ -1,0 +1,79 @@
+<aura:component implements="lightning:availableForFlowScreens" access="global">
+	<aura:attribute name="MandE" type="Integer" default="0"/>
+    <aura:attribute name="AdministrativeFee" type="Integer" default="0"/>
+    <aura:attribute name="NameOfRider1" type="String"/>   
+    <aura:attribute name="NameOfRider2" type="String"/>
+    <aura:attribute name="NameOfRider3" type="String"/>
+    <aura:attribute name="Rider1" type="Integer" default="0"/>
+    <aura:attribute name="Rider2" type="Integer" default="0"/>
+    <aura:attribute name="Rider3" type="Integer" default="0"/>
+    <aura:attribute name="OtherText" type="String"/>
+    <aura:attribute name="OtherPercent" type="Integer" default="0"/>
+    <aura:attribute name="Total" type="Integer" default="0" />
+    
+    <lightning:card title="Expenses and Costs">
+        <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+            <thead>
+                <tr>
+                    <th>Expense</th>
+                    <th>Cost</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="slds-hint-parent">
+                    <td>
+                        <label class="slds-form-element__label" style="margin-right: 0.5rem;">Mortality &amp; Expense Risk Fee (M&amp;E):</label></td>
+                    <td>
+                        <lightning:input type="number" value="{!v.MandE}" name="MandE" variant="label-hidden" formatter="percent-fixed" step="1" max="100"/>
+                    </td>
+                </tr>
+                <tr class="slds-hint-parent">
+                    <td>
+                        <label class="slds-form-element__label" style="margin-right: 0.5rem;">Administrative Fee:</label></td>
+                    <td>
+                        <lightning:input type="number" value="{!v.AdministrativeFee}" name="AdministrativeFee" variant="label-hidden" formatter="percent-fixed" step="1" max="100"/>
+                    </td>
+                </tr>
+                <tr class="slds-hint-parent">
+                    <td>
+                        <label class="slds-form-element__label" style="margin-right: 0.5rem;">Optional Rider Charges:</label></td>
+                </tr>
+                <tr class="slds-hint-parent">
+                    <td>
+                        <lightning:input type="String" value="{!v.NameOfRider1}" name="NameOfRider1" label="Name of Rider:"/></td>
+                    <td>
+                        <lightning:input type="number" value="{!v.Rider1}" name="Rider1" label=" " formatter="percent-fixed" step="1" max="100"/>
+                    </td>
+                </tr>
+                <tr class="slds-hint-parent">
+                    <td>
+                        <lightning:input type="String" value="{!v.NameOfRider2}" name="NameOfRider2" label="Name of Rider:"/></td>
+                    <td>
+                        <lightning:input type="number" value="{!v.Rider2}" name="Rider2" label=" " formatter="percent-fixed" step="1" max="100"/>
+                    </td>
+                </tr>
+                <tr class="slds-hint-parent">
+                    <td>
+                        <lightning:input type="String" value="{!v.NameOfRider3}" name="NameOfRider3" label="Name of Rider:"/></td>
+                    <td>
+                        <lightning:input type="number" value="{!v.Rider3}" name="Rider3" label=" " formatter="percent-fixed" step="1" max="100"/>
+                    </td>
+                </tr>
+                <tr class="slds-hint-parent">
+                    <td>
+                        <lightning:input type="String" value="{!v.OtherText}" name="OtherText" label="Other:"/></td>
+                    <td>
+                        <lightning:input type="number" value="{!v.OtherPercent}" name="OtherPercent" label=" " formatter="percent-fixed" step="1" max="100"/>
+                    </td>
+                </tr>
+                <tr class="slds-hint-parent">
+                    <td>
+                        <label class="slds-form-element__label" style="margin-right: 0.5rem;">Total Expenses (Excluding Sub-Accounts):</label></td>
+                    <td>
+                        <lightning:input type="number" value="{!v.Total}" name="Total" variant="label-hidden" formatter="percent-fixed" step="1" max="100"/>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </lightning:card>	
+</aura:component>

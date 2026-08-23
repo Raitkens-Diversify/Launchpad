@@ -1,0 +1,461 @@
+/**
+ * Author: Hoang Long Vu To
+ * Date: 2026-08-12
+ *
+ * Native HTML field control for arcRecordDetail — consistent styling independent of
+ * envelopeFieldControl / SLDS base components.
+ */
+import { LightningElement, api } from 'lwc';
+import { loadStyle } from 'lightning/platformResourceLoader';
+import diversifyStyles from '@salesforce/resourceUrl/diversifyStyles';
+import {
+  applyInputMask,
+  draftValuesEqual,
+  isEmptyValue,
+  isFormatValid,
+  normalizeDateWireValue
+} from 'c/envelopeFormSchema';
+
+export default class ArcRecordDetailField extends LightningElement {
+  @api field;
+
+  _stylesLoaded = false;
+  _validationMessage = '';
+
+  connectedCallback() {
+    if (this._stylesLoaded) {
+      return;
+    }
+    loadStyle(this, diversifyStyles).catch(() => {
+      // Non-fatal: fall back to local token defaults.
+    });
+    this._stylesLoaded = true;
+  }
+
+  get isTextInput() {
+    return (
+      this.isText ||
+      this.isNumber ||
+      this.isDate ||
+      this.isDateTime ||
+      this.isUnsupported
+    );
+  }
+
+  get isText() {
+    return ['STRING', 'EMAIL', 'PHONE', 'URL'].includes(this.field?.type);
+  }
+
+  get isTextarea() {
+    return this.field?.type === 'TEXTAREA';
+  }
+
+  get isNumber() {
+    return ['DOUBLE', 'INTEGER', 'CURRENCY', 'PERCENT'].includes(this.field?.type);
+  }
+
+  get isBoolean() {
+    return this.field?.type === 'BOOLEAN';
+  }
+
+  get isDate() {
+    return this.field?.type === 'DATE';
+  }
+
+  get isDateTime() {
+    return this.field?.type === 'DATETIME';
+  }
+
+  get isPicklist() {
+    return this.normalizedType === 'PICKLIST';
+  }
+
+  get isMultiPicklist() {
+    return this.normalizedType === 'MULTIPICKLIST';
+  }
+
+  get normalizedType() {
+    return String(this.field?.type || '').toUpperCase();
+  }
+
+  get isAddRecord() {
+    return this.field?.type === 'ADD_RECORD' || !!this.field?.addRecord;
+  }
+
+  get isUnsupported() {
+    return (
+      !!this.field &&
+      !this.isAddRecord &&
+      !this.isText &&
+      !this.isTextarea &&
+      !this.isNumber &&
+      !this.isBoolean &&
+      !this.isDate &&
+      !this.isDateTime &&
+      !this.isPicklist &&
+      !this.isMultiPicklist
+    );
+  }
+
+  get unsupportedMessage() {
+    return `Unsupported field type: ${this.field?.type}`;
+  }
+
+  get inputType() {
+    if (this.isUnsupported) {
+      return 'text';
+    }
+    if (this.field?.type === 'EMAIL') {
+      return 'email';
+    }
+    if (this.field?.type === 'PHONE') {
+      return 'tel';
+    }
+    if (this.field?.type === 'URL') {
+      return 'url';
+    }
+    if (this.isNumber) {
+      return 'number';
+    }
+    if (this.isDate) {
+      return 'date';
+    }
+    if (this.isDateTime) {
+      return 'datetime-local';
+    }
+    return 'text';
+  }
+
+  get stringValue() {
+    const value = this.field?.value;
+    if (value === null || value === undefined) {
+      return '';
+    }
+    if (this.isDate) {
+      return normalizeDateWireValue(value) || '';
+    }
+    if (this.isDateTime) {
+      return this.toDatetimeLocalValue(value);
+    }
+    return String(value);
+  }
+
+  get textareaValue() {
+    return this.field?.value ?? '';
+  }
+
+  get selectValue() {
+    return this.resolvePicklistValue(this.field?.value);
+  }
+
+  get isChecked() {
+    return this.field?.value === true || this.field?.value === 'true';
+  }
+
+  get picklistOptions() {
+    return this.field?.picklistOptions || [];
+  }
+
+  get picklistOptionsWithSelection() {
+    const selectedValue = this.selectValue;
+    return this.picklistOptions.map((option) => ({
+      ...option,
+      isSelected: String(option.value) === String(selectedValue)
+    }));
+  }
+
+  get multiPicklistValues() {
+    const raw = this.field?.value;
+    if (Array.isArray(raw)) {
+      return raw;
+    }
+    if (typeof raw === 'string' && raw.trim()) {
+      return raw.split(';').map((entry) => entry.trim()).filter(Boolean);
+    }
+    return [];
+  }
+
+  get multiPicklistOptions() {
+    const selected = new Set(this.multiPicklistValues);
+    return this.picklistOptions.map((option) => ({
+      ...option,
+      checked: selected.has(option.value) || selected.has(option.label)
+    }));
+  }
+
+  get placeholder() {
+    if (this.isUnsupported) {
+      return this.unsupportedMessage;
+    }
+    if (this.isDate) {
+      return 'Select a date';
+    }
+    if (this.isDateTime) {
+      return 'Select a date & time';
+    }
+    if (this.isText || this.isNumber || this.isTextarea) {
+      return `Enter ${this.humanizeLabel(this.field?.label)}`;
+    }
+    return undefined;
+  }
+
+  get maxLength() {
+    return (this.isText || this.isTextarea) && this.field?.maxLength > 0
+      ? this.field.maxLength
+      : undefined;
+  }
+
+  get numberStep() {
+    const scale = this.field?.scale;
+    return scale > 0 ? `0.${'0'.repeat(scale - 1)}1` : '1';
+  }
+
+  get minValue() {
+    return (this.isNumber || this.isDate) && this.field?.minValue
+      ? this.field.minValue
+      : undefined;
+  }
+
+  get maxValue() {
+    return (this.isNumber || this.isDate) && this.field?.maxValue
+      ? this.field.maxValue
+      : undefined;
+  }
+
+  get pattern() {
+    return this.isText && this.field?.pattern ? this.field.pattern : undefined;
+  }
+
+  get ariaLabel() {
+    return this.field?.label || 'Field';
+  }
+
+  get showValidationMessage() {
+    return !!this._validationMessage;
+  }
+
+  get validationMessage() {
+    return this._validationMessage;
+  }
+
+  get hasValidationError() {
+    return !!this._validationMessage;
+  }
+
+  get inputClass() {
+    const base = 'div-input div-input--record-detail';
+    return this.hasValidationError ? `${base} div-input--error` : base;
+  }
+
+  get textareaClass() {
+    const base = 'div-textarea div-input--record-detail';
+    return this.hasValidationError ? `${base} div-input--error` : base;
+  }
+
+  get selectClass() {
+    const base = 'div-select div-input--record-detail';
+    return this.hasValidationError ? `${base} div-input--error` : base;
+  }
+
+  renderedCallback() {
+    if (!this.isPicklist) {
+      return;
+    }
+
+    const select = this.template.querySelector('select.rdf-select');
+    const nextValue = this.selectValue;
+    if (!select || !nextValue || select.value === nextValue) {
+      return;
+    }
+
+    select.value = nextValue;
+  }
+
+  handleInputChange(event) {
+    let value = event.target.value;
+
+    if (this.field?.format && this.isText) {
+      value = applyInputMask(this.field.format, value, this.stringValue);
+      event.target.value = value;
+    }
+
+    if (this.isDateTime) {
+      value = this.fromDatetimeLocalValue(value);
+    }
+
+    if (this.isNumber && value !== '') {
+      value = Number(value);
+      if (!Number.isFinite(value)) {
+        return;
+      }
+    }
+
+    this.clearValidationMessage();
+    this.emitChange(value);
+  }
+
+  handleCheckboxChange(event) {
+    this.clearValidationMessage();
+    this.emitChange(event.target.checked);
+  }
+
+  handleSelectChange(event) {
+    this.clearValidationMessage();
+    this.emitChange(event.target.value);
+  }
+
+  handleMultiChange(event) {
+    const optionValue = event.target.value;
+    const current = this.multiPicklistValues;
+    const next = event.target.checked
+      ? [...current, optionValue]
+      : current.filter((entry) => entry !== optionValue);
+
+    this.clearValidationMessage();
+    this.emitChange(next);
+  }
+
+  handleBlur() {
+    this.reportValidity();
+  }
+
+  @api
+  flushPendingEdits() {
+    // Native inputs commit on change; nothing buffered.
+  }
+
+  @api
+  resetValue() {
+    this.clearValidationMessage();
+    const control = this.primaryControl();
+    if (!control) {
+      return;
+    }
+
+    if (control.type === 'checkbox' && !control.closest('.rdf-multi')) {
+      control.checked = this.isChecked;
+      return;
+    }
+
+    if (control.tagName === 'SELECT') {
+      control.value = this.selectValue;
+      return;
+    }
+
+    if (this.isMultiPicklist) {
+      const selected = new Set(this.multiPicklistValues);
+      this.template.querySelectorAll('.rdf-multi__checkbox').forEach((input) => {
+        input.checked = selected.has(input.value);
+      });
+      return;
+    }
+
+    control.value = this.stringValue;
+  }
+
+  @api
+  reportValidity() {
+    const valid = this.runValidation();
+    this._validationMessage = valid ? '' : this.buildValidationMessage();
+    return valid;
+  }
+
+  @api
+  checkValidity() {
+    return this.runValidation();
+  }
+
+  runValidation() {
+    const value = this.field?.value;
+
+    if (this.field?.required && isEmptyValue(value)) {
+      return false;
+    }
+
+    return isFormatValid(this.field, value);
+  }
+
+  buildValidationMessage() {
+    if (this.field?.required && isEmptyValue(this.field?.value)) {
+      return 'Complete this field.';
+    }
+    return this.field?.patternError || 'Enter a valid value.';
+  }
+
+  clearValidationMessage() {
+    this._validationMessage = '';
+  }
+
+  emitChange(value) {
+    if (draftValuesEqual(this.field?.value, value)) {
+      return;
+    }
+
+    this.dispatchEvent(
+      new CustomEvent('valuechange', {
+        detail: {
+          field: this.field?.apiName,
+          value
+        }
+      })
+    );
+  }
+
+  resolvePicklistValue(rawValue) {
+    if (rawValue === null || rawValue === undefined || rawValue === '') {
+      return '';
+    }
+
+    const text = String(rawValue).trim();
+    const options = this.picklistOptions;
+    const byValue = options.find((option) => String(option.value) === text);
+    if (byValue) {
+      return String(byValue.value);
+    }
+
+    const lowered = text.toLowerCase();
+    const byLabel = options.find(
+      (option) => String(option.label || '').trim().toLowerCase() === lowered
+    );
+    return byLabel ? String(byLabel.value) : text;
+  }
+
+  primaryControl() {
+    return this.template.querySelector(
+      '.rdf-input, .rdf-select, .rdf-textarea, .rdf-checkbox'
+    );
+  }
+
+  toDatetimeLocalValue(value) {
+    if (!value) {
+      return '';
+    }
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      return '';
+    }
+    const pad = (part) => String(part).padStart(2, '0');
+    return `${parsed.getFullYear()}-${pad(parsed.getMonth() + 1)}-${pad(parsed.getDate())}T${pad(parsed.getHours())}:${pad(parsed.getMinutes())}`;
+  }
+
+  fromDatetimeLocalValue(value) {
+    if (!value) {
+      return '';
+    }
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? value : parsed.toISOString();
+  }
+
+  humanizeLabel(label) {
+    if (!label) {
+      return '';
+    }
+    return label
+      .split(' ')
+      .map((word) => {
+        const isAcronym = word === word.toUpperCase() && /[A-Z]/.test(word);
+        return isAcronym ? word : word.toLowerCase();
+      })
+      .join(' ');
+  }
+}

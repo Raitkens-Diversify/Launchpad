@@ -1,0 +1,154 @@
+<template>
+    <div class="are">
+        <div class="are__bar">
+            <lightning-button-icon icon-name="utility:back"
+                                   alternative-text="Back to resources"
+                                   onclick={handleBack}></lightning-button-icon>
+            <div class="are__bar-text">
+                <h2 class="are__title">{headerTitle}</h2>
+                <p class="are__status">{statusNote}</p>
+            </div>
+            <div class="are__bar-actions">
+                <template if:true={copyUrl}>
+                    <lightning-button label="Copy link"
+                                      icon-name="utility:link"
+                                      onclick={handleCopyLink}
+                                      disabled={busy}></lightning-button>
+                </template>
+                <lightning-button variant="brand"
+                                  label="Save"
+                                  onclick={handleSave}
+                                  disabled={busy}></lightning-button>
+            </div>
+        </div>
+
+        <template if:true={errorMessage}>
+            <p class="are__error" role="alert">{errorMessage}</p>
+        </template>
+
+        <template if:true={loading}>
+            <div class="are__loading">
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={loading}>
+            <div class="are__grid">
+                <div class="are__col">
+                    <section class="are__card">
+                        <h3 class="are__card-title">Basics</h3>
+                        <lightning-combobox label="Resource type"
+                                            field-level-help="Decides how the resource is delivered: uploaded file, video embed, or an external link."
+                                            value={resourceType}
+                                            options={typeOptions}
+                                            onchange={handleTypeChange}></lightning-combobox>
+                        <lightning-input label="Name"
+                                         value={name}
+                                         required
+                                         max-length="80"
+                                         onchange={handleNameChange}></lightning-input>
+                        <lightning-input label="URL slug"
+                                         field-level-help="Becomes the resource's shareable link (Copy link in the header). Auto-suggested from the name; lowercase letters, numbers, and dashes only."
+                                         value={slug}
+                                         required
+                                         max-length="80"
+                                         onchange={handleSlugChange}
+                                         onblur={handleSlugBlur}></lightning-input>
+                        <template if:true={slugError}>
+                            <p class="are__field-error">{slugError}</p>
+                        </template>
+                        <lightning-textarea label="Description"
+                                            field-level-help="Shown on the resource card and detail page."
+                                            value={description}
+                                            onchange={handleDescriptionChange}></lightning-textarea>
+                        <template if:true={isVideo}>
+                            <lightning-input label="Video Embed URL"
+                                             field-level-help="The embeddable player URL (e.g. a YouTube or Vimeo embed link)."
+                                             value={videoEmbedUrl}
+                                             type="url"
+                                             required
+                                             onchange={handleVideoUrlChange}></lightning-input>
+                        </template>
+                        <template if:true={isExternal}>
+                            <lightning-input label="External URL"
+                                             field-level-help="Where the resource lives — opens in a new tab."
+                                             value={externalUrl}
+                                             type="url"
+                                             required
+                                             onchange={handleExternalUrlChange}></lightning-input>
+                        </template>
+                    </section>
+
+                    <template if:true={showUpload}>
+                        <section class="are__card">
+                            <h3 class="are__card-title">File</h3>
+                            <lightning-file-upload label="Upload the file users download"
+                                                   record-id={recordId}
+                                                   accept={acceptedFormats}
+                                                   onuploadfinished={handleUploadFinished}></lightning-file-upload>
+                            <template if:true={hasFiles}>
+                                <ul class="are__files">
+                                    <template for:each={files} for:item="file">
+                                        <li key={file.contentDocumentId} class="are__file">
+                                            <span class="are__file-name">{file.label}</span>
+                                            <span class="are__file-badge">{file.badge}</span>
+                                            <lightning-button-icon icon-name="utility:close"
+                                                                   size="x-small"
+                                                                   variant="border-filled"
+                                                                   alternative-text="Detach file"
+                                                                   data-id={file.contentDocumentId}
+                                                                   onclick={handleRemoveFile}></lightning-button-icon>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </template>
+                        </section>
+                    </template>
+
+                    <section class="are__card">
+                        <h3 class="are__card-title">Visibility</h3>
+                        <lightning-input type="checkbox"
+                                         label="Active"
+                                         field-level-help="Inactive resources are hidden everywhere in the Resource Center."
+                                         checked={active}
+                                         onchange={handleActiveChange}></lightning-input>
+                        <lightning-input type="checkbox"
+                                         label="Featured"
+                                         field-level-help="Featured resources appear in the home-page strip."
+                                         checked={featured}
+                                         onchange={handleFeaturedChange}></lightning-input>
+                        <lightning-input type="number"
+                                         label="Display order"
+                                         field-level-help="Lower numbers sort first within the category."
+                                         value={displayOrder}
+                                         onchange={handleOrderChange}></lightning-input>
+                    </section>
+                </div>
+
+                <div class="are__col are__col--side">
+                    <section class="are__card">
+                        <h3 class="are__card-title">Category</h3>
+                        <p class="are__help">Every resource lives in exactly one category.</p>
+                        <c-admin-category-tree nodes={categoryTree}
+                                               selected={categorySelection}
+                                               mode="single"
+                                               onselectionchange={handleCategoryChange}></c-admin-category-tree>
+                    </section>
+
+                    <section class="are__card">
+                        <h3 class="are__card-title">Related articles</h3>
+                        <p class="are__help">
+                            Help Center articles shown with this resource — the link is created
+                            for you, no Ids to copy.
+                        </p>
+                        <c-admin-related-linker search-type="articleLinks"
+                                                label="Attached articles"
+                                                placeholder="Search published articles…"
+                                                items={articleItems}
+                                                onitemschange={handleArticlesChange}></c-admin-related-linker>
+                    </section>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

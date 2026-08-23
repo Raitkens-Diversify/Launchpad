@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Account_Status__c</fullName>
+    <label>Account Status</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Advisor Only</fullName>
+                <default>false</default>
+                <label>Advisor Only</label>
+            </value>
+            <value>
+                <fullName>DB-Copy</fullName>
+                <default>false</default>
+                <label>DB-Copy</label>
+            </value>
+            <value>
+                <fullName>Demo</fullName>
+                <default>false</default>
+                <label>Demo</label>
+            </value>
+            <value>
+                <fullName>Manually Managed</fullName>
+                <default>false</default>
+                <label>Manually Managed</label>
+            </value>
+            <value>
+                <fullName>Non-Downloading</fullName>
+                <default>false</default>
+                <label>Non-Downloading</label>
+            </value>
+            <value>
+                <fullName>Normal Downloading</fullName>
+                <default>false</default>
+                <label>Normal Downloading</label>
+            </value>
+            <value>
+                <fullName>Pending</fullName>
+                <default>false</default>
+                <label>Pending</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

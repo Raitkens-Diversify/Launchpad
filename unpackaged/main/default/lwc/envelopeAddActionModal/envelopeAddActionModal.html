@@ -1,0 +1,40 @@
+<template>
+    <c-ds-modal-v2
+        is-open={isOpen}
+        title="Add action item"
+        subtitle={subtitle}
+        size="medium"
+        onclose={handleClose}>
+        <div class="add-action__grid">
+            <template for:each={actionRows} for:item="action">
+                <div
+                    key={action.id}
+                    class={action.cardClass}
+                    data-id={action.id}
+                    onclick={handleCardClick}>
+                    <lightning-input
+                        type="checkbox"
+                        label={action.label}
+                        data-id={action.id}
+                        checked={action.selected}
+                        disabled={action.disabled}
+                        onchange={handleToggle}>
+                    </lightning-input>
+                </div>
+            </template>
+        </div>
+
+        <div slot="footer" class="add-action__footer">
+            <lightning-button
+                variant="neutral"
+                label="Cancel"
+                onclick={handleCancel}>
+            </lightning-button>
+            <lightning-button
+                variant="brand"
+                label="Confirm"
+                onclick={handleConfirm}>
+            </lightning-button>
+        </div>
+    </c-ds-modal-v2>
+</template>

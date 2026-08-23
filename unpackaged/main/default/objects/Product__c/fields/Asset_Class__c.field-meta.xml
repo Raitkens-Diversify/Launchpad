@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Asset_Class__c</fullName>
+    <label>Asset Class</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Private Real Estate</fullName>
+                <default>false</default>
+                <label>Private Real Estate</label>
+            </value>
+            <value>
+                <fullName>Private Credit</fullName>
+                <default>false</default>
+                <label>Private Credit</label>
+            </value>
+            <value>
+                <fullName>Private Equity</fullName>
+                <default>false</default>
+                <label>Private Equity</label>
+            </value>
+            <value>
+                <fullName>Energy Programs</fullName>
+                <default>false</default>
+                <label>Energy Programs</label>
+            </value>
+            <value>
+                <fullName>Interval Funds</fullName>
+                <default>false</default>
+                <label>Interval Funds</label>
+            </value>
+            <value>
+                <fullName>Structured Notes</fullName>
+                <default>false</default>
+                <label>Structured Notes</label>
+            </value>
+            <value>
+                <fullName>Not Applicable</fullName>
+                <default>false</default>
+                <label>Not Applicable</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

@@ -1,0 +1,204 @@
+<template>
+    <div class="auc">
+        <template if:true={isDetail}>
+            <c-admin-uat-case-detail case-id={detailCaseId}
+                                     open-execution-id={detailExecutionId}
+                                     origin-cycle-id={originCycleId}
+                                     origin-cycle-name={originCycleName}
+                                     onback={handleDetailBack}
+                                     onnavigatecycle={handleNavigateCycle}></c-admin-uat-case-detail>
+        </template>
+
+        <template if:true={isList}>
+            <template if:true={errorMessage}>
+                <p class="auc__error" role="alert">{errorMessage}</p>
+            </template>
+
+            <template if:true={loading}>
+                <div class="auc__loading">
+                    <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+                </div>
+            </template>
+
+            <template if:false={loading}>
+                <div class="auc__toolbar">
+                    <lightning-input type="search"
+                                     label="Search"
+                                     variant="label-hidden"
+                                     placeholder="Search by title, Case ID, or module…"
+                                     value={searchTerm}
+                                     onchange={handleSearchChange}
+                                     class="auc__search"></lightning-input>
+                    <lightning-combobox label="System"
+                                        variant="label-hidden"
+                                        options={systemOptions}
+                                        value={systemFilter}
+                                        onchange={handleSystemFilterChange}></lightning-combobox>
+                    <lightning-combobox label="Latest run status"
+                                        variant="label-hidden"
+                                        options={statusOptions}
+                                        value={statusFilter}
+                                        onchange={handleStatusFilterChange}></lightning-combobox>
+                    <template if:true={hasRetiredRows}>
+                        <lightning-input type="toggle"
+                                         label={showRetiredLabel}
+                                         checked={showRetired}
+                                         onchange={handleShowRetiredToggle}></lightning-input>
+                    </template>
+                    <lightning-button variant="brand"
+                                      label="New test case"
+                                      onclick={handleNewCase}></lightning-button>
+                </div>
+
+                <template if:true={hasSelection}>
+                    <div class="auc__bulkbar">
+                        <span class="auc__bulkbar-count">{selectedCountLabel}</span>
+                        <lightning-combobox label="Move to module"
+                                            variant="label-hidden"
+                                            options={bulkModuleOptions}
+                                            value={bulkModuleId}
+                                            onchange={handleBulkModuleChange}
+                                            class="auc__bulkbar-picker"></lightning-combobox>
+                        <lightning-button variant="brand"
+                                          label="Move"
+                                          disabled={moveDisabled}
+                                          onclick={handleMoveClick}></lightning-button>
+                        <button type="button" class="auc__link" onclick={handleClearSelection}>Clear</button>
+                    </div>
+                </template>
+
+                <template if:true={hasRows}>
+                    <div class="auc__table-wrap">
+                        <table class="auc__table">
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="auc__check">
+                                        <lightning-input type="checkbox"
+                                                         label="Select all shown"
+                                                         variant="label-hidden"
+                                                         checked={allSelected}
+                                                         onchange={handleToggleAll}></lightning-input>
+                                    </th>
+                                    <th scope="col">Test case</th>
+                                    <th scope="col">Module</th>
+                                    <th scope="col">Creation status</th>
+                                    <th scope="col">Latest run</th>
+                                    <th scope="col">Assigned</th>
+                                    <th scope="col">Latest run status</th>
+                                    <th scope="col">Result</th>
+                                    <th scope="col"><span class="auc__sr">Actions</span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={filteredRows} for:item="row">
+                                    <tr key={row.id}>
+                                        <td class="auc__check">
+                                            <lightning-input type="checkbox"
+                                                             label={row.selectLabel}
+                                                             variant="label-hidden"
+                                                             checked={row.selected}
+                                                             data-id={row.id}
+                                                             onchange={handleToggleRow}></lightning-input>
+                                        </td>
+                                        <td>
+                                            <button type="button"
+                                                    class="auc__link auc__case"
+                                                    data-id={row.id}
+                                                    onclick={handleOpenDetail}>
+                                                <span class="auc__case-title">{row.titleDisplay}</span>
+                                                <span class="auc__case-code">{row.caseCode}</span>
+                                            </button>
+                                        </td>
+                                        <td>{row.moduleName}</td>
+                                        <td><span class={row.creationClass}>{row.creationDisplay}</span></td>
+                                        <td>{row.latestRunDisplay}</td>
+                                        <td>{row.assignedDisplay}</td>
+                                        <td>{row.statusDisplay}</td>
+                                        <td>{row.resultDisplay}</td>
+                                        <td class="auc__actions">
+                                            <lightning-button label="Open"
+                                                              size="small"
+                                                              data-id={row.id}
+                                                              onclick={handleOpenDetail}></lightning-button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+                <template if:false={hasRows}>
+                    <p class="auc__empty">No test cases match. Create the first one.</p>
+                </template>
+            </template>
+
+            <!-- Outer guard: the slot bindings dereference {modal.*}, which is
+                 null until the modal opens — mount the dialog only when open. -->
+            <template if:true={modalOpen}>
+            <c-ds-modal-v2 is-open={modalOpen} title="New test case" size="small" allow-overflow onclose={handleModalCancel}>
+                        <lightning-combobox label="System"
+                                            options={modalSystemOptions}
+                                            value={modal.systemId}
+                                            required
+                                            onchange={handleModalSystemChange}></lightning-combobox>
+                        <lightning-combobox label="Module group"
+                                            options={modalGroupOptions}
+                                            value={modal.groupId}
+                                            required
+                                            disabled={groupDisabled}
+                                            onchange={handleModalGroupChange}></lightning-combobox>
+                        <lightning-combobox label="Module"
+                                            options={modalModuleOptions}
+                                            value={modal.moduleId}
+                                            required
+                                            disabled={moduleDisabled}
+                                            onchange={handleModalModuleChange}></lightning-combobox>
+                        <div class="auc-modal__pair">
+                            <lightning-input label="Version"
+                                             value={modal.version}
+                                             required
+                                             max-length="10"
+                                             onchange={handleModalVersionChange}></lightning-input>
+                            <lightning-input type="number"
+                                             label="Sequence"
+                                             field-level-help="Auto-suggested (max in module + 1, seeded at 1001); editable."
+                                             value={modal.sequence}
+                                             onchange={handleModalSequenceChange}></lightning-input>
+                        </div>
+                        <lightning-combobox label="Testing surface"
+                                            options={surfaceOptions}
+                                            value={modal.testingSurface}
+                                            onchange={handleModalSurfaceChange}></lightning-combobox>
+                        <lightning-combobox label="Add to book when complete"
+                                            field-level-help="Optional. When this case's Creation status reaches Complete it is appended to this test book automatically — no separate Edit Book step."
+                                            options={modalBookOptions}
+                                            value={modal.targetBookId}
+                                            onchange={handleModalBookChange}></lightning-combobox>
+                        <div class="auc-modal__preview">
+                            <span class="auc-modal__preview-label">Case ID preview</span>
+                            <code class="auc-modal__preview-code">{caseIdPreview}</code>
+                        </div>
+                        <lightning-button slot="footer"
+                                          label="Cancel"
+                                          disabled={saving}
+                                          onclick={handleModalCancel}></lightning-button>
+                        <lightning-button slot="footer"
+                                          variant="brand"
+                                          label="Create"
+                                          disabled={saving}
+                                          onclick={handleModalCreate}></lightning-button>
+            </c-ds-modal-v2>
+            </template>
+
+            <template if:true={confirmOpen}>
+                <c-admin-confirm-modal header={confirm.header}
+                                       message={confirm.message}
+                                       confirm-label={confirm.confirmLabel}
+                                       variant={confirm.variant}
+                                       busy={saving}
+                                       onconfirm={handleConfirmProceed}
+                                       oncancel={handleConfirmCancel}></c-admin-confirm-modal>
+            </template>
+        </template>
+    </div>
+</template>

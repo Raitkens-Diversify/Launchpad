@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Affiliations --></label>
+        <name>Affiliations__c</name>
+        <picklistValues>
+            <masterLabel>DAS</masterLabel>
+            <translation><!-- DAS --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DAS / BD</masterLabel>
+            <translation><!-- DAS / BD --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DFPG</masterLabel>
+            <translation><!-- DFPG --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DWM</masterLabel>
+            <translation><!-- DWM --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DWM / BD</masterLabel>
+            <translation><!-- DWM / BD --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

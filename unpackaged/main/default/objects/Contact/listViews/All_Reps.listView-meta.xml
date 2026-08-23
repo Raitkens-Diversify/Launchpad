@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>All_Reps</fullName>
+    <columns>FULL_NAME</columns>
+    <columns>ACCOUNT.NAME</columns>
+    <columns>CONTACT.TITLE</columns>
+    <columns>Rep_Id__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Rep_Id__c</field>
+        <operation>notEqual</operation>
+    </filters>
+    <label>All Reps</label>
+</ListView>

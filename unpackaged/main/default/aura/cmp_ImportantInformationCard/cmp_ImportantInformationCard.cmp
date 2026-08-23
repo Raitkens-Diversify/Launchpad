@@ -1,0 +1,9 @@
+<aura:component implements="force:hasRecordId,flexipage:availableForRecordHome">
+    <aura:attribute name="ImportantInformation" type="String" />
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <lightning:card>
+    	Important Information: 
+    </lightning:card>
+	
+</aura:component>

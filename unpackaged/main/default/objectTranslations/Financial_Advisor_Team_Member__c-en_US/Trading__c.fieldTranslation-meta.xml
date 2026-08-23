@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <help><!-- This is the person on your team who will enter trades. --></help>
+        <label><!-- Trading --></label>
+        <name>Trading__c</name>
+    </CustomFieldTranslation>

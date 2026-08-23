@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Trust_Type__c</fullName>
+    <label>Trust Type</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Joint (Community Property, JTWROS, Tenants in Common, Tenants in the Entirety)</fullName>
+                <default>false</default>
+                <label>Joint (Community Property, JTWROS, Tenants in Common, Tenants in the Entirety)</label>
+            </value>
+            <value>
+                <fullName>Trust</fullName>
+                <default>false</default>
+                <label>Trust</label>
+            </value>
+            <value>
+                <fullName>UTMA/UGMA</fullName>
+                <default>false</default>
+                <label>UTMA/UGMA</label>
+            </value>
+            <value>
+                <fullName>Corporation (C or S)</fullName>
+                <default>false</default>
+                <label>Corporation (C or S)</label>
+            </value>
+            <value>
+                <fullName>Estate</fullName>
+                <default>false</default>
+                <label>Estate</label>
+            </value>
+            <value>
+                <fullName>Other Non-Trust Fiduciary (Conservatorship or Guardianship)</fullName>
+                <default>false</default>
+                <label>Other Non-Trust Fiduciary (Conservatorship or Guardianship)</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

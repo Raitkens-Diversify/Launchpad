@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Search Type --></label>
+        <name>Search_Type__c</name>
+        <picklistValues>
+            <masterLabel>Fallback</masterLabel>
+            <translation><!-- Fallback --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Full</masterLabel>
+            <translation><!-- Full --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Fuzzy</masterLabel>
+            <translation><!-- Fuzzy --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Typeahead</masterLabel>
+            <translation><!-- Typeahead --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

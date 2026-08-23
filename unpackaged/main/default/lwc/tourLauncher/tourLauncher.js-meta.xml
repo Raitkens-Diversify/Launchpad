@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Tour Launcher</masterLabel>
+    <description>Runs a published guided tour on this page. Works in Experience Cloud and core app.</description>
+    <targets>
+        <target>lightning__AppPage</target>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <!-- Experience Builder properties must live on lightningCommunity__Default;
+         the __Page target rejects property tags. -->
+    <targetConfigs>
+        <targetConfig targets="lightning__AppPage">
+            <property name="tourKey" type="String" label="Tour Key"
+                description="API key of the published tour to run, e.g. nexus_help"/>
+            <property name="autoStartOverride" type="String" default="auto"
+                label="Auto Start"
+                description="auto = start when eligible; never = only via API; always = ignore saved state (testing)"/>
+        </targetConfig>
+        <targetConfig targets="lightningCommunity__Default">
+            <property name="tourKey" type="String" label="Tour Key"
+                description="API key of the published tour to run, e.g. nexus_help"/>
+            <property name="autoStartOverride" type="String" default="auto"
+                label="Auto Start"
+                description="auto = start when eligible; never = only via API; always = ignore saved state (testing)"/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

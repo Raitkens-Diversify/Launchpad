@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Microsoft License Attributes --></label>
+        <name>Microsoft_License_Attributes__c</name>
+        <picklistValues>
+            <masterLabel>Exchange Online (Plan 1)</masterLabel>
+            <translation><!-- Exchange Online (Plan 1) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Exchange Online (Plan 2)</masterLabel>
+            <translation><!-- Exchange Online (Plan 2) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Microsoft 365 Business Premium</masterLabel>
+            <translation><!-- Microsoft 365 Business Premium --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Microsoft 365 E5 Information Protection and Governance</masterLabel>
+            <translation><!-- Microsoft 365 E5 Information Protection and Governance --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Power Automate Premium</masterLabel>
+            <translation><!-- Power Automate Premium --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

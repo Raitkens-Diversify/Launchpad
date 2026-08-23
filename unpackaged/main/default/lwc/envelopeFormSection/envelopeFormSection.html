@@ -1,0 +1,70 @@
+<!-- Author: Mile Cacanovic -->
+<template>
+    <div class={sectionClass}>
+        <template lwc:if={showHeader}>
+            <header class="section__header">
+                <div class="section__heading">
+                    <h3 class="section__title">{label}</h3>
+                    <template lwc:if={hasKeyPoint}>
+                        <lightning-badge
+                            class="section__badge"
+                            label="Key Point"
+                            icon-name="utility:priority"
+                            icon-position="end">
+                        </lightning-badge>
+                    </template>
+                </div>
+                <template lwc:if={hasStatus}>
+                    <div class="section__statuses">
+                        <template lwc:if={isIncomplete}>
+                            <span class="section__status section__status_missing">
+                                <lightning-icon
+                                    icon-name="utility:warning"
+                                    size="x-small"
+                                    variant="warning">
+                                </lightning-icon>
+                                <span class="section__status-text">Inputs missing</span>
+                            </span>
+                        </template>
+                        <template lwc:if={isUpdated}>
+                            <span class="section__status section__status_updated">
+                                <span class="section__status-text">Inputs updated</span>
+                            </span>
+                        </template>
+                    </div>
+                </template>
+            </header>
+        </template>
+        <template lwc:if={isTradeInstructions}>
+            <c-envelope-trade-instructions
+                value={section.value}
+                options={section.options}
+                funded={section.funded}
+                ontradechange={handleBodyChange}>
+            </c-envelope-trade-instructions>
+        </template>
+        <template lwc:elseif={isRelatedParties}>
+            <c-envelope-related-parties
+                requirements={section.requirements}
+                value={section.value}
+                entity-id={section.entityId}
+                household-id={section.householdId}
+                envelope-id={section.envelopeId}
+                onpartieschange={handleBodyChange}>
+            </c-envelope-related-parties>
+        </template>
+        <template lwc:else>
+            <div class="section__fields">
+                <template for:each={fields} for:item="field">
+                    <div key={field.key} class="section__field">
+                        <c-envelope-field-control
+                            field={field}
+                            data-field={field.apiName}
+                            onvaluechange={handleFieldChange}>
+                        </c-envelope-field-control>
+                    </div>
+                </template>
+            </div>
+        </template>
+    </div>
+</template>

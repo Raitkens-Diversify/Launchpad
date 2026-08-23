@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <columns>
+        <field>Financial_Account__c.Check_Logs__r$Id</field>
+    </columns>
+    <columns>
+        <field>Financial_Account__c.Check_Logs__r$Name</field>
+    </columns>
+    <columns>
+        <field>Financial_Account__c.Check_Logs__r$Received_Date__c</field>
+    </columns>
+    <columns>
+        <field>Financial_Account__c.Check_Logs__r$Sent_Date__c</field>
+    </columns>
+    <columns>
+        <field>Financial_Account__c$Primary_Owner__c</field>
+    </columns>
+    <columns>
+        <field>Financial_Account__c$Joint_Owner__c</field>
+    </columns>
+    <columns>
+        <field>Financial_Account__c$Financial_Advisor_Team__c</field>
+    </columns>
+    <columns>
+        <aggregateTypes>Sum</aggregateTypes>
+        <field>Financial_Account__c.Check_Logs__r$Amount__c</field>
+    </columns>
+    <columns>
+        <field>Financial_Account__c.Check_Logs__r$Status__c</field>
+    </columns>
+    <description>Report of Financial Accounts with Check Logs</description>
+    <format>Summary</format>
+    <groupingsDown>
+        <dateGranularity>Day</dateGranularity>
+        <field>Financial_Account__c$Name</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <name>Check Log Oversight Report</name>
+    <params>
+        <name>co</name>
+        <value>1</value>
+    </params>
+    <reportType>Financial_Accounts_w_Check_Logs__c</reportType>
+    <scope>organization</scope>
+    <showDetails>true</showDetails>
+    <showGrandTotal>true</showGrandTotal>
+    <showSubTotals>true</showSubTotals>
+    <timeFrameFilter>
+        <dateColumn>Financial_Account__c.Check_Logs__r$Received_Date__c</dateColumn>
+        <interval>INTERVAL_CURRENT</interval>
+    </timeFrameFilter>
+</Report>

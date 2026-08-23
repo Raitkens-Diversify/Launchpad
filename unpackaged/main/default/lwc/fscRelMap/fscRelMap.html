@@ -1,0 +1,317 @@
+<template>
+    <!-- Author: Hoang Long Vu To | Date: 2026-06-11 -->
+    <h2 class="slds-assistive-text">Relationship map</h2>
+
+    <template lwc:if={isLoading}>
+        <div class="map-shell__spinner slds-align_absolute-center slds-p-around_medium">
+            <lightning-spinner
+                alternative-text={loadingMessage}
+                size="small"
+            ></lightning-spinner>
+        </div>
+    </template>
+
+    <template lwc:elseif={showResolveError}>
+        <section class="map-shell map-shell_error slds-theme_default" aria-label="Relationship map error">
+            <p class="map-shell__message slds-text-body_small">{resolveErrorMessage}</p>
+        </section>
+    </template>
+
+    <template lwc:elseif={showTreeError}>
+        <section class="map-shell map-shell_error slds-theme_default" aria-label="Relationship map error">
+            <p class="map-shell__message slds-text-body_small">{apexErrorMessage}</p>
+        </section>
+    </template>
+
+    <template lwc:elseif={showMap}>
+        <article class="map-shell slds-card">
+            <div class="slds-card__header slds-grid">
+                <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                    <div class="slds-media__figure">
+                        <lightning-icon
+                            icon-name="standard:hierarchy"
+                            alternative-text="Relationship map"
+                        ></lightning-icon>
+                    </div>
+                    <div class="slds-media__body">
+                        <h2 class="slds-text-heading_small">Relationship Map</h2>
+                        <p class="slds-text-body_small">{householdSubtitle}</p>
+                    </div>
+                </header>
+
+                <div class="slds-no-flex map-shell__actions">
+                    <lightning-button
+                        label={expandCollapseLabel}
+                        title={expandCollapseLabel}
+                        variant="neutral"
+                        disabled={isMapBusy}
+                        onclick={handleExpandCollapseToggle}
+                    ></lightning-button>
+                </div>
+            </div>
+
+            <div class="slds-card__body map-shell__body">
+                <div
+                    class="map-canvas"
+                    style={mapCanvasStyle}
+                    data-map-canvas
+                    aria-busy={isMapBusy}
+                >
+                    <template lwc:if={isMapBusy}>
+                        <div class="map-canvas__loading" role="status" aria-live="polite">
+                            <lightning-spinner
+                                alternative-text={loadingMessage}
+                                size="small"
+                            ></lightning-spinner>
+                        </div>
+                    </template>
+                    <svg
+                        class="map-canvas__wires"
+                        xmlns="http://www.w3.org/2000/svg"
+                        preserveAspectRatio="xMinYMin meet"
+                        aria-hidden="true"
+                    ></svg>
+
+                    <div class="map-canvas__tree">
+                        <template lwc:if={displayTree}>
+                            <template lwc:if={isUnlinkedPersonCentricMap}>
+                                <div class="map-node-row">
+                                    <div class="map-node-row__card" data-anchor-id={displayTree.id}>
+                                        <c-fsc-rel-map-card
+                                            node={displayTree}
+                                            active-preview-source-id={activePreviewSourceId}
+                                            oncardaction={handleCardAction}
+                                        ></c-fsc-rel-map-card>
+                                    </div>
+
+                                    <template lwc:if={displayTree.isOpen}>
+                                        <div class="map-node-row__children">
+                                            <template lwc:if={personFamilyGroup}>
+                                                <div class="map-node-row map-node-row_nested">
+                                                    <div
+                                                        class="map-node-row__card map-node-row__card_group"
+                                                        data-anchor-id={personFamilyGroup.id}
+                                                    >
+                                                        <c-fsc-rel-map-card
+                                                            node={personFamilyGroup}
+                                                            active-preview-source-id={activePreviewSourceId}
+                                                            oncardaction={handleCardAction}
+                                                        ></c-fsc-rel-map-card>
+                                                    </div>
+
+                                                    <template lwc:if={personFamilyGroup.isOpen}>
+                                                        <div class="map-node-row__children">
+                                                            <template
+                                                                for:each={personFamilyGroup.children}
+                                                                for:item="contact"
+                                                            >
+                                                                <div
+                                                                    key={contact.id}
+                                                                    class="map-node-row map-node-row_nested"
+                                                                >
+                                                                    <div
+                                                                        class="map-node-row__card"
+                                                                        data-anchor-id={contact.id}
+                                                                    >
+                                                                        <c-fsc-rel-map-card
+                                                                            node={contact}
+                                                                            active-preview-source-id={activePreviewSourceId}
+                                                                            oncardaction={handleCardAction}
+                                                                        ></c-fsc-rel-map-card>
+                                                                    </div>
+                                                                </div>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </template>
+
+                                            <c-fsc-rel-map-relationship-groups
+                                                groups={personRelationshipGroups}
+                                                active-preview-source-id={activePreviewSourceId}
+                                                oncardaction={handleCardAction}
+                                            ></c-fsc-rel-map-relationship-groups>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <template lwc:else>
+                            <div class="map-node-row">
+                                <div class="map-node-row__card" data-anchor-id={displayTree.id}>
+                                    <c-fsc-rel-map-card
+                                        node={displayTree}
+                                        active-preview-source-id={activePreviewSourceId}
+                                        oncardaction={handleCardAction}
+                                    ></c-fsc-rel-map-card>
+                                </div>
+
+                                <template lwc:if={displayTree.isOpen}>
+                                    <div class="map-node-row__children map-node-row__children_top-level-groups">
+                                        <template for:each={displayTree.children} for:item="group">
+                                            <div key={group.id} class="map-top-level-group-row">
+                                                <div
+                                                    class="map-node-row__card map-node-row__card_group"
+                                                    data-anchor-id={group.id}
+                                                >
+                                                    <c-fsc-rel-map-card
+                                                        node={group}
+                                                        active-preview-source-id={activePreviewSourceId}
+                                                        oncardaction={handleCardAction}
+                                                    ></c-fsc-rel-map-card>
+                                                </div>
+
+                                                <template lwc:if={group.isOpen}>
+                                                    <div class="map-node-row__children map-top-level-group-row__content">
+                                                        <template for:each={group.children} for:item="child">
+                                                            <div
+                                                                key={child.rowKey}
+                                                                class="map-node-row map-node-row_nested"
+                                                            >
+                                                                <div
+                                                                    class="map-node-row__card"
+                                                                    data-anchor-id={child.id}
+                                                                >
+                                                                    <c-fsc-rel-map-card
+                                                                        node={child}
+                                                                        active-preview-source-id={activePreviewSourceId}
+                                                                        oncardaction={handleCardAction}
+                                                                    ></c-fsc-rel-map-card>
+                                                                </div>
+
+                                                                <template lwc:if={child.isOpen}>
+                                                                    <div class="map-node-row__children">
+                                                                        <template lwc:if={child.isClassificationGroup}>
+                                                                            <template
+                                                                                for:each={child.children}
+                                                                                for:item="classificationAccount"
+                                                                            >
+                                                                                <div
+                                                                                    key={classificationAccount.id}
+                                                                                    class="map-node-row map-node-row_nested"
+                                                                                >
+                                                                                    <div
+                                                                                        class="map-node-row__card"
+                                                                                        data-anchor-id={classificationAccount.id}
+                                                                                    >
+                                                                                        <c-fsc-rel-map-card
+                                                                                            node={classificationAccount}
+                                                                                            active-preview-source-id={activePreviewSourceId}
+                                                                                            oncardaction={handleCardAction}
+                                                                                        ></c-fsc-rel-map-card>
+                                                                                    </div>
+
+                                                                                    <template lwc:if={classificationAccount.isOpen}>
+                                                                                        <div class="map-node-row__children">
+                                                                                            <template
+                                                                                                for:each={classificationAccount.children}
+                                                                                                for:item="member"
+                                                                                            >
+                                                                                                <div
+                                                                                                    key={member.id}
+                                                                                                    class="map-node-row map-node-row_nested"
+                                                                                                >
+                                                                                                    <div
+                                                                                                        class="map-node-row__card"
+                                                                                                        data-anchor-id={member.id}
+                                                                                                    >
+                                                                                                        <c-fsc-rel-map-card
+                                                                                                            node={member}
+                                                                                                            active-preview-source-id={activePreviewSourceId}
+                                                                                                            oncardaction={handleCardAction}
+                                                                                                        ></c-fsc-rel-map-card>
+                                                                                                    </div>
+
+                                                                                                    <template lwc:if={member.isOpen}>
+                                                                                                        <div class="map-node-row__children">
+                                                                                                            <c-fsc-rel-map-relationship-groups
+                                                                                                                groups={member.children}
+                                                                                                                active-preview-source-id={activePreviewSourceId}
+                                                                                                                oncardaction={handleCardAction}
+                                                                                                            ></c-fsc-rel-map-relationship-groups>
+                                                                                                        </div>
+                                                                                                    </template>
+                                                                                                </div>
+                                                                                            </template>
+                                                                                        </div>
+                                                                                    </template>
+                                                                                </div>
+                                                                            </template>
+                                                                        </template>
+
+                                                                        <template lwc:if={child.isAccountNode}>
+                                                                            <template
+                                                                                for:each={child.children}
+                                                                                for:item="member"
+                                                                            >
+                                                                                <div
+                                                                                    key={member.id}
+                                                                                    class="map-node-row map-node-row_nested"
+                                                                                >
+                                                                                    <div
+                                                                                        class="map-node-row__card"
+                                                                                        data-anchor-id={member.id}
+                                                                                    >
+                                                                                        <c-fsc-rel-map-card
+                                                                                            node={member}
+                                                                                            active-preview-source-id={activePreviewSourceId}
+                                                                                            oncardaction={handleCardAction}
+                                                                                        ></c-fsc-rel-map-card>
+                                                                                    </div>
+
+                                                                                    <template lwc:if={member.isOpen}>
+                                                                                        <div class="map-node-row__children">
+                                                                                            <c-fsc-rel-map-relationship-groups
+                                                                                                groups={member.children}
+                                                                                                active-preview-source-id={activePreviewSourceId}
+                                                                                                oncardaction={handleCardAction}
+                                                                                            ></c-fsc-rel-map-relationship-groups>
+                                                                                        </div>
+                                                                                    </template>
+                                                                                </div>
+                                                                            </template>
+                                                                        </template>
+
+                                                                        <template lwc:if={child.isMemberNode}>
+                                                                            <c-fsc-rel-map-relationship-groups
+                                                                                groups={child.children}
+                                                                                active-preview-source-id={activePreviewSourceId}
+                                                                                oncardaction={handleCardAction}
+                                                                            ></c-fsc-rel-map-relationship-groups>
+                                                                        </template>
+                                                                    </div>
+                                                                </template>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                            </template>
+                        </template>
+                    </div>
+                </div>
+
+                <template lwc:if={showPreviewPanel}>
+                    <c-fsc-rel-member-popover
+                        record-id={previewPanel.recordId}
+                        object-api-name={previewPanel.objectApiName}
+                        member-name={previewPanel.memberName}
+                        left={previewPanel.left}
+                        top={previewPanel.top}
+                        use-scroll-relative-boundary
+                        constrain-to-boundary={previewBoundary.isSet}
+                        boundary-scroll-left={previewBoundary.scrollLeft}
+                        boundary-scroll-top={previewBoundary.scrollTop}
+                        boundary-client-width={previewBoundary.clientWidth}
+                        boundary-client-height={previewBoundary.clientHeight}
+                        onclose={handlePreviewClose}
+                    ></c-fsc-rel-member-popover>
+                </template>
+            </div>
+        </article>
+    </template>
+</template>

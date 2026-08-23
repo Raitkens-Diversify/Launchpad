@@ -1,0 +1,60 @@
+{
+  "type" : "sfdc_cms__view",
+  "title" : "Envelope List",
+  "contentBody" : {
+    "component" : {
+      "children" : [ {
+        "children" : [ {
+          "attributes" : {
+            "backgroundImageConfig" : "",
+            "backgroundImageOverlay" : "rgba(0,0,0,0)",
+            "componentSpacerSize" : "",
+            "dxpStyle" : { },
+            "layoutDirectionDesktop" : "row",
+            "layoutDirectionMobile" : "column",
+            "layoutDirectionTablet" : "column",
+            "maxContentWidth" : "",
+            "sectionColumnGutterWidth" : "",
+            "sectionConfig" : "{\"UUID\":\"50af1213-0a76-4fe4-9ac8-05571bc7cbf7\",\"columns\":[{\"UUID\":\"706a3788-e2c6-4b16-ac45-2731eeea215e\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":[]}]}",
+            "sectionMinHeight" : "",
+            "sectionVerticalAlign" : "flex-start"
+          },
+          "children" : [ {
+            "id" : "706a3788-e2c6-4b16-ac45-2731eeea215e",
+            "name" : "col1",
+            "title" : "Column 1",
+            "type" : "region"
+          } ],
+          "definition" : "community_layout:section",
+          "id" : "50af1213-0a76-4fe4-9ac8-05571bc7cbf7",
+          "type" : "component"
+        } ],
+        "id" : "1b90c73c-6b15-47fe-87dd-e11d35f739b1",
+        "name" : "content",
+        "title" : "Content",
+        "type" : "region"
+      }, {
+        "children" : [ {
+          "attributes" : {
+            "dxpStyle" : { },
+            "recordId" : "{!recordId}"
+          },
+          "definition" : "community_builder:seoAssistant",
+          "id" : "dd60f65b-4e23-4f40-b209-4a8d35aed1c1",
+          "type" : "component"
+        } ],
+        "id" : "190852d9-b416-4f0d-8113-61eb09d86cef",
+        "name" : "sfdcHiddenRegion",
+        "title" : "sfdcHiddenRegion",
+        "type" : "region"
+      } ],
+      "definition" : "community_layout:sldsFlexibleLayout",
+      "id" : "18accbfa-5ef3-458b-9ea8-3c740d73e9de",
+      "type" : "component"
+    },
+    "dataProviders" : [ ],
+    "themeLayoutType" : "n4XOgjPQfZfzQSHKRqH2V6iupFBUNG",
+    "viewType" : "list-Envelope__c"
+  },
+  "urlName" : "envelope-list"
+}

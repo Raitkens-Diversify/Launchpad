@@ -1,0 +1,100 @@
+<template>
+    <c-ds-modal-v2
+        is-open={isOpen}
+        title="New envelope"
+        subtitle="Create new envelope."
+        size="small"
+        allow-overflow
+        onclose={handleClose}>
+        <div class="new-envelope-form">
+            <lightning-input
+                label="Envelope Title"
+                placeholder="Enter envelope title"
+                value={newEnvelope.title}
+                data-field="title"
+                onchange={handleFieldChange}>
+            </lightning-input>
+
+            <div class="new-envelope-form__toggle" role="group" aria-label="Household">
+                <button
+                    type="button"
+                    class={newHouseholdClass}
+                    aria-pressed={isNewHousehold}
+                    data-value="new"
+                    onclick={handleHouseholdModeChange}>
+                    New Household
+                </button>
+                <button
+                    type="button"
+                    class={existingHouseholdClass}
+                    aria-pressed={isExistingHousehold}
+                    data-value="existing"
+                    onclick={handleHouseholdModeChange}>
+                    Existing Household
+                </button>
+            </div>
+
+            <template if:true={isNewHousehold}>
+                <lightning-input
+                    label="Household Name"
+                    placeholder="Enter household name"
+                    value={newEnvelope.householdName}
+                    data-field="householdName"
+                    onchange={handleFieldChange}>
+                </lightning-input>
+                <template if:true={showAdvisorTeamField}>
+                    <div class="new-envelope-form__field">
+                        <span class="new-envelope-form__label">Financial Advisor Team</span>
+                        <lightning-combobox
+                            variant="label-hidden"
+                            label="Financial Advisor Team"
+                            placeholder="Select financial advisor team"
+                            options={advisorTeamOptions}
+                            value={newEnvelope.advisorTeam}
+                            data-field="advisorTeam"
+                            dropdown-alignment="auto"
+                            onchange={handleFieldChange}>
+                        </lightning-combobox>
+                    </div>
+                </template>
+            </template>
+            <template if:false={isNewHousehold}>
+                <div class="new-envelope-form__field">
+                    <span class="new-envelope-form__label">Household</span>
+                    <c-envelope-searchable-combobox
+                        variant="label-hidden"
+                        label="Household"
+                        placeholder="Select household"
+                        options={householdOptions}
+                        value={newEnvelope.householdId}
+                        data-field="householdId"
+                        onchange={handleFieldChange}>
+                    </c-envelope-searchable-combobox>
+                </div>
+            </template>
+        </div>
+        <div slot="footer" class="new-envelope-form__footer">
+            <lightning-button
+                variant="secondary"
+                label="Cancel"
+                disabled={isSaving}
+                onclick={handleCancel}
+            ></lightning-button>
+            <div class="env-busy-button">
+                <lightning-button
+                    variant="brand"
+                    label="Create envelope"
+                    disabled={isCreateEnvelopeDisabled}
+                    onclick={handleCreate}
+                ></lightning-button>
+                <template lwc:if={isSaving}>
+                    <lightning-spinner
+                        size="small"
+                        variant="brand"
+                        alternative-text="Creating">
+                    </lightning-spinner>
+                </template>
+            </div>
+        </div>
+    </c-ds-modal-v2>
+</template>

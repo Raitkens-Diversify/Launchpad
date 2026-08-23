@@ -1,0 +1,164 @@
+<template>
+  <div class="list-v2">
+    <div class="list-v2__header">
+      <h1 class="list-v2__title">Envelopes</h1>
+    </div>
+
+    <template lwc:if={isLoading}>
+      <div class="list-v2__loading">
+        <lightning-spinner alternative-text="Loading envelopes" size="medium">
+        </lightning-spinner>
+      </div>
+    </template>
+
+    <template lwc:elseif={hasEnvelopes}>
+      <div class="list-v2__toolbar">
+        <div class="list-v2__toolbar-search">
+          <lightning-input
+            type="search"
+            variant="label-hidden"
+            label="Search envelopes"
+            placeholder="Search envelopes..."
+            value={searchTerm}
+            onchange={handleSearchChange}
+          >
+          </lightning-input>
+        </div>
+
+        <div class="list-v2__toolbar-controls">
+          <lightning-combobox
+            class="list-v2__toolbar-team"
+            variant="label-hidden"
+            label="Team"
+            value={teamFilter}
+            options={teamOptions}
+            onchange={handleTeamChange}
+          >
+          </lightning-combobox>
+
+          <lightning-input
+            class="list-v2__toolbar-date"
+            type="date"
+            variant="label-hidden"
+            label="Filter by date"
+            placeholder="Last Activity"
+            value={dateFilter}
+            onchange={handleDateChange}
+          >
+          </lightning-input>
+
+          <lightning-button
+            class="list-v2__toolbar-new"
+            variant="brand"
+            icon-name="utility:add"
+            label="New Envelope"
+            onclick={handleNewEnvelope}
+          >
+          </lightning-button>
+        </div>
+      </div>
+
+      <template lwc:if={hasResults}>
+        <div class="list-v2__table">
+          <c-ds-data-table-v2
+            key-field="id"
+            columns={columns}
+            data={filteredRows}
+            placeholder="-"
+            default-sort-field={defaultSortField}
+            default-sort-direction={defaultSortDirection}
+            row-actions={rowActions}
+            onrowaction={handleRowAction}
+            onrowclick={handleRowClick}
+          >
+          </c-ds-data-table-v2>
+        </div>
+      </template>
+
+      <template lwc:else>
+        <!-- Filter matched no envelopes. Illustration reuses the empty-state
+
+                     asset until the dedicated "no results" image is exported. -->
+
+        <div class="list-v2__empty">
+          <img
+            class="list-v2__empty-illustration"
+            src={noResultsEnvelopeIllustration}
+            alt="No results"
+          />
+
+          <div class="list-v2__empty-text list-v2__empty-text--narrow">
+            <p class="list-v2__empty-title">No results found</p>
+
+            <p class="list-v2__empty-subtitle">
+              We can't find any item matching your search. Clear your filters
+              and try again
+            </p>
+          </div>
+
+          <lightning-button
+            variant="neutral"
+            icon-name="utility:undo"
+            label="Reset Filter"
+            onclick={handleResetFilters}
+          >
+          </lightning-button>
+        </div>
+      </template>
+    </template>
+
+    <template lwc:else>
+      <div class="list-v2__empty">
+        <img
+          class="list-v2__empty-illustration"
+          src={emptyEnvelopeIllustration}
+          alt="No envelopes"
+        />
+
+        <div class="list-v2__empty-text">
+          <p class="list-v2__empty-title">No envelopes yet</p>
+
+          <p class="list-v2__empty-subtitle">
+            Create an envelope to start preparing work for submission.
+          </p>
+        </div>
+
+        <lightning-button
+          class="list-v2__empty-cta"
+          variant="brand"
+          icon-name="utility:add"
+          label="New Envelope"
+          onclick={handleNewEnvelope}
+        >
+        </lightning-button>
+      </div>
+    </template>
+
+    <c-envelope-create-modal-v2
+      is-open={showCreateModal}
+      household-options={householdOptions}
+      advisor-team-options={advisorTeamOptions}
+      onclose={handleCloseCreateModal}
+      oncreated={handleCreateEnvelope}
+    >
+    </c-envelope-create-modal-v2>
+
+    <c-envelope-rename-modal-v2
+      is-open={showRenameModal}
+      envelope-id={renameEnvelopeId}
+      envelope-name={renameEnvelopeName}
+      onclose={handleCloseRenameModal}
+      onrenamed={handleRenameEnvelope}
+    >
+    </c-envelope-rename-modal-v2>
+
+    <c-envelope-delete-modal-v2
+      is-open={showDeleteModal}
+      envelope-id={deleteEnvelopeId}
+      envelope-name={deleteEnvelopeName}
+      onclose={handleCloseDeleteModal}
+      ondeleted={handleDeleteEnvelope}
+    >
+    </c-envelope-delete-modal-v2>
+  </div>
+</template>

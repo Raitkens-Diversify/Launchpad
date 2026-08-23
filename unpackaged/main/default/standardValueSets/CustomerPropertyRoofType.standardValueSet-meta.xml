@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Solar Tiles</fullName>
+        <default>false</default>
+        <label>Solar Tiles</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Asphalt Shingles</fullName>
+        <default>false</default>
+        <label>Asphalt Shingles</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Metal Roofing</fullName>
+        <default>false</default>
+        <label>Metal Roofing</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Stone-coated steel</fullName>
+        <default>false</default>
+        <label>Stone-coated steel</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Slate</fullName>
+        <default>false</default>
+        <label>Slate</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Rubber Slate</fullName>
+        <default>false</default>
+        <label>Rubber Slate</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Clay and concrete tiles</fullName>
+        <default>false</default>
+        <label>Clay and concrete tiles</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Green roof</fullName>
+        <default>false</default>
+        <label>Green roof</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Built-up roofing</fullName>
+        <default>false</default>
+        <label>Built-up roofing</label>
+    </standardValue>
+</StandardValueSet>

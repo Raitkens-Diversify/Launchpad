@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionCalls>
+        <name>Send_Rule_Change_Email</name>
+        <label>Send Rule Change Email</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <actionName>emailSimple</actionName>
+        <actionType>emailSimple</actionType>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>emailBody</name>
+            <value>
+                <elementReference>textRuleChangeEmailBody</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>emailSubject</name>
+            <value>
+                <elementReference>formulaEmailSubject</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>emailAddresses</name>
+            <value>
+                <elementReference>Get_Recipient_User.Email</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>senderType</name>
+            <value>
+                <stringValue>DefaultWorkflowUser</stringValue>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>sendRichBody</name>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </inputParameters>
+        <nameSegment>emailSimple</nameSegment>
+    </actionCalls>
+    <apiVersion>66.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <decisions>
+        <name>Has_Recipient_Email</name>
+        <label>Has Recipient Email</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnectorLabel>No Email</defaultConnectorLabel>
+        <rules>
+            <name>Recipient_Has_Email</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>formulaHasRecipientEmail</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Should_Send_Email</targetReference>
+            </connector>
+            <label>Recipient Has Email</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Should_Send_Email</name>
+        <label>Should Send Email</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnectorLabel>No Send</defaultConnectorLabel>
+        <rules>
+            <name>Created</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>formulaIsCreate</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Send_Rule_Change_Email</targetReference>
+            </connector>
+            <label>Created</label>
+        </rules>
+        <rules>
+            <name>Updated_With_Changes</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>formulaIsCreate</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>formulaHasTrackedChanges</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Send_Rule_Change_Email</targetReference>
+            </connector>
+            <label>Updated With Changes</label>
+        </rules>
+    </decisions>
+    <environments>Default</environments>
+    <formulas>
+        <name>formulaActionVerb</name>
+        <dataType>String</dataType>
+        <expression>IF(ISBLANK({!$Record__Prior.Id}), &quot;created&quot;, &quot;updated&quot;)</expression>
+    </formulas>
+    <formulas>
+        <name>formulaCategory</name>
+        <dataType>String</dataType>
+        <expression>IF(
+OR(ISNULL({!$Record.Priority__c}), {!$Record.Priority__c} &lt; 10),
+&quot;Info&quot;,
+IF({!$Record.Priority__c} &gt;= 40, &quot;Urgent&quot;, &quot;Service&quot;)
+)</expression>
+    </formulas>
+    <formulas>
+        <name>formulaChangeDetails</name>
+        <dataType>String</dataType>
+        <expression>TRIM(
+IF(
+AND(NOT(ISBLANK({!$Record__Prior.Id})), {!$Record.Rule_Name__c} &lt;&gt; {!$Record__Prior.Rule_Name__c}),
+&quot;Rule name:&quot; &amp; BR() &amp;
+&quot;Old Value: &quot; &amp; IF(ISBLANK({!$Record__Prior.Rule_Name__c}), &quot;(n/a)&quot;, {!$Record__Prior.Rule_Name__c}) &amp; BR() &amp;
+&quot;New Value: &quot; &amp; IF(ISBLANK({!$Record.Rule_Name__c}), &quot;(n/a)&quot;, {!$Record.Rule_Name__c}) &amp; BR(),
+&quot;&quot;
+) &amp;
+IF(
+AND(NOT(ISBLANK({!$Record__Prior.Id})), TEXT({!$Record.Object_Type__c}) &lt;&gt; TEXT({!$Record__Prior.Object_Type__c})),
+&quot;Object type:&quot; &amp; BR() &amp;
+&quot;Old Value: &quot; &amp; IF(ISBLANK(TEXT({!$Record__Prior.Object_Type__c})), &quot;(n/a)&quot;, TEXT({!$Record__Prior.Object_Type__c})) &amp; BR() &amp;
+&quot;New Value: &quot; &amp; IF(ISBLANK(TEXT({!$Record.Object_Type__c})), &quot;(n/a)&quot;, TEXT({!$Record.Object_Type__c})) &amp; BR(),
+&quot;&quot;
+) &amp;
+IF(
+AND(NOT(ISBLANK({!$Record__Prior.Id})), {!$Record.Priority__c} &lt;&gt; {!$Record__Prior.Priority__c}),
+&quot;Category:&quot; &amp; BR() &amp;
+&quot;Old Value: &quot; &amp; {!formulaPriorCategory} &amp; BR() &amp;
+&quot;New Value: &quot; &amp; {!formulaCategory} &amp; BR(),
+&quot;&quot;
+) &amp;
+IF(
+AND(NOT(ISBLANK({!$Record__Prior.Id})), TEXT({!$Record.Frequency__c}) &lt;&gt; TEXT({!$Record__Prior.Frequency__c})),
+&quot;Frequency:&quot; &amp; BR() &amp;
+&quot;Old Value: &quot; &amp; IF(ISBLANK(TEXT({!$Record__Prior.Frequency__c})), &quot;(n/a)&quot;, TEXT({!$Record__Prior.Frequency__c})) &amp; BR() &amp;
+&quot;New Value: &quot; &amp; IF(ISBLANK(TEXT({!$Record.Frequency__c})), &quot;(n/a)&quot;, TEXT({!$Record.Frequency__c})) &amp; BR(),
+&quot;&quot;
+) &amp;
+IF(
+AND(NOT(ISBLANK({!$Record__Prior.Id})), TEXT({!$Record.Digest_Cadence__c}) &lt;&gt; TEXT({!$Record__Prior.Digest_Cadence__c})),
+&quot;Digest cadence:&quot; &amp; BR() &amp;
+&quot;Old Value: &quot; &amp; IF(ISBLANK(TEXT({!$Record__Prior.Digest_Cadence__c})), &quot;(n/a)&quot;, TEXT({!$Record__Prior.Digest_Cadence__c})) &amp; BR() &amp;
+&quot;New Value: &quot; &amp; IF(ISBLANK(TEXT({!$Record.Digest_Cadence__c})), &quot;(n/a)&quot;, TEXT({!$Record.Digest_Cadence__c})) &amp; BR(),
+&quot;&quot;
+) &amp;
+IF(
+AND(NOT(ISBLANK({!$Record__Prior.Id})), TEXT({!$Record.Digest_Frequency_Hour__c}) &lt;&gt; TEXT({!$Record__Prior.Digest_Frequency_Hour__c})),
+&quot;Digest hour:&quot; &amp; BR() &amp;
+&quot;Old Value: &quot; &amp; IF(ISBLANK(TEXT({!$Record__Prior.Digest_Frequency_Hour__c})), &quot;(n/a)&quot;, TEXT({!$Record__Prior.Digest_Frequency_Hour__c})) &amp; BR() &amp;
+&quot;New Value: &quot; &amp; IF(ISBLANK(TEXT({!$Record.Digest_Frequency_Hour__c})), &quot;(n/a)&quot;, TEXT({!$Record.Digest_Frequency_Hour__c})) &amp; BR(),
+&quot;&quot;
+) &amp;
+IF(
+AND(NOT(ISBLANK({!$Record__Prior.Id})), {!$Record.Is_Active__c} &lt;&gt; {!$Record__Prior.Is_Active__c}),
+&quot;Active:&quot; &amp; BR() &amp;
+&quot;Old Value: &quot; &amp; IF({!$Record__Prior.Is_Active__c}, &quot;Yes&quot;, &quot;No&quot;) &amp; BR() &amp;
+&quot;New Value: &quot; &amp; IF({!$Record.Is_Active__c}, &quot;Yes&quot;, &quot;No&quot;) &amp; BR(),
+&quot;&quot;
+) &amp;
+IF(
+AND(NOT(ISBLANK({!$Record__Prior.Id})), {!$Record.Household__c} &lt;&gt; {!$Record__Prior.Household__c}),
+&quot;Household:&quot; &amp; BR() &amp;
+&quot;Old Value: &quot; &amp; {!formulaPriorHouseholdDisplay} &amp; BR() &amp;
+&quot;New Value: &quot; &amp; {!formulaHouseholdDisplay} &amp; BR(),
+&quot;&quot;
+) &amp;
+IF(
+AND(NOT(ISBLANK({!$Record__Prior.Id})), {!$Record.Is_System_Default__c} &lt;&gt; {!$Record__Prior.Is_System_Default__c}),
+&quot;System default:&quot; &amp; BR() &amp;
+&quot;Old Value: &quot; &amp; IF({!$Record__Prior.Is_System_Default__c}, &quot;Yes&quot;, &quot;No&quot;) &amp; BR() &amp;
+&quot;New Value: &quot; &amp; IF({!$Record.Is_System_Default__c}, &quot;Yes&quot;, &quot;No&quot;) &amp; BR(),
+&quot;&quot;
+)
+)</expression>
+    </formulas>
+    <formulas>
+        <name>formulaChangeDetailsSection</name>
+        <dataType>String</dataType>
+        <expression>IF(
+ISBLANK({!$Record__Prior.Id}),
+&quot;&quot;,
+IF(
+ISBLANK({!formulaChangeDetails}),
+&quot;&quot;,
+&quot;&lt;strong&gt;Changes&lt;/strong&gt;&lt;br/&gt;&quot; &amp; {!formulaChangeDetails}
+)
+)</expression>
+    </formulas>
+    <formulas>
+        <name>formulaDigestCadenceDisplay</name>
+        <dataType>String</dataType>
+        <expression>IF(
+ISBLANK(TEXT({!$Record.Digest_Cadence__c})),
+&quot;(n/a)&quot;,
+TEXT({!$Record.Digest_Cadence__c})
+)</expression>
+    </formulas>
+    <formulas>
+        <name>formulaDigestHourDisplay</name>
+        <dataType>String</dataType>
+        <expression>IF(
+ISBLANK(TEXT({!$Record.Digest_Frequency_Hour__c})),
+&quot;(n/a)&quot;,
+TEXT({!$Record.Digest_Frequency_Hour__c})
+)</expression>
+    </formulas>
+    <formulas>
+        <name>formulaDisplayRuleName</name>
+        <dataType>String</dataType>
+        <expression>IF(
+NOT(ISBLANK({!$Record.Rule_Name__c})),
+{!$Record.Rule_Name__c},
+TEXT({!$Record.Object_Type__c}) &amp; &quot; &quot; &amp; TEXT({!$Record.Frequency__c})
+)</expression>
+    </formulas>
+    <formulas>
+        <name>formulaEmailSubject</name>
+        <dataType>String</dataType>
+        <expression>&quot;Notification rule &quot; &amp; {!formulaActionVerb} &amp; &quot;: &quot; &amp; {!formulaDisplayRuleName}</expression>
+    </formulas>
+    <formulas>
+        <name>formulaHasRecipientEmail</name>
+        <dataType>Boolean</dataType>
+        <expression>NOT(ISBLANK({!Get_Recipient_User.Email}))</expression>
+    </formulas>
+    <formulas>
+        <name>formulaHasTrackedChanges</name>
+        <dataType>Boolean</dataType>
+        <expression>OR(
+AND(NOT(ISBLANK({!$Record__Prior.Id})), {!$Record.Rule_Name__c} &lt;&gt; {!$Record__Prior.Rule_Name__c}),
+AND(NOT(ISBLANK({!$Record__Prior.Id})), TEXT({!$Record.Object_Type__c}) &lt;&gt; TEXT({!$Record__Prior.Object_Type__c})),
+AND(NOT(ISBLANK({!$Record__Prior.Id})), {!$Record.Priority__c} &lt;&gt; {!$Record__Prior.Priority__c}),
+AND(NOT(ISBLANK({!$Record__Prior.Id})), TEXT({!$Record.Frequency__c}) &lt;&gt; TEXT({!$Record__Prior.Frequency__c})),
+AND(NOT(ISBLANK({!$Record__Prior.Id})), TEXT({!$Record.Digest_Cadence__c}) &lt;&gt; TEXT({!$Record__Prior.Digest_Cadence__c})),
+AND(NOT(ISBLANK({!$Record__Prior.Id})), TEXT({!$Record.Digest_Frequency_Hour__c}) &lt;&gt; TEXT({!$Record__Prior.Digest_Frequency_Hour__c})),
+AND(NOT(ISBLANK({!$Record__Prior.Id})), {!$Record.Is_Active__c} &lt;&gt; {!$Record__Prior.Is_Active__c}),
+AND(NOT(ISBLANK({!$Record__Prior.Id})), {!$Record.Household__c} &lt;&gt; {!$Record__Prior.Household__c}),
+AND(NOT(ISBLANK({!$Record__Prior.Id})), {!$Record.Is_System_Default__c} &lt;&gt; {!$Record__Prior.Is_System_Default__c})
+)</expression>
+    </formulas>
+    <formulas>
+        <name>formulaHouseholdDisplay</name>
+        <dataType>String</dataType>
+        <expression>IF(ISBLANK({!Get_Household.Id}), &quot;(n/a)&quot;, {!Get_Household.Name})</expression>
+    </formulas>
+    <formulas>
+        <name>formulaIsActiveDisplay</name>
+        <dataType>String</dataType>
+        <expression>IF({!$Record.Is_Active__c}, &quot;Yes&quot;, &quot;No&quot;)</expression>
+    </formulas>
+    <formulas>
+        <name>formulaIsCreate</name>
+        <dataType>Boolean</dataType>
+        <expression>ISBLANK({!$Record__Prior.Id})</expression>
+    </formulas>
+    <formulas>
+        <name>formulaIsSystemDefaultDisplay</name>
+        <dataType>String</dataType>
+        <expression>IF({!$Record.Is_System_Default__c}, &quot;Yes&quot;, &quot;No&quot;)</expression>
+    </formulas>
+    <formulas>
+        <name>formulaPriorCategory</name>
+        <dataType>String</dataType>
+        <expression>IF(
+OR(ISNULL({!$Record__Prior.Priority__c}), {!$Record__Prior.Priority__c} &lt; 10),
+&quot;Info&quot;,
+IF({!$Record__Prior.Priority__c} &gt;= 40, &quot;Urgent&quot;, &quot;Service&quot;)
+)</expression>
+    </formulas>
+    <formulas>
+        <name>formulaPriorHouseholdDisplay</name>
+        <dataType>String</dataType>
+        <expression>IF(ISBLANK({!Get_Prior_Household.Id}), &quot;(n/a)&quot;, {!Get_Prior_Household.Name})</expression>
+    </formulas>
+    <formulas>
+        <name>formulaRecipientUserId</name>
+        <dataType>String</dataType>
+        <expression>IF(ISBLANK({!$Record.User__c}), {!$Record.LastModifiedById}, {!$Record.User__c})</expression>
+    </formulas>
+    <interviewLabel>Auto Notification Rule Change Email {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Auto Notification Rule Change Email</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <recordLookups>
+        <name>Get_Changed_By_User</name>
+        <label>Get Changed By User</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>true</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Get_Household</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>$Record.LastModifiedById</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>User</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
+        <name>Get_Household</name>
+        <label>Get Household</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>true</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Get_Prior_Household</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>$Record.Household__c</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Account</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
+        <name>Get_Prior_Household</name>
+        <label>Get Prior Household</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>true</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Has_Recipient_Email</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>$Record__Prior.Household__c</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Account</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
+        <name>Get_Recipient_User</name>
+        <label>Get Recipient User</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>true</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Get_Changed_By_User</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>formulaRecipientUserId</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>User</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Get_Recipient_User</targetReference>
+        </connector>
+        <filterFormula>NOT(ISBLANK(IF(ISBLANK({!$Record.User__c}), {!$Record.LastModifiedById}, {!$Record.User__c})))</filterFormula>
+        <object>Notification_Rule__c</object>
+        <recordTriggerType>CreateAndUpdate</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+    </start>
+    <status>Active</status>
+    <textTemplates>
+        <name>textRuleChangeEmailBody</name>
+        <isViewedAsPlainText>false</isViewedAsPlainText>
+        <text>&lt;p&gt;A notification rule was {!formulaActionVerb}: &lt;strong&gt;{!formulaDisplayRuleName}&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Rule settings&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Rule name: {!formulaDisplayRuleName}&lt;/li&gt;
+&lt;li&gt;Object type: {!$Record.Object_Type__c}&lt;/li&gt;
+&lt;li&gt;Category: {!formulaCategory}&lt;/li&gt;
+&lt;li&gt;Channels: {!$Record.Channel__c}&lt;/li&gt;
+&lt;li&gt;Frequency: {!$Record.Frequency__c}&lt;/li&gt;
+&lt;li&gt;Digest cadence: {!formulaDigestCadenceDisplay}&lt;/li&gt;
+&lt;li&gt;Digest hour: {!formulaDigestHourDisplay}&lt;/li&gt;
+&lt;li&gt;Active: {!formulaIsActiveDisplay}&lt;/li&gt;
+&lt;li&gt;Household: {!formulaHouseholdDisplay}&lt;/li&gt;
+&lt;li&gt;System default: {!formulaIsSystemDefaultDisplay}&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;{!formulaChangeDetailsSection}&lt;/p&gt;
+&lt;p&gt;Changed at: {!$Record.LastModifiedDate}&lt;br/&gt;Changed by: {!Get_Changed_By_User.Name}&lt;/p&gt;</text>
+    </textTemplates>
+</Flow>

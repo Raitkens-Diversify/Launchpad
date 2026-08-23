@@ -1,0 +1,53 @@
+<template>
+    <article class="nexs-article">
+        <template if:true={loading}>
+            <div class="nexs-article__status">
+                <lightning-spinner alternative-text="Loading article" size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:true={hasArticle}>
+            <h1 class="nexs-article__title">{article.title}</h1>
+            <template if:true={article.summary}>
+                <p class="nexs-article__summary">{article.summary}</p>
+            </template>
+
+            <template if:true={showToc}>
+                <nav class="nexs-article__toc" aria-label="In this article">
+                    <span class="nexs-article__toc-title">In this article</span>
+                    <ul class="nexs-article__toc-list">
+                        <template for:each={headings} for:item="h">
+                            <li key={h.id}>
+                                <a
+                                    href="#"
+                                    class={h.cssClass}
+                                    data-target={h.id}
+                                    onclick={handleTocClick}
+                                >{h.text}</a>
+                            </li>
+                        </template>
+                    </ul>
+                </nav>
+            </template>
+
+            <!-- Sanitized in JS (sanitizeAndIndex) before injection. -->
+            <div class="nexs-article__body" lwc:dom="manual"></div>
+
+            <!-- Interactive embed (e.g. Scribe guide), driven by Embed_URL__c. -->
+            <template if:true={embedSrc}>
+                <iframe
+                    class="nexs-article__embed"
+                    src={embedSrc}
+                    title="Embedded guide"
+                    allow="fullscreen"
+                ></iframe>
+            </template>
+
+            <c-nexs-article-rating article-id={article.id}></c-nexs-article-rating>
+        </template>
+
+        <template if:true={error}>
+            <div class="nexs-article__status nexs-article__error">{error}</div>
+        </template>
+    </article>
+</template>

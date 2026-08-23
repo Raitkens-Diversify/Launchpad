@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Close_Task_Without_Ops_2nd_Review</fullName>
+    <active>true</active>
+    <description>You cannot close a task that requires a 2nd Ops Review if you do not have the Ops SSE custom permission.</description>
+    <errorConditionFormula>AND(
+  NOT($Permission.Ops_SSE),
+  ISPICKVAL(Status,&#39;Completed&#39;),
+  Needs_2nd_Ops_Review__c
+)</errorConditionFormula>
+    <errorMessage>You must assign this task to Ops SSE.</errorMessage>
+</ValidationRule>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Asset_Subclass__c</fullName>
+    <label>Asset Subclass</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <controllingField>Asset_Class__c</controllingField>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>1031DST/TIC</fullName>
+                <default>false</default>
+                <label>1031DST/TIC</label>
+            </value>
+            <value>
+                <fullName>Reg D Real Estate Funds</fullName>
+                <default>false</default>
+                <label>Reg D Real Estate Funds</label>
+            </value>
+            <value>
+                <fullName>Public Non-Traded Funds</fullName>
+                <default>false</default>
+                <label>Public Non-Traded Funds</label>
+            </value>
+        </valueSetDefinition>
+        <valueSettings>
+            <controllingFieldValue>Private Real Estate</controllingFieldValue>
+            <valueName>1031DST/TIC</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Private Real Estate</controllingFieldValue>
+            <valueName>Reg D Real Estate Funds</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Private Real Estate</controllingFieldValue>
+            <valueName>Public Non-Traded Funds</valueName>
+        </valueSettings>
+    </valueSet>
+</CustomField>

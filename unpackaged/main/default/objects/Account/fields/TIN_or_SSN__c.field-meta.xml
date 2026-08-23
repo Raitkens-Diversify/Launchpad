@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>TIN_or_SSN__c</fullName>
+    <label>TIN or SSN</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>TIN</fullName>
+                <default>false</default>
+                <label>TIN</label>
+            </value>
+            <value>
+                <fullName>SSN</fullName>
+                <default>false</default>
+                <label>SSN</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

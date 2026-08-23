@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Type_Override__c</fullName>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Type Override</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Client - Individual</fullName>
+                <default>false</default>
+                <label>Client - Individual</label>
+            </value>
+            <value>
+                <fullName>Client - Business</fullName>
+                <default>false</default>
+                <label>Client - Business</label>
+            </value>
+            <value>
+                <fullName>Client - Trust</fullName>
+                <default>false</default>
+                <label>Client - Trust</label>
+            </value>
+            <value>
+                <fullName>ISA - Fin Acct</fullName>
+                <default>false</default>
+                <label>ISA - Fin Acct</label>
+            </value>
+            <value>
+                <fullName>ISA - Service Agreement</fullName>
+                <default>false</default>
+                <label>ISA - Service Agreement</label>
+            </value>
+            <value>
+                <fullName>Client - Authorized Person</fullName>
+                <default>false</default>
+                <label>Client - Authorized Person</label>
+            </value>
+            <value>
+                <fullName>Client - Trustee</fullName>
+                <default>false</default>
+                <label>Client - Trustee</label>
+            </value>
+            <value>
+                <fullName>Client - Beneficial Owner</fullName>
+                <default>false</default>
+                <label>Client - Beneficial Owner</label>
+            </value>
+            <value>
+                <fullName>Client - Revocable Trust</fullName>
+                <default>false</default>
+                <label>Client - Revocable Trust</label>
+            </value>
+            <value>
+                <fullName>Client - Irrevocable Trust</fullName>
+                <default>false</default>
+                <label>Client - Irrevocable Trust</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

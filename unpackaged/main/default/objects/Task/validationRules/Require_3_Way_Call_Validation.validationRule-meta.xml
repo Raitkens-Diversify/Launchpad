@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Require_3_Way_Call_Validation</fullName>
+    <active>false</active>
+    <errorConditionFormula>IF(Subject = &#39;Determine if Rollover Requires 3-way call.&#39; &amp;&amp;  ISBLANK(TEXT(Requires_a_3_Way_Call__c)), true, false)</errorConditionFormula>
+    <errorMessage>Please specify whether the 3-Way Call is required on this Task before moving it to Complete.</errorMessage>
+</ValidationRule>

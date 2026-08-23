@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- File Delivery Mode --></label>
+        <name>File_Delivery_Mode__c</name>
+        <picklistValues>
+            <masterLabel>ContentDistribution</masterLabel>
+            <translation><!-- ContentDistribution --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Shepherd</masterLabel>
+            <translation><!-- Shepherd --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

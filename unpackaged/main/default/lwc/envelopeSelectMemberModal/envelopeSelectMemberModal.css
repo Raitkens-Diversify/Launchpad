@@ -1,0 +1,12 @@
+/* Body wraps the member lookup; positioned so the loading spinner overlays it. */
+.select-member__body {
+    position: relative;
+    width: 100%;
+}
+
+.select-member__footer {
+    display: flex;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    justify-content: flex-end;
+    width: 100%;
+}

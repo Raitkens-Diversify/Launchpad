@@ -1,0 +1,76 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-08-11 -->
+<template>
+  <div class="env-layout work-datatable">
+    <div class="work-datatable__header">
+      <h1 class="work-datatable__title">{title}</h1>
+    </div>
+
+    <template lwc:if={errorMessage}>
+      <div class="work-datatable__error slds-notify slds-notify_alert slds-alert_error" role="alert">
+        {errorMessage}
+      </div>
+    </template>
+
+    <div class="work-datatable__toolbar">
+      <template lwc:if={enableSearch}>
+        <div class="work-datatable__toolbar-search">
+          <lightning-input
+            type="search"
+            variant="label-hidden"
+            label="Search work"
+            placeholder={searchPlaceholder}
+            value={searchTerm}
+            onchange={handleSearchChange}
+          ></lightning-input>
+        </div>
+      </template>
+
+      <div class="work-datatable__toolbar-controls">
+        <c-div-segmented-control
+          class="work-datatable__toolbar-scope"
+          options={scopeOptions}
+          value={scopeFilter}
+          group-label="Record scope"
+          onchange={handleScopeChange}
+        ></c-div-segmented-control>
+      </div>
+    </div>
+
+    <template lwc:if={isLoading}>
+      <div class="work-datatable__loading">
+        <lightning-spinner alternative-text="Loading work" size="medium"></lightning-spinner>
+      </div>
+    </template>
+
+    <template lwc:else>
+      <div class="work-datatable__table">
+        <c-styled-data-table
+          aria-label={title}
+          key-field="id"
+          columns={columns}
+          data={tableRows}
+          placeholder="-"
+          default-sort-field={defaultSortField}
+          default-sort-direction={defaultSortDirection}
+          enable-row-click={enableRowClick}
+          expanded-row-ids={expandedCaseIds}
+          row-detail-type="workTasks"
+          enable-pagination={enablePagination}
+          page-size={pageSize}
+          page-size-options={pageSizeOptions}
+          empty-message="No work records found."
+          onrowclick={handleRowClick}
+        ></c-styled-data-table>
+      </div>
+
+      <template lwc:if={showCustomFooter}>
+        <footer class="work-datatable__footer">
+          <span class="work-datatable__footer-summary">{showingSummary}</span>
+          <template lwc:if={showViewAll}>
+            <span class="work-datatable__footer-view-all">View All</span>
+          </template>
+        </footer>
+      </template>
+    </template>
+  </div>
+</template>

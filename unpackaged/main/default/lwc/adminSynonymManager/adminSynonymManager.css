@@ -1,0 +1,116 @@
+.asm__toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+.asm__hint {
+    margin: 0;
+    flex: 1 1 auto;
+    font-size: 0.8125rem;
+    color: #4b5563;
+}
+.asm__deploying {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    min-height: 28px;
+    margin-bottom: 0.75rem;
+    font-size: 0.8125rem;
+    color: #0f406f;
+}
+.asm__loading {
+    position: relative;
+    min-height: 120px;
+}
+.asm__error {
+    color: #b42318;
+    font-size: 0.875rem;
+}
+.asm__table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    overflow: hidden;
+    font-size: 0.875rem;
+}
+.asm__table th,
+.asm__table td {
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+.asm__table th {
+    background: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+.asm__term {
+    font-weight: 600;
+    color: #09243f;
+}
+.asm__actions {
+    display: flex;
+    gap: 0.375rem;
+}
+.asm__actions-col {
+    width: 12rem;
+}
+.asm-badge {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.asm-badge--on {
+    background: #e6f4ea;
+    color: #1e7e34;
+}
+.asm-badge--off {
+    background: #f3f4f6;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.asm__empty {
+    font-size: 0.875rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* Modal */
+.asm-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(9, 36, 63, 0.45);
+}
+.asm-modal__panel {
+    width: min(480px, calc(100vw - 2rem));
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(9, 36, 63, 0.25);
+}
+.asm-modal__title {
+    margin: 0;
+    font-family: "Libre Baskerville", Georgia, serif;
+    font-size: 1.125rem;
+    color: #09243f;
+}
+.asm-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}

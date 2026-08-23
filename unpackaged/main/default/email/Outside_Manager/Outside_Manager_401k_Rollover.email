@@ -1,0 +1,8 @@
+I hope this email finds you well. I am reaching out with a confirmation that a 401(k) rollover has been successfully deposited into the following account:
+
+Rollover Amount: [!Case.Amount__c]
+Receiving Account: [!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.Name] [!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.OASP_FSC__Registration_Type__r.Name], XXXX[!Case.FinServ__FinancialAccount__r.Account_Number_Last_4__c], [!Case.FinServ__FinancialAccount__r.OASP_FSC__Custodian__r.Name]
+
+Please don't hesitate to reach out with any follow up questions.
+
+Sincerely,

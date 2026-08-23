@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Authority --></label>
+        <name>Authority__c</name>
+        <picklistValues>
+            <masterLabel>Discretionary basis</masterLabel>
+            <translation><!-- Discretionary basis --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Non-Discretionary basis</masterLabel>
+            <translation><!-- Non-Discretionary basis --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

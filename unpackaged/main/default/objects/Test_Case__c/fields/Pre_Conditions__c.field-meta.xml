@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Pre_Conditions__c</fullName>
+    <description>Setup the tester must have in place before starting this case — data, permissions, environment state. Shown as its own panel in the runner; blank hides the panel.</description>
+    <label>Pre-Conditions</label>
+    <length>32768</length>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>4</visibleLines>
+</CustomField>

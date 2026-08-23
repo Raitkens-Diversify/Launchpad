@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Frequency__c</fullName>
+    <label>Frequency</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Monthly</fullName>
+                <default>false</default>
+                <label>Monthly</label>
+            </value>
+            <value>
+                <fullName>Quarterly</fullName>
+                <default>false</default>
+                <label>Quarterly</label>
+            </value>
+            <value>
+                <fullName>Last Business Day</fullName>
+                <default>false</default>
+                <label>Last Business Day</label>
+            </value>
+            <value>
+                <fullName>Direct Deposit</fullName>
+                <default>false</default>
+                <label>Direct Deposit</label>
+            </value>
+            <value>
+                <fullName>Semi-Monthly</fullName>
+                <default>false</default>
+                <label>Semi-Monthly</label>
+            </value>
+            <value>
+                <fullName>On Request</fullName>
+                <default>false</default>
+                <label>On Request</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

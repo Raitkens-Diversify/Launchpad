@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Assigned_Tester__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Nullable: blank = unclaimed, visible to the whole assigned team. Claiming sets this on the SAME record; adding a second tester creates a NEW execution.</description>
+    <label>Assigned Tester</label>
+    <referenceTo>User</referenceTo>
+    <relationshipLabel>Assigned Test Executions</relationshipLabel>
+    <relationshipName>Assigned_Test_Executions</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

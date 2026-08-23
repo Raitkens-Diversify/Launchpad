@@ -1,0 +1,82 @@
+/**
+ * Author: Hoang Long Vu To
+ * Date: 2026-08-13
+ */
+:host {
+  display: block;
+  --arc-info-banner-color: var(--arc-color-blue-600, var(--div-color-blue-600, #0369a1));
+}
+
+.info-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--div-space-4, 1rem);
+  width: 100%;
+  padding: var(--div-space-3, 0.75rem) var(--div-space-4, 1rem);
+  border-radius: var(--div-control-radius, 0.5rem);
+  border: 1px solid transparent;
+}
+
+.info-banner_info {
+  background: var(--div-color-accent-1, #e8f2fb);
+  border-color: #c5dff3;
+  color: var(--arc-info-banner-color);
+}
+
+.info-banner__content {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--div-space-2, 0.5rem);
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.info-banner__icon {
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+  --slds-c-icon-color-foreground-default: var(--arc-info-banner-color);
+}
+
+.info-banner__message {
+  margin: 0;
+  font-family: var(--div-font-family-base, "Inter", -apple-system, BlinkMacSystemFont, sans-serif);
+  font-size: var(--slds-g-font-scale-1, 0.875rem);
+  font-weight: 400;
+  line-height: 18px;
+  color: var(--arc-info-banner-color);
+}
+
+.info-banner__action {
+  flex-shrink: 0;
+  font-family: var(--div-font-family-base, "Inter", -apple-system, BlinkMacSystemFont, sans-serif);
+  font-size: var(--slds-g-font-scale-1, 0.875rem);
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--arc-info-banner-color);
+  text-decoration: underline;
+  text-underline-offset: 0.125rem;
+  white-space: nowrap;
+}
+
+.info-banner__action:hover,
+.info-banner__action:focus-visible {
+  color: var(--div-color-accent-3, #1a76bb);
+}
+
+.info-banner__action:focus-visible {
+  outline: 2px solid var(--div-color-accent-3, #1a76bb);
+  outline-offset: 2px;
+  border-radius: var(--slds-g-radius-border-1, 0.125rem);
+}
+
+@media (max-width: 640px) {
+  .info-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .info-banner__action {
+    align-self: flex-end;
+  }
+}

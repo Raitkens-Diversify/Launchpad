@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Type__c</fullName>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Type</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Client - Individual</fullName>
+                <default>true</default>
+                <label>Client - Individual</label>
+            </value>
+            <value>
+                <fullName>Client - Business</fullName>
+                <default>false</default>
+                <label>Client - Business</label>
+            </value>
+            <value>
+                <fullName>Client - Trust</fullName>
+                <default>false</default>
+                <label>Client - Trust</label>
+            </value>
+            <value>
+                <fullName>Authorized Person</fullName>
+                <default>false</default>
+                <label>Authorized Person</label>
+            </value>
+            <value>
+                <fullName>Beneficial Owner</fullName>
+                <default>false</default>
+                <label>Beneficial Owner</label>
+            </value>
+            <value>
+                <fullName>Control Person</fullName>
+                <default>false</default>
+                <label>Control Person</label>
+            </value>
+            <value>
+                <fullName>Trustee</fullName>
+                <default>false</default>
+                <label>Trustee</label>
+            </value>
+            <value>
+                <fullName>Grantor - Revocable Trust</fullName>
+                <default>false</default>
+                <label>Grantor - Revocable Trust</label>
+            </value>
+            <value>
+                <fullName>Grantor - Irrevocable Trust</fullName>
+                <default>false</default>
+                <label>Grantor - Irrevocable Trust</label>
+            </value>
+            <value>
+                <fullName>ISA - Fin Acct</fullName>
+                <default>false</default>
+                <label>ISA - Fin Acct</label>
+            </value>
+            <value>
+                <fullName>ISA - Service Agreement</fullName>
+                <default>false</default>
+                <label>ISA - Service Agreement</label>
+            </value>
+            <value>
+                <fullName>AML Documentation</fullName>
+                <default>false</default>
+                <label>AML Documentation</label>
+            </value>
+            <value>
+                <fullName>Alternative Investment</fullName>
+                <default>false</default>
+                <label>Alternative Investment</label>
+            </value>
+            <value>
+                <fullName>Trust Related Party</fullName>
+                <default>false</default>
+                <label>Trust Related Party</label>
+            </value>
+            <value>
+                <fullName>Business Related Party</fullName>
+                <default>false</default>
+                <label>Business Related Party</label>
+            </value>
+            <value>
+                <fullName>ISA - DPI</fullName>
+                <default>false</default>
+                <label>ISA - DPI</label>
+            </value>
+            <value>
+                <fullName>Client - Irrevocable Trust</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Client - Irrevocable Trust</label>
+            </value>
+            <value>
+                <fullName>Client - Revocable Trust</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Client - Revocable Trust</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

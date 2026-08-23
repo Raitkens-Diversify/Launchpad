@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Account Type --></label>
+        <name>Account_Type__c</name>
+        <picklistValues>
+            <masterLabel>401(K)</masterLabel>
+            <translation><!-- 401(K) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>403(B)</masterLabel>
+            <translation><!-- 403(B) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>457</masterLabel>
+            <translation><!-- 457 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>529</masterLabel>
+            <translation><!-- 529 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Beneficiary IRA</masterLabel>
+            <translation><!-- Beneficiary IRA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Business</masterLabel>
+            <translation><!-- Business --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Charitable Remainder Unitrust</masterLabel>
+            <translation><!-- Charitable Remainder Unitrust --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Community Property</masterLabel>
+            <translation><!-- Community Property --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Community Property WROS</masterLabel>
+            <translation><!-- Community Property WROS --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Contributory IRA</masterLabel>
+            <translation><!-- Contributory IRA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Contributory Roth</masterLabel>
+            <translation><!-- Contributory Roth --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Conversion Roth</masterLabel>
+            <translation><!-- Conversion Roth --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Corporation</masterLabel>
+            <translation><!-- Corporation --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Custodial</masterLabel>
+            <translation><!-- Custodial --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DVP</masterLabel>
+            <translation><!-- DVP --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Decedent IRA</masterLabel>
+            <translation><!-- Decedent IRA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Defined Benefit Plan</masterLabel>
+            <translation><!-- Defined Benefit Plan --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Defined Contribution Plan</masterLabel>
+            <translation><!-- Defined Contribution Plan --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Defined Pension</masterLabel>
+            <translation><!-- Defined Pension --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Donor Advised Fund</masterLabel>
+            <translation><!-- Donor Advised Fund --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Education IRA</masterLabel>
+            <translation><!-- Education IRA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Educational Savings Account</masterLabel>
+            <translation><!-- Educational Savings Account --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Estate</masterLabel>
+            <translation><!-- Estate --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Health Savings Account</masterLabel>
+            <translation><!-- Health Savings Account --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>I401K</masterLabel>
+            <translation><!-- I401K --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>IRA Rollover</masterLabel>
+            <translation><!-- IRA Rollover --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>IRVTRU</masterLabel>
+            <translation><!-- IRVTRU --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Individual</masterLabel>
+            <translation><!-- Individual --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Individual Retirement Account</masterLabel>
+            <translation><!-- Individual Retirement Account --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Inh IRA</masterLabel>
+            <translation><!-- Inh IRA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Inherited IRA</masterLabel>
+            <translation><!-- Inherited IRA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Inherited Roth</masterLabel>
+            <translation><!-- Inherited Roth --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Invalid Type</masterLabel>
+            <translation><!-- Invalid Type --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>JTWROS</masterLabel>
+            <translation><!-- JTWROS --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Joint</masterLabel>
+            <translation><!-- Joint --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Joint Tenant</masterLabel>
+            <translation><!-- Joint Tenant --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Joint Tenants by Entirety</masterLabel>
+            <translation><!-- Joint Tenants by Entirety --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Keogh</masterLabel>
+            <translation><!-- Keogh --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>LLC</masterLabel>
+            <translation><!-- LLC --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Non-Profit</masterLabel>
+            <translation><!-- Non-Profit --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>PCRAT</masterLabel>
+            <translation><!-- PCRAT --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Partnership</masterLabel>
+            <translation><!-- Partnership --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Pension</masterLabel>
+            <translation><!-- Pension --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Personal Choice Retirement Account</masterLabel>
+            <translation><!-- Personal Choice Retirement Account --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Profit Sharing Plan</masterLabel>
+            <translation><!-- Profit Sharing Plan --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Retirement Plan</masterLabel>
+            <translation><!-- Retirement Plan --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Rollover IRA</masterLabel>
+            <translation><!-- Rollover IRA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Roth IRA</masterLabel>
+            <translation><!-- Roth IRA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>SAR Sep Plan</masterLabel>
+            <translation><!-- SAR Sep Plan --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>SEP IRA</masterLabel>
+            <translation><!-- SEP IRA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Simple</masterLabel>
+            <translation><!-- Simple --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Simplified Employee Pension Plan</masterLabel>
+            <translation><!-- Simplified Employee Pension Plan --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Solo 401(k)</masterLabel>
+            <translation><!-- Solo 401(k) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>TIC</masterLabel>
+            <translation><!-- TIC --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Traditional IRA</masterLabel>
+            <translation><!-- Traditional IRA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Transfer on Death</masterLabel>
+            <translation><!-- Transfer on Death --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Trust</masterLabel>
+            <translation><!-- Trust --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Uniform Gift to Minors Account</masterLabel>
+            <translation><!-- Uniform Gift to Minors Account --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Uniform Transfers to Minors Account</masterLabel>
+            <translation><!-- Uniform Transfers to Minors Account --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

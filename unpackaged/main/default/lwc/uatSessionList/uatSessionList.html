@@ -1,0 +1,188 @@
+<template>
+    <div class="usl">
+        <div class="usl__toolbar">
+            <c-ds-filter-chips class="usl__chips"
+                               chips={chips}
+                               selected={filterStatus}
+                               group-label="Filter sessions"
+                               onselect={handleChipSelect}></c-ds-filter-chips>
+            <div class="usl__toolbar-actions">
+                <template if:true={showLogLink}>
+                    <button type="button" class="usl__log-link" onclick={handleLogOpen}>
+                        View cycle findings log
+                    </button>
+                </template>
+                <lightning-button variant="brand"
+                                  label="Start New Session"
+                                  onclick={handleStartOpen}></lightning-button>
+            </div>
+        </div>
+
+        <template if:true={featuredSession}>
+            <section class="usl__featured" aria-label="Active session">
+                <div class="usl__featured-main">
+                    <div class="usl__featured-badges">
+                        <c-ds-badge label={featuredSession.status}
+                                    variant={featuredSession.statusVariant}
+                                    size="sm"></c-ds-badge>
+                        <span class="usl__featured-cycle">{featuredSession.cycleLabel}</span>
+                    </div>
+                    <button type="button" class="usl__featured-title"
+                            data-id={featuredSession.sessionId}
+                            onclick={handleOpen}>{featuredSession.title}</button>
+                    <template if:true={featuredSession.charterExcerpt}>
+                        <p class="usl__featured-charter">{featuredSession.charterExcerpt}</p>
+                    </template>
+                    <span class="usl__featured-meta">{featuredSession.metaLine}</span>
+                    <div class="usl__featured-actions">
+                        <lightning-button variant="brand"
+                                          label="Continue Session"
+                                          data-id={featuredSession.sessionId}
+                                          onclick={handleOpen}></lightning-button>
+                    </div>
+                </div>
+                <span class="usl__featured-visual" aria-hidden="true">
+                    <lightning-icon icon-name="utility:search" size="medium"
+                                    alternative-text=""></lightning-icon>
+                </span>
+            </section>
+        </template>
+
+        <template if:true={hasRows}>
+            <div class="usl__table">
+                <div class="usl__thead" aria-hidden="true">
+                    <span class="usl__th">Session</span>
+                    <span class="usl__th usl__th--cycle">Cycle</span>
+                    <span class="usl__th">Status</span>
+                    <span class="usl__th">Findings</span>
+                    <span class="usl__th usl__th--updated">Updated</span>
+                    <span class="usl__th"></span>
+                    <span class="usl__th"></span>
+                </div>
+                <template for:each={pagedRows} for:item="row">
+                    <article key={row.key} class="usl__tr">
+                        <div class="usl__td usl__td--session">
+                            <button type="button" class="usl__row-title"
+                                    data-id={row.sessionId}
+                                    onclick={handleOpen}>{row.title}</button>
+                            <span class="usl__row-meta">
+                                {row.name}
+                                <template if:false={row.mine}>
+                                    <span class="usl__row-tester">· {row.testerName}</span>
+                                </template>
+                            </span>
+                        </div>
+                        <div class="usl__td usl__td--cycle">{row.cycleLabel}</div>
+                        <div class="usl__td">
+                            <c-ds-badge label={row.status} variant={row.statusVariant} size="sm"></c-ds-badge>
+                        </div>
+                        <div class="usl__td usl__td--findings">
+                            <span>{row.findingsLabel}</span>
+                            <template if:true={row.filesLabel}>
+                                <span class="usl__row-files">{row.filesLabel}</span>
+                            </template>
+                        </div>
+                        <div class="usl__td usl__td--updated">{row.updatedLabel}</div>
+                        <div class="usl__td usl__td--action">
+                            <lightning-button label="Open"
+                                              aria-label={row.openAria}
+                                              data-id={row.sessionId}
+                                              onclick={handleOpen}></lightning-button>
+                        </div>
+                        <div class="usl__td usl__td--kebab">
+                            <lightning-button-menu class="usl__row-kebab"
+                                                   variant="bare"
+                                                   icon-name="utility:threedots_vertical"
+                                                   icon-size="small"
+                                                   menu-alignment="right"
+                                                   alternative-text={row.menuAlt}
+                                                   data-id={row.sessionId}
+                                                   onselect={handleMenuSelect}>
+                                <lightning-menu-item value="open" label="Open"></lightning-menu-item>
+                                <template if:true={row.canDelete}>
+                                    <lightning-menu-item value="delete" label="Delete"></lightning-menu-item>
+                                </template>
+                            </lightning-button-menu>
+                        </div>
+                    </article>
+                </template>
+            </div>
+            <div class="usl__pager">
+                <c-ds-pager page={clampedPage}
+                            page-size={pageSize}
+                            total={totalFiltered}
+                            item-label="sessions"
+                            onpagechange={handlePageChange}></c-ds-pager>
+            </div>
+        </template>
+
+        <template if:false={hasRows}>
+            <template if:true={isEmpty}>
+                <c-ds-empty-state
+                    icon="utility:search"
+                    heading="No ad-hoc sessions yet"
+                    message="Start one to explore areas outside the scripted test cases and record findings."
+                    action-label="Start New Session"
+                    show-action
+                    onaction={handleStartOpen}
+                ></c-ds-empty-state>
+            </template>
+            <template if:false={isEmpty}>
+                <c-ds-empty-state
+                    icon="utility:filterList"
+                    heading="Nothing matches"
+                    message="No sessions match this filter."
+                ></c-ds-empty-state>
+            </template>
+        </template>
+
+        <c-ds-modal-v2 is-open={startOpen}
+                       title="Start an ad-hoc session"
+                       size="medium"
+                       allow-overflow
+                       onclose={handleStartCancel}>
+            <template if:true={startOpen}>
+                <div class="usl__start-form">
+                    <lightning-input label="Session title"
+                                     required
+                                     value={startForm.title}
+                                     data-field="title"
+                                     onchange={handleStartField}></lightning-input>
+                    <!-- One optional line, and that is the whole form. The
+                         charter and timebox fields were exploratory-testing
+                         ceremony standing between a business user and writing
+                         down what they just saw. -->
+                    <lightning-input label="What are you looking at? (optional)"
+                                     placeholder="e.g. Client Records after the merge fix"
+                                     value={startForm.areaText}
+                                     data-field="areaText"
+                                     onchange={handleStartField}></lightning-input>
+                    <lightning-combobox label="Related test cycle"
+                                        required
+                                        options={cycleOptions}
+                                        value={startForm.cycleId}
+                                        dropdown-alignment="auto"
+                                        onchange={handleStartCycle}></lightning-combobox>
+                </div>
+            </template>
+            <div slot="footer" class="usl__start-actions">
+                <lightning-button label="Cancel"
+                                  disabled={starting}
+                                  onclick={handleStartCancel}></lightning-button>
+                <lightning-button variant="brand"
+                                  label="Start Session"
+                                  disabled={starting}
+                                  onclick={handleStartConfirm}></lightning-button>
+            </div>
+        </c-ds-modal-v2>
+
+        <template if:true={deleteOpen}>
+            <c-admin-confirm-modal header="Delete session"
+                                   message={deleteMessage}
+                                   confirm-label="Delete"
+                                   busy={deleting}
+                                   onconfirm={handleDeleteConfirm}
+                                   oncancel={handleDeleteCancel}></c-admin-confirm-modal>
+        </template>
+    </div>
+</template>

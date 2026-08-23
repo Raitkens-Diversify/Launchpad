@@ -1,0 +1,77 @@
+<template>
+    <div class="outline-item">
+        <!-- Chevron spacer keeps the icon aligned with expandable tree items. -->
+        <span class="outline-item__chevron"></span>
+        <lightning-icon
+            icon-name={iconName}
+            size="x-small"
+            class={iconClass}
+            alternative-text={item.name}>
+        </lightning-icon>
+        <div class="outline-item__text">
+            <p class="outline-item__name">{item.name}</p>
+            <template lwc:if={hasMeta}>
+                <p class="outline-item__meta">{item.meta}</p>
+            </template>
+            <template lwc:if={hasAmount}>
+                <p class="outline-item__amount">{item.amount}</p>
+            </template>
+        </div>
+        <!-- Right-region slot: the new-item indicators and the hover controls share it so
+             they swap in place without reflowing the row. -->
+        <div class="outline-item__aside">
+            <template lwc:if={showStatusRegion}>
+                <div class="outline-item__status">
+                    <template lwc:if={showNewBadge}>
+                        <span class="outline-item__badge outline-item__badge_new">New</span>
+                    </template>
+                    <template lwc:if={showStatusDot}>
+                        <span class="outline-item__dot" title="In progress — inputs missing"></span>
+                    </template>
+                    <template lwc:elseif={showStatusCheck}>
+                        <span class="outline-item__check" title="Completed">
+                            <lightning-icon
+                                icon-name="utility:check"
+                                size="x-small"
+                                alternative-text="Completed">
+                            </lightning-icon>
+                        </span>
+                    </template>
+                </div>
+            </template>
+            <!-- Row controls, revealed on hover/focus: add (plus) only for existing rows (a new
+                 entity gets its single default action on creation and can't gain more); more
+                 actions (Remove) only for removable rows (existing household entities can't be
+                 removed). -->
+            <div class="outline-item__actions">
+                <template lwc:if={canAdd}>
+                    <lightning-button-icon
+                        class="outline-item__add"
+                        icon-name="utility:add"
+                        variant="container"
+                        size="small"
+                        alternative-text="Add action item"
+                        tooltip="Add action item"
+                        onclick={handleAdd}>
+                    </lightning-button-icon>
+                </template>
+                <template lwc:if={canRemove}>
+                    <lightning-button-menu
+                        variant="bare"
+                        icon-name="utility:threedots_vertical"
+                        menu-alignment="right"
+                        alternative-text="More actions"
+                        title="More actions"
+                        onselect={handleMenuSelect}>
+                        <lightning-menu-item
+                            value="remove"
+                            label={removeMenuLabel}
+                            prefix-icon-name="utility:delete"
+                            class="env-menu-item_destructive">
+                        </lightning-menu-item>
+                    </lightning-button-menu>
+                </template>
+            </div>
+        </div>
+    </div>
+</template>

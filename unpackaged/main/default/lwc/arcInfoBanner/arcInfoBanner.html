@@ -1,0 +1,27 @@
+<!-- Author: Hoang Long Vu To -->
+<template>
+  <div class={bannerClass} role="status">
+    <div class="info-banner__content">
+      <lightning-icon
+        class="info-banner__icon"
+        icon-name="utility:info"
+        size="x-small"
+        alternative-text="Information"
+      ></lightning-icon>
+      <p class="info-banner__message">{message}</p>
+    </div>
+
+    <template lwc:if={showAction}>
+      <a
+        class="info-banner__action"
+        href="#"
+        role="button"
+        aria-label={actionAriaLabel}
+        onclick={handleActionClick}
+        onkeydown={handleActionKeyDown}
+      >
+        {actionLabel}
+      </a>
+    </template>
+  </div>
+</template>

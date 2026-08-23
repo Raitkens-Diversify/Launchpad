@@ -1,0 +1,20 @@
+<template>
+    <div class="theme-layout">
+        <!-- data-f6-region marks each area as an F6 keyboard-navigation landmark,
+             per the LWR custom-layout docs. -->
+        <header class="theme-layout__header" data-f6-region>
+            <slot name="header"></slot>
+        </header>
+        <div class="theme-layout__body">
+            <aside class="theme-layout__sidebar" data-f6-region>
+                <slot name="sidebar"></slot>
+            </aside>
+            <main class="theme-layout__main" data-f6-region>
+                <slot></slot>
+            </main>
+        </div>
+        <footer class="theme-layout__footer" data-f6-region>
+            <slot name="footer"></slot>
+        </footer>
+    </div>
+</template>

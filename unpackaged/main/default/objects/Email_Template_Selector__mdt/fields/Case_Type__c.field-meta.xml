@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Case_Type__c</fullName>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Case Type</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Move Money - One Time</fullName>
+                <default>true</default>
+                <label>Move Money - One Time</label>
+            </value>
+            <value>
+                <fullName>Move Money - Recurring</fullName>
+                <default>false</default>
+                <label>Move Money - Recurring</label>
+            </value>
+            <value>
+                <fullName>Cancel Move Money Recurring</fullName>
+                <default>false</default>
+                <label>Cancel Move Money Recurring</label>
+            </value>
+            <value>
+                <fullName>Transfer</fullName>
+                <default>false</default>
+                <label>Transfer</label>
+            </value>
+            <value>
+                <fullName>401k Rollover</fullName>
+                <default>false</default>
+                <label>401k Rollover</label>
+            </value>
+            <value>
+                <fullName>Journal Between Accounts - On Demand</fullName>
+                <default>false</default>
+                <label>Journal Between Accounts - On Demand</label>
+            </value>
+            <value>
+                <fullName>Draft and Submit - New Account</fullName>
+                <default>false</default>
+                <label>Draft and Submit - New Account</label>
+            </value>
+            <value>
+                <fullName>Draft and Submit - Alt Investment</fullName>
+                <default>false</default>
+                <label>Draft and Submit - Alt Investment</label>
+            </value>
+            <value>
+                <fullName>Client Onboarding</fullName>
+                <default>false</default>
+                <label>Client Onboarding</label>
+            </value>
+            <value>
+                <fullName>Client Terminated Services</fullName>
+                <default>false</default>
+                <label>Client Terminated Services</label>
+            </value>
+            <value>
+                <fullName>Review Meeting</fullName>
+                <default>false</default>
+                <label>Review Meeting</label>
+            </value>
+            <value>
+                <fullName>Grant Donation</fullName>
+                <default>false</default>
+                <label>Grant Donation</label>
+            </value>
+            <value>
+                <fullName>Donation in Kind</fullName>
+                <default>false</default>
+                <label>Donation in Kind</label>
+            </value>
+            <value>
+                <fullName>Qualified Charitable Distribution</fullName>
+                <default>false</default>
+                <label>Qualified Charitable Distribution</label>
+            </value>
+            <value>
+                <fullName>Roth Conversion</fullName>
+                <default>false</default>
+                <label>Roth Conversion</label>
+            </value>
+            <value>
+                <fullName>Prepare Trades</fullName>
+                <default>false</default>
+                <label>Prepare Trades</label>
+            </value>
+            <value>
+                <fullName>Trade Error</fullName>
+                <default>false</default>
+                <label>Trade Error</label>
+            </value>
+            <value>
+                <fullName>Client Reimbursement</fullName>
+                <default>false</default>
+                <label>Client Reimbursement</label>
+            </value>
+            <value>
+                <fullName>Change Management Style</fullName>
+                <default>false</default>
+                <label>Change Management Style</label>
+            </value>
+            <value>
+                <fullName>Update IMA</fullName>
+                <default>false</default>
+                <label>Update IMA</label>
+            </value>
+            <value>
+                <fullName>Deposit Check</fullName>
+                <default>false</default>
+                <label>Deposit Check</label>
+            </value>
+            <value>
+                <fullName>Client Passed Away</fullName>
+                <default>false</default>
+                <label>Client Passed Away</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

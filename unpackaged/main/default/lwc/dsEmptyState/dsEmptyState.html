@@ -1,0 +1,12 @@
+<template>
+    <div class="ds-empty">
+        <template if:true={hasIcon}>
+            <lightning-icon icon-name={icon} size="medium" class="ds-empty__icon"></lightning-icon>
+        </template>
+        <h3 class="ds-empty__heading">{heading}</h3>
+        <p class="ds-empty__message">{message}</p>
+        <template if:true={showActionButton}>
+            <lightning-button variant="brand" label={actionLabel} onclick={handleAction}></lightning-button>
+        </template>
+    </div>
+</template>

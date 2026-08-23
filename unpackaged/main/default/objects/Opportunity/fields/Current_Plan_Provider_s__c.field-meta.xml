@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Current_Plan_Provider_s__c</fullName>
+    <label>Current Plan Provider(s)</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>MultiselectPicklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>401Go</fullName>
+                <default>false</default>
+                <label>401Go</label>
+            </value>
+            <value>
+                <fullName>ADP</fullName>
+                <default>false</default>
+                <label>ADP</label>
+            </value>
+            <value>
+                <fullName>American Funds</fullName>
+                <default>false</default>
+                <label>American Funds</label>
+            </value>
+            <value>
+                <fullName>Ameritas</fullName>
+                <default>false</default>
+                <label>Ameritas</label>
+            </value>
+            <value>
+                <fullName>Ascensus</fullName>
+                <default>false</default>
+                <label>Ascensus</label>
+            </value>
+            <value>
+                <fullName>Empower</fullName>
+                <default>false</default>
+                <label>Empower</label>
+            </value>
+            <value>
+                <fullName>Fidelity</fullName>
+                <default>false</default>
+                <label>Fidelity</label>
+            </value>
+            <value>
+                <fullName>Guideline</fullName>
+                <default>false</default>
+                <label>Guideline</label>
+            </value>
+            <value>
+                <fullName>Human Interest</fullName>
+                <default>false</default>
+                <label>Human Interest</label>
+            </value>
+            <value>
+                <fullName>John Hancock</fullName>
+                <default>false</default>
+                <label>John Hancock</label>
+            </value>
+            <value>
+                <fullName>JPMorgan</fullName>
+                <default>false</default>
+                <label>JPMorgan</label>
+            </value>
+            <value>
+                <fullName>Lincoln Financial Group</fullName>
+                <default>false</default>
+                <label>Lincoln Financial Group</label>
+            </value>
+            <value>
+                <fullName>Nationwide</fullName>
+                <default>false</default>
+                <label>Nationwide</label>
+            </value>
+            <value>
+                <fullName>NWPS</fullName>
+                <default>false</default>
+                <label>NWPS</label>
+            </value>
+            <value>
+                <fullName>Paychex</fullName>
+                <default>false</default>
+                <label>Paychex</label>
+            </value>
+            <value>
+                <fullName>Principal</fullName>
+                <default>false</default>
+                <label>Principal</label>
+            </value>
+            <value>
+                <fullName>Schwab</fullName>
+                <default>false</default>
+                <label>Schwab</label>
+            </value>
+            <value>
+                <fullName>T. Rowe Price</fullName>
+                <default>false</default>
+                <label>T. Rowe Price</label>
+            </value>
+            <value>
+                <fullName>The Standard</fullName>
+                <default>false</default>
+                <label>The Standard</label>
+            </value>
+            <value>
+                <fullName>TIAA</fullName>
+                <default>false</default>
+                <label>TIAA</label>
+            </value>
+            <value>
+                <fullName>Transamerica</fullName>
+                <default>false</default>
+                <label>Transamerica</label>
+            </value>
+            <value>
+                <fullName>Vanguard</fullName>
+                <default>false</default>
+                <label>Vanguard</label>
+            </value>
+            <value>
+                <fullName>Vestwell</fullName>
+                <default>false</default>
+                <label>Vestwell</label>
+            </value>
+            <value>
+                <fullName>VOYA</fullName>
+                <default>false</default>
+                <label>VOYA</label>
+            </value>
+            <value>
+                <fullName>Other</fullName>
+                <default>false</default>
+                <label>Other</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+    <visibleLines>4</visibleLines>
+</CustomField>

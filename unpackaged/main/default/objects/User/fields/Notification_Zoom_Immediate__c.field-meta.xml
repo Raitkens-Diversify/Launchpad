@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Notification_Zoom_Immediate__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Whether this user receives immediate Zoom notifications.</description>
+    <label>Notification Zoom Immediate</label>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Checkbox</type>
+</CustomField>

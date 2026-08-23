@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningMessageChannel xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Broadcasts when a case or its current task changes so subscribers can refresh quickly.</description>
+    <isExposed>true</isExposed>
+    <lightningMessageFields>
+        <description>Id of the Case whose status changed.</description>
+        <fieldName>recordId</fieldName>
+    </lightningMessageFields>
+    <masterLabel>Case Status Updated</masterLabel>
+</LightningMessageChannel>

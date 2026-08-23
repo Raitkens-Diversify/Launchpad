@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Notification Log</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Notification Logs</value>
+    </caseValues>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <layouts>
+        <layout>Notification Log Layout</layout>
+        <sections>
+            <label><!-- Change Context --></label>
+            <section>Change Context</section>
+        </sections>
+        <sections>
+            <label><!-- Delivery --></label>
+            <section>Delivery</section>
+        </sections>
+        <sections>
+            <label><!-- Delivery Issues --></label>
+            <section>Delivery Issues</section>
+        </sections>
+        <sections>
+            <label><!-- Legacy Migration --></label>
+            <section>Legacy Migration</section>
+        </sections>
+        <sections>
+            <label><!-- Message --></label>
+            <section>Message</section>
+        </sections>
+        <sections>
+            <label><!-- Notification Summary --></label>
+            <section>Notification Summary</section>
+        </sections>
+        <sections>
+            <label><!-- Source Context --></label>
+            <section>Source Context</section>
+        </sections>
+    </layouts>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

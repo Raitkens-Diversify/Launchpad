@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Case_Account_Type__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Account type related to the case so we can show it on the task level</description>
+    <label>Case Account Type</label>
+    <referenceTo>Case</referenceTo>
+    <relationshipLabel>Task Templates</relationshipLabel>
+    <relationshipName>Task_Templates</relationshipName>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

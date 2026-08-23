@@ -1,0 +1,91 @@
+<aura:component controller="FlowCreateMultipleController" implements="flexipage:availableForAllPageTypes,lightning:availableForFlowScreens,force:hasRecordId" access="global">
+    <aura:attribute name="sObjectName" type="String" default=""/>
+    <aura:attribute name="recordTypeName" type="String" default=""/>
+    <aura:attribute name="sObjectFields" type="String" default=""/>
+    <aura:attribute name="recordId" type="String" />
+    <aura:attribute name="parentRecordId" type="String" default=""/>
+    <aura:attribute name="parentLookupFieldName" type="String" default=""/>
+    <aura:attribute name="MaximumNumberofRecords" type="Integer" default="10"/>
+    <aura:attribute name="LinestoShow" type="Integer" default="4"/>
+    <aura:attribute name="lstLoop" type="List"/>
+    <aura:attribute name="BondLadder" type="Boolean" />
+    <aura:attribute name="ShortTermCashManagement" type="Boolean" />
+    
+    <aura:attribute name="tableHeaderRecords" type="List"/>
+    <aura:attribute name="tableHeaderRows" type="List"/>
+    <aura:attribute name="fieldsWithDataTypes" type="List"/>
+    <aura:attribute name="existingRecords" type="List"/>
+    <aura:attribute name="pendingChanges" type="Object"/>
+    <aura:attribute name="dynamicFormList" type="Aura.Component[]"/>
+    <aura:attribute name="fetchedResult" type="List"/>
+    <aura:attribute name="autoSaving" type="Boolean" default="false"/>
+    <aura:attribute name="ObjectType" type="Object"/>   
+    <aura:attribute name="currentIndex" type="Integer" default="0"/>
+    <aura:attribute name="spinner" type="boolean" default="false"/>
+    <aura:attribute name="totalFundingPercent" type="Decimal" />
+    <aura:attribute name="numberOfRecords" type="String"/>
+    <aura:attribute name="filter" type="String" default=""/>
+
+    <!--Attributes for Check Deposit Object -->
+    <aura:attribute name="varhouseholdId" type="String" />
+    <aura:attribute name="totalInitialFundingAmount" type="String" />
+    <aura:attribute name="leaveInKind" type="Boolean" default="false" />
+    <aura:attribute name="orderTicketId" type="String" />
+    <aura:attribute name="advisorNotes" type="String" />
+    <aura:attribute name="formattedAdvisorNotes" type="String" />
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="change" value="{!v.leaveInKind}" action="{!c.handleLeaveInKindChange}"/>
+    
+    <aura:registerEvent name ="customLookUpRowDisable" type ="c:DisableRowForCustomObjectListLookup"/>
+    
+    <aura:handler event = "c:dynamicFormEvent" action = "{!c.handleDeleteForm}"/>
+    <aura:handler event = "c:dynamicFormChangeEvent" action = "{!c.handleFormChange}"/>
+    <aura:handler event="c:dynamicFormAddRowEvent" action="{!c.handleAddRow}"/>
+    
+    <div class="container-fluid">
+        <aura:if isTrue="{!v.spinner}">
+            <lightning:spinner alternativeText="Loading" size="medium"></lightning:spinner>
+        </aura:if>
+        <table class="slds-table slds-table_bordered slds-table_cell-buffer"> 
+            <thead>
+                <tr class="slds-text-title_caps">
+                    <aura:iteration items="{!v.tableHeaderRecords}" var="header">
+                        <th scope="col">
+                            <div class="slds-truncate slds-text-align_center headerWrap" title="{!header}">{!header}</div>
+                        </th>
+                    </aura:iteration>
+                    <th scope="col">
+                        <div class="slds-truncate slds-text-align_center" title=""> </div>
+                    </th>
+                </tr>
+            </thead>   
+            <tbody>
+                {!v.dynamicFormList}
+            </tbody>
+        </table>
+        <aura:if isTrue="{!v.sObjectName == 'Order__c'}">
+           <div class="slds-grid slds-wrap">
+                <div class="slds-size--2-of-7 slds-m-top_small slds-m-left_x-large">
+                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Total Initial Funding Percentage:</label>
+                <lightning:helptext content="Total Initial Funding Percentage must equal 100% before moving forward."/> 
+                <lightning:input type="number" label="Total Initial Funding Percentage:" value="{!v.totalFundingPercent}" formatter="percent-fixed" disabled="true" step="0.01" variant="label-hidden"/>
+            </div>
+            <div class="slds-size--2-of-7 slds-m-top_small slds-m-left_x-large">
+                <label class="slds-form-element__label" style="margin-right: 0.5rem;">Total Initial Funding Amount:</label>
+                <lightning:input type="number" label="Total Initial Funding Amount:" value="{!v.totalInitialFundingAmount}" formatter="currency" disabled="true"  variant="label-hidden"/>
+            </div>
+                </div>
+        </aura:if>
+        <div class="footer">
+            <div class="footer_btn">
+                <h1 class="slds-text-title_caps">
+                    <lightning:button title="Save and Add Row" label="Save and Add Row" onclick="{!c.handleSaveAndAddRowBtn}"/>
+                </h1>
+            </div>    
+        </div> 
+        <aura:if isTrue="{!v.sObjectName == 'Order__c'}">
+            <lightning:button variant="brand" label="Next" class="Class" title="Next" onclick="{!c.handleNextBtn}"/>
+        </aura:if>
+    </div>
+</aura:component>

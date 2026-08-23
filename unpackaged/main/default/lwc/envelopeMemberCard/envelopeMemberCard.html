@@ -1,0 +1,36 @@
+<template>
+    <div class="member-card">
+        <div class="member-card__body">
+            <div class="member-card__label">
+                <span class="member-card__title">{member.name}</span>
+                <template lwc:if={hasBadge}>
+                    <span class="member-card__badge">New</span>
+                </template>
+            </div>
+            <template lwc:if={hasMissing}>
+                <div class="member-card__missing-group">
+                    <lightning-icon
+                        icon-name="utility:warning"
+                        size="x-small"
+                        class="member-card__warn-icon"
+                        alternative-text="Warning">
+                    </lightning-icon>
+                    <span class="member-card__missing">{member.missingLabel}</span>
+                </div>
+            </template>
+        </div>
+        <lightning-button-menu
+            variant="bare"
+            icon-name="utility:threedots_vertical"
+            menu-alignment="right"
+            alternative-text="More actions"
+            title="More actions"
+            onselect={handleMenuSelect}>
+            <lightning-menu-item
+                value="remove"
+                label="Remove account owner"
+                prefix-icon-name="utility:delete">
+            </lightning-menu-item>
+        </lightning-button-menu>
+    </div>
+</template>

@@ -1,0 +1,128 @@
+/* Hoang Long Vu To — Aug 13, 2026 */
+
+:host {
+  display: inline-flex;
+}
+
+.nav-toggle__wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.nav-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #4b5563;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.nav-toggle:hover,
+.nav-toggle:focus-visible {
+  background: #f3f4f6;
+  outline: none;
+}
+
+.nav-toggle:focus-visible {
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #1a76bb;
+}
+
+.nav-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.nav-toggle:disabled:hover {
+  background: transparent;
+}
+
+.nav-toggle__icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+  background-color: currentColor;
+  -webkit-mask-image: var(--icon-url);
+  mask-image: var(--icon-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.nav-toggle__tooltip {
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  z-index: 100;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #1a2b4a;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-50%);
+  transition:
+    opacity 0.15s ease,
+    visibility 0.15s ease;
+}
+
+.nav-toggle__tooltip::before {
+  content: "";
+  position: absolute;
+  left: -4px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  background: #1a2b4a;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.nav-toggle__tooltip-shortcuts {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nav-toggle__tooltip-keys {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.nav-toggle__wrap:hover .nav-toggle__tooltip,
+.nav-toggle__wrap:focus-within .nav-toggle__tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+@media (hover: none) {
+  .nav-toggle__tooltip {
+    display: none;
+  }
+}

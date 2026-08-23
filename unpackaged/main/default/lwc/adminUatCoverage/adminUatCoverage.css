@@ -1,0 +1,123 @@
+.aucv__error {
+    margin: 0 0 0.75rem;
+    font-size: 0.875rem;
+    color: var(--ds-error-text, #a83232);
+}
+.aucv__loading {
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+    min-height: 80px;
+}
+.aucv__empty {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.aucv__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-md, 8px);
+}
+.aucv__table th {
+    padding: 0.5rem 0.625rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    white-space: nowrap;
+}
+.aucv__table td {
+    padding: 0.5rem 0.625rem;
+    border-bottom: 1px solid var(--slds-g-color-surface-container-2, #f3f4f6);
+    color: var(--slds-g-color-on-surface-2, #374151);
+    vertical-align: top;
+}
+.aucv__num {
+    text-align: right;
+}
+.aucv__row {
+    cursor: pointer;
+}
+.aucv__row:hover td {
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+.aucv__row--risk td:first-child {
+    box-shadow: inset 3px 0 0 var(--ds-error, #d94545);
+}
+.aucv__name {
+    display: block;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.aucv__status {
+    font-size: 0.6875rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.aucv__drill {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-md, 8px);
+}
+.aucv__drill-title {
+    margin: 0 0 0.75rem;
+    font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+    font-size: 1.0625rem;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.aucv__drill-cols {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+}
+.aucv__drill-heading {
+    margin: 0 0 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.aucv__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 320px;
+    overflow-y: auto;
+}
+.aucv__list-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    padding: 0.5rem 0.625rem;
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    border-radius: var(--ds-radius-sm, 6px);
+}
+.aucv__seat-code {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    word-break: break-word;
+}
+.aucv__seat-meta {
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+@media (max-width: 760px) {
+    .aucv__table {
+        display: block;
+        overflow-x: auto;
+    }
+}

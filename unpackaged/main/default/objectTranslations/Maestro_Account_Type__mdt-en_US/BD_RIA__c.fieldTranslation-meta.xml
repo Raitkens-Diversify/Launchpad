@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- BD/RIA --></label>
+        <name>BD_RIA__c</name>
+        <picklistValues>
+            <masterLabel>BD</masterLabel>
+            <translation><!-- BD --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>RIA</masterLabel>
+            <translation><!-- RIA --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

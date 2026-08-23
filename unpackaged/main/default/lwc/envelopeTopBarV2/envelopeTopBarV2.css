@@ -1,0 +1,92 @@
+:host {
+    display: block;
+    /* Tokens come from :root in envelopeWizardStyles.css (single source). To override a
+       token locally, declare it here on :host (wins for the top bar subtree). */
+}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--slds-g-spacing-4, 16px);
+    min-height: 64px;
+    box-sizing: border-box;
+    padding: var(--slds-g-spacing-4, 16px) var(--slds-g-spacing-5, 24px);
+    background: var(--slds-g-color-surface-1, #ffffff);
+    font-family: var(--slds-g-font-family-base, "Inter", -apple-system, BlinkMacSystemFont, sans-serif);
+    font-size: var(--slds-g-font-scale-1, 14px);
+}
+
+.topbar__left {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-5, 24px);
+    min-width: 0;
+}
+
+.topbar__logo {
+    height: 24px;
+    width: auto;
+    display: block;
+}
+
+.topbar__divider {
+    flex: none;
+    width: 1px;
+    height: 24px;
+    background: var(--slds-g-color-border-1, #d1d5db);
+}
+
+.topbar__review {
+    flex: none;
+}
+
+/* lightning-breadcrumb wrapper — layout only; the breadcrumb styling lives in
+   envelopeWizardStyles.css (shared, reaches the anchor via the flat DOM). */
+.topbar__ds-breadcrumb {
+    display: flex;
+    align-items: center;
+}
+
+/* Focused variant (full-screen review views): leading screen title, envelope name, and an
+   optional warning status on the left; the Review/Close actions on the right. */
+.topbar__title,
+.topbar__envelope {
+    flex: none;
+    color: var(--slds-g-color-accent-2, #0b2f51);
+    white-space: nowrap;
+}
+
+.topbar__title {
+    font-weight: var(--slds-g-font-weight-6, 600);
+}
+
+.topbar__envelope {
+    font-weight: var(--slds-g-font-weight-4, 400);
+}
+
+.topbar__status,
+.topbar__actions {
+    flex: none;
+    display: flex;
+    align-items: center;
+}
+
+.topbar__status {
+    gap: var(--slds-g-spacing-2, 8px);
+}
+
+.topbar__status-icon {
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-warning-base-50, #f59e0b);
+}
+
+.topbar__status-text {
+    font-size: var(--slds-g-font-size-base, 13px);
+    line-height: 18px;
+    color: var(--slds-g-color-warning-base-30, #92400e);
+    white-space: nowrap;
+}
+
+.topbar__actions {
+    gap: var(--slds-g-spacing-4, 16px);
+}

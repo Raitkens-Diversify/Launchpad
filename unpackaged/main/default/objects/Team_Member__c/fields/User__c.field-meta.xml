@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>User__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>The internal user who is a member of this team. Not DB-required: the platform forbids Restrict on User lookups and required lookups demand Restrict — the User_Required validation rule enforces presence instead.</description>
+    <label>User</label>
+    <referenceTo>User</referenceTo>
+    <relationshipLabel>UAT Team Memberships</relationshipLabel>
+    <relationshipName>UAT_Team_Memberships</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

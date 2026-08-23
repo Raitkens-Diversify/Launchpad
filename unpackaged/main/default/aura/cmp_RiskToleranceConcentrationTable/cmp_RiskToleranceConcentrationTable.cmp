@@ -1,0 +1,60 @@
+<aura:component implements="lightning:availableForFlowScreens">
+    <aura:attribute name="securitizedPrivateRealEstateAmount" type="Decimal" default="0"/>
+    <aura:attribute name="privateEquityAmount" type="Decimal" default="0"/>
+    <aura:attribute name="privateCreditAmount" type="Decimal" default="0"/>
+    <aura:attribute name="intervalFundsAmount" type="Decimal" default="0"/>
+    <aura:attribute name="energyProgramsAmount" type="Decimal" default="0"/>
+    <aura:attribute name="netWorthAmount" type="Decimal" default="0"/>
+    <aura:attribute name="netWorthTotalPercentage" type="Decimal" default="0"/>
+    <aura:attribute name="netWorthPercentages" type="Decimal[]"/>
+    <aura:attribute name="structuredNotesAmount" type="Decimal" default="0"/>
+    
+    <aura:handler name="init" value="{! this }" action="{! c.init }"/>
+    <div class="container-fluid">
+        <table border="1" width="500">
+            <thead>
+                <tr class="slds-text-title_cap" style="text-align : center;">
+                    <th width="25%">Product type</th>
+                    <th width="30%">Total Amount In Asset Class (including today’s purchases)</th>
+                    <th width="30%">Total Amount in Asset Class (as a % of Net Worth)</th>
+                    <th width="25%">All Securitized Alternative Investments (as a % of Net Worth)</th>
+                </tr>
+                
+            </thead>
+            <tbody>
+                
+                <tr>
+                    <td>Securitized Private Real Estate</td>
+                    <td>{!v.securitizedPrivateRealEstateAmount}</td>
+                    <td>{!v.netWorthPercentages[0]} %</td>
+                    <td rowspan="6">{!v.netWorthTotalPercentage} %</td>
+                </tr>
+                <tr>
+                    <td>Private Equity</td>
+                    <td>{!v.privateEquityAmount}</td>
+                    <td>{!v.netWorthPercentages[1]} %</td>
+                </tr>
+                <tr>
+                    <td>Private Credit</td>
+                    <td>{!v.privateCreditAmount}</td>
+                    <td>{!v.netWorthPercentages[2]} %</td>
+                </tr>
+                <tr>
+                    <td>Interval Funds</td>
+                    <td>{!v.intervalFundsAmount}</td>
+                    <td>{!v.netWorthPercentages[3]} %</td>
+                </tr>
+                <tr>
+                    <td>Energy Programs</td>
+                    <td>{!v.energyProgramsAmount}</td>
+                    <td>{!v.netWorthPercentages[4]} %</td>
+                </tr>
+                <tr>
+                    <td>Structured Notes</td>
+                    <td>{!v.structuredNotesAmount}</td>
+                    <td>{!v.netWorthPercentages[5]} %</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</aura:component>

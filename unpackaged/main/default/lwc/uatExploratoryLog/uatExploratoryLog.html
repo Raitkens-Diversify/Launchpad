@@ -1,0 +1,193 @@
+<template>
+    <div class="uxl">
+        <nav class="uxl__crumbs" aria-label="Breadcrumb">
+            <button type="button" class="uxl__crumb-link" onclick={handleBack}>My Test Cases</button>
+            <span class="uxl__crumb-sep">/</span>
+            <span class="uxl__crumb-current">{title}</span>
+        </nav>
+
+        <template if:true={errorMessage}>
+            <p class="uxl__error" role="alert">{errorMessage}</p>
+        </template>
+
+        <template if:true={loading}>
+            <c-ds-skeleton variant="card" count="3"></c-ds-skeleton>
+        </template>
+
+        <template if:false={loading}>
+            <div class="uxl__toolbar">
+                <p class="uxl__hint">
+                    A team-visible log — everyone on the cycle sees every entry;
+                    you edit and delete your own.
+                </p>
+                <lightning-button variant="brand"
+                                  label="+ Add finding"
+                                  disabled={busy}
+                                  onclick={handleAddOpen}></lightning-button>
+            </div>
+
+            <template if:true={hasAnyFindings}>
+                <!-- Since the unification this list carries both flows, so the
+                     first question a triager asks is where a finding came
+                     from. -->
+                <div class="uxl__filters">
+                    <c-ds-filter-chips chips={sourceChips}
+                                       selected={sourceFilter}
+                                       group-label="Source"
+                                       onselect={handleSourceFilter}></c-ds-filter-chips>
+                    <c-ds-filter-chips chips={typeChips}
+                                       selected={typeFilter}
+                                       group-label="Type"
+                                       onselect={handleTypeFilter}></c-ds-filter-chips>
+                </div>
+            </template>
+
+            <template if:true={formOpen}>
+                <section class="uxl__form">
+                    <h3 class="uxl__form-title">{formTitle}</h3>
+                    <lightning-input label="Title"
+                                     required
+                                     max-length="255"
+                                     field-level-help="What someone triaging this will read first."
+                                     value={form.title}
+                                     data-field="title"
+                                     onchange={handleFormField}></lightning-input>
+                    <lightning-combobox label="What kind of finding is this?"
+                                        options={typeOptions}
+                                        value={form.type}
+                                        onchange={handleFormType}></lightning-combobox>
+                    <lightning-textarea label="What were you testing?"
+                                        value={form.whatTesting}
+                                        data-field="whatTesting"
+                                        onchange={handleFormField}></lightning-textarea>
+                    <lightning-textarea label="What did you expect?"
+                                        value={form.whatExpected}
+                                        data-field="whatExpected"
+                                        onchange={handleFormField}></lightning-textarea>
+                    <lightning-textarea label="What happened?"
+                                        required
+                                        value={form.whatHappened}
+                                        data-field="whatHappened"
+                                        onchange={handleFormField}></lightning-textarea>
+                    <template if:true={formIsDefect}>
+                        <lightning-combobox label="Severity"
+                                            required
+                                            options={severityOptions}
+                                            value={form.severity}
+                                            onchange={handleFormSeverity}></lightning-combobox>
+                    </template>
+                    <template if:true={formNeedsEvidence}>
+                        <lightning-textarea label="Why is there no screenshot?"
+                                            field-level-help="A severe defect needs evidence, or a note saying why there isn't any."
+                                            value={form.noEvidenceReason}
+                                            data-field="noEvidenceReason"
+                                            onchange={handleFormField}></lightning-textarea>
+                    </template>
+                    <template if:true={formHasId}>
+                        <c-uat-evidence-upload record-id={form.id}
+                                               label="Evidence"></c-uat-evidence-upload>
+                    </template>
+                    <div class="uxl__form-actions">
+                        <lightning-button label="Close"
+                                          disabled={saving}
+                                          onclick={handleFormCancel}></lightning-button>
+                        <lightning-button variant="brand"
+                                          label="Save finding"
+                                          disabled={saving}
+                                          onclick={handleFormSave}></lightning-button>
+                    </div>
+                </section>
+            </template>
+
+            <template if:true={hasRows}>
+                <ul class="uxl__list">
+                    <template for:each={rows} for:item="row">
+                        <li key={row.id} class="uxl__card">
+                            <p class="uxl__headline">{row.headline}</p>
+                            <div class="uxl__card-head">
+                                <span class="uxl__meta">{row.metaLine}</span>
+                                <template if:true={row.sessionChip}>
+                                    <span class="uxl__session-chip">{row.sessionChip}</span>
+                                </template>
+                                <template if:true={row.caseChip}>
+                                    <span class="uxl__session-chip">{row.caseChip}</span>
+                                </template>
+                                <template if:true={row.hasType}>
+                                    <c-ds-badge label={row.type} variant={row.typeVariant} size="sm"></c-ds-badge>
+                                </template>
+                                <template if:true={row.hasSeverity}>
+                                    <c-ds-badge label={row.severity} variant={row.severityVariant} size="sm"></c-ds-badge>
+                                </template>
+                                <template if:true={row.isMine}>
+                                    <span class="uxl__card-actions">
+                                        <lightning-button variant="base"
+                                                          label="Edit"
+                                                          disabled={busy}
+                                                          data-id={row.id}
+                                                          onclick={handleEditOpen}></lightning-button>
+                                        <lightning-button variant="base"
+                                                          label="Delete"
+                                                          disabled={busy}
+                                                          data-id={row.id}
+                                                          onclick={handleDeleteClick}></lightning-button>
+                                    </span>
+                                </template>
+                            </div>
+                            <div class="uxl__block">
+                                <span class="uxl__block-label">Testing</span>
+                                <p class="uxl__block-text">{row.whatTesting}</p>
+                            </div>
+                            <template if:true={row.whatExpected}>
+                                <div class="uxl__block">
+                                    <span class="uxl__block-label">Expected</span>
+                                    <p class="uxl__block-text">{row.whatExpected}</p>
+                                </div>
+                            </template>
+                            <template if:true={row.whatHappened}>
+                                <div class="uxl__block">
+                                    <span class="uxl__block-label">Happened</span>
+                                    <p class="uxl__block-text">{row.whatHappened}</p>
+                                </div>
+                            </template>
+                            <template if:true={row.files.length}>
+                                <ul class="uxl__files">
+                                    <template for:each={row.files} for:item="file">
+                                        <li key={file.contentDocumentId}>
+                                            <template if:true={file.isImage}>
+                                                <a href={file.downloadUrl} target="_blank" rel="noopener">
+                                                    <img class="uxl__thumb" src={file.thumbnailUrl} alt={file.title} loading="lazy" />
+                                                </a>
+                                            </template>
+                                            <template if:false={file.isImage}>
+                                                <a class="uxl__file-link" href={file.downloadUrl} target="_blank" rel="noopener">{file.title}</a>
+                                            </template>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </template>
+                        </li>
+                    </template>
+                </ul>
+            </template>
+            <template if:false={hasRows}>
+                <c-ds-empty-state
+                    icon="utility:note"
+                    heading="No findings yet"
+                    message="No findings logged for this cycle yet — you could be first."
+                    action-label="+ Add finding"
+                    show-action
+                    onaction={handleAddOpen}
+                ></c-ds-empty-state>
+            </template>
+        </template>
+
+        <template if:true={confirmOpen}>
+            <c-admin-confirm-modal header={confirm.header}
+                                   message={confirm.message}
+                                   confirm-label={confirm.confirmLabel}
+                                   busy={saving}
+                                   onconfirm={handleConfirmProceed}
+                                   oncancel={handleConfirmCancel}></c-admin-confirm-modal>
+        </template>
+    </div>
+</template>

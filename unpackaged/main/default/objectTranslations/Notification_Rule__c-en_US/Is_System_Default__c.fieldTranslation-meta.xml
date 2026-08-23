@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <help><!-- When checked, this rule is a system default applied to all users until they override it. --></help>
+        <label><!-- System Default --></label>
+        <name>Is_System_Default__c</name>
+    </CustomFieldTranslation>

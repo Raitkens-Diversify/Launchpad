@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Event Category --></label>
+        <name>Event_Category__c</name>
+        <picklistValues>
+            <masterLabel>Advisor Meeting</masterLabel>
+            <translation><!-- Advisor Meeting --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Internal Meeting</masterLabel>
+            <translation><!-- Internal Meeting --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

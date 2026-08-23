@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Task Type --></label>
+        <name>Task_Type__c</name>
+        <picklistValues>
+            <masterLabel>Notify Advisor.</masterLabel>
+            <translation><!-- Notify Advisor. --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Notify Client.</masterLabel>
+            <translation><!-- Notify Client. --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Notify Outside Manager.</masterLabel>
+            <translation><!-- Notify Outside Manager. --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Notify Tax Advisor.</masterLabel>
+            <translation><!-- Notify Tax Advisor. --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Send Advisor Calendar link to Client.</masterLabel>
+            <translation><!-- Send Advisor Calendar link to Client. --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

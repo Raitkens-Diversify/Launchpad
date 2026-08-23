@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Trust Type --></label>
+        <name>Trust_Type__c</name>
+        <picklistValues>
+            <masterLabel>Corporation (C or S)</masterLabel>
+            <translation><!-- Corporation (C or S) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Estate</masterLabel>
+            <translation><!-- Estate --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Joint (Community Property, JTWROS, Tenants in Common, Tenants in the Entirety)</masterLabel>
+            <translation><!-- Joint (Community Property, JTWROS, Tenants in Common, Tenants in the Entirety) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Other Non-Trust Fiduciary (Conservatorship or Guardianship)</masterLabel>
+            <translation><!-- Other Non-Trust Fiduciary (Conservatorship or Guardianship) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Trust</masterLabel>
+            <translation><!-- Trust --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>UTMA/UGMA</masterLabel>
+            <translation><!-- UTMA/UGMA --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

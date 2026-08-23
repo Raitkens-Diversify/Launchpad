@@ -1,0 +1,144 @@
+<template>
+    <div class="ase">
+        <div class="ase__bar">
+            <lightning-button-icon icon-name="utility:back"
+                                   alternative-text="Back to my submissions"
+                                   onclick={handleBack}></lightning-button-icon>
+            <div class="ase__bar-text">
+                <h2 class="ase__title">{headerTitle}</h2>
+                <p class="ase__status">{statusNote}</p>
+            </div>
+            <div class="ase__bar-actions">
+                <lightning-button label="Save"
+                                  onclick={handleSave}
+                                  disabled={busy}></lightning-button>
+                <lightning-button variant="brand"
+                                  label="Submit for review"
+                                  onclick={handleSubmit}
+                                  disabled={busy}></lightning-button>
+            </div>
+        </div>
+
+        <template if:true={showReviewNotes}>
+            <div class="ase__notes" role="status">
+                <lightning-icon icon-name="utility:comments" size="x-small"></lightning-icon>
+                <span><strong>Reviewer notes:</strong> {reviewNotes}</span>
+            </div>
+        </template>
+
+        <template if:true={errorMessage}>
+            <p class="ase__error" role="alert">{errorMessage}</p>
+        </template>
+
+        <template if:true={loading}>
+            <div class="ase__loading">
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={loading}>
+            <div class="ase__grid">
+                <div class="ase__col">
+                    <section class="ase__card">
+                        <h3 class="ase__card-title">Basics</h3>
+                        <lightning-combobox label="Article type"
+                                            value={recordTypeName}
+                                            options={recordTypeOptions}
+                                            onchange={handleRecordTypeChange}></lightning-combobox>
+                        <template if:true={recordTypeDescription}>
+                            <p class="ase__help">{recordTypeDescription}</p>
+                        </template>
+                        <lightning-input label="Title"
+                                         value={title}
+                                         required
+                                         max-length="80"
+                                         onchange={handleTitleChange}></lightning-input>
+                        <lightning-input label="URL Name"
+                                         field-level-help="Becomes the article's link when published. Auto-suggested from the title; the reviewer double-checks it's unique."
+                                         value={urlName}
+                                         required
+                                         max-length="255"
+                                         onchange={handleUrlNameChange}
+                                         onblur={handleUrlNameBlur}></lightning-input>
+                        <lightning-textarea label="Summary"
+                                            field-level-help="Shown in search results and article lists. One or two plain sentences."
+                                            value={summary}
+                                            onchange={handleSummaryChange}></lightning-textarea>
+                    </section>
+
+                    <section class="ase__card">
+                        <h3 class="ase__card-title">Content</h3>
+                        <p class="ase__help">
+                            The article body. Use headings to structure it. Don’t paste iframes
+                            or embed codes — they’re stripped on display; use the Embed URL
+                            field below instead.
+                        </p>
+                        <lightning-input-rich-text value={content}
+                                                   label="Article body"
+                                                   label-visible
+                                                   onchange={handleContentChange}></lightning-input-rich-text>
+                        <template if:true={isFaq}>
+                            <p class="ase__help ase__help--spaced">
+                                FAQ extras: Question and Answer boost this article in search.
+                                <strong>They are never shown to readers.</strong>
+                            </p>
+                            <lightning-input-rich-text value={question}
+                                                       label="Question (search-only)"
+                                                       label-visible
+                                                       onchange={handleQuestionChange}></lightning-input-rich-text>
+                            <lightning-input-rich-text value={answer}
+                                                       label="Answer (search-only)"
+                                                       label-visible
+                                                       onchange={handleAnswerChange}></lightning-input-rich-text>
+                        </template>
+                        <lightning-input label="Embed URL (optional)"
+                                         field-level-help="Paste an https:// embed link (e.g. a Scribe share link). It renders as an interactive frame below the article body."
+                                         value={embedUrl}
+                                         type="url"
+                                         onchange={handleEmbedUrlChange}></lightning-input>
+                    </section>
+
+                    <section class="ase__card">
+                        <h3 class="ase__card-title">Discovery</h3>
+                        <lightning-textarea label="Keywords"
+                                            field-level-help="Comma- or space-separated words that boost this article in search. Never shown to readers."
+                                            value={keywords}
+                                            onchange={handleKeywordsChange}></lightning-textarea>
+                        <c-admin-related-linker search-type="articles"
+                                                label="Suggested articles (optional)"
+                                                placeholder="Search published articles…"
+                                                items={suggestedItems}
+                                                onitemschange={handleSuggestedChange}></c-admin-related-linker>
+                    </section>
+                </div>
+
+                <div class="ase__col ase__col--side">
+                    <section class="ase__card">
+                        <h3 class="ase__card-title">Help topics</h3>
+                        <p class="ase__help">
+                            Where this article should live in the Help Center — pick the topic
+                            section(s). Most articles belong to exactly one subtopic.
+                        </p>
+                        <c-admin-category-tree nodes={categoryTree}
+                                               selected={categoryNames}
+                                               mode="multi"
+                                               onselectionchange={handleCategoryChange}></c-admin-category-tree>
+                    </section>
+
+                    <section class="ase__card">
+                        <h3 class="ase__card-title">Related resources</h3>
+                        <p class="ase__help">
+                            Downloadable resources to show with this article — attached
+                            automatically when it’s published.
+                        </p>
+                        <c-admin-related-linker search-type="resources"
+                                                label="Attached resources"
+                                                placeholder="Search resources…"
+                                                items={resourceItems}
+                                                onitemschange={handleResourcesChange}></c-admin-related-linker>
+                    </section>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

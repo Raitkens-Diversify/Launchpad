@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSetGroup xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Group of permission sets that are minimal requirements for end users to authenticate their login and leverage the DS functionality in SF.</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Docusign User - Basic</label>
+    <permissionSets>dfsle__DocuSign_Login</permissionSets>
+    <permissionSets>dfsle__DocuSign_Sender</permissionSets>
+    <permissionSets>dfsle__DocuSign_User</permissionSets>
+    <status>Updated</status>
+</PermissionSetGroup>

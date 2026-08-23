@@ -1,0 +1,19 @@
+.THIS {
+}
+
+.THIS .slds-button {
+    background-color: #5aaadc;
+    padding-bottom: 16px;
+    padding-top: 16px;
+    display: block;
+  	margin-left: auto;
+  	margin-right: auto;
+  	width: 30%;
+}
+
+.THIS img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 30%;
+}

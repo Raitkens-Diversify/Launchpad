@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Target_Book__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Deferred book membership. Holds the book this case should join while it is still being authored; when Creation Status flips to Complete the case is appended to the book (Test_Book_Item__c) and this field is cleared. Admin-only — never rendered on tester surfaces.</description>
+    <label>Add to Book When Complete</label>
+    <referenceTo>Test_Book__c</referenceTo>
+    <relationshipLabel>Pending Cases</relationshipLabel>
+    <relationshipName>Pending_Cases</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

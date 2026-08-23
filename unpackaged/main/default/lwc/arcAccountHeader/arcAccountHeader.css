@@ -1,0 +1,91 @@
+/**
+ * Author: Hoang Long Vu To
+ * Date: 2026-08-13
+ */
+:host {
+  display: block;
+}
+
+.account-header {
+  width: 100%;
+}
+
+.account-header__loading {
+  display: flex;
+  justify-content: flex-start;
+  padding: var(--div-space-2, 0.5rem) 0;
+}
+
+.account-header__error {
+  padding: var(--div-space-2, 0.5rem) 0;
+  color: var(--slds-g-color-on-error-1, #991b1b);
+  font-size: var(--slds-g-font-scale-1, 0.875rem);
+}
+
+.account-header__layout {
+  display: flex;
+  align-items: flex-start;
+}
+
+.account-header__content {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--div-space-2, 0.5rem);
+}
+
+.account-header__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--div-space-3, 0.75rem);
+}
+
+.account-header__name {
+  margin: 0;
+  font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+  font-size: 1.75rem;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.account-header__badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--div-space-2, 0.5rem);
+}
+
+.account-header__type-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.5rem;
+  padding: 0 var(--div-space-2, 0.5rem);
+  border-radius: 999px;
+  font-family: var(--div-font-family-base, "Inter", -apple-system, BlinkMacSystemFont, sans-serif);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.account-header__type-badge_primary {
+  background: var(--div-color-accent-1, #e8f2fb);
+  color: var(--arc-color-blue-600, var(--div-color-blue-600, #0369a1));
+  border: 1px solid transparent;
+}
+
+.account-header__type-badge_secondary {
+  background: var(--slds-g-color-surface-1, #ffffff);
+  color: var(--slds-g-color-on-surface-2, #374151);
+  border: 1px solid var(--div-color-gray-200, #e5e7eb);
+}
+
+@media (max-width: 640px) {
+  .account-header__name {
+    font-size: 1.375rem;
+  }
+}

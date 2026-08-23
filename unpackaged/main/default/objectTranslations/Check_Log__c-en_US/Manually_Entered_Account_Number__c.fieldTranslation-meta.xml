@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Manually Entered Account Number --></label>
+        <name>Manually_Entered_Account_Number__c</name>
+    </CustomFieldTranslation>

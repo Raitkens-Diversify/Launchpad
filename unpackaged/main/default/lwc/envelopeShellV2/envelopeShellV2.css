@@ -1,0 +1,106 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* The shared top bar now lives in envelopeApp; the shell fills the body row below
+   it (.env-layout__body). Flex to fill the available height rather than flooring at
+   100vh — the persistent top bar already owns the top of the layout. */
+.shell {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+}
+
+/* Mirror the existing wizard grid (envelopeNavSidebar .wizard__grid), simplified
+   — no drag-resize / mobile drawer in this first slice. Fills the shell height. */
+.shell__grid {
+  flex: 1;
+  display: grid;
+  /* A single length (clamp) rather than minmax() so the column width animates
+       smoothly to/from the collapsed 48px strip — minmax→length does not interpolate. */
+  grid-template-columns: clamp(280px, 30vw, 400px) minmax(0, 1fr);
+  min-height: 0;
+  transition: grid-template-columns 200ms ease;
+  /* White base behind the columns so the content panel's rounded top-left corner
+       reveals white (matching the rail/top bar), not the gray surface behind it. */
+  background: var(--slds-g-color-surface-1, #ffffff);
+}
+
+/* Collapsed: rail shrinks to a narrow strip, content takes the rest. */
+.shell__grid--nav-collapsed {
+  grid-template-columns: 48px minmax(0, 1fr);
+}
+
+/* The rail component (householdOutlineV2) owns its own internal spacing per the
+   design, so the nav host carries only the surface and full-height flex. The divider
+   between rail and content is the content panel's left border (see .shell__content). */
+.shell__nav {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--slds-g-color-surface-container-1, #ffffff);
+}
+
+/* Content panel (Figma "Body"): a gray surface inset against the rail/top bar with a
+   rounded top-left corner and left/top border. Scrolls within the shell height; positioned
+   so absolutely-positioned descendants anchor inside it and stay clipped by the scroll. */
+.shell__content {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--slds-g-color-surface-2, #f3f4f6);
+  border-left: 1px solid var(--slds-g-color-border-1, #d1d5db);
+  border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+  border-top-left-radius: var(--slds-g-radius-border-3, 12px);
+}
+
+/* Content grid (Figma "Grid"): centered column, capped width, generous padding. */
+.shell__main {
+  width: 100%;
+  max-width: 1280px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-5, 24px);
+  padding: var(--slds-g-spacing-6, 32px) var(--slds-g-spacing-7, 40px)
+    var(--slds-g-spacing-10, 64px);
+}
+
+.shell__loading {
+  position: relative;
+  flex: 1;
+  min-height: 240px;
+  background: var(--slds-g-color-surface-2, #f3f4f6);
+}
+
+/* The "Items List" region: the add CTA plus the stacked Action Item groups, spaced 16px
+   apart (the 24px gap from the page header above comes from .shell__main). */
+.items-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-4, 16px);
+}
+
+@media (max-width: 767px) {
+  .shell__grid,
+  .shell__grid--nav-collapsed {
+    grid-template-columns: 1fr;
+  }
+
+  .shell__nav {
+    border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
+  }
+
+  /* Full-width stacked content — no inset corner. */
+  .shell__content {
+    border-left: none;
+    border-top-left-radius: 0;
+  }
+}

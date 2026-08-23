@@ -1,0 +1,82 @@
+<template>
+    <div class={overlayClass} lwc:ref="shell">
+        <!-- Backdrop blur layer: transparent, backdrop-filter, spotlight hole via
+             clip-path. Hidden by CSS unless the browser supports both features. -->
+        <div class="tour-overlay__blur" lwc:ref="blur" aria-hidden="true"></div>
+
+        <!-- Scrim + spotlight: a masked full-viewport rect (feathered cutout)
+             plus a glowing ring that rides the cutout. All geometry is applied
+             at runtime — ids too, because LWC mangles template ids and would
+             break the url(#...) references. -->
+        <svg class="tour-overlay__scrim" lwc:ref="svg" aria-hidden="true" focusable="false">
+            <defs>
+                <filter lwc:ref="feather" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="4"></feGaussianBlur>
+                </filter>
+                <mask lwc:ref="mask" maskUnits="userSpaceOnUse">
+                    <rect lwc:ref="maskBase" fill="white"></rect>
+                    <rect lwc:ref="cutout" fill="black" rx="12" ry="12"></rect>
+                </mask>
+            </defs>
+            <rect lwc:ref="scrimRect" class="tour-overlay__scrim-fill"></rect>
+            <rect lwc:ref="glow" class="tour-overlay__glow" rx="12" ry="12" fill="none"></rect>
+            <!-- Click shield: invisible but hit-testable. Button steps cover the
+                 whole viewport (modal); click steps carve the spotlight out with
+                 fill-rule=evenodd so only the highlighted element takes clicks. -->
+            <path lwc:ref="shield" class="tour-overlay__shield" fill-rule="evenodd"></path>
+        </svg>
+
+        <!-- Coach-mark card. Non-modal: aria-modal=false, soft focus wrap via
+             sentinels (page content stays operable). -->
+        <section
+            class="tour-overlay__card"
+            lwc:ref="card"
+            role="dialog"
+            aria-modal="false"
+            tabindex="-1"
+        >
+            <span class="tour-overlay__sentinel" tabindex="0" onfocus={handleSentinelStart}></span>
+            <span class={caretClass} lwc:ref="caret" aria-hidden="true"></span>
+            <div class={cardInnerClass}>
+                <h2 class="tour-overlay__title" lwc:ref="title">{dTitle}</h2>
+                <div class="tour-overlay__body" lwc:ref="body">
+                    <lightning-formatted-rich-text value={dBody}></lightning-formatted-rich-text>
+                </div>
+                <template lwc:if={showClickHint}>
+                    <p class="tour-overlay__hint">Try it &mdash; click the highlighted area to continue.</p>
+                </template>
+                <div class="tour-overlay__progress">
+                    <span class="tour-overlay__count">{progressLabel}</span>
+                    <span class="tour-overlay__dots">
+                        <template for:each={dots} for:item="dot">
+                            <span key={dot.key} class={dot.className}></span>
+                        </template>
+                    </span>
+                </div>
+                <div class="tour-overlay__actions">
+                    <button type="button" class="tour-overlay__skip" onclick={handleSkipClick}>
+                        Skip tour
+                    </button>
+                    <span class="tour-overlay__spacer"></span>
+                    <template lwc:if={showBack}>
+                        <button type="button" class="tour-overlay__back" onclick={handleBackClick}>
+                            Back
+                        </button>
+                    </template>
+                    <button
+                        type="button"
+                        class="tour-overlay__next"
+                        lwc:ref="nextBtn"
+                        onclick={handleNextClick}
+                    >{nextLabel}</button>
+                </div>
+                <template lwc:if={showDismissForever}>
+                    <button type="button" class="tour-overlay__dismiss" onclick={handleDismissForever}>
+                        Don&rsquo;t show this again
+                    </button>
+                </template>
+            </div>
+            <span class="tour-overlay__sentinel" tabindex="0" onfocus={handleSentinelEnd}></span>
+        </section>
+    </div>
+</template>

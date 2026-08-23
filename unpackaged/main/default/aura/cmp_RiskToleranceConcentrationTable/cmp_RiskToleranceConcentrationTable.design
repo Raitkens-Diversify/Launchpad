@@ -1,0 +1,10 @@
+<design:component>
+    <design:attribute name="securitizedPrivateRealEstateAmount" label="Securitized Private Real Estate Amount" description="" />
+    <design:attribute name="privateEquityAmount" label="Private Equity Amount" description="" />
+    <design:attribute name="privateCreditAmount" label="Private Credit Amount" description=""/>
+    <design:attribute name="intervalFundsAmount" label="Interval Funds Amount" description="" />
+    <design:attribute name="energyProgramsAmount" label="Energy Programs Amount" description="" />
+    <design:attribute name="netWorthAmount" label="Net worth Amount" description="Net worth Amount" />
+    <design:attribute name="structuredNotesAmount" label="Structured Notes Amount" description="" />
+
+</design:component>

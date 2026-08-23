@@ -1,0 +1,82 @@
+<template>
+    <template if:true={available}>
+        <div class="nexs-rating">
+            <div class="nexs-rating__prompt-row">
+                <span class="nexs-rating__prompt">Was this article helpful?</span>
+                <button
+                    type="button"
+                    class={upClass}
+                    data-vote="Up"
+                    aria-pressed={upPressed}
+                    aria-label="Yes, this article was helpful"
+                    disabled={busy}
+                    onclick={handleVote}
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M2 10h4v11H2zM22 11c0-1.1-.9-2-2-2h-5.2l.9-4.4v-.3c0-.4-.2-.8-.4-1.1L14.2 2 8.6 7.6c-.4.4-.6.9-.6 1.4v9c0 1.7 1.3 3 3 3h6.3c.8 0 1.5-.5 1.8-1.2l2.7-6.4c.1-.2.2-.5.2-.7V11z"/>
+                    </svg>
+                    <span>Yes</span>
+                </button>
+                <button
+                    type="button"
+                    class={downClass}
+                    data-vote="Down"
+                    aria-pressed={downPressed}
+                    aria-label="No, this article was not helpful"
+                    disabled={busy}
+                    onclick={handleVote}
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M22 14h-4V3h4zM2 13c0 1.1.9 2 2 2h5.2l-.9 4.4v.3c0 .4.2.8.4 1.1l1.1 1.2 5.6-5.6c.4-.4.6-.9.6-1.4V6c0-1.7-1.3-3-3-3H6.7c-.8 0-1.5.5-1.8 1.2L2.2 10.6c-.1.2-.2.5-.2.7V13z"/>
+                    </svg>
+                    <span>No</span>
+                </button>
+            </div>
+
+            <template if:true={showThanks}>
+                <p class="nexs-rating__thanks">
+                    {thanksMessage}
+                    <template if:true={showCommentLink}>
+                        <button
+                            type="button"
+                            class="nexs-rating__link"
+                            onclick={handleAddComment}
+                        >Add a comment</button>
+                    </template>
+                </p>
+            </template>
+
+            <template if:true={showComment}>
+                <div class="nexs-rating__comment">
+                    <label class="nexs-rating__comment-label" for="rating-comment">{commentPrompt}</label>
+                    <textarea
+                        id="rating-comment"
+                        class="nexs-rating__textarea"
+                        rows="3"
+                        maxlength={maxComment}
+                        placeholder="Tell us what was missing or unclear (optional)"
+                        disabled={busy}
+                    ></textarea>
+                    <div class="nexs-rating__comment-actions">
+                        <button
+                            type="button"
+                            class="nexs-rating__btn nexs-rating__btn--primary"
+                            disabled={busy}
+                            onclick={handleSubmitComment}
+                        >Submit</button>
+                        <button
+                            type="button"
+                            class="nexs-rating__btn"
+                            disabled={busy}
+                            onclick={handleDismissComment}
+                        >No thanks</button>
+                    </div>
+                </div>
+            </template>
+
+            <template if:true={error}>
+                <p class="nexs-rating__error">{error}</p>
+            </template>
+        </div>
+    </template>
+</template>

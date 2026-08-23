@@ -1,0 +1,41 @@
+<template>
+    <c-ds-modal-v2
+        is-open={isOpen}
+        title="Select existing member"
+        subtitle="Search for household member to select as account owner."
+        size="small"
+        allow-overflow
+        onclose={handleClose}>
+        <div class="select-member__body">
+            <c-envelope-searchable-combobox
+                variant="label-hidden"
+                label="Member"
+                placeholder="Search member..."
+                options={memberOptions}
+                value={selectedId}
+                onchange={handleSelect}>
+            </c-envelope-searchable-combobox>
+            <template lwc:if={isLoading}>
+                <lightning-spinner
+                    size="small"
+                    variant="brand"
+                    alternative-text="Loading members">
+                </lightning-spinner>
+            </template>
+        </div>
+
+        <div slot="footer" class="select-member__footer">
+            <lightning-button
+                variant="secondary"
+                label="Cancel"
+                onclick={handleCancel}>
+            </lightning-button>
+            <lightning-button
+                variant="brand"
+                label="Continue"
+                disabled={isContinueDisabled}
+                onclick={handleContinue}>
+            </lightning-button>
+        </div>
+    </c-ds-modal-v2>
+</template>

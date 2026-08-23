@@ -1,0 +1,17 @@
+<design:component>
+    <design:attribute name="sObjectName" label="Name" description="API name of the Object that the records will be." />
+    <design:attribute name="recordTypeName" label="Record Type" description="All records shown/created will be of this type" />
+    <design:attribute name="MaximumNumberofRecords" label="Maximum Number of Records" description="If there is a maximum number of records, put that value here." />
+    <design:attribute name="LinestoShow" label="Lines to Show" description="Number of lines to show initially." />
+    <design:attribute name="flowInterviewId" label="Flow Interview Id" description="Flow Interview Id." />
+    <design:attribute name="flowInterviewFieldName" label="Flow Interview Field Name" description="API Name of the Flow Interview Field." />
+    <design:attribute name="wFAIds" label="Wizard Financial Account Ids" description="Wizard Financial Account Ids separated by commas." />
+    <design:attribute name="wFAFieldName" label="Wizard Financial Account Field Name" description="API Name of the Wizard Financial Account lookup field." />
+    <design:attribute name="sObjectFields" label="Fields" description="API names of Fields separated by commas." />
+    <design:attribute name="readOnlyFields" label="Read Only Fields" description="API names of Fields with read-only permission separated by commas." />
+    <design:attribute name="varhouseholdId" label="Household Id" description="Household Record Id." />
+    <design:attribute name="allowCreate" label="Allow Record Creation?" description="Specifies whether a user can create new records. The default is false." />
+    <design:attribute name="totalAmountFieldName" label="Total Amount Field Name" description="API Name of the Field on Object to Calculate Total for." />
+    <design:attribute name="totalAmountComparisonValue" label="Total Amount Comparison Value" description="The value to compare the Total Amount With." />
+    <design:attribute name="doesTotalMatch" label="Does Total Amount Match?" description="Boolean value that specifies whether the actual total amount has matched with total comparison value or not." />
+</design:component>

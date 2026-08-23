@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Strategy Allocation Type --></label>
+        <name>Strategy_Allocation_Type__c</name>
+        <picklistValues>
+            <masterLabel>fixed-dollar</masterLabel>
+            <translation><!-- fixed-dollar --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>fixed-percentage</masterLabel>
+            <translation><!-- fixed-percentage --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

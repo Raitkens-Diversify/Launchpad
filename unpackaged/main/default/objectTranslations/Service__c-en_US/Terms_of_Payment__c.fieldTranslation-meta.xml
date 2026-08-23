@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Terms of Payment --></label>
+        <name>Terms_of_Payment__c</name>
+        <picklistValues>
+            <masterLabel>Fixed Annual Fee</masterLabel>
+            <translation><!-- Fixed Annual Fee --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Fixed Project Fee</masterLabel>
+            <translation><!-- Fixed Project Fee --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Hourly Fee</masterLabel>
+            <translation><!-- Hourly Fee --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Previous Task Template --></label>
+        <name>Previous_Task_Template__c</name>
+        <relationshipLabel><!-- Task Templates (Previous Task Template) --></relationshipLabel>
+    </CustomFieldTranslation>

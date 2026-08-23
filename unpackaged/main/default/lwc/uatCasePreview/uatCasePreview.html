@@ -1,0 +1,84 @@
+<template>
+    <div class="ucp">
+        <template if:true={hasMeta}>
+            <p class="ucp__meta">{metaLabel}</p>
+        </template>
+
+        <template if:true={hasDescription}>
+            <div class="ucp__block">
+                <span class="ucp__block-label">What this covers</span>
+                <p class="ucp__block-text">{dto.description}</p>
+            </div>
+        </template>
+
+        <template if:true={hasPreConditions}>
+            <section class="ucp__panel">
+                <h3 class="ucp__panel-title">Pre-conditions</h3>
+                <p class="ucp__block-text">{dto.preConditions}</p>
+            </section>
+        </template>
+
+        <template if:true={hasSteps}>
+            <section class="ucp__steps">
+                <div class="ucp__steps-head">
+                    <h3 class="ucp__panel-title">Steps</h3>
+                    <span class="ucp__steps-count">{stepCountLabel}</span>
+                </div>
+                <ol class="ucp__list">
+                    <template for:each={stepViews} for:item="step">
+                        <li key={step.key} class={step.itemClass}>
+                            <template if:true={step.showGroup}>
+                                <p class="ucp__group">{step.groupLabel}</p>
+                            </template>
+                            <div class="ucp__step-body">
+                                <span class="ucp__step-number" aria-hidden="true">{step.numberLabel}</span>
+                                <div class="ucp__step-content">
+                                    <template if:true={step.showTitle}>
+                                        <p class="ucp__step-title">{step.title}</p>
+                                    </template>
+                                    <template if:true={step.isExplore}>
+                                        <span class="ucp__tag">Exploratory</span>
+                                    </template>
+                                    <template if:true={step.showInstruction}>
+                                        <div class="ucp__block">
+                                            <span class="ucp__block-label">What to do</span>
+                                            <p class="ucp__block-text">{step.instruction}</p>
+                                        </div>
+                                    </template>
+                                    <template if:true={step.showExpected}>
+                                        <div class="ucp__block ucp__block--expected">
+                                            <span class="ucp__block-label">Expected result</span>
+                                            <p class="ucp__block-text">{step.expected}</p>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </li>
+                    </template>
+                </ol>
+            </section>
+        </template>
+
+        <template if:false={hasSteps}>
+            <c-ds-empty-state icon="utility:list"
+                              heading="This case has no steps yet"
+                              message="Check with the UAT admin before claiming it."></c-ds-empty-state>
+        </template>
+
+        <template if:true={hasReferenceMaterials}>
+            <section class="ucp__panel">
+                <h3 class="ucp__panel-title">Reference material</h3>
+                <ul class="ucp__refs">
+                    <template for:each={referenceRows} for:item="ref">
+                        <li key={ref.key} class="ucp__ref">
+                            <span class="ucp__ref-label">{ref.displayLabel}</span>
+                            <template if:true={ref.openUrl}>
+                                <a class="ucp__ref-open" href={ref.openUrl} target="_blank" rel="noopener">Open</a>
+                            </template>
+                        </li>
+                    </template>
+                </ul>
+            </section>
+        </template>
+    </div>
+</template>

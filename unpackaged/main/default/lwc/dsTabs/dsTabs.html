@@ -1,0 +1,20 @@
+<template>
+    <div class="ds-tabs" role="tablist" aria-label={label}>
+        <template for:each={decorated} for:item="tab">
+            <button key={tab.value}
+                    type="button"
+                    role="tab"
+                    class={tab.cssClass}
+                    aria-selected={tab.ariaSelected}
+                    tabindex={tab.tabIndex}
+                    data-value={tab.value}
+                    onclick={handleClick}
+                    onkeydown={handleKeydown}>
+                <span class="ds-tabs__label">{tab.label}</span>
+                <template if:true={tab.hasCount}>
+                    <span class="ds-tabs__count">{tab.count}</span>
+                </template>
+            </button>
+        </template>
+    </div>
+</template>

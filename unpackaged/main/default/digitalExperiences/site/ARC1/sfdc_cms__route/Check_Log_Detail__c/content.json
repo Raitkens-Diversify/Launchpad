@@ -1,0 +1,12 @@
+{
+  "type" : "sfdc_cms__route",
+  "title" : "Check Log Detail",
+  "contentBody" : {
+    "activeViewId" : "Check_Log_Detail",
+    "configurationTags" : [ ],
+    "pageAccess" : "UseParent",
+    "routeType" : "detail-Check_Log__c",
+    "urlPrefix" : "check-log"
+  },
+  "urlName" : "check-log-detail"
+}

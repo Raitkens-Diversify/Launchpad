@@ -1,0 +1,43 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes" access="global" >
+    
+    <aura:attribute name="showScreen1" type="boolean" default="true"/>
+    <aura:attribute name="showScreen2" type="boolean" default="false"/>
+    <aura:attribute name="openFlow" type="boolean" default="false" />
+    <lightning:card>
+    <img src="data:image/png;base64,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"/>
+    <aura:if isTrue="{!v.showScreen1}">
+        <lightning:card>
+            <div>
+                <lightning:button variant="brand" label="New Order" title="Brand action" onclick="{! c.handleNewOrderClick }" />
+            </div>
+            <div>
+                <lightning:button variant="brand" label="New Advertising Requests" title="Brand action" onclick="{! c.handleClick }" />
+                
+            </div>
+            <div>
+                <lightning:button variant="brand" label="Enter New Check Log" title="Brand action" onclick="{! c.handleClick }" />
+                
+            </div>
+        </lightning:card>
+    </aura:if>
+    <aura:if isTrue="{!v.showScreen2}">
+        <lightning:card>
+            <div>
+                <lightning:button variant="brand" label="New Investment Ticket" title="Brand action" onclick="{! c.handleClick }" />
+            </div>
+            <div>
+                <lightning:button variant="brand" label="New Servicing Request" title="Brand action" onclick="{! c.handleClick }" />
+            </div>
+            
+            <div>
+                <lightning:button variant="brand" label="New Client" title="Brand action" onclick="{! c.handleNewClientClick }" />
+            </div>
+        </lightning:card>
+    </aura:if>
+    <aura:if isTrue="{!v.openFlow}">
+        <lightning:card>
+            <lightning:flow aura:id="flowData" class="flow"/>
+        </lightning:card>
+    </aura:if> 
+        </lightning:card>
+</aura:component>

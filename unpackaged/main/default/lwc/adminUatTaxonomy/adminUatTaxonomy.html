@@ -1,0 +1,211 @@
+<template>
+    <div class="aut">
+        <template if:true={errorMessage}>
+            <p class="aut__error" role="alert">{errorMessage}</p>
+        </template>
+
+        <template if:true={loading}>
+            <div class="aut__loading">
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={loading}>
+            <div class="aut__panes">
+                <section class="aut__pane">
+                    <div class="aut__pane-head">
+                        <div>
+                            <h3 class="aut__pane-title">Systems</h3>
+                            <p class="aut__pane-sub">Top taxonomy level — the code feeds Case IDs.</p>
+                        </div>
+                        <lightning-button variant="brand"
+                                          label="New system"
+                                          disabled={busy}
+                                          onclick={handleNewSystem}></lightning-button>
+                    </div>
+                    <template if:true={hasSystems}>
+                        <ul class="aut__rows">
+                            <template for:each={systemRows} for:item="row">
+                                <li key={row.id}>
+                                    <div class={row.rowClass}
+                                         data-id={row.id}
+                                         onclick={handleSystemSelect}>
+                                        <div class="aut__row-text">
+                                            <span class="aut__row-label">{row.name}</span>
+                                            <span class="aut__row-sub">{row.sublabel}</span>
+                                        </div>
+                                        <lightning-button variant="base"
+                                                          label="Edit"
+                                                          disabled={busy}
+                                                          data-id={row.id}
+                                                          onclick={handleEditSystem}></lightning-button>
+                                        <lightning-button variant="destructive-text"
+                                                          label="Delete"
+                                                          disabled={busy}
+                                                          data-id={row.id}
+                                                          onclick={handleDeleteSystem}></lightning-button>
+                                    </div>
+                                </li>
+                            </template>
+                        </ul>
+                    </template>
+                    <template if:false={hasSystems}>
+                        <p class="aut__empty">No systems yet.</p>
+                    </template>
+                </section>
+
+                <section class="aut__pane">
+                    <div class="aut__pane-head">
+                        <div>
+                            <h3 class="aut__pane-title">Module Groups</h3>
+                            <p class="aut__pane-sub">Within the selected system. Structure only —
+                                cycles run Test Books, not groups. "Create book" bundles a
+                                group's Complete cases into one.</p>
+                        </div>
+                        <lightning-button variant="brand"
+                                          label="New group"
+                                          disabled={groupsDisabled}
+                                          onclick={handleNewGroup}></lightning-button>
+                    </div>
+                    <template if:true={hasGroups}>
+                        <ul class="aut__rows">
+                            <template for:each={groupRows} for:item="row">
+                                <li key={row.id}>
+                                    <div class={row.rowClass}
+                                         data-id={row.id}
+                                         onclick={handleGroupSelect}>
+                                        <div class="aut__row-text">
+                                            <span class="aut__row-label">{row.name}</span>
+                                        </div>
+                                        <lightning-button variant="base"
+                                                          label="Create book"
+                                                          title="New test book pre-filled with this group's Complete cases"
+                                                          disabled={busy}
+                                                          data-id={row.id}
+                                                          onclick={handleCreateBookClick}></lightning-button>
+                                        <lightning-button variant="base"
+                                                          label="Edit"
+                                                          disabled={busy}
+                                                          data-id={row.id}
+                                                          onclick={handleEditGroup}></lightning-button>
+                                        <lightning-button variant="destructive-text"
+                                                          label="Delete"
+                                                          disabled={busy}
+                                                          data-id={row.id}
+                                                          onclick={handleDeleteGroup}></lightning-button>
+                                    </div>
+                                </li>
+                            </template>
+                        </ul>
+                    </template>
+                    <template if:false={hasGroups}>
+                        <p class="aut__empty">{groupsEmptyText}</p>
+                    </template>
+                </section>
+
+                <section class="aut__pane">
+                    <div class="aut__pane-head">
+                        <div>
+                            <h3 class="aut__pane-title">Modules</h3>
+                            <p class="aut__pane-sub">Test cases attach at this level.</p>
+                        </div>
+                        <lightning-button variant="brand"
+                                          label="New module"
+                                          disabled={modulesDisabled}
+                                          onclick={handleNewModule}></lightning-button>
+                    </div>
+                    <template if:true={hasModules}>
+                        <ul class="aut__rows">
+                            <template for:each={moduleRows} for:item="row">
+                                <li key={row.id}>
+                                    <div class={row.rowClass}>
+                                        <div class="aut__row-text">
+                                            <span class="aut__row-label">{row.name}</span>
+                                        </div>
+                                        <lightning-button variant="base"
+                                                          label="Edit"
+                                                          disabled={busy}
+                                                          data-id={row.id}
+                                                          onclick={handleEditModule}></lightning-button>
+                                        <lightning-button variant="destructive-text"
+                                                          label="Delete"
+                                                          disabled={busy}
+                                                          data-id={row.id}
+                                                          onclick={handleDeleteModule}></lightning-button>
+                                    </div>
+                                </li>
+                            </template>
+                        </ul>
+                    </template>
+                    <template if:false={hasModules}>
+                        <p class="aut__empty">{modulesEmptyText}</p>
+                    </template>
+                </section>
+            </div>
+        </template>
+
+        <!-- Outer guard: the slot bindings dereference {modal.*}, which is
+             null until the modal opens — mount the dialog only when open. -->
+        <template if:true={modalOpen}>
+        <c-ds-modal-v2 is-open={modalOpen} title={modalTitle} size="small" onclose={handleModalCancel}>
+            <lightning-input label="Name"
+                             value={modal.name}
+                             required
+                             max-length="80"
+                             onchange={handleNameChange}></lightning-input>
+            <template if:true={modalIsSystem}>
+                <lightning-input label="System code"
+                                 field-level-help="Lowercase letters and numbers only — becomes the first segment of every Case ID under this system."
+                                 value={modal.code}
+                                 required
+                                 max-length="20"
+                                 onchange={handleCodeChange}></lightning-input>
+            </template>
+            <lightning-textarea label="Description"
+                                value={modal.description}
+                                max-length="32768"
+                                onchange={handleDescriptionChange}></lightning-textarea>
+            <lightning-button slot="footer"
+                              label="Cancel"
+                              disabled={saving}
+                              onclick={handleModalCancel}></lightning-button>
+            <lightning-button slot="footer"
+                              variant="brand"
+                              label="Save"
+                              disabled={saving}
+                              onclick={handleModalSave}></lightning-button>
+        </c-ds-modal-v2>
+        </template>
+
+        <!-- Same outer-guard pattern as the taxonomy modal above. -->
+        <template if:true={bookModalOpen}>
+        <c-ds-modal-v2 is-open={bookModalOpen} title="Create book from module group" size="small" onclose={handleBookModalCancel}>
+            <lightning-input label="Book name"
+                             value={bookModal.name}
+                             required
+                             max-length="80"
+                             onchange={handleBookNameChange}></lightning-input>
+            <p class="aut__bookmodal-copy">{bookModalCopy}</p>
+            <lightning-button slot="footer"
+                              label="Cancel"
+                              disabled={saving}
+                              onclick={handleBookModalCancel}></lightning-button>
+            <lightning-button slot="footer"
+                              variant="brand"
+                              label="Create book"
+                              disabled={bookCreateDisabled}
+                              onclick={handleBookModalCreate}></lightning-button>
+        </c-ds-modal-v2>
+        </template>
+
+        <template if:true={confirmOpen}>
+            <c-admin-confirm-modal header={confirm.header}
+                                   message={confirm.message}
+                                   confirm-label={confirm.confirmLabel}
+                                   variant={confirm.variant}
+                                   busy={saving}
+                                   onconfirm={handleConfirmProceed}
+                                   oncancel={handleConfirmCancel}></c-admin-confirm-modal>
+        </template>
+    </div>
+</template>

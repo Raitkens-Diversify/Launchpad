@@ -1,0 +1,90 @@
+{
+  "type" : "sfdc_cms__view",
+  "title" : "Task Detail",
+  "contentBody" : {
+    "component" : {
+      "children" : [ {
+        "children" : [ {
+          "attributes" : {
+            "backgroundImageConfig" : "",
+            "backgroundImageOverlay" : "rgba(0,0,0,0)",
+            "componentSpacerSize" : "",
+            "dxpStyle" : { },
+            "layoutDirectionDesktop" : "row",
+            "layoutDirectionMobile" : "column",
+            "layoutDirectionTablet" : "column",
+            "maxContentWidth" : "",
+            "sectionColumnGutterWidth" : "",
+            "sectionConfig" : "{\"UUID\":\"92d9a921-f0bf-4c82-9125-f886c93b369a\",\"columns\":[{\"UUID\":\"4753bc6c-2420-455d-ab8b-aaa77954c646\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":[]}]}",
+            "sectionMinHeight" : "",
+            "sectionVerticalAlign" : "flex-start"
+          },
+          "children" : [ {
+            "children" : [ {
+              "attributes" : {
+                "ariaLabel" : "Breadcrumb",
+                "currentLabel" : "",
+                "dxpStyle" : { },
+                "listLabel" : "All Contacts",
+                "listPath" : "/account/Account/Default?c__tabId=tab1",
+                "nameField" : "Name",
+                "objectApiName" : "Account",
+                "parentKey" : "",
+                "parentLabel" : ""
+              },
+              "definition" : "c:arcBreadcrumb",
+              "id" : "4fe10269-854b-4b0f-9733-2a9fcb08ad82",
+              "type" : "component"
+            }, {
+              "attributes" : {
+                "dxpStyle" : { },
+                "enableEditing" : false,
+                "fieldSetApiName" : "ARC_Task",
+                "objectApiName" : "Task",
+                "sectionTitle" : "Task Detail"
+              },
+              "definition" : "c:arcRecordDetailByFieldSet",
+              "id" : "6f1dfcc1-8054-46ce-bd07-d3d2d6dbbef3",
+              "type" : "component"
+            } ],
+            "id" : "4753bc6c-2420-455d-ab8b-aaa77954c646",
+            "name" : "col1",
+            "title" : "Column 1",
+            "type" : "region"
+          } ],
+          "definition" : "community_layout:section",
+          "id" : "92d9a921-f0bf-4c82-9125-f886c93b369a",
+          "type" : "component"
+        } ],
+        "id" : "bf689703-17b9-49d2-acff-579cab2a0370",
+        "name" : "content",
+        "title" : "Content",
+        "type" : "region"
+      }, {
+        "children" : [ {
+          "attributes" : {
+            "customHeadTags" : "",
+            "description" : "",
+            "dxpStyle" : { },
+            "pageTitle" : "{!Record._Object}: {!Record._Title}",
+            "recordId" : "{!recordId}"
+          },
+          "definition" : "community_builder:seoAssistant",
+          "id" : "b46ee037-bdca-4673-b362-e55f7802bed5",
+          "type" : "component"
+        } ],
+        "id" : "d8772510-a1ca-48b6-a727-1d0bb8643485",
+        "name" : "sfdcHiddenRegion",
+        "title" : "sfdcHiddenRegion",
+        "type" : "region"
+      } ],
+      "definition" : "community_layout:sldsFlexibleLayout",
+      "id" : "ef8f3a27-31b2-45db-804f-2283328aae09",
+      "type" : "component"
+    },
+    "dataProviders" : [ ],
+    "themeLayoutType" : "OHzbXAVux6mZ7VVDb7Pb8F2YUFBAXR",
+    "viewType" : "detail-00T"
+  },
+  "urlName" : "task-detail"
+}

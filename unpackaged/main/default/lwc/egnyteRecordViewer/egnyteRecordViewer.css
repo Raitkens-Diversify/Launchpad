@@ -1,0 +1,51 @@
+.egnyte-record-viewer {
+    display: flex;
+    flex-direction: column;
+    min-height: 32rem;
+    width: 100%;
+}
+
+.egnyte-record-viewer__status {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    min-height: 12rem;
+    padding: 1rem;
+}
+
+.egnyte-record-viewer__placeholder {
+    align-items: center;
+    border: 1px dashed var(--slds-g-color-border-base-1, #c9c9c9);
+    border-radius: 0.25rem;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 12rem;
+    padding: 1.5rem;
+    text-align: center;
+    width: 100%;
+}
+
+.egnyte-record-viewer__placeholder-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem;
+}
+
+.egnyte-record-viewer__placeholder-copy {
+    color: var(--slds-g-color-neutral-base-30, #444);
+    margin: 0;
+    max-width: 28rem;
+}
+
+.egnyte-record-viewer__error {
+    color: var(--slds-g-color-error-base-40, #ba0517);
+}
+
+.egnyte-record-viewer__frame {
+    border: 0;
+    flex: 1 1 auto;
+    min-height: 32rem;
+    width: 100%;
+}

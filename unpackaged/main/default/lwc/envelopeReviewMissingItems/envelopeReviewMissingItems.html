@@ -1,0 +1,220 @@
+<!-- Author: Mile Cacanovic -->
+<template>
+  <!-- Full-width scroll container: the whole page scrolls as one, with a single scrollbar at the
+         viewport edge. Only the focused top bar above (outside this component) stays fixed. -->
+  <div class="missing__scroll">
+    <div class="missing">
+      <template lwc:if={hasActionItems}>
+        <div class="missing__body">
+          <div class="missing__toc">
+            <c-envelope-toc
+              title="Action Items"
+              items={tocItems}
+              active-key={activeAnchorKey}
+              save-status={saveStatus}
+              onselect={handleTocSelect}
+            >
+            </c-envelope-toc>
+          </div>
+
+          <div class="missing__content">
+            <template for:each={visibleActionItems} for:item="item">
+              <div key={item.key} class="missing__action-item">
+                <h2 class="missing__action-title">{item.title}</h2>
+                <template for:each={item.sections} for:item="section">
+                  <div key={section.key} class="missing__section">
+                    <h3 class="missing__section-title">{section.title}</h3>
+                    <section class="missing__card">
+                      <template for:each={section.parts} for:item="part">
+                        <div
+                          key={part.key}
+                          class={part.partClass}
+                          data-section-key={part.anchorKey}
+                        >
+                          <template lwc:if={part.showHeader}>
+                            <header class="missing__part-header">
+                              <div class="missing__part-heading">
+                                <template lwc:if={part.title}>
+                                  <h4 class="missing__part-title">
+                                    {part.title}
+                                  </h4>
+                                </template>
+                                <template lwc:if={part.badge}>
+                                  <lightning-badge
+                                    class="missing__badge"
+                                    label={part.badge.label}
+                                    icon-name="utility:priority"
+                                    icon-position="end"
+                                  >
+                                  </lightning-badge>
+                                </template>
+                              </div>
+                              <template lwc:if={part.statusLabel}>
+                                <div class="missing__status">
+                                  <lightning-icon
+                                    icon-name="utility:warning"
+                                    size="x-small"
+                                    variant="warning"
+                                  >
+                                  </lightning-icon>
+                                  <span class="missing__status-text"
+                                    >{part.statusLabel}</span
+                                  >
+                                </div>
+                              </template>
+                            </header>
+                          </template>
+                          <template lwc:if={part.isFieldsPart}>
+                            <div class="missing__fields">
+                              <template for:each={part.fields} for:item="field">
+                                <div key={field.key} class="missing__field">
+                                  <c-envelope-field-control
+                                    field={field}
+                                    data-item={item.key}
+                                    data-field={field.apiName}
+                                    onvaluechange={handleFieldChange}
+                                  >
+                                  </c-envelope-field-control>
+                                </div>
+                              </template>
+                            </div>
+                          </template>
+                          <template lwc:else>
+                            <div class="missing__requirements">
+                              <template
+                                for:each={part.requirements}
+                                for:item="requirement"
+                              >
+                                <div
+                                  key={requirement.key}
+                                  class="missing__requirement"
+                                >
+                                  <header class="missing__part-header">
+                                    <div class="missing__part-heading">
+                                      <h5 class="missing__requirement-title">
+                                        {requirement.title}
+                                      </h5>
+                                    </div>
+                                    <template lwc:if={requirement.statusLabel}>
+                                      <div class="missing__status">
+                                        <lightning-icon
+                                          icon-name="utility:warning"
+                                          size="x-small"
+                                          variant="warning"
+                                        >
+                                        </lightning-icon>
+                                        <span class="missing__status-text"
+                                          >{requirement.statusLabel}</span
+                                        >
+                                      </div>
+                                    </template>
+                                  </header>
+                                  <template lwc:if={requirement.hasOwners}>
+                                    <div class="missing__owners">
+                                      <div class="missing__owners-actions">
+                                        <p class="missing__owners-label">
+                                          Selected account owners.
+                                        </p>
+                                        <div class="missing__owners-buttons">
+                                          <template
+                                            for:each={requirement.emptyState.actions}
+                                            for:item="action"
+                                          >
+                                            <lightning-button
+                                              key={action.key}
+                                              label={action.label}
+                                              disabled={action.disabled}
+                                              data-action={action.key}
+                                              data-part={requirement.key}
+                                              data-item={item.key}
+                                              onclick={handleOwnerAction}
+                                            >
+                                            </lightning-button>
+                                          </template>
+                                        </div>
+                                      </div>
+                                      <div class="missing__owners-list">
+                                        <template
+                                          for:each={requirement.owners}
+                                          for:item="owner"
+                                        >
+                                          <c-envelope-member-card
+                                            key={owner.id}
+                                            member={owner}
+                                            data-part={requirement.key}
+                                            data-item={item.key}
+                                            onownerremove={handleOwnerRemove}
+                                          >
+                                          </c-envelope-member-card>
+                                        </template>
+                                      </div>
+                                    </div>
+                                  </template>
+                                  <template lwc:else>
+                                    <div class="missing__empty">
+                                      <div class="missing__empty-content">
+                                        <p class="missing__empty-title">
+                                          {requirement.emptyState.title}
+                                        </p>
+                                        <p class="missing__empty-message">
+                                          {requirement.emptyState.message}
+                                        </p>
+                                      </div>
+                                      <div class="missing__empty-actions">
+                                        <template
+                                          for:each={requirement.emptyState.actions}
+                                          for:item="action"
+                                        >
+                                          <lightning-button
+                                            key={action.key}
+                                            label={action.label}
+                                            disabled={action.disabled}
+                                            data-action={action.key}
+                                            data-part={requirement.key}
+                                            data-item={item.key}
+                                            onclick={handleOwnerAction}
+                                          >
+                                          </lightning-button>
+                                        </template>
+                                      </div>
+                                    </div>
+                                  </template>
+                                </div>
+                              </template>
+                            </div>
+                          </template>
+                        </div>
+                      </template>
+                    </section>
+                  </div>
+                </template>
+              </div>
+            </template>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <template lwc:if={showSectionNav}>
+      <div class="missing__fab-dock">
+        <c-envelope-section-nav
+          total={sectionTotal}
+          active-index={activeSectionIndex}
+          onprevious={handleSectionPrevious}
+          onnext={handleSectionNext}
+        >
+        </c-envelope-section-nav>
+      </div>
+    </template>
+  </div>
+
+  <!-- Confirmation raised before a Key Point change that would discard answers already given: the
+       edit is held back until the user accepts that the questions below it will be rebuilt and
+       cleared. -->
+  <c-envelope-key-point-change-modal
+    lwc:ref="keyPointModal"
+    onconfirm={handleKeyPointConfirm}
+    onclose={handleKeyPointCancel}
+  >
+  </c-envelope-key-point-change-modal>
+</template>

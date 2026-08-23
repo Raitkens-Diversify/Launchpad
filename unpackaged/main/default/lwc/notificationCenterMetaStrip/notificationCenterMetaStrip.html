@@ -1,0 +1,81 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-07-08 -->
+<template>
+  <div class={metaStripClass}>
+    <template lwc:if={showSourceTypeSegment}>
+      <span class="div-meta-strip__item div-source-type">
+        <lightning-icon
+          icon-name={sourceTypeIcon}
+          size="xx-small"
+          class={sourceTypeIconClass}
+          alternative-text={sourceTypeLabel}
+        ></lightning-icon>
+        <span class="div-meta-strip__label">{sourceTypeLabel}</span>
+      </span>
+    </template>
+
+    <template lwc:if={showChangeTypeSegment}>
+      <template lwc:if={showChangeTypeDivider}>
+        <span class="div-meta-strip__divider" aria-hidden="true">·</span>
+      </template>
+      <span class={changeTypeItemClass}>{changeTypeLabel}</span>
+    </template>
+
+    <template lwc:if={showModeSegment}>
+      <template lwc:if={showModeDivider}>
+        <span class="div-meta-strip__divider" aria-hidden="true">·</span>
+      </template>
+      <span class="div-meta-strip__item">
+        <span class={modeLabelClassComputed}>
+          <template lwc:if={isDigestMode}>
+            <lightning-icon
+              icon-name={modeIcons.DIGEST}
+              size="xx-small"
+              class={modeIconClassComputed}
+              aria-hidden="true"
+            ></lightning-icon>
+          </template>
+          <template lwc:else>
+            <lightning-icon
+              icon-name={modeIcons.IMMEDIATE}
+              size="xx-small"
+              class={modeIconClassComputed}
+              aria-hidden="true"
+            ></lightning-icon>
+          </template>
+          {frequencyLabel}
+        </span>
+      </span>
+    </template>
+
+    <template lwc:if={showDigestFrequencySegment}>
+      <template lwc:if={showDigestFrequencyDivider}>
+        <span class="div-meta-strip__divider" aria-hidden="true">·</span>
+      </template>
+      <span class="div-meta-strip__item div-meta-strip__label">{digestFrequencyLabel}</span>
+    </template>
+
+    <template lwc:if={showQuietHoursSegment}>
+      <template lwc:if={showQuietHoursDivider}>
+        <span class="div-meta-strip__divider" aria-hidden="true">·</span>
+      </template>
+      <span class={quietHoursClass}>{quietHoursLabel}</span>
+    </template>
+
+    <template lwc:if={showChannelSegment}>
+      <template lwc:if={showChannelDivider}>
+        <span class="div-meta-strip__divider" aria-hidden="true">·</span>
+      </template>
+      <span class="div-meta-strip__item div-meta-strip__label">{channelLabelText}</span>
+    </template>
+
+    <template lwc:if={showHouseholdSegment}>
+      <template lwc:if={showHouseholdDivider}>
+        <span class="div-meta-strip__divider" aria-hidden="true">·</span>
+      </template>
+      <span class="div-meta-strip__item div-meta-strip__household">
+        <lightning-icon icon-name={homeIcon} size="xx-small" aria-hidden="true"></lightning-icon>
+        <span class="div-meta-strip__label">{householdLabel}</span>
+      </span>
+    </template>
+  </div>
+</template>

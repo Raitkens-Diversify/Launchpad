@@ -1,0 +1,73 @@
+:host {
+    display: block;
+}
+
+/* DS "Card" — a selected member row (mirrors the action card surface). */
+.member-card {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-4, 16px);
+    padding: var(--slds-g-spacing-4, 16px);
+    background: var(--slds-g-color-surface-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--slds-g-radius-border-3, 12px);
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+}
+
+.member-card__body,
+.member-card__label {
+    display: flex;
+    align-items: center;
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.member-card__body {
+    gap: var(--slds-g-spacing-4, 16px);
+}
+
+.member-card__label {
+    gap: var(--slds-g-spacing-2, 8px);
+}
+
+.member-card__title {
+    font-size: 16px;
+    line-height: 22px;
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* DS "Badge - Informational". Shown only for a newly-created member. */
+.member-card__badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--slds-g-radius-border-2, 8px);
+    padding: var(--slds-g-spacing-1, 4px) var(--slds-g-spacing-2, 8px);
+    font-size: var(--slds-g-font-scale-neg-1, 12px);
+    font-weight: var(--slds-g-font-weight-5, 500);
+    line-height: 17px;
+    white-space: nowrap;
+    background: var(--slds-g-color-info-container-1, #e0f2fe);
+    color: var(--slds-g-color-on-info-1, #0369a1);
+}
+
+.member-card__missing-group {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 8px);
+    flex: none;
+}
+
+.member-card__warn-icon {
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-warning-1, #f59e0b);
+}
+
+.member-card__missing {
+    font-size: var(--slds-g-font-size-base, 13px);
+    line-height: 18px;
+    color: var(--slds-g-color-warning-base-30, #92400e);
+    white-space: nowrap;
+}

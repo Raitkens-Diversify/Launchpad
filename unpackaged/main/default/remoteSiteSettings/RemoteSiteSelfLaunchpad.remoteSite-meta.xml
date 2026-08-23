@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RemoteSiteSetting xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Self-callout for the launchpad sandbox domain (SOAP Metadata API from Apex - the Help Topic editor in the Admin Console). Modeled on cosmosdev&#39;s RemoteSiteSelfCosmosdev; each sandbox needs its own.</description>
+    <disableProtocolSecurity>false</disableProtocolSecurity>
+    <isActive>true</isActive>
+    <url>https://dfpginvestments--launchpad.sandbox.my.salesforce.com</url>
+</RemoteSiteSetting>

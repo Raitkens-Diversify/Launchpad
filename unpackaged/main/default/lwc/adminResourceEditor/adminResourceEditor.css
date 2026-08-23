@@ -1,0 +1,127 @@
+.are__bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    position: sticky;
+    top: 72px;
+    z-index: 15;
+}
+.are__bar-text {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.are__title {
+    margin: 0;
+    font-family: "Libre Baskerville", Georgia, serif;
+    font-size: 1.125rem;
+    color: #09243f;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.are__status {
+    margin: 0;
+    font-size: 0.75rem;
+    color: #4b5563;
+}
+.are__bar-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+.are__loading {
+    position: relative;
+    min-height: 160px;
+}
+.are__error {
+    color: #b42318;
+    font-size: 0.875rem;
+}
+.are__field-error {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: #b42318;
+}
+.are__grid {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+.are__col {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.are__col--side {
+    flex: 0 0 320px;
+}
+.are__card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem 1.25rem;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+}
+.are__card-title {
+    margin: 0;
+    font-family: "Libre Baskerville", Georgia, serif;
+    font-size: 1rem;
+    color: #09243f;
+}
+.are__help {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: #4b5563;
+}
+.are__files {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+.are__file {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.5rem;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.875rem;
+}
+.are__file-name {
+    flex: 1 1 auto;
+    color: #09243f;
+    overflow-wrap: anywhere;
+}
+.are__file-badge {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #1e7e34;
+}
+.are__file:not(:first-child) .are__file-badge {
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+@media (max-width: 960px) {
+    .are__grid {
+        flex-direction: column;
+    }
+    .are__col--side {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+}

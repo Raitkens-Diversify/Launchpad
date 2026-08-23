@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Type_OR_Classification_Required</fullName>
+    <active>false</active>
+    <description>Ensures either a Type or Classification are populated.</description>
+    <errorConditionFormula>AND(
+OR(
+RecordType.DeveloperName = &quot;Business&quot;,
+RecordType.DeveloperName = &quot;Retirement_Plan&quot;,
+RecordType.DeveloperName = &quot;Trust&quot;,
+RecordType.DeveloperName = &quot;PersonAccount&quot;,
+RecordType.DeveloperName = &quot;Diversify_Related_Person&quot;
+),
+(TEXT(Type)=&#39;&#39;),
+PICKLISTCOUNT(Classification__c)=0
+)</errorConditionFormula>
+    <errorMessage>Please provide either a Type or Classification.</errorMessage>
+</ValidationRule>

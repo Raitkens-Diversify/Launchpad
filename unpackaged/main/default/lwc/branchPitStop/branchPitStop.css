@@ -1,0 +1,16 @@
+/* Task subject link */
+a.slds-truncate {
+    color: #0070d2;
+    text-decoration: none;
+}
+
+a.slds-truncate:hover {
+    text-decoration: underline;
+}
+
+/* Milestone banner rows – matches original inline style */
+.milestone-banner {
+    color: #1b76bb;
+    font-size: 18px;
+    text-align: center;
+}

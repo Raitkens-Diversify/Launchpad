@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Draft</fullName>
+        <default>true</default>
+        <label>Draft</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Final</fullName>
+        <default>false</default>
+        <label>Final</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Negotiation End</fullName>
+        <default>false</default>
+        <label>Negotiation End</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Not Taken Up</fullName>
+        <default>false</default>
+        <label>Not Taken Up</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Quote Abandoned</fullName>
+        <default>false</default>
+        <label>Quote Abandoned</label>
+    </standardValue>
+</StandardValueSet>

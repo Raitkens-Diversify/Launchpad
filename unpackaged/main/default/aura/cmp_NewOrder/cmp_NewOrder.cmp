@@ -1,0 +1,20 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes" access="global" >
+    <aura:attribute name="openFlow" type="boolean" default="false" />
+    <lightning:card>
+
+    <lightning:card>
+    	<lightning:button variant="brand" label="New Investment Ticket" title="Brand action" onclick="{! c.handleClick }" />
+        </lightning:card>
+    <lightning:card>
+            <lightning:button variant="brand" label="New Servicing Request" title="Brand action" onclick="{! c.handleClick }" />
+    </lightning:card>
+
+    <lightning:card>
+        <lightning:button variant="brand" label="New Client" title="Brand action" onclick="{! c.handleNewClientClick }" />
+    </lightning:card>
+    <aura:if isTrue="{!v.openFlow}">
+        <lightning:flow aura:id="flowData" class="flow"/>
+  </aura:if> 
+            </lightning:card>
+
+</aura:component>

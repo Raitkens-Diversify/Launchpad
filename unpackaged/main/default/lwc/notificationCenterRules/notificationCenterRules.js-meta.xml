@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Notification Center Rules</masterLabel>
+    <description>Manage notification rules in full or compact household-scoped mode.</description>
+    <targets>
+        <target>lightning__RecordPage</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__RecordPage">
+            <objects>
+                <object>Account</object>
+            </objects>
+            <property name="variant" type="String" default="compact" />
+            <property name="mode" type="String" default="user" />
+            <property
+                name="embeddedInSection"
+                type="Boolean"
+                default="false"
+                label="Embedded in section"
+                description="Hide outer chrome when nested inside an admin settings section."
+            />
+            <property
+                name="displayAsCard"
+                type="Boolean"
+                default="true"
+                label="Display as card"
+                description="Wrap the component in a card with the component title."
+            />
+            <property
+                name="cardTitle"
+                type="String"
+                default="Notification Rules"
+                label="Card Title"
+                description="Title shown when Display as card is enabled."
+            />
+        </targetConfig>
+        <targetConfig targets="lightningCommunity__Default">
+            <property name="variant" type="String" default="compact" />
+            <property name="mode" type="String" default="user" />
+            <property
+                name="embeddedInSection"
+                type="Boolean"
+                default="false"
+                label="Embedded in section"
+                description="Hide outer chrome when nested inside an admin settings section."
+            />
+            <property
+                name="displayAsCard"
+                type="Boolean"
+                default="false"
+                label="Display as card"
+                description="Wrap the component in a card with the component title."
+            />
+            <property
+                name="cardTitle"
+                type="String"
+                default="Notification Rules"
+                label="Card Title"
+                description="Title shown when Display as card is enabled."
+            />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

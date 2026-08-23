@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Liability</fullName>
+        <default>false</default>
+        <label>Liability</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Uninsured Motorist Insurance</fullName>
+        <default>false</default>
+        <label>Uninsured Motorist Insurance</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Other</fullName>
+        <default>false</default>
+        <label>Other</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Auto</fullName>
+        <default>false</default>
+        <label>Auto</label>
+    </standardValue>
+    <standardValue>
+        <fullName>General</fullName>
+        <default>false</default>
+        <label>General</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Additional Coverage</fullName>
+        <default>false</default>
+        <label>Additional Coverage</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Section-1 Property Coverage</fullName>
+        <default>false</default>
+        <label>Section-1 Property Coverage</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Section 2/Liability Coverage</fullName>
+        <default>false</default>
+        <label>Section 2/Liability Coverage</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Forms and Endorsements</fullName>
+        <default>false</default>
+        <label>Forms and Endorsements</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Home</fullName>
+        <default>false</default>
+        <label>Home</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Bundled Coverage</fullName>
+        <default>false</default>
+        <label>Bundled Coverage</label>
+    </standardValue>
+</StandardValueSet>

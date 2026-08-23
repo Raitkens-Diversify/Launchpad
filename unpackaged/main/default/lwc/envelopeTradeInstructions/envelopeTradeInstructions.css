@@ -1,0 +1,123 @@
+/* Self-declared so the status colors hold on every surface: the platform injects --slds-g-* hooks per
+   scope, and the --ds-* triads are not injected at all, so inheritance cannot be relied on. */
+:host {
+  display: block;
+  --ds-error-text: #a83232;
+  --ds-warning-text: #b8860b;
+  --ds-success-text: #2d7d46;
+}
+
+.trade {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-5, 24px);
+}
+
+/* Dividers between the Expected Account Value, the allocation table, and the notes (mirrors the design). */
+.trade__block_strategy,
+.trade__block_notes {
+  padding-top: var(--slds-g-spacing-5, 24px);
+  border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+
+.trade__block_strategy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-3, 12px);
+}
+
+/* Expected Account Value is a single field, capped to the design width. */
+.trade__block_expected {
+  width: 360px;
+  max-width: 100%;
+}
+
+/* Explains why an entry point cannot show dollar equivalents, so the absence reads as intended
+   rather than as a missing field. */
+.trade__note {
+  margin: 0;
+  max-width: 70ch;
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
+  line-height: 17px;
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* The math footer: a small ledger under the table. Figures right-aligned in a fixed column so the
+   subtraction reads down the page. */
+.trade__footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-1, 4px);
+  padding-top: var(--slds-g-spacing-2, 8px);
+  border-top: 1px solid var(--slds-g-color-border-1, #e5e7eb);
+}
+
+.trade__footer-line {
+  display: grid;
+  grid-template-columns: 170px 130px;
+  gap: var(--slds-g-spacing-4, 16px);
+  font-size: var(--slds-g-font-size-base, 13px);
+  line-height: 18px;
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.trade__footer-figure {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The pool is the result line of the subtraction above it. */
+.trade__footer-line_pool {
+  padding-top: var(--slds-g-spacing-1, 4px);
+  border-top: 1px solid var(--slds-g-color-border-1, #e5e7eb);
+  font-weight: var(--slds-g-font-weight-7, 700);
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.trade__footer-hint {
+  margin: 0;
+  font-size: var(--slds-g-font-size-base, 13px);
+  line-height: 18px;
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.trade__status {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-1, 4px);
+}
+
+.trade__status-line {
+  margin: 0;
+  font-size: var(--slds-g-font-size-base, 13px);
+  line-height: 18px;
+  font-weight: var(--slds-g-font-weight-6, 600);
+}
+
+.trade__status-line_ok {
+  color: var(--ds-success-text, #2d7d46);
+}
+
+.trade__status-line_warn {
+  color: var(--ds-warning-text, #b8860b);
+}
+
+.trade__status-line_error {
+  color: var(--ds-error-text, #a83232);
+}
+
+.trade__mismatch {
+  margin: 0;
+  font-size: var(--slds-g-font-size-base, 13px);
+  line-height: 18px;
+  color: var(--ds-error-text, #a83232);
+}
+
+/* Over-funded is advisory, not a blocker, so it reads as a caution rather than an error. */
+.trade__warning {
+  margin: 0;
+  max-width: 70ch;
+  font-size: var(--slds-g-font-size-base, 13px);
+  line-height: 18px;
+  color: var(--ds-warning-text, #b8860b);
+}

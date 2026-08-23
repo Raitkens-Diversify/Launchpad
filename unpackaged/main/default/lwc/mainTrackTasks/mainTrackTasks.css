@@ -1,0 +1,9 @@
+/* Preserve original table link styling */
+a.slds-truncate {
+    color: #0070d2;
+    text-decoration: none;
+}
+
+a.slds-truncate:hover {
+    text-decoration: underline;
+}

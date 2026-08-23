@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Partial Loss</fullName>
+        <default>false</default>
+        <label>Partial Loss</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Repairs</fullName>
+        <default>false</default>
+        <label>Repairs</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Replacement</fullName>
+        <default>false</default>
+        <label>Replacement</label>
+    </standardValue>
+</StandardValueSet>

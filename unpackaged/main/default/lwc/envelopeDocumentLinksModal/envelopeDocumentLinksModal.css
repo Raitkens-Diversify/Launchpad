@@ -1,0 +1,39 @@
+/* Tagline under the title (Figma "Manage document links" body). The filename is bolded by the
+   template's <strong>. */
+.doc-links__tagline {
+    margin: 0 0 var(--slds-g-spacing-4, 1rem);
+    color: var(--slds-g-color-on-surface-2, #444a54);
+    font-size: var(--slds-g-font-scale-neg-1, 0.8125rem);
+    line-height: 1.4;
+}
+
+/* Vertical list of document checkboxes. */
+.doc-links__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-3, 0.75rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* A disabled (linked-to-another-file) row is dimmed; the checkbox itself renders neutral (grey)
+   via the disabled + checked theme in envelopeWizardStyles.css. */
+.doc-links__row_disabled {
+    opacity: 0.5;
+}
+
+/* Subline naming the file that already owns this document; small, muted, indented under the
+   label to align past the checkbox. */
+.doc-links__subtext {
+    margin: var(--slds-g-spacing-1, 0.25rem) 0 0 var(--slds-g-spacing-6, 1.5rem);
+    color: var(--slds-g-color-on-surface-3, #5c6670);
+    font-size: var(--slds-g-font-scale-neg-2, 0.75rem);
+}
+
+.doc-links__footer {
+    display: flex;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+    justify-content: flex-end;
+    width: 100%;
+}

@@ -1,0 +1,191 @@
+<template>
+  <div class={viewportClass}>
+    <template for:each={navPanels} for:item="panel">
+      <nav
+        key={panel.key}
+        class={panel.className}
+        aria-label="Site"
+        aria-hidden={panel.isHidden}
+      >
+        <template for:each={panel.items} for:item="item">
+          <div key={item.id} class="nav-entry">
+            <template lwc:if={item.isDivider}>
+              <div class="nav-divider" role="separator"></div>
+            </template>
+            <template lwc:elseif={item.renderCollapsedLink}>
+              <a
+                href={item.collapsedHref}
+                class={item.linkClass}
+                data-id={item.id}
+                data-group-id={item.collapsedGroupId}
+                data-type={item.collapsedType}
+                data-target={item.collapsedTarget}
+                aria-current={item.ariaCurrent}
+                title={item.itemTitle}
+                target={item.linkTarget}
+                rel={item.linkRel}
+                onclick={handleClick}
+              >
+                <template lwc:if={item.hasIcon}>
+                  <span
+                    class="nav-item__icon nav-item__icon--asset"
+                    style={item.iconStyle}
+                    aria-hidden="true"
+                  ></span>
+                </template>
+                <span class="nav-item__label nav-item__label--hidden"
+                  >{item.label}</span
+                >
+              </a>
+            </template>
+            <template lwc:elseif={item.hasChildren}>
+              <div class="nav-group">
+                <template lwc:if={item.isCollapsible}>
+                  <div class="nav-group__header">
+                    <a
+                      href={item.headerHref}
+                      class={item.headerLinkClass}
+                      data-id={item.headerNavId}
+                      data-group-id={item.id}
+                      data-type={item.headerType}
+                      data-target={item.headerTarget}
+                      aria-current={item.headerAriaCurrent}
+                      target={item.headerLinkTarget}
+                      rel={item.headerLinkRel}
+                      onclick={handleClick}
+                    >
+                      <span class="nav-group__leading">
+                        <template lwc:if={item.hasIcon}>
+                          <span
+                            class="nav-item__icon nav-item__icon--asset"
+                            style={item.iconStyle}
+                            aria-hidden="true"
+                          ></span>
+                        </template>
+                        <span class="nav-group__title">{item.label}</span>
+                      </span>
+                    </a>
+                    <button
+                      type="button"
+                      class="nav-group__chevron-button"
+                      data-id={item.id}
+                      aria-expanded={item.isExpanded}
+                      aria-controls={item.panelId}
+                      aria-label={item.chevronLabel}
+                      onclick={handleGroupToggle}
+                      onkeydown={handleGroupKeyDown}
+                    >
+                      <lightning-icon
+                        icon-name={item.chevronIcon}
+                        size="xx-small"
+                        class="nav-group__chevron"
+                        alternative-text=""
+                      ></lightning-icon>
+                    </button>
+                  </div>
+                  <div
+                    class={item.childrenClass}
+                    id={item.panelId}
+                    aria-hidden={item.isCollapsed}
+                  >
+                    <template for:each={item.subMenu} for:item="child">
+                      <a
+                        key={child.id}
+                        href={child.href}
+                        class={child.linkClass}
+                        data-id={child.id}
+                        data-group-id={item.id}
+                        data-type={child.type}
+                        data-target={child.target}
+                        aria-current={child.ariaCurrent}
+                        target={child.linkTarget}
+                        rel={child.linkRel}
+                        onclick={handleClick}
+                      >
+                        {child.label}
+                      </a>
+                    </template>
+                  </div>
+                </template>
+                <template lwc:else>
+                  <div class="nav-group__label">
+                    <template lwc:if={item.hasIcon}>
+                      <span
+                        class="nav-item__icon nav-item__icon--asset"
+                        style={item.iconStyle}
+                        aria-hidden="true"
+                      ></span>
+                    </template>
+                    <span>{item.label}</span>
+                  </div>
+                  <div class="nav-group__children">
+                    <template for:each={item.subMenu} for:item="child">
+                      <a
+                        key={child.id}
+                        href={child.href}
+                        class={child.linkClass}
+                        data-id={child.id}
+                        data-type={child.type}
+                        data-target={child.target}
+                        aria-current={child.ariaCurrent}
+                        target={child.linkTarget}
+                        rel={child.linkRel}
+                        onclick={handleClick}
+                      >
+                        {child.label}
+                      </a>
+                    </template>
+                  </div>
+                </template>
+              </div>
+            </template>
+            <template lwc:else>
+              <template lwc:if={item.isComingSoon}>
+                <div
+                  class={item.linkClass}
+                  data-coming-soon="true"
+                  aria-disabled="true"
+                  aria-label={item.ariaLabel}
+                  title={item.ariaLabel}
+                >
+                  <template lwc:if={item.hasIcon}>
+                    <span
+                      class="nav-item__icon nav-item__icon--asset"
+                      style={item.iconStyle}
+                      aria-hidden="true"
+                    ></span>
+                  </template>
+                  <span class={item.labelClass}>{item.label}</span>
+                  <span class="nav-item__coming-pill div-pill div-pill--coming-soon">Coming Soon</span>
+                </div>
+              </template>
+              <template lwc:else>
+                <a
+                  href={item.href}
+                  class={item.linkClass}
+                  data-id={item.id}
+                  data-type={item.type}
+                  data-target={item.target}
+                  aria-current={item.ariaCurrent}
+                  title={item.itemTitle}
+                  target={item.linkTarget}
+                  rel={item.linkRel}
+                  onclick={handleClick}
+                >
+                  <template lwc:if={item.hasIcon}>
+                    <span
+                      class="nav-item__icon nav-item__icon--asset"
+                      style={item.iconStyle}
+                      aria-hidden="true"
+                    ></span>
+                  </template>
+                  <span class={item.labelClass}>{item.label}</span>
+                </a>
+              </template>
+            </template>
+          </div>
+        </template>
+      </nav>
+    </template>
+  </div>
+</template>

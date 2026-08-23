@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- New Money Bonus Advisor --></label>
+        <name>New_Money_Bonus_Advisor__c</name>
+        <relationshipLabel><!-- Accounts (New Money Bonus Advisor) --></relationshipLabel>
+    </CustomFieldTranslation>

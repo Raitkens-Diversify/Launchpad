@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Ops_Initial_Review_User__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Select the person in the dropdown that completed the initial ops review for the case.</description>
+    <label>Ops Initial Review User</label>
+    <referenceTo>User</referenceTo>
+    <relationshipName>Cases</relationshipName>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

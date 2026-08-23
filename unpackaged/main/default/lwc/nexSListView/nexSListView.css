@@ -1,0 +1,1289 @@
+:host {
+  display: block;
+}
+
+/*
+ * Self-declared --slds-g-* set (same values as arcSearchBar/arcLanding).
+ *
+ * Anchored to the component's own root element, NOT to :host. This bundle's
+ * stylesheet is emitted into the document rather than a shadow root, so a bare
+ * `:host` rule matches nothing and the whole block was inert — every hook below
+ * fell through to the stock SLDS value the platform sets further up the tree.
+ * That is why the brand button rendered Salesforce blue #0176d3 instead of the
+ * frame's #0f406f, and why its corners were 0.25rem instead of 8px: the literal
+ * fallbacks in `var(--slds-g-…, #0f406f)` never fire, because the name IS
+ * defined — just not with our value. Declaring on .nexs-list-view puts the
+ * values on a real element that every rule below inherits from.
+ *
+ * Lengths are px on purpose: the LWR root font-size is 14px, so the rem forms
+ * these previously used resolved to 87.5% of their labels (0.5rem = 7px where
+ * the spec says 8, 1.25rem = 17.5px where it says 20).
+ */
+.nexs-list-view {
+  --slds-g-spacing-1: 4px;
+  --slds-g-spacing-2: 8px;
+  --slds-g-spacing-3: 12px;
+  --slds-g-spacing-4: 16px;
+  --slds-g-spacing-5: 24px;
+  --slds-g-radius-border-1: 4px;
+  --slds-g-radius-border-2: 8px;
+  --slds-g-font-family-base:
+    "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --slds-g-font-family-serif: "Libre Baskerville", Georgia, serif;
+  --slds-g-font-scale-neg-1: 12px;
+  --slds-g-font-scale-1: 14px;
+  --slds-g-font-scale-3: 20px;
+  --slds-g-font-scale-4: 24px;
+  --slds-g-color-surface-container-1: #ffffff;
+  --slds-g-color-surface-container-2: #f3f4f6;
+  --slds-g-color-on-surface-1: #4b5563;
+  --slds-g-color-on-surface-2: #374151;
+  --slds-g-color-on-surface-3: #09243f;
+  --slds-g-color-neutral-base-60: #838a97;
+  --slds-g-color-border-1: #d1d5db;
+  --slds-g-color-border-2: #b6bcc5;
+  --slds-g-color-accent-1: #0f406f;
+  --slds-g-color-accent-2: #0b2f51;
+  --slds-g-color-accent-3: #071c31;
+  --slds-g-color-on-accent-1: #ffffff;
+  --slds-g-color-accent-container-1: #0f406f;
+}
+
+.nexs-list-view {
+  font-family: var(--slds-g-font-family-base);
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+/* ---- Page header ------------------------------------------------------- */
+
+/*
+ * Body > Content > Page Header (Figma 838:54291 / 505:67786). The header is
+ * 16px/24px/0 padded with a bottom rule; spacing between its three rows comes
+ * from margins rather than a flex gap, so each row states its own offset and
+ * no extra wrapper elements are needed to group them.
+ */
+.nexs-list-view__page-header {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: var(--slds-g-spacing-4, 16px) var(--slds-g-spacing-5, 24px) 0;
+}
+
+.nexs-list-view__page-header--no-tabs {
+  padding-bottom: var(--slds-g-spacing-4, 16px);
+  border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+
+.nexs-list-view__page-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--slds-g-spacing-2, 8px);
+}
+
+.nexs-list-view__title {
+  margin: 0;
+  font-family: var(--slds-g-font-family-serif);
+  font-size: var(--slds-g-font-scale-4, 24px);
+  font-weight: 700;
+  line-height: 32px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.nexs-list-view__tagline {
+  /* 4px below the title row (Figma "Content" gap). */
+  margin: var(--slds-g-spacing-1, 4px) 0 0;
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* ---- Saved-view tabs --------------------------------------------------- */
+
+.nexs-list-view__tabs {
+  display: flex;
+  align-items: stretch;
+  /* 12px below the title block, and flush with the header's bottom rule. */
+  margin-top: var(--slds-g-spacing-3, 12px);
+  /* Not overflow: hidden — each tab already truncates its own label (see
+     .nexs-list-view__tab), and this row's box ends right where the "More"
+     menu starts (top: calc(100% + 4px)), so clipping this row also clipped
+     the whole menu. With only 3 tabs configured, hasOverflowTabs was never
+     true and nobody noticed until a config added a 6th tab. */
+}
+
+.nexs-list-view__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-2, 8px);
+  height: 40px;
+  max-width: 240px;
+  padding: 0 var(--slds-g-spacing-3, 12px);
+  border: 0;
+  border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
+  background: transparent;
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+  font-family: inherit;
+  font-size: var(--slds-g-font-scale-1, 14px);
+  font-weight: 600;
+  line-height: 19px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.nexs-list-view__tab--active {
+  border-bottom: 3px solid var(--slds-g-color-accent-1, #0f406f);
+  color: var(--slds-g-color-accent-1, #0f406f);
+}
+
+.nexs-list-view__tab:hover:not(.nexs-list-view__tab--active) {
+  color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.nexs-list-view__tab-more {
+  position: relative;
+  display: flex;
+}
+
+/* The delete "x" only ever renders for the ACTIVE custom-view tab (see
+   showDelete), so this wrapper always carries the active-tab underline
+   itself — spanning the delete button too — rather than leaving that to the
+   inner tab button, whose own border-bottom would stop short of the wrap's
+   full width and look like the line was cut off under the "x". */
+.nexs-list-view__tab-wrap {
+  display: inline-flex;
+  align-items: stretch;
+  height: 40px;
+  border-bottom: 3px solid var(--slds-g-color-accent-1, #0f406f);
+  box-sizing: border-box;
+}
+
+.nexs-list-view__tab-wrap .nexs-list-view__tab {
+  max-width: 200px;
+  padding-right: var(--slds-g-spacing-2, 8px);
+  border-bottom: 0;
+}
+
+.nexs-list-view__tab-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  align-self: center;
+  width: 20px;
+  height: 20px;
+  margin: 0 var(--slds-g-spacing-3, 12px) 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+  cursor: pointer;
+}
+
+.nexs-list-view__tab-delete:hover,
+.nexs-list-view__tab-delete:focus-visible {
+  background: var(--slds-g-color-surface-container-2, #f3f4f6);
+  color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.nexs-list-view__tab-delete .nexs-list-view__icon {
+  width: 12px;
+  height: 12px;
+}
+
+.nexs-list-view__menu-item-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.nexs-list-view__menu-item-wrap .nexs-list-view__menu-item {
+  flex: 1 1 auto;
+}
+
+.nexs-list-view__tab-spacer {
+  flex: 1 1 auto;
+  border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+
+/* ---- Toolbar ----------------------------------------------------------- */
+
+/* Body > Content: 24px inset, 16px between the toolbar and the table. */
+.nexs-list-view__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-4, 16px);
+  padding: var(--slds-g-spacing-5, 24px);
+}
+
+.nexs-list-view__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--slds-g-spacing-4, 16px);
+  flex-wrap: wrap;
+}
+
+.nexs-list-view__actions-right {
+  display: flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-2, 8px);
+  flex-wrap: wrap;
+}
+
+/* Table / Cards / Chart button group (Figma "⚡ Button Group") */
+.nexs-list-view__segmented {
+  display: inline-flex;
+  border: 1px solid var(--slds-g-color-border-2, #b6bcc5);
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  overflow: hidden;
+}
+
+.nexs-list-view__segment {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--slds-g-spacing-2, 8px);
+  height: 36px;
+  padding: 0 var(--slds-g-spacing-4, 16px);
+  border: 0;
+  border-left: 1px solid var(--slds-g-color-border-2, #b6bcc5);
+  background: var(--slds-g-color-surface-container-1, #ffffff);
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+  font-family: inherit;
+  font-size: var(--slds-g-font-scale-1, 14px);
+  font-weight: 600;
+  line-height: 19px;
+  cursor: pointer;
+}
+
+.nexs-list-view__segment:first-child {
+  border-left: 0;
+}
+
+/* Selected view carries the deep navy the metric charts draw with (#032d60),
+   not the old container-2 grey, which barely separated it from the unselected
+   options. The label and its mask-painted icon both take currentColor, so the
+   inverse text carries the glyph with it. The pressed inset is dropped: those
+   rgba blacks were tuned against a near-white fill and only muddy a dark one. */
+.nexs-list-view__segment--active {
+  background: #032d60;
+  color: var(--slds-g-color-on-accent-1, #ffffff);
+}
+
+/* ---- Icons ------------------------------------------------------------- */
+
+/*
+ * Phosphor glyphs are painted as a mask over currentColor rather than an <img>,
+ * so a single SVG serves default, hover and active states and always matches
+ * the text it sits beside. The SVG's own fill is irrelevant here.
+ */
+.nexs-list-view__icon {
+  display: block;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  background-color: currentColor;
+  -webkit-mask-image: var(--icon-url);
+  mask-image: var(--icon-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+/* Segmented-control glyphs are 14px in the design. */
+.nexs-list-view__icon--sm {
+  width: 14px;
+  height: 14px;
+}
+
+/* Each modifier picks a glyph from the --nexs-icon-* properties the component
+   publishes on its host in connectedCallback. */
+.nexs-list-view__icon--table {
+  --icon-url: var(--nexs-icon-table);
+}
+.nexs-list-view__icon--cards {
+  --icon-url: var(--nexs-icon-cards);
+}
+.nexs-list-view__icon--chart {
+  --icon-url: var(--nexs-icon-chart);
+}
+.nexs-list-view__icon--search {
+  --icon-url: var(--nexs-icon-search);
+}
+.nexs-list-view__icon--group {
+  --icon-url: var(--nexs-icon-group);
+}
+.nexs-list-view__icon--filter {
+  --icon-url: var(--nexs-icon-filter);
+}
+.nexs-list-view__icon--plus {
+  --icon-url: var(--nexs-icon-plus);
+}
+.nexs-list-view__icon--caret {
+  --icon-url: var(--nexs-icon-caret);
+}
+.nexs-list-view__icon--bookmark {
+  --icon-url: var(--nexs-icon-bookmark);
+}
+.nexs-list-view__icon--close {
+  --icon-url: var(--nexs-icon-close);
+}
+.nexs-list-view__icon--columns {
+  --icon-url: var(--nexs-icon-columns);
+}
+.nexs-list-view__icon--check {
+  --icon-url: var(--nexs-icon-check);
+}
+
+/* ---- Buttons ----------------------------------------------------------- */
+
+.nexs-list-view__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--slds-g-spacing-2, 8px);
+  height: 36px;
+  padding: 0 var(--slds-g-spacing-4, 16px);
+  border: 1px solid transparent;
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  font-family: inherit;
+  font-size: var(--slds-g-font-scale-1, 14px);
+  font-weight: 600;
+  line-height: 19px;
+  cursor: pointer;
+}
+
+.nexs-list-view__button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.nexs-list-view__button--brand {
+  background: var(--slds-g-color-accent-container-1, #0f406f);
+  color: var(--slds-g-color-on-accent-1, #ffffff);
+}
+
+.nexs-list-view__button--brand:hover {
+  background: var(--slds-g-color-accent-2, #0b2f51);
+}
+
+.nexs-list-view__button--neutral {
+  background: var(--slds-g-color-surface-container-2, #f3f4f6);
+  border-color: var(--slds-g-color-border-2, #b6bcc5);
+  color: var(--slds-g-color-accent-3, #071c31);
+}
+
+.nexs-list-view__button--outline {
+  background: var(--slds-g-color-surface-container-1, #ffffff);
+  border-color: var(--slds-g-color-border-2, #b6bcc5);
+  color: var(--slds-g-color-accent-2, #0b2f51);
+}
+
+.nexs-list-view__button--on {
+  border-color: var(--slds-g-color-accent-1, #0f406f);
+}
+
+.nexs-list-view__link-button {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--slds-g-color-accent-2, #0b2f51);
+  font-family: inherit;
+  font-size: var(--slds-g-font-scale-1, 14px);
+  font-weight: 600;
+  line-height: 19px;
+  cursor: pointer;
+}
+
+.nexs-list-view__link-button:hover {
+  text-decoration: underline;
+}
+
+/* ---- Search input ------------------------------------------------------ */
+
+.nexs-list-view__search,
+.nexs-list-view__menu-search {
+  display: flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-2, 8px);
+  height: 36px;
+  padding: 2px var(--slds-g-spacing-2, 8px);
+  border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  background: var(--slds-g-color-surface-container-1, #ffffff);
+}
+
+.nexs-list-view__search {
+  width: 275px;
+  max-width: 100%;
+}
+
+.nexs-list-view__search:focus-within,
+.nexs-list-view__menu-search:focus-within {
+  border-color: var(--slds-g-color-accent-1, #0f406f);
+  box-shadow: 0 0 0 1px var(--slds-g-color-accent-1, #0f406f);
+}
+
+.nexs-list-view__search-icon {
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+  flex: none;
+}
+
+.nexs-list-view__search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--slds-g-font-scale-1, 14px);
+  line-height: 19px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.nexs-list-view__search-input:focus {
+  outline: none;
+}
+
+.nexs-list-view__search-input::placeholder {
+  color: var(--slds-g-color-neutral-base-60, #838a97);
+}
+
+/* ---- Popovers ---------------------------------------------------------- */
+
+.nexs-list-view__popover-root {
+  position: relative;
+  display: inline-flex;
+}
+
+.nexs-list-view__popover-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+}
+
+.nexs-list-view__menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 250;
+  min-width: 280px;
+  padding: var(--slds-g-spacing-2, 8px);
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  background: var(--slds-g-color-surface-container-1, #ffffff);
+  box-shadow:
+    0 8px 10px -6px rgba(0, 0, 0, 0.07),
+    0 20px 25px -5px rgba(0, 0, 0, 0.07);
+}
+
+.nexs-list-view__menu--tabs,
+.nexs-list-view__menu--save {
+  left: 0;
+  right: auto;
+  min-width: 216px;
+}
+
+.nexs-list-view__menu--chip {
+  left: 0;
+  right: auto;
+  min-width: 336px;
+}
+
+.nexs-list-view__menu-list {
+  display: flex;
+  flex-direction: column;
+  max-height: 280px;
+  overflow-y: auto;
+  margin-top: var(--slds-g-spacing-2, 8px);
+}
+
+/* Menu row (Figma "Group / Dropdown" 532:39348): 36px, 12px padding, 8px gap,
+   13px/18px regular, with a checkmark slot ahead of the label. */
+.nexs-list-view__menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-2, 8px);
+  width: 100%;
+  height: 36px;
+  padding: var(--slds-g-spacing-3, 12px);
+  border: 0;
+  border-radius: var(--slds-g-radius-border-1, 4px);
+  background: transparent;
+  text-align: left;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+  cursor: pointer;
+}
+
+/*
+ * The slot is always present so labels line up whether or not a row is the
+ * current selection; only the selected row paints a glyph into it.
+ */
+.nexs-list-view__menu-check {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+
+/*
+ * The glyph is inlined as a data URI rather than pulled from the static
+ * resource: a mask-image fetched over the network paints a frame or two after
+ * the row does, which reads as the tick lagging behind the click. Any '#' in
+ * the URI must stay percent-encoded — unescaped it is read as a fragment and
+ * the mask silently resolves to nothing.
+ *
+ * Colour is Figma's literal #0b2f51 ("Utility Icons / C / check") rather than a
+ * --slds-g-* token: LWR injects its own SLDS2 hooks into each component scope,
+ * which would win over the :host value and wash the tick out.
+ */
+.nexs-list-view__menu-check--on {
+  background-color: #0b2f51;
+  --icon-url: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none"><g transform="translate(0.661 2.784)"><path d="M5.21538 10.2923L0.138462 5.18462C-0.0461538 5 -0.0461538 4.69231 0.138462 4.50769L0.815385 3.83077C1 3.64615 1.30769 3.64615 1.49231 3.83077L5.30769 7.67692C5.43077 7.8 5.64615 7.8 5.76923 7.67692L13.2462 0.138462C13.4308 -0.0461538 13.7385 -0.0461538 13.9231 0.138462L14.6 0.815385C14.7846 1 14.7846 1.30769 14.6 1.49231L5.89231 10.2923C5.70769 10.5077 5.4 10.5077 5.21538 10.2923V10.2923Z" fill="%23000"/></g></svg>');
+  -webkit-mask-image: var(--icon-url);
+  mask-image: var(--icon-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.nexs-list-view__menu-item > span:last-child {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nexs-list-view__menu-item:hover,
+.nexs-list-view__menu-item:focus-visible {
+  background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+
+.nexs-list-view__menu-item--muted {
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.nexs-list-view__menu-item .nexs-list-view__icon {
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.nexs-list-view__menu-empty {
+  margin: 0;
+  padding: var(--slds-g-spacing-2, 8px) var(--slds-g-spacing-3, 12px);
+  font-size: var(--slds-g-font-scale-1, 14px);
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* Sits under the last painted row so a capped list never reads as the whole
+   one. Quieter than a menu item — it is a note, not something to click. */
+.nexs-list-view__menu-overflow {
+  margin: 0;
+  padding: var(--slds-g-spacing-2, 8px) var(--slds-g-spacing-3, 12px);
+  border-top: 1px solid var(--slds-g-color-border-1, #e5e7eb);
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
+  color: var(--slds-g-color-on-surface-2, #6b7280);
+}
+
+/* ---- Filter chips ------------------------------------------------------ */
+
+.nexs-list-view__chips {
+  display: flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-2, 8px);
+  flex-wrap: wrap;
+}
+
+.nexs-list-view__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-1, 4px);
+  height: 24px;
+  padding: var(--slds-g-spacing-1, 4px) var(--slds-g-spacing-2, 8px);
+  border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  background: var(--slds-g-color-surface-container-1, #ffffff);
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+  font-family: inherit;
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
+  font-weight: 500;
+  line-height: 17px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.nexs-list-view__chip .nexs-list-view__icon {
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.nexs-list-view__chip-title {
+  margin: 0 0 var(--slds-g-spacing-2, 8px);
+  padding: 0 var(--slds-g-spacing-1, 4px);
+  font-size: var(--slds-g-font-scale-1, 14px);
+  font-weight: 600;
+  color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.nexs-list-view__chip-row {
+  display: flex;
+  gap: var(--slds-g-spacing-2, 8px);
+  margin-bottom: var(--slds-g-spacing-2, 8px);
+}
+
+.nexs-list-view__chip-control {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.nexs-list-view__select,
+.nexs-list-view__input {
+  width: 100%;
+  box-sizing: border-box;
+  height: 36px;
+  padding: 0 var(--slds-g-spacing-2, 8px);
+  border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  background: var(--slds-g-color-surface-container-1, #ffffff);
+  font-family: inherit;
+  font-size: var(--slds-g-font-scale-1, 14px);
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.nexs-list-view__input::placeholder {
+  color: var(--slds-g-color-neutral-base-60, #838a97);
+}
+
+/* ---- Cards view -------------------------------------------------------- */
+
+/* ---- Cards --------------------------------------------------------------
+ * Two or three to a row rather than as many 260px columns as will fit, so a
+ * card is wide enough to read as a record summary instead of a narrow strip.
+ * ------------------------------------------------------------------------ */
+.nexs-list-view__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: var(--slds-g-spacing-4, 16px);
+}
+
+/* Three across once there is room for it, two below that, one on a phone. */
+@media (min-width: 1200px) {
+  .nexs-list-view__cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 719px) {
+  .nexs-list-view__cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.nexs-list-view__card {
+  display: flex;
+  flex-direction: column;
+  padding: var(--slds-g-spacing-4, 16px);
+  border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  background: var(--slds-g-color-surface-container-1, #ffffff);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.nexs-list-view__card:hover {
+  border-color: var(--slds-g-color-border-2, #b6bcc5);
+  box-shadow: 0 4px 12px rgba(3, 45, 96, 0.08);
+}
+
+.nexs-list-view__card-head {
+  display: flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-3, 12px);
+  padding-bottom: var(--slds-g-spacing-3, 12px);
+  margin-bottom: var(--slds-g-spacing-3, 12px);
+  border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+
+.nexs-list-view__card-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #032d60;
+  color: #ffffff;
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.nexs-list-view__card-heading {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.nexs-list-view__card-title {
+  font-size: var(--slds-g-font-scale-1, 14px);
+  font-weight: 600;
+  line-height: 19px;
+  color: var(--slds-g-color-accent-1, #0f406f);
+  text-decoration: none;
+  /* A long account name truncates rather than reflowing the card head. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nexs-list-view__card-title:hover,
+.nexs-list-view__card-title:focus-visible {
+  text-decoration: underline;
+}
+
+.nexs-list-view__card-meta {
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
+  line-height: 17px;
+}
+
+.nexs-list-view__card-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-2, 8px);
+  margin: 0;
+}
+
+.nexs-list-view__card-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--slds-g-spacing-3, 12px);
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
+  line-height: 17px;
+}
+
+.nexs-list-view__card-field + .nexs-list-view__card-field {
+  padding-top: var(--slds-g-spacing-2, 8px);
+  border-top: 1px solid #f3f4f6;
+}
+
+.nexs-list-view__card-field dt {
+  flex: 0 1 auto;
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.nexs-list-view__card-field dd {
+  margin: 0;
+  text-align: right;
+  font-weight: 500;
+  color: var(--slds-g-color-on-surface-2, #374151);
+  overflow-wrap: anywhere;
+}
+
+/* The expander. Pushed to the card's foot so a row of cards of unequal
+   height still lines its controls up along the bottom. */
+.nexs-list-view__card-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--slds-g-spacing-1, 4px);
+  margin-top: auto;
+  padding-top: var(--slds-g-spacing-3, 12px);
+  border: 0;
+  background: transparent;
+  color: var(--slds-g-color-accent-1, #0f406f);
+  font-family: inherit;
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
+  font-weight: 600;
+  line-height: 17px;
+  cursor: pointer;
+}
+
+.nexs-list-view__card-toggle:hover span:first-child {
+  text-decoration: underline;
+}
+
+.nexs-list-view__card-chevron {
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid currentColor;
+  transition: transform 0.15s ease;
+}
+
+.nexs-list-view__card-chevron--open {
+  transform: rotate(180deg);
+}
+
+.nexs-list-view__cards-more {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--slds-g-spacing-4, 16px);
+}
+
+/* ---- Chart --------------------------------------------------------------
+ * A counts-by-field bar chart drawn in CSS. One series of counts needs no
+ * charting library, no canvas to size against the region, and the list markup
+ * underneath stays readable to a screen reader.
+ * ------------------------------------------------------------------------ */
+.nexs-list-view__chart {
+  padding: var(--slds-g-spacing-5, 24px);
+  border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  background: var(--slds-g-color-surface-container-1, #ffffff);
+}
+
+.nexs-list-view__chart-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--slds-g-spacing-4, 16px);
+  padding-bottom: var(--slds-g-spacing-4, 16px);
+  margin-bottom: var(--slds-g-spacing-4, 16px);
+  border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+
+.nexs-list-view__chart-title {
+  margin: 0;
+  font-family: var(--slds-g-font-family-serif);
+  font-size: var(--slds-g-font-scale-3, 20px);
+  font-weight: 700;
+  line-height: 26px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.nexs-list-view__chart-summary {
+  margin: 4px 0 0;
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+  font-size: var(--slds-g-font-scale-1, 14px);
+  line-height: 19px;
+}
+
+.nexs-list-view__chart-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-2, 8px);
+}
+
+.nexs-list-view__chart-picker-label {
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.nexs-list-view__chart-select {
+  height: 36px;
+  max-width: 260px;
+  padding: 0 var(--slds-g-spacing-2, 8px);
+  border: 1px solid var(--slds-g-color-border-2, #b6bcc5);
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  background: var(--slds-g-color-surface-container-1, #ffffff);
+  color: var(--slds-g-color-on-surface-2, #374151);
+  font-family: inherit;
+  font-size: var(--slds-g-font-scale-1, 14px);
+  cursor: pointer;
+}
+
+.nexs-list-view__chart-bars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-3, 12px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Fixed label and value columns so the tracks share one baseline and the
+   bars stay comparable down the chart. */
+.nexs-list-view__chart-row {
+  display: grid;
+  grid-template-columns: minmax(0, 200px) 1fr 72px;
+  align-items: center;
+  gap: var(--slds-g-spacing-3, 12px);
+}
+
+.nexs-list-view__chart-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--slds-g-color-on-surface-2, #374151);
+  font-size: var(--slds-g-font-scale-1, 14px);
+  line-height: 19px;
+}
+
+.nexs-list-view__chart-track {
+  display: block;
+  height: 24px;
+  border-radius: 4px;
+  background: #f3f4f6;
+}
+
+.nexs-list-view__chart-bar {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  border-radius: 4px;
+  transition: width 0.25s ease;
+}
+
+.nexs-list-view__chart-value {
+  display: flex;
+  align-items: baseline;
+  gap: var(--slds-g-spacing-1, 4px);
+  justify-content: flex-end;
+  color: var(--slds-g-color-on-surface-2, #374151);
+  font-size: var(--slds-g-font-scale-1, 14px);
+  font-variant-numeric: tabular-nums;
+}
+
+.nexs-list-view__chart-percent {
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
+}
+
+@media (max-width: 719px) {
+  .nexs-list-view__chart-row {
+    grid-template-columns: minmax(0, 120px) 1fr 60px;
+  }
+}
+
+/* ---- Modals ------------------------------------------------------------ */
+
+.nexs-list-view__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(31, 41, 55, 0.5);
+  z-index: 300;
+}
+
+.nexs-list-view__modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  width: min(480px, calc(100vw - 32px));
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  background: var(--slds-g-color-surface-container-1, #ffffff);
+  box-shadow:
+    0 8px 10px -6px rgba(0, 0, 0, 0.07),
+    0 20px 25px -5px rgba(0, 0, 0, 0.07);
+}
+
+.nexs-list-view__modal--wide {
+  width: min(720px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+}
+
+.nexs-list-view__modal-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--slds-g-spacing-3, 12px);
+  padding: var(--slds-g-spacing-5, 24px);
+}
+
+.nexs-list-view__modal-title {
+  margin: 0 0 var(--slds-g-spacing-2, 8px);
+  font-size: var(--slds-g-font-scale-3, 1.25rem);
+  font-weight: 600;
+  line-height: 24px;
+  color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.nexs-list-view__modal-help {
+  margin: 0;
+  font-size: var(--slds-g-font-scale-1, 14px);
+  line-height: 19px;
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.nexs-list-view__modal-close {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: var(--slds-g-radius-border-1, 4px);
+  background: transparent;
+  cursor: pointer;
+  --slds-c-icon-color-foreground-default: var(
+    --slds-g-color-on-surface-2,
+    #374151
+  );
+}
+
+.nexs-list-view__modal-body {
+  padding: 0 var(--slds-g-spacing-5, 24px);
+  overflow: auto;
+}
+
+.nexs-list-view__modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--slds-g-spacing-3, 12px);
+  padding: var(--slds-g-spacing-5, 24px);
+}
+
+/* ---- Status + errors --------------------------------------------------- */
+
+.nexs-list-view__status {
+  position: relative;
+  min-height: 160px;
+  padding: var(--slds-g-spacing-5, 24px) 0;
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+  font-size: var(--slds-g-font-scale-1, 14px);
+}
+
+.nexs-list-view__error {
+  margin: var(--slds-g-spacing-2, 8px) 0;
+  padding: 10px 12px;
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
+}
+
+.nexs-list-view__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 640px) {
+  .nexs-list-view__search {
+    width: 100%;
+  }
+
+  .nexs-list-view__chip-row {
+    flex-direction: column;
+  }
+}
+
+/* ---- Table Columns dropdown (Figma 532:39223) --------------------------- */
+
+.nexs-list-view__table-wrap {
+  position: relative;
+  /* A flex item defaults to min-width: auto, which refuses to shrink below its
+       content. The table already scrolls inside .div-table-scroll, so without
+       this the wrap stayed as wide as the widest table and pushed the whole page
+       sideways under the sidebar instead of letting the table scroll itself. */
+  min-width: 0;
+}
+
+.nexs-list-view__columns-menu {
+  position: absolute;
+  /* Flush under the 36px header row, right-aligned to the column-settings
+       icon that opens it (Figma "Table Columns / Dropdown", 532:39223). */
+  top: 36px;
+  right: 0;
+  /* Above the popover backdrop (200), like the toolbar menus — otherwise the
+       backdrop swallows every click inside the dropdown. */
+  z-index: 250;
+  width: 240px;
+  max-height: 408px;
+  overflow-x: clip;
+  overflow-y: auto;
+  padding: var(--slds-g-spacing-1, 4px) 0;
+  border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  background: var(--slds-g-color-surface-container-1, #ffffff);
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.07),
+    0 8px 10px -6px rgba(0, 0, 0, 0.07);
+}
+
+.nexs-list-view__columns-title {
+  display: flex;
+  align-items: center;
+  height: 36px;
+  margin: 0;
+  padding: var(--slds-g-spacing-3, 12px);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.nexs-list-view__columns-search-row {
+  padding: var(--slds-g-spacing-1, 4px) var(--slds-g-spacing-2, 8px);
+}
+
+.nexs-list-view__columns-row {
+  display: flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-2, 8px);
+  width: 100%;
+  padding: var(--slds-g-spacing-2, 8px) var(--slds-g-spacing-3, 12px);
+  border: 0;
+  background: var(--slds-g-color-surface-container-1, #ffffff);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nexs-list-view__columns-row:disabled {
+  cursor: default;
+}
+
+.nexs-list-view__columns-row:hover:not(:disabled) {
+  background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+
+.nexs-list-view__columns-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Toggle: 42x24 track, 20px thumb, 12px glyph on the opposite side. */
+.nexs-list-view__toggle {
+  position: relative;
+  flex: none;
+  width: 42px;
+  height: 24px;
+  border-radius: 24px;
+}
+
+.nexs-list-view__toggle--on {
+  border: 1px solid var(--slds-g-color-accent-1, #0f406f);
+  background: var(--slds-g-color-accent-container-1, #0f406f);
+}
+
+/* Off and locked-on share the neutral track; only the thumb side differs. */
+.nexs-list-view__toggle--off,
+.nexs-list-view__toggle--locked {
+  border: 1px solid var(--slds-g-color-neutral-base-60, #838a97);
+  background: var(--slds-g-color-neutral-base-60, #838a97);
+}
+
+.nexs-list-view__toggle-thumb {
+  position: absolute;
+  top: 1px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.nexs-list-view__toggle--on .nexs-list-view__toggle-thumb,
+.nexs-list-view__toggle--locked .nexs-list-view__toggle-thumb {
+  left: 19px;
+}
+
+.nexs-list-view__toggle--off .nexs-list-view__toggle-thumb {
+  left: 1px;
+}
+
+.nexs-list-view__toggle-glyph {
+  position: absolute;
+  top: 5px;
+  width: 12px;
+  height: 12px;
+  background-color: #ffffff;
+  -webkit-mask-image: var(--icon-url);
+  mask-image: var(--icon-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.nexs-list-view__toggle--on .nexs-list-view__toggle-glyph,
+.nexs-list-view__toggle--locked .nexs-list-view__toggle-glyph {
+  left: 5px;
+  --icon-url: var(--nexs-icon-check);
+}
+
+.nexs-list-view__toggle--off .nexs-list-view__toggle-glyph {
+  left: 24px;
+  --icon-url: var(--nexs-icon-close);
+}
+
+/* ---- Row action menu trigger ------------------------------------------- */
+
+/*
+ * This org's lightning-button-menu always renders a down-caret alongside the
+ * icon when icon-name is set, with no attribute to switch it off — see the same
+ * workaround in envelopeWizardStyles.css:733. Figma's row cell (797:120088) has
+ * the three dots only. This component renders in light DOM, so its stylesheet is
+ * global and reaches the base component's internals under synthetic shadow.
+ */
+.nexs-list-view lightning-button-menu svg[data-key="down"] {
+  display: none;
+}
+
+/* The caret also widens the trigger; hold it to Figma's 36px square cell. */
+.nexs-list-view lightning-button-menu .slds-button_icon-bare {
+  width: var(--slds-g-sizing-9, 32px);
+  height: var(--slds-g-sizing-9, 32px);
+  padding: 0;
+  justify-content: center;
+}
+
+/* ---- Filter chip popover value field ------------------------------------ */
+
+/*
+ * Figma's filter popover (532:42759) clears the value with an × inside the
+ * field; there is no "Remove filter" link, so the × is the only control here.
+ */
+.nexs-list-view__chip-control--value {
+  position: relative;
+}
+
+.nexs-list-view__chip-control--value .nexs-list-view__input {
+  padding-right: 28px;
+}
+
+.nexs-list-view__chip-clear {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+  cursor: pointer;
+}
+
+.nexs-list-view__chip-clear .nexs-list-view__icon {
+  width: 12px;
+  height: 12px;
+}

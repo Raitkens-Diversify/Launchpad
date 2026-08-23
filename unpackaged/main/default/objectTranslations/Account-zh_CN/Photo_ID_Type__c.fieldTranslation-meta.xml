@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Photo ID Type --></label>
+        <name>Photo_ID_Type__c</name>
+        <picklistValues>
+            <masterLabel>Driver License</masterLabel>
+            <translation><!-- Driver License --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Military ID</masterLabel>
+            <translation><!-- Military ID --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Passport</masterLabel>
+            <translation><!-- Passport --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>State ID</masterLabel>
+            <translation><!-- State ID --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

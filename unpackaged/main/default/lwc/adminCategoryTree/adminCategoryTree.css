@@ -1,0 +1,34 @@
+.act-list,
+.act-children {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.act-children {
+    margin-left: 1.5rem;
+}
+.act-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.375rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.875rem;
+}
+.act-item:hover {
+    background: #f3f4f6;
+}
+.act-item__label--topic {
+    font-weight: 600;
+    color: #09243f;
+}
+.act-item input {
+    accent-color: #0f406f;
+    cursor: pointer;
+}
+.act-empty {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #4b5563;
+}

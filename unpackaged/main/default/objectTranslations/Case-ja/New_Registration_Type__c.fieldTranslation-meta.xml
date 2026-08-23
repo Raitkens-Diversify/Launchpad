@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- New Registration Type --></label>
+        <name>New_Registration_Type__c</name>
+        <picklistValues>
+            <masterLabel>401(k) Plan</masterLabel>
+            <translation><!-- 401(k) Plan --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>401(k) Roth</masterLabel>
+            <translation><!-- 401(k) Roth --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>403(b)</masterLabel>
+            <translation><!-- 403(b) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>457 Plan</masterLabel>
+            <translation><!-- 457 Plan --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>457(B) Plan</masterLabel>
+            <translation><!-- 457(B) Plan --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>529 Plan</masterLabel>
+            <translation><!-- 529 Plan --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Business Account</masterLabel>
+            <translation><!-- Business Account --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Community Property</masterLabel>
+            <translation><!-- Community Property --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Conservatorship</masterLabel>
+            <translation><!-- Conservatorship --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Coverdell ESA</masterLabel>
+            <translation><!-- Coverdell ESA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Individual</masterLabel>
+            <translation><!-- Individual --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>JTWROS</masterLabel>
+            <translation><!-- JTWROS --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Rollover IRA</masterLabel>
+            <translation><!-- Rollover IRA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Roth IRA</masterLabel>
+            <translation><!-- Roth IRA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>SEP IRA</masterLabel>
+            <translation><!-- SEP IRA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Tenants in Common</masterLabel>
+            <translation><!-- Tenants in Common --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Tenants in the Entirety</masterLabel>
+            <translation><!-- Tenants in the Entirety --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Traditional IRA</masterLabel>
+            <translation><!-- Traditional IRA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Trust</masterLabel>
+            <translation><!-- Trust --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>UGMA/UTMA</masterLabel>
+            <translation><!-- UGMA/UTMA --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

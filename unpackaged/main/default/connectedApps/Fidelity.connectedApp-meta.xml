@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ConnectedApp xmlns="http://soap.sforce.com/2006/04/metadata">
+    <contactEmail>banderson@dfpg.com</contactEmail>
+    <label>Fidelity</label>
+    <samlConfig>
+        <acsUrl>https://login.advisorchannel.com/ftgw/Fas/nfExternal/WCRep/InboundSSO/consumer/sp/ACS.saml2</acsUrl>
+        <encryptionType>AES_128</encryptionType>
+        <entityUrl>urn:sp:dfpginvestments:WC:PROD</entityUrl>
+        <issuer>11871b53-ce60-38e6-aa2a-06a60d793941</issuer>
+        <samlNameIdFormat>Unspecified</samlNameIdFormat>
+        <samlSigningAlgoType>SHA1</samlSigningAlgoType>
+        <samlSubjectType>UserId</samlSubjectType>
+    </samlConfig>
+    <startUrl>https://wealthcentral.advisorchannel.com/container/home</startUrl>
+</ConnectedApp>

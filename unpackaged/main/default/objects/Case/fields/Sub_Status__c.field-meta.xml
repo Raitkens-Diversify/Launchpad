@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Sub_Status__c</fullName>
+    <label>Sub-Status</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>New</fullName>
+                <default>false</default>
+                <label>New</label>
+            </value>
+            <value>
+                <fullName>In Progress</fullName>
+                <default>false</default>
+                <label>In Progress</label>
+            </value>
+            <value>
+                <fullName>Pending Advisor Response</fullName>
+                <default>false</default>
+                <label>Pending Advisor Response</label>
+            </value>
+            <value>
+                <fullName>Pending Advisor Signature</fullName>
+                <default>false</default>
+                <label>Pending Advisor Signature</label>
+            </value>
+            <value>
+                <fullName>Response Received</fullName>
+                <default>false</default>
+                <label>Response Received</label>
+            </value>
+            <value>
+                <fullName>Returned from Compliance</fullName>
+                <default>false</default>
+                <label>Returned from Compliance</label>
+            </value>
+            <value>
+                <fullName>On Hold</fullName>
+                <default>false</default>
+                <label>On Hold</label>
+            </value>
+            <value>
+                <fullName>Pending Client Response</fullName>
+                <default>false</default>
+                <label>Pending Client Response</label>
+            </value>
+            <value>
+                <fullName>Front Office Complete</fullName>
+                <default>false</default>
+                <label>Front Office Complete</label>
+            </value>
+            <value>
+                <fullName>Needs Response</fullName>
+                <default>false</default>
+                <label>Needs Response</label>
+            </value>
+            <value>
+                <fullName>Pending Client Signatures</fullName>
+                <default>false</default>
+                <label>Pending Client Signatures</label>
+            </value>
+            <value>
+                <fullName>Ops Review</fullName>
+                <default>false</default>
+                <label>Ops Review</label>
+            </value>
+            <value>
+                <fullName>Returned for Correction</fullName>
+                <default>false</default>
+                <label>Returned for Correction</label>
+            </value>
+            <value>
+                <fullName>Pending Response</fullName>
+                <default>false</default>
+                <label>Pending Response</label>
+            </value>
+            <value>
+                <fullName>Returned from Branch</fullName>
+                <default>false</default>
+                <label>Returned from Branch</label>
+            </value>
+            <value>
+                <fullName>Ops Complete</fullName>
+                <default>false</default>
+                <label>Ops Complete</label>
+            </value>
+            <value>
+                <fullName>Supervisory Review</fullName>
+                <default>false</default>
+                <label>Supervisory Review</label>
+            </value>
+            <value>
+                <fullName>Returned to Operations</fullName>
+                <default>false</default>
+                <label>Returned to Operations</label>
+            </value>
+            <value>
+                <fullName>Compliance Hold</fullName>
+                <default>false</default>
+                <label>Compliance Hold</label>
+            </value>
+            <value>
+                <fullName>Approved</fullName>
+                <default>false</default>
+                <label>Approved</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

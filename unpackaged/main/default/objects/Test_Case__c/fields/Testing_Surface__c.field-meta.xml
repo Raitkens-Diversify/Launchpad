@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Testing_Surface__c</fullName>
+    <description>Where this case is executed.</description>
+    <label>Testing Surface</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Lightning App (Internal)</fullName>
+                <default>false</default>
+                <label>Lightning App (Internal)</label>
+            </value>
+            <value>
+                <fullName>Client Portal / Experience Cloud</fullName>
+                <default>false</default>
+                <label>Client Portal / Experience Cloud</label>
+            </value>
+            <value>
+                <fullName>Integration / API Layer</fullName>
+                <default>false</default>
+                <label>Integration / API Layer</label>
+            </value>
+            <value>
+                <fullName>Mobile</fullName>
+                <default>false</default>
+                <label>Mobile</label>
+            </value>
+            <value>
+                <fullName>Multiple</fullName>
+                <default>false</default>
+                <label>Multiple</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

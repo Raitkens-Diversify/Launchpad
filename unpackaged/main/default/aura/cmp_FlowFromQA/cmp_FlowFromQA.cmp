@@ -1,0 +1,7 @@
+<aura:component implements="lightning:actionOverride,force:lightningQuickActionWithoutHeader" access="global" >
+    <aura:handler name="init" value="{!this}" action="{!c.init}" />
+    <div class="slds-scrollable" style="height:430px;">
+        <lightning:flow aura:id="flowData" class="flow"/>
+    	<div class="slds-p-bottom_xx-large"></div>
+	</div>
+</aura:component>

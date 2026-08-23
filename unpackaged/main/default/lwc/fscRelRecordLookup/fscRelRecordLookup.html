@@ -1,0 +1,167 @@
+<template>
+  <!-- Author: Hoang Long Vu To | Date: 2026-06-08 -->
+  <div class="lookup slds-form-element">
+    <template if:false={isLabelHidden}>
+      <label class="slds-form-element__label" for="lookup-input"
+        >{displayLabel}</label
+      >
+    </template>
+
+    <div class="slds-form-element__control">
+      <div class="slds-combobox_container">
+        <div
+          class={comboboxClass}
+          aria-expanded={isOpen}
+          aria-haspopup="listbox"
+        >
+          <div
+            class="lookup__control"
+            role="combobox"
+            onclick={handleControlClick}
+          >
+            <template if:true={showSelectionPill}>
+              <div class="lookup__pill" title={selectedLabel}>
+                <span class="lookup__pill-icon" aria-hidden="true">
+                  <lightning-icon
+                    icon-name={lookupIconName}
+                    size="x-small"
+                    alternative-text={lookupObjectLabel}
+                  ></lightning-icon>
+                </span>
+                <span class="lookup__pill-label slds-truncate"
+                  >{selectedLabel}</span
+                >
+                <template if:false={disabled}>
+                  <button
+                    type="button"
+                    class="lookup__pill-clear"
+                    title="Remove"
+                    aria-label="Remove selected account"
+                    onclick={handleClearSelection}
+                  >
+                    ×
+                  </button>
+                </template>
+              </div>
+            </template>
+
+            <template if:true={showSearchInput}>
+              <div
+                class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right"
+              >
+                <input
+                  id="lookup-input"
+                  class="slds-input slds-combobox__input lookup__input"
+                  type="text"
+                  role="textbox"
+                  autocomplete="off"
+                  placeholder={inputPlaceholder}
+                  value={searchTerm}
+                  disabled={disabled}
+                  oninput={handleInput}
+                  onfocus={handleInputFocus}
+                  onblur={handleInputBlur}
+                  onkeydown={handleInputKeydown}
+                />
+                <lightning-icon
+                  icon-name="utility:search"
+                  size="x-small"
+                  alternative-text="Search"
+                  class="slds-input__icon slds-input__icon_right"
+                ></lightning-icon>
+              </div>
+            </template>
+          </div>
+
+          <template if:true={isOpen}>
+            <div
+              class={dropdownClass}
+              style={dropdownStyle}
+              role="listbox"
+              onmousedown={handleDropdownMouseDown}
+            >
+              <div class="lookup__dropdown-scroll">
+                <ul
+                  class="slds-listbox slds-listbox_vertical"
+                  role="presentation"
+                >
+                  <template if:true={isLoading}>
+                    <li class="lookup__status" role="presentation">
+                      <lightning-spinner
+                        alternative-text="Searching accounts"
+                        size="small"
+                      ></lightning-spinner>
+                    </li>
+                  </template>
+
+                  <template for:each={searchResults} for:item="option">
+                    <li
+                      key={option.id}
+                      role="presentation"
+                      class="slds-listbox__item"
+                    >
+                      <div
+                        class="slds-media slds-listbox__option slds-listbox__option_entity slds-listbox__option_has-meta lookup__option"
+                        role="option"
+                        data-record-id={option.id}
+                        data-label={option.label}
+                        onclick={handleOptionSelect}
+                      >
+                        <span
+                          class="slds-media__figure slds-listbox__option-icon"
+                        >
+                          <span class="lookup__option-icon" aria-hidden="true">
+                            <lightning-icon
+                              icon-name={option.iconName}
+                              size="small"
+                              alternative-text={option.label}
+                            ></lightning-icon>
+                          </span>
+                        </span>
+                        <span class="slds-media__body">
+                          <span
+                            class="slds-listbox__option-text slds-listbox__option-text_entity lookup__option-label"
+                          >
+                            {option.label}
+                          </span>
+                          <template if:true={option.subtitle}>
+                            <span
+                              class="slds-listbox__option-meta slds-listbox__option-meta_entity lookup__option-meta"
+                            >
+                              {option.subtitle}
+                            </span>
+                          </template>
+                        </span>
+                      </div>
+                    </li>
+                  </template>
+
+                  <template if:true={showEmptyResults}>
+                    <li
+                      class="lookup__status lookup__status_empty"
+                      role="presentation"
+                    >
+                      {emptyResultsMessage}
+                    </li>
+                  </template>
+                </ul>
+              </div>
+
+              <template if:true={showCreateInDropdown}>
+                <div class="lookup__dropdown-footer">
+                  <div
+                    class="lookup__new-option"
+                    role="option"
+                    onclick={handleCreateClick}
+                  >
+                    {createNewOptionLabel}
+                  </div>
+                </div>
+              </template>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>

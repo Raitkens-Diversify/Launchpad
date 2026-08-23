@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>All</fullName>
+    <columns>Client__c</columns>
+    <columns>NAME</columns>
+    <columns>CREATEDBY_USER</columns>
+    <columns>CREATED_DATE</columns>
+    <columns>Received_Date__c</columns>
+    <columns>Financial_Account__c</columns>
+    <columns>Status__c</columns>
+    <columns>Amount__c</columns>
+    <columns>Financial_Advisor_Team__c</columns>
+    <columns>Sent_Date__c</columns>
+    <columns>Case__c</columns>
+    <columns>Tracking_Number__c</columns>
+    <columns>Custodian__c</columns>
+    <filterScope>Everything</filterScope>
+    <label>All</label>
+</ListView>

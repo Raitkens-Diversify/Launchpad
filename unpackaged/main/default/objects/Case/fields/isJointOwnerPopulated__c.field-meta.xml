@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>isJointOwnerPopulated__c</fullName>
+    <formula>NOT(ISBLANK(Joint_Account_Owner__c))</formula>
+    <label>isJointOwnerPopulated</label>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Format --></label>
+        <name>Format__c</name>
+        <picklistValues>
+            <masterLabel>EIN</masterLabel>
+            <translation><!-- EIN --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>SSN</masterLabel>
+            <translation><!-- SSN --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>SSN or EIN</masterLabel>
+            <translation><!-- SSN or EIN --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>US Phone</masterLabel>
+            <translation><!-- US Phone --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>US ZIP</masterLabel>
+            <translation><!-- US ZIP --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

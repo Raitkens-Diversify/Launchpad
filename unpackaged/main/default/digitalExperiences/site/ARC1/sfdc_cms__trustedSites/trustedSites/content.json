@@ -1,0 +1,16 @@
+{
+  "type" : "sfdc_cms__trustedSites",
+  "title" : "trustedSites",
+  "contentBody" : {
+    "trustedSites" : [ {
+      "isActive" : true,
+      "source" : "https://falconpark.egnyte.com/",
+      "sourceName" : "Egnyte"
+    }, {
+      "isActive" : true,
+      "source" : "https://dfpginvestments--launchpad--c.sandbox.vf.force.com/resource/1785204546000/DiversifyLogoV2?",
+      "sourceName" : "launchpad"
+    } ]
+  },
+  "urlName" : "trustedsites"
+}

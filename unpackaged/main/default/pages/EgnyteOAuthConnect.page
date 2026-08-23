@@ -1,0 +1,17 @@
+<apex:page controller="EgnyteOAuthController" action="{!beginAuthorization}" showHeader="true" sidebar="false" title="Connect Egnyte">
+    <apex:pageMessages />
+    <div style="font-family: Arial, sans-serif; max-width: 42rem; margin: 2rem auto; line-height: 1.5;">
+        <h1>Connect Egnyte</h1>
+        <p>Redirecting to Egnyte for authorization...</p>
+        <apex:form >
+            <p>
+                If you are not redirected automatically,
+                <apex:commandLink action="{!beginAuthorization}" value="click here to continue" />.
+            </p>
+        </apex:form>
+        <p>
+            Register this callback URL in the Egnyte developer portal before connecting:
+        </p>
+        <p><code>{!redirectUri}</code></p>
+    </div>
+</apex:page>

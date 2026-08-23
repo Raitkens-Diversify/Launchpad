@@ -1,0 +1,119 @@
+<!--
+  Author: Hoang Long Vu To
+  Date: 2026-08-13
+
+  Hosts the Egnyte for Salesforce managed package component (efs:EgnyteComponent)
+  for embedding inside LWR Experience Cloud via the egnyteIframe LWC.
+
+  Query params: recordId, pageHeight (default 600px), permission (optional).
+  Add this page to your Experience site under Administration → Pages.
+-->
+<apex:page showHeader="false"
+  sidebar="false"
+  standardStylesheets="false"
+  applyHtmlTag="false"
+  applyBodyTag="false"
+  docType="html-5.0"
+  lightningStylesheets="true"
+>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <style>
+        html,
+        body {
+          margin: 0;
+          padding: 0;
+          width: 100%;
+          min-height: 100%;
+          background: #fff;
+        }
+
+        #egnyteEmbedContainer {
+          width: 100%;
+          min-height: 600px;
+        }
+
+        .egnyte-embed-error {
+          color: #ba0517;
+          font-family: system-ui, sans-serif;
+          padding: 1rem;
+        }
+      </style>
+    </head>
+    <body>
+      <div id="egnyteEmbedContainer" role="main"></div>
+      <apex:includeLightning />
+      <script>
+        (function () {
+          var recordId = "{!JSENCODE($CurrentPage.parameters.recordId)}";
+          var pageHeight =
+            "{!JSENCODE($CurrentPage.parameters.pageHeight)}" || "600px";
+          var permission = "{!JSENCODE($CurrentPage.parameters.permission)}";
+          var container = document.getElementById("egnyteEmbedContainer");
+
+          if (!recordId) {
+            return;
+          }
+
+          function showError(message) {
+            container.innerHTML =
+              '<p class="egnyte-embed-error">' + message + "</p>";
+          }
+
+          function createEgnyteComponent() {
+            var attributes = {
+              recordId: recordId,
+              pageHeight: pageHeight,
+            };
+
+            if (permission) {
+              attributes.permission = permission;
+            }
+
+            $Lightning.use(
+              "c:EgnyteEmbedApp",
+              function () {
+                $Lightning.createComponent(
+                  "efs:EgnyteComponent",
+                  attributes,
+                  "egnyteEmbedContainer",
+                  function (cmp) {
+                    if (!cmp) {
+                      showError(
+                        "Unable to load the Egnyte for Salesforce component."
+                      );
+                    }
+                  },
+                  function (error) {
+                    showError(
+                      "Unable to load Egnyte for Salesforce. Check package install and Egnyte Domain Configuration."
+                    );
+                    if (error) {
+                      console.error("efs:EgnyteComponent failed", error);
+                    }
+                  }
+                );
+              },
+              function (error) {
+                showError(
+                  "Unable to initialize Egnyte. Check that Egnyte for Salesforce is installed."
+                );
+                if (error) {
+                  console.error("EgnyteEmbedApp failed", error);
+                }
+              }
+            );
+          }
+
+          if (document.readyState === "complete") {
+            createEgnyteComponent();
+          } else {
+            document.addEventListener("DOMContentLoaded", createEgnyteComponent);
+          }
+        })();
+      </script>
+    </body>
+  </html>
+</apex:page>

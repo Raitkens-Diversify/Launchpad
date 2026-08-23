@@ -1,0 +1,119 @@
+/* Tree structure + drag styles moved verbatim from adminCategoryManager.css
+   (class names kept so the two panes stay pixel-identical). */
+.acm__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+.acm__topics {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+.acm__topic {
+    font-weight: 600;
+    color: #09243f;
+}
+.acm__subtopics {
+    list-style: none;
+    margin: 0.125rem 0 0;
+    padding: 0 0 0 1rem;
+    color: #4b5563;
+    font-size: 0.8125rem;
+}
+.acm__topic-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+.acm__topic-label {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.acm__topic-actions {
+    display: inline-flex;
+    gap: 2px;
+    flex: none;
+}
+
+/* Optional row decorations (Resource-categories pane) */
+.acm__sublabel {
+    flex: none;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    font-size: 0.75rem;
+    font-weight: 400;
+    max-width: 9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.acm__count {
+    flex: none;
+    display: inline-block;
+    min-width: 1.25rem;
+    text-align: center;
+    padding: 0.125rem 0.375rem;
+    border-radius: 10px;
+    background: #eef2f7;
+    color: #0b2f51;
+    font-size: 0.6875rem;
+    font-weight: 600;
+}
+.acm-badge {
+    flex: none;
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+}
+.acm-badge--on {
+    background: #e6f4ea;
+    color: #1e7e34;
+}
+.acm-badge--off {
+    background: #f3f4f6;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* Drag-and-drop reorder */
+.acm__grip {
+    border: none;
+    background: none;
+    padding: 0 2px;
+    flex: none;
+    cursor: grab;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    font-size: 0.75rem;
+    letter-spacing: -2px;
+    line-height: 1;
+}
+.acm__grip:active {
+    cursor: grabbing;
+}
+.acm__grip:disabled {
+    cursor: default;
+    opacity: 0.4;
+}
+.acm__grip:focus-visible {
+    outline: 2px solid #1a76bb;
+    border-radius: 4px;
+}
+.acm__topic-row--dragging {
+    opacity: 0.4;
+}
+/* Insertion line via box-shadow — borders would shift the layout. */
+.acm__topic-row--drop-before {
+    box-shadow: 0 -2px 0 0 #1a76bb;
+}
+.acm__topic-row--drop-after {
+    box-shadow: 0 2px 0 0 #1a76bb;
+}

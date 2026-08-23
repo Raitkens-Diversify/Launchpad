@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Source_Note__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>The session entry this finding was promoted from. Drives the entry&#39;s &quot;→ EF-00003&quot; badge and the finding&#39;s &quot;From session note · {timestamp}&quot; line. SetNull, not Restrict: a tester deleting a note must not be blocked by a finding that has since taken on its own life — the finding keeps its copied text and evidence and simply loses the back-link.</description>
+    <label>Source Note</label>
+    <referenceTo>Session_Note__c</referenceTo>
+    <relationshipLabel>Findings</relationshipLabel>
+    <relationshipName>Findings</relationshipName>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

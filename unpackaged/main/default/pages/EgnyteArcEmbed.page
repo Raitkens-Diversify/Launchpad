@@ -1,0 +1,108 @@
+<!--
+  Author: Hoang Long Vu To
+  Date: 2026-08-17
+
+  White-background shell for Egnyte record embeds on ARC Experience Cloud.
+  Styles the managed Egnyte_integration_page document from Visualforce because
+  LWC Locker blocks parent iframe.contentDocument access.
+-->
+<apex:page controller="EgnyteArcEmbedController"
+  showHeader="false"
+  sidebar="false"
+  standardStylesheets="false"
+  applyHtmlTag="false"
+  applyBodyTag="false"
+  docType="html-5.0"
+  lightningStylesheets="false"
+>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <style>
+        html,
+        body {
+          margin: 0;
+          padding: 0;
+          width: 100%;
+          height: 100%;
+          min-height: 100%;
+          background: #fff !important;
+          overflow: hidden;
+        }
+
+        #egnyteArcFrame {
+          display: block;
+          width: 100%;
+          height: 100vh;
+          min-height: 800px;
+          border: 0;
+          background: #fff;
+        }
+      </style>
+    </head>
+    <body>
+      <iframe
+        id="egnyteArcFrame"
+        title="Egnyte"
+        allowtransparency="true"
+        src="{!innerFrameUrl}"
+      ></iframe>
+      <script>
+        (function () {
+          var styleId = "egnyte-arc-embed-document-style";
+          var styleRules =
+            "html, body, body.sfdcBody, body.brandQuaternaryBgr, #bodyTable, #bodyCell, .noSidebarCell, .bPageBlock, .bRelatedList { background: #fff !important; background-color: #fff !important; }";
+
+          function applyInnerDocumentStyles(frame) {
+            try {
+              var doc = frame && frame.contentDocument;
+              if (!doc || !doc.documentElement) {
+                return false;
+              }
+
+              if (!doc.getElementById(styleId)) {
+                var style = doc.createElement("style");
+                style.id = styleId;
+                style.textContent = styleRules;
+                (doc.head || doc.documentElement).appendChild(style);
+              }
+
+              doc.documentElement.style.backgroundColor = "#ffffff";
+              if (doc.body) {
+                doc.body.style.backgroundColor = "#ffffff";
+                doc.body.classList.remove("brandQuaternaryBgr");
+              }
+
+              return true;
+            } catch (error) {
+              return false;
+            }
+          }
+
+          function bindFrame(frame) {
+            if (!frame) {
+              return;
+            }
+
+            var attempts = 0;
+            var maxAttempts = 30;
+
+            function tryApply() {
+              attempts += 1;
+              var applied = applyInnerDocumentStyles(frame);
+              if (!applied && attempts < maxAttempts) {
+                window.setTimeout(tryApply, 100);
+              }
+            }
+
+            frame.addEventListener("load", tryApply);
+            tryApply();
+          }
+
+          bindFrame(document.getElementById("egnyteArcFrame"));
+        })();
+      </script>
+    </body>
+  </html>
+</apex:page>

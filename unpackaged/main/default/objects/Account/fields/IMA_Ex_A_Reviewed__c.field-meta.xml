@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>IMA_Ex_A_Reviewed__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>This box should be checked when a home office employee has verified that the client has signed a signed IMA Exhibit A on file and the fee on the form matches the value in Salesforce.</description>
+    <label>IMA Ex A Reviewed</label>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Checkbox</type>
+</CustomField>

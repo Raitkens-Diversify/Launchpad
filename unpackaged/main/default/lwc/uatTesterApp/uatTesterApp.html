@@ -1,0 +1,80 @@
+<template>
+    <div class={shellClass}>
+        <div class="uta-chrome">
+            <header class="uta-chrome__header">
+                <img class="uta-chrome__logo" src={logoUrl} alt="Diversify" />
+                <span class="uta-chrome__divider" aria-hidden="true"></span>
+                <span class="uta-chrome__crumb">UAT Testing</span>
+                <template if:true={showNav}>
+                    <c-uat-cycle-switcher class="uta-chrome__switcher"
+                                          cycles={myCycles}
+                                          selected-cycle-id={selectedCycleId}
+                                          oncyclechange={handleCycleChange}></c-uat-cycle-switcher>
+                </template>
+            </header>
+            <template if:true={showNav}>
+                <nav class="uta-band" aria-label="UAT views">
+                    <button class={dashboardNavClass} onclick={handleNavDashboard}>
+                        <lightning-icon class="uta-band__icon" icon-name="utility:apps"
+                                        size="xx-small" alternative-text=""></lightning-icon>
+                        Dashboard</button>
+                    <button class={queueNavClass} onclick={handleNavQueue}>
+                        <lightning-icon class="uta-band__icon" icon-name="utility:task"
+                                        size="xx-small" alternative-text=""></lightning-icon>
+                        My Queue</button>
+                    <button class={poolNavClass} onclick={handleNavPool}>
+                        <lightning-icon class="uta-band__icon" icon-name="utility:groups"
+                                        size="xx-small" alternative-text=""></lightning-icon>
+                        Open Pool</button>
+                </nav>
+            </template>
+        </div>
+
+        <main class={mainClass}>
+            <template if:true={isDashboard}>
+                <c-uat-dashboard cycle-id={selectedCycleId}
+                                 onopen={handleOpen}
+                                 onsessionopen={handleSessionOpen}
+                                 onnavigate={handleDashboardNavigate}></c-uat-dashboard>
+            </template>
+
+            <template if:true={isQueue}>
+                <c-uat-queue cycle-id={selectedCycleId}
+                             onopen={handleOpen}
+                             onexploratory={handleExploratory}
+                             onsessionopen={handleSessionOpen}
+                             onnavigate={handleDashboardNavigate}></c-uat-queue>
+            </template>
+
+            <template if:true={isPool}>
+                <c-uat-pool cycle-id={selectedCycleId}
+                            onnavigate={handleDashboardNavigate}></c-uat-pool>
+            </template>
+
+            <template if:true={isRunner}>
+                <c-uat-runner execution-id={activeExecutionId}
+                              claim-on-start={claimOnStart}
+                              case-index={activeCaseIndex}
+                              case-total={activeCaseTotal}
+                              onexit={handleBackToQueue}
+                              onsubmitted={handleBackToQueue}></c-uat-runner>
+            </template>
+
+            <template if:true={isExploratory}>
+                <c-uat-exploratory-log cycle-id={activeCycleId}
+                                       cycle-name={activeCycleName}
+                                       onback={handleBackToQueue}></c-uat-exploratory-log>
+            </template>
+
+            <template if:true={isSession}>
+                <c-uat-session-workspace session-id={activeSessionId}
+                                         onexit={handleBackToQueue}></c-uat-session-workspace>
+            </template>
+        </main>
+
+        <footer class="uta-chrome__footer">
+            <span class="uta-chrome__footer-brand">UAT Testing · Helios</span>
+            <span class="uta-chrome__footer-meta">© 2026 Diversify Financial. Internal use only.</span>
+        </footer>
+    </div>
+</template>

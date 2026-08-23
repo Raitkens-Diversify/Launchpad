@@ -1,0 +1,53 @@
+/* ───────── Slotted header (flag + title) ─────────
+   The header is slotted into ds-modal-v2, so it lives in this component's shadow DOM and can't use
+   the modal's scoped .ds-modal-v2__title class — the typography is re-created here. */
+.keypoint-change__title-row {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-4, 16px);
+    font-family: var(--slds-g-font-family-base);
+}
+
+/* The same flag and blue as the Key Point field header (envelopeFieldControl). */
+.keypoint-change__title-icon {
+    flex-shrink: 0;
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-on-info-1, #0369a1);
+}
+
+.keypoint-change__title {
+    margin: 0;
+    font-family: var(--slds-g-font-family-base);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 22px;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.keypoint-change__alert {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--slds-g-spacing-2, 8px);
+    padding: var(--slds-g-spacing-2, 8px) var(--slds-g-spacing-3, 12px);
+    border: 1px solid var(--slds-g-color-warning-base-90, #fde68a);
+    border-radius: var(--slds-g-radius-border-2, 8px);
+    background: var(--slds-g-color-warning-container-1, #fef3c7);
+    color: var(--slds-g-color-on-warning-1, #b45309);
+}
+
+.keypoint-change__alert-icon {
+    flex: none;
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-on-warning-1, #b45309);
+}
+
+.keypoint-change__alert-text {
+    margin: 0;
+    font-family: var(--slds-g-font-family-base);
+    font-size: var(--slds-g-font-size-base, 13px);
+    line-height: 18px;
+}
+
+.keypoint-change__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--slds-g-spacing-3, 12px);
+}

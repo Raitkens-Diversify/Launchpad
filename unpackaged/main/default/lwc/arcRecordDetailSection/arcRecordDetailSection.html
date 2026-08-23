@@ -1,0 +1,111 @@
+<!-- Author: Hoang Long Vu To -->
+<template>
+  <div class="record-section">
+    <template lwc:if={isSaving}>
+      <div class="record-section__saving" role="status" aria-live="polite">
+        <lightning-spinner alternative-text="Saving changes" size="small"></lightning-spinner>
+      </div>
+    </template>
+    <template lwc:if={showHeader}>
+      <header class="record-section__header">
+        <div class="record-section__title-group">
+          <h3 class="record-section__title">{label}</h3>
+          <template lwc:if={showInfoIcon}>
+            <lightning-icon
+              class="record-section__info-icon"
+              icon-name="utility:info"
+              size="x-small"
+              alternative-text={infoAriaLabel}
+              title={infoAriaLabel}
+            >
+            </lightning-icon>
+          </template>
+        </div>
+        <template lwc:if={showEditButton}>
+          <button
+            type="button"
+            class="record-section__edit"
+            aria-label={editAriaLabel}
+            onclick={handleEditClick}
+          >
+            <svg
+              class="record-section__edit-icon"
+              viewBox="0 0 19 19"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path d={pencilIconPath}></path>
+            </svg>
+            <span class="record-section__edit-label">Edit</span>
+          </button>
+        </template>
+        <template lwc:elseif={showSectionActions}>
+          <div class="record-section__actions">
+            <lightning-button
+              label="Cancel"
+              variant="neutral"
+              disabled={isCancelDisabled}
+              onclick={handleCancelClick}
+            >
+            </lightning-button>
+            <lightning-button
+              label="Save"
+              variant="brand"
+              disabled={isSaveDisabled}
+              onclick={handleSaveClick}
+            >
+            </lightning-button>
+          </div>
+        </template>
+      </header>
+    </template>
+    <div class="record-section__fields">
+      <template for:each={fieldRows} for:item="field">
+        <div key={field.key} class={field.rowClass}>
+          <div class="field-row__label">
+            <div class="field-row__label-heading">
+              <span class="field-row__label-text">{field.displayLabel}</span>
+              <template lwc:if={showFieldLock}>
+                <svg
+                  class="field-row__lock-icon"
+                  viewBox="0 0 11 12"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path d={lockIconPath}></path>
+                </svg>
+              </template>
+            </div>
+          </div>
+          <div class="field-row__control">
+            <template lwc:if={isReadonly}>
+              <template lwc:if={field.isRecordLink}>
+                <a
+                  class="field-row__value field-row__link"
+                  href={field.recordUrl}
+                  data-record-id={field.linkRecordId}
+                  data-object-api-name={field.linkObjectApiName}
+                  aria-label={field.linkAriaLabel}
+                  onclick={handleRecordLinkClick}
+                >
+                  {field.displayValue}
+                </a>
+              </template>
+              <template lwc:else>
+                <span class="field-row__value">{field.displayValue}</span>
+              </template>
+            </template>
+            <template lwc:else>
+              <c-arc-record-detail-field
+                field={field}
+                data-field={field.apiName}
+                onvaluechange={handleFieldChange}
+              >
+              </c-arc-record-detail-field>
+            </template>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+</template>

@@ -1,0 +1,61 @@
+/*
+ * Author: Hoang Long Vu To
+ * Date: 2026-06-12
+ */
+:host {
+    display: block;
+    --member-panel-width: 24rem;
+}
+
+:host(.member-popover-host_scroll-relative) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    overflow: visible;
+    z-index: 10000;
+}
+
+.member-panel {
+    position: absolute;
+    width: var(--member-panel-width);
+    max-width: 90vw;
+    z-index: 10000;
+    background: #ffffff;
+    border-radius: 0.4rem;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.18);
+    overflow: hidden;
+}
+
+.member-panel_fixed {
+    position: fixed;
+    z-index: 10001;
+}
+
+.member-panel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    border-bottom: 1px solid #e5e5e5;
+    background: #f7f7f7;
+    cursor: move;
+    user-select: none;
+}
+
+.member-panel__header--anchored {
+    cursor: default;
+}
+
+.member-panel__title {
+    margin: 0;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.member-panel__body {
+    background: #ffffff;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}

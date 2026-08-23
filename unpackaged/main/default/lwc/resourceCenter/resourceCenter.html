@@ -1,0 +1,68 @@
+<template>
+    <div class="rc-shell"
+         oncategoryselect={handleCategorySelect}
+         onresourceselect={handleResourceSelect}
+         onrcsearch={handleSearch}
+         onrchome={handleHome}
+         onguideopen={handleGuideOpen}
+         onresourcedownload={handleDownload}>
+
+        <header class="rc-chrome__header">
+            <img class="rc-chrome__logo" src={logoUrl} alt="Diversify" />
+            <span class="rc-chrome__divider" aria-hidden="true"></span>
+            <button type="button" class="rc-chrome__crumb" onclick={handleHome}>
+                Resource Center
+            </button>
+            <template if:true={showHeaderSearch}>
+                <div class="rc-chrome__search">
+                    <c-resource-search-bar placeholder="Search resources…"
+                                           onselect={handleHeaderSelect}
+                                           onsearch={handleHeaderSearch}></c-resource-search-bar>
+                </div>
+            </template>
+            <template if:true={helpCenterBaseUrl}>
+                <button type="button" class="rc-chrome__link" onclick={handleHelpCenter}>
+                    Help Center
+                </button>
+            </template>
+        </header>
+
+        <main class="rc-main">
+            <template if:true={isHome}>
+                <c-resource-center-home></c-resource-center-home>
+            </template>
+            <template if:true={isCategory}>
+                <c-resource-category-page slug={slug}></c-resource-category-page>
+            </template>
+            <template if:true={isDetail}>
+                <c-resource-detail slug={slug} help-center-base-url={helpCenterBaseUrl}></c-resource-detail>
+            </template>
+            <template if:true={isSearch}>
+                <c-resource-search-results term={term}
+                    help-center-base-url={helpCenterBaseUrl}></c-resource-search-results>
+            </template>
+            <template if:true={isGuide}>
+                <section class="rc-guide">
+                    <nav class="rc-guide__crumbs" aria-label="Breadcrumb">
+                        <a class="rc-guide__crumb-link" href="#" onclick={handleGuideBack}>Resource Center</a>
+                        <span class="rc-guide__crumb-sep" aria-hidden="true">›</span>
+                        <span class="rc-guide__crumb-current">Get Help</span>
+                    </nav>
+                    <h1 class="rc-guide__title">Get Help</h1>
+                    <p class="rc-guide__sub">Answer a couple of questions and we&rsquo;ll point you to the right place.</p>
+                    <!-- Embedded mode: category/resource terminals fire events the
+                         shell already routes; no helpCenterBaseUrl because the
+                         starter guide has no article terminals (and the Help
+                         Center has no /article/ route). -->
+                    <!-- case target defaults from Resource_Center_Setting__mdt -->
+                    <c-help-guide guide-key="get_help"></c-help-guide>
+                </section>
+            </template>
+        </main>
+
+        <footer class="rc-chrome__footer">
+            <span class="rc-chrome__footer-brand">Resource Center</span>
+            <span class="rc-chrome__footer-meta">{copyrightLine}</span>
+        </footer>
+    </div>
+</template>

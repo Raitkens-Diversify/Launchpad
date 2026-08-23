@@ -1,0 +1,13 @@
+<template>
+    <c-envelope-confirm-removal-modal
+        is-open={isOpen}
+        title="Delete envelope?"
+        confirm-label="Delete envelope"
+        message-before="This will permanently delete envelope "
+        message-highlight={envelopeName}
+        message-after=" including all of its saved data. This action cannot be undone."
+        busy={isDeleting}
+        onconfirm={handleDelete}
+        onclose={handleClose}>
+    </c-envelope-confirm-removal-modal>
+</template>

@@ -1,0 +1,130 @@
+.arq__toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+.arq__hint {
+    margin: 0;
+    flex: 1 1 auto;
+    font-size: 0.8125rem;
+    color: #4b5563;
+}
+.arq__loading {
+    position: relative;
+    min-height: 120px;
+}
+.arq__error {
+    color: #b42318;
+    font-size: 0.875rem;
+}
+.arq__table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    overflow: hidden;
+    font-size: 0.875rem;
+}
+.arq__table th,
+.arq__table td {
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: top;
+}
+.arq__table th {
+    background: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+.arq__title {
+    display: block;
+    font-weight: 600;
+    color: #09243f;
+}
+.arq__urlname {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.arq__actions-col {
+    width: 8rem;
+}
+.arq__empty {
+    font-size: 0.875rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* Modals */
+.arq-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(9, 36, 63, 0.45);
+}
+.arq-modal--notes {
+    z-index: 110;
+}
+.arq-modal__panel {
+    width: min(720px, calc(100vw - 2rem));
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(9, 36, 63, 0.25);
+}
+.arq-modal__panel--small {
+    width: min(480px, calc(100vw - 2rem));
+}
+.arq-modal__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+.arq-modal__title {
+    margin: 0;
+    font-family: "Libre Baskerville", Georgia, serif;
+    font-size: 1.25rem;
+    color: #09243f;
+}
+.arq-modal__meta {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.25rem 0.75rem;
+    margin: 0;
+    font-size: 0.8125rem;
+}
+.arq-modal__meta dt {
+    font-weight: 600;
+    color: #374151;
+}
+.arq-modal__meta dd {
+    margin: 0;
+    color: #4b5563;
+    overflow-wrap: anywhere;
+}
+.arq-modal__body {
+    padding: 0.75rem 1rem;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.875rem;
+}
+.arq-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}

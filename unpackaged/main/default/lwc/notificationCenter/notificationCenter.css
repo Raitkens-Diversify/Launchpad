@@ -1,0 +1,18 @@
+:host {
+  display: block;
+}
+
+.app-shell.div-app {
+  min-height: calc(100vh - 250px);
+}
+
+/* diversifyStyles .div-app sets a content-area gray background; restore app-shell frame bg */
+.app-shell.div-app {
+  background: var(--div-layout-frame-bg, #ffffff);
+}
+
+@media (max-width: 48rem) {
+  :host {
+    height: calc(100vh - 30rem);
+  }
+}

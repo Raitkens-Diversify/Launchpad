@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Status__c</fullName>
+    <label>Status</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>New</fullName>
+                <default>true</default>
+                <label>New</label>
+            </value>
+            <value>
+                <fullName>Ops Review</fullName>
+                <default>false</default>
+                <label>Ops Review</label>
+            </value>
+            <value>
+                <fullName>Ops Hold</fullName>
+                <default>false</default>
+                <label>Ops Hold</label>
+            </value>
+            <value>
+                <fullName>Ops Complete</fullName>
+                <default>false</default>
+                <label>Ops Complete</label>
+            </value>
+            <value>
+                <fullName>Pending Funding</fullName>
+                <default>false</default>
+                <label>Pending Funding</label>
+            </value>
+            <value>
+                <fullName>Funded Pending Trading</fullName>
+                <default>false</default>
+                <label>Funded Pending Trading</label>
+            </value>
+            <value>
+                <fullName>No E-Delivery</fullName>
+                <default>false</default>
+                <label>No E-Delivery</label>
+            </value>
+            <value>
+                <fullName>Not Enabled</fullName>
+                <default>false</default>
+                <label>Not Enabled</label>
+            </value>
+            <value>
+                <fullName>AM Flagged</fullName>
+                <default>false</default>
+                <label>AM Flagged</label>
+            </value>
+            <value>
+                <fullName>OCI Pending</fullName>
+                <default>false</default>
+                <label>OCI Pending</label>
+            </value>
+            <value>
+                <fullName>Completed</fullName>
+                <default>false</default>
+                <label>Completed</label>
+            </value>
+            <value>
+                <fullName>Closed-No Action</fullName>
+                <default>false</default>
+                <label>Closed-No Action</label>
+            </value>
+            <value>
+                <fullName>Closed - Error</fullName>
+                <default>false</default>
+                <label>Closed - Error</label>
+            </value>
+            <value>
+                <fullName>Waiting on Trade Instructions</fullName>
+                <default>false</default>
+                <label>Waiting on Trade Instructions</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

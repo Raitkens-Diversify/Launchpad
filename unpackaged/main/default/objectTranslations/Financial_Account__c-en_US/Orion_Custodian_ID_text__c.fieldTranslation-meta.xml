@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Orion Custodian ID --></label>
+        <name>Orion_Custodian_ID_text__c</name>
+    </CustomFieldTranslation>

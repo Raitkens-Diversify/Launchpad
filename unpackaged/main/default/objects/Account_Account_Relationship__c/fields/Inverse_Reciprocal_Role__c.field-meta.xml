@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Inverse_Reciprocal_Role__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Inverse reciprocal role for member account relationships on the map.</description>
+    <label>Inverse Role</label>
+    <referenceTo>Reciprocal_Role__c</referenceTo>
+    <relationshipLabel>Account Account Relationshipa (Inverse Role)</relationshipLabel>
+    <relationshipName>Account_Account_Relationshipa1</relationshipName>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

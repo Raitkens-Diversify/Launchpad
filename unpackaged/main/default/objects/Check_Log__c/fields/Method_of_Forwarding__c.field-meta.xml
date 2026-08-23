@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Method_of_Forwarding__c</fullName>
+    <label>Method of Forwarding</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Mail</fullName>
+                <default>false</default>
+                <label>Mail</label>
+            </value>
+            <value>
+                <fullName>Remote Deposit</fullName>
+                <default>false</default>
+                <label>Mobile Deposit</label>
+            </value>
+            <value>
+                <fullName>Returned to Client</fullName>
+                <default>false</default>
+                <label>Returned to Client</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Principal_Approver_Task_Approval</fullName>
+    <active>true</active>
+    <description>If the Task is assigned to the Principal Review Queue, the user changing the status to &#39;Approved&#39; or &#39;Complete&#39;  must be  a member of the  Principal Review Queue.</description>
+    <errorConditionFormula>AND(
+ISCHANGED(Status),
+OR(
+ISPICKVAL(Status, &quot;Completed&quot;),
+ISPICKVAL(Status, &quot;Approved&quot;)
+),
+AND(
+NOT ( $Permission.Principal_Approver_Task_Approval ),
+Owner:Queue.DeveloperName = &#39;Principal_Review&#39;)
+)</errorConditionFormula>
+    <errorMessage>This task is Assigned to the Principal Review Queue. You can only set the Task status to &#39;Approved&#39; or &#39;Complete&#39; if you are a member of the Principal Review Queue.</errorMessage>
+</ValidationRule>

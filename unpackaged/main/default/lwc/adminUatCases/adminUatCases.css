@@ -1,0 +1,168 @@
+/* Mirrors adminArticleList's toolbar + table conventions (.aal__*) so the UAT
+   Test Cases section is visually indistinguishable from existing sections. */
+
+.auc__error {
+    margin: 0 0 0.75rem;
+    font-size: 0.875rem;
+    color: var(--ds-error-text, #a83232);
+}
+.auc__loading {
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+    min-height: 80px;
+}
+.auc__empty {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.auc__sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+}
+
+.auc__toolbar {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+.auc__search {
+    flex: 1 1 240px;
+}
+.auc__toolbar lightning-button:last-child {
+    margin-left: auto;
+}
+
+/* Bulk re-file bar — only mounted while something is selected, so it pushes
+   the table down rather than reserving empty space. */
+.auc__bulkbar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+    padding: 0.625rem 1rem;
+    background: var(--ds-lightest-blue, #e2f8ff);
+    border: 1px solid var(--ds-medium-blue, #1a76bb);
+    border-radius: var(--ds-radius-lg, 10px);
+}
+.auc__bulkbar-count {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--slds-g-color-accent-1, #0f406f);
+}
+.auc__bulkbar-picker {
+    min-width: 280px;
+}
+.auc__check {
+    width: 1px; /* shrink-to-fit: the checkbox column never steals table width */
+    padding-right: 0;
+}
+
+.auc__table-wrap {
+    overflow-x: auto;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+}
+.auc__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+.auc__table th {
+    text-align: left;
+    padding: 0.625rem 1rem;
+    border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    white-space: nowrap;
+}
+.auc__table td {
+    padding: 0.625rem 1rem;
+    border-bottom: 1px solid var(--slds-g-color-surface-container-2, #f3f4f6);
+    color: var(--slds-g-color-on-surface-2, #374151);
+    vertical-align: middle;
+}
+.auc__table tbody tr:last-child td {
+    border-bottom: none;
+}
+.auc__table tbody tr:hover td {
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+.auc__link {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: 600;
+    color: var(--ds-medium-blue, #1a76bb);
+}
+.auc__link:hover {
+    text-decoration: underline;
+}
+/* Identity cell: title over Case ID, the .aal__title/.aal__urlname pairing
+   from adminArticleList. The button is a block so both lines left-align
+   instead of centering the way button text does by default. */
+.auc__case {
+    display: block;
+    text-align: left;
+}
+.auc__case-title {
+    display: block;
+}
+.auc__case-code {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.auc__actions {
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* Modal — same overlay/panel treatment as .acm-modal */
+.auc-modal__pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+.auc-modal__preview {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.625rem 0.75rem;
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    border-radius: var(--ds-radius-md, 8px);
+}
+.auc-modal__preview-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.auc-modal__preview-code {
+    font-size: 0.8125rem;
+    word-break: break-all;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+/* Retired definitions stay findable via the toggle but read as parked. */
+.auc__creation--retired {
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    font-style: italic;
+}

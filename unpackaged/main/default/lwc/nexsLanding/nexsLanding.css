@@ -1,0 +1,248 @@
+/* Self-declared tokens (mirrors envelopeListV2): V2 --slds-g-* drives our
+   palette; V1 --ds-* stays for the reused ds* components inside the browser /
+   welcome video. No dsTokensV2 provider (absent in the org). */
+:host {
+    display: block;
+
+    /* --- V2 / SLDS2 tokens --- */
+    --slds-g-spacing-2: 0.5rem;
+    --slds-g-spacing-3: 0.75rem;
+    --slds-g-spacing-4: 1rem;
+    --slds-g-spacing-5: 24px;
+    --slds-g-spacing-10: 48px;
+    --slds-g-radius-border-2: 0.5rem;
+    --slds-g-font-family-base: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-accent-3: #071c31;
+    --slds-g-color-on-accent-1: #ffffff;
+
+    /* --- V1 --ds-* set for reused ds* components (border cooled to V2) --- */
+    --ds-dark-blue: #0f406f;
+    --ds-medium-blue: #1a76bb;
+    --ds-light-blue: #14bef0;
+    --ds-lightest-blue: #e2f8ff;
+    --ds-white: #ffffff;
+    --ds-gray-1: #f3f4f6;
+    --ds-gray-2: #d1d5db;
+    --ds-gray-3: #b6bcc5;
+    --ds-gray-4: #9aa1ad;
+    --ds-gray-5: #4b5563;
+    --ds-gray-6: #374151;
+    --ds-success: #2d9f6f;
+    --ds-success-bg: #e8f5e9;
+    --ds-success-text: #2d7d46;
+    --ds-warning: #e8b84b;
+    --ds-warning-bg: #fff8e6;
+    --ds-warning-text: #b8860b;
+    --ds-error: #d94545;
+    --ds-error-bg: #fdecec;
+    --ds-error-text: #a83232;
+    --ds-font-heading: "Libre Baskerville", Georgia, serif;
+    --ds-font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    --ds-space-xs: 4px;
+    --ds-space-sm: 8px;
+    --ds-space-md: 12px;
+    --ds-space-lg: 16px;
+    --ds-space-xl: 24px;
+    --ds-space-2xl: 32px;
+    --ds-space-3xl: 48px;
+    --ds-radius-sm: 6px;
+    --ds-radius-md: 8px;
+    --ds-radius-lg: 10px;
+    --ds-radius-xl: 12px;
+    --ds-radius-pill: 20px;
+    --ds-border-light: 1px solid #e5e7eb;
+    --ds-border-default: 1px solid #d1d5db;
+    --ds-shadow-rest: 0 1px 2px rgba(15, 23, 42, 0.06);
+    --ds-shadow-hover: 0 4px 14px rgba(15, 64, 111, 0.08);
+    --ds-shadow-drop: 0 8px 24px rgba(9, 36, 63, 0.12);
+
+    /* Readable line length for article text (no measure token exists in
+       either set; consumed by nexsArticleViewer). */
+    --nexs-article-measure: 82ch;
+    /* Centered content columns (Hulu-like): narrow for the home page,
+       wide for inner (topics/article) pages — matching the reference. */
+    --nexs-content-max: 1040px;
+    --nexs-content-wide: 1440px;
+}
+
+.landing__loading {
+    display: flex;
+    justify-content: center;
+    padding: var(--slds-g-spacing-10, 48px);
+}
+
+/* ---- Branded chrome (header / body / footer) ---- */
+.nexs-chrome {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+}
+
+.nexs-chrome__header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--slds-g-spacing-5, 24px);
+    min-height: 64px;
+    box-sizing: border-box;
+    padding: var(--slds-g-spacing-4, 16px) var(--slds-g-spacing-5, 24px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    /* Pin the brand header to the top so it stays visible while the page
+       scrolls (identical behavior on the LWR site and the core app tab). */
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+/* Right-aligned header search (browse view), Hulu-style. */
+.nexs-chrome__search {
+    margin-left: auto;
+    flex: 1 1 320px;
+    max-width: 420px;
+    min-width: 200px;
+}
+
+/* ---- Header help menu (tour entry point) ---- */
+.nexs-chrome__help {
+    position: relative;
+    /* Far right on the home view (no header search)… */
+    margin-left: auto;
+}
+
+/* …and directly after the search when it's present (browse view), so the two
+   auto margins don't split the free space. */
+.nexs-chrome__search ~ .nexs-chrome__help {
+    margin-left: 0;
+}
+
+.nexs-chrome__help-btn {
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: 50%;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    transition: color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.nexs-chrome__help-btn:hover,
+.nexs-chrome__help-btn[aria-expanded="true"] {
+    color: var(--slds-g-color-accent-1, #0f406f);
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+    box-shadow: var(--ds-shadow-hover, 0 4px 14px rgba(15, 64, 111, 0.08));
+}
+
+.nexs-chrome__help-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 264px;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+    box-shadow: var(--ds-shadow-drop, 0 8px 24px rgba(9, 36, 63, 0.12));
+    padding: var(--ds-space-lg, 16px);
+    z-index: 30;
+}
+
+.nexs-chrome__help-title {
+    margin: 0;
+    font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+    font-size: 1rem;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.nexs-chrome__help-text {
+    margin: var(--ds-space-sm, 8px) 0 0;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.nexs-chrome__help-cta {
+    margin-top: var(--ds-space-md, 12px);
+    width: 100%;
+    min-height: 34px;
+    border: none;
+    border-radius: var(--ds-radius-md, 8px);
+    background: var(--slds-g-color-accent-1, #0f406f);
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 150ms ease;
+}
+
+.nexs-chrome__help-cta:hover {
+    background: var(--slds-g-color-accent-2, #0b2f51);
+}
+
+.nexs-chrome__logo {
+    height: 24px;
+    width: auto;
+    display: block;
+}
+
+.nexs-chrome__divider {
+    flex: none;
+    width: 1px;
+    height: 24px;
+    background: var(--slds-g-color-border-1, #d1d5db);
+}
+
+/* Text button so "Help Center" can return to the home view. */
+.nexs-chrome__crumb {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: 500;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.nexs-chrome__crumb:hover {
+    color: var(--slds-g-color-accent-1, #0f406f);
+}
+
+.nexs-chrome__body {
+    flex: 1 1 auto;
+}
+
+.nexs-chrome__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--slds-g-spacing-1, 4px);
+    padding: var(--slds-g-spacing-3, 12px) var(--slds-g-spacing-5, 24px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    font-size: 0.75rem;
+}
+
+.nexs-chrome__footer-brand {
+    font-weight: 600;
+    color: var(--slds-g-color-accent-1, #0f406f);
+}

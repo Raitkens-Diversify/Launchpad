@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Households Filtered to Person HHs --></label>
+        <name>Households_Filtered_to_Person_HHs__c</name>
+        <relationshipLabel><!-- Product Filter Lookups --></relationshipLabel>
+    </CustomFieldTranslation>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Name_of_Country__c</fullName>
+    <description>Broker-Dealer Affiliation - Name of Country for Senior Military, Governmental, or Political.</description>
+    <label>Name of Country</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetName>FinServ__Countries</valueSetName>
+    </valueSet>
+</CustomField>

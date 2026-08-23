@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Test_Condition__c</fullName>
+    <description>Group heading shared by consecutive steps. Renaming propagates to every step on the case sharing the old value (bulk update, not per-row).</description>
+    <externalId>false</externalId>
+    <label>Test Condition</label>
+    <length>120</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

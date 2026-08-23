@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<IframeWhiteListUrlSettings xmlns="http://soap.sforce.com/2006/04/metadata">
+    <iframeWhiteListUrls>
+        <context>VisualforcePages</context>
+        <url>https://dfpginvestments--launchpad.sandbox.preview.salesforce-experience.com</url>
+    </iframeWhiteListUrls>
+    <iframeWhiteListUrls>
+        <context>VisualforcePages</context>
+        <url>https://dfpginvestments--launchpad.sandbox.my.site.com</url>
+    </iframeWhiteListUrls>
+    <iframeWhiteListUrls>
+        <context>VisualforcePages</context>
+        <url>https://dfpginvestments--launchpad.sandbox.lightning.force.com</url>
+    </iframeWhiteListUrls>
+    <iframeWhiteListUrls>
+        <context>VisualforcePages</context>
+        <url>*.salesforce-experience.com</url>
+    </iframeWhiteListUrls>
+</IframeWhiteListUrlSettings>

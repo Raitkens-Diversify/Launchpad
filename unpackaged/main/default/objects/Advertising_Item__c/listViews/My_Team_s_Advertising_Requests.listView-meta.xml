@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>My_Team_s_Advertising_Requests</fullName>
+    <columns>NAME</columns>
+    <columns>Advertising_Type__c</columns>
+    <columns>Review_Case__c</columns>
+    <columns>Status__c</columns>
+    <filterScope>Mine</filterScope>
+    <label>My Team&#39;s Advertising Requests</label>
+</ListView>

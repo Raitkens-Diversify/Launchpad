@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EntitlementProcess xmlns="http://soap.sforce.com/2006/04/metadata">
+    <SObjectType>Case</SObjectType>
+    <active>true</active>
+    <businessHours>SLA Standard Hours</businessHours>
+    <entryStartDateField>Case.Home_Office_Submission_Milestone_Start__c</entryStartDateField>
+    <exitCriteriaFilterItems>
+        <field>Case.IsClosed</field>
+        <operation>equals</operation>
+        <value>true</value>
+    </exitCriteriaFilterItems>
+    <milestones>
+        <isDisplayedOnLinkedEntity>false</isDisplayedOnLinkedEntity>
+        <milestoneCompletionCriteria>
+            <criteriaObjectName>Case_Standard_SLA_Milestone_Completion</criteriaObjectName>
+            <criteriaObjectType>Flow</criteriaObjectType>
+        </milestoneCompletionCriteria>
+        <milestoneCriteriaFilterItems>
+            <field>Case.Home_Office_Submission_Milestone_Start__c</field>
+            <operation>notEqual</operation>
+            <value></value>
+        </milestoneCriteriaFilterItems>
+        <milestoneName>Standard SLA</milestoneName>
+        <minutesToComplete>480</minutesToComplete>
+        <useCriteriaStartTime>true</useCriteriaStartTime>
+    </milestones>
+</EntitlementProcess>

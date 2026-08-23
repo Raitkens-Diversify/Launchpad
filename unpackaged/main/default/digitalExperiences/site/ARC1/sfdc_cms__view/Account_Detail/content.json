@@ -1,0 +1,142 @@
+{
+  "type" : "sfdc_cms__view",
+  "title" : "Account Detail",
+  "contentBody" : {
+    "component" : {
+      "children" : [ {
+        "children" : [ {
+          "attributes" : {
+            "backgroundImageConfig" : "",
+            "backgroundImageOverlay" : "rgba(0,0,0,0)",
+            "componentSpacerSize" : "",
+            "dxpStyle" : { },
+            "layoutDirectionDesktop" : "row",
+            "layoutDirectionMobile" : "column",
+            "layoutDirectionTablet" : "column",
+            "maxContentWidth" : "",
+            "sectionColumnGutterWidth" : "",
+            "sectionConfig" : "{\"UUID\":\"ffabe37e-408c-4246-9c0d-b1d83cd9462b\",\"columns\":[{\"UUID\":\"1571329b-01aa-4ee0-9351-3e02b4647545\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":[]}]}",
+            "sectionMinHeight" : "",
+            "sectionVerticalAlign" : "flex-start"
+          },
+          "children" : [ {
+            "children" : [ {
+              "attributes" : {
+                "ariaLabel" : "Breadcrumb",
+                "dxpStyle" : { },
+                "listLabel" : "All Contacts",
+                "listPath" : "/account/Account/Default?c__tabId=tab1",
+                "nameField" : "Name",
+                "objectApiName" : "Account"
+              },
+              "definition" : "c:arcBreadcrumb",
+              "id" : "ab8eeca3-084c-4768-92f8-2c44c73f6dc6",
+              "type" : "component"
+            }, {
+              "attributes" : {
+                "dxpStyle" : { }
+              },
+              "definition" : "c:arcAccountHeader",
+              "id" : "5fb331ca-a297-43de-a946-210b0e60f400",
+              "type" : "component"
+            }, {
+              "attributes" : {
+                "columnGutterWidth" : "",
+                "columnMinHeight" : "",
+                "columnVerticalAlign" : "flex-start",
+                "dxpStyle" : { },
+                "layoutDirectionDesktop" : "row",
+                "layoutDirectionMobile" : "column",
+                "layoutDirectionTablet" : "column",
+                "sectionConfig" : "{\"UUID\":\"a48a344a-0660-465d-ba8c-a9251168d2ad\",\"columns\":[{\"UUID\":\"afe3cae7-5cc2-4f2d-90bd-ab189a02e8ce\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"9\",\"seedComponents\":[]},{\"UUID\":\"baf1d6ec-f2e2-40cf-bca5-8857df9dbd36\",\"columnName\":\"Column 2\",\"columnKey\":\"col2\",\"columnWidth\":\"3\",\"seedComponents\":[]}]}"
+              },
+              "children" : [ {
+                "children" : [ {
+                  "attributes" : {
+                    "actionLabel" : "Create Envelope",
+                    "dxpStyle" : { },
+                    "message" : "Regulated fields cannot be edited. In order to make changes, you will need to create an envelope, make edits and submit an envelope to home office."
+                  },
+                  "definition" : "c:arcRegulatedFieldBanner",
+                  "id" : "b9b3ad22-5d54-44ba-b43c-bcdac4a1eed6",
+                  "type" : "component"
+                }, {
+                  "attributes" : {
+                    "dxpStyle" : { },
+                    "useRelatedRecord" : false
+                  },
+                  "definition" : "c:arcRecordDetail",
+                  "id" : "cd588101-ef62-4749-868a-953fbd630f1c",
+                  "type" : "component"
+                }, {
+                  "attributes" : {
+                    "domain" : "https://arc-launchpad.diversify.com",
+                    "dxpStyle" : { }
+                  },
+                  "definition" : "c:egnyteVfEmbed",
+                  "id" : "bf4a017c-1982-4fe0-9893-4e7acf24f468",
+                  "type" : "component"
+                } ],
+                "id" : "afe3cae7-5cc2-4f2d-90bd-ab189a02e8ce",
+                "name" : "col1",
+                "title" : "Column 1",
+                "type" : "region"
+              }, {
+                "children" : [ {
+                  "attributes" : {
+                    "dxpStyle" : { }
+                  },
+                  "definition" : "c:arcRecordSummary",
+                  "id" : "5ad7f3d5-78f8-499b-8460-9bc69b5c2992",
+                  "type" : "component"
+                } ],
+                "id" : "baf1d6ec-f2e2-40cf-bca5-8857df9dbd36",
+                "name" : "col2",
+                "title" : "Column 2",
+                "type" : "region"
+              } ],
+              "definition" : "dxp_layout:columns",
+              "id" : "a48a344a-0660-465d-ba8c-a9251168d2ad",
+              "type" : "component"
+            } ],
+            "id" : "1571329b-01aa-4ee0-9351-3e02b4647545",
+            "name" : "col1",
+            "title" : "Column 1",
+            "type" : "region"
+          } ],
+          "definition" : "community_layout:section",
+          "id" : "ffabe37e-408c-4246-9c0d-b1d83cd9462b",
+          "type" : "component"
+        } ],
+        "id" : "09c67353-10c0-4bfa-9299-37bf08090fee",
+        "name" : "content",
+        "title" : "Content",
+        "type" : "region"
+      }, {
+        "children" : [ {
+          "attributes" : {
+            "customHeadTags" : "",
+            "description" : "",
+            "dxpStyle" : { },
+            "pageTitle" : "Contacts: {!Record._Title}",
+            "recordId" : "{!recordId}"
+          },
+          "definition" : "community_builder:seoAssistant",
+          "id" : "827c571b-1915-43ba-82fd-617d79a30e55",
+          "type" : "component"
+        } ],
+        "id" : "b11b91e6-8a17-45e6-b4ce-24794c547dda",
+        "name" : "sfdcHiddenRegion",
+        "title" : "sfdcHiddenRegion",
+        "type" : "region"
+      } ],
+      "definition" : "community_layout:sldsFlexibleLayout",
+      "id" : "7daf365d-28e1-463b-97ee-eae554f3ae14",
+      "type" : "component"
+    },
+    "dataProviders" : [ ],
+    "themeLayoutType" : "OHzbXAVux6mZ7VVDb7Pb8F2YUFBAXR",
+    "viewType" : "detail-001"
+  },
+  "urlName" : "account-detail"
+}

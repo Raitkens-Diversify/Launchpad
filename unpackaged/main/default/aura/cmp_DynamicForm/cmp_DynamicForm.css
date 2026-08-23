@@ -1,0 +1,7 @@
+.THIS .disablePointer {
+    pointer-events:none;
+}
+
+.THIS .textField {
+    display: block !important;
+}

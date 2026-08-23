@@ -1,0 +1,292 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-07-27 -->
+<template>
+  <section class="log-view">
+    <div class="log-view__filter-panel">
+      <div class="div-filter div-filter--toolbar log-view__filter-toolbar">
+        <div class="log-view__filter-start">
+          <lightning-icon
+            icon-name={icons.FILTER_LIST}
+            size="xx-small"
+            class="div-filter__leading-icon"
+          ></lightning-icon>
+          <div
+            class="div-filter__group"
+            role="group"
+            aria-label="Filter by status"
+          >
+            <template for:each={statusFilterButtons} for:item="filter">
+              <button
+                key={filter.value}
+                class={filter.cssClass}
+                type="button"
+                data-filter={filter.value}
+                aria-pressed={filter.ariaPressed}
+                onclick={handleStatusFilter}
+              >
+                {filter.label}
+              </button>
+            </template>
+          </div>
+        </div>
+        <div class="log-view__filter-end">
+          <div class="div-filter__date-range" role="group" aria-label="Filter by date range">
+            <lightning-input
+              type="date"
+              label="From"
+              value={startDate}
+              onchange={handleStartDateChange}
+            ></lightning-input>
+            <lightning-input
+              type="date"
+              label="To"
+              value={endDate}
+              onchange={handleEndDateChange}
+            ></lightning-input>
+          </div>
+        </div>
+      </div>
+      <div class="log-view__filter-actions">
+        <span class="div-filter__auto-refresh" aria-live="polite">
+          {autoRefreshLabel}
+        </span>
+        <lightning-button
+          variant="neutral"
+          label={refreshButtonLabel}
+          title={autoRefreshTitle}
+          icon-name="utility:refresh"
+          onclick={handleRefresh}
+          disabled={isRefreshDisabled}
+        ></lightning-button>
+      </div>
+    </div>
+
+    <template lwc:if={errorMessage}>
+      <div
+        class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium"
+        role="alert"
+      >
+        <h2>{errorMessage}</h2>
+      </div>
+    </template>
+
+    <div class="div-table-card">
+      <template lwc:if={isLoading}>
+        <div class="div-table-card__loading" role="status" aria-live="polite" aria-busy="true"></div>
+      </template>
+
+      <template lwc:elseif={hasRows}>
+        <div class="div-table-scroll">
+          <table class="div-table" aria-label="Notification log">
+            <thead>
+              <tr>
+                <template for:each={tableHeaderColumns} for:item="column">
+                  <th
+                    key={column.fieldName}
+                    scope="col"
+                    aria-sort={column.ariaSort}
+                    class="div-table__header"
+                  >
+                    <template lwc:if={column.isSortable}>
+                      <button
+                        type="button"
+                        class="div-table__sort-button"
+                        data-field={column.fieldName}
+                        aria-label={column.label}
+                        onclick={handleColumnSort}
+                        onkeydown={handleColumnSortKeyDown}
+                      >
+                        <span>{column.label}</span>
+                        <lightning-icon
+                          icon-name={column.sortIcon}
+                          size="xx-small"
+                          alternative-text="Sort direction"
+                          class={column.sortIconClass}
+                        ></lightning-icon>
+                      </button>
+                    </template>
+                    <template lwc:else>
+                      <span class="div-table__header-spacer" aria-hidden="true"></span>
+                    </template>
+                  </th>
+                </template>
+              </tr>
+            </thead>
+            <tbody>
+              <template for:each={tableRows} for:item="row">
+                <tr
+                  key={row.id}
+                  class={row.rowClass}
+                  data-row-id={row.id}
+                  data-detail-row={row.detailRowFlag}
+                  tabindex={row.rowTabIndex}
+                  aria-expanded={row.ariaExpanded}
+                  onclick={handleRowToggle}
+                  onkeydown={handleRowToggleKeyDown}
+                >
+                  <template lwc:if={row.isDetailRow}>
+                    <td colspan={detailColumnSpan} class="div-table__detail-cell">
+                      <template lwc:if={row.hasChangeContext}>
+                        <c-notification-center-change-context-tree
+                          change-context-json={row.changeContext}
+                        ></c-notification-center-change-context-tree>
+                      </template>
+                      <template lwc:else>
+                        <p class="log-detail__empty">
+                          No change context recorded for this log entry.
+                        </p>
+                      </template>
+                    </td>
+                  </template>
+
+                  <template lwc:else>
+                    <td class="div-table__cell--expand">
+                      <button
+                        type="button"
+                        class="div-table__expand-button"
+                        data-row-id={row.id}
+                        aria-expanded={row.isExpanded}
+                        aria-label={row.expandAriaLabel}
+                        title={row.expandAriaLabel}
+                        onclick={handleToggleRowExpand}
+                        onkeydown={handleToggleRowExpandKeyDown}
+                      >
+                        <lightning-icon
+                          icon-name={row.expandIcon}
+                          size="xx-small"
+                          alternative-text="Toggle notification details"
+                        ></lightning-icon>
+                      </button>
+                    </td>
+                    <td class="div-table__cell--muted">{row.timestampLabel}</td>
+                    <td>
+                      <div class="div-table-cell div-table-cell--meta">
+                        <lightning-icon
+                          icon-name={icons.HOME}
+                          size="xx-small"
+                          class="div-table-cell__icon"
+                        ></lightning-icon>
+                        <template lwc:if={row.hasHouseholdLink}>
+                          <button
+                            type="button"
+                            class="div-table__link"
+                            data-record-id={row.householdId}
+                            onclick={handleRecordNavigate}
+                            onkeydown={handleRecordNavigateKeyDown}
+                          >
+                            {row.householdLabel}
+                          </button>
+                        </template>
+                        <template lwc:else>
+                          <span class="div-table-cell__text">{row.householdLabel}</span>
+                        </template>
+                      </div>
+                    </td>
+                    <td>
+                      <template lwc:if={row.hasSourceRecordLink}>
+                        <button
+                          type="button"
+                          class="div-table__link log-table__source-link"
+                          data-record-id={row.sourceRecordId}
+                          aria-label={row.sourceLinkAriaLabel}
+                          onclick={handleRecordNavigate}
+                          onkeydown={handleRecordNavigateKeyDown}
+                        >
+                          <c-notification-center-meta-strip
+                            variant="table"
+                            source-type={row.sourceType}
+                            change-type-label={row.changeTypeLabel}
+                            show-change-type
+                          ></c-notification-center-meta-strip>
+                        </button>
+                      </template>
+                      <template lwc:else>
+                        <c-notification-center-meta-strip
+                          variant="table"
+                          source-type={row.sourceType}
+                          change-type-label={row.changeTypeLabel}
+                          show-change-type
+                        ></c-notification-center-meta-strip>
+                      </template>
+                    </td>
+                    <td>
+                      <div class="div-table-cell">
+                        <c-notification-center-meta-strip
+                          frequency={row.frequency}
+                        ></c-notification-center-meta-strip>
+                        <template lwc:if={row.showChannelPill}>
+                          <span class={row.channelPillClass}>{row.channelPillLabel}</span>
+                        </template>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="div-table-cell div-table-cell--stacked">
+                        <div class="div-log-status">
+                          <lightning-icon
+                            icon-name={row.statusIcon}
+                            size="xx-small"
+                            class={row.statusIconClass}
+                          ></lightning-icon>
+                          <span class="div-log-status__label">{row.statusLabel}</span>
+                        </div>
+                        <template lwc:if={row.recordLabel}>
+                          <template lwc:if={row.hasLogRecordLink}>
+                            <button
+                              type="button"
+                              class="div-table__link log-table__record-link"
+                              data-record-id={row.id}
+                              aria-label={row.logRecordLinkAriaLabel}
+                              onclick={handleRecordNavigate}
+                              onkeydown={handleRecordNavigateKeyDown}
+                            >
+                              {row.recordLabel}
+                            </button>
+                          </template>
+                          <template lwc:else>
+                            <span class="div-table-cell__record">{row.recordLabel}</span>
+                          </template>
+                        </template>
+                        <template lwc:if={row.statusNote}>
+                          <span class="div-table-cell__muted">{row.statusNote}</span>
+                        </template>
+                      </div>
+                    </td>
+                  </template>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+
+        <template lwc:if={canLoadMore}>
+          <div class="div-table-card__load-more">
+            <lightning-button
+              variant="neutral"
+              label="Load more"
+              onclick={handleLoadMore}
+              disabled={isLoadingMore}
+            ></lightning-button>
+          </div>
+        </template>
+      </template>
+
+      <template lwc:else>
+        <div class="div-table-card__empty">
+          <lightning-icon
+            icon-name={icons.FILE}
+            size="large"
+          ></lightning-icon>
+          <h3 class="slds-text-heading_small slds-m-top_small">
+            No log entries yet
+          </h3>
+          <p class="slds-text-body_regular slds-m-top_x-small">
+            Delivered and queued notifications will appear here.
+          </p>
+        </div>
+      </template>
+
+      <footer class="div-table-card__footer">
+        <span>{footerSummary}</span>
+      </footer>
+    </div>
+  </section>
+</template>

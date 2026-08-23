@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Test_Cycle__c</fullName>
+    <deleteConstraint>Restrict</deleteConstraint>
+    <description>Nullable: blank = standalone session outside any cycle, personal to its Tester (owner-or-admin on every read/write path). Cycled sessions are team-visible via the cycle audience; Apex enforces owner-or-admin on writes. Restricted delete: UatCycleAdminController.deleteCycle purges a cycle&#39;s sessions explicitly — SetNull would silently relabel deleted-cycle history as &quot;Standalone&quot;.</description>
+    <label>Test Cycle</label>
+    <referenceTo>Test_Cycle__c</referenceTo>
+    <relationshipLabel>Exploratory Sessions</relationshipLabel>
+    <relationshipName>Exploratory_Sessions</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

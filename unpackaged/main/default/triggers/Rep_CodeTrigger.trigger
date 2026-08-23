@@ -1,0 +1,17 @@
+trigger Rep_CodeTrigger on Rep_Code__c (before insert, before update, before delete, after insert, after update, after delete) {
+    Rep_Code_TriggerHandler handler = new Rep_Code_TriggerHandler();
+    
+    if (Trigger.isBefore) {
+        if(Trigger.isInsert){
+            handler.isBeforeInsert(Trigger.new);
+        }else if(Trigger.isUpdate){
+            handler.isBeforeUpdate(Trigger.newMap, Trigger.oldMap);
+        }      
+    } else if (Trigger.isAfter) {
+        if(Trigger.isInsert){
+            handler.isAfterInsert(Trigger.newMap);
+        }else if(Trigger.isUpdate){
+            handler.isAfterUpdate(Trigger.newMap, Trigger.oldMap);
+        }
+    }
+}

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Work Datatable</masterLabel>
+    <description>Case work list with My / My Team scope. Row values come from Case fields.</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+        <target>lightning__AppPage</target>
+        <target>lightning__HomePage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property
+                name="title"
+                type="String"
+                default="Work"
+                label="Title"
+            />
+            <property
+                name="enableSearch"
+                type="Boolean"
+                default="true"
+                label="Enable Search"
+            />
+            <property
+                name="searchPlaceholder"
+                type="String"
+                default="Search work..."
+                label="Search Placeholder"
+            />
+            <property
+                name="enablePagination"
+                type="Boolean"
+                default="true"
+                label="Enable Pagination"
+            />
+            <property
+                name="pageSize"
+                type="Integer"
+                default="10"
+                label="Page Size"
+            />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

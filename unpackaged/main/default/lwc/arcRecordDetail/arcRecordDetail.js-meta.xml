@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Arc Record Detail</masterLabel>
+    <description>Metadata-driven record detail form for Experience Cloud, powered by Envelope_Field__mdt.</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+        <target>lightning__RecordPage</target>
+        <target>lightning__AppPage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default,lightning__RecordPage,lightning__AppPage">
+            <property
+                name="title"
+                type="String"
+                label="Title"
+                description="Optional heading shown above the record detail sections."
+            />
+            <property
+                name="useRelatedRecord"
+                type="Boolean"
+                label="Use Related Record"
+                description="When enabled, loads schema and values from the record referenced by the lookup field below instead of the page record."
+                default="false"
+            />
+            <property
+                name="relatedRecordLookupField"
+                type="String"
+                label="Related Record Lookup Field"
+                description="API name of the lookup field on the page record that points to the record to display (e.g. Service__c). Required when Use Related Record is enabled."
+            />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

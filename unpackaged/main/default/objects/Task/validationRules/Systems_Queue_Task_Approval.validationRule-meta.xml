@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Systems_Queue_Task_Approval</fullName>
+    <active>true</active>
+    <description>If a Task is assigned to the Systems Queue, or the Task Template indicates it will be assigned there, only members of the Systems Queue can change the status to Completed.</description>
+    <errorConditionFormula>AND(
+  ISCHANGED(Status),
+  ISPICKVAL(Status, &quot;Completed&quot;),
+  NOT($Permission.Systems_Task_Approval),
+  OR(
+    Owner:Queue.DeveloperName = &quot;Systems&quot;,
+    Task_Template_Queue__c = &quot;Systems&quot;
+  )
+)</errorConditionFormula>
+    <errorMessage>This task is (or is set to be) assigned to the Systems Queue. Only Systems Queue members can set the status to Completed.</errorMessage>
+</ValidationRule>

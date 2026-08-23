@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Share Class --></label>
+        <name>Share_Class__c</name>
+        <picklistValues>
+            <masterLabel>A Shares</masterLabel>
+            <translation><!-- A Shares --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B Shares</masterLabel>
+            <translation><!-- B Shares --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>C Shares</masterLabel>
+            <translation><!-- C Shares --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

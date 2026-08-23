@@ -1,0 +1,25 @@
+<template>
+    <section class="welcome">
+        <template lwc:if={hasVideo}>
+            <div class="welcome__media">
+                <video class="welcome__video" controls poster="" src={videoUrl}>
+                    <track kind="captions" />
+                </video>
+            </div>
+        </template>
+
+        <div class="welcome__content">
+            <h2 class="welcome__title">Welcome to the Help Center</h2>
+            <p class="welcome__subtitle">
+                New here? Everything you need — articles, resources, and guided help — lives on this page.
+            </p>
+            <div class="welcome__actions">
+                <lightning-button
+                    variant="brand"
+                    label="Got it"
+                    onclick={handleContinue}
+                ></lightning-button>
+            </div>
+        </div>
+    </section>
+</template>

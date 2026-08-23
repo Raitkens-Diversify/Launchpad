@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <help><!-- Check this box if the client does donations in kind every year. --></help>
+        <label><!-- Donation in Kind Client --></label>
+        <name>Donation_in_Kind_Client__c</name>
+    </CustomFieldTranslation>

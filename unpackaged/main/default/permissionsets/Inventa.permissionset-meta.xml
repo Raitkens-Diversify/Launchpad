@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Inventa</label>
+    <applicationVisibilities>
+        <application>Diversify_Inventa</application>
+        <visible>true</visible>
+    </applicationVisibilities>
+</PermissionSet>

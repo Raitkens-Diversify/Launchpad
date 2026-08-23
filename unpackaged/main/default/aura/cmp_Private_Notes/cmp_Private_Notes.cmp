@@ -1,0 +1,211 @@
+<aura:component controller="PrivateNotesComponentController" implements="force:hasRecordId,force:hasSObjectName,flexipage:availableForRecordHome">
+    <aura:attribute name="recordId" type="String" />
+    <aura:attribute name="sObjectName" type="String" default="{!v.sObjectName}"/>
+    <aura:attribute name="parentLookupFieldName" type="String" />
+    <aura:attribute name="notesTemplatesList" type="List" />
+    <aura:attribute name="notesTemplatesMap" type="Map" />
+    <aura:attribute name="noteTemplate" type="String" />
+    <aura:attribute name="selectedTemplate" type="String" />
+    
+    <!-- For Edit button-->
+    <aura:attribute name="editRecordId" type="String" />
+    <aura:attribute name="currentUserId" type="String" /> 
+    <aura:attribute name="yesterday" type="Date" />
+    <aura:attribute name="today" type="Date" />
+    <aura:attribute name="aMonthBeforeDate" type="Date" />
+    <aura:attribute name="notesList" type="Notes__c[]" access="global"/>
+    <aura:attribute name="filteredNoteList" type="Notes__c[]" access="global"/>
+    <aura:attribute name="allNotesList" type="Notes__c[]" access="global"/>
+    <aura:attribute name="section" type="String"/>
+    <!--Search attributes-->
+    <aura:attribute name="searchString" type="String" />
+    <aura:attribute name="typeaheadMultiselectValue" type="String" access="global"/>
+    <aura:attribute name="startDate" type="Date" default=""/>
+    <aura:attribute name="endDate" type="Date" default=""/> 
+    
+    <aura:attribute name="isWorking" type="Boolean" default="false"/> 
+    <aura:attribute name="isModalOpen" type="boolean" default="false"/>
+    <aura:attribute name="toggleNoteList" type="Notes__c[]" access="global"/>
+    <aura:attribute name="toggleAllNoteList" type="Notes__c[]" access="global"/>
+    <aura:attribute name="toggleSection" type="String"/>
+    <aura:attribute name="chkBoxValue" type="boolean" default="false"/> 
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler event="force:refreshView" action="{!c.doInit}" />
+    <aura:handler name="change" value="{!v.typeaheadMultiselectValue}" action="{!c.typeSearchKey}"/>
+    
+    <lightning:unsavedChanges aura:id="unsaved"  onsave="{!c.handleSave}"/>
+    
+    <aura:if isTrue="{! v.isWorking }">
+        <lightning:spinner alternativeText="Processing"                            
+                           style="background: rgba(0, 0, 0, 0.10);"
+                           variant="brand"/>
+        
+    </aura:if>
+    <lightning:card>
+        <div class="slds-box slds-box_xx-small">
+            <lightning:tabset selectedTabId="newNoteTab">
+                <!--  New Note Tab -->
+                <lightning:tab label="New Notes" id="newNoteTab">
+                    <lightning:recordEditForm aura:id="myNewRecordForm" onsubmit="{!c.handleSubmit}"
+                                              onsuccess="{!c.handlesuccess}"
+                                              objectApiName="Notes__c">
+                        <lightning:messages />
+                        <lightning:inputField aura:id="field" fieldName="Name" required ="true" onchange="{!c.handleDataChange}"/>
+                        <lightning:inputField aura:id="field" fieldName="Type__c" required ="true" onchange="{!c.handleDataChange}"/>
+                        <lightning:select aura:id="selectTemp" label="Note Template" value="{!v.selectedTemplate}" onchange="{!c.changeNotesTemplate}">
+                            <option value="">--NONE--</option>
+                            <aura:iteration items="{!v.notesTemplatesList}" var="item" indexVar="key">
+                                <option value="{!item}">{!item}</option>
+                            </aura:iteration>
+                        </lightning:select> 
+                        <lightning:inputField style="padding-bottom:20px" aura:id="field" fieldName="Note__c" required ="true" onchange="{!c.handleDataChange}" value="{!v.noteTemplate}"/>
+                        
+                        <lightning:button class="slds-m-top_small slds-align_absolute-center slds-button slds-button slds-button_outline-brand" variant="brand-outline" type="submit" name="New" label="Save" />
+                    </lightning:recordEditForm><br/><br/>
+                </lightning:tab>
+                <!--  Search Tab -->
+                <lightning:tab label="Search" id="searchNote">
+                    <div>
+                        <div class="slds-grid slds-grid_vertical">
+                            <lightning:layout verticalAlign="end">
+                                <lightning:layoutItem flexibility="grow">
+                                    <!-- <lightning:input type="text"  label="Search String" placeholder ="Enter your search term here" aura:id="searchString"  value="{!v.searchString}" onchange="{!c.searchNotesOnChange}"></lightning:input>-->
+                                    <label class="slds-form-element__label" for="text-input-id-1">
+                                        <abbr class="slds-required" title="required">* </abbr>Search</label>
+                                    <input type="text" class="slds-input" label="Search"  onkeyup="{!c.searchKey}" value="{!v.searchString}" placeholder="Enter your search term here"/>
+                                </lightning:layoutItem>
+                                <lightning:layoutItem class="slds-p-left_x-small">
+                                    <lightning:button class="slds-theme_base slds-button slds-button_outline-brand" name="Search Notes" variant="base" type="button" onclick="{!c.searchingNotesRecords}" iconName="utility:search" />
+                                </lightning:layoutItem>
+                                <lightning:layoutItem class="slds-p-left_x-small">
+                                    <lightning:button class="slds-theme_base slds-button slds-button_outline-brand" name="Clear filter" variant="base" type="button" onclick="{!c.clearFilter}" iconName="utility:close"></lightning:button>
+                                </lightning:layoutItem>
+                            </lightning:layout>
+                        </div>
+                        
+                        <div class="slsds-grid slds-grid_vertical">
+                            <lightning:layout verticalAlign="end">
+                                <div class="slds-size_2-of-4">
+                                    <lightning:layoutItem flexibility="grow">
+                                        <label class="slds-form-element__label .slds-text-title_bold"> Type </label>
+                                        <c:cmp_typeAheadLookup objectName ="Notes__c" 
+                                                               fieldName="Type__c" 
+                                                               roleValue="{!v.typeaheadMultiselectValue}"
+                                                               picklistId="Type__c"
+                                                               />
+                                    </lightning:layoutItem>
+                                </div>
+                                <lightning:layoutItem class="slds-p-left_x-small" flexibility="grow">
+                                    <label class="slds-form-element__label .slds-text-title_bold">  Search by Date </label>
+                                    <lightning:input type ="Date"  label="Start" placeholder="{!v.aMonthBeforeDate}" min="{!v.aMonthBeforeDate}" max="{!v.today}" value="{!v.startDate}" format="M/dd/yyyy" displayDatePicker="true" onchange="{!c.searchByDate}"/>
+                                </lightning:layoutItem>
+                                <lightning:layoutItem class="slds-p-left_x-small" flexibility="grow">
+                                    <lightning:input type ="Date"  label="End" placeholder="{!v.today}" max="{!v.today}" value="{!v.endDate}" format="M/dd/yyyy" displayDatePicker="true" onchange="{!c.searchByDate}"/>
+                                </lightning:layoutItem>
+                            </lightning:layout>
+                        </div>
+                    </div>
+                </lightning:tab>
+            </lightning:tabset>
+        </div>
+        
+        <br/><br/>
+        <lightning:input type="toggle" name="toggleButton" aura:id="tglbtn" label="Rollup Notes?"  
+                         onchange="{!c.getToggleButtonValue}"/>  
+        
+            <aura:if isTrue="{!v.chkBoxValue}">
+                <lightning:accordion allowMultipleSectionsOpen="true" activeSectionName="{!v.toggleSection}">
+                    <aura:iteration items="{!v.toggleNoteList}" var="note" indexVar="index">
+                        <lightning:accordionSection class="{! (mod(index,2)==0) ? 'slds-theme_shade':'.slds-theme_default'}" label="{!note.Name + ' - ' + note.Created_Date__c}" name="{!note.Name}">
+                            <div class="slds-illustration slds-illustration_small">
+                                <div class="slds-text-longform" align="left">
+                                    <aura:if isTrue="{!note.CreatedBy.Name == 'eConsentAndCRSDelivery Site Guest User'}">
+                                        <div style="font-size: 0.8125rem;" >
+                                            Created by: Form CRS Site - Client User &nbsp;<lightning:formattedDateTime timeZone="{! $Locale.timezone }"  value="{!note.CreatedDate}" year="numeric" month="numeric" day="numeric"  hour="2-digit" minute="2-digit" />
+                                        </div>
+                                        <aura:set attribute="else"> 
+                                            <div style="font-size: 0.8125rem;" >
+                                                Created by: {!note.CreatedBy.Name}&nbsp;<lightning:formattedDateTime timeZone="{! $Locale.timezone }"  value="{!note.CreatedDate}" year="numeric" month="numeric" day="numeric"  hour="2-digit" minute="2-digit" />
+                                            </div>
+                                        </aura:set>
+                                    </aura:if>
+                                    <lightning:recordViewForm recordId="{!note.Id}" objectApiName="Notes__c">
+                                        <lightning:outputField fieldName="Type__c" />
+                                        <lightning:outputField fieldName="Note__c" />
+                                    </lightning:recordViewForm>
+                                </div>
+                            </div>
+                        </lightning:accordionSection>
+                    </aura:iteration>
+                </lightning:accordion>
+            <aura:set attribute="else">
+        <lightning:accordion allowMultipleSectionsOpen="true" activeSectionName="{!v.section}">
+            <aura:iteration items="{!v.filteredNoteList}" var="note" indexVar="index">
+                <lightning:accordionSection class="{! (mod(index,2)==0) ? 'slds-theme_shade':'.slds-theme_default'}" label="{!note.Name + ' - ' + note.Created_Date__c}" name="{!note.Name}">
+                  <!--  <aura:set attribute="actions">
+                        <aura:if isTrue="{!and(and((note.CreatedById == v.currentUserId), (note.Created_Date__c == v.today)), (note.Type__c != 'CRS Delivered'))}" >
+                            <button class="slds-theme_base slds-button slds-button_outline-brand" type="button" onclick="{!c.editNote}" id="{!note.Id}" name="Edit" variant="brand-outline" title="Edit Note" >Edit</button>  
+                        </aura:if>
+                    </aura:set>-->
+                    <div class="slds-illustration slds-illustration_small">
+                        <div class="slds-text-longform" align="left">
+                            <aura:if isTrue="{!note.CreatedBy.Name == 'eConsentAndCRSDelivery Site Guest User'}">
+                                <div style="font-size: 0.8125rem;" >
+                                    Created by: Form CRS Site - Client User &nbsp;<lightning:formattedDateTime timeZone="{! $Locale.timezone }"  value="{!note.CreatedDate}" year="numeric" month="numeric" day="numeric"  hour="2-digit" minute="2-digit" />
+                                </div>
+                                <aura:set attribute="else"> 
+                                    <div style="font-size: 0.8125rem;" >
+                                        Created by: {!note.CreatedBy.Name}&nbsp;<lightning:formattedDateTime timeZone="{! $Locale.timezone }"  value="{!note.CreatedDate}" year="numeric" month="numeric" day="numeric"  hour="2-digit" minute="2-digit" />
+                                    </div>
+                                </aura:set>
+                            </aura:if>
+                            <lightning:layoutItem class="" flexibility="grow">
+                            	<label class="slds-form-element__label .slds-text-title_bold">Type</label>
+                                <br/>
+                                <span>{!note.Type__c}</span>
+                            </lightning:layoutItem>
+                            <lightning:layoutItem class="" flexibility="grow">
+                            	<label class="slds-form-element__label .slds-text-title_bold">Note</label>
+                                <br/>
+                                
+                                <span style="white-space: pre-wrap;">{!note.Note__c}</span>
+                            </lightning:layoutItem>
+                            <!--<lightning:recordViewForm recordId="{!note.Id}" objectApiName="Notes__c">
+                                <lightning:outputField fieldName="Type__c" />
+                                <lightning:outputField fieldName="Note__c" />
+                            </lightning:recordViewForm>-->
+                        </div>
+                    </div>
+                </lightning:accordionSection>
+            </aura:iteration>
+        </lightning:accordion>
+    </aura:set>
+</aura:if>
+        <!--Edit Note Record section-->
+     <!--<div class="slds-m-around_xx-large">
+            <aura:if isTrue="{!v.isModalOpen}">
+                <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+                    <div class="slds-modal__container">
+                        <div class="slds-modal__content slds-p-around_medium slds-form" id="modal-content-id-1">
+                            <header class="slds-modal__header">
+                                <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Edit Notes</h2>
+                            </header>
+                            <lightning:recordEditForm aura:id="myRecordForm" onsubmit="{!c.handleSubmit}"
+                                                      recordId="{!v.editRecordId}" objectApiName="Notes__c">
+                                <lightning:messages />
+                                <lightning:inputField aura:id="field" fieldName="Name" required ="true"/>
+                                <lightning:inputField fieldName="Type__c"  required ="true"/>
+                                <lightning:inputField fieldName="Note__c" required ="true"/>
+                                <div class="slds-align_absolute-center">
+                                    <lightning:button class="slds-m-top_small" variant="brand" type="submit" name="Update" label="Update" />                          
+                                    <lightning:button class="slds-m-top_small" variant="neutral" label="Cancel" title="Cancel" onclick="{! c.closeModel }"/>
+                                </div>
+                            </lightning:recordEditForm>
+                        </div>      
+                    </div>
+                </section>
+                <div class="slds-backdrop slds-backdrop_open"></div>
+            </aura:if>
+        </div>-->
+    </lightning:card>
+</aura:component>

@@ -1,0 +1,336 @@
+/* Hoang Long Vu To — Aug 17, 2026
+   Local component stylesheet (shadow DOM). No scoped.css suffix needed. */
+
+:host {
+  display: block;
+  width: 100%;
+  font: inherit;
+  --arc-nav-expanded-width: 280px;
+  --arc-nav-collapsed-width: 56px;
+}
+
+:host([data-collapsed="true"]) {
+  width: 100%;
+}
+
+.nav-viewport {
+  display: grid;
+  grid-template: 1fr / 1fr;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.nav-panel {
+  grid-area: 1 / 1;
+  justify-self: start;
+  overflow: hidden;
+  transition: transform 0.22s ease;
+  will-change: transform;
+}
+
+.nav-panel--expanded {
+  width: var(--arc-nav-expanded-width, 280px);
+}
+
+.nav-panel--collapsed {
+  width: var(--arc-nav-collapsed-width, 56px);
+}
+
+.nav-panel[aria-hidden="true"] {
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* Resting — expanded */
+.nav-viewport--expanded .nav-panel--expanded {
+  transform: translateX(0);
+}
+
+.nav-viewport--expanded .nav-panel--collapsed {
+  transform: translateX(-100%);
+}
+
+/* Resting — collapsed */
+.nav-viewport--collapsed .nav-panel--expanded {
+  transform: translateX(-100%);
+}
+
+.nav-viewport--collapsed .nav-panel--collapsed {
+  transform: translateX(0);
+}
+
+/* Collapse phase 1: full nav slides out to the left */
+.nav-viewport--collapse-exit .nav-panel--expanded {
+  transform: translateX(-100%);
+}
+
+.nav-viewport--collapse-exit .nav-panel--collapsed {
+  transform: translateX(-100%);
+}
+
+/* Collapse phase 2: icon rail slides in from the left */
+.nav-viewport--collapse-enter .nav-panel--expanded {
+  transform: translateX(-100%);
+}
+
+.nav-viewport--collapse-enter .nav-panel--collapsed {
+  transform: translateX(0);
+}
+
+/* Expand phase 1: icon rail slides out to the left */
+.nav-viewport--expand-exit .nav-panel--expanded {
+  transform: translateX(-100%);
+}
+
+.nav-viewport--expand-exit .nav-panel--collapsed {
+  transform: translateX(-100%);
+}
+
+/* Expand phase 2: full nav slides in from the left */
+.nav-viewport--expand-enter .nav-panel--expanded {
+  transform: translateX(0);
+}
+
+.nav-viewport--expand-enter .nav-panel--collapsed {
+  transform: translateX(-100%);
+}
+
+.nav-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 0;
+  font: inherit;
+}
+
+.nav-entry {
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-group__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 12px 0 16px;
+  font: inherit;
+  color: #4b5563;
+}
+
+.nav-group__leading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.nav-group__header {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-height: 40px;
+}
+
+.nav-group__header .nav-item {
+  flex: 1;
+  min-width: 0;
+  padding-right: 4px;
+}
+
+.nav-group__chevron-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 32px;
+  padding: 0 8px 0 4px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+}
+
+.nav-group__chevron-button:hover,
+.nav-group__chevron-button:focus-visible {
+  background: #e2f8ff;
+  outline: none;
+}
+
+.nav-group__title {
+  flex: 1;
+  min-width: 0;
+}
+
+.nav-group__chevron {
+  flex-shrink: 0;
+  --slds-c-icon-color-foreground-default: #9ca3af;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 12px 0 16px;
+  border-radius: 0;
+  border-left: 3px solid transparent;
+  font: inherit;
+  color: #4b5563;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.nav-item:hover {
+  background: #e2f8ff;
+  border-left-color: #0f406f;
+  color: #071c31;
+  text-decoration: none;
+}
+
+.nav-item:focus-visible {
+  outline: 2px solid #1a76bb;
+  outline-offset: -2px;
+}
+
+.nav-item--active {
+  background: #e2f8ff;
+  border-left-color: #0f406f;
+  font-weight: 600;
+  color: #071c31;
+}
+
+.nav-item--active:hover {
+  background: #e2f8ff;
+}
+
+.nav-item--coming-soon {
+  cursor: default;
+  min-width: 0;
+  padding-right: 8px;
+  pointer-events: none;
+}
+
+.nav-item--coming-soon:hover {
+  background: transparent;
+  border-left-color: transparent;
+  color: #4b5563;
+}
+
+.nav-item--coming-soon .nav-item__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav-item__coming-pill {
+  flex-shrink: 0;
+}
+
+.nav-group__children {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-group__children--collapsed {
+  display: none;
+}
+
+.nav-item__icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: block;
+}
+
+.nav-item__icon--asset {
+  background-color: currentColor;
+  -webkit-mask-image: var(--icon-url);
+  mask-image: var(--icon-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.nav-item__label {
+  flex: 1;
+  min-width: 0;
+}
+
+.nav-divider {
+  border-top: 1px solid #d1d5db;
+  margin: 8px 12px;
+}
+
+.nav-group__children .nav-item {
+  padding-left: 28px;
+}
+
+.nav-sidebar--collapsed {
+  align-items: center;
+  padding: 8px 0;
+  gap: 4px;
+}
+
+.nav-sidebar--collapsed .nav-entry {
+  width: 100%;
+}
+
+.nav-sidebar--collapsed .nav-item {
+  justify-content: center;
+  gap: 0;
+  width: 100%;
+  min-height: 40px;
+  padding: 0;
+  border-left-width: 3px;
+}
+
+.nav-sidebar--collapsed .nav-group__header {
+  justify-content: center;
+  min-height: 40px;
+}
+
+.nav-sidebar--collapsed .nav-group__chevron-button,
+.nav-sidebar--collapsed .nav-group__title,
+.nav-sidebar--collapsed .nav-group__children,
+.nav-sidebar--collapsed .nav-item__label,
+.nav-sidebar--collapsed .nav-item__label--hidden,
+.nav-sidebar--collapsed .nav-item__coming-pill {
+  display: none;
+}
+
+.nav-sidebar--collapsed .nav-divider {
+  margin: 8px 12px;
+  align-self: stretch;
+}
+
+.nav-sidebar--collapsed .nav-item--active {
+  background: #e2f8ff;
+  border-left-color: #0f406f;
+  color: #071c31;
+}
+
+.nav-sidebar--collapsed .nav-item:hover {
+  background: #e2f8ff;
+  border-left-color: #0f406f;
+  color: #071c31;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-panel {
+    transition: none;
+  }
+}

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Test_Execution__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>The execution the event happened to. Can go null (pristine releases delete their execution row) — Test Case + Test Cycle keep the durable context.</description>
+    <label>Test Execution</label>
+    <referenceTo>Test_Execution__c</referenceTo>
+    <relationshipLabel>Assignment Events</relationshipLabel>
+    <relationshipName>Assignment_Events</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

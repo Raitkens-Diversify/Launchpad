@@ -1,0 +1,111 @@
+<template>
+    <div class="hgb">
+        <aside class="hgb__list">
+            <div class="hgb__list-head">
+                <span>Guides</span>
+                <lightning-button-icon icon-name="utility:add" alternative-text="New guide"
+                                       onclick={newGuide}></lightning-button-icon>
+            </div>
+
+            <template if:true={showGuideForm}>
+                <div class="hgb__form">
+                    <lightning-input label="Guide key" value={formKey}
+                                     field-level-help="Lowercase letters, digits, underscores (e.g. get_help)."
+                                     onchange={handleFormKey}></lightning-input>
+                    <lightning-input label="Label" value={formLabel}
+                                     onchange={handleFormLabel}></lightning-input>
+                    <lightning-input type="checkbox" label="Active" checked={formActive}
+                                     onchange={handleFormActive}></lightning-input>
+                    <div class="hgb__form-actions">
+                        <lightning-button label="Cancel" onclick={cancelGuideForm}></lightning-button>
+                        <lightning-button variant="brand" label="Create" onclick={saveGuide}></lightning-button>
+                    </div>
+                </div>
+            </template>
+
+            <template if:true={hasGuides}>
+                <ul class="hgb__guides">
+                    <template for:each={guides} for:item="g">
+                        <li key={g.recordId} class="hgb__guide" data-id={g.recordId} onclick={openGuide}>
+                            <span class="hgb__guide-label">{g.label}</span>
+                            <span class="hgb__guide-key">{g.guideKey}</span>
+                        </li>
+                    </template>
+                </ul>
+            </template>
+            <template if:false={hasGuides}>
+                <p class="hgb__empty">No guides yet. Create one to get started.</p>
+            </template>
+        </aside>
+
+        <section class="hgb__detail">
+            <template if:true={selected}>
+                <div class="hgb__detail-head">
+                    <div>
+                        <h2 class="hgb__detail-title">{selected.label}</h2>
+                        <p class="hgb__detail-key">{selected.guideKey}</p>
+                    </div>
+                    <div class="hgb__detail-actions">
+                        <template if:true={selected.published}>
+                            <lightning-badge label="Published"></lightning-badge>
+                        </template>
+                        <lightning-button label="Add question" icon-name="utility:add"
+                                          onclick={addNode}></lightning-button>
+                        <lightning-button variant="brand" label="Publish" onclick={doPublish}
+                                          disabled={publishDisabled}></lightning-button>
+                        <lightning-button-icon icon-name="utility:delete" variant="border-filled"
+                                               alternative-text="Delete guide"
+                                               onclick={removeGuide}></lightning-button-icon>
+                    </div>
+                </div>
+
+                <template if:true={publishing}>
+                    <div class="hgb__publishing">
+                        <lightning-spinner alternative-text="Publishing" size="small"></lightning-spinner>
+                        <span>Publishing…</span>
+                    </div>
+                </template>
+
+                <template if:true={showEditor}>
+                    <c-help-guide-node-editor guide-id={selected.recordId} node={editingNode}
+                                              onsaved={handleEditorSaved}
+                                              oncancel={handleEditorCancel}></c-help-guide-node-editor>
+                </template>
+
+                <template if:false={showEditor}>
+                    <ul class="hgb__nodes">
+                        <template for:each={nodes} for:item="n">
+                            <li key={n.recordId} class="hgb__node">
+                                <div class="hgb__node-head">
+                                    <span class="hgb__node-q">{n.question}</span>
+                                    <template if:true={n.isRoot}>
+                                        <lightning-badge label="Start"></lightning-badge>
+                                    </template>
+                                    <span class="hgb__node-key">{n.nodeKey}</span>
+                                    <lightning-button-icon icon-name="utility:edit"
+                                        alternative-text="Edit" data-id={n.recordId}
+                                        onclick={editNode}></lightning-button-icon>
+                                    <lightning-button-icon icon-name="utility:delete"
+                                        alternative-text="Delete" data-id={n.recordId}
+                                        onclick={removeNode}></lightning-button-icon>
+                                </div>
+                                <ul class="hgb__opts">
+                                    <template for:each={n.options} for:item="o">
+                                        <li key={o.recordId} class="hgb__opt">
+                                            <span class="hgb__opt-label">{o.label}</span>
+                                            <span class="hgb__opt-target">→ {o.targetType} {o.targetValue}</span>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </li>
+                        </template>
+                    </ul>
+                </template>
+            </template>
+
+            <template if:false={selected}>
+                <p class="hgb__empty">Select a guide to edit, or create a new one.</p>
+            </template>
+        </section>
+    </div>
+</template>

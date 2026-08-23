@@ -1,0 +1,15 @@
+/*
+ * Author: Hoang Long Vu To
+ * Date: 2026-06-15
+ */
+:host {
+    display: block;
+}
+
+.modal-body {
+    min-height: 8rem;
+}
+
+.modal-banner {
+    margin-bottom: 0.75rem;
+}

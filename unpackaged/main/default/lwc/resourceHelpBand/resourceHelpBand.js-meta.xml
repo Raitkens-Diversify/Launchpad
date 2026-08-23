@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightning__AppPage</target>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property name="heading" type="String" label="Heading"/>
+            <property name="subtitle" type="String" label="Subtitle"/>
+            <property name="contactEmail" type="String" label="Contact email (Get in touch)"/>
+            <property name="contactLabel" type="String" label="Contact card label"/>
+            <property name="contactText" type="String" label="Contact card text"/>
+            <property name="requestUrl" type="String" label="Request URL (Submit a request)"/>
+            <property name="requestLabel" type="String" label="Request card label"/>
+            <property name="requestText" type="String" label="Request card text"/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

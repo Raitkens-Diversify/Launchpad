@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Test_Step_Result__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>The scripted step this defect was raised against — the other half of the unification (2026-08-06). Before this, scripted defects lived only as Test_Step_Result__c.Defect_Severity__c / Defect_Summary__c and were not findings at all. SetNull because Test_Step_Result__c is master-detail to Test_Execution__c and gets purged with a cycle; the finding is the durable record and must outlive the run.</description>
+    <label>Test Step Result</label>
+    <referenceTo>Test_Step_Result__c</referenceTo>
+    <relationshipLabel>Findings</relationshipLabel>
+    <relationshipName>Findings</relationshipName>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

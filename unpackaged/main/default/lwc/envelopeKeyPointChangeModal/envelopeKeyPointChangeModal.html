@@ -1,0 +1,43 @@
+<template>
+    <c-ds-modal-v2
+        is-open={isOpen}
+        title="Change key point answer?"
+        size="small"
+        onclose={handleClose}>
+        <div slot="header" class="keypoint-change__title-row">
+            <lightning-icon
+                icon-name="utility:priority"
+                size="small"
+                class="keypoint-change__title-icon"
+                alternative-text="Key Point">
+            </lightning-icon>
+            <h2 class="keypoint-change__title">Change key point answer?</h2>
+        </div>
+
+        <div class="keypoint-change__alert">
+            <lightning-icon
+                icon-name="utility:warning"
+                size="x-small"
+                class="keypoint-change__alert-icon"
+                alternative-text="Warning">
+            </lightning-icon>
+            <p class="keypoint-change__alert-text">
+                Changing this answer rebuilds the questions that come after it. Anything you've
+                already entered past this point will be cleared.
+            </p>
+        </div>
+
+        <div slot="footer" class="keypoint-change__footer">
+            <lightning-button
+                variant="neutral"
+                label="Cancel"
+                onclick={handleCancel}
+            ></lightning-button>
+            <lightning-button
+                variant="brand"
+                label="Change Answer"
+                onclick={handleConfirm}
+            ></lightning-button>
+        </div>
+    </c-ds-modal-v2>
+</template>

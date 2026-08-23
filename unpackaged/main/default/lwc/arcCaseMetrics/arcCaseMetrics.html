@@ -1,0 +1,68 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-08-12 -->
+<template>
+  <article class="div-card arc-case-metrics" aria-labelledby="arc-case-metrics-title">
+    <header class="arc-case-metrics__header">
+      <div class="arc-case-metrics__header-copy">
+        <div class="arc-case-metrics__title-row">
+          <h2 id="arc-case-metrics-title" class="arc-case-metrics__title">Cases</h2>
+          <lightning-helptext
+            content="Open cases grouped by milestone status."
+          ></lightning-helptext>
+        </div>
+        <p class="arc-case-metrics__subtitle">By milestone</p>
+      </div>
+
+      <c-div-segmented-control
+        options={scopeOptions}
+        value={scope}
+        group-label="Case scope"
+        onchange={handleScopeChange}
+      ></c-div-segmented-control>
+    </header>
+
+    <template lwc:if={errorMessage}>
+      <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+        {errorMessage}
+      </div>
+    </template>
+
+    <template lwc:if={isInitialLoading}>
+      <div class="arc-case-metrics__loading">
+        <lightning-spinner alternative-text="Loading case metrics" size="small"></lightning-spinner>
+      </div>
+    </template>
+
+    <template lwc:elseif={hasChartData}>
+      <div class="div-card__body div-card__body--chart arc-case-metrics__body">
+        <div class="arc-case-metrics__chart-wrap">
+          <canvas
+            data-id="case-metrics-chart"
+            aria-label="Cases by milestone donut chart"
+          ></canvas>
+        </div>
+
+        <ul class="div-chart-legend arc-case-metrics__legend" role="list">
+          <template for:each={segments} for:item="segment">
+            <li key={segment.key}>
+              <div class="arc-case-metrics__legend-item">
+                <span
+                  class="div-chart-legend__swatch"
+                  style={segment.swatchStyle}
+                  aria-hidden="true"
+                ></span>
+                <span class="div-chart-legend__label">{segment.label}</span>
+                <span class="arc-case-metrics__legend-count">{segment.countLabel}</span>
+              </div>
+            </li>
+          </template>
+        </ul>
+      </div>
+    </template>
+
+    <template lwc:else>
+      <div class="div-card__body">
+        <p class="div-card__empty div-card__empty--center">No open cases for the selected scope.</p>
+      </div>
+    </template>
+  </article>
+</template>

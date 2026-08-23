@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Loss_Reason__c</fullName>
+    <label>Loss Reason</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <controllingField>StageName</controllingField>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Cultural/Strategic Fit</fullName>
+                <default>false</default>
+                <label>Cultural/Strategic Fit</label>
+            </value>
+            <value>
+                <fullName>Timing/Not Ready</fullName>
+                <default>false</default>
+                <label>Timing/Not Ready</label>
+            </value>
+            <value>
+                <fullName>Stayed with Current Firm</fullName>
+                <default>false</default>
+                <label>Stayed with Current Firm</label>
+            </value>
+            <value>
+                <fullName>Chose Another Firm</fullName>
+                <default>false</default>
+                <label>Chose Another Firm</label>
+            </value>
+            <value>
+                <fullName>Started Own RIA</fullName>
+                <default>false</default>
+                <label>Started Own RIA</label>
+            </value>
+            <value>
+                <fullName>Economics/Deal Terms</fullName>
+                <default>false</default>
+                <label>Economics/Deal Terms</label>
+            </value>
+            <value>
+                <fullName>Platform/Services Fit</fullName>
+                <default>false</default>
+                <label>Platform/Services Fit</label>
+            </value>
+            <value>
+                <fullName>Compliance/Risk Concern</fullName>
+                <default>false</default>
+                <label>Compliance/Risk Concern</label>
+            </value>
+            <value>
+                <fullName>No Decision</fullName>
+                <default>false</default>
+                <label>No Decision</label>
+            </value>
+            <value>
+                <fullName>Non-Responsive</fullName>
+                <default>false</default>
+                <label>Non-Responsive</label>
+            </value>
+            <value>
+                <fullName>Lost to Competitor</fullName>
+                <default>false</default>
+                <label>Lost to Competitor</label>
+            </value>
+            <value>
+                <fullName>No Budget / Lost Funding</fullName>
+                <default>false</default>
+                <label>No Budget / Lost Funding</label>
+            </value>
+            <value>
+                <fullName>Circumstances Changed</fullName>
+                <default>false</default>
+                <label>Circumstances Changed</label>
+            </value>
+            <value>
+                <fullName>Withdrew from Planning Process</fullName>
+                <default>false</default>
+                <label>Withdrew from Planning Process</label>
+            </value>
+            <value>
+                <fullName>Price</fullName>
+                <default>false</default>
+                <label>Price</label>
+            </value>
+            <value>
+                <fullName>Other</fullName>
+                <default>false</default>
+                <label>Other</label>
+            </value>
+        </valueSetDefinition>
+        <valueSettings>
+            <controllingFieldValue>Advisor Lost</controllingFieldValue>
+            <controllingFieldValue>Closed Lost</controllingFieldValue>
+            <valueName>Cultural/Strategic Fit</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Advisor Lost</controllingFieldValue>
+            <controllingFieldValue>Closed Lost</controllingFieldValue>
+            <valueName>Timing/Not Ready</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Advisor Lost</controllingFieldValue>
+            <controllingFieldValue>Closed Lost</controllingFieldValue>
+            <valueName>Stayed with Current Firm</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Advisor Lost</controllingFieldValue>
+            <controllingFieldValue>Closed Lost</controllingFieldValue>
+            <valueName>Chose Another Firm</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Advisor Lost</controllingFieldValue>
+            <controllingFieldValue>Closed Lost</controllingFieldValue>
+            <valueName>Started Own RIA</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Advisor Lost</controllingFieldValue>
+            <controllingFieldValue>Closed Lost</controllingFieldValue>
+            <valueName>Economics/Deal Terms</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Advisor Lost</controllingFieldValue>
+            <controllingFieldValue>Closed Lost</controllingFieldValue>
+            <valueName>Platform/Services Fit</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Advisor Lost</controllingFieldValue>
+            <controllingFieldValue>Closed Lost</controllingFieldValue>
+            <valueName>Compliance/Risk Concern</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Advisor Lost</controllingFieldValue>
+            <controllingFieldValue>Closed Lost</controllingFieldValue>
+            <valueName>No Decision</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Advisor Lost</controllingFieldValue>
+            <controllingFieldValue>Closed Lost</controllingFieldValue>
+            <valueName>Non-Responsive</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Advisor Lost</controllingFieldValue>
+            <controllingFieldValue>Closed Lost</controllingFieldValue>
+            <valueName>Lost to Competitor</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Advisor Lost</controllingFieldValue>
+            <controllingFieldValue>Closed Lost</controllingFieldValue>
+            <valueName>No Budget / Lost Funding</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Advisor Lost</controllingFieldValue>
+            <controllingFieldValue>Closed Lost</controllingFieldValue>
+            <valueName>Circumstances Changed</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Advisor Lost</controllingFieldValue>
+            <controllingFieldValue>Closed Lost</controllingFieldValue>
+            <valueName>Withdrew from Planning Process</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Advisor Lost</controllingFieldValue>
+            <controllingFieldValue>Closed Lost</controllingFieldValue>
+            <valueName>Other</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Closed Lost</controllingFieldValue>
+            <valueName>Price</valueName>
+        </valueSettings>
+    </valueSet>
+</CustomField>

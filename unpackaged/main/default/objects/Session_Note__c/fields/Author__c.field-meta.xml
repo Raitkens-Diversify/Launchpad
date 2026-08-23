@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Author__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Who logged the entry — the edit/delete gate (author-or-admin, enforced in UatSessionController). SetNull, not Restrict: the platform forbids Restrict on User lookups, so presence is an Apex concern.</description>
+    <label>Author</label>
+    <referenceTo>User</referenceTo>
+    <relationshipLabel>Session Notes</relationshipLabel>
+    <relationshipName>Session_Notes</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

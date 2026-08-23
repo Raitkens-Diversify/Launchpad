@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Radio_TV_Ad__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <label>Radio/TV Ad</label>
+    <lookupFilter>
+        <active>true</active>
+        <filterItems>
+            <field>Advertising_Item__c.Advertising_Type__c</field>
+            <operation>equals</operation>
+            <value>Radio/TV Ad</value>
+        </filterItems>
+        <filterItems>
+            <field>Advertising_Item__c.Status__c</field>
+            <operation>equals</operation>
+            <value>Conditionally Approved</value>
+        </filterItems>
+        <isOptional>false</isOptional>
+    </lookupFilter>
+    <referenceTo>Advertising_Item__c</referenceTo>
+    <relationshipLabel>Advertising Items (Radio/TV Ad)</relationshipLabel>
+    <relationshipName>Advertising_Items</relationshipName>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

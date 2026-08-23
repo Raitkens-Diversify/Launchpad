@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Account Status --></label>
+        <name>Account_Status__c</name>
+        <picklistValues>
+            <masterLabel>Advisor Only</masterLabel>
+            <translation><!-- Advisor Only --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DB-Copy</masterLabel>
+            <translation><!-- DB-Copy --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Demo</masterLabel>
+            <translation><!-- Demo --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Manually Managed</masterLabel>
+            <translation><!-- Manually Managed --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Non-Downloading</masterLabel>
+            <translation><!-- Non-Downloading --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Normal Downloading</masterLabel>
+            <translation><!-- Normal Downloading --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Pending</masterLabel>
+            <translation><!-- Pending --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

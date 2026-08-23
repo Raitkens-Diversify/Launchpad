@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Ceramic Tile</fullName>
+        <default>false</default>
+        <label>Ceramic Tile</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Porcelain Tile</fullName>
+        <default>false</default>
+        <label>Porcelain Tile</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Floating wood tile</fullName>
+        <default>false</default>
+        <label>Floating wood tile</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Carpet</fullName>
+        <default>false</default>
+        <label>Carpet</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Hardwood</fullName>
+        <default>false</default>
+        <label>Hardwood</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Engineered wood</fullName>
+        <default>false</default>
+        <label>Engineered wood</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Bamboo</fullName>
+        <default>false</default>
+        <label>Bamboo</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Cork</fullName>
+        <default>false</default>
+        <label>Cork</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Stone</fullName>
+        <default>false</default>
+        <label>Stone</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Vinyl</fullName>
+        <default>false</default>
+        <label>Vinyl</label>
+    </standardValue>
+</StandardValueSet>

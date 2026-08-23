@@ -1,0 +1,71 @@
+<template>
+    <template if:true={loaded}>
+        <article class={tileClass}>
+            <div class={accentClass}></div>
+            <div class="case-tile__content slds-p-around_medium">
+                <header class="case-tile__header slds-grid slds-grid_vertical-align-center">
+                    <div class="case-tile__header-main">
+                        <div class="header-main__top slds-grid slds-grid_vertical-align-center">
+
+                            <div class={unifiedBadgeClass}  style="flex: 1;">
+                                <template if:true={statusIconUrl}>
+                                    <span
+                                        class="case-tile__pill-icon case-tile__pill-icon--custom"
+                                        role="img"
+                                        aria-label={statusBadgeLabel}
+                                    ></span>
+                                </template>
+                                <template if:false={statusIconUrl}>
+                                    <lightning-icon
+                                        icon-name={statusIcon}
+                                        alternative-text="Status"
+                                        size="medium"
+                                        class="case-tile__pill-icon"
+                                    ></lightning-icon>
+                                </template>
+                                    <span class="case-tile__pill-label">{statusBadgeLabel}</span>
+                            </div>
+                            <div class="case-tile__title slds-text-align_center" style="flex: 5;">
+                                    <span class="case-tile__title-value">
+                                        <lightning-formatted-rich-text value={membership}></lightning-formatted-rich-text>
+                                    </span>
+                            </div>
+                        </div>
+
+                        <div class="header-main__bottom slds-m-top_xx-small">
+                            <div class="header-right__waiting">
+                                <lightning-icon icon-name="utility:user" size="xx-small" alternative-text="Waiting On"></lightning-icon>
+                                <span class="header-right__waiting-value">{ownerDetails}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="case-tile__header-right">
+                        <div class="header-right__progress">
+                            <div class={progressCircleClass}>
+                                <div class="progress-circle__ratio" aria-label={progressSummary}>{taskCompletionDisplay}</div>
+                            </div>
+                            <div class="progress-circle__caption">Main Track Tasks</div>
+                        </div>
+                    </div>
+                </header>
+                <section class="milestone-section slds-m-top_medium">
+                    <div class="milestone-track">
+                        <template for:each={mileStoneDetails} for:item="stage">
+                            <div key={stage.label} class={stage.class}>
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span class="milestone__bullet"></span>
+                                <span class="milestone__label">{stage.label}</span>
+                            </div>
+                        </template>
+                    </div>
+                </section>
+
+            </div>
+        </article>
+    </template>
+
+    <template if:false={loaded}>
+        <div class="slds-m-around_medium slds-text-align_center">
+            <lightning-spinner alternative-text="Loading case overview"></lightning-spinner>
+        </div>
+    </template>
+</template>

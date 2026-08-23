@@ -1,0 +1,320 @@
+<template>
+    <div class="uq">
+        <c-uat-page-header icon-name="utility:task"
+                           heading="My Queue"
+                           subtitle="Your claimed test cases and ad-hoc sessions."
+                           action-label="Go to Open Pool"
+                           onaction={handleGoToPool}></c-uat-page-header>
+
+        <template if:true={errorMessage}>
+            <p class="uq__error" role="alert">{errorMessage}</p>
+        </template>
+
+        <template if:true={loading}>
+            <c-ds-skeleton variant="card" count="3"></c-ds-skeleton>
+        </template>
+
+        <template if:false={loading}>
+            <c-ds-tabs class="uq__tabs"
+                       tabs={tabs}
+                       selected={activeTab}
+                       label="Queue sections"
+                       ontabchange={handleTabChange}></c-ds-tabs>
+
+            <template if:true={isAssignedTab}>
+                <div role="tabpanel" aria-label="Assigned test cases">
+                    <template if:false={isEmpty}>
+                        <div class="uq__toolbar">
+                            <c-ds-filter-chips class="uq__chips"
+                                               chips={chips}
+                                               selected={filterBucket}
+                                               group-label="Filter by status"
+                                               onselect={handleChipSelect}></c-ds-filter-chips>
+                            <div class="uq__toolbar-controls">
+                                <lightning-input class="uq__search" type="search"
+                                                 label="Search test cases" variant="label-hidden"
+                                                 placeholder="Search test cases…"
+                                                 value={searchTerm}
+                                                 onchange={handleSearch}></lightning-input>
+                                <button type="button" class="uq__filters-toggle"
+                                        aria-expanded={filtersExpanded}
+                                        onclick={handleToggleFilters}>
+                                    <lightning-icon icon-name="utility:filterList" size="xx-small"
+                                                    alternative-text="" class="uq__filters-icon"></lightning-icon>
+                                    {filtersLabel}
+                                </button>
+                            </div>
+                        </div>
+
+                        <template if:true={filtersOpen}>
+                            <div class="uq__filters">
+                                <lightning-combobox label="Functional area" value={filterArea}
+                                                    options={areaOptions}
+                                                    onchange={handleFilterArea}></lightning-combobox>
+                                <lightning-combobox label="Sort by" value={sortBy}
+                                                    options={sortOptions}
+                                                    onchange={handleSort}></lightning-combobox>
+                                <template if:true={hasActiveFilters}>
+                                    <button type="button" class="uq__clear" onclick={handleClearFilters}>Clear filters</button>
+                                </template>
+                            </div>
+                        </template>
+
+                        <template if:true={featuredRow}>
+                            <section class="uq__featured" aria-label="Continue testing">
+                                <div class="uq__featured-head">
+                                    <h2 class="uq__featured-heading">Continue Testing</h2>
+                                    <lightning-button-menu class="uq__featured-kebab" variant="bare"
+                                                           icon-name="utility:threedots_vertical"
+                                                           menu-alignment="right"
+                                                           alternative-text={featuredRow.menuAlt}
+                                                           title={featuredRow.menuAlt}
+                                                           data-id={featuredRow.executionId}
+                                                           data-index={featuredRow.caseIndex}
+                                                           data-total={featuredRow.caseTotal}
+                                                           data-code={featuredRow.caseCode}
+                                                           data-title={featuredRow.displayTitle}
+                                                           onselect={handleMenuSelect}>
+                                        <lightning-menu-item value="details" label="View Details"></lightning-menu-item>
+                                        <template if:true={featuredRow.canRelease}>
+                                            <lightning-menu-item value="release" label="Release"></lightning-menu-item>
+                                        </template>
+                                    </lightning-button-menu>
+                                </div>
+                                <div class="uq__featured-body">
+                                    <div class="uq__featured-main">
+                                        <c-ds-badge label={featuredRow.statusLabel}
+                                                    variant={featuredRow.statusVariant}
+                                                    size="sm"></c-ds-badge>
+                                        <button type="button" class="uq__featured-title" title={featuredRow.caseCode}
+                                                data-id={featuredRow.executionId}
+                                                data-index={featuredRow.caseIndex}
+                                                data-total={featuredRow.caseTotal}
+                                                onclick={handleCardAction}>{featuredRow.displayTitle}</button>
+                                        <div class="uq__featured-meta">
+                                            <span class="uq__featured-meta-item">{featuredRow.cycleName}</span>
+                                            <template if:true={featuredRow.targetLabel}>
+                                                <span class="uq__featured-meta-item">{featuredRow.targetLabel}</span>
+                                            </template>
+                                            <template if:true={featuredRow.moduleName}>
+                                                <span class="uq__featured-meta-item">{featuredRow.moduleName}</span>
+                                            </template>
+                                        </div>
+                                        <div class="uq__featured-status">
+                                            <template if:true={featuredRow.stepLabel}>
+                                                <span class="uq__featured-note">{featuredRow.stepLabel}</span>
+                                            </template>
+                                            <template if:true={featuredRow.percentLabel}>
+                                                <span class="uq__featured-note">{featuredRow.percentLabel}</span>
+                                            </template>
+                                            <template for:each={featuredRow.statusNotes} for:item="note">
+                                                <span key={note.key} class={note.cssClass}>{note.label}</span>
+                                            </template>
+                                            <template if:true={featuredRow.updatedLabel}>
+                                                <span class="uq__featured-note">{featuredRow.updatedLabel}</span>
+                                            </template>
+                                        </div>
+                                        <div class="uq__featured-actions">
+                                            <lightning-button variant="brand"
+                                                              label={featuredRow.actionLabel}
+                                                              aria-label={featuredRow.actionAria}
+                                                              data-id={featuredRow.executionId}
+                                                              data-index={featuredRow.caseIndex}
+                                                              data-total={featuredRow.caseTotal}
+                                                              onclick={handleCardAction}></lightning-button>
+                                        </div>
+                                    </div>
+                                    <span class="uq__featured-visual" aria-hidden="true">
+                                        <lightning-icon icon-name="utility:task" size="medium"
+                                                        alternative-text=""></lightning-icon>
+                                    </span>
+                                </div>
+                            </section>
+                        </template>
+
+                        <template if:true={hasRows}>
+                            <div class="uq__table">
+                                <div class="uq__thead" aria-hidden="true">
+                                    <span class="uq__th">Status</span>
+                                    <span class="uq__th">Test case</span>
+                                    <span class="uq__th uq__th--cycle">Cycle</span>
+                                    <span class="uq__th">Progress</span>
+                                    <span class="uq__th uq__th--updated">Updated</span>
+                                    <span class="uq__th"></span>
+                                    <span class="uq__th"></span>
+                                </div>
+                                <template for:each={pagedGroups} for:item="group">
+                                    <template if:true={group.label}>
+                                        <div key={group.key} class="uq__group-head">
+                                            {group.label}
+                                            <span class="uq__group-count">{group.countLabel}</span>
+                                        </div>
+                                    </template>
+                                    <template for:each={group.rows} for:item="row">
+                                    <article key={row.key} class={row.rowClass}>
+                                        <div class="uq__td uq__td--status">
+                                            <c-ds-badge label={row.statusLabel} variant={row.statusVariant} size="sm"></c-ds-badge>
+                                            <template if:true={row.hasStatusNotes}>
+                                                <div class="uq__status-notes">
+                                                    <template for:each={row.statusNotes} for:item="note">
+                                                        <span key={note.key} class={note.cssClass}>{note.label}</span>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
+                                        <div class="uq__td uq__td--case">
+                                            <button type="button" class="uq__row-title" title={row.caseCode}
+                                                    data-id={row.executionId}
+                                                    data-index={row.caseIndex}
+                                                    data-total={row.caseTotal}
+                                                    onclick={handleCardAction}>{row.displayTitle}</button>
+                                            <span class="uq__case-meta">
+                                                {row.caseMeta}
+                                                <span class="uq__inline-cycle">{row.cycleName}</span>
+                                                <template if:true={row.updatedShort}>
+                                                    <span class="uq__inline-updated">Updated {row.updatedShort}</span>
+                                                </template>
+                                            </span>
+                                        </div>
+                                        <div class="uq__td uq__td--cycle">
+                                            <span class="uq__cycle-name">{row.cycleName}</span>
+                                            <template if:true={row.targetLabel}>
+                                                <span class="uq__cycle-target">{row.targetLabel}</span>
+                                            </template>
+                                        </div>
+                                        <div class="uq__td uq__td--progress">
+                                            <template if:true={row.showProgress}>
+                                                <c-ds-progress-bar segments={row.segments}
+                                                                   aria-label={row.progressAria}></c-ds-progress-bar>
+                                                <span class="uq__progress-fraction">{row.stepFraction}</span>
+                                            </template>
+                                            <template if:true={row.showStepText}>
+                                                <span class="uq__progress-fraction">{row.stepLabel}</span>
+                                            </template>
+                                            <template if:false={row.stepFraction}>
+                                                <span class="uq__progress-fraction" aria-hidden="true">—</span>
+                                                <span class="uq__sr">No steps</span>
+                                            </template>
+                                        </div>
+                                        <div class="uq__td uq__td--updated">
+                                            <template if:true={row.updatedShort}>
+                                                <span class="uq__sr">Updated </span>{row.updatedShort}
+                                            </template>
+                                            <template if:false={row.updatedShort}>
+                                                <span aria-hidden="true">—</span>
+                                            </template>
+                                        </div>
+                                        <div class="uq__td uq__td--action">
+                                            <lightning-button variant="brand"
+                                                              label={row.actionLabel}
+                                                              aria-label={row.actionAria}
+                                                              data-id={row.executionId}
+                                                              data-index={row.caseIndex}
+                                                              data-total={row.caseTotal}
+                                                              onclick={handleCardAction}></lightning-button>
+                                        </div>
+                                        <lightning-button-menu class="uq__row-kebab" variant="bare"
+                                                               icon-name="utility:threedots_vertical"
+                                                               menu-alignment="right"
+                                                               alternative-text={row.menuAlt}
+                                                               title={row.menuAlt}
+                                                               data-id={row.executionId}
+                                                               data-index={row.caseIndex}
+                                                               data-total={row.caseTotal}
+                                                               data-code={row.caseCode}
+                                                               data-title={row.displayTitle}
+                                                               onselect={handleMenuSelect}>
+                                            <lightning-menu-item value="details" label="View Details"></lightning-menu-item>
+                                            <template if:true={row.canRelease}>
+                                                <lightning-menu-item value="release" label="Release"></lightning-menu-item>
+                                            </template>
+                                        </lightning-button-menu>
+                                    </article>
+                                    </template>
+                                </template>
+                            </div>
+
+                            <div class="uq__pager">
+                                <c-ds-pager page={clampedPage}
+                                            page-size={pageSize}
+                                            total={totalFiltered}
+                                            item-label="test cases"
+                                            onpagechange={handlePageChange}></c-ds-pager>
+                            </div>
+                        </template>
+
+                        <template if:true={isFilteredEmpty}>
+                            <c-ds-empty-state
+                                icon="utility:filterList"
+                                heading="Nothing matches"
+                                message="Clear the search or filters to see the rest of your queue."
+                                action-label="Clear filters"
+                                show-action
+                                onaction={handleClearFilters}
+                            ></c-ds-empty-state>
+                        </template>
+                    </template>
+
+                    <template if:true={isEmpty}>
+                        <c-ds-empty-state
+                            icon="utility:task"
+                            heading="Nothing in your queue yet"
+                            message="Claim a test from the Open Pool and it lands here."
+                            action-label="Go to Open Pool"
+                            show-action
+                            onaction={handleGoToPool}
+                        ></c-ds-empty-state>
+                    </template>
+                </div>
+            </template>
+
+            <template if:true={isExploratoryTab}>
+                <div role="tabpanel" aria-label="Ad-hoc sessions">
+                    <c-uat-session-list sessions={scopedSessions}
+                                        cycle-id={cycleId}
+                                        cycle-name={scopedCycleName}
+                                        onsessionopen={handleSessionOpen}
+                                        onsessionschange={handleSessionsChange}
+                                        onexploratory={handleExploratoryRelay}></c-uat-session-list>
+                </div>
+            </template>
+        </template>
+
+        <template if:true={previewOpen}>
+            <c-ds-modal-v2 class="uq__preview-modal"
+                           is-open={previewOpen}
+                           title={previewTitle}
+                           subtitle={previewSubtitle}
+                           size="large"
+                           onclose={handlePreviewClose}>
+                <template if:true={previewLoading}>
+                    <c-ds-skeleton variant="text" count="6"></c-ds-skeleton>
+                </template>
+                <template if:true={previewError}>
+                    <p class="uq__preview-error" role="alert">{previewError}</p>
+                </template>
+                <template if:true={showPreviewBody}>
+                    <c-uat-case-preview preview={previewData}></c-uat-case-preview>
+                </template>
+                <div slot="footer" class="uq__preview-footer">
+                    <lightning-button label="Close" onclick={handlePreviewClose}></lightning-button>
+                    <lightning-button variant="brand"
+                                      label="Open in Runner"
+                                      disabled={previewLoading}
+                                      onclick={handlePreviewStart}></lightning-button>
+                </div>
+            </c-ds-modal-v2>
+        </template>
+
+        <template if:true={releaseOpen}>
+            <c-admin-confirm-modal header={releaseHeader}
+                                   message="Releasing returns this seat to the pool. Anything you've already recorded stays with you and resumes if you claim it again."
+                                   confirm-label="Release"
+                                   prompt-label="Why are you releasing it?"
+                                   prompt-required
+                                   busy={releaseBusy}
+                                   onconfirm={handleReleaseConfirm}
+                                   oncancel={handleReleaseCancel}></c-admin-confirm-modal>
+        </template>
+    </div>
+</template>

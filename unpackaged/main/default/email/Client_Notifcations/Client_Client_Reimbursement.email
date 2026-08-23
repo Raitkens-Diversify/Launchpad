@@ -1,0 +1,6 @@
+Hello [!Case.Contact.FirstName] [!Case.Contact.LastName],
+
+I hope this email finds you well. I am writing today to notify you of a client reimbursement that occurred into you [!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.Name] [!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.OASP_FSC__Registration_Type__r.Name] XXXX[!Case.FinServ__FinancialAccount__r.Account_Number_Last_4__c], [!Case.FinServ__FinancialAccount__r.OASP_FSC__Custodian__r.Name] account. We sincerely apologize for any inconvenience this may have caused. These funds were paid out to you as your account was mistakenly charged for [!Case.Reimbursement_Reason__c]. You will see the reimbursement reflected in your account balance within the next 1-3 business days.
+
+Please don't hesitate to reach out with any follow up questions or concerns.
+Sincerely,

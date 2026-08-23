@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>New_Advertising_Reviews</fullName>
+    <columns>CASES.CASE_NUMBER</columns>
+    <columns>Advertising_Item__c</columns>
+    <columns>Advertising_Type__c</columns>
+    <columns>Advertising_Item_Intended_First_Use__c</columns>
+    <columns>CASES.CREATED_DATE_DATE_ONLY</columns>
+    <columns>CASES.STATUS</columns>
+    <columns>Financial_Advisor_Team__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>CASES.RECORDTYPE</field>
+        <operation>equals</operation>
+        <value>Case.Advertising_Review</value>
+    </filters>
+    <filters>
+        <field>CASES.STATUS</field>
+        <operation>notEqual</operation>
+        <value>Closed,Approved,Rejected</value>
+    </filters>
+    <label>Advertising Reviews - New/Pending</label>
+    <sharedTo>
+        <group>Compliance</group>
+    </sharedTo>
+</ListView>

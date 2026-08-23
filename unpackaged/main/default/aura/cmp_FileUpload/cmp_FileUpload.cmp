@@ -1,0 +1,31 @@
+<aura:component controller="FileUploadController" implements="flexipage:availableForAllPageTypes,lightning:availableForFlowScreens,force:hasRecordId" access="global">
+    
+    <aura:attribute name="fileType" type="List" default="['.png', '.jpg', '.jpeg', '.pdf', '.csv', '.xlsx', '.mp4', '.mp3']" />
+    <aura:attribute name="label" type="String" />
+    <aura:attribute name="multiple" type="Boolean" />
+    <aura:attribute name="disabled" type="Boolean" />
+    <aura:attribute name="contentVersionIds" type="String" />
+    <aura:attribute name="recordId" type="String" />
+    <aura:attribute name="advertisingType" type="String" />
+    <aura:attribute name="flowInterviewId" type="String" />
+    <aura:attribute name="loading" type="Boolean" />
+    <aura:attribute name="invalidAdType" type="Boolean" default="false" />
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+    <aura:if isTrue="{!v.loading}">
+        <div class="Loader">
+            <lightning:spinner alternativeText="Loading" size="medium" />
+        </div>
+    </aura:if>
+    <lightning:fileUpload label="{!v.label}"
+                          name="fileUploader"
+                          multiple="{!v.multiple}"
+                          accept="{!v.filetype}"
+                          recordId="{!v.recordId}"
+                          disabled="{!v.disabled}"
+                          onuploadfinished="{!c.handleUploadFinished}" />
+    <aura:if isTrue="{!v.invalidAdType}">
+        <div class="slds-text-body_small slds-text-color_error">Please select valid value for Advertising Type.</div>
+    </aura:if>
+</aura:component>

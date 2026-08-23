@@ -1,0 +1,62 @@
+<template>
+    <div class="ueu">
+        <template if:true={label}>
+            <span class="ueu__label">{label}</span>
+        </template>
+
+        <template if:true={hasFiles}>
+            <ul class="ueu__grid">
+                <template for:each={files} for:item="file">
+                    <li key={file.contentDocumentId} class="ueu__item">
+                        <template if:true={file.isImage}>
+                            <a href={file.downloadUrl} target="_blank" rel="noopener">
+                                <img class="ueu__thumb" src={file.thumbnailUrl} alt={file.title} loading="lazy" />
+                            </a>
+                        </template>
+                        <template if:false={file.isImage}>
+                            <a class="ueu__doc" href={file.downloadUrl} target="_blank" rel="noopener">
+                                <lightning-icon icon-name="doctype:attachment" size="small"></lightning-icon>
+                            </a>
+                        </template>
+                        <div class="ueu__meta">
+                            <span class="ueu__title" title={file.title}>{file.title}</span>
+                            <template if:true={file.sizeLabel}>
+                                <span class="ueu__size">{file.sizeLabel}</span>
+                            </template>
+                            <template if:false={viewOnly}>
+                                <lightning-button-icon icon-name="utility:delete"
+                                                       size="small"
+                                                       alternative-text="Remove"
+                                                       title="Remove"
+                                                       data-docid={file.contentDocumentId}
+                                                       data-title={file.title}
+                                                       onclick={handleRemoveClick}></lightning-button-icon>
+                            </template>
+                        </div>
+                    </li>
+                </template>
+            </ul>
+        </template>
+        <template if:false={hasFiles}>
+            <template if:true={viewOnly}>
+                <p class="ueu__empty">No evidence attached.</p>
+            </template>
+        </template>
+
+        <template if:true={showUpload}>
+            <lightning-file-upload label="Add files"
+                                   record-id={uploadTargetId}
+                                   accept={acceptedFormats}
+                                   multiple
+                                   onuploadfinished={handleUploadFinished}></lightning-file-upload>
+        </template>
+
+        <template if:true={confirmOpen}>
+            <c-admin-confirm-modal header={confirm.header}
+                                   message={confirm.message}
+                                   confirm-label={confirm.confirmLabel}
+                                   onconfirm={handleConfirmProceed}
+                                   oncancel={handleConfirmCancel}></c-admin-confirm-modal>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Equity Contribution Method --></label>
+        <name>Equity_Contribution_Method__c</name>
+        <picklistValues>
+            <masterLabel>Capital Call</masterLabel>
+            <translation><!-- Capital Call --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Subscription</masterLabel>
+            <translation><!-- Subscription --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

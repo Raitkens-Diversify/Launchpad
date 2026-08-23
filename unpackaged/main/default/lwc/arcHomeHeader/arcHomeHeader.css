@@ -1,0 +1,21 @@
+/* Author: Hoang Long Vu To | Date: 2026-08-12 */
+
+:host {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.arc-home-header .div-page-header {
+  margin-bottom: 0;
+}
+
+@media (max-width: 30rem) {
+  .arc-home-header .div-btn-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .arc-home-header .div-btn {
+    width: 100%;
+  }
+}

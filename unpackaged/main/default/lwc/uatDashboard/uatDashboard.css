@@ -1,0 +1,557 @@
+/* Operational dashboard: a two-column grid from the very top of the page —
+   cycle summary, active test, and available tests in the main column;
+   My Queue / activity / recent in a sidebar that starts level with the
+   summary card. All sans type (no serif on this operational surface);
+   white cards sit on the shell's gray canvas for edge definition.
+
+   --slds-g-* values are declared locally, NOT inherited: the platform
+   injects real SLDS2 styling hooks under these names into each component
+   scope, and injected values beat values inherited from an ancestor's
+   :host (see nexsHome.css) — inheritance is what made this page's accents
+   render the platform's theme blue instead of brand navy in the core app. */
+:host {
+    display: block;
+
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-accent-3: #071c31;
+    --slds-g-color-on-accent-1: #ffffff;
+}
+
+.ud {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-xl, 24px);
+}
+
+.ud__error {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--ds-error-text, #a83232);
+}
+
+/* ---- Shared card + section-head language ---- */
+.ud__card {
+    box-sizing: border-box;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+    padding: var(--ds-space-xl, 24px);
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-lg, 16px);
+}
+
+.ud__section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--ds-space-sm, 8px);
+}
+
+.ud__section-title {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-sm, 8px);
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.ud__count-chip {
+    padding: 2px 10px;
+    border-radius: var(--ds-radius-pill, 20px);
+    background: var(--ds-lightest-blue, #e2f8ff);
+    color: var(--slds-g-color-accent-1, #0f406f);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.ud__link {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ds-medium-blue, #1a76bb);
+    white-space: nowrap;
+}
+.ud__link:hover {
+    text-decoration: underline;
+}
+.ud__link:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+
+.ud__meta {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* Icon-led metadata row (active card + available cards). */
+.ud__meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
+}
+.ud__meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    white-space: nowrap;
+}
+.ud__meta-icon {
+    --sds-c-icon-color-foreground-default: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.ud__time {
+    flex: none;
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    white-space: nowrap;
+}
+
+.ud__empty-line {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* ---- Cycle summary card (compact horizontal layout) ---- */
+.ud__summary {
+    padding: 20px var(--ds-space-xl, 24px);
+}
+
+.ud__summary-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ds-space-lg, 16px);
+}
+
+.ud__summary-title {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-sm, 8px);
+    min-width: 0;
+}
+
+.ud__cycle-name {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    overflow-wrap: break-word;
+}
+
+.ud__summary-sub {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-md, 12px);
+}
+
+.ud__days {
+    font-size: 0.8125rem;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.ud__ends {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8125rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.ud__summary-body {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--ds-space-2xl, 32px);
+}
+.ud__summary-body c-ds-progress-ring {
+    --ds-ring-size: 100px;
+    flex: none;
+}
+
+/* Metrics + progress detail share the space to the ring's right. */
+.ud__summary-right {
+    flex: 1 1 320px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--ds-space-lg, 16px);
+}
+
+/* Evenly distributed metric items with thin separators between them. */
+.ud__stats {
+    display: flex;
+    align-items: center;
+}
+.ud__stats .ud__stat {
+    flex: 1 1 0;
+    min-width: 0;
+}
+.ud__stats .ud__stat + .ud__stat {
+    border-left: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    padding-left: 20px;
+}
+
+.ud__stat {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ud__stat-icon {
+    display: inline-flex;
+}
+.ud__stat-icon--success {
+    --sds-c-icon-color-foreground-default: var(--ds-success, #2d9f6f);
+}
+.ud__stat-icon--info {
+    --sds-c-icon-color-foreground-default: var(--ds-medium-blue, #1a76bb);
+}
+.ud__stat-icon--error {
+    --sds-c-icon-color-foreground-default: var(--ds-error, #d94545);
+}
+.ud__stat-icon--accent {
+    --sds-c-icon-color-foreground-default: var(--slds-g-color-accent-1, #0f406f);
+}
+/* Zero values stay visible but neutral — an empty category shouldn't
+   carry a semantic color. */
+.ud__stat-icon--muted {
+    --sds-c-icon-color-foreground-default: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.ud__stat-text {
+    display: flex;
+    flex-direction: column;
+}
+.ud__stat-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.ud__stat-label {
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* Label sits ABOVE the thin bar; both span only the metrics column. */
+.ud__summary-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.ud__summary-progress c-ds-progress-bar {
+    display: block;
+}
+.ud__progress-caption {
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* ---- Two-column grid (starts at the very top of the page) ---- */
+.ud__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 24%);
+    gap: var(--ds-space-xl, 24px);
+    align-items: start;
+}
+
+.ud__main,
+.ud__side {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-xl, 24px);
+    min-width: 0;
+}
+
+/* ---- Active test ---- */
+.ud__active {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-space-xl, 24px);
+}
+
+.ud__active-main {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    min-width: 0;
+}
+
+/* Icon circle filling the card's right side — the topic-nav icon-circle
+   idiom (lightest-blue disc, medium-blue glyph), decorative only. */
+.ud__active-visual {
+    flex: none;
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ds-lightest-blue, #e2f8ff);
+    --sds-c-icon-color-foreground-default: var(--ds-medium-blue, #1a76bb);
+}
+
+.ud__active-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    overflow-wrap: break-word;
+}
+
+.ud__active-desc {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.ud__active-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ds-space-sm, 8px);
+    margin-top: var(--ds-space-xs, 4px);
+}
+
+.ud__more-link {
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+/* ---- Available tests ---- */
+.ud__avail-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ds-space-md, 12px);
+}
+.ud__search {
+    flex: 1 1 200px;
+    min-width: 160px;
+}
+.ud__avail-controls lightning-combobox {
+    flex: 0 1 160px;
+    min-width: 130px;
+}
+.ud__quick {
+    flex: none;
+}
+
+.ud__avail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--ds-space-lg, 16px);
+}
+
+.ud__pool-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-sm, 8px);
+    padding: var(--ds-space-lg, 16px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.ud__pool-card:hover {
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+    box-shadow: var(--ds-shadow-hover, 0 4px 14px rgba(15, 64, 111, 0.08));
+}
+
+.ud__pool-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ds-space-sm, 8px);
+}
+
+.ud__pool-title {
+    margin: 0;
+    min-width: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    overflow-wrap: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.ud__pool-desc {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--slds-g-color-on-surface-2, #374151);
+    overflow-wrap: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.ud__pool-footer {
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+.ud__pool-footer lightning-button {
+    display: block;
+    width: 100%;
+}
+
+/* ---- Sidebar cards ---- */
+.ud__side-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-md, 12px);
+}
+
+.ud__side-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.ud__side-value {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    min-width: 1.25rem;
+}
+.ud__side-label {
+    font-size: 0.8125rem;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.ud__activity-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--ds-space-sm, 8px);
+}
+.ud__activity-row + .ud__activity-row {
+    border-top: 1px solid var(--slds-g-color-surface-container-2, #f3f4f6);
+    padding-top: var(--ds-space-md, 12px);
+}
+.ud__activity-text {
+    font-size: 0.8125rem;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.ud__recent-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.ud__recent-row + .ud__recent-row {
+    border-top: 1px solid var(--slds-g-color-surface-container-2, #f3f4f6);
+    padding-top: var(--ds-space-md, 12px);
+}
+.ud__recent-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ds-space-sm, 8px);
+}
+.ud__recent-title {
+    min-width: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    overflow-wrap: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.ud__recent-meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--ds-space-sm, 8px);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 1024px) {
+    .ud__grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 560px) {
+    .ud__card {
+        padding: var(--ds-space-lg, 16px);
+    }
+    .ud__summary-head {
+        flex-direction: column;
+        gap: var(--ds-space-sm, 8px);
+    }
+    .ud__summary-body {
+        gap: var(--ds-space-lg, 16px);
+    }
+    /* Metrics fall into a compact two-column grid; separators off. */
+    .ud__stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--ds-space-md, 12px);
+    }
+    .ud__stats .ud__stat + .ud__stat {
+        border-left: none;
+        padding-left: 0;
+    }
+    .ud__active-visual {
+        display: none;
+    }
+    .ud__active-actions,
+    .ud__active-actions lightning-button {
+        width: 100%;
+    }
+    .ud__active-actions lightning-button {
+        display: block;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ud__pool-card {
+        transition-duration: 0.01ms;
+    }
+}
+
+/* Header aside: the cycle end date and the off-script escape hatch. */
+.ud__summary-aside {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-md, 12px);
+    flex-wrap: wrap;
+}

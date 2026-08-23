@@ -1,0 +1,43 @@
+:host {
+  display: inline-flex;
+}
+
+.header-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--div-color-gray-600, #4b5563);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.header-icon-btn:hover,
+.header-icon-btn:focus-visible {
+  background: var(--div-color-gray-100, #f3f4f6);
+  outline: none;
+}
+
+.header-icon-btn:focus-visible {
+  box-shadow: var(--div-input-focus-ring, 0 0 0 2px #ffffff, 0 0 0 4px #1a76bb);
+}
+
+.header-icon-btn__icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+  background-color: currentColor;
+  -webkit-mask-image: var(--icon-url);
+  mask-image: var(--icon-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}

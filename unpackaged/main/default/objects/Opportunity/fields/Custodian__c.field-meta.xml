@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Custodian__c</fullName>
+    <label>Custodian</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Fidelity</fullName>
+                <default>false</default>
+                <label>Fidelity</label>
+            </value>
+            <value>
+                <fullName>Schwab</fullName>
+                <default>false</default>
+                <label>Schwab</label>
+            </value>
+            <value>
+                <fullName>Outside Manager</fullName>
+                <default>false</default>
+                <label>Outside Manager</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

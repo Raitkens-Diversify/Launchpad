@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Suggested_Articles__c</fullName>
+    <description>Optional curated list for the help center&#39;s Suggested Articles rail: one article URL Name per line, shown first and topped up automatically with same-topic articles. Blank means fully automatic.</description>
+    <inlineHelpText>Optional: curate the Suggested Articles rail. One article URL Name per line; automatically topped up with same-topic articles.</inlineHelpText>
+    <label>Suggested Articles</label>
+    <length>32768</length>
+    <type>LongTextArea</type>
+    <visibleLines>4</visibleLines>
+</CustomField>

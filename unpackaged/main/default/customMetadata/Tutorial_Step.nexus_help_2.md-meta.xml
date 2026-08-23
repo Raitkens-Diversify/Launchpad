@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Start with Popular Articles</label>
+    <protected>false</protected>
+    <values>
+        <field>Active__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Advance_On__c</field>
+        <value xsi:type="xsd:string">button</value>
+    </values>
+    <values>
+        <field>Body__c</field>
+        <value xsi:type="xsd:string">&lt;p&gt;Our most useful guides are pinned here — if you&amp;#39;re new, these are the best place to start.&lt;/p&gt;</value>
+    </values>
+    <values>
+        <field>Order__c</field>
+        <value xsi:type="xsd:double">2.0</value>
+    </values>
+    <values>
+        <field>Placement__c</field>
+        <value xsi:type="xsd:string">bottom</value>
+    </values>
+    <values>
+        <field>Target_Selector__c</field>
+        <value xsi:type="xsd:string">[data-tour-id=&quot;nexus-featured&quot;]</value>
+    </values>
+    <values>
+        <field>Title__c</field>
+        <value xsi:type="xsd:string">Start with Popular Articles</value>
+    </values>
+    <values>
+        <field>Tour__c</field>
+        <value xsi:type="xsd:string">nexus_help</value>
+    </values>
+</CustomMetadata>

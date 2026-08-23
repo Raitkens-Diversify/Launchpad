@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomPermission xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Scopes the Admin Console rail to the Help Center sections (AdminAccessService persona gating). Carried by Resource_Center_Admin.</description>
+    <isLicensed>false</isLicensed>
+    <label>Help Center Console</label>
+</CustomPermission>

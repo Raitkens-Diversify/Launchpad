@@ -1,0 +1,38 @@
+<!-- Author: Mile Cacanovic -->
+<template>
+    <div class="party">
+        <header class="party__header">
+            <div class="party__heading">
+                <h4 class="party__title">{title}</h4>
+                <template lwc:if={note}>
+                    <p class="party__note">{note}</p>
+                </template>
+            </div>
+            <div class="party__buttons">
+                <template for:each={actions} for:item="action">
+                    <lightning-button
+                        key={action.key}
+                        label={action.label}
+                        data-action={action.key}
+                        disabled={action.disabled}
+                        onclick={handleAction}>
+                    </lightning-button>
+                </template>
+            </div>
+        </header>
+        <template lwc:if={hasParties}>
+            <div class="party__list">
+                <template for:each={parties} for:item="party">
+                    <c-envelope-member-card
+                        key={party.id}
+                        member={party}
+                        onownerremove={handleRemove}>
+                    </c-envelope-member-card>
+                </template>
+            </div>
+        </template>
+        <template lwc:else>
+            <p class="party__empty">{emptyMessage}</p>
+        </template>
+    </div>
+</template>

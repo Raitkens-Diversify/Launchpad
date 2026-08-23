@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Targeted Asset Class (REIT) --></label>
+        <name>Targeted_Asset_Class_REIT__c</name>
+        <picklistValues>
+            <masterLabel>Hospitality</masterLabel>
+            <translation><!-- Hospitality --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Industrial</masterLabel>
+            <translation><!-- Industrial --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Land</masterLabel>
+            <translation><!-- Land --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Manufactured Housing</masterLabel>
+            <translation><!-- Manufactured Housing --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Multi-Tenant Office</masterLabel>
+            <translation><!-- Multi-Tenant Office --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Multi-Tenant Retail</masterLabel>
+            <translation><!-- Multi-Tenant Retail --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Multifamily</masterLabel>
+            <translation><!-- Multifamily --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Other</masterLabel>
+            <translation><!-- Other --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Self-Storage</masterLabel>
+            <translation><!-- Self-Storage --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Seniors Housing</masterLabel>
+            <translation><!-- Seniors Housing --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Single-Family Rental</masterLabel>
+            <translation><!-- Single-Family Rental --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Single-Tenant Office</masterLabel>
+            <translation><!-- Single-Tenant Office --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Single-Tenant Retail</masterLabel>
+            <translation><!-- Single-Tenant Retail --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Student Housing</masterLabel>
+            <translation><!-- Student Housing --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

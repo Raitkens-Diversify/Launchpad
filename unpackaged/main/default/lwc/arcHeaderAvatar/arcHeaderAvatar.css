@@ -1,0 +1,152 @@
+:host {
+  display: inline-flex;
+}
+
+/* Anchors the menu; the avatar itself keeps its own size. */
+.avatar-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.avatar {
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+  background: var(--div-color-blue-700, #1a76bb);
+  color: var(--div-color-white, #ffffff);
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 22px;
+  user-select: none;
+}
+.avatar:focus-visible {
+  outline: 2px solid var(--div-color-blue-700, #1a76bb);
+  outline-offset: 2px;
+}
+
+.avatar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+}
+
+.avatar-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 9001;
+  min-width: 220px;
+  padding: 4px;
+  background: var(--div-color-white, #ffffff);
+  border: 1px solid var(--div-color-border-1, #d1d5db);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+  font-family: "Inter", sans-serif;
+}
+
+.avatar-menu__identity {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--div-color-border-1, #d1d5db);
+  margin-bottom: 4px;
+}
+
+.avatar-menu__name {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--div-color-on-surface-2, #374151);
+}
+
+/* The username is long and is the one thing here that must not wrap the menu
+   open to twice its width. */
+.avatar-menu__username {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--div-color-text-muted, #6b7280);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.avatar-menu__item {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  text-align: left;
+  font-size: 13px;
+  color: var(--div-color-on-surface-2, #374151);
+  cursor: pointer;
+}
+
+.avatar-menu__item:hover {
+  background: var(--div-color-container-2, #f3f4f6);
+}
+
+.avatar-menu__item--danger {
+  color: var(--div-color-red-700, #b91c1c);
+}
+
+/* ---- Logout confirm dialog ----------------------------------------------
+ * Slotted into c-ds-modal-v2, so this lives in this component's own shadow
+ * DOM rather than the modal's — same reason envelopeConfirmRemovalModal.css
+ * re-creates its heading/message typography instead of reaching into the
+ * modal's scoped classes.
+ */
+.logout-confirm__heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Inter", sans-serif;
+}
+
+.logout-confirm__icon {
+  flex-shrink: 0;
+  --slds-c-icon-color-foreground-default: var(--div-color-red-700, #b91c1c);
+}
+
+.logout-confirm__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--div-color-on-surface-2, #374151);
+}
+
+.logout-confirm__message {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--div-color-text-muted, #6b7280);
+}
+
+/* Preview-only caveat under the main message: quieter than the message it
+   qualifies, but not so quiet it reads as decoration. */
+.logout-confirm__note {
+  margin: 8px 0 0;
+  padding: 8px 12px;
+  border-left: 2px solid var(--div-color-blue-400, #14bef0);
+  border-radius: 0 6px 6px 0;
+  background: var(--div-color-container-2, #f3f4f6);
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--div-color-on-surface-2, #374151);
+}
+
+.logout-confirm__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}

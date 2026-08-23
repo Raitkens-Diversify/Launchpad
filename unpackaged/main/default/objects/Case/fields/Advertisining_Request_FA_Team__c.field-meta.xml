@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Advertisining_Request_FA_Team__c</fullName>
+    <externalId>false</externalId>
+    <formula>Advertising_Item__r.Financial_Advisor_Team__r.Name</formula>
+    <label>Advertisining Request FA Team</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

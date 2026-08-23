@@ -1,0 +1,5 @@
+<design:component>
+    <design:attribute name="householdId" label="Household Id" description="Pass the Selected Household Id in"/>
+    <design:attribute name="selectedPrimaryOwnerId" label="Selected Primary Owner Id" description="This will pass back the Primary Owner Account Id"/>
+    <design:attribute name="selectedJointOwnerId" label="Selected Joint Owner Id" description="This will pass back the Joint Owner Account Id"/>
+</design:component>

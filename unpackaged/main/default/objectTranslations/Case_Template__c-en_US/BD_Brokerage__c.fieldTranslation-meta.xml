@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- BD Brokerage --></label>
+        <name>BD_Brokerage__c</name>
+        <picklistValues>
+            <masterLabel>EXCLUDED</masterLabel>
+            <translation><!-- EXCLUDED --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>FALSE</masterLabel>
+            <translation><!-- FALSE --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>TRUE</masterLabel>
+            <translation><!-- TRUE --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

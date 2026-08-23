@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <columns>
+        <field>CUST_NAME</field>
+    </columns>
+    <columns>
+        <field>Compliance_Exception__c.User_Who_Approved_Exception__c</field>
+    </columns>
+    <columns>
+        <field>Compliance_Exception__c.Exception_Reason__c</field>
+    </columns>
+    <columns>
+        <field>Compliance_Exception__c.Other_Explanation__c</field>
+    </columns>
+    <columns>
+        <field>Compliance_Exception__c.Exception_Explanation__c</field>
+    </columns>
+    <columns>
+        <field>Compliance_Exception__c.Submitted_Date_Time__c</field>
+    </columns>
+    <columns>
+        <field>Compliance_Exception__c.Submitted_By__c</field>
+    </columns>
+    <columns>
+        <field>FK_NAME</field>
+    </columns>
+    <columns>
+        <field>FK_CASE_SUBJECT</field>
+    </columns>
+    <format>Tabular</format>
+    <name>Compliance Exceptions Granted</name>
+    <params>
+        <name>co</name>
+        <value>1</value>
+    </params>
+    <reportType>CustomEntity$Compliance_Exception__c@Compliance_Exception__c.Case__c</reportType>
+    <scope>user</scope>
+    <showDetails>true</showDetails>
+    <showGrandTotal>true</showGrandTotal>
+    <showSubTotals>true</showSubTotals>
+    <timeFrameFilter>
+        <dateColumn>Compliance_Exception__c.Submitted_Date_Time__c</dateColumn>
+        <interval>INTERVAL_CUSTOM</interval>
+    </timeFrameFilter>
+</Report>

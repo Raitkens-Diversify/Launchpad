@@ -1,0 +1,54 @@
+<template>
+    <div class="rsr">
+        <h1 class="rsr__title">Results for “{term}”</h1>
+
+        <template if:true={loading}>
+            <div class="rsr__status">
+                <lightning-spinner alternative-text="Searching" size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:true={hasResources}>
+            <section class="rsr__section">
+                <p class="rsr__label">Resources</p>
+                <ul class="rsr__list">
+                    <template for:each={resources} for:item="r">
+                        <li key={r.id} class="rsr__row" data-slug={r.slug} role="button"
+                            tabindex="0" onclick={handleResource}>
+                            <span class="rsr__row-title">{r.title}</span>
+                            <template if:true={r.subtitle}>
+                                <span class="rsr__row-sub">{r.subtitle}</span>
+                            </template>
+                        </li>
+                    </template>
+                </ul>
+            </section>
+        </template>
+
+        <template if:true={hasArticles}>
+            <section class="rsr__section">
+                <p class="rsr__label">Help Center Articles</p>
+                <ul class="rsr__list">
+                    <template for:each={articles} for:item="a">
+                        <li key={a.id} class="rsr__row">
+                            <template if:true={a.href}>
+                                <a class="rsr__row-link" href={a.href} target="_blank"
+                                   rel="noopener noreferrer">{a.title}</a>
+                            </template>
+                            <template if:false={a.href}>
+                                <span class="rsr__row-title">{a.title}</span>
+                            </template>
+                            <template if:true={a.subtitle}>
+                                <span class="rsr__row-sub">{a.subtitle}</span>
+                            </template>
+                        </li>
+                    </template>
+                </ul>
+            </section>
+        </template>
+
+        <template if:true={isEmpty}>
+            <p class="rsr__status">No resources or articles matched your search.</p>
+        </template>
+    </div>
+</template>

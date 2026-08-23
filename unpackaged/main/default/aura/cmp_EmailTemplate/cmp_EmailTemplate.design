@@ -1,0 +1,5 @@
+<design:component>
+    <design:attribute name="EmailTemplate" label="Name of Email Template from Record" description="This is the name of the Email Template determined by the Task." />
+    <design:attribute name="CaseId" label="Case Id, or WhatId of the Task" description="This is the parent Case Id."/>
+    <design:attribute name="UserId" label="User Id of the running user" description="This is who will be sending the email; Should be running user of the flow."/>
+</design:component>

@@ -1,0 +1,4 @@
+The following account has been updated:
+
+[!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.Name] [!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.OASP_FSC__Registration_Type__r.Name], XXXX[!Case.FinServ__FinancialAccount__r.Account_Number_Last_4__c], [!Case.FinServ__FinancialAccount__r.OASP_FSC__Custodian__r.Name]
+Moved from [!Case.Previous_Management_Style__c] to [!Case.Management_Style__c][!Case.Outside_Manager__r.Name].

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Add Record Type --></label>
+        <name>Add_Record_Type__c</name>
+        <picklistValues>
+            <masterLabel>Authorized Person</masterLabel>
+            <translation><!-- Authorized Person --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Beneficial Owner</masterLabel>
+            <translation><!-- Beneficial Owner --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Grantor</masterLabel>
+            <translation><!-- Grantor --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Trustee</masterLabel>
+            <translation><!-- Trustee --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

@@ -1,0 +1,12 @@
+/**
+ * Author: Hoang Long Vu To
+ * Date: 2026-08-13
+ */
+:host {
+  display: block;
+  width: 100%;
+}
+
+.regulated-field-banner {
+  width: 100%;
+}

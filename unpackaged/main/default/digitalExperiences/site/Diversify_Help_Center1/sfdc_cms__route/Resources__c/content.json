@@ -1,0 +1,12 @@
+{
+  "type" : "sfdc_cms__route",
+  "title" : "Resources",
+  "contentBody" : {
+    "activeViewId" : "resources",
+    "configurationTags" : [ ],
+    "pageAccess" : "UseParent",
+    "routeType" : "custom-resources",
+    "urlPrefix" : "resources"
+  },
+  "urlName" : "resources"
+}

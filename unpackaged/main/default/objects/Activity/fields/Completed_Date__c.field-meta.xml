@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Completed_Date__c</fullName>
+    <externalId>false</externalId>
+    <formula>IF(NOT(ISNULL(CompletedDateTime)),(IF(MONTH(DATEVALUE(CompletedDateTime))&lt; 10, &#39;0&#39; + TEXT(MONTH(DATEVALUE(CompletedDateTime))),TEXT(MONTH(DATEVALUE(CompletedDateTime))))  + &#39;/&#39; + IF(DAY(DATEVALUE(CompletedDateTime))&lt; 10, &#39;0&#39; + TEXT(DAY(DATEVALUE(CompletedDateTime))),TEXT(DAY(DATEVALUE(CompletedDateTime)))) + &#39;/&#39; + TEXT(YEAR(DATEVALUE(CompletedDateTime)))),&#39;&#39;)</formula>
+    <label>Completed Date</label>
+    <required>false</required>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

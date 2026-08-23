@@ -1,0 +1,187 @@
+/* Author: Hoang Long Vu To | Date: 2026-06-08 */
+:host {
+    display: block;
+    width: 100%;
+    position: relative;
+    z-index: 0;
+    margin: 0;
+    padding: 0;
+}
+
+:host([data-open="true"]) {
+    z-index: 3;
+}
+
+.lookup {
+    width: 100%;
+    min-width: 0;
+}
+
+.lookup.slds-form-element {
+    margin: 0;
+    padding: 0;
+}
+
+.lookup .slds-form-element__control {
+    margin: 0;
+    padding: 0;
+}
+
+.lookup__control {
+    width: 100%;
+}
+
+.lookup__input {
+    width: 100%;
+    height: 2rem;
+    min-height: 2rem;
+    box-sizing: border-box;
+}
+
+.lookup__pill {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 2rem;
+    padding: 0.2rem 0.45rem;
+    border: 1px solid #c9c9c9;
+    border-radius: 0.25rem;
+    background: #fff;
+    cursor: text;
+}
+
+.lookup__pill-icon {
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.lookup__pill-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 0.8125rem;
+    color: #181818;
+}
+
+.lookup__pill-clear {
+    flex-shrink: 0;
+    border: 0;
+    background: transparent;
+    color: #747474;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0 0.15rem;
+    cursor: pointer;
+}
+
+.lookup__pill-clear:hover {
+    color: #181818;
+}
+
+.slds-combobox_container {
+    position: relative;
+    width: 100%;
+}
+
+.slds-combobox {
+    position: relative;
+    width: 100%;
+}
+
+.lookup__dropdown {
+    position: absolute;
+    top: calc(100% + 0.125rem);
+    left: 0;
+    right: 0;
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+    margin: 0;
+    transform: none;
+    z-index: 10050;
+    max-height: 13.75rem;
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    box-sizing: border-box;
+    background: #ffffff;
+    border: 1px solid #d8dde6;
+    border-radius: 0.25rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.16);
+}
+
+.lookup__dropdown_with-footer {
+    grid-template-rows: minmax(0, 1fr) auto;
+}
+
+.lookup__dropdown-scroll {
+    min-height: 0;
+    max-height: var(--lookup-scroll-max, 12rem);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.lookup__dropdown-footer {
+    border-top: 1px solid #e5e5e5;
+    background: #ffffff;
+}
+
+.lookup__dropdown.slds-dropdown {
+    overflow: hidden;
+    overflow-y: hidden;
+}
+
+.lookup__dropdown_above {
+    top: auto;
+    bottom: calc(100% + 0.125rem);
+}
+
+.lookup__option {
+    cursor: pointer;
+}
+
+.lookup__option:hover,
+.lookup__option:focus {
+    background: #f3f3f3;
+}
+
+.lookup__option-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lookup__option-label {
+    display: block;
+    color: #181818;
+}
+
+.lookup__option-meta {
+    display: block;
+    color: #747474;
+    font-size: 0.75rem;
+}
+
+.lookup__new-option {
+    padding: 0.55rem 0.75rem;
+    color: #0176d3;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    background: #ffffff;
+}
+
+.lookup__new-option:hover {
+    background: #f3f3f3;
+}
+
+.lookup__status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem;
+}
+
+.lookup__status_empty {
+    color: #747474;
+    font-size: 0.8125rem;
+}

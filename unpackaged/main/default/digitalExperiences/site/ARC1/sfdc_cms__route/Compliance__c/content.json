@@ -1,0 +1,12 @@
+{
+  "type" : "sfdc_cms__route",
+  "title" : "Compliance",
+  "contentBody" : {
+    "activeViewId" : "Compliance",
+    "configurationTags" : [ ],
+    "pageAccess" : "UseParent",
+    "routeType" : "custom-compliance",
+    "urlPrefix" : "compliance"
+  },
+  "urlName" : "compliance"
+}

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Fund Life-Cycle --></label>
+        <name>Fund_Life_Cycle__c</name>
+        <picklistValues>
+            <masterLabel>Finite</masterLabel>
+            <translation><!-- Finite --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Perpetual</masterLabel>
+            <translation><!-- Perpetual --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

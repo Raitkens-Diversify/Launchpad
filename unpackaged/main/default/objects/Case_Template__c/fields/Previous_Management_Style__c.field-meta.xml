@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Previous_Management_Style__c</fullName>
+    <label>Previous Management Style</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>MultiselectPicklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>AMS</fullName>
+                <default>false</default>
+                <label>AMS</label>
+            </value>
+            <value>
+                <fullName>AMS+</fullName>
+                <default>false</default>
+                <label>AMS+</label>
+            </value>
+            <value>
+                <fullName>AltMS</fullName>
+                <default>false</default>
+                <label>AltMS</label>
+            </value>
+            <value>
+                <fullName>DMS</fullName>
+                <default>false</default>
+                <label>DMS</label>
+            </value>
+            <value>
+                <fullName>EPS</fullName>
+                <default>false</default>
+                <label>EPS</label>
+            </value>
+            <value>
+                <fullName>EXCLUDED</fullName>
+                <default>false</default>
+                <label>EXCLUDED</label>
+            </value>
+            <value>
+                <fullName>OMS</fullName>
+                <default>false</default>
+                <label>OMS</label>
+            </value>
+            <value>
+                <fullName>TMS</fullName>
+                <default>false</default>
+                <label>TMS</label>
+            </value>
+            <value>
+                <fullName>Courtesy Account</fullName>
+                <default>false</default>
+                <label>Courtesy Account</label>
+            </value>
+            <value>
+                <fullName>BD Exclusion</fullName>
+                <default>false</default>
+                <label>BD Exclusion</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+    <visibleLines>3</visibleLines>
+</CustomField>

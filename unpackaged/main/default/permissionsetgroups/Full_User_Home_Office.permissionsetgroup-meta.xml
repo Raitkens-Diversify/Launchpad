@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSetGroup xmlns="http://soap.sforce.com/2006/04/metadata">
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Full User Home Office</label>
+    <permissionSets>App_Business_Development</permissionSets>
+    <permissionSets>App_Home_Office</permissionSets>
+    <permissionSets>Branch_Object_Visibility</permissionSets>
+    <permissionSets>FinServ__ApexAuraAccess</permissionSets>
+    <permissionSets>FinServ__FinancialServicesCloudStandard</permissionSets>
+    <permissionSets>General_Advisor_Requests</permissionSets>
+    <permissionSets>Significant_Events_CRED</permissionSets>
+    <permissionSets>Zoom_User_Diversify</permissionSets>
+    <permissionSets>dfsle__CLM_User</permissionSets>
+    <permissionSets>dfsle__DocuSign_Sender</permissionSets>
+    <permissionSets>efs__EgnyteUser</permissionSets>
+    <permissionSets>fidelityws__Fidelity_Standard_User_Permission_Set</permissionSets>
+    <status>Updated</status>
+</PermissionSetGroup>

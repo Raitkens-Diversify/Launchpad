@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Funding_Basis_Matches_Value</fullName>
+    <active>true</active>
+    <description>A sleeve carries the value its basis names and not the other: Dollar an amount, Percent a percentage. Skipped when Funding Basis is blank, because the legacy Flow and Aura screens write both numbers and no basis and blocking them would break Operations.</description>
+    <errorConditionFormula>AND(
+  NOT(ISBLANK(TEXT(Funding_Basis__c))),
+  OR(
+    AND(
+      ISPICKVAL(Funding_Basis__c, &quot;Dollar&quot;),
+      OR(ISBLANK(Initial_Funding_Amount__c), NOT(ISBLANK(Initial_Funding_Percentage__c)))
+    ),
+    AND(
+      ISPICKVAL(Funding_Basis__c, &quot;Percent&quot;),
+      OR(ISBLANK(Initial_Funding_Percentage__c), NOT(ISBLANK(Initial_Funding_Amount__c)))
+    )
+  )
+)</errorConditionFormula>
+    <errorMessage>A Dollar sleeve needs an Initial Funding Amount and no percentage; a Percent sleeve needs an Initial Funding Percentage and no amount.</errorMessage>
+</ValidationRule>

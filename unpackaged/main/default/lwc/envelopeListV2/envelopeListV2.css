@@ -1,0 +1,140 @@
+/* Envelopes list page (v2). Empty-state slice — the datatable arrives in the next step.
+   Design tokens come from :root in the shared envelopeWizardStyles.css (single source);
+   this file only references them. Chrome styled with SLDS global hooks + Figma-literal
+   fallbacks (see envelopeTopBarV2.css). */
+:host {
+    display: block;
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+
+.list-v2 {
+    font-family: var(--ds-font-body);
+    flex: 1 0 auto;
+    max-width: 1280px;
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    gap: var(--slds-g-spacing-5, 24px);
+    padding: var(--slds-g-spacing-6, 32px) var(--slds-g-spacing-7, 40px) var(--slds-g-spacing-10, 64px) var(--slds-g-spacing-7, 40px);
+}
+
+.list-v2__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.list-v2__title {
+    margin: 0;
+    font-family: var(--ds-font-heading);
+    font-size: var(--slds-g-font-scale-4);
+    font-weight: var(--slds-g-font-weight-6);
+    color: var(--slds-g-color-palette-neutral-30, #374151);
+    line-height: var(--slds-g-font-lineheight-6);
+}
+
+/* Filter toolbar — search on the left, Team / date / New Envelope on the right. */
+.list-v2__toolbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--slds-g-spacing-4, 16px);
+    flex-wrap: wrap;
+}
+
+.list-v2__toolbar-search {
+    flex: 1 1 260px;
+    max-width: 320px;
+}
+
+.list-v2__toolbar-controls {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--slds-g-spacing-3, 12px);
+}
+
+.list-v2__toolbar-team,
+.list-v2__toolbar-date {
+    min-width: 180px;
+    min-height: 3.75rem; /* reserve space for the "Format: …" help line that SLDS renders only while the date field is focused */
+}
+
+
+/* Bordered white card around the datatable, per the Figma frame. No overflow
+   clipping — the table's own corner cells carry the rounding so the per-row
+   action dropdown can open past the card edge without being cut off. */
+.list-v2__table {
+    background: var(--slds-g-color-surface-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: 10px;
+}
+
+/* Loading state — spinner centered in the body while envelope data loads.
+   Transparent over the page surface (no card), per the Figma frame.
+   position: relative gives lightning-spinner's absolute positioning a host. */
+.list-v2__loading {
+    position: relative;
+    flex: 1 0 auto;
+    min-height: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--slds-g-spacing-5, 24px);
+}
+
+/* Empty-state card — centered white panel per the Figma frame. */
+.list-v2__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--slds-g-spacing-5, 24px);
+    padding: var(--slds-g-spacing-5, 24px) var(--slds-g-spacing-5, 24px) var(--slds-g-spacing-7, 40px);
+    background: var(--slds-g-color-surface-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: 10px;
+}
+
+/* Illustration: rings + envelope, served from the EmptyEnvelopeV2 static
+   resource (Figma export). Rendered at the source SVG's intrinsic 177×177. */
+.list-v2__empty-illustration {
+    width: 177px;
+    height: 177px;
+}
+
+.list-v2__empty-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 8px);
+    max-width: 576px;
+    text-align: center;
+    color: var(--slds-g-color-palette-neutral-20, #383330);
+    min-width: 336px;
+}
+
+/* No-results variant — narrower column so the subtitle wraps per the Figma frame. */
+.list-v2__empty-text--narrow {
+    max-width: 396px;
+}
+
+.list-v2__empty-title {
+    margin: 0;
+    font-size: var(--slds-g-font-scale-3, 20px);
+    font-weight: 600;
+    line-height: 28px;
+}
+
+.list-v2__empty-subtitle {
+    margin: 0;
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: 400;
+    line-height: 19px;
+}
+
+/* Brand CTA in Diversify navy (the SLDS default brand blue is too bright). */
+.list-v2__empty-cta {
+    --slds-c-button-brand-color-background: var(--slds-g-color-accent-container-1, #0f406f);
+    --slds-c-button-brand-color-border: var(--slds-g-color-accent-container-1, #0f406f);
+    --slds-c-button-brand-color-background-hover: #0c3258;
+    --slds-c-button-brand-color-border-hover: #0c3258;
+}

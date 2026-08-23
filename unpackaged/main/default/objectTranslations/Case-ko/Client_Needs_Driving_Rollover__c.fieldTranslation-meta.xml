@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <help><!-- Select all that apply. --></help>
+        <label><!-- Client Needs Driving Rollover? --></label>
+        <name>Client_Needs_Driving_Rollover__c</name>
+        <picklistValues>
+            <masterLabel>Consolidation of Assets</masterLabel>
+            <translation><!-- Consolidation of Assets --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Desires lifetime income</masterLabel>
+            <translation><!-- Desires lifetime income --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Desires more direct control over assets</masterLabel>
+            <translation><!-- Desires more direct control over assets --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Desires professional advice/management</masterLabel>
+            <translation><!-- Desires professional advice/management --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Does not want assets in former employers plan</masterLabel>
+            <translation><!-- Does not want assets in former employers plan --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Lack of Investment Options</masterLabel>
+            <translation><!-- Lack of Investment Options --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Lack of Planning Service</masterLabel>
+            <translation><!-- Lack of Planning Service --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Other</masterLabel>
+            <translation><!-- Other --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Performance of Investment Options</masterLabel>
+            <translation><!-- Performance of Investment Options --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

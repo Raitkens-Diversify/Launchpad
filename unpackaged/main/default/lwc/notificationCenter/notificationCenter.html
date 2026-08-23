@@ -1,0 +1,96 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-06-22 -->
+<template>
+  <div class="div-app--font-root-14">
+    <template lwc:if={showInitialSkeleton}>
+      <c-notification-center-skeleton label={skeletonLabel}></c-notification-center-skeleton>
+    </template>
+
+    <template lwc:if={isAppReady}>
+      <div class="app-shell div-app">
+        <header class="app-header" aria-label="Application header">
+          <div class="app-header__brand">
+            <div class="app-header__brand-mark" aria-hidden="true">
+              <lightning-icon icon-name={icons.NOTIFICATION} size="x-small"></lightning-icon>
+            </div>
+            <h1 class="app-header__title">Notification Center</h1>
+          </div>
+        </header>
+
+        <div class="app-body">
+          <aside class="sidebar" aria-label="Notification center navigation">
+            <nav class="sidebar__nav" aria-label="Notification management">
+              <ul class="sidebar__nav-list">
+                <template for:each={navItems} for:item="item">
+                  <li key={item.id} class="sidebar__nav-item">
+                    <button
+                      type="button"
+                      class={item.buttonClass}
+                      data-view={item.id}
+                      aria-current={item.ariaCurrent}
+                      aria-label={item.label}
+                      onclick={handleNavigate}
+                      onkeydown={handleNavigateKeyDown}
+                    >
+                      <lightning-icon
+                        class="sidebar__nav-icon"
+                        icon-name={item.icon}
+                        size="x-small"
+                        aria-hidden="true"
+                      ></lightning-icon>
+                      <span class="sidebar__nav-label">{item.label}</span>
+                    </button>
+                  </li>
+                </template>
+              </ul>
+            </nav>
+          </aside>
+          <div class="main-panel">
+            <main class="main-panel__content">
+              <div class="main-panel__inner slds-container_center slds-container_large">
+                <header class="page-header">
+                  <h2 class="page-header__title">{activeViewTitle}</h2>
+                  <p class="page-header__subtitle">{activeViewSubtitle}</p>
+                </header>
+                <div class="page-header__rule" role="separator"></div>
+
+                <template lwc:if={isViewLoading}>
+                  <c-notification-center-skeleton label={skeletonLabel}></c-notification-center-skeleton>
+                </template>
+
+                <div
+                  class="main-panel__view"
+                  hidden={isViewLoading}
+                  onnotificationcenterchange={handleNotificationCenterChange}
+                  onnotificationcenterviewready={handleNotificationCenterViewReady}
+                >
+                  <template lwc:if={activeViewFlags.dashboard}>
+                    <c-notification-center-dashboard data-notification-view="dashboard"></c-notification-center-dashboard>
+                  </template>
+
+                  <template lwc:if={activeViewFlags.notificationRules}>
+                    <c-notification-center-rules data-notification-view="notification-rules"></c-notification-center-rules>
+                  </template>
+
+                  <template lwc:if={activeViewFlags.notificationLog}>
+                    <c-notification-center-log data-notification-view="notification-log"></c-notification-center-log>
+                  </template>
+
+                  <template lwc:if={activeViewFlags.adminSettings}>
+                    <c-notification-center-admin-settings data-notification-view="admin-settings"></c-notification-center-admin-settings>
+                  </template>
+                </div>
+              </div>
+            </main>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <template lwc:if={stylesLoadError}>
+      <div class="div-callout div-callout--error" role="alert">
+        <span class="div-callout__icon-slot" aria-hidden="true"></span>
+        <p class="div-callout__body">{stylesLoadError}</p>
+      </div>
+    </template>
+  </div>
+</template>

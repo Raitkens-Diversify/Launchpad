@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Previous Management Style --></label>
+        <name>Previous_Management_Style__c</name>
+        <picklistValues>
+            <masterLabel>AMS</masterLabel>
+            <translation><!-- AMS --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>AMS+</masterLabel>
+            <translation><!-- AMS+ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>AltMS</masterLabel>
+            <translation><!-- AltMS --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>BD Exclusion</masterLabel>
+            <translation><!-- BD Exclusion --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Courtesy Account</masterLabel>
+            <translation><!-- Courtesy Account --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DMS</masterLabel>
+            <translation><!-- DMS --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>EPS</masterLabel>
+            <translation><!-- EPS --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>EXCLUDED</masterLabel>
+            <translation><!-- EXCLUDED --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>OMS</masterLabel>
+            <translation><!-- OMS --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>TMS</masterLabel>
+            <translation><!-- TMS --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

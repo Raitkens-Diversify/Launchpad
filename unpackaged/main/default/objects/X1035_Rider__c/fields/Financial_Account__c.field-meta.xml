@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Financial_Account__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <label>Financial Account</label>
+    <referenceTo>FinServ__FinancialAccount__c</referenceTo>
+    <relationshipLabel>1035 Riders</relationshipLabel>
+    <relationshipName>X1035_Riders</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

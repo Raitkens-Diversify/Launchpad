@@ -1,0 +1,294 @@
+/* Renders inside the shell content grid (.shell__main), which owns the centered width and
+   padding. This host only supplies the vertical rhythm between its three sections. */
+:host {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-5, 24px);
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+}
+
+/* Header: back link, title, household/envelope subtitle. */
+.docs__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-2, 8px);
+    padding-bottom: var(--slds-g-spacing-5, 24px);
+    border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+
+.docs__back {
+    align-self: flex-start;
+}
+
+.docs__title {
+    margin: 0;
+    font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    font-size: var(--slds-g-font-scale-4, 24px);
+    line-height: var(--slds-g-font-lineheight-6, 32px);
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.docs__subtitle {
+    margin: 0;
+    font-size: 16px;
+    line-height: var(--slds-g-font-lineheight-4, 24px);
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* Info alert banner. */
+.docs__alert {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--slds-g-spacing-2, 8px);
+    padding: var(--slds-g-spacing-2, 8px) 12px;
+    background: var(--slds-g-color-info-container-1, #e0f2fe);
+    border: 1px solid var(--slds-g-color-info-base-90, #bae6fd);
+    border-radius: var(--slds-g-radius-border-2, 8px);
+}
+
+.docs__alert-icon {
+    flex: none;
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-on-info-1, #0369a1);
+}
+
+.docs__alert-text {
+    margin: 0;
+    font-size: var(--slds-g-font-size-base, 13px);
+    line-height: 18px;
+    color: var(--slds-g-color-on-info-1, #0369a1);
+}
+
+/* Document-link warning shown in the remove-file confirmation dialog. Slotted into
+   envelopeConfirmRemovalModal, so it stays in this component's shadow DOM and is styled here. */
+.docs__remove-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--slds-g-spacing-2, 8px);
+    margin-top: var(--slds-g-spacing-4, 16px);
+    padding: var(--slds-g-spacing-2, 8px) 12px;
+    background: var(--slds-g-color-warning-container-1, #fef3c7);
+    border: 1px solid var(--slds-g-color-warning-base-90, #fde68a);
+    border-radius: var(--slds-g-radius-border-2, 8px);
+}
+
+.docs__remove-warning-icon {
+    flex: none;
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-on-warning-1, #b45309);
+}
+
+.docs__remove-warning-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-1, 4px);
+    color: var(--slds-g-color-on-warning-1, #b45309);
+}
+
+.docs__remove-warning-text {
+    margin: 0;
+    font-size: var(--slds-g-font-size-base, 13px);
+    line-height: 18px;
+}
+
+.docs__remove-warning-list {
+    margin: 0;
+    padding-left: 1.25rem;
+    font-size: var(--slds-g-font-size-base, 13px);
+    line-height: 18px;
+    list-style: disc;
+}
+
+.docs__remove-warning strong {
+    font-weight: var(--slds-g-font-weight-7, 700);
+}
+
+/* Two-column content: uploaded files (left) + supporting documents (right). */
+.docs__content {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--slds-g-spacing-5, 24px);
+}
+
+.docs__column {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-3, 12px);
+}
+
+.docs__column-label {
+    margin: 0;
+    font-size: var(--slds-g-font-scale-1, 14px);
+    line-height: 19px;
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* File-drop area. The file-selector (.docs__file-input) is positioned to fill this box so its
+   native dropzone covers the whole area; this box supplies the dashed frame and anchors the copy
+   at the top. A min-height gives the box real estate even though its only in-flow child is the
+   short copy block (the file-selector is taken out of flow). */
+.docs__dropzone {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--slds-g-spacing-2, 8px);
+    min-height: 121px;
+    padding: var(--slds-g-spacing-4, 16px) var(--slds-g-spacing-5, 24px);
+    background: var(--slds-g-color-brand-base-95, #f7fbfc);
+    border: 1px dashed var(--slds-g-color-on-surface-4, #1a76bb);
+    border-radius: var(--slds-g-radius-border-3, 12px);
+    text-align: center;
+}
+
+/* Fill the dashed box so the file-selector's drop surface covers it all. The selector's internal
+   layout (dropzone fill, bottom-anchored button, click only on the button) is themed in the shared
+   sheet (envelopeWizardStyles.css). */
+.docs__file-input {
+    position: absolute;
+    inset: 0;
+}
+
+.docs__dropzone-copy {
+    /* Purely visual; the file-selector layered above captures clicks and drops. */
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-1, 4px);
+}
+
+.docs__dropzone-title {
+    margin: 0;
+    font-size: 16px;
+    line-height: 22px;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--slds-g-color-accent-1, #0f406f);
+}
+
+.docs__dropzone-hint {
+    margin: 0;
+    font-size: var(--slds-g-font-scale-1, 14px);
+    line-height: 19px;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* Files picked via the file-selector (browse or drop). */
+.docs__file-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-2, 8px);
+}
+
+.docs__file {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--slds-g-spacing-3, 12px);
+    padding: var(--slds-g-spacing-3, 12px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--slds-g-radius-border-3, 12px);
+}
+
+/* The file's primary row — icon + name + actions when complete, or the upload interior + cancel
+   while in progress. Carries the horizontal layout the card frame used to own. */
+.docs__file-row {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 8px);
+    width: 100%;
+}
+
+.docs__file-icon {
+    flex: none;
+}
+
+.docs__file-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--slds-g-font-scale-2, 16px);
+    line-height: 22px;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+/* Keep the row actions at their intrinsic width so the name truncates instead. */
+.docs__file-link,
+.docs__file-menu {
+    flex: none;
+}
+
+/* Documents linked to a file, listed below the file row with a separator (Figma file card).
+   The 32px inset (24px icon + 8px row gap) is a left margin, not padding, so the separator
+   starts under the filename instead of spanning the full card width — matching the document
+   card's divider. */
+.docs__file-docs {
+    margin: 0 0 0 var(--slds-g-spacing-6, 32px);
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-3, 12px);
+    padding: var(--slds-g-spacing-3, 12px) 0 var(--slds-g-spacing-2, 8px);
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+
+.docs__file-doc {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    line-height: 19px;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* In-progress upload interior: filename + byte/percent readout above a progress bar. Shares the
+   .docs__file card frame; the cancel button sits to its right. */
+.docs__upload {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-2, 8px);
+}
+
+.docs__upload-labels {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--slds-g-spacing-2, 8px);
+}
+
+.docs__upload-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--slds-g-font-size-base, 13px);
+    line-height: 18px;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.docs__upload-meta {
+    flex: none;
+    font-size: var(--slds-g-font-size-base, 13px);
+    line-height: 18px;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.docs__upload-cancel {
+    flex: none;
+}
+
+/* Stack the columns on narrow viewports. */
+@media (max-width: 767px) {
+    .docs__content {
+        flex-direction: column;
+    }
+}

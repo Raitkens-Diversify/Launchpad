@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- MutualFundsServiceNone --></label>
+        <name>MutualFundsServiceNone__c</name>
+        <relationshipLabel><!-- Product Filter Lookups (MutualFundsServiceNone) --></relationshipLabel>
+    </CustomFieldTranslation>

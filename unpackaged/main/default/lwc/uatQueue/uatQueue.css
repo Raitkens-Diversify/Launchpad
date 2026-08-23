@@ -1,0 +1,531 @@
+/* --slds-g-* declared locally, not inherited: platform-injected SLDS2
+   styling hooks beat values inherited from an ancestor's :host
+   (see nexsHome.css / dsHero.css). */
+:host {
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-accent-3: #071c31;
+    --slds-g-color-on-accent-1: #ffffff;
+}
+
+.uq__error {
+    margin: 0 0 var(--ds-space-md, 12px);
+    font-size: 0.875rem;
+    color: var(--ds-error-text, #a83232);
+}
+
+.uq__tabs {
+    display: block;
+    margin-bottom: var(--ds-space-lg, 16px);
+}
+
+/* ---- Toolbar: chips left, search + Filters right ------------------------- */
+
+.uq__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-space-lg, 16px);
+    flex-wrap: wrap;
+    margin-bottom: var(--ds-space-lg, 16px);
+}
+
+.uq__chips {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.uq__toolbar-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-sm, 8px);
+    flex: none;
+}
+
+.uq__search {
+    width: 260px;
+}
+
+.uq__filters-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-sm, 8px);
+    padding: 7px 14px;
+    border-radius: var(--ds-radius-md, 8px);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-2, #374151);
+    white-space: nowrap;
+}
+.uq__filters-toggle:hover {
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+}
+.uq__filters-toggle:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+.uq__filters-icon {
+    --sds-c-icon-color-foreground-default: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* Inline panel under the toolbar (not an overlay — no focus trap needed). */
+.uq__filters {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(160px, 220px));
+    align-items: end;
+    gap: var(--ds-space-lg, 16px);
+    padding: var(--ds-space-lg, 16px);
+    margin-bottom: var(--ds-space-lg, 16px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+}
+
+.uq__clear {
+    justify-self: start;
+    background: none;
+    border: none;
+    padding: 0 0 6px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--ds-medium-blue, #1a76bb);
+    white-space: nowrap;
+}
+.uq__clear:hover {
+    text-decoration: underline;
+}
+.uq__clear:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+
+/* ---- Featured "Continue Testing" card --------------------------------------
+   The dashboard's Your-Active-Test language: one polished card for the single
+   most relevant run; everything else stays dense below. */
+
+.uq__featured {
+    padding: var(--ds-space-xl, 24px);
+    margin-bottom: var(--ds-space-lg, 16px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+    box-shadow: var(--ds-shadow-rest, 0 1px 2px rgba(15, 23, 42, 0.06));
+}
+
+.uq__featured-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--ds-space-md, 12px);
+}
+.uq__featured-heading {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.uq__featured-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-space-xl, 24px);
+}
+
+.uq__featured-main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--ds-space-sm, 8px);
+}
+
+.uq__featured-title {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--ds-medium-blue, #1a76bb);
+    overflow-wrap: anywhere;
+}
+.uq__featured-title:hover {
+    text-decoration: underline;
+}
+.uq__featured-title:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+
+.uq__featured-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--ds-space-xs, 4px) 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.uq__featured-meta-item + .uq__featured-meta-item::before {
+    content: "·";
+    margin: 0 var(--ds-space-sm, 8px);
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    font-weight: 400;
+}
+
+.uq__featured-status {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--ds-space-xs, 4px) 0;
+    font-size: 0.8125rem;
+}
+.uq__featured-note {
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.uq__featured-status > * + *::before {
+    content: "·";
+    margin: 0 var(--ds-space-sm, 8px);
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.uq__featured-actions {
+    margin-top: var(--ds-space-sm, 8px);
+}
+
+/* Decorative disc, dashboard parity (hidden on narrow). */
+.uq__featured-visual {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: var(--ds-lightest-blue, #e2f8ff);
+    --sds-c-icon-color-foreground-default: var(--ds-medium-blue, #1a76bb);
+}
+
+/* ---- Dense column-header list -----------------------------------------------
+   A grid, not a <table>, and no overflow property anywhere on it or the rows —
+   the kebab dropdown (lightning-button-menu) must be free to escape. The
+   header row is decorative (aria-hidden): rows are self-describing articles. */
+
+.uq__table {
+    /* Fixed action track (not auto): the header and each row are separate
+       grid containers sharing this template, and auto resolves per container
+       — 0px under the empty header cell, button-width (varying with
+       Start/Continue/Review) in rows — shearing every column after it. */
+    --uq-cols: 140px minmax(0, 1fr) minmax(120px, 160px) 150px 90px 104px 36px;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+}
+
+.uq__thead,
+.uq__tr {
+    display: grid;
+    grid-template-columns: var(--uq-cols);
+    align-items: center;
+    column-gap: var(--ds-space-lg, 16px);
+    padding: var(--ds-space-md, 12px) var(--ds-space-lg, 16px);
+}
+
+.uq__thead {
+    padding-top: var(--ds-space-sm, 8px);
+    padding-bottom: var(--ds-space-sm, 8px);
+}
+.uq__th {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.uq__tr {
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    transition: background-color 0.15s ease;
+}
+.uq__tr:hover {
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+
+/* Lifecycle section header (default sort only). Real content — not
+   aria-hidden like the decorative thead — and, like everything else in this
+   container, it must not carry an overflow property (kebab rule above). */
+.uq__group-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--ds-space-sm, 8px);
+    padding: var(--ds-space-sm, 8px) var(--ds-space-lg, 16px);
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.uq__group-count {
+    font-weight: 500;
+}
+/* The in-flight rows keep a left accent cue. */
+.uq__tr--active {
+    box-shadow: inset 3px 0 0 var(--ds-medium-blue, #1a76bb);
+}
+
+.uq__td {
+    min-width: 0;
+}
+
+.uq__td--status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--ds-space-xs, 4px);
+}
+.uq__status-notes {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.uq__status-note {
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.uq__status-note--error {
+    color: var(--ds-error-text, #a83232);
+}
+.uq__status-note--warning {
+    color: var(--ds-warning-text, #b8860b);
+}
+.uq__status-note--success {
+    color: var(--ds-success-text, #2d7d46);
+}
+.uq__status-note--muted {
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.uq__td--case {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+/* The title is the open action — link-styled, same as the Dashboard's
+   nav-cards and the Help Center's popular-article rows. */
+.uq__row-title {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--ds-medium-blue, #1a76bb);
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.uq__row-title:hover {
+    text-decoration: underline;
+}
+.uq__row-title:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+.uq__case-meta {
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    overflow-wrap: anywhere;
+}
+/* Cycle/updated fold into the case meta line only when their columns drop. */
+.uq__inline-cycle,
+.uq__inline-updated {
+    display: none;
+}
+.uq__inline-cycle::before,
+.uq__inline-updated::before {
+    content: "·";
+    margin: 0 var(--ds-space-xs, 4px);
+}
+
+.uq__td--cycle {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.uq__cycle-name {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    overflow-wrap: anywhere;
+}
+.uq__cycle-target {
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.uq__td--progress {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-sm, 8px);
+}
+.uq__td--progress c-ds-progress-bar {
+    flex: 1 1 auto;
+    min-width: 60px;
+}
+.uq__progress-fraction {
+    flex: none;
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    white-space: nowrap;
+}
+
+.uq__td--updated {
+    font-size: 0.8125rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    white-space: nowrap;
+}
+
+.uq__td--action {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.uq__row-kebab {
+    justify-self: end;
+}
+
+.uq__sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.uq__pager {
+    margin-top: var(--ds-space-lg, 16px);
+}
+
+/* ---- Responsive ------------------------------------------------------------ */
+
+@media (max-width: 1024px) {
+    /* UPDATED drops; its value folds into the case meta line. */
+    .uq__table {
+        --uq-cols: 130px minmax(0, 1fr) minmax(110px, 150px) 130px 104px 36px;
+    }
+    .uq__th--updated,
+    .uq__td--updated {
+        display: none;
+    }
+    .uq__inline-updated {
+        display: inline;
+    }
+}
+
+@media (max-width: 768px) {
+    /* The decorative header goes; rows re-flow into stacked cards. Cycle
+       folds into the case meta line. */
+    .uq__thead {
+        display: none;
+    }
+    .uq__tr {
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+            "status kebab"
+            "case case"
+            "progress progress"
+            "action action";
+        row-gap: var(--ds-space-sm, 8px);
+    }
+    .uq__td--status { grid-area: status; }
+    .uq__td--case { grid-area: case; }
+    .uq__td--progress { grid-area: progress; }
+    .uq__td--action { grid-area: action; justify-content: stretch; }
+    .uq__td--action lightning-button {
+        flex: 1 1 auto;
+    }
+    .uq__row-kebab { grid-area: kebab; }
+    .uq__td--cycle {
+        display: none;
+    }
+    .uq__inline-cycle {
+        display: inline;
+    }
+
+    .uq__toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .uq__toolbar-controls {
+        justify-content: stretch;
+    }
+    .uq__search {
+        flex: 1 1 auto;
+        width: auto;
+    }
+    .uq__filters {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .uq__featured-visual {
+        display: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .uq__tr {
+        padding: var(--ds-space-md, 12px);
+    }
+    .uq__featured {
+        padding: var(--ds-space-lg, 16px);
+    }
+    .uq__featured-actions {
+        align-self: stretch;
+    }
+    .uq__featured-actions lightning-button {
+        display: flex;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .uq__tr,
+    .uq__filters-toggle {
+        transition-duration: 0.01ms;
+    }
+}
+.uq__preview-error {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--ds-error-text, #a83232);
+}
+.uq__preview-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--ds-space-sm, 8px);
+}

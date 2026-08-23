@@ -1,0 +1,12 @@
+.THIS {
+}
+
+.THIS .slds-table th,
+.THIS .slds-table td
+{
+    white-space: break-spaces;
+}
+
+.THIS .boldText{
+    font-weight: 700;
+}

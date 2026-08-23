@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- AA - Account Number - Wizard --></label>
+        <name>AA_Account_Number_Wizard__c</name>
+        <relationshipLabel><!-- Cases (AA - Account Number - Wizard) --></relationshipLabel>
+    </CustomFieldTranslation>

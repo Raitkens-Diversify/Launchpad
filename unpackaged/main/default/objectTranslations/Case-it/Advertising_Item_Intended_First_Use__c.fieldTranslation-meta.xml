@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Advertising Item Intended First Use --></label>
+        <name>Advertising_Item_Intended_First_Use__c</name>
+    </CustomFieldTranslation>

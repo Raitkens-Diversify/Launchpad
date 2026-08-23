@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Action --></label>
+        <name>Action__c</name>
+        <picklistValues>
+            <masterLabel>Auto Released</masterLabel>
+            <translation><!-- Auto Released --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Claimed</masterLabel>
+            <translation><!-- Claimed --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Force Unassigned</masterLabel>
+            <translation><!-- Force Unassigned --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Reassigned</masterLabel>
+            <translation><!-- Reassigned --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Released</masterLabel>
+            <translation><!-- Released --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>61.0</apiVersion>
+    <isExposed>false</isExposed>
+    <description>Tester landing view: hero cycle progress + Continue testing/Due this week/Available to claim/Recently completed rows. Embedded by uatTesterApp only.</description>
+</LightningComponentBundle>

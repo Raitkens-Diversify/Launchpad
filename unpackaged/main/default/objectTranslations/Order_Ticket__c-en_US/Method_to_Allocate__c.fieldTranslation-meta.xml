@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Method to Allocate --></label>
+        <name>Method_to_Allocate__c</name>
+        <picklistValues>
+            <masterLabel>Allocate Pro-rata to Standard Trade Instructions</masterLabel>
+            <translation><!-- Allocate Pro-rata to Standard Trade Instructions --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Custom</masterLabel>
+            <translation><!-- Custom --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

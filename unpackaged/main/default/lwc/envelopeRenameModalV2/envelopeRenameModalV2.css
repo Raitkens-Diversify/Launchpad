@@ -1,0 +1,58 @@
+/* ───────── Slotted header (icon + title + subtitle) ─────────
+   The header is slotted into ds-modal-v2, so it lives in this component's
+   shadow DOM and can't use the modal's scoped .ds-modal-v2__title/__subtitle
+   classes — typography is re-created here to match dsModalV2.css. */
+.rename-envelope__heading {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-2);
+    font-family: var(--slds-g-font-family-base);
+}
+
+.rename-envelope__title-row {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2);
+}
+
+.rename-envelope__title-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    fill: var(--slds-g-color-on-surface-1);
+}
+
+.rename-envelope__title {
+    margin: 0;
+    font-family: var(--slds-g-font-family-base);
+    font-size: var(--slds-g-font-scale-3);
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--slds-g-color-on-surface-3);
+}
+
+.rename-envelope__subtitle {
+    margin: 0;
+    font-size: var(--slds-g-font-scale-2);
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--slds-g-color-on-surface-1);
+}
+
+.rename-envelope__subtitle strong {
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-1);
+}
+
+.rename-envelope__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-4);
+    font-family: var(--slds-g-font-family-base);
+}
+
+.rename-envelope__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--slds-g-spacing-2);
+}

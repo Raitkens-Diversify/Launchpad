@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Charter__c</fullName>
+    <description>DEPRECATED 2026-08-06 - exploratory-testing ceremony that business testers were required to fill in before they could start. No longer authored or required (its validation rule is deleted); Area__c carries the optional one-liner instead. Kept so the existing sessions keep their text.</description>
+    <label>Charter</label>
+    <length>32768</length>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>5</visibleLines>
+</CustomField>

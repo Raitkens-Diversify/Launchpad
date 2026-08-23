@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>DMS_Task</fullName>
+    <booleanFilter>1 AND 2 AND 3 AND 4</booleanFilter>
+    <columns>SUBJECT</columns>
+    <columns>WHO_NAME</columns>
+    <columns>WHAT_NAME</columns>
+    <columns>FinServ__Household__c</columns>
+    <columns>Financial_Account__c</columns>
+    <columns>CORE.USERS.FULL_NAME</columns>
+    <columns>DUE_DATE</columns>
+    <columns>STATUS</columns>
+    <columns>COMPLETED_DATE_TIME</columns>
+    <columns>LAST_UPDATE</columns>
+    <columns>UPDATEDBY_USER.ALIAS</columns>
+    <filterScope>Queue</filterScope>
+    <filters>
+        <field>STATUS</field>
+        <operation>equals</operation>
+        <value>Open,Not Started,In Progress</value>
+    </filters>
+    <filters>
+        <field>SUBJECT</field>
+        <operation>notContain</operation>
+        <value>NF</value>
+    </filters>
+    <filters>
+        <field>SUBJECT</field>
+        <operation>notContain</operation>
+        <value>deliv</value>
+    </filters>
+    <filters>
+        <field>SUBJECT</field>
+        <operation>notContain</operation>
+        <value>no trade</value>
+    </filters>
+    <label>DMS</label>
+    <queue>DMS</queue>
+    <sharedTo>
+        <allInternalUsers />
+    </sharedTo>
+</ListView>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Allows the user to access Financial Services Cloud features delivered after Spring &#39;20.</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Config CDS</label>
+    <license>FinancialServicesCloudExtensionPsl</license>
+    <userPermissions>
+        <enabled>true</enabled>
+        <name>FinancialServices2UserAccess</name>
+    </userPermissions>
+</PermissionSet>

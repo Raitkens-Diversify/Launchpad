@@ -1,0 +1,7 @@
+<template>
+    <div class="ds-skel-group" aria-hidden="true">
+        <template for:each={blocks} for:item="b">
+            <div key={b.key} class={cssClass}></div>
+        </template>
+    </div>
+</template>

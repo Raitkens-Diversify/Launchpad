@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Format__c</fullName>
+    <description>Named input format for the field. Drives the input mask, the client pattern, and the server-side format check from one library (WizardFieldValidator.FORMATS). When set, it supersedes Pattern__c/Pattern_Error__c, which remain as an escape hatch for one-off fields.</description>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Format</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>SSN</fullName>
+                <default>false</default>
+                <label>SSN</label>
+            </value>
+            <value>
+                <fullName>EIN</fullName>
+                <default>false</default>
+                <label>EIN</label>
+            </value>
+            <value>
+                <fullName>SSN or EIN</fullName>
+                <default>false</default>
+                <label>SSN or EIN</label>
+            </value>
+            <value>
+                <fullName>US ZIP</fullName>
+                <default>false</default>
+                <label>US ZIP</label>
+            </value>
+            <value>
+                <fullName>US Phone</fullName>
+                <default>false</default>
+                <label>US Phone</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

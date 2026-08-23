@@ -1,0 +1,13 @@
+<aura:component implements="lightning:availableForFlowScreens" controller="EmailTemplateHelper">
+	<aura:attribute name="EmailTemplate" type="String" />
+    <aura:attribute name="CaseId" type="String" />
+	<aura:attribute name="UserId" type="String" />
+    <aura:attribute name="EmailTemplateText" type="String"/>
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <lightning:textarea aura:id="template" name="emailTempText" value="{!v.EmailTemplateText}"/>
+    <lightning:button iconName="utility:copy_to_clipboard"
+                          onclick="{!c.copyEmailTemplateText}"
+                          label="Copy Text to clipboard"
+                          aura:id="buttonId"/>
+</aura:component>

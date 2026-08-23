@@ -1,0 +1,118 @@
+<template>
+    <div class="aal">
+        <div class="aal__toolbar">
+            <lightning-input type="search"
+                             variant="label-hidden"
+                             label="Search articles"
+                             placeholder="Search by title or URL name…"
+                             value={searchTerm}
+                             class="aal__search"
+                             onchange={handleSearchChange}></lightning-input>
+            <lightning-combobox variant="label-hidden"
+                                label="Status"
+                                value={statusFilter}
+                                options={statusOptions}
+                                onchange={handleStatusChange}></lightning-combobox>
+            <lightning-combobox variant="label-hidden"
+                                label="Topic"
+                                value={categoryFilter}
+                                options={categoryOptions}
+                                onchange={handleCategoryChange}></lightning-combobox>
+            <lightning-input type="checkbox"
+                             label="Featured only"
+                             checked={featuredOnly}
+                             onchange={handleFeaturedChange}></lightning-input>
+            <lightning-button-icon icon-name="utility:refresh"
+                                   alternative-text="Refresh"
+                                   onclick={handleRefresh}></lightning-button-icon>
+            <lightning-button variant="brand"
+                              label="New article"
+                              onclick={handleCreate}></lightning-button>
+        </div>
+
+        <template if:true={errorMessage}>
+            <p class="aal__error" role="alert">{errorMessage}</p>
+        </template>
+
+        <template if:true={loading}>
+            <div class="aal__loading">
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={loading}>
+            <template if:true={hasRows}>
+                <table class="aal__table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Title</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Topics</th>
+                            <th scope="col">Featured</th>
+                            <th scope="col" class="aal__actions-col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={filteredRows} for:item="row">
+                            <tr key={row.kaId}>
+                                <td>
+                                    <span class="aal__title">{row.title}</span>
+                                    <span class="aal__urlname">{row.urlName}</span>
+                                </td>
+                                <td><span class={row.statusClass}>{row.status}</span></td>
+                                <td>{row.recordTypeLabel}</td>
+                                <td class="aal__categories">{row.categoriesLabel}</td>
+                                <td>
+                                    <template if:true={row.featured}>
+                                        <lightning-icon icon-name="utility:favorite"
+                                                        size="xx-small"
+                                                        alternative-text="Featured"></lightning-icon>
+                                    </template>
+                                </td>
+                                <td class="aal__actions">
+                                    <lightning-button label="Edit"
+                                                      size="small"
+                                                      data-kaid={row.kaId}
+                                                      onclick={handleEdit}></lightning-button>
+                                    <template if:true={row.isOnline}>
+                                        <lightning-button label="Unpublish"
+                                                          size="small"
+                                                          data-kaid={row.kaId}
+                                                          data-title={row.title}
+                                                          onclick={handleUnpublishClick}></lightning-button>
+                                    </template>
+                                    <template if:true={row.hasDraft}>
+                                        <lightning-button label="Discard draft"
+                                                          size="small"
+                                                          data-kaid={row.kaId}
+                                                          data-title={row.title}
+                                                          onclick={handleDiscardClick}></lightning-button>
+                                    </template>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </template>
+            <template if:false={hasRows}>
+                <p class="aal__empty">No articles match these filters.</p>
+            </template>
+        </template>
+
+        <template if:true={confirm}>
+            <section class="aal-modal" role="dialog" aria-modal="true" aria-label={confirm.confirmLabel}>
+                <div class="aal-modal__panel">
+                    <h2 class="aal-modal__title">{confirm.confirmLabel}: {confirm.title}</h2>
+                    <p class="aal-modal__message">{confirm.message}</p>
+                    <div class="aal-modal__actions">
+                        <lightning-button label="Cancel" onclick={handleConfirmCancel}></lightning-button>
+                        <lightning-button variant="destructive"
+                                          label={confirm.confirmLabel}
+                                          onclick={handleConfirmProceed}></lightning-button>
+                    </div>
+                </div>
+            </section>
+        </template>
+    </div>
+</template>

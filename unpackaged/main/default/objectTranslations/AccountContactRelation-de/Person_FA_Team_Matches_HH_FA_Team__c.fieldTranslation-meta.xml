@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Person FA Team Matches HH FA Team --></label>
+        <name>Person_FA_Team_Matches_HH_FA_Team__c</name>
+    </CustomFieldTranslation>

@@ -1,0 +1,359 @@
+/* Self-declared design tokens (mirrors envelopeListV2): the V2 --slds-g-* set
+   drives our own layout/palette, and the V1 --ds-* set feeds the reused ds*
+   components (c-ds-card, c-ds-badge, c-ds-search-bar, c-ds-section-label) that
+   exist in the org. --ds-border-default is cooled to the V2 border so those
+   components match the new look. No dsTokensV2 provider (absent in the org). */
+:host {
+    display: block;
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+
+    /* --- V2 / SLDS2 tokens (the "new design system") --- */
+    --slds-g-spacing-1: 4px;
+    --slds-g-spacing-2: 0.5rem;
+    --slds-g-spacing-3: 0.75rem;
+    --slds-g-spacing-4: 1rem;
+    --slds-g-spacing-5: 24px;
+    --slds-g-radius-border-2: 0.5rem;
+    --slds-g-font-family-base: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    --slds-g-font-scale-1: 14px;
+    --slds-g-font-scale-2: 0.875rem;
+    --slds-g-font-scale-3: 1.25rem;
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-border-2: #b6bcc5;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-accent-3: #071c31;
+    --slds-g-color-on-accent-1: #ffffff;
+    --slds-g-color-accent-container-1: #0f406f;
+
+    /* --- V1 --ds-* set, still needed by the reused ds* components --- */
+    --ds-dark-blue: #0f406f;
+    --ds-medium-blue: #1a76bb;
+    --ds-light-blue: #14bef0;
+    --ds-lightest-blue: #e2f8ff;
+    --ds-white: #ffffff;
+    --ds-gray-1: #f3f4f6;
+    --ds-gray-2: #d1d5db;
+    --ds-gray-3: #b6bcc5;
+    --ds-gray-4: #9aa1ad;
+    --ds-gray-5: #4b5563;
+    --ds-gray-6: #374151;
+    --ds-success: #2d9f6f;
+    --ds-success-bg: #e8f5e9;
+    --ds-success-text: #2d7d46;
+    --ds-warning: #e8b84b;
+    --ds-warning-bg: #fff8e6;
+    --ds-warning-text: #b8860b;
+    --ds-error: #d94545;
+    --ds-error-bg: #fdecec;
+    --ds-error-text: #a83232;
+    --ds-font-heading: "Libre Baskerville", Georgia, serif;
+    --ds-font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    --ds-space-xs: 4px;
+    --ds-space-sm: 8px;
+    --ds-space-md: 12px;
+    --ds-space-lg: 16px;
+    --ds-space-xl: 24px;
+    --ds-space-2xl: 32px;
+    --ds-space-3xl: 48px;
+    --ds-radius-sm: 6px;
+    --ds-radius-md: 8px;
+    --ds-radius-lg: 10px;
+    --ds-radius-xl: 12px;
+    --ds-radius-pill: 20px;
+    --ds-border-light: 1px solid #e5e7eb;
+    --ds-border-default: 1px solid #d1d5db;
+
+    /* Readable line length for article text (no measure token exists in
+       either set; declared once here and on nexsLanding, consumed by
+       nexsArticleViewer). Widened so text fills the wider Hulu-like card. */
+    --nexs-article-measure: 82ch;
+    /* Centered content columns (also declared on nexsLanding): inner pages
+       use the wide one, per the Hulu reference. */
+    --nexs-content-max: 1040px;
+    --nexs-content-wide: 1440px;
+}
+
+.nexs {
+    display: flex;
+    gap: var(--slds-g-spacing-5, 24px);
+    max-width: var(--nexs-content-wide, 1440px);
+    margin: 0 auto;
+    padding: var(--ds-space-2xl, 32px) var(--slds-g-spacing-5, 24px) var(--slds-g-spacing-5, 24px);
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+    /* Leave room for the sticky brand header when we scroll here on open. */
+    scroll-margin-top: 80px;
+}
+
+/* Article view: a touch more top breathing room, and the breadcrumb is inset
+   to line up under the article card's content (Hulu-style) rather than hugging
+   the card's outer edge. Scoped to the article view so the list view's
+   breadcrumb still aligns with the section cards. */
+.nexs--article {
+    padding-top: var(--ds-space-3xl, 48px);
+}
+
+.nexs--article c-ds-breadcrumbs {
+    padding-left: var(--ds-space-2xl, 32px);
+}
+
+/* List view: the breadcrumb row reserves the same height as the "All topics"
+   heading (1.5rem × 1.2 line-height) so the first section card's top edge
+   lines up with the topic card across the divider. */
+/* Host-element rule: dsBreadcrumbs' :host is display:flex, so align-items
+   here lays out the shadow nav (crumb baseline aligns with the nav title). */
+.nexs:not(.nexs--article) c-ds-breadcrumbs {
+    min-height: calc(1.5rem * 1.2);
+    align-items: flex-end;
+}
+
+/* ---- Left category nav (Hulu-style: heading + white icon list, with a
+   full-height rule dividing nav from content — the aside stretches) ---- */
+.nexs__nav {
+    flex: 0 0 340px;
+    padding-right: var(--slds-g-spacing-5, 24px);
+    border-right: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+
+/* Nav list visuals live in the shared c-ds-topic-nav component; this host
+   keeps only the column layout (.nexs__nav above). */
+
+/* ---- Main panel ---- */
+.nexs__main {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* Breadcrumb visuals live in the shared c-ds-breadcrumbs component. */
+
+/* ---- Article view: body card left, related panel right ---- */
+.nexs__article-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: var(--slds-g-spacing-5, 24px);
+    align-items: start;
+}
+
+.nexs__article-layout--single {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+/* Rail wrapper: sticky column holding Suggested Articles + Downloads &
+   Resources. Renders zero-height when both are empty (single-column layout). */
+.nexs__rail {
+    position: sticky;
+    top: var(--slds-g-spacing-5, 24px);
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-4, 16px);
+    min-width: 0;
+}
+
+.nexs__related {
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+    padding: var(--slds-g-spacing-5, 24px);
+}
+
+/* Hulu-style rail header: bold title closed by a divider. */
+.nexs__related-title {
+    margin: 0;
+    padding-bottom: var(--slds-g-spacing-3, 12px);
+    border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.nexs__related-list {
+    list-style: none;
+    margin: var(--slds-g-spacing-4, 16px) 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-3, 12px);
+}
+
+/* ---- Collapsible sections (Hulu-style card of link rows) ---- */
+.nexs__sections {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-3, 12px);
+}
+
+.nexs__section {
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-md, 8px);
+    overflow: hidden;
+}
+
+.nexs__section-head {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--slds-g-spacing-3, 12px);
+    padding: 18px var(--slds-g-spacing-5, 24px);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+}
+
+.nexs__section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.nexs__section-head lightning-icon {
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.nexs__section-body {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+
+.nexs__section-body--collapsed {
+    display: none;
+}
+
+.nexs__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--slds-g-spacing-3, 12px);
+    padding: var(--slds-g-spacing-3, 12px) var(--slds-g-spacing-5, 24px);
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+
+.nexs__section-body > .nexs__row:first-child {
+    border-top: none;
+}
+
+.nexs__row:hover {
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+
+.nexs__row-link {
+    color: var(--ds-medium-blue, #1a76bb);
+    font-size: 0.9375rem;
+    text-decoration: none;
+}
+
+.nexs__row-link:hover {
+    text-decoration: underline;
+}
+
+.nexs__empty {
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    font-size: var(--slds-g-font-scale-2, 0.875rem);
+}
+/* Related panel stacks under the article before the page goes single column. */
+@media (max-width: 1024px) {
+    .nexs__article-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .nexs__rail {
+        position: static;
+    }
+}
+
+/* Single column on narrow viewports (LWR mobile / tablet). */
+@media (max-width: 768px) {
+    .nexs {
+        flex-direction: column;
+    }
+    .nexs__nav {
+        flex-basis: auto;
+        width: 100%;
+        padding-right: 0;
+        border-right: none;
+    }
+}
+
+/* ---- Phase 3: search result presentation -------------------------------- */
+
+/* Fuzzy-correction banner. */
+.nexs__fuzzy {
+    margin: 0 0 var(--slds-g-spacing-4, 1rem);
+    font-size: var(--slds-g-font-scale-2, 0.875rem);
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.nexs__fuzzy-link {
+    color: var(--slds-g-color-accent-1, #0f406f);
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* Result rows: title (with highlight) stacked over a summary snippet. */
+.nexs__row-title {
+    display: block;
+}
+
+.nexs__row-title strong {
+    font-weight: 800;
+    color: var(--slds-g-color-accent-1, #0f406f);
+}
+
+.nexs__row-summary {
+    display: block;
+    margin-top: 2px;
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: 400;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Zero-results state: fallback articles + contact CTA. */
+.nexs__zero {
+    padding: var(--slds-g-spacing-4, 1rem) 0;
+}
+
+.nexs__zero-lead {
+    margin: 0 0 var(--slds-g-spacing-3, 0.75rem);
+    font-size: var(--slds-g-font-scale-3, 1.25rem);
+    font-weight: 700;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.nexs__zero-sub {
+    margin: var(--slds-g-spacing-4, 1rem) 0 var(--slds-g-spacing-2, 0.5rem);
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.nexs__zero-list {
+    list-style: none;
+    margin: 0 0 var(--slds-g-spacing-4, 1rem);
+    padding: 0;
+}
+
+.nexs__zero-cta {
+    display: inline-block;
+    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-4, 1rem);
+    background: var(--slds-g-color-accent-1, #0f406f);
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    font-weight: 600;
+    text-decoration: none;
+}

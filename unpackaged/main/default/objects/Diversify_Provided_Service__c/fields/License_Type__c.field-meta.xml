@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>License_Type__c</fullName>
+    <label>License Type</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <controllingField>Sub_Type__c</controllingField>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Enhanced</fullName>
+                <default>false</default>
+                <label>Enhanced</label>
+            </value>
+            <value>
+                <fullName>Basic</fullName>
+                <default>false</default>
+                <label>Basic</label>
+            </value>
+            <value>
+                <fullName>Advisor</fullName>
+                <default>false</default>
+                <label>Advisor</label>
+            </value>
+            <value>
+                <fullName>Wizard Only</fullName>
+                <default>false</default>
+                <label>Wizard Only</label>
+            </value>
+            <value>
+                <fullName>Enhanced - Department Admin</fullName>
+                <default>false</default>
+                <label>Enhanced - Department Admin</label>
+            </value>
+            <value>
+                <fullName>Metadata Permissions</fullName>
+                <default>false</default>
+                <label>Metadata Permissions</label>
+            </value>
+            <value>
+                <fullName>Enhanced - Systems Team</fullName>
+                <default>false</default>
+                <label>Enhanced - Systems Team</label>
+            </value>
+            <value>
+                <fullName>System Administrator</fullName>
+                <default>false</default>
+                <label>System Administrator</label>
+            </value>
+            <value>
+                <fullName>Systems</fullName>
+                <default>false</default>
+                <label>Systems</label>
+            </value>
+            <value>
+                <fullName>Enrolled</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Enrolled</label>
+            </value>
+        </valueSetDefinition>
+        <valueSettings>
+            <controllingFieldValue>Salesforce</controllingFieldValue>
+            <valueName>Advisor</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Salesforce</controllingFieldValue>
+            <valueName>Wizard Only</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Salesforce</controllingFieldValue>
+            <valueName>System Administrator</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Salesforce</controllingFieldValue>
+            <valueName>Systems</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Egnyte</controllingFieldValue>
+            <valueName>Enhanced</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Egnyte</controllingFieldValue>
+            <valueName>Basic</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Egnyte</controllingFieldValue>
+            <valueName>Enhanced - Department Admin</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Egnyte</controllingFieldValue>
+            <valueName>Metadata Permissions</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Egnyte</controllingFieldValue>
+            <valueName>Enhanced - Systems Team</valueName>
+        </valueSettings>
+    </valueSet>
+</CustomField>

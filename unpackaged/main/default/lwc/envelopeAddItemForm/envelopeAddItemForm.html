@@ -1,0 +1,61 @@
+<!-- Author: Mile Cacanovic -->
+<template>
+    <c-card>
+        <div class="add-form">
+            <div class="add-form__header">
+                <lightning-icon
+                    icon-name={config.icon}
+                    size="small"
+                    class={config.iconClass}
+                    alternative-text="">
+                </lightning-icon>
+                <span class="add-form__title">{config.title}</span>
+            </div>
+
+            <div class="add-form__row">
+                <lightning-input
+                    class="add-form__field"
+                    type="text"
+                    label={config.nicknameLabel}
+                    placeholder={config.nicknamePlaceholder}
+                    value={nickname}
+                    onchange={handleNicknameChange}>
+                </lightning-input>
+
+                <lightning-combobox
+                    class="add-form__field"
+                    label={config.typeLabel}
+                    placeholder={config.typePlaceholder}
+                    options={config.typeOptions}
+                    value={typeValue}
+                    onchange={handleTypeChange}>
+                </lightning-combobox>
+
+                <div class="add-form__actions">
+                    <lightning-button
+                        class="env-base-button"
+                        variant="base"
+                        label="Cancel"
+                        disabled={saving}
+                        onclick={handleCancel}>
+                    </lightning-button>
+                    <div class="env-busy-button">
+                        <lightning-button
+                            variant="brand"
+                            label={config.submitLabel}
+                            disabled={disableSubmit}
+                            onclick={handleSubmit}>
+                        </lightning-button>
+                        <template lwc:if={saving}>
+                            <lightning-spinner
+                                size="small"
+                                variant="brand"
+                                alternative-text="Saving">
+                            </lightning-spinner>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </c-card>
+</template>

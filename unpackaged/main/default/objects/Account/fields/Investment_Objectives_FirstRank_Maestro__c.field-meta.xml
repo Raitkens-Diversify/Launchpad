@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Investment_Objectives_FirstRank_Maestro__c</fullName>
+    <externalId>false</externalId>
+    <formula>CASE(
+        UPPER(LEFT(Household__r.Investment_Objective_Ranked__c, 1)),
+        &#39;B&#39;, &#39;L&#39;, 
+        &#39;G&#39;, &#39;R&#39;,  
+        &#39;I&#39;, &#39;I&#39;, 
+        &#39;S&#39;, &#39;S&#39;,  
+        &#39;P&#39;, &#39;P&#39;,
+        &#39;W&#39;, &#39;W&#39;,  
+        &#39;&#39;        
+)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Investment Objectives</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

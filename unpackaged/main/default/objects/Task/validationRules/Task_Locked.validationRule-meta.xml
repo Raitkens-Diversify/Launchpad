@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Task_Locked</fullName>
+    <active>true</active>
+    <description>Prevents any changes to the Task record if Lock__c is set to true.</description>
+    <errorConditionFormula>AND(
+    Lock__c = TRUE,
+    NOT(ISCHANGED(Lock__c))
+)</errorConditionFormula>
+    <errorMessage>Changes cannot be made to a Task when it is locked.</errorMessage>
+</ValidationRule>

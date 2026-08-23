@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Home</fullName>
+        <default>false</default>
+        <label>Home</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Auto</fullName>
+        <default>false</default>
+        <label>Auto</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Life</fullName>
+        <default>false</default>
+        <label>Life</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Annuity</fullName>
+        <default>false</default>
+        <label>Annuity</label>
+    </standardValue>
+</StandardValueSet>

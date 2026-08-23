@@ -1,0 +1,53 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-08-18 -->
+<template>
+  <template lwc:if={isVisible}>
+    <div class="menu-setting">
+      <button
+        type="button"
+        class={triggerButtonClass}
+        aria-label="Settings"
+        aria-haspopup="menu"
+        aria-expanded={isMenuOpen}
+        aria-controls={menuId}
+        onclick={handleTriggerClick}
+        onkeydown={handleTriggerKeyDown}
+      >
+        <span
+          class="menu-setting__icon"
+          style={iconStyle}
+          aria-hidden="true"
+        ></span>
+      </button>
+
+      <template lwc:if={isMenuOpen}>
+        <div
+          id={menuId}
+          class="menu-setting__panel div-popover div-shadow-elevation-3-down"
+          role="menu"
+          aria-label="Settings menu"
+        >
+          <button
+            type="button"
+            class="div-popover__option"
+            role="menuitem"
+            data-action="reset-password"
+            onclick={handleResetPasswordClick}
+            onkeydown={handleResetPasswordKeyDown}
+          >
+            Reset Password
+          </button>
+          <button
+            type="button"
+            class="div-popover__option"
+            role="menuitem"
+            data-action="logout"
+            onclick={handleLogoutClick}
+            onkeydown={handleLogoutKeyDown}
+          >
+            Logout
+          </button>
+        </div>
+      </template>
+    </div>
+  </template>
+</template>

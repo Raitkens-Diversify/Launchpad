@@ -1,0 +1,107 @@
+<template>
+    <div class="asm">
+        <div class="asm__toolbar">
+            <p class="asm__hint">
+                Synonyms expand help-center search: a search for the term also finds
+                articles matching its synonyms (at slightly lower weight). Changes
+                deploy in the background and usually land within seconds.
+            </p>
+            <lightning-button-icon icon-name="utility:refresh"
+                                   alternative-text="Refresh"
+                                   onclick={handleRefresh}
+                                   disabled={busy}></lightning-button-icon>
+            <lightning-button variant="brand"
+                              label="New synonym group"
+                              onclick={handleNew}
+                              disabled={busy}></lightning-button>
+        </div>
+
+        <template if:true={deploying}>
+            <div class="asm__deploying" role="status">
+                <lightning-spinner alternative-text="Deploying" size="x-small"></lightning-spinner>
+                <span>Deploying your change…</span>
+            </div>
+        </template>
+
+        <template if:true={errorMessage}>
+            <p class="asm__error" role="alert">{errorMessage}</p>
+        </template>
+
+        <template if:true={loading}>
+            <div class="asm__loading">
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={loading}>
+            <template if:true={hasRows}>
+                <table class="asm__table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Term</th>
+                            <th scope="col">Synonyms</th>
+                            <th scope="col">Direction</th>
+                            <th scope="col">Status</th>
+                            <th scope="col" class="asm__actions-col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={rows} for:item="row">
+                            <tr key={row.developerName}>
+                                <td class="asm__term">{row.term}</td>
+                                <td>{row.synonyms}</td>
+                                <td>{row.directionLabel}</td>
+                                <td><span class={row.statusClass}>{row.statusLabel}</span></td>
+                                <td class="asm__actions">
+                                    <lightning-button label="Edit"
+                                                      size="small"
+                                                      data-name={row.developerName}
+                                                      onclick={handleEdit}
+                                                      disabled={busy}></lightning-button>
+                                    <lightning-button label={row.toggleLabel}
+                                                      size="small"
+                                                      data-name={row.developerName}
+                                                      onclick={handleToggleActive}
+                                                      disabled={busy}></lightning-button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </template>
+            <template if:false={hasRows}>
+                <p class="asm__empty">No synonym groups yet.</p>
+            </template>
+        </template>
+
+        <template if:true={modalOpen}>
+            <section class="asm-modal" role="dialog" aria-modal="true" aria-label={modalTitle}>
+                <div class="asm-modal__panel">
+                    <h2 class="asm-modal__title">{modalTitle}</h2>
+                    <lightning-input label="Term"
+                                     field-level-help="The single search word this group is keyed on (e.g. 'transfer'). Stored lowercase."
+                                     value={formTerm}
+                                     max-length="80"
+                                     required
+                                     onchange={handleTermChange}></lightning-input>
+                    <lightning-input label="Synonyms (comma-separated)"
+                                     field-level-help="Words that should behave like the term in search (e.g. 'acat, move, rollover')."
+                                     value={formSynonyms}
+                                     max-length="255"
+                                     required
+                                     onchange={handleSynonymsChange}></lightning-input>
+                    <lightning-input type="checkbox"
+                                     label="Works both ways"
+                                     field-level-help="Checked: searching any synonym also finds the term (recommended). Unchecked: only the term expands to the synonyms."
+                                     checked={formBidirectional}
+                                     onchange={handleBidirectionalChange}></lightning-input>
+                    <div class="asm-modal__actions">
+                        <lightning-button label="Cancel" onclick={handleModalCancel}></lightning-button>
+                        <lightning-button variant="brand" label="Save &amp; deploy"
+                                          onclick={handleModalSave}></lightning-button>
+                    </div>
+                </div>
+            </section>
+        </template>
+    </div>
+</template>

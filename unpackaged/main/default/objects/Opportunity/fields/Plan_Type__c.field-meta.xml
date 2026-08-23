@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Plan_Type__c</fullName>
+    <description>Used for Retirement Plans</description>
+    <label>Plan Type</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>401(k)</fullName>
+                <default>false</default>
+                <label>401(k)</label>
+            </value>
+            <value>
+                <fullName>Solo 401(k)</fullName>
+                <default>false</default>
+                <label>Solo 401(k)</label>
+            </value>
+            <value>
+                <fullName>401(a)</fullName>
+                <default>false</default>
+                <label>401(a)</label>
+            </value>
+            <value>
+                <fullName>403(b)</fullName>
+                <default>false</default>
+                <label>403(b)</label>
+            </value>
+            <value>
+                <fullName>457</fullName>
+                <default>false</default>
+                <label>457</label>
+            </value>
+            <value>
+                <fullName>Cash Balance</fullName>
+                <default>false</default>
+                <label>Cash Balance</label>
+            </value>
+            <value>
+                <fullName>Defined Benefit</fullName>
+                <default>false</default>
+                <label>Defined Benefit</label>
+            </value>
+            <value>
+                <fullName>Employee Stock Ownership Plan (ESOP)</fullName>
+                <default>false</default>
+                <label>Employee Stock Ownership Plan (ESOP)</label>
+            </value>
+            <value>
+                <fullName>Money Purchase</fullName>
+                <default>false</default>
+                <label>Money Purchase</label>
+            </value>
+            <value>
+                <fullName>Profit-Sharing</fullName>
+                <default>false</default>
+                <label>Profit-Sharing</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

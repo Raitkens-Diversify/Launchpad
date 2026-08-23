@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Trust_Related_Party_Records</fullName>
+    <columns>MasterLabel</columns>
+    <columns>Parent_Section_Name__c</columns>
+    <columns>Child_Section_Name__c</columns>
+    <columns>Type__c</columns>
+    <columns>Order__c</columns>
+    <columns>Parent_Section_Order__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Type__c</field>
+        <operation>equals</operation>
+        <value>Trust Related Party</value>
+    </filters>
+    <label>Trust Related Party Records</label>
+</ListView>

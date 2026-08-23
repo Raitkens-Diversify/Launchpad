@@ -1,0 +1,12 @@
+{
+  "type" : "sfdc_cms__route",
+  "title" : "Account Related List",
+  "contentBody" : {
+    "activeViewId" : "Account_Related_List",
+    "configurationTags" : [ ],
+    "pageAccess" : "UseParent",
+    "routeType" : "relatedlist-001",
+    "urlPrefix" : "account"
+  },
+  "urlName" : "account-related-list"
+}

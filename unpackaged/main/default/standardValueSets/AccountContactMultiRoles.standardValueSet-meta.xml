@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Accountant</fullName>
+        <default>false</default>
+        <label>Accountant</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Aunt / Uncle</fullName>
+        <default>false</default>
+        <label>Aunt / Uncle</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Attorney</fullName>
+        <default>false</default>
+        <label>Attorney</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Beneficiary</fullName>
+        <default>false</default>
+        <label>Beneficiary</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Board Member</fullName>
+        <default>false</default>
+        <label>Board Member</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Business</fullName>
+        <default>false</default>
+        <label>Business</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Child</fullName>
+        <default>false</default>
+        <label>Child</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Client</fullName>
+        <default>true</default>
+        <label>Client</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Deceased</fullName>
+        <default>false</default>
+        <label>Deceased</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Dependent</fullName>
+        <default>false</default>
+        <label>Dependent</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Domestic Partner</fullName>
+        <default>false</default>
+        <label>Domestic Partner</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Employee</fullName>
+        <default>false</default>
+        <label>Employee</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Employer</fullName>
+        <default>false</default>
+        <label>Employer</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Ex-Spouse</fullName>
+        <default>false</default>
+        <label>Ex-Spouse</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Former Client</fullName>
+        <default>false</default>
+        <label>Former Client</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Friends</fullName>
+        <default>false</default>
+        <label>Friends</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Grandchild</fullName>
+        <default>false</default>
+        <label>Grandchild</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Grandparent</fullName>
+        <default>false</default>
+        <label>Grandparent</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Grantor</fullName>
+        <default>false</default>
+        <label>Grantor</label>
+    </standardValue>
+    <standardValue>
+        <fullName>In-Law</fullName>
+        <default>false</default>
+        <label>In-Law</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Life Partner</fullName>
+        <default>false</default>
+        <label>Life Partner</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Niece / Nephew</fullName>
+        <default>false</default>
+        <label>Niece / Nephew</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Nephew</fullName>
+        <default>false</default>
+        <label>Nephew</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Other</fullName>
+        <default>false</default>
+        <label>Other</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Others</fullName>
+        <default>false</default>
+        <label>Others</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Other Dependent</fullName>
+        <default>false</default>
+        <label>Other Dependent</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Other Connection</fullName>
+        <default>false</default>
+        <label>Other Connection</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Parent</fullName>
+        <default>false</default>
+        <label>Parent</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Power of Attorney</fullName>
+        <default>false</default>
+        <label>Power of Attorney</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Prospect</fullName>
+        <default>false</default>
+        <label>Prospect</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Referral</fullName>
+        <default>false</default>
+        <label>Referral</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Referrer</fullName>
+        <default>false</default>
+        <label>Referrer</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Sibling</fullName>
+        <default>false</default>
+        <label>Sibling</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Spouse</fullName>
+        <default>false</default>
+        <label>Spouse</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Trustee</fullName>
+        <default>false</default>
+        <label>Trustee</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Trust</fullName>
+        <default>false</default>
+        <label>Trust</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Trusted Contact</fullName>
+        <default>false</default>
+        <label>Trusted Contact</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Center of Influence</fullName>
+        <default>false</default>
+        <label>Center of Influence</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Vendor</fullName>
+        <default>false</default>
+        <label>Vendor</label>
+    </standardValue>
+</StandardValueSet>

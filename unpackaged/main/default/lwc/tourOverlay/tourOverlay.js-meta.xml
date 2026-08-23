@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>false</isExposed>
+    <description>Presentational tour overlay: blurred scrim, feathered animated spotlight, coach-mark card. Child of c-tour-launcher and the Tour Builder preview.</description>
+</LightningComponentBundle>

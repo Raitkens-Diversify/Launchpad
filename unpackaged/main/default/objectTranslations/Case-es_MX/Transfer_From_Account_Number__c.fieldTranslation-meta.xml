@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Transfer From Account Number --></label>
+        <name>Transfer_From_Account_Number__c</name>
+    </CustomFieldTranslation>

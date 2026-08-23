@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Home</fullName>
+        <default>false</default>
+        <label>Home</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Auto</fullName>
+        <default>false</default>
+        <label>Auto</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Life</fullName>
+        <default>false</default>
+        <label>Life</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Annuity</fullName>
+        <default>false</default>
+        <label>Annuity</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Earthquake</fullName>
+        <default>false</default>
+        <label>Earthquake</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Business Interruption</fullName>
+        <default>false</default>
+        <label>Business Interruption</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Commercial Auto</fullName>
+        <default>false</default>
+        <label>Commercial Auto</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Commercial Property</fullName>
+        <default>false</default>
+        <label>Commercial Property</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Workers Compensation</fullName>
+        <default>false</default>
+        <label>Workers Compensation</label>
+    </standardValue>
+</StandardValueSet>

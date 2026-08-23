@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Synonyms__c</fullName>
+    <description>Comma-separated synonym terms (lowercase). Multi-word synonyms (e.g. &quot;sign in&quot;) expand into their significant tokens (&quot;sign&quot;; &quot;in&quot; is a stopword). Each is searched with the same 3+ char wildcard rule and scored at the synonym multiplier relative to the original term.</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Synonyms</label>
+    <length>255</length>
+    <required>true</required>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

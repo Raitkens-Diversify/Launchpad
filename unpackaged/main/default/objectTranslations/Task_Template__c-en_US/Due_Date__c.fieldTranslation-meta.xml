@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Due Date --></label>
+        <name>Due_Date__c</name>
+        <picklistValues>
+            <masterLabel>After Referenced Field</masterLabel>
+            <translation><!-- After Referenced Field --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Before Referenced Field</masterLabel>
+            <translation><!-- Before Referenced Field --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Days from Case Creation</masterLabel>
+            <translation><!-- Days from Case Creation --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Days from Previous Task Completion</masterLabel>
+            <translation><!-- Days from Previous Task Completion --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Immediate</masterLabel>
+            <translation><!-- Immediate --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

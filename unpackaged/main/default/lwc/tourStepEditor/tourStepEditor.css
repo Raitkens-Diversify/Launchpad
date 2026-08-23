@@ -1,0 +1,36 @@
+.editor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-md, 12px);
+}
+
+.editor__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--ds-space-md, 12px);
+}
+
+.editor__note {
+    margin: -4px 0 0;
+    font-size: 0.75rem;
+    line-height: 1.4;
+}
+
+.editor__note--error {
+    color: var(--ds-error-text, #a83232);
+}
+
+.editor__note--warn {
+    color: var(--ds-warning-text, #b8860b);
+}
+
+.editor__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-sm, 8px);
+    margin-top: var(--ds-space-sm, 8px);
+}
+
+.editor__spacer {
+    flex: 1;
+}

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Embed_URL__c</fullName>
+    <description>Optional URL of an embedded interactive guide (e.g. a Scribe share link). The help center renders it as a full-width frame below the article body. Pasting iframe HTML into the rich-text body does not work — Salesforce strips iframes on save — so embeds go through this field.</description>
+    <inlineHelpText>Optional: paste an embed URL (e.g. a Scribe share link, https://scribehow.com/embed/…). It renders as an interactive frame below the article body.</inlineHelpText>
+    <label>Embed URL</label>
+    <required>false</required>
+    <type>Url</type>
+</CustomField>

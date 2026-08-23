@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>BD_Reallowance_Blank__c</fullName>
+    <description>For Lightning Page for Advisors.</description>
+    <formula>ISBLANK(BD_Reallowance__c)</formula>
+    <label>BD Reallowance Blank</label>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

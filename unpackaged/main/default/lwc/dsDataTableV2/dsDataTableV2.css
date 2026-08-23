@@ -1,0 +1,162 @@
+/* Design-system custom table (v2). Fully styleable semantic <table> matching the
+   Figma envelopes list. Tokens are declared on :host (SLDS global hooks don't
+   cascade across sibling components) with Figma-literal fallbacks. */
+:host {
+    display: block;
+
+    --slds-g-color-surface-1: #ffffff;
+    --slds-g-color-surface-container-1: #f9fafb;
+    --slds-g-color-border-1: #e5e7eb;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #111827;
+    --slds-g-color-accent-1: #1a76bb;
+    --slds-g-spacing-3: 0.75rem;
+    --slds-g-spacing-4: 1rem;
+    --slds-g-font-scale-1: 0.875rem;
+    --slds-g-font-family-base: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Overflow stays visible so the per-row action dropdown isn't clipped; the
+   parent card (.list-v2__table) drops its overflow:hidden for the same reason,
+   and the table's corner cells carry the rounding instead. */
+.ds-data-table-v2 {
+    width: 100%;
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+}
+
+.ds-data-table-v2__table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--slds-g-color-surface-1, #ffffff);
+    font-size: var(--slds-g-font-scale-1, 14px);
+    border-radius: 10px;
+}
+
+.ds-data-table-v2__table thead th:first-child {
+    border-top-left-radius: 10px;
+}
+
+.ds-data-table-v2__table thead th:last-child {
+    border-top-right-radius: 10px;
+}
+
+.ds-data-table-v2__table tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 10px;
+}
+
+.ds-data-table-v2__table tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 10px;
+}
+
+.ds-data-table-v2__table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+/* Header row — light surface, bottom rule, medium-weight dark labels. */
+.ds-data-table-v2__header {
+    text-align: left;
+    padding: var(--slds-g-spacing-3, 12px) var(--slds-g-spacing-4, 16px);
+    background: var(--slds-g-color-surface-container-1, #f9fafb);
+    border-bottom: 1px solid var(--slds-g-color-border-1, #e5e7eb);
+    color: var(--slds-g-color-on-surface-3, #111827);
+    font-weight: 600;
+    line-height: 1.25;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.ds-data-table-v2__header--actions {
+    width: 48px;
+}
+
+.ds-data-table-v2__header-label {
+    display: inline-block;
+}
+
+/* Sortable header acts as a button but stays visually like a label. */
+.ds-data-table-v2__sort-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+}
+
+.ds-data-table-v2__sort-button:focus-visible {
+    outline: 2px solid var(--slds-g-color-accent-1, #1a76bb);
+    outline-offset: 2px;
+}
+
+.ds-data-table-v2__sort-icon {
+    opacity: 0.4;
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.ds-data-table-v2__sort-icon--active {
+    opacity: 1;
+}
+
+/* Whole row is clickable (opens the envelope); no row-level hover background —
+   only the action cell highlights on hover (below). */
+.ds-data-table-v2__row {
+    cursor: pointer;
+}
+
+.ds-data-table-v2__cell {
+    padding: var(--slds-g-spacing-3, 12px) var(--slds-g-spacing-4, 16px);
+    border-bottom: 1px solid var(--slds-g-color-border-1, #e5e7eb);
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    /* Center vertically so when one cell wraps to two lines (e.g. Created /
+       Last Activity), the single-line cells stay aligned to its middle. */
+    vertical-align: middle;
+    line-height: 1.35;
+}
+
+/* Primary-cell navigation link: a native <button> styled as a link so it's a
+   real focusable, keyboard-activatable control (Tab + Enter/Space) and is
+   announced as such by screen readers, while the whole-row click remains a
+   mouse convenience. */
+.ds-data-table-v2__row-link {
+    display: inline;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    text-align: left;
+    color: var(--slds-g-color-accent-1, #1a76bb);
+    cursor: pointer;
+}
+
+.ds-data-table-v2__row-link:hover {
+    text-decoration: underline;
+}
+
+.ds-data-table-v2__row-link:focus-visible {
+    outline: 2px solid var(--slds-g-color-accent-1, #1a76bb);
+    outline-offset: 2px;
+    /* Round the focus ring to match small controls (the ⋮ menu button). */
+    border-radius: var(--slds-g-radius-border-1, 4px);
+}
+
+.ds-data-table-v2__cell--actions {
+    width: 36px;
+    text-align: right;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.ds-data-table-v2__cell--actions:hover {
+    background: var(--slds-g-color-surface-container-1, #f9fafb);
+}
+
+/* The per-row action (⋮) menu is a lightning-button-menu (variant="bare").
+   Its trigger and dropdown live in the base component's shadow tree, so they're
+   themed from the shared static-resource sheet (envelopeWizardStyles.css), not
+   here. The overflow:visible arrangement above keeps the dropdown from clipping. */

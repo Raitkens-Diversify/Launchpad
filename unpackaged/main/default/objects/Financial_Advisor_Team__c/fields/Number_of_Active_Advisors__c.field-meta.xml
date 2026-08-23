@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Number_of_Active_Advisors__c</fullName>
+    <label>Number of Active Advisors</label>
+    <summaryFilterItems>
+        <field>Financial_Advisor_Team_Member__c.Active__c</field>
+        <operation>equals</operation>
+        <value>True</value>
+    </summaryFilterItems>
+    <summaryFilterItems>
+        <field>Financial_Advisor_Team_Member__c.Role__c</field>
+        <operation>equals</operation>
+        <value>Financial Advisor</value>
+    </summaryFilterItems>
+    <summaryFilterItems>
+        <field>Financial_Advisor_Team_Member__c.User__c</field>
+        <operation>notEqual</operation>
+        <value />
+    </summaryFilterItems>
+    <summaryForeignKey>Financial_Advisor_Team_Member__c.Financial_Advisor_Team__c</summaryForeignKey>
+    <summaryOperation>count</summaryOperation>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Summary</type>
+</CustomField>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Finance_Queue_Task_Approval</fullName>
+    <active>true</active>
+    <description>If a Task is assigned to the Finance Queue, or the Task Template indicates it will be assigned there, only members of the Finance Queue can change the status to Completed.</description>
+    <errorConditionFormula>AND(
+  ISCHANGED(Status),
+  ISPICKVAL(Status, &quot;Completed&quot;),
+  NOT($Permission.Finance_Task_Approval),
+  OR(
+    Owner:Queue.DeveloperName = &quot;Finance&quot;,
+    Task_Template_Queue__c = &quot;Finance&quot;
+  )
+)</errorConditionFormula>
+    <errorMessage>This task is (or is set to be) assigned to the Finance Queue. Only Finance Queue members can set the status to Completed.</errorMessage>
+</ValidationRule>

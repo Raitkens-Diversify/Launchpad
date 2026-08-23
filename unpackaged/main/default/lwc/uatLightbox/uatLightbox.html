@@ -1,0 +1,60 @@
+<template>
+    <div class="ulb" onclick={handleBackdropClick}>
+        <div class="ulb__dialog" role="dialog" aria-modal="true" aria-label={dialogLabel} tabindex="-1">
+            <div class="ulb__bar">
+                <div class="ulb__titles">
+                    <span class="ulb__title" title={title}>{title}</span>
+                    <template if:true={position}>
+                        <span class="ulb__position">{position}</span>
+                    </template>
+                </div>
+                <div class="ulb__actions">
+                    <a class="ulb__download" href={downloadUrl} target="_blank" rel="noopener"
+                       title="Download the original file">
+                        <lightning-icon icon-name="utility:download" size="x-small"
+                                        variant="inverse"></lightning-icon>
+                        <span>Download</span>
+                    </a>
+                    <button type="button" class="ulb__close" title="Close (Esc)" aria-label="Close preview"
+                            onclick={handleClose}>
+                        <lightning-icon icon-name="utility:close" size="x-small"
+                                        variant="inverse"></lightning-icon>
+                    </button>
+                </div>
+            </div>
+
+            <div class={stageClass}>
+                <template if:true={hasMany}>
+                    <button type="button" class="ulb__nav ulb__nav--prev"
+                            title="Previous (←)" aria-label="Previous screenshot"
+                            disabled={prevDisabled}
+                            onclick={handlePrev}>
+                        <lightning-icon icon-name="utility:chevronleft" size="small"
+                                        variant="inverse"></lightning-icon>
+                    </button>
+                </template>
+                <template if:true={hasFile}>
+                    <template if:false={loaded}>
+                        <lightning-spinner alternative-text="Loading screenshot"
+                                           variant="inverse" size="medium"></lightning-spinner>
+                    </template>
+                    <img class="ulb__img" src={src} alt={title}
+                         onload={handleLoad} onerror={handleError} />
+                </template>
+                <template if:true={hasMany}>
+                    <button type="button" class="ulb__nav ulb__nav--next"
+                            title="Next (→)" aria-label="Next screenshot"
+                            disabled={nextDisabled}
+                            onclick={handleNext}>
+                        <lightning-icon icon-name="utility:chevronright" size="small"
+                                        variant="inverse"></lightning-icon>
+                    </button>
+                </template>
+            </div>
+
+            <template if:true={metaLine}>
+                <div class="ulb__meta">{metaLine}</div>
+            </template>
+        </div>
+    </div>
+</template>

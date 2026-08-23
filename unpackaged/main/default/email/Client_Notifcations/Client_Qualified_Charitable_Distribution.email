@@ -1,0 +1,7 @@
+Hello [!Case.Contact.FirstName] [!Case.Contact.LastName],
+
+I hope this email finds you well. I wanted to reach out with a final confirmation that [!Case.FinServ__FinancialAccount__r.OASP_FSC__Custodian__r.Name], has sent off your Qualified Charitable Distribution check to [!Case.Name_of_Charity__c], on **Date funds sent**. We ask that you allow [!Case.Name_of_Charity__c] two weeks to receive the donation, and deposit the funds. On, or after, **two weeks from date sent**, you are welcome to follow up with [!Case.Name_of_Charity__c] to confirm this donation.
+
+At this point, this transaction has been finalized. Please don't hesitate to reach out with any additional follow up questions.
+
+Sincerely,

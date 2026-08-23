@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Carry Forward</fullName>
+        <default>false</default>
+        <label>Carry Forward</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Customer Specified</fullName>
+        <default>false</default>
+        <label>Customer Specified</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Deposit At interest</fullName>
+        <default>false</default>
+        <label>Deposit At interest</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Dividend Payment</fullName>
+        <default>false</default>
+        <label>Dividend Payment</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Indexed</fullName>
+        <default>false</default>
+        <label>Indexed</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Interest Only</fullName>
+        <default>false</default>
+        <label>Interest Only</label>
+    </standardValue>
+</StandardValueSet>

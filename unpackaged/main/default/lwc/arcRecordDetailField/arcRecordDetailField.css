@@ -1,0 +1,94 @@
+/**
+ * Author: Hoang Long Vu To
+ * Date: 2026-08-12
+ *
+ * Layout-only styles. Control chrome: diversifyStyles .div-input--record-detail
+ */
+:host {
+  display: block;
+  width: 100%;
+
+  /* Figma record-detail field tokens (36px hug) */
+  --div-record-field-height: 2.25rem;
+  --div-record-field-padding-y: 0.125rem;
+  --div-record-field-padding-x: 0.5rem;
+  --div-record-field-radius: 0.5rem;
+  --div-record-field-font-size: inherit;
+  --div-input-focus-ring: 0 0 0 2px #ffffff, 0 0 0 4px #1a76bb;
+  --div-input-color-background: #ffffff;
+  --div-input-color-border: #b6bcc5;
+  --div-input-color-border-hover: #9ca3af;
+  --div-input-color-text: #374151;
+  --div-input-color-text-focus: #09243f;
+}
+
+.rdf {
+  display: flex;
+  flex-direction: column;
+  gap: var(--div-space-2, 0.5rem);
+  width: 100%;
+}
+
+.rdf-boolean {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  min-height: var(--div-record-field-height);
+}
+
+.rdf-checkbox,
+.rdf-multi__checkbox {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  accent-color: var(--div-color-blue-700, #1a76bb);
+  cursor: pointer;
+}
+
+.rdf-multi {
+  display: flex;
+  flex-direction: column;
+  gap: var(--div-space-2, 0.5rem);
+  width: 100%;
+}
+
+.rdf-multi__item {
+  display: flex;
+  align-items: center;
+  gap: var(--div-space-2, 0.5rem);
+  cursor: pointer;
+}
+
+.rdf-multi__label {
+  font-family: var(--div-font-family-base, inherit);
+  font-size: var(--div-record-field-font-size);
+  color: var(--div-input-color-text);
+}
+
+/* Date/datetime — WebKit internal parts fight fixed height without these overrides */
+.div-input--record-detail[type="date"],
+.div-input--record-detail[type="datetime-local"],
+.div-input--record-detail[type="time"] {
+  display: block;
+  height: var(--div-record-field-height);
+  min-height: var(--div-record-field-height);
+  max-height: var(--div-record-field-height);
+  padding: var(--div-record-field-padding-y) var(--div-record-field-padding-x);
+}
+
+.div-input--record-detail[type="date"]::-webkit-datetime-edit,
+.div-input--record-detail[type="datetime-local"]::-webkit-datetime-edit {
+  display: inline-flex;
+  align-items: center;
+  min-height: 0;
+  padding: 0;
+}
+
+.div-input--record-detail[type="date"]::-webkit-calendar-picker-indicator,
+.div-input--record-detail[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  padding: 0;
+}

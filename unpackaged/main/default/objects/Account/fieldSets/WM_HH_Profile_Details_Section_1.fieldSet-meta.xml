@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FieldSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>WM_HH_Profile_Details_Section_1</fullName>
+    <description>Household profile&#39;s Details tab</description>
+    <label>LBL.Label_Field_Set_Household_Info</label>
+</FieldSet>

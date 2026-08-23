@@ -1,0 +1,71 @@
+<!-- Author: Claude -->
+<template>
+  <div class="work-items">
+    <header class="work-items__header">
+      <h3 class="work-items__title">{cardLabel}</h3>
+      <div class="work-items__tabs" role="tablist" aria-label={cardLabel}>
+        <template for:each={tabs} for:item="tab">
+          <button
+            key={tab.key}
+            type="button"
+            role="tab"
+            class={tab.cssClass}
+            data-key={tab.key}
+            aria-selected={tab.ariaSelected}
+            onclick={handleTabClick}
+            onkeydown={handleTabKeyDown}
+          >
+            {tab.label}
+          </button>
+        </template>
+      </div>
+    </header>
+
+    <template lwc:if={isLoading}>
+      <div class="work-items__loading">
+        <c-arc-loading-spinner
+          alternative-text="Loading related work"
+          size="small"
+        ></c-arc-loading-spinner>
+      </div>
+    </template>
+
+    <template lwc:elseif={errorMessage}>
+      <p class="work-items__error" role="alert">{errorMessage}</p>
+    </template>
+
+    <template lwc:elseif={hasItems}>
+      <ul class="work-items__list">
+        <template for:each={activeItems} for:item="item">
+          <li key={item.id} class="work-items__row">
+            <button
+              type="button"
+              class="work-items__link"
+              data-id={item.id}
+              onclick={handleItemClick}
+            >
+              <span class="work-items__row-main">
+                <span class="work-items__row-title">{item.title}</span>
+                <template lwc:if={item.hasSubtitle}>
+                  <span class="work-items__row-subtitle">{item.subtitle}</span>
+                </template>
+              </span>
+              <span class="work-items__row-meta">
+                <template lwc:if={item.hasDetail}>
+                  <span class="work-items__row-detail">{item.detail}</span>
+                </template>
+                <template lwc:if={item.hasStatus}>
+                  <span class="work-items__row-status">{item.status}</span>
+                </template>
+              </span>
+            </button>
+          </li>
+        </template>
+      </ul>
+    </template>
+
+    <template lwc:else>
+      <p class="work-items__empty">{emptyMessage}</p>
+    </template>
+  </div>
+</template>

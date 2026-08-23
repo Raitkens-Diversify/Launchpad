@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>All_Related_People</fullName>
+    <columns>FULL_NAME</columns>
+    <columns>ACCOUNT.NAME</columns>
+    <columns>CONTACT.TITLE</columns>
+    <columns>Rep_Id__c</columns>
+    <columns>RIA_Affiliation__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>CONTACT.RECORDTYPE</field>
+        <operation>equals</operation>
+        <value>0128X000001UnN6</value>
+    </filters>
+    <label>All Related People</label>
+    <sharedTo>
+        <group>Home_Office</group>
+    </sharedTo>
+</ListView>

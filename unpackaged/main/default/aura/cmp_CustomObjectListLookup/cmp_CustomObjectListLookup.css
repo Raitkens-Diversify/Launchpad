@@ -1,0 +1,29 @@
+.THIS .slds-leftpad{
+	padding-left: 2rem;
+}
+.THIS .iconheight{
+    top: 65%;
+}
+
+.THIS .leftspace input {
+    padding-left:2rem;
+}
+.THIS .object_iconheight{
+   top:50%;
+}
+.THIS .slds-box{
+    width:20Px;
+}
+
+.THIS .disableState .slds-input{
+    background-color: var(--slds-g-color-neutral-base-95, var(--lwc-colorBackgroundInputDisabled,rgb(243, 243, 243))) !important;
+    border-color: var(--slds-g-color-border-base-1, var(--lwc-colorBorderInputDisabled,rgb(201, 201, 201))) !important;
+}
+                    
+.THIS .customIconStyle .slds-icon{
+	width: 1.5rem;
+    height: 1.5rem;
+}
+.THIS .support80chars{
+	width: 700px;                        
+}

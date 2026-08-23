@@ -1,0 +1,13 @@
+.THIS .flow-container {
+    box-sizing: border-box;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    /* Fallback until init measures the utility bar */
+    height: calc(100vh - 14rem);
+    max-height: calc(100vh - 14rem);
+    padding-bottom: 4rem;
+}
+
+.THIS .slds-scrollable {
+    overflow: auto !important;
+}

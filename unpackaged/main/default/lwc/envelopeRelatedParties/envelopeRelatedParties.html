@@ -1,0 +1,38 @@
+<!-- Author: Mile Cacanovic -->
+<template>
+    <div class="related-parties">
+        <template for:each={groups} for:item="group">
+            <c-envelope-related-party-group
+                key={group.key}
+                class="related-parties__group"
+                party-key={group.key}
+                title={group.title}
+                note={group.note}
+                parties={group.parties}
+                max-parties={group.max}
+                empty-message={group.emptyMessage}
+                onpartyaction={handlePartyAction}
+                onpartyremove={handlePartyRemove}>
+            </c-envelope-related-party-group>
+        </template>
+    </div>
+
+    <!-- "Select existing" dialog, opened imperatively from a subsection's Select Existing button; it
+         fetches the members itself and bubbles the pick back via memberselected. -->
+    <c-envelope-select-member-modal
+        lwc:ref="selectMemberModal"
+        onmemberselected={handleMemberSelected}
+        onclose={handleModalClose}>
+    </c-envelope-select-member-modal>
+
+    <!-- "Create new" dialog, opened imperatively from a subsection's Create New button; on save it
+         bubbles the created pending member(s) back via membercreated, each carrying the party type
+         to file it under. -->
+    <c-envelope-create-pending-member-modal
+        lwc:ref="createMemberModal"
+        variant="relatedParty"
+        member-type-options={memberTypeOptions}
+        onmembercreated={handleMembersCreated}
+        onclose={handleModalClose}>
+    </c-envelope-create-pending-member-modal>
+</template>

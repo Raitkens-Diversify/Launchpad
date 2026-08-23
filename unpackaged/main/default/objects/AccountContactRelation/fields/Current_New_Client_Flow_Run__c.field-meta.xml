@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Current_New_Client_Flow_Run__c</fullName>
+    <defaultValue>false</defaultValue>
+    <label>Current New Client Flow Run</label>
+    <type>Checkbox</type>
+</CustomField>

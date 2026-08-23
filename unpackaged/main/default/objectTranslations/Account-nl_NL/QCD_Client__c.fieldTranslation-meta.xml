@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <help><!-- Check this box if this client does qualified charitable distributions regularly. --></help>
+        <label><!-- QCD Client --></label>
+        <name>QCD_Client__c</name>
+    </CustomFieldTranslation>

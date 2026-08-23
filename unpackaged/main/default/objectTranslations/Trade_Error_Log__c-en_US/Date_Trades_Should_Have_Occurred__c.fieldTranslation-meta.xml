@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Date Trades Should Have Occurred --></label>
+        <name>Date_Trades_Should_Have_Occurred__c</name>
+    </CustomFieldTranslation>

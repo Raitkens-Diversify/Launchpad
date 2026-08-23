@@ -1,0 +1,42 @@
+<!-- Author: Mile Cacanovic -->
+<template>
+  <div class="env-layout">
+    <c-envelope-top-bar-v2
+      hide-branding={hideBranding}
+      breadcrumb={topBreadcrumb}
+      mode={topBarMode}
+      leading-title={topBarLeadingTitle}
+      envelope-name={topBarEnvelopeName}
+      status-text={topBarStatusText}
+      show-review={topBarShowReview}
+      review-disabled={topBarReviewDisabled}
+      show-close={topBarShowClose}
+      onnavigate={handleShellNavigate}
+      onreview={handleTopBarReview}
+      onclose={handleTopBarClose}
+    >
+    </c-envelope-top-bar-v2>
+
+    <div class={bodyClass}>
+      <template if:true={isListView}>
+        <c-envelope-list-v2 onopencreated={handleEnvelopeCreated}>
+        </c-envelope-list-v2>
+      </template>
+      <template if:true={isShellV2}>
+        <c-envelope-shell-v2
+          lwc:ref="shellV2"
+          envelope-id={createdEnvelopeId}
+          envelope-title={createdEnvelopeTitle}
+          household-name={createdHouseholdName}
+          household-id={createdHouseholdId}
+          onenveloperenamed={handleEnvelopeRenamed}
+          onenvelopedeleted={handleEnvelopeDeleted}
+          onenvelopesubmitted={handleEnvelopeSubmitted}
+          onsubviewchange={handleSubViewChange}
+          onreviewablechange={handleReviewableChange}
+        >
+        </c-envelope-shell-v2>
+      </template>
+    </div>
+  </div>
+</template>

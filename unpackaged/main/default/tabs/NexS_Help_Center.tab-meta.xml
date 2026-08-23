@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>NexS help center (LWC tab, no standard App Page header).</description>
+    <label>Help Center</label>
+    <lwcComponent>nexsLanding</lwcComponent>
+    <motif>Custom55: Books</motif>
+</CustomTab>

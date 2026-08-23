@@ -1,0 +1,79 @@
+<template>
+    <c-ds-modal-v2
+        is-open={isOpen}
+        title={dialogTitle}
+        size="large"
+        onclose={handleClose}>
+        <div class="create-member">
+            <div class="create-member__info" role="status">
+                <lightning-icon
+                    class="create-member__info-icon"
+                    icon-name="utility:info"
+                    size="x-small"
+                    alternative-text="Information">
+                </lightning-icon>
+                <p class="create-member__info-text">{infoText}</p>
+            </div>
+
+            <div class="create-member__rows">
+                <template for:each={members} for:item="member" for:index="index">
+                    <div key={member.id} class="create-member__row">
+                        <lightning-input
+                            label="Member Nickname"
+                            placeholder="Enter member nickname"
+                            value={member.nickname}
+                            data-index={index}
+                            onchange={handleNicknameChange}>
+                        </lightning-input>
+                        <c-envelope-searchable-combobox
+                            label="Member Type"
+                            placeholder="Select member type"
+                            options={memberTypeOptions}
+                            value={member.type}
+                            name={member.id}
+                            data-index={index}
+                            disabled={isTypeLocked}
+                            float-menu
+                            onchange={handleTypeChange}>
+                        </c-envelope-searchable-combobox>
+                        <div class="create-member__row-action">
+                            <template lwc:if={canRemoveMembers}>
+                                <lightning-button-icon
+                                    variant="container"
+                                    icon-name="utility:delete"
+                                    alternative-text="Remove member"
+                                    title="Remove member"
+                                    data-index={index}
+                                    onclick={handleRemoveMember}>
+                                </lightning-button-icon>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <div class="create-member__actions">
+                <lightning-button
+                    variant="neutral"
+                    label="Add another member"
+                    disabled={isAddMemberDisabled}
+                    onclick={handleAddMember}>
+                </lightning-button>
+            </div>
+        </div>
+
+        <div slot="footer" class="create-member__footer">
+            <lightning-button
+                variant="secondary"
+                label="Cancel"
+                onclick={handleCancel}>
+            </lightning-button>
+            <lightning-button
+                variant="brand"
+                label="Save"
+                disabled={isSaveDisabled}
+                onclick={handleSave}>
+            </lightning-button>
+        </div>
+    </c-ds-modal-v2>
+</template>

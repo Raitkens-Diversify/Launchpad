@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Product Type/Platform --></label>
+        <name>Product_Type_Platform__c</name>
+        <picklistValues>
+            <masterLabel>AMS Plus (AMS+)</masterLabel>
+            <translation><!-- AMS Plus (AMS+) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Advisor Managed Solutions (AMS)</masterLabel>
+            <translation><!-- Advisor Managed Solutions (AMS) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Alternative Managed Solutions (AltMS)</masterLabel>
+            <translation><!-- Alternative Managed Solutions (AltMS) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>BDC</masterLabel>
+            <translation><!-- BDC --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Brokerage Account</masterLabel>
+            <translation><!-- Brokerage Account --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Courtesy Account</masterLabel>
+            <translation><!-- Courtesy Account --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Custodian</masterLabel>
+            <translation><!-- Custodian --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DFPG Managed Solutions (DMS)</masterLabel>
+            <translation><!-- DFPG Managed Solutions (DMS) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DST</masterLabel>
+            <translation><!-- DST --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Energy</masterLabel>
+            <translation><!-- Energy --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Fixed Annuity</masterLabel>
+            <translation><!-- Fixed Annuity --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Indexed Annuity</masterLabel>
+            <translation><!-- Indexed Annuity --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Interval Fund</masterLabel>
+            <translation><!-- Interval Fund --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>LLC Program</masterLabel>
+            <translation><!-- LLC Program --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Mutual Fund</masterLabel>
+            <translation><!-- Mutual Fund --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Outside Managed Solutions (OMS)</masterLabel>
+            <translation><!-- Outside Managed Solutions (OMS) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Private Credit</masterLabel>
+            <translation><!-- Private Credit --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Private Equity</masterLabel>
+            <translation><!-- Private Equity --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Public Non-Traded Fund</masterLabel>
+            <translation><!-- Public Non-Traded Fund --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>REIT</masterLabel>
+            <translation><!-- REIT --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Real Estate Fund</masterLabel>
+            <translation><!-- Real Estate Fund --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Secondary Market</masterLabel>
+            <translation><!-- Secondary Market --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Securitized Real Estate</masterLabel>
+            <translation><!-- Securitized Real Estate --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Services Agreement</masterLabel>
+            <translation><!-- Services Agreement --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Single Premium Immediate Annuity (SPIA)</masterLabel>
+            <translation><!-- Single Premium Immediate Annuity (SPIA) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Unified Managed Solutions (UMS)</masterLabel>
+            <translation><!-- Unified Managed Solutions (UMS) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Variable Annuity</masterLabel>
+            <translation><!-- Variable Annuity --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Variable Universal Life</masterLabel>
+            <translation><!-- Variable Universal Life --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

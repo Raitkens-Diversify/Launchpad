@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Source_of_Funds__c</fullName>
+    <label>Source of Funds</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>MultiselectPicklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Income</fullName>
+                <default>false</default>
+                <label>Income</label>
+            </value>
+            <value>
+                <fullName>Gift/Inheritance</fullName>
+                <default>false</default>
+                <label>Gift/Inheritance</label>
+            </value>
+            <value>
+                <fullName>Savings (12+ Months)</fullName>
+                <default>false</default>
+                <label>Savings (12+ Months)</label>
+            </value>
+            <value>
+                <fullName>Advisory Account</fullName>
+                <default>false</default>
+                <label>Advisory Account</label>
+            </value>
+            <value>
+                <fullName>Employer Sponsored Plan</fullName>
+                <default>false</default>
+                <label>Employer Sponsored Plan</label>
+            </value>
+            <value>
+                <fullName>Brokerage Packaged Product (Mutual Fund, UIT, etc)</fullName>
+                <default>false</default>
+                <label>Brokerage Packaged Product (Mutual Fund, UIT, etc)</label>
+            </value>
+            <value>
+                <fullName>Retail Brokerage Account</fullName>
+                <default>false</default>
+                <label>Retail Brokerage Account</label>
+            </value>
+            <value>
+                <fullName>Sale of an Annuity (Including 1035)</fullName>
+                <default>false</default>
+                <label>Sale of an Annuity (Including 1035)</label>
+            </value>
+            <value>
+                <fullName>Sale of a Mutual Fund</fullName>
+                <default>false</default>
+                <label>Sale of a Mutual Fund</label>
+            </value>
+            <value>
+                <fullName>Sale of an Insurance Product (Including 1035)</fullName>
+                <default>false</default>
+                <label>Sale of an Insurance Product (Including 1035)</label>
+            </value>
+            <value>
+                <fullName>Sale of Property (Including 1031)</fullName>
+                <default>false</default>
+                <label>Sale of Property (Including 1031)</label>
+            </value>
+            <value>
+                <fullName>Full Cycle Alternative Investment</fullName>
+                <default>false</default>
+                <label>Full Cycle Alternative Investment</label>
+            </value>
+            <value>
+                <fullName>Maturing Fixed Income Securities</fullName>
+                <default>false</default>
+                <label>Maturing Fixed Income Securities</label>
+            </value>
+            <value>
+                <fullName>Sale of Individual Equities/ETFs</fullName>
+                <default>false</default>
+                <label>Sale of Individual Equities/ETFs</label>
+            </value>
+            <value>
+                <fullName>Change of Dealer or Investment Advisor</fullName>
+                <default>false</default>
+                <label>Change of Dealer or Investment Advisor</label>
+            </value>
+            <value>
+                <fullName>Other</fullName>
+                <default>false</default>
+                <label>Other</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+    <visibleLines>4</visibleLines>
+</CustomField>

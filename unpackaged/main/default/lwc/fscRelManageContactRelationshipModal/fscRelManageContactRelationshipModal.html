@@ -1,0 +1,246 @@
+<template>
+    <!-- Author: Hoang Long Vu To | Date: 2026-06-15 -->
+    <lightning-modal-header>
+        <div class="modal-header__group">
+            <div class="modal-header__breadcrumb">
+                <lightning-icon icon-name="standard:contact" alternative-text="Contact"></lightning-icon>
+                <h2 class="slds-text-heading_small">{resolvedHeaderName}</h2>
+            </div>
+            <h3 class="slds-text-heading_medium">{modalTitle}</h3>
+            <p class="modal-header__instruction slds-text-body_small">{relationshipInstruction}</p>
+        </div>
+    </lightning-modal-header>
+
+    <lightning-modal-body class="modal-body" onclick={handleModalBodyClick}>
+        <template if:true={hasBanner}>
+            <div class={bannerClass} role="alert">
+                <span>{bannerMessage}</span>
+            </div>
+        </template>
+
+        <template if:true={isSaving}>
+            <div class="modal-loading-overlay">
+                <lightning-spinner alternative-text="Saving related contacts..." size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <div class="modal-body__scroll">
+        <section class={modalTableClass}>
+            <template if:false={showReadOnlyEmptyState}>
+                <div class="modal-table__header">
+                    <div class="modal-table__col modal-table__col_relationship slds-text-title_caps">RELATIONSHIP</div>
+                    <div class="modal-table__col slds-text-title_caps">ACTIVE</div>
+                    <template if:false={isReadOnly}>
+                        <div class="modal-table__col" aria-hidden="true"></div>
+                    </template>
+                </div>
+            </template>
+
+            <template if:true={showReadOnlyEmptyState}>
+                <p class="modal-table__empty slds-text-body_regular">
+                    No {recordTypeLabel} contacts defined.
+                </p>
+            </template>
+
+            <template for:each={rowViewModels} for:item="row">
+                <div key={row.id} class={row.rowWrapperClass}>
+                    <div class="modal-table__row">
+                        <div class="modal-table__col modal-table__col_relationship">
+                            <template if:true={isReadOnly}>
+                                <div class="relationship-sentence relationship-sentence_read-only">
+                                    <span class="relationship-sentence__static relationship-sentence__subject">{row.subjectName}</span>
+                                    <span class="relationship-sentence__static">is the</span>
+                                    <span class="relationship-sentence__static relationship-sentence__emphasis">{row.roleLabel}</span>
+                                    <span class="relationship-sentence__static">of</span>
+                                    <span class="relationship-sentence__static relationship-sentence__emphasis">{row.relatedAccountName}</span>
+                                    <span class="relationship-sentence__static">, who is the</span>
+                                    <span class="relationship-sentence__static relationship-sentence__emphasis">{row.inverseRoleLabel}</span>
+                                </div>
+                            </template>
+                            <template if:false={isReadOnly}>
+                            <template if:false={row.isPendingDelete}>
+                                <div class={editableRelationshipSentenceClass}>
+                                    <template lwc:if={isClientSelectMode}>
+                                        <div class="relationship-sentence__subject">
+                                            <c-fsc-rel-record-lookup
+                                                data-row-id={row.id}
+                                                data-field="memberAccount"
+                                                object-api-name="Account"
+                                                variant="label-hidden"
+                                                label="Client account"
+                                                value={row.memberAccountId}
+                                                record-label={row.memberAccountName}
+                                                placeholder="Search Accounts..."
+                                                filter={personAccountFilter}
+                                                allowed-record-ids={allowedClientMemberAccountIds}
+                                                create-enabled={isSubjectLookupCreateEnabled}
+                                                disabled={row.isMemberAccountDisabled}
+                                                onchange={handleMemberAccountChange}
+                                            ></c-fsc-rel-record-lookup>
+                                        </div>
+                                    </template>
+                                    <template lwc:else>
+                                        <span class="relationship-sentence__static relationship-sentence__subject">{resolvedMemberName}</span>
+                                    </template>
+                                    <span class="relationship-sentence__static">is the</span>
+                                    <div class="relationship-sentence__role">
+                                        <c-fsc-rel-record-lookup
+                                            data-row-id={row.id}
+                                            data-field="reciprocalRole"
+                                            object-api-name="Reciprocal_Role__c"
+                                            variant="label-hidden"
+                                            label={roleFieldLabel}
+                                            value={row.reciprocalRoleId}
+                                            record-label={row.reciprocalRoleName}
+                                            record-type-developer-name={roleLookupRecordTypeDeveloperName}
+                                            placeholder="Search roles..."
+                                            create-button-label="New Role"
+                                            create-modal-label="New Reciprocal Role"
+                                            disabled={row.isRoleDisabled}
+                                            onchange={handleReciprocalRoleChange}
+                                            oncreaterequest={handleReciprocalRoleCreateRequest}
+                                        ></c-fsc-rel-record-lookup>
+                                    </div>
+                                    <span class="relationship-sentence__static">of</span>
+                                    <div class="relationship-sentence__contact">
+                                        <c-fsc-rel-record-lookup
+                                            data-row-id={row.id}
+                                            object-api-name="Account"
+                                            variant="label-hidden"
+                                            label="Related Person Account"
+                                            value={row.relatedAccountId}
+                                            record-label={row.relatedAccountName}
+                                            placeholder="Search Accounts..."
+                                            filter={personAccountFilter}
+                                            create-button-label="New Account"
+                                            create-modal-label="New Person Account"
+                                            disabled={row.isRelatedAccountDisabled}
+                                            onchange={handleRelatedAccountChange}
+                                            oncreaterequest={handleRelatedAccountCreateRequest}
+                                        ></c-fsc-rel-record-lookup>
+                                    </div>
+                                    <span class="relationship-sentence__static">, who is the</span>
+                                    <div class="relationship-sentence__role">
+                                        <c-fsc-rel-record-lookup
+                                            data-row-id={row.id}
+                                            data-field="inverseReciprocalRole"
+                                            object-api-name="Reciprocal_Role__c"
+                                            variant="label-hidden"
+                                            label="Related person's role"
+                                            value={row.inverseReciprocalRoleId}
+                                            record-label={row.inverseReciprocalRoleName}
+                                            record-type-developer-name={roleLookupRecordTypeDeveloperName}
+                                            placeholder="Search roles..."
+                                            create-button-label="New Role"
+                                            create-modal-label="New Reciprocal Role"
+                                            disabled={row.isInverseRoleDisabled}
+                                            onchange={handleInverseReciprocalRoleChange}
+                                            oncreaterequest={handleReciprocalRoleCreateRequest}
+                                        ></c-fsc-rel-record-lookup>
+                                    </div>
+                                </div>
+                            </template>
+                            <template if:true={row.isPendingDelete}>
+                                <div class="row-pending">
+                                    <p class="row-pending__sentence slds-truncate" title={row.pendingSentence}>
+                                        {row.pendingSentence}
+                                    </p>
+                                    <p class="row-pending__hint slds-text-body_small">Pending removal</p>
+                                </div>
+                            </template>
+                            </template>
+                        </div>
+
+                        <div class="modal-table__col">
+                            <template if:true={isReadOnly}>
+                                <span class="relationship-sentence__static">{row.activeStatusLabel}</span>
+                            </template>
+                            <template if:false={isReadOnly}>
+                                <template if:false={row.isPendingDelete}>
+                                    <lightning-input
+                                        data-row-id={row.id}
+                                        type="checkbox"
+                                        variant="label-hidden"
+                                        label="Active"
+                                        checked={row.isActive}
+                                        disabled={row.isActiveDisabled}
+                                        onchange={handleActiveChange}>
+                                    </lightning-input>
+                                </template>
+                                <template if:true={row.isPendingDelete}>
+                                    <span class="row-pending__placeholder" aria-hidden="true">&mdash;</span>
+                                </template>
+                            </template>
+                        </div>
+
+                        <template if:false={isReadOnly}>
+                            <div class="modal-table__col">
+                                <template if:true={row.canRemove}>
+                                    <lightning-button-icon
+                                        data-row-id={row.id}
+                                        icon-name="utility:delete"
+                                        variant="bare"
+                                        size="small"
+                                        alternative-text="Remove contact row"
+                                        aria-label="Remove contact row"
+                                        title="Remove contact row"
+                                        onclick={handleRemoveRow}>
+                                    </lightning-button-icon>
+                                </template>
+                                <template if:true={row.isPendingDelete}>
+                                    <lightning-button-icon
+                                        data-row-id={row.id}
+                                        icon-name="utility:undo"
+                                        variant="bare"
+                                        size="small"
+                                        alternative-text="Undo removal"
+                                        aria-label="Undo removal"
+                                        title="Undo removal"
+                                        onclick={handleUndoRemoveRow}>
+                                    </lightning-button-icon>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+
+                    <template if:true={row.hasError}>
+                        <p class="modal-table__row-error" role="alert">
+                            <lightning-icon icon-name="utility:error" size="xx-small" variant="error" alternative-text="Error"></lightning-icon>
+                            <span>{row.errorMessage}</span>
+                        </p>
+                    </template>
+                </div>
+            </template>
+
+            <template if:false={isReadOnly}>
+            <div class="modal-table__add">
+                <lightning-button
+                    variant="neutral"
+                    label={addRowButtonLabel}
+                    icon-name="utility:add"
+                    disabled={isRelationshipEditorDisabled}
+                    onclick={handleAddRow}>
+                </lightning-button>
+            </div>
+            </template>
+        </section>
+        </div>
+    </lightning-modal-body>
+
+    <lightning-modal-footer>
+        <lightning-button
+            label={cancelButtonLabel}
+            onclick={handleCancel}
+            disabled={isSaving}>
+        </lightning-button>
+        <template if:false={isReadOnly}>
+        <lightning-button
+            class="slds-m-left_x-small"
+            variant="brand"
+            label={saveButtonLabel}
+            onclick={handleSave}
+            disabled={isSaveDisabled}>
+        </lightning-button>
+        </template>
+    </lightning-modal-footer>
+</template>

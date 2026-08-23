@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Trade_Error_Log__c</fullName>
+    <label>Trade Error Log</label>
+    <referenceTo>Trade_Error_Log__c</referenceTo>
+    <relationshipLabel>Trade Error Impacted Accounts</relationshipLabel>
+    <relationshipName>Trade_Error_Impacted_Accounts</relationshipName>
+    <relationshipOrder>1</relationshipOrder>
+    <reparentableMasterDetail>false</reparentableMasterDetail>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>MasterDetail</type>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+</CustomField>

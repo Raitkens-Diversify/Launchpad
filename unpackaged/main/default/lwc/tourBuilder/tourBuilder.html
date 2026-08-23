@@ -1,0 +1,266 @@
+<template>
+    <div class="tb">
+        <header class="tb__header">
+            <h1 class="tb__heading">Tour Builder</h1>
+            <p class="tb__subheading">
+                Author guided tours as drafts, preview them live, then publish to make them
+                available to <code class="tb__code">&lt;c-tour-launcher&gt;</code> on any page.
+            </p>
+        </header>
+
+        <template lwc:if={errorMessage}>
+            <div class="tb__banner tb__banner--error" role="alert">{errorMessage}</div>
+        </template>
+        <template lwc:if={successMessage}>
+            <div class="tb__banner tb__banner--success" role="status">{successMessage}</div>
+        </template>
+
+        <div class="tb__layout">
+            <!-- ============ Left rail: tour list ============ -->
+            <aside class="tb__rail">
+                <div class="tb__rail-head">
+                    <span class="tb__rail-title">Tours</span>
+                    <lightning-button
+                        label="New tour"
+                        variant="brand"
+                        onclick={handleNewTour}
+                    ></lightning-button>
+                </div>
+                <template lwc:if={loadingTours}>
+                    <div class="tb__loading">
+                        <lightning-spinner alternative-text="Loading tours" size="small"></lightning-spinner>
+                    </div>
+                </template>
+                <ul class="tb__tour-list">
+                    <template for:each={tourRows} for:item="row">
+                        <li key={row.recordId}>
+                            <button
+                                type="button"
+                                class={row.className}
+                                data-id={row.recordId}
+                                onclick={handleSelectTour}
+                            >
+                                <span class="tb__tour-label">{row.label}</span>
+                                <span class="tb__tour-meta">
+                                    <code class="tb__code">{row.tourKey}</code>
+                                    <span class={row.statusClass}>{row.statusLabel}</span>
+                                </span>
+                                <template lwc:if={row.lastPublishedLabel}>
+                                    <span class="tb__tour-published">{row.lastPublishedLabel}</span>
+                                </template>
+                            </button>
+                        </li>
+                    </template>
+                </ul>
+                <template lwc:if={showEmptyTours}>
+                    <p class="tb__empty">No tours yet — create the first one.</p>
+                </template>
+            </aside>
+
+            <!-- ============ Right pane: selected tour ============ -->
+            <section class="tb__main">
+                <template lwc:if={showTourForm}>
+                    <!-- Tour settings -->
+                    <div class="tb__card">
+                        <h2 class="tb__section-title">{tourFormTitle}</h2>
+                        <div class="tb__form-grid">
+                            <lightning-input
+                                label="Label"
+                                value={formLabel}
+                                onchange={handleFormLabel}
+                                required
+                                max-length="40"
+                            ></lightning-input>
+                            <lightning-input
+                                label="Tour Key"
+                                value={formKey}
+                                onchange={handleFormKey}
+                                required
+                                disabled={keyLocked}
+                                max-length="30"
+                                field-level-help="Lowercase letters, digits and single underscores (e.g. nexus_help). Becomes the published identity — locked after first publish."
+                            ></lightning-input>
+                            <lightning-input
+                                type="number"
+                                label="Version"
+                                value={formVersion}
+                                onchange={handleFormVersion}
+                                field-level-help="Bump the version to re-show the tour to users who completed or dismissed it."
+                            ></lightning-input>
+                            <div class="tb__toggles">
+                                <lightning-input
+                                    type="toggle"
+                                    label="Active"
+                                    checked={formActive}
+                                    onchange={handleFormActive}
+                                ></lightning-input>
+                                <lightning-input
+                                    type="toggle"
+                                    label="Auto start"
+                                    checked={formAutoStart}
+                                    onchange={handleFormAutoStart}
+                                ></lightning-input>
+                            </div>
+                        </div>
+                        <div class="tb__row-actions">
+                            <template lwc:if={hasSelectedTour}>
+                                <lightning-button
+                                    label={deleteTourLabel}
+                                    variant="destructive-text"
+                                    onclick={handleDeleteTour}
+                                ></lightning-button>
+                            </template>
+                            <span class="tb__spacer"></span>
+                            <lightning-button
+                                label="Save tour"
+                                variant="brand"
+                                onclick={handleSaveTour}
+                                disabled={saving}
+                            ></lightning-button>
+                        </div>
+                    </div>
+                </template>
+
+                <template lwc:if={hasSelectedTour}>
+                    <!-- Steps -->
+                    <div class="tb__card">
+                        <div class="tb__section-head">
+                            <h2 class="tb__section-title">Steps</h2>
+                            <lightning-button
+                                label="Add step"
+                                onclick={handleAddStep}
+                            ></lightning-button>
+                        </div>
+                        <template lwc:if={hasSteps}>
+                            <ul class="tb__steps">
+                                <template for:each={stepRows} for:item="row" for:index="index">
+                                    <li
+                                        key={row.recordId}
+                                        class={row.className}
+                                        draggable="true"
+                                        data-index={index}
+                                        ondragstart={handleDragStart}
+                                        ondragover={handleDragOver}
+                                        ondragleave={handleDragLeave}
+                                        ondrop={handleDrop}
+                                        ondragend={handleDragEnd}
+                                    >
+                                        <span class="tb__step-grip" aria-hidden="true">⋮⋮</span>
+                                        <span class="tb__step-order">{row.stepOrder}</span>
+                                        <button
+                                            type="button"
+                                            class="tb__step-body"
+                                            data-id={row.recordId}
+                                            onclick={handleSelectStep}
+                                        >
+                                            <span class="tb__step-title">{row.title}</span>
+                                            <code class="tb__code">{row.targetSelector}</code>
+                                        </button>
+                                        <c-ds-badge label={row.placement} size="sm"></c-ds-badge>
+                                        <span class="tb__step-move">
+                                            <lightning-button-icon
+                                                icon-name="utility:up"
+                                                size="small"
+                                                variant="bare"
+                                                alternative-text="Move up"
+                                                data-index={index}
+                                                disabled={row.isFirst}
+                                                onclick={handleMoveUp}
+                                            ></lightning-button-icon>
+                                            <lightning-button-icon
+                                                icon-name="utility:down"
+                                                size="small"
+                                                variant="bare"
+                                                alternative-text="Move down"
+                                                data-index={index}
+                                                disabled={row.isLast}
+                                                onclick={handleMoveDown}
+                                            ></lightning-button-icon>
+                                        </span>
+                                    </li>
+                                </template>
+                            </ul>
+                        </template>
+                        <template lwc:if={showEmptySteps}>
+                            <p class="tb__empty">No steps yet — add the first one.</p>
+                        </template>
+                    </div>
+
+                    <!-- Step editor -->
+                    <template lwc:if={selectedStep}>
+                        <div class="tb__card">
+                            <h2 class="tb__section-title">{stepEditorTitle}</h2>
+                            <c-tour-step-editor
+                                step={selectedStep}
+                                onstepchange={handleStepSave}
+                                onstepdelete={handleStepDelete}
+                            ></c-tour-step-editor>
+                        </div>
+                    </template>
+
+                    <!-- Preview + publish -->
+                    <div class="tb__card">
+                        <div class="tb__section-head">
+                            <h2 class="tb__section-title">Preview &amp; publish</h2>
+                            <div class="tb__row-actions">
+                                <lightning-button
+                                    label="Preview tour"
+                                    onclick={handlePreview}
+                                    disabled={previewDisabled}
+                                ></lightning-button>
+                                <lightning-button
+                                    label={publishLabel}
+                                    variant="brand"
+                                    onclick={handlePublish}
+                                    disabled={publishDisabled}
+                                ></lightning-button>
+                            </div>
+                        </div>
+                        <p class="tb__hint">
+                            Preview runs the draft steps against the sample targets below with the
+                            exact runtime overlay. Publishing promotes this draft to custom metadata
+                            (asynchronous — the status updates when the deploy finishes).
+                        </p>
+                        <template lwc:if={publishStatusLabel}>
+                            <p class={publishStatusClass}>{publishStatusLabel}</p>
+                        </template>
+                        <div class="tb__stage">
+                            <div class="tb__stage-tile" data-preview-index="0">Sample target 1</div>
+                            <div class="tb__stage-tile" data-preview-index="1">Sample target 2</div>
+                            <div class="tb__stage-tile" data-preview-index="2">Sample target 3</div>
+                            <div class="tb__stage-tile" data-preview-index="3">Sample target 4</div>
+                        </div>
+                    </div>
+                </template>
+
+                <template lwc:if={showWelcome}>
+                    <div class="tb__card tb__card--welcome">
+                        <h2 class="tb__section-title">Select or create a tour</h2>
+                        <p class="tb__hint">
+                            Pick a tour from the list or create a new one. Tours are edited here as
+                            drafts and only affect users after you publish.
+                        </p>
+                    </div>
+                </template>
+            </section>
+        </div>
+
+        <!-- Live preview: the real runtime overlay, driven by draft data. -->
+        <template lwc:if={previewing}>
+            <c-tour-overlay
+                target-element={previewTarget}
+                step-title={previewTitle}
+                step-body={previewBody}
+                placement={previewPlacement}
+                step-index={previewIndex}
+                step-count={previewCount}
+                advance-on={previewAdvanceOn}
+                active={previewActive}
+                onnext={handlePreviewNext}
+                onback={handlePreviewBack}
+                onskip={handlePreviewExit}
+                onfinish={handlePreviewExit}
+            ></c-tour-overlay>
+        </template>
+    </div>
+</template>

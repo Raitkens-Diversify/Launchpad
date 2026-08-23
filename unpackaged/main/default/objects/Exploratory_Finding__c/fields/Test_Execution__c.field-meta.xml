@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Test_Execution__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>The run a Test case-sourced finding came from. Denormalized alongside Test_Step_Result__c on purpose: the step result is master-detail to the execution and is purged with it, so without this the finding would lose all trace of which case and tester it came from. SetNull for the same reason.</description>
+    <label>Test Execution</label>
+    <referenceTo>Test_Execution__c</referenceTo>
+    <relationshipLabel>Findings</relationshipLabel>
+    <relationshipName>Findings</relationshipName>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

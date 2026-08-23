@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Mutual_Fund_Sell_Service</fullName>
+    <columns>NAME</columns>
+    <columns>Investment_Type__c</columns>
+    <columns>Commission__c</columns>
+    <columns>Date_Approved__c</columns>
+    <columns>Sponsor_Website__c</columns>
+    <columns>Asset_Class__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Status__c</field>
+        <operation>equals</operation>
+        <value>Sell/Service</value>
+    </filters>
+    <filters>
+        <field>Asset_Category__c</field>
+        <operation>equals</operation>
+        <value>Mutual Fund</value>
+    </filters>
+    <label>Mutual Fund - Sell/Service</label>
+</ListView>

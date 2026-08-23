@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <caseType>Nominative</caseType>
+        <plural>false</plural>
+        <value>Finanz-Account</value>
+    </caseValues>
+    <caseValues>
+        <caseType>Nominative</caseType>
+        <plural>true</plural>
+        <value>Finanz-Accounts</value>
+    </caseValues>
+    <caseValues>
+        <caseType>Accusative</caseType>
+        <plural>false</plural>
+        <value>Finanz-Account</value>
+    </caseValues>
+    <caseValues>
+        <caseType>Accusative</caseType>
+        <plural>true</plural>
+        <value>Finanz-Accounts</value>
+    </caseValues>
+    <caseValues>
+        <caseType>Genitive</caseType>
+        <plural>false</plural>
+        <value>Finanz-Accounts</value>
+    </caseValues>
+    <caseValues>
+        <caseType>Genitive</caseType>
+        <plural>true</plural>
+        <value>Finanz-Accounts</value>
+    </caseValues>
+    <caseValues>
+        <caseType>Dative</caseType>
+        <plural>false</plural>
+        <value>Finanz-Account</value>
+    </caseValues>
+    <caseValues>
+        <caseType>Dative</caseType>
+        <plural>true</plural>
+        <value>Finanz-Accounts</value>
+    </caseValues>
+    <gender>Masculine</gender>
+    <nameFieldLabel>Finanz-Accountname</nameFieldLabel>
+    <quickActions>
+        <label><!-- Financial Account Information --></label>
+        <name>Financial_Account_Information</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Financial Account Information for Case --></label>
+        <name>Financial_Account_Information_for_Case</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Financial Account Owner Info --></label>
+        <name>Financial_Account_Owner_Info</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Merge Financial Account --></label>
+        <name>Merge_Financial_Account</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Reg BI Information --></label>
+        <name>Reg_BI_Information</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Submit Request --></label>
+        <name>Submit_Request</name>
+    </quickActions>
+</CustomObjectTranslation>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Sub-Type --></label>
+        <name>Sub_Type__c</name>
+        <picklistValues>
+            <masterLabel>Diversify Asset Management</masterLabel>
+            <translation><!-- Diversify Asset Management --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DocuSign</masterLabel>
+            <translation><!-- DocuSign --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Egnyte</masterLabel>
+            <translation><!-- Egnyte --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Estate Guru</masterLabel>
+            <translation><!-- Estate Guru --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>IT Managed</masterLabel>
+            <translation><!-- IT Managed --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Integrated Ops</masterLabel>
+            <translation><!-- Integrated Ops --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>LastPass</masterLabel>
+            <translation><!-- LastPass --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Microsoft</masterLabel>
+            <translation><!-- Microsoft --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Orion Compliance</masterLabel>
+            <translation><!-- Orion Compliance --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Salesforce</masterLabel>
+            <translation><!-- Salesforce --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Zoom</masterLabel>
+            <translation><!-- Zoom --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

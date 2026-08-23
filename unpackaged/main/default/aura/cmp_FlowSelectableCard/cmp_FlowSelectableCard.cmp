@@ -1,0 +1,83 @@
+<aura:component implements="lightning:availableForFlowScreens" Controller="FlowSelectableCard_Controller" access="global">
+    <aura:attribute name="recordId" type="String"/>
+    <aura:attribute name="recordIds" type="String[]" />
+    <aura:attribute name="sObjectType" type="String"/>
+    <aura:attribute name="fields" type="String"/>
+    <aura:attribute name="personOrHousehold" type="String"/>
+    <aura:attribute name="fieldsList" type="List" default="[]"/>
+    <aura:attribute name="record" type="SObject"/>
+    <aura:attribute name="records" type="SObject[]" default="[]"/>
+    <aura:attribute name="isLoaded" type="boolean" default="false"/>
+    <aura:attribute name="selectedValue" type="string"/>
+    <aura:attribute name="onlyperson" type="boolean"/>
+    <aura:attribute name="personContactId" type="string"/>
+    <aura:attribute name="recordFilter" type="string"/>
+    <aura:attribute name="isSelectedValueBlank" type="boolean"/>
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:if isTrue="{!v.isLoaded}">
+        <aura:if isTrue="{!v.isSelectedValueBlank}">
+                <p style='color:red;text-align:center;font-size:1.5em;'>Please select a record.</p>
+            </aura:if>
+        <div class="slds-grid slds-wrap">
+            <aura:if isTrue="{!v.personOrHousehold == 'Person'}">
+                <aura:iteration items="{!v.records}" var="item">
+                    <div class="{!if(v.onlyperson,'slds-size_6-of-12','slds-size_12-of-12')}">
+                        <div data-id="{!item.Id}" onclick="{!c.handleCardClick}" style="{! if(v.onlyperson,'','padding:0px;')}"  class="{!'slds-col ' + if(v.onlyperson,'slds-var-p-around_small  ', '') }">
+                            <div style="{! if(v.onlyperson,'','min-height:210px;')}" class="{! 'slds-border_top slds-border_right slds-border_bottom slds-border_left card_container ' + if(item.Id == v.selectedValue,'is_selected','')}">
+                                <lightning:card variant="Narrow" title="{!item.FirstName + ' ' + item.LastName}" class="" iconName="standard:account"  >
+                                    <lightning:recordViewForm recordId="{!item.Id}" objectApiName="{!v.sObjectType}">
+                                        <div class="slds-card__body slds-p-left_small disableop">
+                                            <lightning:outputField  fieldName="PersonBirthdate" />
+                                            <lightning:outputField class="text-wrap"  fieldName="PersonEmail"/>
+                                        </div>
+                                    </lightning:recordViewForm>
+                                </lightning:card>
+                            </div>
+                        </div>
+                    </div>
+                </aura:iteration>
+            </aura:if>
+            <aura:if isTrue="{!v.personOrHousehold == 'Household'}">
+                <aura:iteration items="{!v.records}" var="item">
+                    <div data-id="{!item.Id}" onclick="{!c.handleCardClick}" class="{!if(v.onlyperson,'slds-col slds-size_7-of-12 slds-p-bottom_small HouseHold','slds-size_12-of-12')}">
+                        <div style="{! if(v.onlyperson,'','min-height:210px;')}" class="{!'slds-border_top slds-border_right slds-border_bottom slds-border_left slds-col card_container ' + if(v.onlyperson,'slds-var-m-around_medium ', '') + if(item.Id == v.selectedValue,'is_selected','')}">
+                            
+                            <lightning:card variant="Narrow" title="{!item.Name}" class="" iconName="standard:account">
+                                <lightning:recordViewForm recordId="{!item.Id}" objectApiName="{!v.sObjectType}">
+                                    <div class="slds-card__body disableop">
+                                        
+                                        <lightning:outputField  fieldName="BillingAddress" />
+                                        
+                                        <!--<lightning:outputField  fieldName="BillingCity" />
+                                    <lightning:outputField  fieldName="BillingState" />
+                                    <lightning:outputField  fieldName="BillingPostalCode" />-->
+                                        <lightning:outputField  fieldName="FinServ__AUM__c"/>
+                                        
+                                    </div>
+                                </lightning:recordViewForm>
+                            </lightning:card>
+                        </div>
+                    </div>
+                </aura:iteration>
+            </aura:if>
+            <aura:if isTrue="{!v.personOrHousehold == 'Financial Account'}">
+                <aura:iteration items="{!v.records}" var="item">
+                    <div data-id="{!item.Id}" onclick="{!c.handleCardClick}" class="{!if(v.onlyperson,'slds-col slds-size_7-of-12 slds-p-bottom_small HouseHold','slds-size_12-of-12')}">
+                        <div class="{!'slds-border_top slds-border_right slds-border_bottom slds-border_left slds-col slds-var-m-around_medium card_container ' + if(item.Id == v.selectedValue,'is_selected','')}">
+                            
+                            <lightning:card variant="Narrow" title="{!item.Name}" class="" iconName="standard:account">
+                                <lightning:recordViewForm recordId="{!item.Id}" objectApiName="{!v.sObjectType}">
+                                    <div class="slds-card__body disableop">
+                                        <lightning:outputField  fieldName="Name" />
+                                    </div>
+                                </lightning:recordViewForm>
+                            </lightning:card>
+                        </div>
+                    </div>
+                </aura:iteration>
+            </aura:if>
+        </div>
+    </aura:if>
+    
+</aura:component>

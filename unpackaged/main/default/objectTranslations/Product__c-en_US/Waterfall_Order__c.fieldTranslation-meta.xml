@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Waterfall Order --></label>
+        <name>Waterfall_Order__c</name>
+        <picklistValues>
+            <masterLabel>Investor/manager split</masterLabel>
+            <translation><!-- Investor/manager split --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Manager catch-up</masterLabel>
+            <translation><!-- Manager catch-up --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Preferred return</masterLabel>
+            <translation><!-- Preferred return --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Return of capital</masterLabel>
+            <translation><!-- Return of capital --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

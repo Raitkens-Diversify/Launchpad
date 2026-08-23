@@ -1,0 +1,113 @@
+:host {
+    display: block;
+}
+/* Two-column browse layout mirroring the Help Center's .nexs shell:
+   fixed 340px sidebar with a right border, fluid content. */
+.rc-cat {
+    display: flex;
+    gap: var(--ds-space-xl, 24px);
+    max-width: var(--rc-content-wide, 1440px);
+    margin: 0 auto;
+    padding: var(--ds-space-2xl, 32px) var(--ds-space-xl, 24px) var(--ds-space-xl, 24px);
+}
+.rc-cat__nav {
+    flex: 0 0 340px;
+    padding-right: var(--ds-space-xl, 24px);
+    border-right: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+.rc-cat__main {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.rc-cat__title {
+    margin: 0;
+    font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+    font-size: 1.75rem;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.rc-cat__desc {
+    margin: var(--ds-space-sm, 8px) 0 var(--ds-space-lg, 16px);
+    font-size: 1rem;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+.rc-grid {
+    display: grid;
+    gap: var(--ds-space-lg, 16px);
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+.rc-cat__empty,
+.rc-cat__status {
+    padding: var(--ds-space-xl, 24px);
+    text-align: center;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* ---- Collapsible subtopic sections (mirrors the Help Center's topic view) ---- */
+.rc-sections {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-md, 12px);
+}
+.rc-section {
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-md, 8px);
+    overflow: hidden;
+}
+.rc-section__head {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-space-md, 12px);
+    padding: 18px var(--ds-space-xl, 24px);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+}
+.rc-section__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.rc-section__meta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-sm, 8px);
+}
+.rc-section__count {
+    font-size: 0.8125rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    white-space: nowrap;
+}
+.rc-section__head lightning-icon {
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.rc-section__body {
+    padding: var(--ds-space-lg, 16px) var(--ds-space-xl, 24px) var(--ds-space-xl, 24px);
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+.rc-section__body--collapsed {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .rc-cat {
+        flex-direction: column;
+    }
+    .rc-cat__nav {
+        flex-basis: auto;
+        width: 100%;
+        padding-right: 0;
+        border-right: none;
+    }
+}
+@media (max-width: 640px) {
+    .rc-grid { grid-template-columns: 1fr; }
+}

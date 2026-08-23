@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Normalized_Query__c</fullName>
+    <description>The query after the search engine&#39;s own tokenizer runs (alphanumeric strip, lowercase, stopword + single-char drop), significant tokens space-joined. This is the tuning key — group gap reports on it, not the raw Term__c, so &quot;Reset Password?&quot; and &quot;reset password&quot; collapse together.</description>
+    <externalId>false</externalId>
+    <label>Normalized Query</label>
+    <length>255</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

@@ -1,0 +1,183 @@
+<template>
+    <header class="docs__header">
+        <lightning-button
+            class="docs__back"
+            variant="base"
+            icon-name="utility:back"
+            icon-position="left"
+            label="Back to Envelope"
+            onclick={handleBack}>
+        </lightning-button>
+        <h1 class="docs__title">Manage Documents</h1>
+        <p class="docs__subtitle">{subtitle}</p>
+    </header>
+
+    <output class="docs__alert">
+        <lightning-icon
+            icon-name="utility:info"
+            size="x-small"
+            class="docs__alert-icon"
+            alternative-text="Information">
+        </lightning-icon>
+        <p class="docs__alert-text">
+            The documents listed below reflect the envelope as currently constituted. This
+            list is subject to change as action items are added and as key points within each
+            action item are completed or changed.
+        </p>
+    </output>
+
+    <div class="docs__content">
+        <section class="docs__column">
+            <p class="docs__column-label">Uploaded Files</p>
+            <div class="docs__dropzone">
+                <div class="docs__dropzone-copy">
+                    <p class="docs__dropzone-title">Choose a file or drag and drop it here</p>
+                    <p class="docs__dropzone-hint">PDF, ZIP, DOC, DOCX, XLS and XLSX formats, up to 25MB</p>
+                </div>
+                <lightning-file-upload
+                    class="docs__file-input"
+                    label="Upload documents"
+                    name="fileUploader"
+                    accept=".pdf,.zip,.doc,.docx,.xls,.xlsx"
+                    record-id={envelopeId}
+                    onuploadfinished={handleFilesChange}
+                    multiple>
+                </lightning-file-upload>
+            </div>
+
+            <template lwc:if={hasUploadedFiles}>
+                <ul class="docs__file-list">
+                    <template for:each={fileRows} for:item="file">
+                        <li key={file.id} class="docs__file">
+                            <template lwc:if={file.uploading}>
+                                <div class="docs__file-row">
+                                    <div class="docs__upload">
+                                        <div class="docs__upload-labels">
+                                            <span class="docs__upload-name">{file.name}</span>
+                                            <span class="docs__upload-meta">{file.progressLabel}</span>
+                                        </div>
+                                        <lightning-progress-bar
+                                            class="docs__upload-bar"
+                                            value={file.progress}
+                                            size="small"
+                                            variant="base">
+                                        </lightning-progress-bar>
+                                    </div>
+                                    <lightning-button-icon
+                                        class="docs__upload-cancel"
+                                        variant="bare"
+                                        icon-name="utility:close"
+                                        alternative-text="Cancel upload"
+                                        title="Cancel upload"
+                                        data-id={file.id}
+                                        onclick={handleCancelUpload}>
+                                    </lightning-button-icon>
+                                </div>
+                            </template>
+                            <template lwc:else>
+                                <div class="docs__file-row">
+                                    <lightning-icon
+                                        icon-name={file.iconName}
+                                        size="small"
+                                        class="docs__file-icon"
+                                        alternative-text="file">
+                                    </lightning-icon>
+                                    <span class="docs__file-name">{file.name}</span>
+                                    <lightning-button
+                                        class="docs__file-link"
+                                        variant="base"
+                                        icon-name="utility:link"
+                                        icon-position="left"
+                                        label="Manage document links"
+                                        data-id={file.id}
+                                        data-name={file.name}
+                                        onclick={handleLinkDocuments}>
+                                    </lightning-button>
+                                    <lightning-button-menu
+                                        class="docs__file-menu"
+                                        variant="bare"
+                                        icon-name="utility:threedots_vertical"
+                                        menu-alignment="right"
+                                        alternative-text="More actions"
+                                        title="More actions"
+                                        data-id={file.id}
+                                        data-name={file.name}
+                                        onselect={handleFileMenuSelect}>
+                                        <lightning-menu-item
+                                            value="download"
+                                            label="Download"
+                                            prefix-icon-name="utility:download">
+                                        </lightning-menu-item>
+                                        <lightning-menu-item
+                                            value="remove"
+                                            label="Remove file"
+                                            prefix-icon-name="utility:delete">
+                                        </lightning-menu-item>
+                                    </lightning-button-menu>
+                                </div>
+                                <template lwc:if={file.hasLinks}>
+                                    <ul class="docs__file-docs">
+                                        <template for:each={file.linkedDocs} for:item="doc">
+                                            <li key={doc.id} class="docs__file-doc">{doc.name}</li>
+                                        </template>
+                                    </ul>
+                                </template>
+                            </template>
+                        </li>
+                    </template>
+                </ul>
+            </template>
+        </section>
+
+        <section class="docs__column">
+            <p class="docs__column-label">Supporting Documents</p>
+            <template for:each={documentRows} for:item="doc">
+                <c-envelope-document-card
+                    key={doc.id}
+                    name={doc.name}
+                    signees={doc.signees}
+                    linked-file-name={doc.linkedFileName}>
+                </c-envelope-document-card>
+            </template>
+        </section>
+    </div>
+
+    <c-envelope-confirm-removal-modal
+        lwc:ref="removeModal"
+        title="Remove file?"
+        confirm-label="Remove file"
+        message-before={removeMessage}
+        busy={isRemoving}
+        onconfirm={handleRemoveConfirm}
+        onclose={handleRemoveClose}>
+        <template lwc:if={pendingRemoveHasLinks}>
+            <div class="docs__remove-warning" role="alert">
+                <lightning-icon
+                    icon-name="utility:warning"
+                    size="x-small"
+                    class="docs__remove-warning-icon"
+                    alternative-text="Warning">
+                </lightning-icon>
+                <div class="docs__remove-warning-body">
+                    <p class="docs__remove-warning-text">
+                        Please note that this action will unlink file
+                        '<strong>{pendingRemoveName}</strong>' from the following documents:
+                    </p>
+                    <ul class="docs__remove-warning-list">
+                        <template for:each={pendingRemoveLinks} for:item="docName">
+                            <li key={docName}>'<strong>{docName}</strong>'</li>
+                        </template>
+                    </ul>
+                </div>
+            </div>
+        </template>
+    </c-envelope-confirm-removal-modal>
+
+    <c-envelope-document-links-modal
+        lwc:ref="linksModal"
+        file-name={linkModalFileName}
+        documents={linkModalRows}
+        onconfirm={handleLinkConfirm}
+        onclose={handleLinkClose}>
+    </c-envelope-document-links-modal>
+</template>

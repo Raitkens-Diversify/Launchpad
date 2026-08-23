@@ -1,0 +1,35 @@
+<aura:component implements="flexipage:availableForRecordHome,force:hasRecordId" controller="TaskCommentController">
+    <aura:attribute name="mydata" type="Object"/>
+    <aura:attribute name="mydata5" type="Object"/>
+    <aura:attribute name="mydataAll" type="Object"/>
+    <aura:attribute name="dataCount" type="String"/>
+    <aura:attribute name="mycolumns" type="List"/>
+    <aura:attribute name="recordId" type="String"/>
+    <aura:attribute name="iconName" type="String"/>
+    <aura:attribute name="viewMinMax" type="String" default='View All'/>
+    <aura:attribute name="sobjectLabelPlural" type="String" default="Task Comments"/>
+
+    <!--handlers-->
+    <aura:handler name="init" value="{!this}" action="{!c.init}"/>
+    
+    <div>
+        <lightning:card class="slds-theme_shade slds-card_boundary" iconName="utility:comments"> 
+            <!--div class="slds-theme_shade slds-p-around_medium"-->
+            <aura:set attribute="title">
+                <b><a class="slds-card__header-link">{!(v.sobjectLabelPlural)} ({!(v.dataCount)})</a></b>
+            </aura:set>            
+                <div style="height: 400px">
+                <lightning:datatable
+                                     keyField="id"
+                                     data="{!v.mydata}"
+                                     columns="{!v.mycolumns}"
+                                     hideCheckboxColumn="true"/>
+            </div>
+            <!--</aura:set>--> 
+            <div class="linkText slds-p-horizontal" onclick="{!c.viewAll}">
+                <center>{!(v.viewMinMax)}</center>
+            </div>
+        </lightning:card>
+    </div>
+    
+</aura:component>

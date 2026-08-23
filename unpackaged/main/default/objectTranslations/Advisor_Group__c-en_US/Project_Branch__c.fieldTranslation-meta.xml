@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Project-Branch --></label>
+        <name>Project_Branch__c</name>
+        <picklistValues>
+            <masterLabel>B101.1_KEY</masterLabel>
+            <translation><!-- B101.1_KEY --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B102.1_CAL</masterLabel>
+            <translation><!-- B102.1_CAL --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B103.1_SAN</masterLabel>
+            <translation><!-- B103.1_SAN --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B103.2_SAN-IND</masterLabel>
+            <translation><!-- B103.2_SAN-IND --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B104.1_ORM</masterLabel>
+            <translation><!-- B104.1_ORM --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B104.2_ORM-MFO</masterLabel>
+            <translation><!-- B104.2_ORM-MFO --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B105.1_PRS</masterLabel>
+            <translation><!-- B105.1_PRS --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B105.2_PRS-IND</masterLabel>
+            <translation><!-- B105.2_PRS-IND --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B108.2_DWM-IND</masterLabel>
+            <translation><!-- B108.2_DWM-IND --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B303.1_ASHP</masterLabel>
+            <translation><!-- B303.1_ASHP --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B304.1_BRGE</masterLabel>
+            <translation><!-- B304.1_BRGE --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B305.1_BTLRF</masterLabel>
+            <translation><!-- B305.1_BTLRF --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B306.1_CAPTF</masterLabel>
+            <translation><!-- B306.1_CAPTF --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B307.1_CIPLF</masterLabel>
+            <translation><!-- B307.1_CIPLF --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B308.1_CCWA</masterLabel>
+            <translation><!-- B308.1_CCWA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B309.1_CC</masterLabel>
+            <translation><!-- B309.1_CC --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B311.1_DFPGCD</masterLabel>
+            <translation><!-- B311.1_DFPGCD --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B313.1_DSTP</masterLabel>
+            <translation><!-- B313.1_DSTP --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B314.1_EVGRN</masterLabel>
+            <translation><!-- B314.1_EVGRN --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B315.1_FFC</masterLabel>
+            <translation><!-- B315.1_FFC --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B316.1_FINF</masterLabel>
+            <translation><!-- B316.1_FINF --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B317.1_FINR</masterLabel>
+            <translation><!-- B317.1_FINR --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B319.1_FRMN</masterLabel>
+            <translation><!-- B319.1_FRMN --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B320.1_GLDF</masterLabel>
+            <translation><!-- B320.1_GLDF --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B321.1_GOMC</masterLabel>
+            <translation><!-- B321.1_GOMC --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B322.1_GRCP</masterLabel>
+            <translation><!-- B322.1_GRCP --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B323.1_GRIFFL</masterLabel>
+            <translation><!-- B323.1_GRIFFL --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B325.1_GRVW</masterLabel>
+            <translation><!-- B325.1_GRVW --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B326.1_GWPH</masterLabel>
+            <translation><!-- B326.1_GWPH --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B330.1_INPC</masterLabel>
+            <translation><!-- B330.1_INPC --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B331.1_INVTW</masterLabel>
+            <translation><!-- B331.1_INVTW --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B332.1_KLK</masterLabel>
+            <translation><!-- B332.1_KLK --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B333.1_MAR</masterLabel>
+            <translation><!-- B333.1_MAR --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B334.1_NUCL</masterLabel>
+            <translation><!-- B334.1_NUCL --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B335.1_PRKV</masterLabel>
+            <translation><!-- B335.1_PRKV --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B336.1_PLATW</masterLabel>
+            <translation><!-- B336.1_PLATW --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B337.1_PROV</masterLabel>
+            <translation><!-- B337.1_PROV --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B338.1_RNCH</masterLabel>
+            <translation><!-- B338.1_RNCH --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B339.1_RGVG</masterLabel>
+            <translation><!-- B339.1_RGVG --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B340.1_RMTN</masterLabel>
+            <translation><!-- B340.1_RMTN --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B341.1_SHNLY</masterLabel>
+            <translation><!-- B341.1_SHNLY --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B342.1_SPRKF</masterLabel>
+            <translation><!-- B342.1_SPRKF --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B343.1_STRT</masterLabel>
+            <translation><!-- B343.1_STRT --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B344.1_SUMTG</masterLabel>
+            <translation><!-- B344.1_SUMTG --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B345.1_VNYA</masterLabel>
+            <translation><!-- B345.1_VNYA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B346.1_WRW</masterLabel>
+            <translation><!-- B346.1_WRW --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B347.1_BWAG</masterLabel>
+            <translation><!-- B347.1_BWAG --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B348.1_LHINV</masterLabel>
+            <translation><!-- B348.1_LHINV --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B349.1_HARD</masterLabel>
+            <translation><!-- B349.1_HARD --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B350.1_ICONA</masterLabel>
+            <translation><!-- B350.1_ICONA --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

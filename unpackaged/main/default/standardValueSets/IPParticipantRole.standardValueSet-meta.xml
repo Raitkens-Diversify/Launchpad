@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Driver</fullName>
+        <default>false</default>
+        <label>Driver</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Owner</fullName>
+        <default>false</default>
+        <label>Owner</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Member</fullName>
+        <default>false</default>
+        <label>Member</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Household Member</fullName>
+        <default>false</default>
+        <label>Household Member</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Beneficiary</fullName>
+        <default>false</default>
+        <label>Beneficiary</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Subscriber</fullName>
+        <default>false</default>
+        <label>Subscriber</label>
+    </standardValue>
+    <standardValue>
+        <fullName>HealthPlan Member</fullName>
+        <default>false</default>
+        <label>HealthPlan Member</label>
+    </standardValue>
+    <standardValue>
+        <fullName>LifePlan Member</fullName>
+        <default>false</default>
+        <label>LifePlan Member</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Agreement Payer</fullName>
+        <default>false</default>
+        <label>Agreement Payer</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Insured</fullName>
+        <default>false</default>
+        <label>Insured</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Other</fullName>
+        <default>false</default>
+        <label>Other</label>
+    </standardValue>
+</StandardValueSet>

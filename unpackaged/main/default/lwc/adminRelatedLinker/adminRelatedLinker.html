@@ -1,0 +1,74 @@
+<template>
+    <div class="arl">
+        <p class="arl__label">{label}</p>
+
+        <div class="arl__search">
+            <lightning-input type="search"
+                             variant="label-hidden"
+                             label={label}
+                             placeholder={placeholder}
+                             value={term}
+                             onchange={handleTermChange}></lightning-input>
+            <template if:true={hasResults}>
+                <ul class="arl__results" role="listbox">
+                    <template for:each={results} for:item="result">
+                        <li key={result.value}>
+                            <button type="button"
+                                    class="arl__result"
+                                    data-value={result.value}
+                                    onclick={handlePick}>
+                                <span class="arl__result-label">{result.label}</span>
+                                <span class="arl__result-sub">{result.sublabel}</span>
+                            </button>
+                        </li>
+                    </template>
+                </ul>
+            </template>
+        </div>
+
+        <template if:true={hasItems}>
+            <ul class="arl__items">
+                <template for:each={viewItems} for:item="item">
+                    <li key={item.value} class="arl__item">
+                        <span class="arl__item-label">{item.label}</span>
+                        <span class="arl__item-sub">{item.sublabel}</span>
+                        <span class="arl__item-actions">
+                            <template if:true={item.copyUrl}>
+                                <lightning-button-icon icon-name="utility:link"
+                                                       size="x-small"
+                                                       variant="border-filled"
+                                                       alternative-text="Copy link"
+                                                       title="Copy link"
+                                                       data-url={item.copyUrl}
+                                                       onclick={handleCopyLink}></lightning-button-icon>
+                            </template>
+                            <lightning-button-icon icon-name="utility:up"
+                                                   size="x-small"
+                                                   variant="border-filled"
+                                                   alternative-text="Move up"
+                                                   disabled={item.isFirst}
+                                                   data-index={item.index}
+                                                   onclick={handleMoveUp}></lightning-button-icon>
+                            <lightning-button-icon icon-name="utility:down"
+                                                   size="x-small"
+                                                   variant="border-filled"
+                                                   alternative-text="Move down"
+                                                   disabled={item.isLast}
+                                                   data-index={item.index}
+                                                   onclick={handleMoveDown}></lightning-button-icon>
+                            <lightning-button-icon icon-name="utility:close"
+                                                   size="x-small"
+                                                   variant="border-filled"
+                                                   alternative-text="Remove"
+                                                   data-index={item.index}
+                                                   onclick={handleRemove}></lightning-button-icon>
+                        </span>
+                    </li>
+                </template>
+            </ul>
+        </template>
+        <template if:false={hasItems}>
+            <p class="arl__empty">Nothing attached yet — search above to add.</p>
+        </template>
+    </div>
+</template>

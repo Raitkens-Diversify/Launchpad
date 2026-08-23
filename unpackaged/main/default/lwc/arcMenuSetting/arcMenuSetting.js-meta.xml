@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Arc Menu Setting</masterLabel>
+    <description>Settings gear menu with logout and reset password options for Arc Experience Cloud sites.</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+        <target>lightning__AppPage</target>
+        <target>lightning__RecordPage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property
+                name="resetPasswordPath"
+                type="String"
+                default="/reset-password"
+                label="Reset Password path"
+                description="Site-relative path for the Reset Password action (e.g. /reset-password)."
+            />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

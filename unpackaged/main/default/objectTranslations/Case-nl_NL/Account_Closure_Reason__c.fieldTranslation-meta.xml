@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Account Closure Reason --></label>
+        <name>Account_Closure_Reason__c</name>
+        <picklistValues>
+            <masterLabel>Client Terminated Services</masterLabel>
+            <translation><!-- Client Terminated Services --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Death</masterLabel>
+            <translation><!-- Death --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Other</masterLabel>
+            <translation><!-- Other --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Re-Registration</masterLabel>
+            <translation><!-- Re-Registration --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

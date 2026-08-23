@@ -1,0 +1,151 @@
+{
+  "type" : "sfdc_cms__view",
+  "title" : "Account List",
+  "contentBody" : {
+    "component" : {
+      "children" : [ {
+        "children" : [ {
+          "attributes" : {
+            "backgroundImageConfig" : "",
+            "backgroundImageOverlay" : "rgba(0,0,0,0)",
+            "componentSpacerSize" : "",
+            "dxpStyle" : { },
+            "layoutDirectionDesktop" : "row",
+            "layoutDirectionMobile" : "column",
+            "layoutDirectionTablet" : "column",
+            "maxContentWidth" : "",
+            "sectionColumnGutterWidth" : "",
+            "sectionConfig" : "{\"UUID\":\"5d93e247-4f4f-4397-b639-a4e72ac22d20\",\"columns\":[{\"UUID\":\"e003809f-3bed-43f0-9b75-04b34946ea73\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":[]}]}",
+            "sectionMinHeight" : "",
+            "sectionVerticalAlign" : "flex-start"
+          },
+          "children" : [ {
+            "children" : [ {
+              "attributes" : {
+                "activeTabBorderHighlightWeight" : "2px",
+                "activeTabTextEmphasis" : "{\"bold\":true}",
+                "activeTabTextStyle" : "{\"textStyle\":\"paragraph1\",\"headingTag\":\"p\"}",
+                "borderColor" : "",
+                "borderRadius" : "0px",
+                "borderWeight" : "0px",
+                "dxpStyle" : { },
+                "enableOverflowMenu" : false,
+                "imageFit" : "cover",
+                "imagePosition" : "center center",
+                "overflowIconColor" : "rgb(116,116,116)",
+                "overflowIconStyle" : "down-arrow",
+                "overflowMenuLabel" : "More",
+                "tabAlignment" : "left",
+                "tabBorderColor" : "",
+                "tabBorderRadius" : "0px",
+                "tabBorderWeight" : "0px",
+                "tabHoverBorderHighlightWeight" : "1px",
+                "tabLayout" : "horizontal",
+                "tabPadding" : "12px",
+                "tabTextStyle" : "{\"textStyle\":\"paragraph1\",\"headingTag\":\"p\"}",
+                "tabsetConfig" : "{\"UUID\":\"396c880b-c2ba-4770-a873-a53ffeb4a513\",\"activeTab\":null,\"useOverflowMenu\":null,\"tabs\":[{\"UUID\":\"a3a7bd2a-1274-427c-bfda-64185e32c5d2\",\"tabName\":\"All Contacts\",\"tabKey\":\"tab1\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"1b24f396-8274-4fb6-9324-64e0e0d8ed61\",\"tabName\":\"Households\",\"tabKey\":\"tab2\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"c8b904d3-04df-44c0-84f7-df018ff3cd47\",\"tabName\":\"Clients\",\"tabKey\":\"tab3\",\"locked\":false,\"allowGuestUser\":false}]}",
+                "width" : "100%"
+              },
+              "children" : [ {
+                "children" : [ {
+                  "attributes" : {
+                    "defaultListViewApiName" : "AllAccounts",
+                    "dxpStyle" : { },
+                    "objectApiName" : "Account",
+                    "tableId" : "contact-all-contact",
+                    "title" : ""
+                  },
+                  "definition" : "c:arcListView",
+                  "id" : "e7d60c9b-ab1d-4f92-9d3b-3ce0a2cf8101",
+                  "type" : "component"
+                } ],
+                "id" : "a3a7bd2a-1274-427c-bfda-64185e32c5d2",
+                "name" : "tab1",
+                "title" : "All Contacts",
+                "type" : "region"
+              }, {
+                "children" : [ {
+                  "attributes" : {
+                    "defaultListViewApiName" : "All_Households",
+                    "dxpStyle" : { },
+                    "objectApiName" : "Account",
+                    "tableId" : "contact-household",
+                    "title" : ""
+                  },
+                  "definition" : "c:arcListView",
+                  "id" : "d855a40b-a258-46fb-beac-221a16da0e59",
+                  "type" : "component"
+                } ],
+                "id" : "1b24f396-8274-4fb6-9324-64e0e0d8ed61",
+                "name" : "tab2",
+                "title" : "Households",
+                "type" : "region"
+              }, {
+                "children" : [ {
+                  "attributes" : {
+                    "defaultListViewApiName" : "All_Clients",
+                    "dxpStyle" : { },
+                    "objectApiName" : "Account",
+                    "tableId" : "contact-client",
+                    "title" : ""
+                  },
+                  "definition" : "c:arcListView",
+                  "id" : "662ee405-2b4f-43cf-af73-950083ea2e47",
+                  "type" : "component"
+                } ],
+                "id" : "c8b904d3-04df-44c0-84f7-df018ff3cd47",
+                "name" : "tab3",
+                "title" : "Clients",
+                "type" : "region"
+              } ],
+              "definition" : "dxp_layout:tabs",
+              "id" : "396c880b-c2ba-4770-a873-a53ffeb4a513",
+              "type" : "component"
+            }, {
+              "attributes" : {
+                "dxpStyle" : {
+                  "isVisible" : true
+                }
+              },
+              "definition" : "c:lwrTabUrlHandler",
+              "id" : "5475aa4b-9e0b-4919-84fe-27ea4ffec5c4",
+              "type" : "component"
+            } ],
+            "id" : "e003809f-3bed-43f0-9b75-04b34946ea73",
+            "name" : "col1",
+            "title" : "Column 1",
+            "type" : "region"
+          } ],
+          "definition" : "community_layout:section",
+          "id" : "5d93e247-4f4f-4397-b639-a4e72ac22d20",
+          "type" : "component"
+        } ],
+        "id" : "2472d6dd-5697-40a1-872e-15bf8f63c3dc",
+        "name" : "content",
+        "title" : "Content",
+        "type" : "region"
+      }, {
+        "children" : [ {
+          "attributes" : {
+            "dxpStyle" : { },
+            "recordId" : "{!recordId}"
+          },
+          "definition" : "community_builder:seoAssistant",
+          "id" : "64728969-e670-4603-b312-cbc256f5723c",
+          "type" : "component"
+        } ],
+        "id" : "7704c6aa-1bd6-4f8f-927f-16062ccce8f6",
+        "name" : "sfdcHiddenRegion",
+        "title" : "sfdcHiddenRegion",
+        "type" : "region"
+      } ],
+      "definition" : "community_layout:sldsFlexibleLayout",
+      "id" : "cef48083-2ac6-420a-a437-76984365cbb7",
+      "type" : "component"
+    },
+    "dataProviders" : [ ],
+    "themeLayoutType" : "OHzbXAVux6mZ7VVDb7Pb8F2YUFBAXR",
+    "viewType" : "list-001"
+  },
+  "urlName" : "account-list"
+}

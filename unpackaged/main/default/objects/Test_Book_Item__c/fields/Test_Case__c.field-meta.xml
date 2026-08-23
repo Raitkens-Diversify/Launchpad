@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Test_Case__c</fullName>
+    <deleteConstraint>Restrict</deleteConstraint>
+    <description>The case in the book. Restricted delete: a case referenced by a book cannot be deleted.</description>
+    <label>Test Case</label>
+    <referenceTo>Test_Case__c</referenceTo>
+    <relationshipLabel>Test Book Items</relationshipLabel>
+    <relationshipName>Test_Book_Items</relationshipName>
+    <required>true</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

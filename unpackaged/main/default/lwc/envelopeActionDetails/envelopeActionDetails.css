@@ -1,0 +1,130 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  /* Match the default workspace's content panel surface (.shell__content). */
+  background: var(--slds-g-color-surface-2, #f3f4f6);
+}
+
+/* The single, full-width scroll surface: everything (header included) scrolls as one page, and the
+   scrollbar sits at the viewport edge. Positioned so it is the containing block for any
+   absolutely-positioned descendant without a closer positioned ancestor — otherwise such a box
+   anchors outside this scroll container, escapes its clip, and stretches the LEX page. */
+.action-details__scroll {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  /* Reserve the scrollbar's width whether or not it is showing, so its appearance never changes the
+     width the content lays out into. Adding a section makes the page taller, which is what summons
+     the bar in the first place — and the reflow it caused could change the height that summoned it.
+     See the track below for the other half of that loop. */
+  scrollbar-gutter: stable;
+  background: var(--slds-g-color-surface-2, #f3f4f6);
+  background-attachment: local;
+}
+
+/* Content is capped at the design's max width and centered; bottom padding clears the fixed nav pill. */
+.action-details {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--slds-g-spacing-6, 32px) var(--slds-g-spacing-7, 40px);
+}
+
+.action-details__body {
+  display: grid;
+  /* The rail is sized against this grid, not the viewport. `vw` counts the scrollbar while the pane
+     it sits in does not, so the two disagreed by exactly the bar's width the moment it appeared: the
+     track kept its size, the content column absorbed the difference, its text rewrapped, and the page
+     height that decided the scrollbar changed. Landing back on the threshold, the two states
+     alternate and layout never settles. A percentage resolves against the container, which the bar
+     has already been subtracted from, so the disagreement cannot arise. */
+  grid-template-columns: clamp(280px, 30%, 384px) minmax(0, 1fr);
+  gap: var(--slds-g-spacing-5, 24px);
+  margin-top: var(--slds-g-spacing-5, 24px);
+  /* Let the sticky TOC resolve against the grid item, not stretch it full height. */
+  align-items: start;
+}
+
+/* Table of Contents rail — sticks just under the app bar once the header scrolls away. The sticky box
+   is deliberately not also a scroll container: a box that is both gets a composited layer whose
+   bounds shift as the rail grows, nested inside this pane's own scrolling-contents layer, and that
+   combination leaves stale bands on screen while scrolling. The scrolling lives in the child below. */
+.action-details__toc {
+  position: sticky;
+  top: var(--slds-g-spacing-5, 24px);
+  align-self: start;
+}
+
+/* Scrolls inside itself only if the rail is taller than the viewport. The bottom padding belongs to
+   the scrolled content so the last item clears the rail's edge. */
+.action-details__toc-scroll {
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
+  padding-bottom: var(--slds-g-spacing-6, 32px);
+}
+
+.action-details__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-6, 32px);
+}
+
+/* Floating section-nav: sticks near the bottom of the scroll viewport while the page scrolls, and
+   right-aligns within the centered content column so its right edge matches the content cards —
+   independent of scrollbar width or chrome insets (which broke the old 100vw-based fixed math). */
+.action-details__fab {
+  position: sticky;
+  bottom: var(--slds-g-spacing-4, 64px);
+  width: fit-content;
+  margin-left: auto;
+  z-index: 10;
+}
+
+/* A group: its label above one card holding the group's sections. */
+.action-details__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-5, 24px);
+}
+
+.action-details__group-title {
+  margin: 0;
+  font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+  font-size: var(--slds-g-font-scale-4, 24px);
+  font-weight: var(--slds-g-font-weight-6, 600);
+  line-height: 32px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+/* The card (c/card) holds a group's sections; surface/border/radius come from the component, so
+   only the padding is tuned here via its --card-padding hook. */
+.action-details__card {
+  --card-padding: var(--slds-g-spacing-5, 24px);
+}
+
+.action-details__sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-5, 24px);
+}
+
+/* Each section is an envelopeFormSection host: give it the scroll offset for TOC / scroll-spy landings
+   and a divider below every section but the last. */
+.action-details__sections c-envelope-form-section {
+  display: block;
+  scroll-margin-top: var(--slds-g-spacing-5, 24px);
+}
+
+.action-details__sections c-envelope-form-section:not(:last-child) {
+  padding-bottom: var(--slds-g-spacing-5, 24px);
+  border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+
+.action-details__empty {
+  margin-top: var(--slds-g-spacing-5, 24px);
+  font-size: var(--slds-g-font-scale-1, 14px);
+  color: var(--slds-g-color-on-surface-2, #374151);
+}

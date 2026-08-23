@@ -1,0 +1,70 @@
+<template>
+    <div class="asl">
+        <div class="asl__toolbar">
+            <p class="asl__hint">
+                Draft help articles here — a Knowledge reviewer publishes them for you.
+                You’ll see “Changes requested” with notes if something needs a tweak.
+            </p>
+            <lightning-button-icon icon-name="utility:refresh"
+                                   alternative-text="Refresh"
+                                   onclick={handleRefresh}></lightning-button-icon>
+            <lightning-button variant="brand"
+                              label="New submission"
+                              onclick={handleCreate}></lightning-button>
+        </div>
+
+        <template if:true={errorMessage}>
+            <p class="asl__error" role="alert">{errorMessage}</p>
+        </template>
+
+        <template if:true={loading}>
+            <div class="asl__loading">
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={loading}>
+            <template if:true={hasRows}>
+                <table class="asl__table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Title</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Last changed</th>
+                            <th scope="col" class="asl__actions-col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={rows} for:item="row">
+                            <tr key={row.id}>
+                                <td>
+                                    <span class="asl__title">{row.title}</span>
+                                    <template if:true={row.showNotes}>
+                                        <span class="asl__notes">Reviewer: {row.reviewNotes}</span>
+                                    </template>
+                                </td>
+                                <td><span class={row.statusClass}>{row.status}</span></td>
+                                <td>
+                                    <lightning-formatted-date-time value={row.lastModified}
+                                                                   year="numeric" month="short" day="numeric"
+                                                                   hour="2-digit" minute="2-digit"></lightning-formatted-date-time>
+                                </td>
+                                <td class="asl__actions">
+                                    <template if:true={row.editable}>
+                                        <lightning-button label="Edit"
+                                                          size="small"
+                                                          data-id={row.id}
+                                                          onclick={handleEdit}></lightning-button>
+                                    </template>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </template>
+            <template if:false={hasRows}>
+                <p class="asl__empty">No submissions yet — start one with “New submission”.</p>
+            </template>
+        </template>
+    </div>
+</template>

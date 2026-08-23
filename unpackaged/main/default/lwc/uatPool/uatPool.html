@@ -1,0 +1,220 @@
+<template>
+    <div class="uap">
+        <c-uat-page-header icon-name="utility:groups"
+                           heading="Open Pool"
+                           subtitle="Claim available test cases for your team's cycles."
+                           count={availableCount}
+                           action-label="Go to My Queue"
+                           onaction={handleGoToQueue}></c-uat-page-header>
+
+        <template if:true={errorMessage}>
+            <p class="uap__error" role="alert">{errorMessage}</p>
+        </template>
+
+        <template if:true={loading}>
+            <c-ds-skeleton variant="card" count="3"></c-ds-skeleton>
+        </template>
+
+        <template if:false={loading}>
+            <template if:false={poolIsEmpty}>
+                <div class="uap__toolbar">
+                    <c-ds-filter-chips class="uap__chips"
+                                       chips={chips}
+                                       selected={filterPriority}
+                                       group-label="Filter by priority"
+                                       onselect={handleChipSelect}></c-ds-filter-chips>
+                    <div class="uap__toolbar-controls">
+                        <lightning-input class="uap__quick" type="checkbox"
+                                         label="Quick tests only"
+                                         checked={quickOnly}
+                                         onchange={handleQuickToggle}></lightning-input>
+                        <lightning-input class="uap__search" type="search"
+                                         label="Search available tests" variant="label-hidden"
+                                         placeholder="Search available tests…"
+                                         value={searchTerm}
+                                         onchange={handleSearch}></lightning-input>
+                        <button type="button" class="uap__filters-toggle"
+                                aria-expanded={filtersExpanded}
+                                onclick={handleToggleFilters}>
+                            <lightning-icon icon-name="utility:filterList" size="xx-small"
+                                            alternative-text="" class="uap__filters-icon"></lightning-icon>
+                            {filtersLabel}
+                        </button>
+                    </div>
+                </div>
+
+                <template if:true={filtersOpen}>
+                    <div class="uap__filters">
+                        <lightning-combobox label="Functional area" value={filterArea}
+                                            options={areaOptions}
+                                            onchange={handleFilterArea}></lightning-combobox>
+                        <lightning-combobox label="Effort" value={filterEffort}
+                                            options={effortOptions}
+                                            onchange={handleFilterEffort}></lightning-combobox>
+                        <lightning-combobox label="Sort by" value={sortBy}
+                                            options={sortOptions}
+                                            onchange={handleSort}></lightning-combobox>
+                        <template if:true={hasActiveFilters}>
+                            <button type="button" class="uap__clear" onclick={handleClearFilters}>Clear filters</button>
+                        </template>
+                    </div>
+                </template>
+
+                <template if:true={hasGroups}>
+                    <template for:each={pagedGroups} for:item="grp">
+                        <section key={grp.cycleId} class="uap__group">
+                            <div class="uap__group-head">
+                                <h2 class="uap__group-title">{grp.cycleName}</h2>
+                                <template if:true={grp.targetLabel}>
+                                    <span class="uap__group-date">
+                                        <lightning-icon icon-name="utility:event" size="xx-small"
+                                                        alternative-text="" class="uap__meta-icon"></lightning-icon>
+                                        {grp.targetLabel}
+                                    </span>
+                                </template>
+                                <template if:true={grp.claimHint}>
+                                    <span class={grp.hintClass}>{grp.claimHint}</span>
+                                </template>
+                                <lightning-button class="uap__group-bulk"
+                                                  label={grp.bulkLabel}
+                                                  disabled={grp.bulkDisabled}
+                                                  data-cycleid={grp.cycleId}
+                                                  data-cyclename={grp.cycleName}
+                                                  data-count={grp.bulkCount}
+                                                  onclick={handleBulkClick}></lightning-button>
+                            </div>
+                            <div class="uap__grid">
+                                <template for:each={grp.cards} for:item="card">
+                                    <article key={card.key} class="uap__card">
+                                        <div class="uap__card-badges">
+                                            <template if:true={card.hasPriority}>
+                                                <c-ds-badge label={card.priority} variant={card.priorityVariant} size="sm"></c-ds-badge>
+                                            </template>
+                                            <template if:true={card.effort}>
+                                                <span class="uap__chip">{card.effort}</span>
+                                            </template>
+                                        </div>
+                                        <button type="button"
+                                                class="uap__card-title"
+                                                title={card.caseCode}
+                                                aria-label={card.previewAria}
+                                                data-execid={card.executionId}
+                                                data-cycleid={card.cycleId}
+                                                data-caseid={card.caseId}
+                                                data-code={card.caseCode}
+                                                data-title={card.displayTitle}
+                                                onclick={handlePreview}>{card.displayTitle}</button>
+                                        <template if:true={card.description}>
+                                            <span class="uap__card-desc">{card.description}</span>
+                                        </template>
+                                        <div class="uap__card-meta">
+                                            <span class="uap__card-area">{card.moduleName}</span>
+                                            <template if:true={card.seatsLabel}>
+                                                <span class="uap__chip uap__chip--seats">{card.seatsLabel}</span>
+                                            </template>
+                                            <span class="uap__waiting">{card.waitingLabel}</span>
+                                        </div>
+                                        <template if:true={card.justFilled}>
+                                            <p class="uap__card-note" role="status">Someone beat you to the last spot — updating…</p>
+                                        </template>
+                                        <div class="uap__card-footer">
+                                            <span class="uap__card-id">{card.idLabel}</span>
+                                            <div class="uap__card-actions">
+                                                <lightning-button label="Details"
+                                                                  aria-label={card.previewAria}
+                                                                  data-execid={card.executionId}
+                                                                  data-cycleid={card.cycleId}
+                                                                  data-caseid={card.caseId}
+                                                                  data-code={card.caseCode}
+                                                                  data-title={card.displayTitle}
+                                                                  onclick={handlePreview}></lightning-button>
+                                                <lightning-button variant="brand"
+                                                                  label={card.claimLabel}
+                                                                  aria-label={card.claimAria}
+                                                                  disabled={card.claimDisabled}
+                                                                  data-execid={card.executionId}
+                                                                  data-cycleid={card.cycleId}
+                                                                  data-caseid={card.caseId}
+                                                                  data-code={card.caseCode}
+                                                                  onclick={handleClaim}></lightning-button>
+                                            </div>
+                                        </div>
+                                    </article>
+                                </template>
+                            </div>
+                        </section>
+                    </template>
+
+                    <div class="uap__pager">
+                        <c-ds-pager page={clampedPage}
+                                    page-size={pageSize}
+                                    total={totalFiltered}
+                                    item-label="available tests"
+                                    onpagechange={handlePageChange}></c-ds-pager>
+                    </div>
+                </template>
+
+                <template if:true={isFilteredEmpty}>
+                    <c-ds-empty-state
+                        icon="utility:filterList"
+                        heading="Nothing matches those filters"
+                        message="Clear one or more filters to see the rest of the pool."
+                        action-label="Clear filters"
+                        show-action
+                        onaction={handleClearFilters}
+                    ></c-ds-empty-state>
+                </template>
+            </template>
+
+            <template if:true={poolIsEmpty}>
+                <c-ds-empty-state
+                    icon="utility:open_folder"
+                    heading="The pool is empty"
+                    message="Nothing is claimable right now — new cases land here when a cycle opens."
+                    action-label="Go to My Queue"
+                    show-action
+                    onaction={handleGoToQueue}
+                ></c-ds-empty-state>
+            </template>
+        </template>
+
+        <template if:true={previewOpen}>
+            <c-ds-modal-v2 class="uap__preview-modal"
+                           is-open={previewOpen}
+                           title={previewTitle}
+                           subtitle={previewSubtitle}
+                           size="large"
+                           onclose={handlePreviewClose}>
+                <template if:true={previewLoading}>
+                    <c-ds-skeleton variant="text" count="6"></c-ds-skeleton>
+                </template>
+                <template if:true={previewError}>
+                    <p class="uap__preview-error" role="alert">{previewError}</p>
+                </template>
+                <template if:true={showPreviewBody}>
+                    <c-uat-case-preview preview={previewData}></c-uat-case-preview>
+                </template>
+                <div slot="footer" class="uap__preview-footer">
+                    <lightning-button label="Close" onclick={handlePreviewClose}></lightning-button>
+                    <lightning-button variant="brand"
+                                      label="Claim Test"
+                                      disabled={previewClaimDisabled}
+                                      data-execid={previewCard.execid}
+                                      data-cycleid={previewCard.cycleid}
+                                      data-caseid={previewCard.caseid}
+                                      data-code={previewCard.code}
+                                      onclick={handlePreviewClaim}></lightning-button>
+                </div>
+            </c-ds-modal-v2>
+        </template>
+
+        <template if:true={bulkOpen}>
+            <c-admin-confirm-modal header={bulkHeader}
+                                   message={bulkMessage}
+                                   confirm-label="Claim all"
+                                   busy={bulkBusy}
+                                   onconfirm={handleBulkConfirm}
+                                   oncancel={handleBulkCancel}></c-admin-confirm-modal>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,122 @@
+<template>
+    <span class="acm__sr-only" aria-live="polite">{reorderAnnouncement}</span>
+    <ul class="acm__topics">
+        <template for:each={viewItems} for:item="item">
+            <li key={item.key}>
+                <div class={item.rowClass}
+                     draggable={item.dragEnabled}
+                     data-key={item.key}
+                     data-index={item.index}
+                     onmouseup={handleRowMouseUp}
+                     ondragstart={handleDragStart}
+                     ondragover={handleDragOver}
+                     ondragleave={handleDragLeave}
+                     ondrop={handleDrop}
+                     ondragend={handleDragEnd}>
+                    <template if:true={editable}>
+                        <button type="button" class="acm__grip"
+                                title="Drag to reorder"
+                                aria-label={item.gripLabel}
+                                disabled={busy}
+                                data-key={item.key}
+                                data-index={item.index}
+                                onmousedown={handleGripMouseDown}
+                                onkeydown={handleGripKeydown}>⋮⋮</button>
+                    </template>
+                    <span class={item.labelClass}>{item.label}</span>
+                    <template if:true={item.sublabel}>
+                        <span class="acm__sublabel" title={item.sublabel}>{item.sublabel}</span>
+                    </template>
+                    <template if:true={item.badge}>
+                        <span class="acm__count">{item.badge}</span>
+                    </template>
+                    <template if:true={item.statusLabel}>
+                        <span class={item.statusClass}>{item.statusLabel}</span>
+                    </template>
+                    <template if:true={editable}>
+                        <span class="acm__topic-actions">
+                            <template if:true={item.showEdit}>
+                                <lightning-button-icon icon-name="utility:edit" size="small"
+                                    alternative-text={editLabel} title={editLabel}
+                                    disabled={busy}
+                                    data-key={item.key} data-label={item.label}
+                                    onclick={handleEditClick}></lightning-button-icon>
+                            </template>
+                            <template if:true={item.showAddChild}>
+                                <lightning-button-icon icon-name="utility:add" size="small"
+                                    alternative-text={addChildLabel} title={addChildLabel}
+                                    disabled={busy}
+                                    data-key={item.key}
+                                    onclick={handleAddChildClick}></lightning-button-icon>
+                            </template>
+                            <template if:true={item.showRemove}>
+                                <lightning-button-icon icon-name="utility:close" size="small"
+                                    alternative-text={removeLabel} title={removeLabel}
+                                    disabled={busy}
+                                    data-key={item.key} data-label={item.label}
+                                    onclick={handleRemoveClick}></lightning-button-icon>
+                            </template>
+                        </span>
+                    </template>
+                </div>
+                <ul class="acm__subtopics">
+                    <template for:each={item.children} for:item="sub">
+                        <li key={sub.key}>
+                            <div class={sub.rowClass}
+                                 draggable={sub.dragEnabled}
+                                 data-key={sub.key}
+                                 data-index={sub.index}
+                                 data-parent={item.key}
+                                 onmouseup={handleRowMouseUp}
+                                 ondragstart={handleDragStart}
+                                 ondragover={handleDragOver}
+                                 ondragleave={handleDragLeave}
+                                 ondrop={handleDrop}
+                                 ondragend={handleDragEnd}>
+                                <template if:true={editable}>
+                                    <button type="button" class="acm__grip"
+                                            title="Drag to reorder"
+                                            aria-label={sub.gripLabel}
+                                            disabled={busy}
+                                            data-key={sub.key}
+                                            data-index={sub.index}
+                                            data-parent={item.key}
+                                            onmousedown={handleGripMouseDown}
+                                            onkeydown={handleGripKeydown}>⋮⋮</button>
+                                </template>
+                                <span class={sub.labelClass}>{sub.label}</span>
+                                <template if:true={sub.sublabel}>
+                                    <span class="acm__sublabel" title={sub.sublabel}>{sub.sublabel}</span>
+                                </template>
+                                <template if:true={sub.badge}>
+                                    <span class="acm__count">{sub.badge}</span>
+                                </template>
+                                <template if:true={sub.statusLabel}>
+                                    <span class={sub.statusClass}>{sub.statusLabel}</span>
+                                </template>
+                                <template if:true={editable}>
+                                    <span class="acm__topic-actions">
+                                        <template if:true={sub.showEdit}>
+                                            <lightning-button-icon icon-name="utility:edit" size="small"
+                                                alternative-text={editLabel} title={editLabel}
+                                                disabled={busy}
+                                                data-key={sub.key} data-label={sub.label}
+                                                onclick={handleEditClick}></lightning-button-icon>
+                                        </template>
+                                        <template if:true={sub.showRemove}>
+                                            <lightning-button-icon icon-name="utility:close" size="small"
+                                                alternative-text={removeLabel} title={removeLabel}
+                                                disabled={busy}
+                                                data-key={sub.key} data-label={sub.label}
+                                                onclick={handleRemoveClick}></lightning-button-icon>
+                                        </template>
+                                    </span>
+                                </template>
+                            </div>
+                        </li>
+                    </template>
+                </ul>
+            </li>
+        </template>
+    </ul>
+</template>

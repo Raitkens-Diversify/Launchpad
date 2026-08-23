@@ -1,0 +1,71 @@
+:host {
+    display: block;
+}
+.rsr {
+    max-width: var(--rc-content-max, 1040px);
+    margin: 0 auto;
+    padding: var(--ds-space-2xl, 32px) var(--ds-space-lg, 16px);
+}
+.rsr__title {
+    margin: 0 0 var(--ds-space-lg, 16px);
+    font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+    font-size: 1.5rem;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.rsr__section + .rsr__section {
+    margin-top: var(--ds-space-xl, 24px);
+}
+.rsr__label {
+    margin: 0 0 var(--ds-space-sm, 8px);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.rsr__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+}
+.rsr__row {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--ds-space-md, 12px) var(--ds-space-lg, 16px);
+    cursor: pointer;
+}
+.rsr__row + .rsr__row {
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+.rsr__row:hover {
+    background: var(--ds-lightest-blue, #e2f8ff);
+}
+.rsr__row-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.rsr__row-link {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--ds-medium-blue, #1a76bb);
+    text-decoration: none;
+}
+.rsr__row-link:hover { text-decoration: underline; }
+.rsr__row-sub {
+    font-size: 0.8125rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.rsr__status {
+    padding: var(--ds-space-xl, 24px);
+    text-align: center;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}

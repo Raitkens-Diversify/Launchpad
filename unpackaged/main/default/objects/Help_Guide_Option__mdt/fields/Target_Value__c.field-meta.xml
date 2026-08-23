@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Target_Value__c</fullName>
+    <description>Meaning depends on Target_Type__c: node -&gt; next node&#39;s Node_Key__c; category -&gt; category slug; article -&gt; Knowledge UrlName; resource -&gt; resource slug; case -&gt; optional case reason/prefill.</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Target Value</label>
+    <length>255</length>
+    <required>false</required>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

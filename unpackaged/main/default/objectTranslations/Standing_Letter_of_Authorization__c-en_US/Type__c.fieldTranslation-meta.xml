@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Type --></label>
+        <name>Type__c</name>
+        <picklistValues>
+            <masterLabel>Check</masterLabel>
+            <translation><!-- Check --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Directed Payee Payment/Receipt (3rd party ACH)</masterLabel>
+            <translation><!-- Directed Payee Payment/Receipt (3rd party ACH) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>EFT standing instruction</masterLabel>
+            <translation><!-- EFT standing instruction --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Journal</masterLabel>
+            <translation><!-- Journal --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Journal Disbursement standing instruction</masterLabel>
+            <translation><!-- Journal Disbursement standing instruction --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Journal Receipt standing instruction</masterLabel>
+            <translation><!-- Journal Receipt standing instruction --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Moneylink</masterLabel>
+            <translation><!-- Moneylink --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Wire</masterLabel>
+            <translation><!-- Wire --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Wire standing instruction</masterLabel>
+            <translation><!-- Wire standing instruction --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Identity_Key__c</fullName>
+    <caseSensitive>true</caseSensitive>
+    <description>Trigger-maintained unique key encoding the identity triple: caseId:cycleId-or-STANDALONE:testerId-or-UNCLAIMED. DB-level guard: prevents two executions silently merging and enforces at most one unclaimed slot per case+cycle. Do not edit by hand.</description>
+    <externalId>true</externalId>
+    <label>Identity Key</label>
+    <length>255</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>true</unique>
+</CustomField>

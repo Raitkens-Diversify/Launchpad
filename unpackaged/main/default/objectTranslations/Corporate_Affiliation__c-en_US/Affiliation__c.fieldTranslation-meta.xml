@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Affiliation --></label>
+        <name>Affiliation__c</name>
+        <picklistValues>
+            <masterLabel>DAS</masterLabel>
+            <translation><!-- DAS --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DFPG</masterLabel>
+            <translation><!-- DFPG --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DPS</masterLabel>
+            <translation><!-- DPS --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DWM - 1099</masterLabel>
+            <translation><!-- DWM - 1099 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DWM - 1100</masterLabel>
+            <translation><!-- DWM - 1100 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DWM - 1101</masterLabel>
+            <translation><!-- DWM - 1101 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DWM - 1102</masterLabel>
+            <translation><!-- DWM - 1102 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DWM - 1103</masterLabel>
+            <translation><!-- DWM - 1103 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DWM - 1104</masterLabel>
+            <translation><!-- DWM - 1104 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DWM - W2</masterLabel>
+            <translation><!-- DWM - W2 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Diversify Connect</masterLabel>
+            <translation><!-- Diversify Connect --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>FPC</masterLabel>
+            <translation><!-- FPC --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Home Office</masterLabel>
+            <translation><!-- Home Office --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

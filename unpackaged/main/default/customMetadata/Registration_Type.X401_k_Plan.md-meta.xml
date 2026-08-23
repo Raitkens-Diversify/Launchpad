@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>401(k) Plan</label>
+    <protected>false</protected>
+    <values>
+        <field>American_Funds_F2__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>BD_Account_Type__c</field>
+        <value xsi:type="xsd:string">4PL</value>
+    </values>
+    <values>
+        <field>Beneficiary_Account__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>Business_Account__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>Category__c</field>
+        <value xsi:type="xsd:string">Retirement</value>
+    </values>
+    <values>
+        <field>Code__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Fidelity__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>Joint_Account__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>Qualified__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>RBC__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>RIA_Account_Type__c</field>
+        <value xsi:type="xsd:string">R4P</value>
+    </values>
+    <values>
+        <field>Schwab__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+</CustomMetadata>

@@ -1,0 +1,179 @@
+<template>
+    <div class="ac-shell">
+        <header class="ac-chrome__header">
+            <img class="ac-chrome__logo" src={logoUrl} alt="Diversify" />
+            <span class="ac-chrome__divider" aria-hidden="true"></span>
+            <span class="ac-chrome__crumb">Admin Console</span>
+        </header>
+
+        <template if:true={loading}>
+            <div class="ac-state">
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:true={errorMessage}>
+            <div class="ac-state">
+                <div class="ac-card ac-card--message" role="alert">
+                    <lightning-icon icon-name="utility:error" size="small" variant="error"></lightning-icon>
+                    <p class="ac-card__text">{errorMessage}</p>
+                </div>
+            </div>
+        </template>
+
+        <template if:true={ready}>
+            <template if:true={showLicenseNote}>
+                <div class="ac-banner" role="status">
+                    <lightning-icon icon-name="utility:info" size="x-small"></lightning-icon>
+                    <span>
+                        Your permissions allow article authoring, but your user record is
+                        missing the Knowledge User license flag. Ask an administrator to
+                        enable “Knowledge User” on your user record.
+                    </span>
+                </div>
+            </template>
+
+            <template if:true={noAccess}>
+                <div class="ac-state">
+                    <div class="ac-card ac-card--message">
+                        <lightning-icon icon-name="utility:lock" size="small"></lightning-icon>
+                        <p class="ac-card__text">
+                            You don’t have access to any admin tools. The Resource Center
+                            Admin and UAT Admin permission sets grant access to this console.
+                        </p>
+                    </div>
+                </div>
+            </template>
+
+            <template if:true={hasSections}>
+                <div class="ac-body">
+                    <nav class="ac-rail" aria-label="Admin sections">
+                        <template for:each={railGroups} for:item="grp">
+                            <div key={grp.name} class="ac-rail__group">
+                                <template if:true={grp.showLabel}>
+                                    <span class="ac-rail__group-label">{grp.name}</span>
+                                </template>
+                                <template for:each={grp.items} for:item="item">
+                                    <button key={item.key}
+                                            type="button"
+                                            class={item.cssClass}
+                                            data-key={item.key}
+                                            aria-current={item.ariaCurrent}
+                                            onclick={handleSectionClick}>
+                                        <lightning-icon icon-name={item.icon} size="x-small"></lightning-icon>
+                                        <span>{item.label}</span>
+                                    </button>
+                                </template>
+                            </div>
+                        </template>
+                    </nav>
+
+                    <main class="ac-main">
+                        <h1 class="ac-main__title">{activeLabel}</h1>
+
+                        <template if:true={isArticlesSection}>
+                            <template if:true={showArticleSubnav}>
+                                <div class="ac-subnav">
+                                    <template for:each={articleTabs} for:item="tab">
+                                        <button key={tab.key}
+                                                type="button"
+                                                class={tab.cssClass}
+                                                data-view={tab.key}
+                                                onclick={handleArticlesSubnav}>{tab.label}</button>
+                                    </template>
+                                </div>
+                            </template>
+                            <template if:true={isArticlesList}>
+                                <c-admin-article-list onedit={handleArticleEdit}
+                                                      oncreate={handleArticleCreate}></c-admin-article-list>
+                            </template>
+                            <template if:true={isArticlesEditor}>
+                                <c-admin-article-editor ka-id={editKaId}
+                                                        onback={handleEditorBack}></c-admin-article-editor>
+                            </template>
+                            <template if:true={isReviewQueue}>
+                                <c-admin-review-queue></c-admin-review-queue>
+                            </template>
+                            <template if:true={isMySubmissions}>
+                                <c-admin-submission-list onedit={handleSubmissionEdit}
+                                                         oncreate={handleSubmissionCreate}></c-admin-submission-list>
+                            </template>
+                            <template if:true={isSubmissionEditor}>
+                                <c-admin-submission-editor submission-id={editSubmissionId}
+                                                           onback={handleSubmissionBack}></c-admin-submission-editor>
+                            </template>
+                            <template if:true={isArticlesSynonyms}>
+                                <c-admin-synonym-manager></c-admin-synonym-manager>
+                            </template>
+                        </template>
+
+                        <template if:true={isResourcesSection}>
+                            <template if:true={isResourceList}>
+                                <c-admin-resource-list onedit={handleResourceEdit}
+                                                       oncreate={handleResourceCreate}></c-admin-resource-list>
+                            </template>
+                            <template if:true={isResourceEditor}>
+                                <c-admin-resource-editor resource-id={editResourceId}
+                                                         onback={handleResourceBack}></c-admin-resource-editor>
+                            </template>
+                        </template>
+
+                        <template if:true={isCategoriesSection}>
+                            <c-admin-category-manager></c-admin-category-manager>
+                        </template>
+
+                        <template if:true={isGuidesSection}>
+                            <!-- Existing builder embedded as-is (wrap, don't rebuild):
+                                 self-contained, Apex-driven, no host assumptions. -->
+                            <c-help-guide-builder></c-help-guide-builder>
+                        </template>
+
+                        <template if:true={isAnalyticsSection}>
+                            <c-admin-analytics></c-admin-analytics>
+                        </template>
+
+                        <template if:true={isUatDashboardSection}>
+                            <c-admin-uat-dashboard onuatnavigate={handleUatNavigate}></c-admin-uat-dashboard>
+                        </template>
+
+                        <template if:true={isUatCyclesSection}>
+                            <c-admin-uat-cycles open-cycle-id={uatCycleOpenId}
+                                                onuatnavigate={handleUatNavigate}></c-admin-uat-cycles>
+                        </template>
+
+                        <template if:true={isUatBooksSection}>
+                            <c-admin-uat-books open-book-id={uatBookOpenId}
+                                               onuatnavigate={handleUatNavigate}></c-admin-uat-books>
+                        </template>
+
+                        <template if:true={isUatCasesSection}>
+                            <c-admin-uat-cases open-context={uatCaseContext}
+                                               onuatnavigate={handleUatNavigate}></c-admin-uat-cases>
+                        </template>
+
+                        <template if:true={isUatTaxonomySection}>
+                            <c-admin-uat-taxonomy onuatnavigate={handleUatNavigate}></c-admin-uat-taxonomy>
+                        </template>
+
+                        <template if:true={isUatTeamsSection}>
+                            <c-admin-uat-teams></c-admin-uat-teams>
+                        </template>
+
+                        <template if:true={isUatCoverageSection}>
+                            <c-admin-uat-coverage onuatnavigate={handleUatNavigate}></c-admin-uat-coverage>
+                        </template>
+
+                        <template if:true={isUatReportSection}>
+                            <c-admin-uat-report onuatnavigate={handleUatNavigate}></c-admin-uat-report>
+                        </template>
+                    </main>
+                </div>
+            </template>
+        </template>
+
+        <footer class="ac-chrome__footer">
+            <span class="ac-chrome__footer-brand">Admin Console · Cosmos</span>
+            <span class="ac-chrome__footer-meta">© 2026 Diversify Financial. Internal use only.</span>
+        </footer>
+    </div>
+</template>

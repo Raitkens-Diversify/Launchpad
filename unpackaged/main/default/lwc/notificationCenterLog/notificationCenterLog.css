@@ -1,0 +1,105 @@
+/* Author: Hoang Long Vu To | Date: 2026-08-06 */
+
+.log-view__filter-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.log-view__filter-row_search-group {
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.log-view__filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.log-view__field-label {
+  display: block;
+  font-size: var(--div-font-scale-xs);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--slds-g-color-neutral-base-30, #444444);
+}
+
+.log-view__search-field {
+  width: 24rem;
+  max-width: 100%;
+}
+
+.log-view__picklist-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.log-view__filter-row_dates {
+  justify-content: flex-start;
+}
+
+.log-view__filter-row_controls {
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.log-view__filter-controls-start {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.log-view__date-range {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.log-view__filter-field_date {
+  min-width: 9rem;
+}
+
+.log-view__filter-field_date lightning-input {
+  display: block;
+}
+
+.log-view__filter-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.log-view__filter-actions_clear {
+  flex: 1 1 100%;
+  margin-top: 0.5rem;
+}
+
+.log-view__picklist-field {
+  flex: 1 1 18rem;
+  min-width: 16rem;
+  max-width: 24rem;
+}
+
+.log-table__day-row {
+  background: var(--div-color-surface-subtle, #fafaf9);
+}
+
+.log-table__day-cell {
+  padding-top: 0.875rem;
+  padding-bottom: 0.5rem;
+  font-size: var(--div-font-scale-sm);
+  font-weight: 700;
+  color: var(--div-color-text-default, #181818);
+}
+
+.log-table__multiline {
+  display: block;
+  white-space: pre-line;
+}

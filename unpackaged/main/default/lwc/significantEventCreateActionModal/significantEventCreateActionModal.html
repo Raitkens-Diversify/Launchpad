@@ -1,0 +1,13 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-07-14 -->
+<template>
+  <!-- <lightning-modal-header label="New Significant Event"></lightning-modal-header> -->
+
+  <lightning-modal-body class="significant-event-action-modal__body">
+    <c-significant-event-create-action
+      record-id={recordId}
+      edit-mode={editMode}
+      suppress-post-save-navigation
+      onactionclose={handleActionClose}
+    ></c-significant-event-create-action>
+  </lightning-modal-body>
+</template>

@@ -1,0 +1,15 @@
+:host {
+    display: block;
+}
+
+.related-parties {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-5, 24px);
+}
+
+/* Hairline between subsections, matching the divider the page draws between form sections. */
+.related-parties__group + .related-parties__group {
+    padding-top: var(--slds-g-spacing-5, 24px);
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}

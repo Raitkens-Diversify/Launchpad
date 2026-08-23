@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Time Horizon --></label>
+        <name>Time_Horizon__c</name>
+        <picklistValues>
+            <masterLabel>1 to 3 years</masterLabel>
+            <translation><!-- 1 to 3 years --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>4 to 6 years</masterLabel>
+            <translation><!-- 4 to 6 years --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>7 to 8 years</masterLabel>
+            <translation><!-- 7 to 8 years --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>9 years or more</masterLabel>
+            <translation><!-- 9 years or more --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Less than 1 year</masterLabel>
+            <translation><!-- Less than 1 year --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

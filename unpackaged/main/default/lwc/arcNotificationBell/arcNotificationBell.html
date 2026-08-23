@@ -1,0 +1,102 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-08-18 -->
+<template>
+  <template lwc:if={isVisible}>
+    <div class="notification-bell">
+      <button
+        type="button"
+        class={bellButtonClass}
+        aria-label="Notifications"
+        aria-haspopup="true"
+        aria-expanded={isPanelOpen}
+        aria-controls={panelId}
+        onclick={handleBellClick}
+        onkeydown={handleBellKeyDown}
+      >
+        <span
+          class="notification-bell__icon"
+          style={iconStyle}
+          aria-hidden="true"
+        ></span>
+        <template lwc:if={showUnreadBadge}>
+          <span
+            class="notification-bell__badge div-toolbar__badge"
+            aria-label={unreadBadgeAriaLabel}
+          >
+            {unreadBadgeLabel}
+          </span>
+        </template>
+      </button>
+
+      <template lwc:if={isPanelOpen}>
+        <section
+          id={panelId}
+          class="notification-bell__panel div-popover div-shadow-elevation-3-down"
+          role="region"
+          aria-label="Notifications"
+        >
+          <div class="notification-bell__list" role="list">
+            <template lwc:if={isLoading}>
+              <div
+                class="notification-bell__state div-text-body-small"
+                role="status"
+                aria-live="polite"
+              >
+                <lightning-spinner
+                  alternative-text="Loading notifications"
+                  size="small"
+                ></lightning-spinner>
+              </div>
+            </template>
+
+            <template lwc:elseif={loadError}>
+              <div
+                class="notification-bell__state notification-bell__state_error div-text-body-small"
+                role="alert"
+              >
+                {loadError}
+              </div>
+            </template>
+
+            <template lwc:elseif={showEmptyState}>
+              <div class="notification-bell__state div-text-body-small" role="status">
+                No new notifications
+              </div>
+            </template>
+
+            <template lwc:else>
+              <template for:each={notificationRows} for:item="notification">
+                <button
+                  key={notification.id}
+                  type="button"
+                  class={notification.rowClass}
+                  role="listitem"
+                  data-id={notification.id}
+                  aria-label={notification.ariaLabel}
+                  onclick={handleNotificationClick}
+                  onkeydown={handleNotificationKeyDown}
+                >
+                  <span class={notification.statusDotClass} aria-hidden="true"></span>
+                  <span class="notification-bell__row-content">
+                    <span class="notification-bell__row-header">
+                      <span class="notification-bell__title div-text-body-small">
+                        {notification.title}
+                      </span>
+                      <span class="notification-bell__time div-text-body-xs">
+                        {notification.relativeTime}
+                      </span>
+                    </span>
+                    <template lwc:if={notification.subtitle}>
+                      <span class="notification-bell__subtitle div-text-weak">
+                        {notification.subtitle}
+                      </span>
+                    </template>
+                  </span>
+                </button>
+              </template>
+            </template>
+          </div>
+        </section>
+      </template>
+    </div>
+  </template>
+</template>

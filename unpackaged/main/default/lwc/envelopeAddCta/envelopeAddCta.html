@@ -1,0 +1,44 @@
+<!-- Author: Mile Cacanovic -->
+<template>
+    <div class="add-cta">
+        <button
+            type="button"
+            class="add-cta__btn"
+            data-action="addMember"
+            onclick={handleClick}>
+            <lightning-icon
+                icon-name="utility:adduser"
+                size="small"
+                class="add-cta__icon add-cta__icon_member"
+                alternative-text="Add user">
+            </lightning-icon>
+            <span class="add-cta__label">Add member</span>
+            <lightning-icon
+                icon-name="utility:add"
+                size="x-small"
+                class="add-cta__plus"
+                alternative-text="Add user">
+            </lightning-icon>
+        </button>
+
+        <button
+            type="button"
+            class="add-cta__btn"
+            data-action="addIsa"
+            onclick={handleClick}>
+            <lightning-icon
+                icon-name="utility:new"
+                size="small"
+                class="add-cta__icon add-cta__icon_isa"
+                alternative-text="Add ISA">
+            </lightning-icon>
+            <span class="add-cta__label">Add ISA</span>
+            <lightning-icon
+                icon-name="utility:add"
+                size="x-small"
+                class="add-cta__plus"
+                alternative-text="Add ISA">
+            </lightning-icon>
+        </button>
+    </div>
+</template>

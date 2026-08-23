@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Type_of_Request__c</fullName>
+    <label>Type of Request</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>New DMS Instructions</fullName>
+                <default>false</default>
+                <label>New DMS Instructions</label>
+            </value>
+            <value>
+                <fullName>Update DMS Instructions</fullName>
+                <default>false</default>
+                <label>Update DMS Instructions</label>
+            </value>
+            <value>
+                <fullName>Raise Cash</fullName>
+                <default>false</default>
+                <label>Raise Cash</label>
+            </value>
+            <value>
+                <fullName>Instructions for Future Deposit</fullName>
+                <default>false</default>
+                <label>Instructions for Future Deposit</label>
+            </value>
+            <value>
+                <fullName>Add Systematic Withdrawal</fullName>
+                <default>false</default>
+                <label>Add Systematic Withdrawal</label>
+            </value>
+            <value>
+                <fullName>Other</fullName>
+                <default>false</default>
+                <label>Other</label>
+            </value>
+            <value>
+                <fullName>Remove Systematic Withdrawal</fullName>
+                <default>false</default>
+                <label>Remove Systematic Withdrawal</label>
+            </value>
+            <value>
+                <fullName>Add/Remove Systematic Withdrawals</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Add/Remove Systematic Withdrawals</label>
+            </value>
+            <value>
+                <fullName>Instructions for Future Deposits</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Instructions for Future Deposits</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

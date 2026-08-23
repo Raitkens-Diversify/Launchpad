@@ -1,0 +1,616 @@
+/* Two-column testing workspace on the shell's wide gray canvas: step card
+   left, navigator/run-details right, pinned nav bar. Mobile-tolerant: the
+   sidebar stacks under the workspace at 1024px. */
+
+/* --slds-g-* declared locally, not inherited: platform-injected SLDS2
+   styling hooks beat values inherited from an ancestor's :host
+   (see nexsHome.css / dsHero.css). */
+:host {
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-accent-3: #071c31;
+    --slds-g-color-on-accent-1: #ffffff;
+}
+
+.ur {
+    box-sizing: border-box;
+    max-width: var(--uta-content-max-wide, 1280px);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-xl, 24px);
+    /* No reserve under the nav bar: it's sticky, so it holds its own slot at
+       the end of this column instead of floating over the last card. */
+    padding-bottom: 0;
+}
+.ur__error {
+    margin: 0 0 var(--ds-space-md, 12px);
+    font-size: 0.875rem;
+    color: var(--ds-error-text, #a83232);
+}
+
+/* ---- Header: breadcrumb → title → meta → progress ------------------------ */
+
+.ur__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-sm, 8px);
+}
+.ur__title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    overflow-wrap: anywhere;
+}
+.ur__meta {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ur__caseposition {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ur__progressline {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-md, 12px);
+    margin-top: var(--ds-space-xs, 4px);
+}
+.ur__progressbar {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.ur__progress-caption {
+    flex: none;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---- The 70/30 workspace grid (dashboard's .ud__grid recipe) ------------- */
+
+.ur__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 30%);
+    gap: var(--ds-space-xl, 24px);
+    align-items: start;
+}
+.ur__main,
+.ur__side {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-lg, 16px);
+    min-width: 0;
+}
+
+/* ---- Step workspace card -------------------------------------------------- */
+
+.ur__step-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-lg, 16px);
+    padding: var(--ds-space-xl, 24px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+}
+/* The card receives programmatic focus (tabindex="-1") so keystrokes land
+   inside the runner's template — a visible ring on the whole card would
+   just be noise. It's not in the tab order, so this hides nothing. */
+.ur__step-card:focus {
+    outline: none;
+}
+.ur__eyebrow {
+    margin: 0;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ur__step-title {
+    margin: calc(-1 * var(--ds-space-sm, 8px)) 0 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.ur__block {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-xs, 4px);
+}
+.ur__block-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ur__block-text {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--slds-g-color-on-surface-2, #374151);
+    white-space: pre-line;
+}
+.ur__step-subtitle {
+    margin: calc(-1 * var(--ds-space-sm, 8px)) 0 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+.ur__pre-text {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--slds-g-color-on-surface-2, #374151);
+    white-space: pre-wrap;
+}
+/* The outcome the tester verifies against — a quiet success tint, not a card. */
+.ur__block--expected {
+    padding: var(--ds-space-md, 12px) var(--ds-space-lg, 16px);
+    background: var(--ds-success-bg, #e8f5e9);
+    border-left: 3px solid var(--ds-success, #2d9f6f);
+    border-radius: var(--ds-radius-sm, 6px);
+}
+/* Sits between the verdict buttons and the notes field: the step isn't
+   answered yet, and the notes box below is not the answer. Quiet enough to
+   ignore once a verdict is picked (it disappears), loud enough to read. */
+.ur__needs-result {
+    margin: calc(-1 * var(--ds-space-sm, 8px)) 0 0;
+    font-size: 0.8125rem;
+    color: var(--ds-warning-text, #b8860b);
+}
+
+/* Taller notes field by default (both hook spellings — base-component
+   generations differ; harmless where unrecognized). */
+.ur__actual {
+    --slds-c-textarea-sizing-min-height: 120px;
+    --sds-c-textarea-sizing-min-height: 120px;
+}
+
+/* ---- Result radio group: four LARGE buttons — speed + tap-friendliness ---- */
+
+.ur__results {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--ds-space-sm, 8px);
+}
+.ur__result {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ds-space-sm, 8px);
+    padding: 0.875rem 0.5rem;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 2px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-md, 8px);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--slds-g-color-on-surface-2, #374151);
+    --sds-c-icon-color-foreground-default: var(--slds-g-color-on-surface-1, #4b5563);
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.ur__result:hover:not(:disabled) {
+    border-color: var(--ds-medium-blue, #1a76bb);
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+.ur__result:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+.ur__result:disabled {
+    cursor: default;
+    opacity: 0.7;
+}
+.ur__result--pass.ur__result--selected {
+    background: var(--ds-success-bg, #e8f5e9);
+    border-color: var(--ds-success, #2d9f6f);
+    color: var(--ds-success-text, #2d7d46);
+    --sds-c-icon-color-foreground-default: var(--ds-success-text, #2d7d46);
+}
+.ur__result--fail.ur__result--selected {
+    background: var(--ds-error-bg, #fdecec);
+    border-color: var(--ds-error, #d94545);
+    color: var(--ds-error-text, #a83232);
+    --sds-c-icon-color-foreground-default: var(--ds-error-text, #a83232);
+}
+.ur__result--blocked.ur__result--selected {
+    background: var(--ds-warning-bg, #fff8e6);
+    border-color: var(--ds-warning, #e8b84b);
+    color: var(--ds-warning-text, #b8860b);
+    --sds-c-icon-color-foreground-default: var(--ds-warning-text, #b8860b);
+}
+.ur__result--na.ur__result--selected {
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    border-color: var(--slds-g-color-on-surface-1, #4b5563);
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+/* ---- Defect disclosure ----------------------------------------------------- */
+
+.ur__defect {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-md, 12px);
+}
+.ur__defect-toggle {
+    align-self: flex-start;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--ds-error-text, #a83232);
+}
+.ur__defect-toggle:hover {
+    text-decoration: underline;
+}
+.ur__defect-fields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-md, 12px);
+    padding: 0.875rem;
+    background: var(--ds-error-bg, #fdecec);
+    border: 1px solid var(--ds-error, #d94545);
+    border-radius: var(--ds-radius-md, 8px);
+}
+
+/* ---- Per-step evidence ------------------------------------------------------ */
+
+.ur__evidence {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-sm, 8px);
+}
+.ur__evidence-hint {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--ds-warning-text, #b8860b);
+}
+
+/* ---- Sidebar cards ----------------------------------------------------------- */
+
+.ur__panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-md, 12px);
+    padding: var(--ds-space-lg, 16px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+}
+.ur__panel-title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.ur__panel-sub {
+    margin: calc(-1 * var(--ds-space-sm, 8px)) 0 0;
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.ur__details {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-sm, 8px);
+}
+.ur__detail {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--ds-space-md, 12px);
+}
+.ur__detail-label {
+    flex: none;
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ur__detail-value {
+    margin: 0;
+    min-width: 0;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--slds-g-color-on-surface-2, #374151);
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+.ur__detail-value--small {
+    font-size: 0.6875rem;
+    font-weight: 400;
+}
+
+/* Collapsed supporting context: native disclosure, card-styled. */
+.ur__disclosure {
+    padding: var(--ds-space-md, 12px) var(--ds-space-lg, 16px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+}
+.ur__disclosure-summary {
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.ur__disclosure-summary:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+.ur__disclosure[open] .ur__disclosure-summary {
+    margin-bottom: var(--ds-space-md, 12px);
+}
+.ur__disclosure-sub {
+    margin: 0 0 var(--ds-space-sm, 8px);
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ur__refs {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-xs, 4px);
+}
+.ur__ref {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-space-sm, 8px);
+    font-size: 0.875rem;
+}
+.ur__ref-label {
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+.ur__ref-open {
+    font-weight: 500;
+    color: var(--ds-medium-blue, #1a76bb);
+    text-decoration: none;
+}
+.ur__ref-open:hover {
+    text-decoration: underline;
+}
+
+/* ---- Run-level feedback (rendered inside the submit review modal) ----------- */
+
+/* Plain numbered 1-5 buttons, NOT stars — it must read as a scale. */
+.ur__ratings {
+    display: flex;
+    gap: var(--ds-space-sm, 8px);
+}
+.ur__rating {
+    width: 48px;
+    height: 48px;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 2px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-md, 8px);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+.ur__rating:hover {
+    border-color: var(--ds-medium-blue, #1a76bb);
+}
+.ur__rating:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+.ur__rating--selected {
+    background: var(--slds-g-color-accent-1, #0f406f);
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+}
+
+/* ---- Submit review modal body ------------------------------------------------ */
+
+.ur__review {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-lg, 16px);
+}
+.ur__review-summary {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.ur__review-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-sm, 8px);
+    padding: var(--ds-space-md, 12px) var(--ds-space-lg, 16px);
+    border-radius: var(--ds-radius-md, 8px);
+}
+/* Unanswered steps are the ONE thing in this review that changes what the
+   server stores, so they carry the nudge's amber PLUS a heavier accent bar —
+   they used to be a quiet gray box (with a footnote saying "you can still
+   submit"), which is how a half-answered run read as finished. Missing
+   Fail/Blocked detail keeps its amber unchanged: it costs an admin a
+   follow-up, not a wrong status. */
+.ur__review-list--alert {
+    background: var(--ds-warning-bg, #fff8e6);
+    border: 1px solid var(--ds-warning, #e8b84b);
+    border-left: 4px solid var(--ds-warning, #e8b84b);
+}
+.ur__review-list--nudge {
+    background: var(--ds-warning-bg, #fff8e6);
+    border: 1px solid var(--ds-warning, #e8b84b);
+}
+.ur__review-list-title {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.ur__review-rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-xs, 4px);
+}
+.ur__review-jump {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.875rem;
+    text-align: left;
+    color: var(--ds-medium-blue, #1a76bb);
+}
+.ur__review-jump:hover {
+    text-decoration: underline;
+}
+.ur__review-jump:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+.ur__review-note {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+/* The consequence of submitting anyway — the one line that must not read as
+   fine print, since the previous copy here actively reassured. */
+.ur__review-note--alert {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.ur__review-feedback {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-md, 12px);
+    padding-top: var(--ds-space-md, 12px);
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+.ur__review-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--ds-space-sm, 8px);
+}
+
+/* ---- Pinned nav bar ------------------------------------------------------------ */
+
+/* Pinned above the app's utility bar — there's often a lot of content above.
+   Sticky rather than fixed so the bar is in flow: it stays reachable at the end
+   of the column even if the offset below is ever wrong, which position:fixed
+   never was.
+   The offset is stated, not measured. LEX's scroll container runs to the bottom
+   of the browser viewport *behind* the utility bar (it pads its scrollable
+   content instead of shortening the scrollport), so both a fixed bar at
+   bottom:0 and a sticky one pinned to the scrollport's bottom edge land
+   underneath the strip — the page region exposes no geometry that reveals it.
+   2.75rem is SLDS's 2.5rem utility-bar height plus a hair of clearance;
+   overshooting shows a sliver of canvas, undershooting would clip the buttons.
+   Apps with no utility bar (the standalone UAT Testing app) pay only that
+   sliver.
+   The trade for sticky is width — the bar spans the workspace column rather
+   than bleeding edge to edge — so it carries a raised panel's rounded top
+   instead of a full-width rule. */
+.ur__navbar {
+    position: sticky;
+    bottom: 2.75rem;
+    z-index: 50;
+    padding: var(--ds-space-md, 12px) clamp(24px, 3vw, 48px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-bottom: none;
+    border-radius: var(--ds-radius-md, 8px) var(--ds-radius-md, 8px) 0 0;
+    box-shadow: var(--ds-shadow-raised, 0 -4px 12px rgba(9, 36, 63, 0.08));
+}
+/* The modal hosts render overlays (position: fixed) and nothing in flow, but as
+   flex items they still draw the column's 24px `gap` after the nav bar — which
+   would leave dead canvas under the sticky bar at full scroll and unpin it
+   early. Out of flow, the nav bar is the column's last item. */
+.ur__offscript-modal,
+.ur__submit-modal {
+    position: absolute;
+}
+
+.ur__navbar-inner {
+    box-sizing: border-box;
+    max-width: var(--uta-content-max-wide, 1280px);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-space-md, 12px);
+}
+.ur__navbar-actions {
+    display: flex;
+    gap: var(--ds-space-md, 12px);
+}
+/* Quiet by design — informational chrome, not a feature to notice. */
+.ur__saveindicator {
+    min-width: 0;
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    transition: opacity 150ms ease;
+}
+.ur__saveindicator--error {
+    color: var(--ds-error-text, #a83232);
+    font-weight: 600;
+}
+.ur__navhint {
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    text-align: center;
+}
+
+/* ---- Responsive ------------------------------------------------------------------ */
+
+@media (max-width: 1024px) {
+    .ur__layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .ur__navhint {
+        display: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .ur__results {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .ur__navbar-inner {
+        flex-wrap: wrap;
+        gap: var(--ds-space-sm, 8px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ur__result,
+    .ur__saveindicator {
+        transition-duration: 0.01ms;
+    }
+}
+
+/* Sits under the run meta, deliberately quiet: it is an escape hatch, not a
+   competing call to action against the step controls. */
+.ur__offscript {
+    display: flex;
+}

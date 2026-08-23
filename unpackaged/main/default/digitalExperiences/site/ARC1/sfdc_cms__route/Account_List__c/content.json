@@ -1,0 +1,12 @@
+{
+  "type" : "sfdc_cms__route",
+  "title" : "Account List",
+  "contentBody" : {
+    "activeViewId" : "Account_List",
+    "configurationTags" : [ ],
+    "pageAccess" : "UseParent",
+    "routeType" : "list-001",
+    "urlPrefix" : "account"
+  },
+  "urlName" : "account-list"
+}

@@ -1,0 +1,160 @@
+/*
+ * Self-declared tokens with literal fallbacks: LWR injects real SLDS2 styling
+ * hooks under these names into each component scope, and those beat values
+ * inherited from an ancestor's :host.
+ */
+:host {
+  --slds-g-spacing-1: 4px;
+  --slds-g-spacing-2: 8px;
+  --slds-g-spacing-3: 12px;
+  --slds-g-spacing-4: 16px;
+
+  display: block;
+}
+
+.related-list {
+  background: var(--div-color-white, #ffffff);
+  border: 1px solid var(--div-color-neutral-200, #e5e7eb);
+  border-radius: var(--div-radius-lg, 12px);
+  padding: var(--slds-g-spacing-4, 16px);
+}
+
+.related-list__header {
+  display: flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-2, 8px);
+  margin-bottom: var(--slds-g-spacing-3, 12px);
+}
+
+.related-list__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--div-color-blue-900, #0f406f);
+}
+
+.related-list__count {
+  padding: 1px var(--slds-g-spacing-2, 8px);
+  border-radius: var(--div-radius-full, 999px);
+  background: var(--div-color-neutral-100, #f3f4f6);
+  color: var(--div-color-neutral-500, #838a97);
+  font-size: 0.75rem;
+}
+
+/* Wide tables scroll inside the card rather than pushing the page sideways. */
+.related-list__scroll {
+  overflow-x: auto;
+}
+
+.related-list__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.related-list__th {
+  padding: 0 var(--slds-g-spacing-3, 12px) var(--slds-g-spacing-2, 8px);
+  border-bottom: 1px solid var(--div-color-neutral-200, #e5e7eb);
+  text-align: right;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--div-color-neutral-500, #838a97);
+  white-space: nowrap;
+}
+
+.related-list__th--first {
+  padding-left: 0;
+  text-align: left;
+}
+
+.related-list__tr--link {
+  cursor: pointer;
+}
+
+.related-list__tr:hover {
+  background: var(--div-color-neutral-50, #f9fafb);
+}
+
+.related-list__td {
+  padding: var(--slds-g-spacing-2, 8px) var(--slds-g-spacing-3, 12px);
+  border-bottom: 1px solid var(--div-color-neutral-100, #f3f4f6);
+  text-align: right;
+  color: var(--div-color-gray-900, #030712);
+  white-space: nowrap;
+}
+
+.related-list__td--first {
+  padding-left: 0;
+  text-align: left;
+  color: var(--div-color-blue-700, #1a76bb);
+  white-space: normal;
+}
+
+.related-list__tr--link:hover .related-list__td--first {
+  text-decoration: underline;
+}
+
+/* A list with nowhere to click reads as plain data, not as links. */
+.related-list:not(:has(.related-list__tr--link)) .related-list__td--first {
+  color: var(--div-color-gray-900, #030712);
+}
+
+.related-list__tr:last-child .related-list__td {
+  border-bottom: none;
+}
+
+.related-list__empty,
+.related-list__error {
+  margin: 0;
+  padding: var(--slds-g-spacing-2, 8px) 0;
+  color: var(--div-color-neutral-500, #838a97);
+  font-size: 0.875rem;
+}
+
+.related-list__error {
+  color: var(--div-color-red-700, #b42318);
+}
+
+.related-list__loading {
+  display: flex;
+  justify-content: center;
+  padding: var(--slds-g-spacing-4, 16px) 0;
+}
+
+/* Collapse caret, only rendered when the consumer opts in. Drawn from borders so
+   it needs no icon resource and rotates with the state. */
+
+.related-list__toggle {
+  appearance: none;
+  background: none;
+  border: 0;
+  margin-left: auto;
+  padding: 4px;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--lwc-colorTextWeak, #444444);
+}
+
+.related-list__toggle:hover,
+.related-list__toggle:focus {
+  background: var(--lwc-colorBackground, #f3f3f3);
+}
+
+.related-list__toggle::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg) translate(-1px, -1px);
+  transition: transform 0.15s ease;
+}
+
+.related-list__toggle--open::before {
+  transform: rotate(45deg) translate(-1px, -1px);
+}

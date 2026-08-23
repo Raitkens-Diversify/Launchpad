@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Variable_Life_Insurance_Service</fullName>
+    <columns>NAME</columns>
+    <columns>Accreditation_Status__c</columns>
+    <columns>Investment_Type__c</columns>
+    <columns>Commission__c</columns>
+    <columns>Date_Approved__c</columns>
+    <columns>Status__c</columns>
+    <columns>Sponsor_Website__c</columns>
+    <columns>Asset_Category__c</columns>
+    <columns>Performance_Status_Color__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Asset_Category__c</field>
+        <operation>equals</operation>
+        <value>Variable Life Insurance</value>
+    </filters>
+    <filters>
+        <field>Status__c</field>
+        <operation>equals</operation>
+        <value>Sell/Service,Service Only</value>
+    </filters>
+    <label>Variable Life Insurance - Service</label>
+</ListView>

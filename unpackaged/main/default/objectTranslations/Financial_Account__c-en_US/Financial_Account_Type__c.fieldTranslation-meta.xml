@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Financial Account Type --></label>
+        <name>Financial_Account_Type__c</name>
+        <picklistValues>
+            <masterLabel>401K</masterLabel>
+            <translation><!-- 401K --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Brokerage</masterLabel>
+            <translation><!-- Brokerage --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>CD</masterLabel>
+            <translation><!-- CD --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Cash Management Account</masterLabel>
+            <translation><!-- Cash Management Account --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Checking</masterLabel>
+            <translation><!-- Checking --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Credit Card</masterLabel>
+            <translation><!-- Credit Card --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DAF</masterLabel>
+            <translation><!-- DAF --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Discount Brokerage</masterLabel>
+            <translation><!-- Discount Brokerage --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Fixed Annuity</masterLabel>
+            <translation><!-- Fixed Annuity --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Individual Life</masterLabel>
+            <translation><!-- Individual Life --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Managed Account</masterLabel>
+            <translation><!-- Managed Account --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Mutual Fund</masterLabel>
+            <translation><!-- Mutual Fund --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>SEPI</masterLabel>
+            <translation><!-- SEPI --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>SIMP</masterLabel>
+            <translation><!-- SIMP --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Savings</masterLabel>
+            <translation><!-- Savings --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Term Life</masterLabel>
+            <translation><!-- Term Life --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Variable Annuity</masterLabel>
+            <translation><!-- Variable Annuity --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Variable Life</masterLabel>
+            <translation><!-- Variable Life --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Whole Life</masterLabel>
+            <translation><!-- Whole Life --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

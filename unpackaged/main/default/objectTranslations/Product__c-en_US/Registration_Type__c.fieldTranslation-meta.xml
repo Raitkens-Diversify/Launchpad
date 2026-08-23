@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Registration Type --></label>
+        <name>Registration_Type__c</name>
+        <picklistValues>
+            <masterLabel>Investment Company Act of 1940</masterLabel>
+            <translation><!-- Investment Company Act of 1940 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Securities Act of 1933</masterLabel>
+            <translation><!-- Securities Act of 1933 --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

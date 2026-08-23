@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Arc Regulated Field Banner</masterLabel>
+    <description>Regulated-fields notice with Create Envelope link for Experience Cloud record pages.</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+        <target>lightning__RecordPage</target>
+        <target>lightning__AppPage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property name="message" type="String" label="Message" description="Regulated fields notice text." />
+            <property name="actionLabel" type="String" label="Action label" default="Create Envelope" />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

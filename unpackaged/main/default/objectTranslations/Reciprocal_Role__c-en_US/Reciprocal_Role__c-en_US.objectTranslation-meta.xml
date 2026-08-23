@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Reciprocal Role</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Reciprocal Roles</value>
+    </caseValues>
+    
+    
+    
+    <recordTypes>
+        <label><!-- Business --></label>
+        <name>Business</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- COI / Referral --></label>
+        <name>COI_Referral</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- Contact --></label>
+        <name>Contact</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- Fiduciary / Regulatory --></label>
+        <name>Fiduciary_Legal</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- Other --></label>
+        <name>Other</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- Family and Friends --></label>
+        <name>Personal_and_Family</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- Service Provider --></label>
+        <name>Service_Provider</name>
+    </recordTypes>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

@@ -1,0 +1,184 @@
+{
+  "type" : "sfdc_cms__view",
+  "title" : "Case List",
+  "contentBody" : {
+    "component" : {
+      "children" : [ {
+        "children" : [ {
+          "attributes" : {
+            "backgroundImageConfig" : "",
+            "backgroundImageOverlay" : "rgba(0,0,0,0)",
+            "componentSpacerSize" : "",
+            "dxpStyle" : { },
+            "layoutDirectionDesktop" : "row",
+            "layoutDirectionMobile" : "column",
+            "layoutDirectionTablet" : "column",
+            "maxContentWidth" : "",
+            "sectionColumnGutterWidth" : "",
+            "sectionConfig" : "{\"UUID\":\"0f55ee15-0bc2-466e-8ac4-03ce0d89d498\",\"columns\":[{\"UUID\":\"54bfe702-b8a5-489a-a485-88ed55e49192\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":[]}]}",
+            "sectionMinHeight" : "",
+            "sectionVerticalAlign" : "flex-start"
+          },
+          "children" : [ {
+            "children" : [ {
+              "attributes" : {
+                "activeTabBorderHighlightWeight" : "2px",
+                "activeTabTextEmphasis" : "{\"bold\":true}",
+                "activeTabTextStyle" : "{\"textStyle\":\"paragraph1\",\"headingTag\":\"p\"}",
+                "borderColor" : "",
+                "borderRadius" : "0px",
+                "borderWeight" : "0px",
+                "dxpStyle" : { },
+                "enableOverflowMenu" : false,
+                "imageFit" : "cover",
+                "imagePosition" : "center center",
+                "overflowIconColor" : "rgb(116,116,116)",
+                "overflowIconStyle" : "down-arrow",
+                "overflowMenuLabel" : "More",
+                "tabAlignment" : "left",
+                "tabBorderColor" : "",
+                "tabBorderRadius" : "0px",
+                "tabBorderWeight" : "0px",
+                "tabHoverBorderHighlightWeight" : "1px",
+                "tabLayout" : "horizontal",
+                "tabPadding" : "12px",
+                "tabTextStyle" : "{\"textStyle\":\"paragraph1\",\"headingTag\":\"p\"}",
+                "tabsetConfig" : "{\"UUID\":\"6c1285e4-7849-4137-a268-1c5141db3ba7\",\"activeTab\":null,\"useOverflowMenu\":null,\"tabs\":[{\"UUID\":\"b671960b-c7cb-4fa9-8710-cff378bc7385\",\"tabName\":\"All Work\",\"tabKey\":\"tab1\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"fe24f6ae-5f44-4617-8776-3fb66cd7be97\",\"tabName\":\"Cases\",\"tabKey\":\"tab2\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"5dc33864-47cb-4dbf-b4f0-453084ff0bdf\",\"tabName\":\"Tasks\",\"tabKey\":\"tab3\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"161ef383-7bd5-4a52-bf17-f2def187af9d\",\"tabName\":\"Advertising Request\",\"tabKey\":\"af087\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"fced54d3-ecdd-417c-963a-0eb1f5d154b2\",\"tabName\":\"Check Log\",\"tabKey\":\"ff964\",\"locked\":false,\"allowGuestUser\":false}]}",
+                "width" : "100%"
+              },
+              "children" : [ {
+                "children" : [ {
+                  "attributes" : {
+                    "dxpStyle" : { },
+                    "enablePagination" : true,
+                    "enableSearch" : true,
+                    "pageSize" : 10,
+                    "searchPlaceholder" : "Search work...",
+                    "title" : ""
+                  },
+                  "definition" : "c:workTable",
+                  "id" : "342d8ae1-7fb6-4ebf-8143-40f2d6f220fe",
+                  "type" : "component"
+                } ],
+                "id" : "b671960b-c7cb-4fa9-8710-cff378bc7385",
+                "name" : "tab1",
+                "title" : "All Work",
+                "type" : "region"
+              }, {
+                "children" : [ {
+                  "attributes" : {
+                    "defaultListViewApiName" : "All_Cases",
+                    "dxpStyle" : { },
+                    "objectApiName" : "Case",
+                    "tableId" : "work-cases",
+                    "title" : ""
+                  },
+                  "definition" : "c:arcListView",
+                  "id" : "25eefd59-38d1-4184-9b23-7931a6d9b191",
+                  "type" : "component"
+                } ],
+                "id" : "fe24f6ae-5f44-4617-8776-3fb66cd7be97",
+                "name" : "tab2",
+                "title" : "Cases",
+                "type" : "region"
+              }, {
+                "children" : [ {
+                  "attributes" : {
+                    "defaultListViewApiName" : "All",
+                    "dxpStyle" : { },
+                    "objectApiName" : "Task",
+                    "tableId" : "work-task",
+                    "title" : ""
+                  },
+                  "definition" : "c:arcListView",
+                  "id" : "55f1757f-c2eb-495b-8c30-3b7ca9562f20",
+                  "type" : "component"
+                } ],
+                "id" : "5dc33864-47cb-4dbf-b4f0-453084ff0bdf",
+                "name" : "tab3",
+                "title" : "Tasks",
+                "type" : "region"
+              }, {
+                "children" : [ {
+                  "attributes" : {
+                    "defaultListViewApiName" : "Advertising_Requests",
+                    "dxpStyle" : { },
+                    "objectApiName" : "Case",
+                    "tableId" : "work-advertising-request",
+                    "title" : ""
+                  },
+                  "definition" : "c:arcListView",
+                  "id" : "aa86c193-a3de-4473-8330-632ae2854b64",
+                  "type" : "component"
+                } ],
+                "id" : "161ef383-7bd5-4a52-bf17-f2def187af9d",
+                "name" : "af087",
+                "title" : "Advertising Request",
+                "type" : "region"
+              }, {
+                "children" : [ {
+                  "attributes" : {
+                    "defaultListViewApiName" : "All",
+                    "dxpStyle" : { },
+                    "objectApiName" : "Check_Log__c",
+                    "tableId" : "work-check-log",
+                    "title" : ""
+                  },
+                  "definition" : "c:arcListView",
+                  "id" : "5a745af0-7de3-47db-a1f2-25c738883709",
+                  "type" : "component"
+                } ],
+                "id" : "fced54d3-ecdd-417c-963a-0eb1f5d154b2",
+                "name" : "ff964",
+                "title" : "Check Log",
+                "type" : "region"
+              } ],
+              "definition" : "dxp_layout:tabs",
+              "id" : "6c1285e4-7849-4137-a268-1c5141db3ba7",
+              "type" : "component"
+            }, {
+              "attributes" : {
+                "dxpStyle" : { }
+              },
+              "definition" : "c:lwrTabUrlHandler",
+              "id" : "d26e0e02-78cc-4d35-a16c-611d9c4cecdc",
+              "type" : "component"
+            } ],
+            "id" : "54bfe702-b8a5-489a-a485-88ed55e49192",
+            "name" : "col1",
+            "title" : "Column 1",
+            "type" : "region"
+          } ],
+          "definition" : "community_layout:section",
+          "id" : "0f55ee15-0bc2-466e-8ac4-03ce0d89d498",
+          "type" : "component"
+        } ],
+        "id" : "bd2966c8-2a03-4577-9061-40ab65046e23",
+        "name" : "content",
+        "title" : "Content",
+        "type" : "region"
+      }, {
+        "children" : [ {
+          "attributes" : {
+            "dxpStyle" : { },
+            "recordId" : "{!recordId}"
+          },
+          "definition" : "community_builder:seoAssistant",
+          "id" : "7b569f84-785e-45b0-8e59-344ee2fc1899",
+          "type" : "component"
+        } ],
+        "id" : "dab93599-5080-4357-933a-6fff53503931",
+        "name" : "sfdcHiddenRegion",
+        "title" : "sfdcHiddenRegion",
+        "type" : "region"
+      } ],
+      "definition" : "community_layout:sldsFlexibleLayout",
+      "id" : "bc84517d-f742-4587-bb8a-8f4b3fccd0b7",
+      "type" : "component"
+    },
+    "dataProviders" : [ ],
+    "themeLayoutType" : "OHzbXAVux6mZ7VVDb7Pb8F2YUFBAXR",
+    "viewType" : "list-500"
+  },
+  "urlName" : "case-list"
+}

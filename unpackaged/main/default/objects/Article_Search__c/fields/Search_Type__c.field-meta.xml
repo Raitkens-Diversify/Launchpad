@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Search_Type__c</fullName>
+    <description>Which search path produced this row: Full (the scoring engine on submit), Typeahead (as-you-type suggestions), Fallback (pure-stopword title-phrase path), or Fuzzy (results came from the Levenshtein pass). Set by the caller; automatic Fallback/Fuzzy tagging is added when the engine surfaces its path.</description>
+    <label>Search Type</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Full</fullName>
+                <default>true</default>
+                <label>Full</label>
+            </value>
+            <value>
+                <fullName>Typeahead</fullName>
+                <default>false</default>
+                <label>Typeahead</label>
+            </value>
+            <value>
+                <fullName>Fallback</fullName>
+                <default>false</default>
+                <label>Fallback</label>
+            </value>
+            <value>
+                <fullName>Fuzzy</fullName>
+                <default>false</default>
+                <label>Fuzzy</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

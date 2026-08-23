@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RecordType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Product</fullName>
+    <active>true</active>
+    <compactLayoutAssignment>Monitoring_Update_Compact_Layout</compactLayoutAssignment>
+    <label>Product</label>
+    <picklistValues>
+        <picklist>All_Redemption_Met__c</picklist>
+        <values>
+            <fullName>No</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Yes</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>LifeCycle_Status__c</picklist>
+        <values>
+            <fullName>Capital Raising</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Full-Cycle</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Liquidating</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Operating</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Performance_Status__c</picklist>
+        <values>
+            <fullName>Performing</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Under Performing</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Watch List</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Review_Type__c</picklist>
+        <values>
+            <fullName>Event Review</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Internal Review</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Ongoing Monitoring</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+</RecordType>

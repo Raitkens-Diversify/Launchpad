@@ -1,0 +1,34 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-08-12 -->
+<template>
+  <header class="div-toolbar arc-home-header" aria-label="Home page header">
+    <div class="div-toolbar__left">
+      <div class="div-page-header">
+        <h1 class="div-page-header__title">{welcomeTitle}</h1>
+        <p class="div-page-header__subtitle">{formattedDate}</p>
+      </div>
+    </div>
+
+    <div class="div-toolbar__right">
+      <div class="div-btn-group" role="group" aria-label="Quick actions">
+        <template for:each={actionButtons} for:item="action">
+          <button
+            key={action.key}
+            type="button"
+            class="div-btn"
+            data-action={action.key}
+            aria-label={action.label}
+            onclick={handleActionClick}
+            onkeydown={handleActionKeyDown}
+          >
+            {action.label}
+          </button>
+        </template>
+      </div>
+    </div>
+  </header>
+
+  <c-arc-flow-modal
+    lwc:ref="flowModal"
+    onflowstatuschange={handleFlowStatusChange}
+  ></c-arc-flow-modal>
+</template>

@@ -1,0 +1,86 @@
+/* Author: Hoang Long Vu To | Date: 2026-06-25 */
+:host {
+    display: block;
+    width: var(--map-card-width, 290px);
+    min-width: var(--map-card-width, 290px);
+    --fsc-rel-map-badge-font-size: 0.6875rem;
+    --fsc-rel-map-accent-surface: #e8f4fd;
+    --fsc-rel-map-accent-surface-hover: #d8edfb;
+    --fsc-rel-map-accent-foreground: #1b96ff;
+}
+
+.relationship-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: var(--map-card-width, 290px);
+    min-width: var(--map-card-width, 290px);
+}
+
+.relationship-groups__item {
+    width: var(--map-card-width, 290px);
+    min-width: var(--map-card-width, 290px);
+}
+
+.map-node-row__card {
+    flex: 0 0 var(--map-card-width, 290px);
+    width: var(--map-card-width, 290px);
+    min-width: var(--map-card-width, 290px);
+    max-width: var(--map-card-width, 290px);
+}
+
+.map-relationship-group {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #d8dde6;
+    border-radius: 0.25rem;
+    background: #ffffff;
+    padding: 0.5rem 0.625rem 0.625rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.map-relationship-group__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.map-relationship-group__label {
+    margin: 0;
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: var(--fsc-rel-map-badge-font-size);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #747474;
+}
+
+.map-relationship-group__count {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    padding: 0 0.35rem;
+    border-radius: 9999px;
+    background: var(--fsc-rel-map-accent-surface);
+    color: var(--fsc-rel-map-accent-foreground);
+    font-size: var(--fsc-rel-map-badge-font-size);
+    font-weight: 700;
+    line-height: 1;
+}
+
+.map-relationship-group__cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.map-relationship-group__card {
+    width: 100%;
+}

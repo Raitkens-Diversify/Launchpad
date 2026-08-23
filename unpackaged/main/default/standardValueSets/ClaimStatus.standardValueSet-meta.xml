@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Initial</fullName>
+        <default>true</default>
+        <label>Initial</label>
+        <closed>false</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Active</fullName>
+        <default>false</default>
+        <label>Active</label>
+        <closed>false</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Closed</fullName>
+        <default>false</default>
+        <label>Closed</label>
+        <closed>true</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Compromised/Settled</fullName>
+        <default>false</default>
+        <label>Compromised/Settled</label>
+        <closed>true</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Coverage Confirmed</fullName>
+        <default>false</default>
+        <label>Coverage Confirmed</label>
+        <closed>false</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Coverage Evaluation</fullName>
+        <default>false</default>
+        <label>Coverage Evaluation</label>
+        <closed>false</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Denied</fullName>
+        <default>false</default>
+        <label>Denied</label>
+        <closed>true</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Disallowed</fullName>
+        <default>false</default>
+        <label>Disallowed</label>
+        <closed>true</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Discontinued</fullName>
+        <default>false</default>
+        <label>Discontinued</label>
+        <closed>true</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Granted</fullName>
+        <default>false</default>
+        <label>Granted</label>
+        <closed>false</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>In Dispute</fullName>
+        <default>false</default>
+        <label>In Dispute</label>
+        <closed>false</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Inactive</fullName>
+        <default>false</default>
+        <label>Inactive</label>
+        <closed>true</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Abandoned</fullName>
+        <default>false</default>
+        <label>Abandoned</label>
+        <closed>true</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Notified</fullName>
+        <default>false</default>
+        <label>Notified</label>
+        <closed>false</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Nullified</fullName>
+        <default>false</default>
+        <label>Nullified</label>
+        <closed>true</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Open</fullName>
+        <default>false</default>
+        <label>Open</label>
+        <closed>false</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Other</fullName>
+        <default>false</default>
+        <label>Other</label>
+        <closed>true</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Paid-in Full</fullName>
+        <default>false</default>
+        <label>Paid-in Full</label>
+        <closed>true</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Pending</fullName>
+        <default>false</default>
+        <label>Pending</label>
+        <closed>false</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Premium Payments on the coverage are suspended</fullName>
+        <default>false</default>
+        <label>Premium Payments on the coverage are suspended</label>
+        <closed>true</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Rejected</fullName>
+        <default>false</default>
+        <label>Rejected</label>
+        <closed>true</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Rejected Coverage Not Provided</fullName>
+        <default>false</default>
+        <label>Rejected Coverage Not Provided</label>
+        <closed>true</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Reopened</fullName>
+        <default>false</default>
+        <label>Reopened</label>
+        <closed>false</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Settled</fullName>
+        <default>false</default>
+        <label>Settled</label>
+        <closed>true</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Under Evaluation</fullName>
+        <default>false</default>
+        <label>Under Evaluation</label>
+        <closed>false</closed>
+    </standardValue>
+    <standardValue>
+        <fullName>Under Negotiation</fullName>
+        <default>false</default>
+        <label>Under Negotiation</label>
+        <closed>false</closed>
+    </standardValue>
+</StandardValueSet>

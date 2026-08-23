@@ -1,0 +1,32 @@
+<template>
+    <article class="rc-card">
+        <div class="rc-card__head" role="button" tabindex="0"
+             onclick={handleSelect} onkeydown={handleKey}>
+            <span class="rc-card__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     focusable="false">
+                    <path d={iconPath}></path>
+                </svg>
+            </span>
+            <c-ds-badge label={badge} variant="info"></c-ds-badge>
+        </div>
+
+        <h3 class="rc-card__title" onclick={handleSelect}>{resource.name}</h3>
+        <template if:true={resource.description}>
+            <p class="rc-card__desc">{resource.description}</p>
+        </template>
+
+        <div class="rc-card__action">
+            <template if:true={isExternal}>
+                <a class="rc-card__btn" href={resource.externalUrl}
+                   target="_blank" rel="noopener noreferrer">{primaryLabel}</a>
+            </template>
+            <template if:true={isOpenInApp}>
+                <button class="rc-card__btn" type="button" onclick={handleSelect}>
+                    {primaryLabel}
+                </button>
+            </template>
+        </div>
+    </article>
+</template>

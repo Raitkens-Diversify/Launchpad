@@ -1,0 +1,302 @@
+/* Renders directly in the shell body as a full-screen focused view (like Review Missing
+   Items): the host is the scroll surface, so its content scrolls within the shell height
+   instead of pushing the whole App Page to scroll. `position: relative` makes the host the
+   containing block for its descendants' absolutely-positioned helper nodes (e.g. the base
+   components' `slds-assistive-text` spans); without it those escape to the Salesforce page
+   wrapper and stretch the App Page into a redundant whole-page scroll. The inner .review
+   block caps the width and centers it. */
+:host {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--slds-g-color-surface-2, #f3f4f6);
+  font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+}
+
+.review {
+  width: 100%;
+  max-width: 790px;
+  margin: 0 auto;
+  padding: var(--slds-g-spacing-5, 24px) var(--slds-g-spacing-7, 40px)
+    var(--slds-g-spacing-10, 64px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-5, 24px);
+}
+
+.review__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-1, 4px);
+  padding-top: var(--slds-g-spacing-5, 24px);
+}
+
+.review__title {
+  margin: 0;
+  font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+  font-size: var(--slds-g-font-scale-4, 24px);
+  font-weight: var(--slds-g-font-weight-6, 600);
+  line-height: 32px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.review__subtitle,
+.review__submit-copy {
+  margin: 0;
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.review__card {
+  --card-padding: var(--slds-g-spacing-6, 32px);
+}
+
+/* Shared 20px heading treatment: accordion row titles, card headings. */
+.review__item-title,
+.review__section-title,
+.review__card-title {
+  margin: 0;
+  font-size: var(--slds-g-font-scale-3, 20px);
+  font-weight: var(--slds-g-font-weight-6, 600);
+  line-height: 24px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+/* Accordion summary rows. Every row carries a bottom divider (per the design, including
+   the last one above the card's bottom padding). */
+.review__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-5, 24px);
+}
+
+.review__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-5, 24px);
+  padding-bottom: var(--slds-g-spacing-5, 24px);
+  border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+
+.review__item-header {
+  display: flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-4, 16px);
+}
+
+/* The expand/collapse hit area: icon + titles. A plain button because no base component
+   expresses a composite clickable row; the Edit/caret actions stay outside it. */
+.review__item-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-4, 16px);
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.review__item-toggle:focus-visible {
+  outline: none;
+  border-radius: var(--slds-g-radius-border-1, 4px);
+  box-shadow:
+    0 0 0 2px var(--slds-g-color-surface-container-1, #ffffff),
+    0 0 0 4px var(--slds-g-color-on-surface-4, #1a76bb);
+}
+
+/* Leading icon color by entity variant (mirrors the workspace action cards). */
+.review__item-icon {
+  flex: none;
+}
+
+.review__item-icon_member {
+  --slds-c-icon-color-foreground-default: var(
+    --slds-g-color-success-base-50,
+    #16a34a
+  );
+}
+
+.review__item-icon_account {
+  --slds-c-icon-color-foreground-default: var(--slds-g-color-accent-1, #0f406f);
+}
+
+.review__item-titles {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.review__item-subtitle {
+  font-size: var(--slds-g-font-scale-1, 14px);
+  line-height: 19px;
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.review__item-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-5, 24px);
+  flex: none;
+}
+
+.review__item-body,
+.review__card-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-6, 32px);
+}
+
+.review__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-5, 24px);
+}
+
+/* Label/value summary grid: three columns, flowing row by row. */
+.review__fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--slds-g-spacing-4, 16px) var(--slds-g-spacing-5, 24px);
+}
+
+.review__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-1, 4px);
+  min-width: 0;
+}
+
+.review__field-label,
+.review__empty-note {
+  font-size: var(--slds-g-font-scale-1, 14px);
+  line-height: 19px;
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.review__empty-note {
+  margin: 0;
+}
+
+.review__field-value {
+  font-size: var(--slds-g-font-scale-2, 16px);
+  line-height: 22px;
+  font-weight: var(--slds-g-font-weight-6, 600);
+  color: var(--slds-g-color-on-surface-2, #374151);
+  word-break: break-word;
+}
+
+.review__card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--slds-g-spacing-4, 16px);
+}
+
+/* Inline alert banners (same treatment as the Manage Documents info alert). */
+.review__alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--slds-g-spacing-2, 8px);
+  padding: var(--slds-g-spacing-2, 8px) 12px;
+  border-radius: var(--slds-g-radius-border-2, 8px);
+}
+
+.review__alert-icon {
+  flex: none;
+}
+
+.review__alert-text {
+  margin: 0;
+  font-size: var(--slds-g-font-size-base, 13px);
+  line-height: 18px;
+}
+
+.review__alert--info {
+  background: var(--slds-g-color-info-container-1, #e0f2fe);
+  border: 1px solid var(--slds-g-color-info-base-90, #bae6fd);
+  color: var(--slds-g-color-on-info-1, #0369a1);
+}
+
+.review__alert--info .review__alert-icon {
+  --slds-c-icon-color-foreground-default: var(
+    --slds-g-color-on-info-1,
+    #0369a1
+  );
+}
+
+.review__alert--warning {
+  background: var(--slds-g-color-warning-container-1, #fef3c7);
+  border: 1px solid var(--slds-g-color-warning-base-90, #fde68a);
+  color: var(--slds-g-color-on-warning-1, #b45309);
+}
+
+.review__alert--warning .review__alert-icon {
+  --slds-c-icon-color-foreground-default: var(
+    --slds-g-color-on-warning-1,
+    #b45309
+  );
+}
+
+/* Document rows render flat here (bottom divider only), unlike the framed card in
+   Manage Documents — the frame is stripped via the document card's styling hooks. */
+.review__docs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-4, 16px);
+}
+
+.review__doc {
+  --doc-card-padding: 0 0 var(--slds-g-spacing-4, 16px);
+  --doc-card-border: 0;
+  --doc-card-radius: 0;
+  border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+
+/* Submit confirmation: the body and the checkbox/actions footer are separately padded
+   blocks split by a divider, so the card's own padding is disabled. */
+.review__submit-card {
+  --card-padding: 0;
+}
+
+.review__submit-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-4, 16px);
+  padding: var(--slds-g-spacing-6, 32px);
+}
+
+.review__submit-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-2, 8px);
+}
+
+.review__submit-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-4, 16px);
+  padding: var(--slds-g-spacing-6, 32px);
+  border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+
+.review__confirm {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.review__submit-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-4, 16px);
+  flex: none;
+}

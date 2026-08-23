@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>X3_Way_Call_Task_Completed__c</fullName>
+    <label>3 Way Call Task Completed</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>TRUE</fullName>
+                <default>false</default>
+                <label>TRUE</label>
+            </value>
+            <value>
+                <fullName>FALSE</fullName>
+                <default>false</default>
+                <label>FALSE</label>
+            </value>
+            <value>
+                <fullName>EXCLUDED</fullName>
+                <default>false</default>
+                <label>EXCLUDED</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

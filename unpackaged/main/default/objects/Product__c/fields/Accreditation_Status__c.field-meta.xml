@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Accreditation_Status__c</fullName>
+    <label>Accreditation Status</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Suitable</fullName>
+                <default>false</default>
+                <label>Suitable</label>
+            </value>
+            <value>
+                <fullName>Accredited</fullName>
+                <default>false</default>
+                <label>Accredited</label>
+            </value>
+            <value>
+                <fullName>Qualified Purchaser</fullName>
+                <default>false</default>
+                <label>Qualified Purchaser</label>
+            </value>
+            <value>
+                <fullName>None</fullName>
+                <default>false</default>
+                <label>None</label>
+            </value>
+            <value>
+                <fullName>Not Applicable</fullName>
+                <default>false</default>
+                <label>Not Applicable</label>
+            </value>
+            <value>
+                <fullName>Qualified</fullName>
+                <default>false</default>
+                <label>Qualified</label>
+            </value>
+            <value>
+                <fullName>Qualified Client</fullName>
+                <default>false</default>
+                <label>Qualified Client</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

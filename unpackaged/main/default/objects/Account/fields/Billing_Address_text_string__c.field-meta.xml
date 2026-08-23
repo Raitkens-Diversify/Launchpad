@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Billing_Address_text_string__c</fullName>
+    <externalId>false</externalId>
+    <formula>IF(Not(ISBLANK(BillingStreet)),BillingStreet +&quot;, &quot; + BillingCity +&quot;, &quot; +  BillingState  +&quot;, &quot; +  BillingPostalCode, &quot;No Billing Address&quot;)</formula>
+    <label>Billing Address (text string)</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

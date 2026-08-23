@@ -1,0 +1,17 @@
+<template>
+    <div class="ds-chips" role="group" aria-label={groupLabel}>
+        <template for:each={decorated} for:item="chip">
+            <button key={chip.value}
+                    type="button"
+                    class={chip.cssClass}
+                    aria-pressed={chip.pressed}
+                    data-value={chip.value}
+                    onclick={handleSelect}>
+                <span class="ds-chips__label">{chip.label}</span>
+                <template if:true={chip.hasCount}>
+                    <span class="ds-chips__count">{chip.count}</span>
+                </template>
+            </button>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Standard Loan</fullName>
+        <default>false</default>
+        <label>Standard Loan</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Commercial hire purchase</fullName>
+        <default>false</default>
+        <label>Commercial hire purchase</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Finance Lease</fullName>
+        <default>false</default>
+        <label>Finance Lease</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Novated Lease</fullName>
+        <default>false</default>
+        <label>Novated Lease</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Operating Lease</fullName>
+        <default>false</default>
+        <label>Operating Lease</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Chattel Mortgage</fullName>
+        <default>false</default>
+        <label>Chattel Mortgage</label>
+    </standardValue>
+</StandardValueSet>

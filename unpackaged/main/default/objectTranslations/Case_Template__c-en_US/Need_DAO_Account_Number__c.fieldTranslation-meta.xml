@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Need DAO Account Number --></label>
+        <name>Need_DAO_Account_Number__c</name>
+        <picklistValues>
+            <masterLabel>EXCLUDED</masterLabel>
+            <translation><!-- EXCLUDED --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>FALSE</masterLabel>
+            <translation><!-- FALSE --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>TRUE</masterLabel>
+            <translation><!-- TRUE --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

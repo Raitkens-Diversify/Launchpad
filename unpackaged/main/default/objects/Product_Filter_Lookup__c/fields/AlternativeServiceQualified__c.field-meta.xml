@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AlternativeServiceQualified__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>WHERE Type__c = &#39;Alternative&#39; AND Status__c = &#39;Service&#39;</description>
+    <label>AlternativeServiceQualified</label>
+    <lookupFilter>
+        <active>true</active>
+        <filterItems>
+            <field>Product__c.Status__c</field>
+            <operation>equals</operation>
+            <value>Sell/Service, Service Only</value>
+        </filterItems>
+        <filterItems>
+            <field>Product__c.Asset_Category__c</field>
+            <operation>equals</operation>
+            <value>Alternative Investment</value>
+        </filterItems>
+        <isOptional>false</isOptional>
+    </lookupFilter>
+    <referenceTo>Product__c</referenceTo>
+    <relationshipLabel>Product Filter Lookups (AlternativeServiceQualified)</relationshipLabel>
+    <relationshipName>Product_Filter_Lookups7</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

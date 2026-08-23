@@ -1,0 +1,14 @@
+<design:component>
+    <design:attribute name="MutualFunds" label="Mutal Funds/Exchange Traded Funds" description=""/>
+	<design:attribute name="IndividualStocks" label="Individual Stocks" description="" />
+    <design:attribute name="Bonds" label="Bonds" description=""/>   
+    <design:attribute name="REIT" label="Real Estate Investment Trust (REIT)" description="" />
+    <design:attribute name="x1031" label="1031 Exchanges" description="" />
+    <design:attribute name="RealEstate" label="Real Estate" description="" />
+    <design:attribute name="Annuities" label="Annuities" description="" />
+    <design:attribute name="PrivateEquity" label="Private Equity" description="" />
+    <design:attribute name="PrivateCredit" label="Private Credit" description="" />
+    <design:attribute name="Options" label="Options" description="" />
+    <design:attribute name="Other" label="Other" description="" />
+    <design:attribute name="OtherExplanation" label="Other Explanation" description="" />
+</design:component>

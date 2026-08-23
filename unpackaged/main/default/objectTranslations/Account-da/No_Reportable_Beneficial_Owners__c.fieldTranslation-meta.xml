@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <help><!-- Select if there are no reportable beneficial owners for this business. --></help>
+        <label><!-- No Reportable Beneficial Owners --></label>
+        <name>No_Reportable_Beneficial_Owners__c</name>
+    </CustomFieldTranslation>

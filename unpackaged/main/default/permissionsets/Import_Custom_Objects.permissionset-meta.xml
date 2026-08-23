@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Allows the user to import custom object records.</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Import Custom Objects</label>
+</PermissionSet>

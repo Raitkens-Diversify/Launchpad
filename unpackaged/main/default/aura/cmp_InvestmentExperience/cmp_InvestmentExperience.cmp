@@ -1,0 +1,114 @@
+<aura:component implements="lightning:availableForFlowScreens" access="global">
+    <aura:attribute name="MutualFunds" type="Integer" default="0"/>
+    <aura:attribute name="IndividualStocks" type="Integer" default="0"/>
+    <aura:attribute name="Bonds" type="Integer" default="0"/>   
+    <aura:attribute name="REIT" type="Integer" default="0"/>
+    <aura:attribute name="x1031" type="Integer" default="0"/>
+    <aura:attribute name="RealEstate" type="Integer" default="0"/>
+    <aura:attribute name="Annuities" type="Integer" default="0"/>
+    <aura:attribute name="PrivateEquity" type="Integer" default="0"/>
+    <aura:attribute name="PrivateCredit" type="Integer" default="0"/>
+    <aura:attribute name="Options" type="Integer" default="0"/>
+    <aura:attribute name="Other" type="Integer" default="0"/>
+    <aura:attribute name="OtherExplanation" type="String" />
+    
+    <lightning:card>
+        <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_col-bordered">
+            <thead>
+                <tr>
+                    <th>Investment</th>
+                    <th>Years Experience</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="slds-hint-parent">
+                    <td>
+                        <label class="slds-form-element__label" style="margin-right: 0.5rem;">Mutual Funds/Exchange Traded Funds:</label></td>
+                    <td>
+                        <lightning:input type="number" value="{!v.MutualFunds}" name="MutualFunds" variant="label-hidden" max="99"/>
+                    </td>
+                </tr>
+                <tr class="slds-hint-parent">
+                    <td>
+                        <label class="slds-form-element__label" style="margin-right: 0.5rem;">Individual Stocks:</label></td>
+                    <td>
+                        <lightning:input type="number" value="{!v.IndividualStocks}" name="IndividualStocks" variant="label-hidden" max="99"/>
+                    </td>
+                </tr>
+                <tr class="slds-hint-parent">
+                    <td>
+                        <label class="slds-form-element__label" style="margin-right: 0.5rem;">Bonds:</label></td>
+                    <td>
+                        <lightning:input type="number" value="{!v.Bonds}" name="Bonds" variant="label-hidden" max="99"/>
+                    </td>
+                </tr>
+                <tr class="slds-hint-parent">
+                    <td>
+                        <label class="slds-form-element__label" style="margin-right: 0.5rem;">Real Estate Investment Trust (REIT):</label></td>
+                    <td>
+                        <lightning:input type="number" value="{!v.REIT}" name="REIT" variant="label-hidden" max="99"/>
+                    </td>
+                </tr>
+                <tr class="slds-hint-parent">
+                    <td>
+                        <label class="slds-form-element__label" style="margin-right: 0.5rem;">1031 Exchanges:</label></td>
+                    <td>
+                        <lightning:input type="number" value="{!v.x1031}" name="1031" variant="label-hidden" max="99"/>
+                    </td>
+                </tr>
+                <tr class="slds-hint-parent">
+                    <td>
+                        <label class="slds-form-element__label" style="margin-right: 0.5rem;">Real Estate:</label></td>
+                    <td>
+                        <lightning:input type="number" value="{!v.RealEstate}" name="RealEstate" variant="label-hidden" max="99"/>
+                    </td>
+                </tr>
+                <tr class="slds-hint-parent">
+                    <td>
+                        <label class="slds-form-element__label" style="margin-right: 0.5rem;">Annuities:</label></td>
+                    <td>
+                        <lightning:input type="number" value="{!v.Annuities}" name="Annuities" variant="label-hidden" max="99"/>
+                    </td>
+                </tr>
+                <tr class="slds-hint-parent">
+                    <td>
+                        <label class="slds-form-element__label" style="margin-right: 0.5rem;">Private Equity:</label></td>
+                    <td>
+                        <lightning:input type="number" value="{!v.PrivateEquity}" name="PrivateEquity" variant="label-hidden" max="99"/>
+                    </td>
+                </tr>
+                <tr class="slds-hint-parent">
+                    <td>
+                        <label class="slds-form-element__label" style="margin-right: 0.5rem;">Private Credit:</label></td>
+                    <td>
+                        <lightning:input type="number" value="{!v.PrivateCredit}" name="PrivateCredit" variant="label-hidden" max="99"/>
+                    </td>
+                </tr>
+                <tr class="slds-hint-parent">
+                    <td>
+                        <label class="slds-form-element__label" style="margin-right: 0.5rem;">Options:</label></td>
+                    <td>
+                        <lightning:input type="number" value="{!v.Options}" name="Options" variant="label-hidden" max="99"/>
+                    </td>
+                </tr>
+                <tr class="slds-hint-parent">
+                    <td>
+                        <label class="slds-form-element__label" style="margin-right: 0.5rem;">Other:</label></td>
+                    <td>
+                        <lightning:input type="number" value="{!v.Other}" name="Other" variant="label-hidden" max="99"/>
+                    </td>
+                </tr>
+                <aura:if isTrue="{!v.Other != 0}">
+                    
+                    <tr class="slds-hint-parent">
+                        <td>
+                            <label class="slds-form-element__label" style="margin-right: 0.5rem;">Other Explanation:</label></td>
+                        <td>
+                            <lightning:input type="String" value="{!v.OtherExplanation}" name="OtherExplanation" variant="label-hidden"/>
+                        </td>
+                    </tr>
+                </aura:if>
+            </tbody>
+        </table>
+    </lightning:card>
+</aura:component>

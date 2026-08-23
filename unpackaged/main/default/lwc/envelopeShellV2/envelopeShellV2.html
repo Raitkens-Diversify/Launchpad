@@ -1,0 +1,212 @@
+<!-- Author: Mile Cacanovic -->
+<template>
+  <div class="shell">
+    <!-- Action-details (interview) view replaces the workspace while an action is open. -->
+    <template lwc:if={isActionView}>
+      <c-envelope-action-details
+        lwc:ref="actionDetails"
+        action={selectedAction}
+        household-id={householdId}
+        envelope-id={envelopeId}
+        sections={actionSchema}
+        section-layout={actionSectionLayout}
+        saved-values={selectedActionFormData}
+        original-values={selectedActionOriginalValues}
+        save-status={saveStatus}
+        registration-attributes={registrationAttributes}
+        user-context={userContext}
+        strategy-options={strategyOptions}
+        onformactivity={handleFormActivity}
+        oncardmenu={handleCardMenu}
+        onback={handleActionBack}
+      >
+      </c-envelope-action-details>
+    </template>
+    <template lwc:elseif={isMissingItemsView}>
+      <template lwc:if={isMissingItemsLoading}>
+        <div class="shell__loading">
+          <lightning-spinner
+            alternative-text="Loading missing items"
+            size="medium"
+          >
+          </lightning-spinner>
+        </div>
+      </template>
+      <template lwc:else>
+        <c-envelope-review-missing-items
+          lwc:ref="missingItems"
+          action-items={missingActionItems}
+          user-context={userContext}
+          save-status={saveStatus}
+          onformactivity={handleFormActivity}
+          onowneraction={handleOwnerAction}
+          onownerremove={handleOwnerRemove}
+        >
+        </c-envelope-review-missing-items>
+      </template>
+    </template>
+    <template lwc:elseif={isReviewView}>
+      <c-envelope-review-submit
+        review-items={reviewItems}
+        envelope-id={envelopeId}
+        oneditreviewitem={handleReviewEdit}
+        onmanagedocuments={handleReviewManageDocuments}
+        onback={handleSubViewBack}
+        onsubmitenvelope={handleSubmitEnvelope}
+      >
+      </c-envelope-review-submit>
+    </template>
+    <template lwc:else>
+      <div class={gridClass}>
+        <!-- Left section: Household Outline rail -->
+        <aside class="shell__nav">
+          <c-household-outline-v2
+            lwc:ref="outline"
+            collapsed={isNavCollapsed}
+            household-data={householdData}
+            ontoggle={handleNavToggle}
+            onaddentity={handleAddEntity}
+            onitemmenu={handleItemMenu}
+            onitemadd={handleItemAdd}
+          >
+          </c-household-outline-v2>
+        </aside>
+
+        <!-- Main section: content area -->
+        <main class="shell__content">
+          <div class="shell__main">
+            <template lwc:if={isDocumentsView}>
+              <c-envelope-manage-documents
+                envelope-title={envelopeTitle}
+                household-name={householdName}
+                envelope-id={envelopeId}
+                onback={handleSubViewBack}
+              >
+              </c-envelope-manage-documents>
+            </template>
+            <template lwc:else>
+              <c-envelope-content-header-v2
+                title={envelopeTitle}
+                subtitle={householdName}
+                has-missing-items={hasMissingItems}
+                has-required-documents={hasRequiredDocuments}
+                onheaderaction={handleHeaderAction}
+              >
+              </c-envelope-content-header-v2>
+              <template lwc:if={isItemsLoading}>
+                <div class="shell__loading">
+                  <lightning-spinner
+                    alternative-text="Loading action items"
+                    size="medium"
+                  >
+                  </lightning-spinner>
+                </div>
+              </template>
+              <template lwc:elseif={hasItemsRegion}>
+                <div class="items-list">
+                  <template lwc:if={activeForm}>
+                    <c-envelope-add-item-form
+                      variant={activeForm}
+                      saving={isAddingItem}
+                      oncancel={handleFormCancel}
+                      onadditem={handleAddItem}
+                    >
+                    </c-envelope-add-item-form>
+                  </template>
+                  <template lwc:else>
+                    <c-envelope-add-cta
+                      onaddaction={handleAddAction}
+                    ></c-envelope-add-cta>
+                  </template>
+                  <template for:each={sortedItems} for:item="item">
+                    <c-envelope-action-item
+                      key={item.id}
+                      entity={item}
+                      oncardmenu={handleCardMenu}
+                      onopenitem={handleOpenItem}
+                    >
+                    </c-envelope-action-item>
+                  </template>
+                </div>
+              </template>
+              <template lwc:else>
+                <c-envelope-add-cta
+                  onaddaction={handleAddAction}
+                ></c-envelope-add-cta>
+                <c-envelope-empty-state></c-envelope-empty-state>
+              </template>
+            </template>
+          </div>
+        </main>
+      </div>
+    </template>
+  </div>
+
+  <!-- Rename/Delete dialogs for the current envelope. Rendered once and opened
+         imperatively via this.refs (no is-open flag) from handleHeaderAction. -->
+  <c-envelope-rename-modal-v2
+    lwc:ref="renameModal"
+    envelope-id={envelopeId}
+    envelope-name={envelopeTitle}
+    onclose={handleRenameClose}
+    onrenamed={handleRenamed}
+  >
+  </c-envelope-rename-modal-v2>
+  <c-envelope-delete-modal-v2
+    lwc:ref="deleteModal"
+    envelope-id={envelopeId}
+    envelope-name={envelopeTitle}
+    onclose={handleDeleteClose}
+    ondeleted={handleDeleted}
+  >
+  </c-envelope-delete-modal-v2>
+
+  <!-- Shared removal dialog for both an action card and a Household Outline row (same
+         copy either way). Opened imperatively via this.refs; the confirm behavior follows
+         the pending removal target (see _removeTarget). -->
+  <c-envelope-confirm-removal-modal
+    lwc:ref="removeModal"
+    title={removeDialogTitle}
+    confirm-label={removeDialogConfirmLabel}
+    message-before={removeDialogMessageBefore}
+    message-highlight={pendingRemoveName}
+    message-after={removeDialogMessageAfter}
+    onconfirm={handleRemoveConfirm}
+    onclose={handleRemoveClose}
+  >
+  </c-envelope-confirm-removal-modal>
+
+  <!-- "Add action item" dialog for a Household Outline row's "+". Opened imperatively via
+         this.refs; the selection isn't persisted yet (mock-first). -->
+  <c-envelope-add-action-modal
+    lwc:ref="addActionModal"
+    entity-name={pendingAddName}
+    actions={pendingAddActions}
+    disabled-ids={pendingAddedActionIds}
+    onconfirm={handleAddActionConfirm}
+    onclose={handleAddActionClose}
+  >
+  </c-envelope-add-action-modal>
+
+  <!-- "Select existing member" dialog for the Account Owner empty state in Review Missing
+         Items. Opened imperatively via this.refs from handleOwnerAction; it fetches all members
+         across the user's households itself and bubbles the pick back via memberselected. -->
+  <c-envelope-select-member-modal
+    lwc:ref="selectMemberModal"
+    onmemberselected={handleMemberSelected}
+    onclose={handleSelectMemberClose}
+  >
+  </c-envelope-select-member-modal>
+
+  <!-- "Create new" dialog for the Account Owner empty state in Review Missing Items. Opened
+         imperatively via this.refs from handleOwnerAction; on save it bubbles the created pending
+         member(s) back via membercreated, which the host attaches to the pending Account Owner. -->
+  <c-envelope-create-pending-member-modal
+    lwc:ref="createMemberModal"
+    variant="accountOwner"
+    member-type-options={ownerMemberTypeOptions}
+    onmembercreated={handleMembersCreated}
+    onclose={handleCreateMemberClose}
+  >
+  </c-envelope-create-pending-member-modal>
+</template>

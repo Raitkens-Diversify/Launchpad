@@ -1,0 +1,53 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-08-06 -->
+<template>
+  <div class="div-app--font-root-14">
+    <template lwc:if={showInitialSkeleton}>
+      <c-notification-center-skeleton label="Loading admin log"></c-notification-center-skeleton>
+    </template>
+
+    <template lwc:if={isAppReady}>
+      <template lwc:if={isSystemAdministrator}>
+        <div class="admin-log-tab div-app">
+          <div class="admin-log-tab__inner slds-container_center slds-container_large">
+            <header class="page-header">
+              <h1 class="page-header__title">Admin Log</h1>
+              <p class="page-header__subtitle">
+                Full delivery log with status filters, date range, and auto-refresh
+              </p>
+            </header>
+            <div class="page-header__rule" role="separator"></div>
+
+            <template lwc:if={isViewLoading}>
+              <c-notification-center-skeleton label="Loading admin log"></c-notification-center-skeleton>
+            </template>
+
+            <c-notification-center-log-admin
+              hidden={isViewLoading}
+              onnotificationcenterviewready={handleNotificationCenterViewReady}
+            ></c-notification-center-log-admin>
+          </div>
+        </div>
+      </template>
+
+      <template lwc:else>
+        <div class="admin-log-tab div-app">
+          <div class="admin-log-tab__inner slds-container_center slds-container_large">
+            <div class="div-callout div-callout--error" role="alert">
+              <span class="div-callout__icon-slot" aria-hidden="true"></span>
+              <p class="div-callout__body">
+                Only System Administrators can access the notification admin log.
+              </p>
+            </div>
+          </div>
+        </div>
+      </template>
+    </template>
+
+    <template lwc:if={stylesLoadError}>
+      <div class="div-callout div-callout--error" role="alert">
+        <span class="div-callout__icon-slot" aria-hidden="true"></span>
+        <p class="div-callout__body">{stylesLoadError}</p>
+      </div>
+    </template>
+  </div>
+</template>

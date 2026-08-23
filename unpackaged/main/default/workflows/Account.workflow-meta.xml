@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workflow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <outboundMessages>
+        <fullName>ZoomTeamChat_OwnerChanged</fullName>
+        <apiVersion>55.0</apiVersion>
+        <endpointUrl>https://applications.zoom.us/addon/v3/webhooks/salesforceBot/GGMWSVvpSNiZX8TZUfqlNA?sig=35e05245f9874b04a2a6d7aacf6a83a2e5b3ce844b0928ca587a95208732dd8d&amp;rnd=1743025392736</endpointUrl>
+        <fields>Id</fields>
+        <includeSessionId>false</includeSessionId>
+        <integrationUser>scarlson@diversify.com</integrationUser>
+        <name>ZoomTeamChat_AccountOwnerChanged</name>
+        <protected>false</protected>
+        <useDeadLetterQueue>false</useDeadLetterQueue>
+    </outboundMessages>
+</Workflow>

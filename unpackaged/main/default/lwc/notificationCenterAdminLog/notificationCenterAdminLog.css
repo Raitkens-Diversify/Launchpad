@@ -1,0 +1,15 @@
+/* Author: Hoang Long Vu To | Date: 2026-08-06 */
+
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.admin-log-tab {
+  padding: 1.5rem 1rem 2rem;
+  background: var(--div-layout-frame-bg, #ffffff);
+}
+
+.admin-log-tab__inner {
+  padding-top: 0.5rem;
+}

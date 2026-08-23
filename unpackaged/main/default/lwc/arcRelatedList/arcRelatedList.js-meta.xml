@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Arc Related List</masterLabel>
+    <description
+  >Child records of the record on the page, as a compact linked table.</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property
+        name="cardLabel"
+        type="String"
+        label="Card Heading"
+        default="Related"
+      />
+            <property
+        name="relatedObjectApiName"
+        type="String"
+        label="Related Object API Name"
+        description="Child object, e.g. Check_Deposit__c"
+      />
+            <property
+        name="parentFieldApiName"
+        type="String"
+        label="Parent Field API Name"
+        description="The child's lookup back to this page's record, e.g. Check__c"
+      />
+            <property
+        name="columns"
+        type="String"
+        label="Columns"
+        description="Ordered Label:FieldPath pairs, e.g. Deposit:Name,Amount:Amount__c. Dotted paths are allowed. The first column links to the record."
+      />
+            <property
+        name="linkFieldApiName"
+        type="String"
+        label="Link Field API Name"
+        description="Field holding the id a row opens, when that is not the row itself, e.g. ContentDocumentId. Blank uses the row's own Id."
+      />
+            <property
+        name="linkObjectApiName"
+        type="String"
+        label="Link Object API Name"
+        description="Object the link id belongs to. Blank uses the related object."
+      />
+            <property
+        name="disableRowLinks"
+        type="Boolean"
+        label="Disable Row Links"
+        default="false"
+        description="For lists whose rows have nowhere to open, such as a field history."
+      />
+            <property
+        name="recordId"
+        type="String"
+        label="Record Id"
+        description="Leave blank to take the record from the page URL."
+      />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

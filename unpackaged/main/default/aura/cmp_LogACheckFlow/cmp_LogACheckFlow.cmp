@@ -1,0 +1,7 @@
+<aura:component implements="force:lightningQuickActionWithoutHeader" access="global">
+    <aura:handler name="init" value="{!this}" action="{!c.init}" />
+    <div aura:id="flowContainer" class="slds-docked-composer__body slds-scrollable flow-container">
+        <lightning:flow aura:id="flowData" onstatuschange="{!c.handleStatusChange}" />
+        <div class="slds-p-bottom_xx-large"></div>
+    </div>
+</aura:component>

@@ -1,0 +1,4 @@
+/* The launcher is pure logic — the overlay child paints everything. */
+:host {
+    display: contents;
+}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <encodingKey>UTF-8</encodingKey>
+    <name>Task Assigned to FA Team Member</name>
+    <style>none</style>
+    <subject>A new task has been assigned to your Financial Advisor Team</subject>
+    <type>text</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

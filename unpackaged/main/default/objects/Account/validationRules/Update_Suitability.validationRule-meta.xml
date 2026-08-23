@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Update_Suitability</fullName>
+    <active>false</active>
+    <description>Suitability Cannot be changed on the record.</description>
+    <errorConditionFormula>AND(
+  NOT(ISNEW()),
+  Submitted__c = true,
+  NOT($Permission.Senior_Ops),
+  OR(
+    ISCHANGED(Time_Horizon__c),
+    ISCHANGED(Risk_Tolerance__c),
+    ISCHANGED(Liquidity_Needs__c),
+    ISCHANGED(Investment_Objectives__c),
+    ISCHANGED(Investment_Objective_Ranked__c),
+    ISCHANGED(Authority__c),
+    ISCHANGED(Tiered_IMA_Advisory_Fee__c),
+    ISCHANGED(Advisory_Fee__c),
+    ISCHANGED(Fee_Disbursement__c),
+    ISCHANGED(Fee_Disbursement_Account__c),
+    ISCHANGED(Fee_Disbursement_Wizard_Account__c),
+    ISCHANGED(Approximate_Net_Worth__c),
+    ISCHANGED(Approximate_Liquid_Net_Worth__c),
+    ISCHANGED(Approximate_Annual_Income_All_Sources__c),
+    ISCHANGED(Approximate_Highest_Tax_Bracket__c)
+  ),
+  NOT(ISCHANGED(Flow_Update__c))
+)</errorConditionFormula>
+    <errorMessage>You cannot update Suitability information from the record.  Please submit an &quot;Update IMA&quot; request so that paperwork can be generated for the Client to sign.</errorMessage>
+</ValidationRule>

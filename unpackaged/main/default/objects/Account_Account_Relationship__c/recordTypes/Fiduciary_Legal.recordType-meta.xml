@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RecordType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Fiduciary_Legal</fullName>
+    <active>true</active>
+    <label>Fiduciary / Regulatory</label>
+    <picklistValues>
+        <picklist>Association_Type__c</picklist>
+        <values>
+            <fullName>Member</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Peer</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Role__c</picklist>
+        <values>
+            <fullName>529 Beneficiary</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Account Beneficiary</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Authorized Person</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Beneficial Owner</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Control Person</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Custodian %28Minor%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Executor %2F Personal Representative</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Grantor</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Guardian %2F Conservator</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Plan Administrator</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Plan Participant</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Power of Attorney</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Trust Beneficiary</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Trusted Contact</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Trustee</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Roles__c</picklist>
+        <values>
+            <fullName>529 Beneficiary</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Account Beneficiary</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Authorized Person</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Beneficial Owner</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Control Person</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Custodian %28Minor%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Executor %2F Personal Representative</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Grantor</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Guardian %2F Conservator</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Plan Administrator</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Plan Participant</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Power of Attorney</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Trust Beneficiary</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Trusted Contact</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Trustee</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+</RecordType>

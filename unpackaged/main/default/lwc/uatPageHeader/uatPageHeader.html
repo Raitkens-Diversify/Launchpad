@@ -1,0 +1,26 @@
+<template>
+    <header class="uph">
+        <div class="uph__lead">
+            <template if:true={hasIcon}>
+                <span class="uph__icon">
+                    <lightning-icon icon-name={iconName} size="small" alternative-text=""></lightning-icon>
+                </span>
+            </template>
+            <div class="uph__text">
+                <div class="uph__title-row">
+                    <h1 class="uph__title">{heading}</h1>
+                    <template if:true={hasCount}>
+                        <span class="uph__count">{count}</span>
+                    </template>
+                </div>
+                <template if:true={hasSubtitle}>
+                    <p class="uph__subtitle">{subtitle}</p>
+                </template>
+            </div>
+        </div>
+        <template if:true={hasAction}>
+            <lightning-button class="uph__action" variant="brand" label={actionLabel}
+                              onclick={handleAction}></lightning-button>
+        </template>
+    </header>
+</template>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>VariableAnnuitySellServiceNone__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>WHERE Type__c = &#39;Variable Annuity&#39; AND Status__c = &#39;Sell/Service&#39;</description>
+    <label>VariableAnnuitySellServiceNone</label>
+    <lookupFilter>
+        <active>true</active>
+        <filterItems>
+            <field>Product__c.Status__c</field>
+            <operation>equals</operation>
+            <value>Sell/Service</value>
+        </filterItems>
+        <filterItems>
+            <field>Product__c.Asset_Category__c</field>
+            <operation>equals</operation>
+            <value>Variable Annuity</value>
+        </filterItems>
+        <isOptional>true</isOptional>
+    </lookupFilter>
+    <referenceTo>Product__c</referenceTo>
+    <relationshipLabel>Product Filter Lookups (VariableAnnuitySellServiceNone)</relationshipLabel>
+    <relationshipName>Product_Filter_Lookups0VOS</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

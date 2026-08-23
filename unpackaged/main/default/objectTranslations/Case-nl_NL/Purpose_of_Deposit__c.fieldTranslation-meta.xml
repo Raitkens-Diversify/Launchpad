@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Purpose of Deposit --></label>
+        <name>Purpose_of_Deposit__c</name>
+        <picklistValues>
+            <masterLabel>Contribution</masterLabel>
+            <translation><!-- Contribution --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Other</masterLabel>
+            <translation><!-- Other --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Rollover</masterLabel>
+            <translation><!-- Rollover --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Specific Investment</masterLabel>
+            <translation><!-- Specific Investment --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

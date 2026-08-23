@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>User_Article_Key__c</fullName>
+    <caseSensitive>false</caseSensitive>
+    <description>{18-char User Id}_{18-char Knowledge__ka Id}. Unique key that makes the per-user-per-article upsert race-safe.</description>
+    <externalId>true</externalId>
+    <label>User Article Key</label>
+    <length>40</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>true</unique>
+</CustomField>

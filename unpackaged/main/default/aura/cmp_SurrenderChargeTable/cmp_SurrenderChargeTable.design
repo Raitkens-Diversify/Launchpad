@@ -1,0 +1,14 @@
+<design:component>
+	<design:attribute name="Year1Percent" label="Year 1 Percent" description="" />
+    <design:attribute name="Year2Percent" label="Year 2 Percent" description="" />
+    <design:attribute name="Year3Percent" label="Year 3 Percent" description="" />
+    <design:attribute name="Year4Percent" label="Year 4 Percent" description="" />
+    <design:attribute name="Year5Percent" label="Year 5 Percent" description="" />
+    <design:attribute name="Year6Percent" label="Year 6 Percent" description="" />
+    <design:attribute name="Year7Percent" label="Year 7 Percent" description="" />
+    <design:attribute name="Year8Percent" label="Year 8 Percent" description="" />
+    <design:attribute name="Year9Percent" label="Year 9 Percent" description="" />
+    <design:attribute name="Year10Percent" label="Year 10 Percent" description="" />
+    <design:attribute name="Year11Percent" label="Year 11 Percent" description="" />
+    <design:attribute name="Year12Percent" label="Year 12 Percent" description="" />
+</design:component>

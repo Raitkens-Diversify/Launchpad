@@ -1,0 +1,152 @@
+<template>
+    <nav class={navClass}>
+        <!-- Header: section title + collapse toggle -->
+        <div class="outline__header">
+            <div class="outline__heading-row">
+                <span class="outline__heading-title">Household Outline</span>
+                <lightning-button-icon
+                    class="outline__toggle"
+                    icon-name="utility:toggle_panel_left"
+                    variant="container"
+                    alternative-text={toggleLabel}
+                    title={toggleLabel}
+                    onclick={handleToggle}>
+                </lightning-button-icon>
+            </div>
+        </div>
+
+        <template lwc:if={showSearch}>
+            <div class="outline__search">
+                <lightning-input
+                    class="outline__search-input"
+                    type="search"
+                    variant="label-hidden"
+                    label="Search household"
+                    placeholder="Search household..."
+                    value={searchTerm}
+                    onchange={handleSearchChange}>
+                </lightning-input>
+            </div>
+        </template>
+
+        <!-- Groups: scrollable list of outline sections, each with an add control -->
+        <ul class="outline__groups">
+            <template for:each={groups} for:item="group">
+                <li key={group.id} class={group.groupClass}>
+                    <div class="outline__group-row">
+                        <!-- With items the heading is an accordion toggle (label + count + caret);
+                             empty groups (and while searching) show a plain, non-interactive label. -->
+                        <template lwc:if={group.showCaret}>
+                            <button
+                                class="outline__group-toggle"
+                                type="button"
+                                aria-expanded={group.ariaExpanded}
+                                data-group={group.id}
+                                title={group.toggleLabel}
+                                onclick={handleGroupToggle}>
+                                <span class="outline__group-label">{group.labelWithCount}</span>
+                                <lightning-icon
+                                    class="outline__group-caret"
+                                    icon-name={group.caretIcon}
+                                    size="x-small"
+                                    alternative-text={group.toggleLabel}>
+                                </lightning-icon>
+                            </button>
+                        </template>
+                        <template lwc:else>
+                            <span class="outline__group-label">{group.labelWithCount}</span>
+                        </template>
+                        <!-- The heading-row "+" is hidden while this group's inline input is open. -->
+                        <template lwc:if={group.showAddControl}>
+                            <template lwc:if={group.menuItems}>
+                                <lightning-button-menu
+                                    class="outline__add"
+                                    icon-name="utility:add"
+                                    variant="container"
+                                    icon-size="small"
+                                    menu-alignment="auto"
+                                    data-group={group.id}
+                                    alternative-text={group.addLabel}
+                                    tooltip={group.addLabel}
+                                    onselect={handleAddSelect}>
+                                    <template for:each={group.menuItems} for:item="item">
+                                        <lightning-menu-item
+                                            key={item.value}
+                                            value={item.value}
+                                            label={item.label}>
+                                        </lightning-menu-item>
+                                    </template>
+                                </lightning-button-menu>
+                            </template>
+                            <template lwc:else>
+                                <lightning-button-icon
+                                    class="outline__add"
+                                    icon-name="utility:add"
+                                    variant="container"
+                                    size="small"
+                                    data-group={group.id}
+                                    tooltip={group.addLabel}
+                                    onclick={handleAddClick}>
+                                </lightning-button-icon>
+                            </template>
+                        </template>
+                    </div>
+
+                    <!-- Inline add editor: nickname input + cancel, directly under the group title. -->
+                    <template lwc:if={group.isAdding}>
+                        <div class="outline__add-row">
+                            <lightning-input
+                                class="outline__add-input"
+                                type="text"
+                                variant="label-hidden"
+                                placeholder={group.addPlaceholder}
+                                disabled={isCommitting}
+                                onkeyup={handleAddKeyup}>
+                            </lightning-input>
+                            <template lwc:if={isCommitting}>
+                                <div class="outline__add-spinner">
+                                    <lightning-spinner
+                                        size="small"
+                                        variant="brand"
+                                        alternative-text="Adding">
+                                    </lightning-spinner>
+                                </div>
+                            </template>
+                            <template lwc:else>
+                                <lightning-button-icon
+                                    class="outline__add-cancel"
+                                    icon-name="utility:close"
+                                    variant="bare"
+                                    size="small"
+                                    alternative-text="Cancel"
+                                    title="Cancel"
+                                    onclick={handleAddCancel}>
+                                </lightning-button-icon>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- Existing entities for this group (members / accounts / DPIs / service agreements). -->
+                    <template lwc:if={group.showItems}>
+                        <div class="outline__items">
+                            <template for:each={group.items} for:item="item">
+                                <c-household-outline-item
+                                    key={item.id}
+                                    item={item}
+                                    remove-label={group.removeLabel}
+                                    data-group={group.id}
+                                    onitemmenu={handleItemMenu}
+                                    onitemadd={handleItemAdd}>
+                                </c-household-outline-item>
+                            </template>
+                        </div>
+                    </template>
+
+                    <template lwc:if={group.showNoResults}>
+                        <div class="outline__no-results">No results</div>
+                    </template>
+                </li>
+            </template>
+        </ul>
+    </nav>
+</template>

@@ -1,0 +1,65 @@
+:host {
+    display: block;
+}
+
+.add-cta {
+    display: flex;
+    gap: var(--slds-g-spacing-4, 16px);
+    align-items: center;
+}
+
+/* Full-width add card: leading icon + label + trailing plus. A plain button is used
+   because lightning-button can't express the icon-left / label / icon-right layout. */
+.add-cta__btn {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-3, 12px);
+    padding: var(--slds-g-spacing-4, 16px) 20px;
+    background: var(--slds-g-color-surface-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--slds-g-radius-border-2, 8px);
+    cursor: pointer;
+    text-align: left;
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+}
+
+.add-cta__btn:hover {
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+
+.add-cta__btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--slds-g-color-surface-container-1, #ffffff),
+        0 0 0 4px var(--slds-g-color-on-surface-4, #1a76bb);
+}
+
+.add-cta__label {
+    flex: 1;
+    min-width: 0;
+    /* 16px is the DS base body-text size (our --slds-g-font-scale-2 is 14px); #030712
+       is the DS base/foreground — both have no matching token, so kept as literals. */
+    font-size: 16px;
+    line-height: 22px;
+    font-weight: var(--slds-g-font-weight-4, 400);
+    color: #030712;
+}
+
+.add-cta__icon_member {
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-success-base-50, #16a34a);
+}
+
+.add-cta__icon_isa {
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-accent-1, #0f406f);
+}
+
+.add-cta__plus {
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-on-surface-2, #374151);
+}
+
+@media (max-width: 767px) {
+    .add-cta {
+        flex-wrap: wrap;
+    }
+}

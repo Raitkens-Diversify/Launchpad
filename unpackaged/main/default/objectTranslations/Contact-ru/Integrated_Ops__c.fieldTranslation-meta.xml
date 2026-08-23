@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Integrated Ops --></label>
+        <name>Integrated_Ops__c</name>
+        <picklistValues>
+            <masterLabel>Active User</masterLabel>
+            <translation><!-- Active User --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Introduced</masterLabel>
+            <translation><!-- Introduced --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Light User</masterLabel>
+            <translation><!-- Light User --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Not Interested</masterLabel>
+            <translation><!-- Not Interested --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

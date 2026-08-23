@@ -1,0 +1,85 @@
+/* --slds-g-* declared locally, not inherited: platform-injected SLDS2
+   styling hooks beat values inherited from an ancestor's :host
+   (see nexsHome.css / dsHero.css). */
+:host {
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-accent-3: #071c31;
+    --slds-g-color-on-accent-1: #ffffff;
+}
+
+.ueu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.ueu__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ueu__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.ueu__item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    width: 128px;
+}
+.ueu__thumb {
+    width: 128px;
+    height: 84px;
+    object-fit: cover;
+    border-radius: var(--ds-radius-sm, 6px);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+.ueu__doc {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 128px;
+    height: 84px;
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-sm, 6px);
+    text-decoration: none;
+}
+.ueu__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.25rem;
+}
+.ueu__title {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-2, #374151);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.ueu__size {
+    flex: none;
+    font-size: 0.6875rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ueu__empty {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}

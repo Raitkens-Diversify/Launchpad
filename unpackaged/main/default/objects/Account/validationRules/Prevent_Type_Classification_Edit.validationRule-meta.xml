@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Prevent_Type_Classification_Edit</fullName>
+    <active>true</active>
+    <description>Prevents non-admins from editing Household, Type or Classification on Business, Retirement Plan, Trust, and Person Account records when Type is Active Client or Former Client.</description>
+    <errorConditionFormula>AND(
+  OR(
+    RecordType.DeveloperName = &quot;Business&quot;,
+    RecordType.DeveloperName = &quot;Retirement_Plan&quot;,
+    RecordType.DeveloperName = &quot;Trust&quot;,
+    RecordType.DeveloperName = &quot;PersonAccount&quot;
+  ),
+  OR(
+    ISPICKVAL(PRIORVALUE(Type), &quot;Former Client&quot;),
+    ISPICKVAL(PRIORVALUE(Type), &quot;Active Client&quot;)
+  ),
+  OR(
+    ISCHANGED(Type),
+    ISCHANGED(Classification__c),
+    ISCHANGED(Household__c)
+  ),
+  $Profile.Name &lt;&gt; &quot;System Administrator&quot;
+)</errorConditionFormula>
+    <errorMessage>To request an update to this field please contact the Ops team or submit an envelope for the change request.</errorMessage>
+</ValidationRule>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Other Experience --></label>
+        <name>Other_Experience__c</name>
+        <picklistValues>
+            <masterLabel>Experienced</masterLabel>
+            <translation><!-- Experienced --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Limited</masterLabel>
+            <translation><!-- Limited --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Moderate</masterLabel>
+            <translation><!-- Moderate --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>No Experience</masterLabel>
+            <translation><!-- No Experience --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

@@ -1,0 +1,8 @@
+:host {
+    display: block;
+    background: var(--slds-g-color-surface-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--div-control-radius, 0.5rem);
+    /* Consumer-overridable padding hook (real default; not a design token). */
+    padding: var(--card-padding, var(--slds-g-spacing-5, 24px));
+}

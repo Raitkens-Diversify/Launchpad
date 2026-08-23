@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Client_Needs_Driving_Rollover__c</fullName>
+    <inlineHelpText>Select all that apply.</inlineHelpText>
+    <label>Client Needs Driving Rollover?</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>MultiselectPicklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Does not want assets in former employers plan</fullName>
+                <default>false</default>
+                <label>Does not want assets in former employers plan</label>
+            </value>
+            <value>
+                <fullName>Performance of Investment Options</fullName>
+                <default>false</default>
+                <label>Performance of Investment Options</label>
+            </value>
+            <value>
+                <fullName>Desires lifetime income</fullName>
+                <default>false</default>
+                <label>Desires lifetime income</label>
+            </value>
+            <value>
+                <fullName>Desires more direct control over assets</fullName>
+                <default>false</default>
+                <label>Desires more direct control over assets</label>
+            </value>
+            <value>
+                <fullName>Desires professional advice/management</fullName>
+                <default>false</default>
+                <label>Desires professional advice/management</label>
+            </value>
+            <value>
+                <fullName>Lack of Planning Service</fullName>
+                <default>false</default>
+                <label>Lack of Planning Service</label>
+            </value>
+            <value>
+                <fullName>Lack of Investment Options</fullName>
+                <default>false</default>
+                <label>Lack of Investment Options</label>
+            </value>
+            <value>
+                <fullName>Consolidation of Assets</fullName>
+                <default>false</default>
+                <label>Consolidation of Assets</label>
+            </value>
+            <value>
+                <fullName>Other</fullName>
+                <default>false</default>
+                <label>Other</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+    <visibleLines>4</visibleLines>
+</CustomField>

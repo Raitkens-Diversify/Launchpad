@@ -1,0 +1,14 @@
+<design:component>
+    <design:attribute name="sObjectName" label="Name" description="API name of the Object that the records will be." />
+    <design:attribute name="recordTypeName" label="Record Type" description="All records shown/created will be of this type" />
+    <design:attribute name="MaximumNumberofRecords" label="Maximum Number of Records" description="If there is a maximum number of records, put that value here." />
+    <design:attribute name="LinestoShow" label="Lines to Show" description="Number of lines to show initially." />
+    <design:attribute name="parentRecordId" label="Parent/Flow Interview Id" description="Id to relate the child objects to." />
+    <design:attribute name="parentLookupFieldName" label="Parent/ Flow Interview Field Name" description="API Name of the parent lookup." />
+    <design:attribute name="sObjectFields" label="Fields" description="API names of Fields separated by commas." />
+    <design:attribute name="varhouseholdId" label="Household Id" description="Household Record Id." />
+    <design:attribute name="BondLadder" label="Bond Ladder" description="To pass back a boolean value." />
+    <design:attribute name="ShortTermCashManagement" label="ShortTermCashManagement" description="To pass back a boolean value."/>
+    <design:attribute name="filter" label="filter" description="Where condition for record filter"/>
+
+</design:component>

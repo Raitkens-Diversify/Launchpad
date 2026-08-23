@@ -1,0 +1,114 @@
+:host {
+    display: block;
+    /* Self-declared token block so the band renders correctly standalone. */
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-font-family-base: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    --ds-medium-blue: #1a76bb;
+    --ds-lightest-blue: #e2f8ff;
+    --ds-font-heading: "Libre Baskerville", Georgia, serif;
+    --slds-g-spacing-2: 0.5rem;
+    --slds-g-spacing-5: 24px;
+    --slds-g-spacing-10: 48px;
+    --ds-space-lg: 16px;
+    --ds-space-2xl: 32px;
+    --ds-space-3xl: 48px;
+    --ds-radius-lg: 10px;
+    --nexs-content-wide: 1440px;
+}
+
+.rc-help {
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    padding: var(--slds-g-spacing-10, 48px) var(--slds-g-spacing-5, 24px)
+        calc(var(--ds-space-3xl, 48px) + var(--ds-space-lg, 16px));
+    text-align: center;
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+}
+
+.rc-help__title {
+    margin: 0;
+    font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+    font-size: 1.75rem;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.rc-help__subtitle {
+    margin: var(--slds-g-spacing-2, 8px) auto var(--ds-space-2xl, 32px);
+    max-width: 640px;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    font-size: 0.9375rem;
+}
+
+.rc-help__cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--slds-g-spacing-5, 24px);
+    max-width: calc(var(--nexs-content-wide, 1440px) - 48px);
+    margin: 0 auto;
+}
+
+.rc-help__card {
+    flex: 1 1 480px;
+    max-width: 620px;
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-5, 24px);
+    padding: var(--ds-space-2xl, 32px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+    text-decoration: none;
+    text-align: left;
+    transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.rc-help__card:hover {
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+    box-shadow: var(--ds-shadow-hover, 0 4px 14px rgba(15, 64, 111, 0.08));
+}
+
+.rc-help__card-icon {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--ds-lightest-blue, #e2f8ff);
+}
+
+.rc-help__card-icon lightning-icon {
+    --slds-c-icon-color-foreground-default: var(--ds-medium-blue, #1a76bb);
+}
+
+.rc-help__card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.rc-help__card-title {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--ds-medium-blue, #1a76bb);
+}
+
+.rc-help__card-text {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+@media (max-width: 768px) {
+    .rc-help__card {
+        flex-basis: 100%;
+    }
+}

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Cancelled at Request of the Finance Company</fullName>
+        <default>false</default>
+        <label>Cancelled at Request of the Finance Company</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Cancelled by Underwriter or Plan Administrator</fullName>
+        <default>false</default>
+        <label>Cancelled by Underwriter or Plan Administrator</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Corporate Officer NonElection</fullName>
+        <default>false</default>
+        <label>Corporate Officer NonElection</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Court Release</fullName>
+        <default>false</default>
+        <label>Court Release</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Coverage Placed Elsewhere</fullName>
+        <default>false</default>
+        <label>Coverage Placed Elsewhere</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Duplicate Coverage</fullName>
+        <default>false</default>
+        <label>Duplicate Coverage</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Failure to Comply with Terms and Conditions (ex. Audit Failure)</fullName>
+        <default>false</default>
+        <label>Failure to Comply with Terms and Conditions (ex. Audit Failure)</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Failure to Pay Deductible</fullName>
+        <default>false</default>
+        <label>Failure to Pay Deductible</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Insured&#39;s Request</fullName>
+        <default>false</default>
+        <label>Insured&#39;s Request</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Misrepresentation of Information on Application</fullName>
+        <default>false</default>
+        <label>Misrepresentation of Information on Application</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Non-Payment</fullName>
+        <default>false</default>
+        <label>Non-Payment</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Not Taken</fullName>
+        <default>false</default>
+        <label>Not Taken</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Other</fullName>
+        <default>false</default>
+        <label>Other</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Revocation of Voluntary Market Acceptance</fullName>
+        <default>false</default>
+        <label>Revocation of Voluntary Market Acceptance</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Rewritten</fullName>
+        <default>false</default>
+        <label>Rewritten</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Substantial Change in Risk</fullName>
+        <default>false</default>
+        <label>Substantial Change in Risk</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Underwriting Reasons</fullName>
+        <default>false</default>
+        <label>Underwriting Reasons</label>
+    </standardValue>
+</StandardValueSet>

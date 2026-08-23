@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workflow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <alerts>
+        <fullName>Case_Status_Updated</fullName>
+        <description>Case Status Updated</description>
+        <protected>false</protected>
+        <recipients>
+            <field>ContactId</field>
+            <type>contactLookup</type>
+        </recipients>
+        <senderType>CurrentUser</senderType>
+        <template>unfiled$public/SUPPORTCaseescalationnotificationSAMPLE</template>
+    </alerts>
+    <fieldUpdates>
+        <fullName>ChangePriorityToHigh</fullName>
+        <field>Priority</field>
+        <literalValue>High</literalValue>
+        <name>Changes the case priority to high.</name>
+        <notifyAssignee>false</notifyAssignee>
+        <operation>Literal</operation>
+        <protected>false</protected>
+        <reevaluateOnChange>false</reevaluateOnChange>
+    </fieldUpdates>
+    <outboundMessages>
+        <fullName>ZoomTeamChat_OwnerChanged</fullName>
+        <apiVersion>55.0</apiVersion>
+        <endpointUrl>https://applications.zoom.us/addon/v3/webhooks/salesforceBot/yJHHUR8QQMOAxFp4qSUZrA?sig=35341a5c3f364e361eb1a6ba57d7879b98a6587aec99a9356825ef3b689f72e2&amp;rnd=1743025405214</endpointUrl>
+        <fields>Id</fields>
+        <includeSessionId>false</includeSessionId>
+        <integrationUser>scarlson@diversify.com</integrationUser>
+        <name>ZoomTeamChat_CaseOwnerChanged</name>
+        <protected>false</protected>
+        <useDeadLetterQueue>false</useDeadLetterQueue>
+    </outboundMessages>
+    <outboundMessages>
+        <fullName>ZoomTeamChat_PriorityChanged</fullName>
+        <apiVersion>55.0</apiVersion>
+        <endpointUrl>https://applications.zoom.us/addon/v3/webhooks/salesforceBot/P62b97KPTXu2l7vTH3mSjQ?sig=c78941c1864b8d3e49dcf987cd36d094090831abf0e4e70a6bcaf99488061630&amp;rnd=1743025408448</endpointUrl>
+        <fields>Id</fields>
+        <includeSessionId>false</includeSessionId>
+        <integrationUser>scarlson@diversify.com</integrationUser>
+        <name>ZoomTeamChat_CasePriorityChanged</name>
+        <protected>false</protected>
+        <useDeadLetterQueue>false</useDeadLetterQueue>
+    </outboundMessages>
+    <outboundMessages>
+        <fullName>ZoomTeamChat_StatusChanged</fullName>
+        <apiVersion>55.0</apiVersion>
+        <endpointUrl>https://applications.zoom.us/addon/v3/webhooks/salesforceBot/Znew7XgfT9m23f3_PVTDeg?sig=40c1147ee13d66b55e53d93d6e962cf4381ff2ba38b2b6d89d3703692652b219&amp;rnd=1743025407030</endpointUrl>
+        <fields>Id</fields>
+        <includeSessionId>false</includeSessionId>
+        <integrationUser>scarlson@diversify.com</integrationUser>
+        <name>ZoomTeamChat_CaseStatusChanged</name>
+        <protected>false</protected>
+        <useDeadLetterQueue>false</useDeadLetterQueue>
+    </outboundMessages>
+</Workflow>

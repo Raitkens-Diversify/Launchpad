@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Notification_Email_Digest__c</fullName>
+    <defaultValue>true</defaultValue>
+    <description>Whether this user receives digest email notifications.</description>
+    <label>Notification Email Digest</label>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Checkbox</type>
+</CustomField>

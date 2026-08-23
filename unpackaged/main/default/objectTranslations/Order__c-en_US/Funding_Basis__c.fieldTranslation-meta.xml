@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <help><!-- Dollar = fixed amount that does not float with account value. Percent = share of the remainder after fixed-dollar sleeves. --></help>
+        <label><!-- Funding Basis --></label>
+        <name>Funding_Basis__c</name>
+        <picklistValues>
+            <masterLabel>Dollar</masterLabel>
+            <translation><!-- Dollar --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Percent</masterLabel>
+            <translation><!-- Percent --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

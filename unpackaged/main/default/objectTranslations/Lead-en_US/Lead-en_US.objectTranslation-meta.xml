@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Lead and Referral</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Leads and Referrals</value>
+    </caseValues>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Referral_Form --></label>
+        <name>FSC_Referral_Form</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBLLabel_Field_Set_Referrals_Expressed_Interest --></label>
+        <name>FSC_Referrals_Expressed_Interest</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Referrals_Made --></label>
+        <name>FSC_Referrals_Made</name>
+    </fieldSets>
+    <fieldSets>
+        <label><!-- LBL.Label_Field_Set_Referrals_Made --></label>
+        <name>FSC_Referrals_Made_Community</name>
+    </fieldSets>
+    <startsWith>Consonant</startsWith>
+    <webLinks>
+        <label><!-- GoogleMaps --></label>
+        <name>GoogleMaps</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- GoogleNews --></label>
+        <name>GoogleNews</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- GoogleSearch --></label>
+        <name>GoogleSearch</name>
+    </webLinks>
+</CustomObjectTranslation>

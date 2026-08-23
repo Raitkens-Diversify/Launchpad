@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Object --></label>
+        <name>Object__c</name>
+        <picklistValues>
+            <masterLabel>Account</masterLabel>
+            <translation><!-- Account --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Advertising_Item__c</masterLabel>
+            <translation><!-- Advertising_Item__c --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Case</masterLabel>
+            <translation><!-- Case --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>FinServ__FinancialAccount__c</masterLabel>
+            <translation><!-- FinServ__FinancialAccount__c --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Financial_Account_Related_Product__c</masterLabel>
+            <translation><!-- Financial_Account_Related_Product__c --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Financial_Account__c</masterLabel>
+            <translation><!-- Financial_Account__c --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Order_Ticket__c</masterLabel>
+            <translation><!-- Order_Ticket__c --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Product_Filter_Lookup__c</masterLabel>
+            <translation><!-- Product_Filter_Lookup__c --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Service__c</masterLabel>
+            <translation><!-- Service__c --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Standing_Letter_of_Authorization__c</masterLabel>
+            <translation><!-- Standing_Letter_of_Authorization__c --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

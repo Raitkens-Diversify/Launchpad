@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Social_Media_Profile__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <label>Social Media Profile</label>
+    <lookupFilter>
+        <active>true</active>
+        <filterItems>
+            <field>Advertising_Item__c.Advertising_Type__c</field>
+            <operation>equals</operation>
+            <value>Social Media Profile</value>
+        </filterItems>
+        <isOptional>false</isOptional>
+    </lookupFilter>
+    <referenceTo>Advertising_Item__c</referenceTo>
+    <relationshipLabel>Advertising Items (Social Media Profile)</relationshipLabel>
+    <relationshipName>Social_Media_Profile_Advertising_Item</relationshipName>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

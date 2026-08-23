@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Business Tax Classification --></label>
+        <name>Business_Tax_Classification__c</name>
+        <picklistValues>
+            <masterLabel>Corp (Taxed as C)</masterLabel>
+            <translation><!-- Corp (Taxed as C) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Corp (Taxed as Partnership)</masterLabel>
+            <translation><!-- Corp (Taxed as Partnership) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Corp (Taxed as S)</masterLabel>
+            <translation><!-- Corp (Taxed as S) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>LLC (Taxed as C)</masterLabel>
+            <translation><!-- LLC (Taxed as C) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>LLC (Taxed as Disregarded)</masterLabel>
+            <translation><!-- LLC (Taxed as Disregarded) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>LLC (Taxed as Partnership)</masterLabel>
+            <translation><!-- LLC (Taxed as Partnership) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>LLC (Taxed as S)</masterLabel>
+            <translation><!-- LLC (Taxed as S) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Partnership (Taxed as C)</masterLabel>
+            <translation><!-- Partnership (Taxed as C) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Partnership (Taxed as S)</masterLabel>
+            <translation><!-- Partnership (Taxed as S) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Patnership (Taxed as Partnership)</masterLabel>
+            <translation><!-- Patnership (Taxed as Partnership) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Sole Proprietorship</masterLabel>
+            <translation><!-- Sole Proprietorship --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Unincorporated</masterLabel>
+            <translation><!-- Unincorporated --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

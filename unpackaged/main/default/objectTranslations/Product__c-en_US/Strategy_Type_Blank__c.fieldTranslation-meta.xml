@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Strategy Type Blank --></label>
+        <name>Strategy_Type_Blank__c</name>
+    </CustomFieldTranslation>

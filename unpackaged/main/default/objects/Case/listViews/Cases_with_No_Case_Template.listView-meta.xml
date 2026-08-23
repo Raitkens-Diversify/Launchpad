@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Cases_with_No_Case_Template</fullName>
+    <columns>CASES.CASE_NUMBER</columns>
+    <columns>NAME</columns>
+    <columns>CASES.SUBJECT</columns>
+    <columns>CASES.STATUS</columns>
+    <columns>CASES.PRIORITY</columns>
+    <columns>OWNER_NAME</columns>
+    <columns>CASES.CREATED_DATE_DATE_ONLY</columns>
+    <columns>FinServ__FinancialAccount__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Case_Template__c</field>
+        <operation>equals</operation>
+    </filters>
+    <filters>
+        <field>CASES.STATUS</field>
+        <operation>notEqual</operation>
+        <value>Closed,Approved</value>
+    </filters>
+    <filters>
+        <field>Record_Type_Name__c</field>
+        <operation>notEqual</operation>
+        <value>Advertising Review</value>
+    </filters>
+    <filters>
+        <field>Record_Type_Name__c</field>
+        <operation>notEqual</operation>
+        <value>Ad Hoc</value>
+    </filters>
+    <filters>
+        <field>Record_Type_Name__c</field>
+        <operation>notEqual</operation>
+        <value>Email to Case</value>
+    </filters>
+    <filters>
+        <field>CASES.SUBJECT</field>
+        <operation>notEqual</operation>
+        <value>Transition - Maestro Loader</value>
+    </filters>
+    <label>Cases with No Case Template</label>
+    <sharedTo>
+        <group>Operations</group>
+    </sharedTo>
+</ListView>

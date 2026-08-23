@@ -1,0 +1,49 @@
+/* --slds-g-* declared locally, not inherited: platform-injected SLDS2
+   styling hooks beat values inherited from an ancestor's :host
+   (see nexsHome.css / dsHero.css). */
+:host {
+    --slds-g-color-surface-container-2: #f3f4f6;
+}
+
+.ds-skel-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-sm, 8px);
+}
+
+.ds-skel {
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    border-radius: var(--ds-radius-md, 8px);
+    animation: ds-skel-pulse 1.4s ease-in-out infinite;
+}
+
+.ds-skel--card {
+    height: 96px;
+    border-radius: var(--ds-radius-lg, 10px);
+}
+
+.ds-skel--row {
+    height: 48px;
+}
+
+.ds-skel--text {
+    height: 14px;
+    max-width: 60%;
+}
+
+@keyframes ds-skel-pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ds-skel {
+        animation: none;
+        opacity: 0.7;
+    }
+}

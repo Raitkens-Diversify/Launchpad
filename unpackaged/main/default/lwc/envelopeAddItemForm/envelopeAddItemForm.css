@@ -1,0 +1,48 @@
+.add-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-4, 16px);
+}
+
+.add-form__header {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 8px);
+}
+
+.add-form__title {
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+    /* 16px is the DS base body-text size (our --slds-g-font-scale-2 is 14px). */
+    font-size: 16px;
+    line-height: 22px;
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.add-form__icon_member {
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-success-base-50, #16a34a);
+}
+
+.add-form__icon_isa {
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-accent-1, #0f406f);
+}
+
+/* Nickname + type + actions on one row; wraps when the content area is narrow. */
+.add-form__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--slds-g-spacing-4, 16px);
+}
+
+.add-form__field {
+    flex: 1 1 240px;
+    min-width: 0;
+}
+
+.add-form__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-4, 16px);
+    flex: none;
+}

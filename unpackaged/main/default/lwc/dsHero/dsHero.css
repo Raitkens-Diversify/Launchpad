@@ -1,0 +1,61 @@
+/* Self-declared --slds-g-* values (same as nexsLanding/nexsArticleBrowser).
+   Declared locally, NOT inherited: both LWR sites and the core Lightning
+   theme inject real SLDS2 styling hooks under these names into each
+   component scope, and injected values beat values inherited from an
+   ancestor's :host (see nexsHome.css) — relying on inheritance is exactly
+   what made the UAT hero render the platform's lighter theme blue instead
+   of the brand navy. */
+:host {
+    display: block;
+
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-3: #071c31;
+    --slds-g-color-on-accent-1: #ffffff;
+    --slds-g-font-scale-2: 0.875rem;
+    --slds-g-spacing-2: 0.5rem;
+    --slds-g-spacing-5: 24px;
+}
+
+/* Values are nexsHome's .home-hero, verbatim. */
+.ds-hero {
+    background: linear-gradient(
+        135deg,
+        var(--slds-g-color-accent-3, #071c31),
+        var(--slds-g-color-accent-1, #0f406f)
+    );
+    padding: var(--ds-space-3xl, 48px) var(--slds-g-spacing-5, 24px)
+        calc(var(--ds-space-3xl, 48px) + var(--ds-space-lg, 16px));
+}
+
+/* Content column: --nexs-content-max's literal value. Not consumed by
+   token name — the name is scoped to the Help Center's own roots, and the
+   whole point of this component is rendering identically everywhere. */
+.ds-hero__inner {
+    max-width: 1040px;
+    margin: 0 auto;
+}
+
+.ds-hero__eyebrow {
+    margin: 0 0 var(--slds-g-spacing-2, 8px);
+    font-size: var(--slds-g-font-scale-2, 0.875rem);
+    font-weight: 600;
+    color: var(--ds-light-blue, #14bef0);
+}
+
+.ds-hero__headline {
+    margin: 0 0 var(--ds-space-2xl, 32px);
+    font-family: var(--ds-font-heading, 'Libre Baskerville', Georgia, serif);
+    font-size: 2.5rem;
+    line-height: 1.2;
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+}
+
+/* nexsHome's own responsive step-down. */
+@media (max-width: 768px) {
+    .ds-hero {
+        padding: var(--ds-space-2xl, 32px) var(--slds-g-spacing-5, 24px);
+    }
+    .ds-hero__headline {
+        font-size: 2rem;
+    }
+}

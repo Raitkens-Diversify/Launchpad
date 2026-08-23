@@ -1,0 +1,15 @@
+:host {
+    display: block;
+
+    /* Self-declared --slds-g-* block (canonical values, ui-standards §1):
+       injected SLDS2 hooks beat :host inheritance, so consumers of these
+       names declare their own. Only the tokens this sheet consumes. */
+    --slds-g-color-on-surface-3: #09243f;
+}
+
+.ucs__menu {
+    /* Bound so a long cycle name can't crowd the brand header; the label
+       text itself is truncated in JS (shadow boundary — see the .js note). */
+    max-width: 280px;
+    --slds-c-button-text-color: var(--slds-g-color-on-surface-3, #09243f);
+}

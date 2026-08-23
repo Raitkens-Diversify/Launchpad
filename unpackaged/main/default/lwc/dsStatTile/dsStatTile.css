@@ -1,0 +1,52 @@
+/* --slds-g-* declared locally, not inherited: platform-injected SLDS2
+   styling hooks beat values inherited from an ancestor's :host
+   (see nexsHome.css / dsHero.css). */
+:host {
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+}
+
+.ds-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--ds-space-lg, 16px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+}
+
+/* Reuses the hero display size at its narrow-viewport value (2rem) rather
+   than inventing a new "data" size — the type scale has no dedicated
+   numeric role, so this borrows the closest existing one. */
+.ds-stat__value {
+    font-family: var(--slds-g-font-family-base, 'Inter', sans-serif);
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.ds-stat__value--error {
+    color: var(--ds-error-text, #a83232);
+}
+
+.ds-stat__value--warning {
+    color: var(--ds-warning-text, #b8860b);
+}
+
+.ds-stat__value--success {
+    color: var(--ds-success-text, #2d7d46);
+}
+
+.ds-stat__label {
+    font-size: 0.8125rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.ds-stat__sublabel {
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}

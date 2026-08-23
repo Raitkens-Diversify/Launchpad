@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Zero_Result_Searches</fullName>
+    <columns>NAME</columns>
+    <columns>Term__c</columns>
+    <columns>CREATEDBY_USER</columns>
+    <columns>Surface__c</columns>
+    <columns>CREATED_DATE</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Result_Count__c</field>
+        <operation>equals</operation>
+        <value>0</value>
+    </filters>
+    <label>Zero-Result Searches (Knowledge Gaps)</label>
+</ListView>

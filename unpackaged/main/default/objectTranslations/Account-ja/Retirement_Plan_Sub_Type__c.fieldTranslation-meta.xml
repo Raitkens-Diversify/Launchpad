@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Retirement Plan Sub-Type --></label>
+        <name>Retirement_Plan_Sub_Type__c</name>
+        <picklistValues>
+            <masterLabel>401(a)</masterLabel>
+            <translation><!-- 401(a) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>401(k)</masterLabel>
+            <translation><!-- 401(k) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>403(b)</masterLabel>
+            <translation><!-- 403(b) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>457</masterLabel>
+            <translation><!-- 457 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Cash Balance</masterLabel>
+            <translation><!-- Cash Balance --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Defined Benefit</masterLabel>
+            <translation><!-- Defined Benefit --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Employee Stock Ownership Plan (ESOP)</masterLabel>
+            <translation><!-- Employee Stock Ownership Plan (ESOP) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Money Purchase</masterLabel>
+            <translation><!-- Money Purchase --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Profit-Sharing</masterLabel>
+            <translation><!-- Profit-Sharing --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Solo 401(k)</masterLabel>
+            <translation><!-- Solo 401(k) --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

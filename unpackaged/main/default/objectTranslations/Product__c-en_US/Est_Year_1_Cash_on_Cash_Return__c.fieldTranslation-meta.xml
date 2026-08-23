@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Est. Year 1 Cash-on-Cash Return --></label>
+        <name>Est_Year_1_Cash_on_Cash_Return__c</name>
+    </CustomFieldTranslation>

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Involved Driver</fullName>
+        <default>false</default>
+        <label>Involved Driver</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Witness</fullName>
+        <default>false</default>
+        <label>Witness</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Plaintiff</fullName>
+        <default>false</default>
+        <label>Plaintiff</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Internal Medical Approver</fullName>
+        <default>false</default>
+        <label>Internal Medical Approver</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Claim Legal Expert</fullName>
+        <default>false</default>
+        <label>Claim Legal Expert</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Opponent Third Party</fullName>
+        <default>false</default>
+        <label>Opponent Third Party</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Defendant</fullName>
+        <default>false</default>
+        <label>Defendant</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Claimant</fullName>
+        <default>false</default>
+        <label>Claimant</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Claim Adjuster</fullName>
+        <default>false</default>
+        <label>Claim Adjuster</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Victim</fullName>
+        <default>false</default>
+        <label>Victim</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Claim Representative</fullName>
+        <default>false</default>
+        <label>Claim Representative</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Claimee</fullName>
+        <default>false</default>
+        <label>Claimee</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Claim Expert</fullName>
+        <default>false</default>
+        <label>Claim Expert</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Claim Payer</fullName>
+        <default>false</default>
+        <label>Claim Payer</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Loss Adjuster</fullName>
+        <default>false</default>
+        <label>Loss Adjuster</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Inpatient</fullName>
+        <default>false</default>
+        <label>Inpatient</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Outpatient</fullName>
+        <default>false</default>
+        <label>Outpatient</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Loss Notification Authority</fullName>
+        <default>false</default>
+        <label>Loss Notification Authority</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Claim Recorder</fullName>
+        <default>false</default>
+        <label>Claim Recorder</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Claim Leader</fullName>
+        <default>false</default>
+        <label>Claim Leader</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Claim Follower</fullName>
+        <default>false</default>
+        <label>Claim Follower</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Claim Declarer</fullName>
+        <default>false</default>
+        <label>Claim Declarer</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Patient</fullName>
+        <default>false</default>
+        <label>Patient</label>
+    </standardValue>
+</StandardValueSet>

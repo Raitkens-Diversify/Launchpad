@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>64.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Arc Global Search Results</masterLabel>
+    <description>Full global-search results page: page title + result count, filter tabs with per-category counts, and category-grouped result lists. Reads the &quot;term&quot; query param and renders per the Figma &quot;Search results&quot; spec.</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+</LightningComponentBundle>

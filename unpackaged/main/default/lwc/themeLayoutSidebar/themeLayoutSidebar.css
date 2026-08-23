@@ -1,0 +1,159 @@
+/* ==========================================================================
+   themeLayoutSidebar — LWR theme layout shell
+
+   Structure confirmed via Figma Inspect (node-id=838-54291):
+     Global Header : width 1440 (full bleed), height 56px, border-bottom 1px
+     Sidebar       : top 56px, width 280px, border-right 1px
+     Body          : top 56px, left 280px  → fills remaining space
+   The header spans the FULL width above both the sidebar and the content;
+   the sidebar/content divider starts beneath it.
+
+   SCROLL BEHAVIOUR — also from Figma: the layer tree groups Global Header and
+   Sidebar under "FIXED" and Body under "SCROLLS", and both fixed layers carry
+   Interactions → Scroll position: Fixed. So the shell is a viewport-height
+   app frame: header and sidebar stay put, only the main region scrolls. The
+   sidebar gets its own overflow-y so a long nav can still scroll internally
+   without moving the header.
+
+   Divider color #D1D5DB (color/border/1, Neutral 80) is identical on the
+   header's bottom edge and the sidebar's right edge, so the two lines read as
+   one system. Values are inlined rather than referencing the arcstyles static
+   resource, so the shell holds its shape even if that global sheet fails.
+   ========================================================================== */
+
+:host {
+  display: block;
+  --arc-sidebar-width: 280px;
+  --nexs-sidebar-width: var(--arc-sidebar-width);
+  --div-layout-sidebar-width: var(--arc-sidebar-width);
+}
+
+:host(.arc-sidebar-collapsed) {
+  --arc-sidebar-width: 56px;
+}
+
+.theme-layout {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+}
+
+/* Preview + live only — viewport-height app frame. Skipped in Experience Builder
+   (isDesignMode) so the editor canvas can scroll and edit regions normally. */
+:host(.arc-runtime-shell) .theme-layout {
+  height: 100vh;
+  /* Contain scrolling to the main region instead of the page. 100dvh keeps the
+     frame correct on mobile browsers whose toolbars change the viewport. */
+  max-height: 100dvh;
+  overflow: hidden;
+  --arc-header-height: 60px;
+}
+
+/* ── Top bar — FIXED. Never scrolls; divider along the bottom. ── */
+.theme-layout__header {
+  /* display: flex; */
+  align-items: center;
+  justify-content: space-between;
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  background: #ffffff;
+  border-bottom: 1px solid #d1d5db;
+  z-index: 2;
+}
+
+:host(.arc-runtime-shell) .theme-layout__header {
+  height: var(--arc-header-height, 60px);
+  /* min-height: var(--arc-header-height, 60px);
+  max-height: var(--arc-header-height, 60px); */
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+:host(.arc-runtime-shell) .theme-layout__header ::slotted(*) {
+  display: block;
+  width: 100%;
+  max-height: 100%;
+  box-sizing: border-box;
+}
+
+.theme-layout__body {
+  display: flex;
+  flex: 1 1 auto;
+}
+
+:host(.arc-runtime-shell) .theme-layout__body {
+  min-height: 0; /* required so children may shrink and scroll inside the flex row */
+  overflow: hidden;
+}
+
+/* ── Left rail — FIXED. Scrolls internally only if the nav overflows. ── */
+.theme-layout__sidebar {
+  flex: 0 0 var(--arc-sidebar-width, 280px);
+  width: var(--arc-sidebar-width, 280px);
+  background: #ffffff;
+  border-right: 1px solid #d1d5db;
+  z-index: 1;
+  transition: width 0.44s ease, flex-basis 0.44s ease;
+}
+
+:host(.arc-runtime-shell) .theme-layout__sidebar {
+  padding: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain; /* nav scroll doesn't chain to the main region */
+}
+
+/* Experience Builder edit canvas only — inset the sidebar slot so component
+   chrome (delete, drag) is not clipped. Never applied on preview or live. */
+:host(.arc-design-mode:not(.arc-runtime-shell)) .theme-layout__sidebar {
+  padding: 8px 12px;
+  overflow: visible;
+}
+
+/* ── Main — the only region that scrolls with page content. ── */
+.theme-layout__main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+:host(.arc-runtime-shell) .theme-layout__main {
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.theme-layout__footer:empty {
+  display: none;
+}
+
+/* ── Responsive — below the sidebar breakpoint, stack and let the page scroll
+   normally rather than trapping content in a short fixed frame. ── */
+@media (max-width: 768px) {
+  :host(.arc-runtime-shell) .theme-layout {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .theme-layout__body {
+    flex-direction: column;
+  }
+
+  :host(.arc-runtime-shell) .theme-layout__body {
+    overflow: visible;
+  }
+
+  .theme-layout__sidebar {
+    flex: 0 0 auto;
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #d1d5db;
+  }
+
+  :host(.arc-runtime-shell) .theme-layout__sidebar {
+    overflow-y: visible;
+  }
+
+  :host(.arc-runtime-shell) .theme-layout__main {
+    overflow-y: visible;
+  }
+}

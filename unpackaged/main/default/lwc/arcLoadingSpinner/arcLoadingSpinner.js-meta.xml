@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>false</isExposed>
+    <masterLabel>ARC Loading Spinner</masterLabel>
+    <description>Branded loading indicator (the ARC mark) that drops in wherever lightning-spinner was used for page/section loading states, so navigation reads as &quot;working&quot; instead of a stalled blank screen.</description>
+</LightningComponentBundle>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Renewal</fullName>
+        <default>false</default>
+        <label>Renewal</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Premium Payment</fullName>
+        <default>false</default>
+        <label>Premium Payment</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Withdrawal</fullName>
+        <default>false</default>
+        <label>Withdrawal</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Surrender</fullName>
+        <default>false</default>
+        <label>Surrender</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Loan</fullName>
+        <default>false</default>
+        <label>Loan</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Cancellation</fullName>
+        <default>false</default>
+        <label>Cancellation</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Endorsement</fullName>
+        <default>false</default>
+        <label>Endorsement</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Credit</fullName>
+        <default>false</default>
+        <label>Credit</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Surcharge</fullName>
+        <default>false</default>
+        <label>Surcharge</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Deposit</fullName>
+        <default>false</default>
+        <label>Deposit</label>
+    </standardValue>
+</StandardValueSet>

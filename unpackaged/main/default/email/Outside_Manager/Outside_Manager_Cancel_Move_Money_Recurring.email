@@ -1,0 +1,9 @@
+I hope this email finds you well. I'm reaching out today with a confirmation that a request to cancel a recurring money movement, has been processed successfully. Below are the details of the cancelled money movement.
+
+Money Movement Amount: $[!Case.Instruction__r.Recurring_Amount__c]
+Sending Account: [!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.Name] [!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.OASP_FSC__Registration_Type__r.Name] XXXX[!Case.FinServ__FinancialAccount__r.Account_Number_Last_4__c], [!Case.FinServ__FinancialAccount__r.OASP_FSC__Custodian__r.Name]
+Cancellation Effective As Of: [!Case.Cancel_Effective_Date__c]
+
+Please don't hesitate to reach out with any follow up questions.
+
+Sincerely,

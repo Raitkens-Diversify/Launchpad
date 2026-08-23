@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Article Type --></label>
+        <name>Record_Type_Name__c</name>
+        <picklistValues>
+            <masterLabel>Core Knowledge</masterLabel>
+            <translation><!-- Core Knowledge --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>FAQ</masterLabel>
+            <translation><!-- FAQ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>How-To</masterLabel>
+            <translation><!-- How-To --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Troubleshooting</masterLabel>
+            <translation><!-- Troubleshooting --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

@@ -1,0 +1,91 @@
+<!-- Author: Mile Cacanovic -->
+<template>
+    <div class="trade">
+        <!-- Only the entry points that establish an account value capture one. Editing existing trade
+             instructions has no funded amount, so the field is absent rather than empty. -->
+        <template lwc:if={funded}>
+            <div class="trade__block trade__block_expected">
+                <!-- No currency formatter, deliberately: a formatter rewrites whatever it is handed,
+                     so the input could never be bound the exact value it just reported — and that
+                     equality is what keeps this controlled field from echoing itself into a loop. The
+                     formatted figure is the footer ledger's first line, immediately below. -->
+                <lightning-input
+                    type="number"
+                    step="0.01"
+                    label="Expected Account Value"
+                    value={expectedAccountValue}
+                    onchange={handleExpectedChange}
+                    onblur={handleExpectedBlur}>
+                </lightning-input>
+            </div>
+        </template>
+        <template lwc:else>
+            <p class="trade__note">
+                This request updates the trade instructions on an existing account, which has no
+                funded amount here — model allocations are recorded as weights only.
+            </p>
+        </template>
+
+        <div class="trade__block trade__block_strategy">
+            <c-envelope-strategy-list
+                lwc:ref="table"
+                strategies={rows}
+                options={pickerOptions}
+                show-derived={funded}
+                remainder={remainder}
+                onstrategieschange={handleRowsChange}>
+            </c-envelope-strategy-list>
+
+            <!-- The remainder arithmetic, shown instead of described: account value, minus the fixed
+                 carve-outs, equals the pool the percentage rows must cover. -->
+            <template lwc:if={showFooter}>
+                <div class="trade__footer">
+                    <template lwc:if={showDollarMath}>
+                        <div class="trade__footer-line">
+                            <span>Account value</span>
+                            <span class="trade__footer-figure">{accountValueDisplay}</span>
+                        </div>
+                        <template lwc:if={showFixedLines}>
+                            <div class="trade__footer-line">
+                                <span>Fixed allocations</span>
+                                <span class="trade__footer-figure">{fixedDisplay}</span>
+                            </div>
+                            <div class="trade__footer-line trade__footer-line_pool">
+                                <span>Modeled pool</span>
+                                <span class="trade__footer-figure">{poolDisplay}</span>
+                            </div>
+                        </template>
+                    </template>
+                    <template lwc:if={showEnterValueHint}>
+                        <p class="trade__footer-hint">
+                            Enter the expected account value to see dollar amounts.
+                        </p>
+                    </template>
+                </div>
+            </template>
+
+            <!-- Always-present live region so status changes are announced as the numbers move. -->
+            <div class="trade__status" aria-live="polite">
+                <template lwc:if={modeledStatusText}>
+                    <p class={modeledStatusClass}>{modeledStatusText}</p>
+                </template>
+                <template lwc:if={showOverFundedWarning}>
+                    <p class="trade__warning">{overFundedMessage}</p>
+                </template>
+            </div>
+
+            <template lwc:if={showMismatch}>
+                <p class="trade__mismatch" role="alert">{mismatchMessage}</p>
+            </template>
+        </div>
+
+        <div class="trade__block trade__block_notes">
+            <lightning-textarea
+                label="Advisor Notes Related to Trade"
+                value={advisorNotes}
+                onchange={handleNotesChange}
+                onblur={handleNotesBlur}>
+            </lightning-textarea>
+        </div>
+    </div>
+</template>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightning__AppPage</target>
+        <target>lightning__Tab</target>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property name="helpCenterBaseUrl" type="String" label="Help Center Base URL"
+                      description="Absolute base URL of the Help Center site for cross-links (e.g. https://.../help)."/>
+        </targetConfig>
+        <targetConfig targets="lightning__AppPage">
+            <property name="helpCenterBaseUrl" type="String" label="Help Center Base URL"
+                      description="Absolute base URL of the Help Center site for cross-links."/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

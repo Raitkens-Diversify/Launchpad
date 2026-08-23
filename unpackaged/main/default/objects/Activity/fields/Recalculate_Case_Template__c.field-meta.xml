@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Recalculate_Case_Template__c</fullName>
+    <formula>Task_Template_Item__r.Task_Template__r.Recalculate_Template_After_Completion__c</formula>
+    <label>Recalculate Case Template</label>
+    <type>Checkbox</type>
+</CustomField>

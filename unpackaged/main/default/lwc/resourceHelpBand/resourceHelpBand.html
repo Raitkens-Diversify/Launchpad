@@ -1,0 +1,32 @@
+<template>
+    <template lwc:if={showBand}>
+        <section class="rc-help">
+            <h2 class="rc-help__title">{heading}</h2>
+            <p class="rc-help__subtitle">{subtitle}</p>
+            <div class="rc-help__cards">
+                <template lwc:if={showContact}>
+                    <a class="rc-help__card" href={mailto}>
+                        <span class="rc-help__card-icon" aria-hidden="true">
+                            <lightning-icon icon-name="utility:email" size="small"></lightning-icon>
+                        </span>
+                        <span class="rc-help__card-body">
+                            <span class="rc-help__card-title">{contactLabel}</span>
+                            <span class="rc-help__card-text">{contactText}</span>
+                        </span>
+                    </a>
+                </template>
+                <template lwc:if={showRequest}>
+                    <a class="rc-help__card" href={effectiveRequestUrl}>
+                        <span class="rc-help__card-icon" aria-hidden="true">
+                            <lightning-icon icon-name="utility:edit" size="small"></lightning-icon>
+                        </span>
+                        <span class="rc-help__card-body">
+                            <span class="rc-help__card-title">{requestLabel}</span>
+                            <span class="rc-help__card-text">{requestText}</span>
+                        </span>
+                    </a>
+                </template>
+            </div>
+        </section>
+    </template>
+</template>

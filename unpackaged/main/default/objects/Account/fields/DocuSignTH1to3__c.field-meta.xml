@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>DocuSignTH1to3__c</fullName>
+    <formula>ISPICKVAL(Time_Horizon__c,&#39;1 to 3 years&#39;)</formula>
+    <label>DocuSignTH1to3</label>
+    <trackHistory>false</trackHistory>
+    <type>Checkbox</type>
+</CustomField>

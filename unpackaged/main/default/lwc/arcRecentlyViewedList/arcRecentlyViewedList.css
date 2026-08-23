@@ -1,0 +1,173 @@
+/* Author: Hoang Long Vu To | Date: 2026-08-17 */
+
+:host {
+  display: block;
+  --arc-recently-viewed-item-height: 4.125rem;
+  --arc-recently-viewed-max-items: 10;
+}
+
+.arc-recently-viewed {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.arc-recently-viewed .div-table-title {
+  margin: 0 0 0.75rem;
+}
+
+.arc-recently-viewed__card {
+  overflow: hidden;
+}
+
+.arc-recently-viewed__body {
+  flex: 0 0 auto;
+  height: calc(
+    var(--arc-recently-viewed-item-height) * var(--arc-recently-viewed-max-items)
+  );
+  max-height: calc(
+    var(--arc-recently-viewed-item-height) * var(--arc-recently-viewed-max-items)
+  );
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.arc-recently-viewed__loading,
+.arc-recently-viewed__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(
+    var(--arc-recently-viewed-item-height) * var(--arc-recently-viewed-max-items)
+  );
+  padding: var(--div-space-6, 1.5rem) var(--div-space-4, 1rem);
+  color: var(--div-color-text-muted, #6b7280);
+  font-size: var(--div-font-scale-base, 1rem);
+}
+
+.arc-recently-viewed__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.arc-recently-viewed__item {
+  height: var(--arc-recently-viewed-item-height);
+  flex-shrink: 0;
+}
+
+.arc-recently-viewed__row {
+  display: flex;
+  align-items: center;
+  gap: var(--div-space-3, 0.75rem);
+  width: 100%;
+  height: 100%;
+  min-height: var(--arc-recently-viewed-item-height);
+  box-sizing: border-box;
+  padding: 0.875rem 1rem;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.arc-recently-viewed__row:hover,
+.arc-recently-viewed__row:focus-visible {
+  background: var(--div-color-surface-subtle, #f9fafb);
+  outline: none;
+  text-decoration: none;
+}
+
+.arc-recently-viewed__icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.arc-recently-viewed__icon {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.arc-recently-viewed__icon--asset {
+  background-color: var(--icon-color, var(--div-color-success-dark, #16a34a));
+  -webkit-mask-image: var(--icon-url);
+  mask-image: var(--icon-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.arc-recently-viewed__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.arc-recently-viewed__name {
+  font-family: var(--div-font-family-base);
+  font-size: var(--div-font-scale-base, 1rem);
+  font-weight: var(--div-font-weight-semibold, 600);
+  line-height: 1.125rem;
+  color: var(--div-color-on-surface-2, #374151);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arc-recently-viewed__metadata {
+  font-family: var(--div-font-family-base);
+  font-size: var(--div-font-scale-sm, 0.75rem);
+  font-weight: var(--div-font-weight-regular, 400);
+  line-height: 1.125rem;
+  color: var(--div-color-text-muted, #6b7280);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arc-recently-viewed__chevron {
+  flex-shrink: 0;
+  --slds-c-icon-color-foreground-default: var(--div-color-text-muted, #9ca3af);
+}
+
+.arc-recently-viewed__footer {
+  justify-content: stretch;
+  padding: 0;
+}
+
+.arc-recently-viewed__footer-pager {
+  justify-content: flex-end;
+}
+
+.arc-recently-viewed__view-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  color: var(--div-color-blue-600, #2563eb);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.arc-recently-viewed__view-all:hover,
+.arc-recently-viewed__view-all:focus-visible {
+  outline: none;
+}
+
+.arc-recently-viewed__view-all-icon {
+  --slds-c-icon-color-foreground-default: var(--div-color-blue-600, #2563eb);
+}

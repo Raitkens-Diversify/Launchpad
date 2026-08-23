@@ -1,0 +1,97 @@
+.aae__bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    position: sticky;
+    top: 72px;
+    z-index: 15;
+}
+.aae__bar-text {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.aae__title {
+    margin: 0;
+    font-family: "Libre Baskerville", Georgia, serif;
+    font-size: 1.125rem;
+    color: #09243f;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.aae__status {
+    margin: 0;
+    font-size: 0.75rem;
+    color: #4b5563;
+}
+.aae__bar-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+.aae__loading {
+    position: relative;
+    min-height: 160px;
+}
+.aae__error {
+    color: #b42318;
+    font-size: 0.875rem;
+}
+.aae__grid {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+.aae__col {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.aae__col--side {
+    flex: 0 0 320px;
+}
+.aae__card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem 1.25rem;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+}
+.aae__card-title {
+    margin: 0;
+    font-family: "Libre Baskerville", Georgia, serif;
+    font-size: 1rem;
+    color: #09243f;
+}
+.aae__help {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: #4b5563;
+}
+.aae__help--spaced {
+    margin-top: 0.5rem;
+}
+.aae__field-error {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: #b42318;
+}
+
+@media (max-width: 960px) {
+    .aae__grid {
+        flex-direction: column;
+    }
+    .aae__col--side {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+}

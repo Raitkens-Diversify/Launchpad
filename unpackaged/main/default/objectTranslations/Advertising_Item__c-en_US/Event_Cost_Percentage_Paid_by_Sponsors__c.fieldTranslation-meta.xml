@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Event Cost Percentage Paid by Sponsors --></label>
+        <name>Event_Cost_Percentage_Paid_by_Sponsors__c</name>
+    </CustomFieldTranslation>

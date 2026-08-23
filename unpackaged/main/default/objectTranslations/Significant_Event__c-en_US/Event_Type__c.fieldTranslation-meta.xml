@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Event Type --></label>
+        <name>Event_Type__c</name>
+        <picklistValues>
+            <masterLabel>Adoption</masterLabel>
+            <translation><!-- Adoption --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Birthday</masterLabel>
+            <translation><!-- Birthday --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>College</masterLabel>
+            <translation><!-- College --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Death</masterLabel>
+            <translation><!-- Death --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Dream Vacation</masterLabel>
+            <translation><!-- Dream Vacation --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Graduation</masterLabel>
+            <translation><!-- Graduation --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Health Diagnosis</masterLabel>
+            <translation><!-- Health Diagnosis --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Marriage</masterLabel>
+            <translation><!-- Marriage --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>New Baby</masterLabel>
+            <translation><!-- New Baby --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>New Business</masterLabel>
+            <translation><!-- New Business --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>New Home</masterLabel>
+            <translation><!-- New Home --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>New Job</masterLabel>
+            <translation><!-- New Job --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Other</masterLabel>
+            <translation><!-- Other --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Retirement</masterLabel>
+            <translation><!-- Retirement --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Service Mission</masterLabel>
+            <translation><!-- Service Mission --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Household New Field --></label>
+        <name>Household__c</name>
+        <relationshipLabel><!-- Cases (Household) --></relationshipLabel>
+    </CustomFieldTranslation>

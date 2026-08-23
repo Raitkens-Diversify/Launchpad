@@ -1,0 +1,76 @@
+/**
+ * Author: Hoang Long Vu To
+ * Date: 2026-08-14
+ */
+:host {
+    display: block;
+}
+
+.egnyte-vf {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 400px;
+}
+
+.egnyte-vf__toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: var(--ds-space-sm, 8px);
+}
+
+.egnyte-vf__open-link {
+    font-size: 0.875rem;
+    color: var(--slds-g-color-brand-1, #0176d3);
+    text-decoration: none;
+}
+
+.egnyte-vf__open-link:hover,
+.egnyte-vf__open-link:focus {
+    text-decoration: underline;
+}
+
+.egnyte-vf__preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ds-space-md, 12px);
+    min-height: 12rem;
+    padding: var(--ds-space-xl, 24px);
+    border: 1px dashed var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-md, 8px);
+    background: var(--slds-g-color-surface-container-1, #eef1f6);
+    text-align: center;
+}
+
+.egnyte-vf__preview-text {
+    margin: 0;
+    max-width: 36rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.egnyte-vf__status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 12rem;
+}
+
+.egnyte-vf__error {
+    padding: var(--ds-space-md, 12px);
+    border: 1px solid var(--slds-g-color-border-error-1, #ea001e);
+    border-radius: var(--ds-radius-md, 8px);
+    color: var(--slds-g-color-on-surface-2, #374151);
+    background: var(--slds-g-color-surface-container-1, #fef3f2);
+}
+
+.egnyte-vf__frame {
+    display: block;
+    width: 100%;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+}

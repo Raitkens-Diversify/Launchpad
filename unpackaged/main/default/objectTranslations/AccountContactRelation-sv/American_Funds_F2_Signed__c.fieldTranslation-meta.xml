@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- American Funds F2 Signed --></label>
+        <name>American_Funds_F2_Signed__c</name>
+    </CustomFieldTranslation>

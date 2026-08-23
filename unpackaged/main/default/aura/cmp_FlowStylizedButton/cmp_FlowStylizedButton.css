@@ -1,0 +1,98 @@
+.THIS {
+}
+
+.THIS .smallButton {
+    background-color: #5aaadc;
+    padding-bottom: 4px;
+    padding-top: 4px;
+    display: block;
+  	margin-left: auto;
+  	margin-right: auto;
+  	width: 20%;
+    font-size: 18px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+
+.THIS .blankButton {
+    background-color: #fff;
+    color: #fff;
+    padding-bottom: 4px;
+    padding-top: 4px;
+    display: block;
+  	margin-left: auto;
+  	margin-right: auto;
+  	width: 20%;
+    font-size: 18px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+
+.THIS .mediumButton {
+    background-color: #5aaadc;
+    padding-bottom: 4px;
+    padding-top: 4px;
+    display: block;
+  	margin-left: auto;
+  	margin-right: auto;
+  	width: 50%;
+    font-size: 18px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+
+.THIS .largeButton {
+    background-color: #5aaadc;
+    padding-bottom: 4px;
+    padding-top: 4px;
+    display: block;
+  	margin-left: auto;
+  	margin-right: auto;
+  	width: 100%;
+    font-size: 18px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+
+.THIS .largeButtonInactive {
+    background-color: #58595b;
+    padding-bottom: 4px;
+    padding-top: 4px;
+    display: block;
+  	margin-left: auto;
+  	margin-right: auto;
+  	width: 100%;
+    font-size: 18px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+
+.THIS .linkButton {
+    padding-bottom: 16px;
+    padding-top: 16px;
+    display: block;
+  	margin-left: auto;
+  	margin-right: auto;
+  	width: 30%;
+    font-size: 12px;
+    text-decoration: underline;
+}
+
+.THIS .smallButton:hover{
+    background-color: #58595b;
+}
+
+.THIS .mediumButton:hover{
+    background-color: #58595b;
+}
+
+.THIS .largeButton:hover{
+    background-color: #58595b;
+}
+
+.THIS .blankButton:hover{
+    background-color: #fff;
+    color: #fff;
+    border-color: #fff;
+    cursor: default;
+}

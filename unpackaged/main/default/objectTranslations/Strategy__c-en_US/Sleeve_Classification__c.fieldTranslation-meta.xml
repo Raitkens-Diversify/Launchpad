@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <help><!-- What kind of sleeve this is. Determines whether advisors fund it as a fixed dollar amount, a percentage, or either — see the Sleeve Basis Rule metadata. --></help>
+        <label><!-- Sleeve Classification --></label>
+        <name>Sleeve_Classification__c</name>
+        <picklistValues>
+            <masterLabel>Billing Exclusion</masterLabel>
+            <translation><!-- Billing Exclusion --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Bond Ladder</masterLabel>
+            <translation><!-- Bond Ladder --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Broker Dealer Alternative</masterLabel>
+            <translation><!-- Broker Dealer Alternative --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Cash / Money Market</masterLabel>
+            <translation><!-- Cash / Money Market --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Fee-Based Alternative</masterLabel>
+            <translation><!-- Fee-Based Alternative --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Interval Fund</masterLabel>
+            <translation><!-- Interval Fund --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Model Allocation</masterLabel>
+            <translation><!-- Model Allocation --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Model Exclusion</masterLabel>
+            <translation><!-- Model Exclusion --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Structured Note</masterLabel>
+            <translation><!-- Structured Note --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

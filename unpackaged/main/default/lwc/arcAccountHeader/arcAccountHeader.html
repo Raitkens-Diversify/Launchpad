@@ -1,0 +1,40 @@
+<!-- Author: Hoang Long Vu To -->
+<template>
+  <header class="account-header" aria-label="Account header">
+      <template lwc:if={isLoading}>
+        <div class="account-header__loading" role="status" aria-live="polite">
+          <lightning-spinner alternative-text="Loading account header" size="small"></lightning-spinner>
+        </div>
+      </template>
+
+      <template lwc:elseif={errorMessage}>
+        <div class="account-header__error" role="alert">{errorMessage}</div>
+      </template>
+
+      <template lwc:elseif={hasHeader}>
+        <div class="account-header__layout">
+          <div class="account-header__content">
+            <div class="account-header__title-row">
+              <h1 class="account-header__name">{header.name}</h1>
+              <span class="account-header__type-badge account-header__type-badge_primary">
+                {header.primaryTypeLabel}
+              </span>
+            </div>
+
+            <template lwc:if={header.secondaryBadges.length}>
+              <div class="account-header__badges" aria-label="Account classifications">
+                <template for:each={header.secondaryBadges} for:item="badge">
+                  <span
+                    key={badge.key}
+                    class="account-header__type-badge account-header__type-badge_secondary"
+                  >
+                    {badge.label}
+                  </span>
+                </template>
+              </div>
+            </template>
+          </div>
+        </div>
+      </template>
+  </header>
+</template>

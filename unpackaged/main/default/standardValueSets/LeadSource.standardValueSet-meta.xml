@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Advertisement</fullName>
+        <default>false</default>
+        <label>Advertisement</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Center of Influence</fullName>
+        <default>false</default>
+        <label>Center of Influence</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Customer Event</fullName>
+        <default>false</default>
+        <label>Customer Event</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Diversify Advisor Referral</fullName>
+        <default>false</default>
+        <label>Diversify Advisor Referral</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Diversify Referral</fullName>
+        <default>false</default>
+        <label>Diversify Referral</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Diversify Team Member Referral</fullName>
+        <default>false</default>
+        <label>Diversify Team Member Referral</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Employee Referral</fullName>
+        <default>false</default>
+        <label>Employee Referral</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Existing Client Referral</fullName>
+        <default>false</default>
+        <label>Existing Client Referral</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Former Employee Relationship</fullName>
+        <default>false</default>
+        <label>Former Employee Relationship</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Google AdWords</fullName>
+        <default>false</default>
+        <label>Google AdWords</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Home Office Referral</fullName>
+        <default>false</default>
+        <label>Home Office Referral</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Outreach</fullName>
+        <default>false</default>
+        <label>Outreach</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Paid Lead</fullName>
+        <default>false</default>
+        <label>Paid Lead</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Partner</fullName>
+        <default>false</default>
+        <label>Partner</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Personal Introduction</fullName>
+        <default>false</default>
+        <label>Personal Introduction</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Personal Relationship</fullName>
+        <default>false</default>
+        <label>Personal Relationship</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Personal Relationship - Dave</fullName>
+        <default>false</default>
+        <label>Personal Relationship - Dave</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Personal Relationship - Todd</fullName>
+        <default>false</default>
+        <label>Personal Relationship - Todd</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Professional Association</fullName>
+        <default>false</default>
+        <label>Professional Association</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Professional Partner Referral</fullName>
+        <default>false</default>
+        <label>Professional Partner Referral</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Promoter Relationship</fullName>
+        <default>false</default>
+        <label>Promoter Relationship</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Purchased List</fullName>
+        <default>false</default>
+        <label>Purchased List</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Referral - External</fullName>
+        <default>false</default>
+        <label>Referral - External</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Referral - Internal</fullName>
+        <default>false</default>
+        <label>Referral - Internal</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Self Sourced List</fullName>
+        <default>false</default>
+        <label>Self Sourced List</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Social Media</fullName>
+        <default>false</default>
+        <label>Social Media</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Trade Show</fullName>
+        <default>false</default>
+        <label>Trade Show</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Vendor or Sponsor Referral</fullName>
+        <default>false</default>
+        <label>Vendor or Sponsor Referral</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Webinar</fullName>
+        <default>false</default>
+        <label>Webinar</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Webinar/Seminar Attendee</fullName>
+        <default>false</default>
+        <label>Webinar/Seminar Attendee</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Website</fullName>
+        <default>false</default>
+        <label>Website</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Website Lead</fullName>
+        <default>false</default>
+        <label>Website Lead</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Other</fullName>
+        <default>false</default>
+        <label>Other</label>
+    </standardValue>
+</StandardValueSet>

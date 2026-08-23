@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Knowledge</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Knowledge</value>
+    </caseValues>
+    
+    
+    
+    
+    
+    
+    
+    
+    <layouts>
+        <layout>Knowledge Layout</layout>
+        <sections>
+            <label><!-- Custom Links --></label>
+            <section>Custom Links</section>
+        </sections>
+    </layouts>
+    <layouts>
+        <layout>Lightning Knowledge FAQ Layout</layout>
+        <sections>
+            <label><!-- Article Details --></label>
+            <section>Article Details</section>
+        </sections>
+        <sections>
+            <label><!-- Custom Links --></label>
+            <section>Custom Links</section>
+        </sections>
+        <sections>
+            <label><!-- Properties --></label>
+            <section>Properties</section>
+        </sections>
+    </layouts>
+    <layouts>
+        <layout>Nexus FAQ Layout</layout>
+        <sections>
+            <label><!-- Article --></label>
+            <section>Article</section>
+        </sections>
+    </layouts>
+    <layouts>
+        <layout>Nexus How To Layout</layout>
+        <sections>
+            <label><!-- Article --></label>
+            <section>Article</section>
+        </sections>
+    </layouts>
+    <layouts>
+        <layout>Nexus Troubleshooting Layout</layout>
+        <sections>
+            <label><!-- Article --></label>
+            <section>Article</section>
+        </sections>
+    </layouts>
+    <recordTypes>
+        <description><!-- This can be used for simple question and answer articles --></description>
+        <label><!-- FAQ --></label>
+        <name>FAQ</name>
+    </recordTypes>
+    <recordTypes>
+        <description><!-- Step-by-step instructional articles that walk a user through completing a task. --></description>
+        <label><!-- How-To --></label>
+        <name>How_To</name>
+    </recordTypes>
+    <recordTypes>
+        <description><!-- Use this record type for all policies &amp; informational articles --></description>
+        <label><!-- Core Knowledge --></label>
+        <name>Standard</name>
+    </recordTypes>
+    <recordTypes>
+        <description><!-- Problem/symptom and resolution articles for diagnosing and fixing issues. --></description>
+        <label><!-- Troubleshooting --></label>
+        <name>Troubleshooting</name>
+    </recordTypes>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Mortgage_Queue_Lead</fullName>
+    <filterScope>Queue</filterScope>
+    <label>Mortgage Queue</label>
+    <queue>Mortgage_Queue</queue>
+    <sharedTo>
+        <allInternalUsers />
+    </sharedTo>
+</ListView>

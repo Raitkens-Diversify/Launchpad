@@ -1,0 +1,386 @@
+/* ============================================================================
+   Tour design tokens — THE single canonical --tour-* block.
+   Brand mirrors reference the Help Center's tokens (declared on the nexs roots
+   and inherited through the shadow cascade when available) with the same
+   literal fallbacks those components use, so the overlay renders on-brand even
+   when dropped outside a token-declaring root (repo precedent: self-declared
+   :host blocks + fallbacks, see nexsLanding.css).
+   Genuinely NEW tokens are limited to tour-unique concerns: scrim, blur,
+   spotlight, motion, z-layers.
+   ========================================================================== */
+:host {
+    /* Brand mirrors */
+    --tour-color-surface: var(--slds-g-color-surface-container-1, #ffffff);
+    --tour-color-heading: var(--slds-g-color-on-surface-3, #09243f);
+    --tour-color-body: var(--slds-g-color-on-surface-2, #374151);
+    --tour-color-muted: var(--slds-g-color-on-surface-1, #4b5563);
+    --tour-color-border: var(--slds-g-color-border-1, #d1d5db);
+    --tour-color-primary: var(--slds-g-color-accent-1, #0f406f);
+    --tour-color-primary-hover: var(--slds-g-color-accent-2, #0b2f51);
+    --tour-color-accent: var(--ds-light-blue, #14bef0);
+    --tour-color-link: var(--ds-medium-blue, #1a76bb);
+    --tour-font-display: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+    --tour-font-body: var(--slds-g-font-family-base, "Inter", -apple-system, BlinkMacSystemFont, sans-serif);
+    --tour-radius-card: var(--ds-radius-xl, 12px);
+    --tour-radius-control: var(--ds-radius-md, 8px);
+    --tour-space-sm: var(--ds-space-sm, 8px);
+    --tour-space-md: var(--ds-space-md, 12px);
+    --tour-space-lg: var(--ds-space-lg, 16px);
+    --tour-space-xl: var(--ds-space-xl, 24px);
+
+    /* Tour-unique tokens */
+    --tour-scrim-color: rgba(7, 28, 49, 0.55); /* accent-3 navy @ 55% over blur */
+    --tour-scrim-color-solid: rgba(7, 28, 49, 0.72); /* darker no-blur fallback */
+    --tour-scrim-blur: 2.5px;
+    --tour-spotlight-radius: 12px;
+    --tour-glow-color: rgba(20, 190, 240, 0.35); /* --ds-light-blue ring */
+    --tour-shadow-card: 0 24px 64px rgba(9, 36, 63, 0.22), 0 2px 8px rgba(9, 36, 63, 0.14);
+    --tour-hairline: rgba(9, 36, 63, 0.1);
+    --tour-ease-spring: cubic-bezier(0.34, 1.3, 0.44, 1);
+    --tour-duration: 350ms;
+    --tour-duration-fast: 200ms;
+    --tour-z-scrim: 9000; /* above the nexs sticky header (z-index: 20) */
+    --tour-z-card: 9010;
+    --tour-focus-ring: 0 0 0 2px rgba(26, 118, 187, 0.35);
+}
+
+/* ---- overlay shell --------------------------------------------------------
+   The overlay layers are pointer-transparent except the card and the click
+   shield: button steps block the page entirely, click steps expose only the
+   spotlighted element (the shield path carves the hole out). */
+.tour-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: var(--tour-z-scrim);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--tour-duration-fast) ease;
+    font-family: var(--tour-font-body);
+}
+
+.tour-overlay--active {
+    opacity: 1;
+}
+
+/* ---- backdrop blur layer --------------------------------------------------
+   Hidden unless the browser supports BOTH backdrop-filter and path()
+   clip-paths; the scrim then lightens because the blur carries part of the
+   "recede" effect. Fallback: no blur, darker solid scrim. */
+.tour-overlay__blur {
+    position: fixed;
+    inset: 0;
+    display: none;
+    background: transparent;
+    pointer-events: none;
+}
+
+.tour-overlay__scrim {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    /* Geometry is drawn in overlay-local coordinates, which go negative when
+       a transformed ancestor offsets the fixed layers (core page chrome) —
+       don't let the SVG canvas clip it. */
+    overflow: visible;
+}
+
+.tour-overlay__scrim-fill {
+    fill: var(--tour-scrim-color-solid);
+}
+
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)))
+    and (clip-path: path('M0 0H1V1H0Z')) {
+    .tour-overlay__blur {
+        display: block;
+        -webkit-backdrop-filter: blur(var(--tour-scrim-blur));
+        backdrop-filter: blur(var(--tour-scrim-blur));
+    }
+
+    .tour-overlay__scrim-fill {
+        fill: var(--tour-scrim-color);
+    }
+}
+
+/* Click shield: transparent fill still counts as painted, so the path takes
+   hits exactly where it is filled — evenodd leaves the spotlight hole open.
+   Armed only while the overlay is active so the fade-out never eats clicks. */
+.tour-overlay__shield {
+    fill: transparent;
+    pointer-events: none;
+}
+
+.tour-overlay--active .tour-overlay__shield {
+    pointer-events: visiblePainted;
+}
+
+/* Accent ring riding the spotlight cutout. */
+.tour-overlay__glow {
+    stroke: var(--tour-glow-color);
+    stroke-width: 1.5;
+    opacity: 0.9;
+    filter: drop-shadow(0 0 10px var(--tour-glow-color));
+}
+
+/* ---- coach-mark card ------------------------------------------------------
+   Fixed at the origin and moved with translate3d so the spring easing applies
+   to travel between steps. */
+.tour-overlay__card {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: var(--tour-z-card);
+    width: min(380px, calc(100vw - 32px));
+    box-sizing: border-box;
+    pointer-events: auto;
+    background: var(--tour-color-surface);
+    border: 1px solid var(--tour-hairline);
+    border-radius: var(--tour-radius-card);
+    box-shadow: var(--tour-shadow-card);
+    padding: var(--tour-space-xl);
+    transition: transform var(--tour-duration) var(--tour-ease-spring);
+    outline: none;
+}
+
+.tour-overlay__card-inner {
+    transition:
+        opacity 160ms ease,
+        transform 160ms ease;
+}
+
+.tour-overlay__card-inner--leaving {
+    opacity: 0;
+    transform: translateY(4px);
+}
+
+/* Caret: a rotated square sharing the card's surface + hairline; JS picks the
+   side class and slides it along the edge to keep pointing at the target. */
+.tour-overlay__caret {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: var(--tour-color-surface);
+    transform: rotate(45deg);
+    border: 1px solid transparent;
+}
+
+.tour-overlay__caret--top {
+    top: -6.5px;
+    border-top-color: var(--tour-hairline);
+    border-left-color: var(--tour-hairline);
+}
+
+.tour-overlay__caret--bottom {
+    bottom: -6.5px;
+    border-bottom-color: var(--tour-hairline);
+    border-right-color: var(--tour-hairline);
+}
+
+.tour-overlay__caret--left {
+    left: -6.5px;
+    border-left-color: var(--tour-hairline);
+    border-bottom-color: var(--tour-hairline);
+}
+
+.tour-overlay__caret--right {
+    right: -6.5px;
+    border-top-color: var(--tour-hairline);
+    border-right-color: var(--tour-hairline);
+}
+
+/* ---- card content ---------------------------------------------------------- */
+.tour-overlay__title {
+    margin: 0;
+    font-family: var(--tour-font-display);
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+    color: var(--tour-color-heading);
+}
+
+.tour-overlay__body {
+    margin-top: var(--tour-space-sm);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--tour-color-body);
+}
+
+.tour-overlay__hint {
+    margin: var(--tour-space-sm) 0 0;
+    font-size: 0.8125rem;
+    color: var(--tour-color-link);
+}
+
+/* ---- progress row ----------------------------------------------------------- */
+.tour-overlay__progress {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--tour-space-lg);
+}
+
+.tour-overlay__count {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--tour-color-muted);
+}
+
+.tour-overlay__dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tour-overlay__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--tour-color-border);
+    transition:
+        background var(--tour-duration-fast) var(--tour-ease-spring),
+        transform var(--tour-duration-fast) var(--tour-ease-spring);
+}
+
+.tour-overlay__dot--active {
+    background: var(--tour-color-accent);
+    transform: scale(1.25);
+}
+
+/* ---- action row --------------------------------------------------------------- */
+.tour-overlay__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--tour-space-sm);
+    margin-top: var(--tour-space-lg);
+}
+
+.tour-overlay__spacer {
+    flex: 1;
+}
+
+.tour-overlay__skip,
+.tour-overlay__back,
+.tour-overlay__next,
+.tour-overlay__dismiss {
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 0;
+}
+
+.tour-overlay__skip {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--tour-color-muted);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: transparent;
+    transition:
+        color var(--tour-duration-fast) ease,
+        text-decoration-color var(--tour-duration-fast) ease;
+}
+
+.tour-overlay__skip:hover {
+    color: var(--tour-color-link);
+    text-decoration-color: currentColor;
+}
+
+.tour-overlay__back {
+    min-height: 36px;
+    padding: 0 14px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--tour-color-body);
+    background: transparent;
+    border: 1px solid var(--tour-color-border);
+    border-radius: var(--tour-radius-control);
+    transition:
+        background var(--tour-duration-fast) ease,
+        border-color var(--tour-duration-fast) ease;
+}
+
+.tour-overlay__back:hover {
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    border-color: var(--slds-g-color-border-2, #b6bcc5);
+}
+
+.tour-overlay__next {
+    min-height: 36px;
+    padding: 0 18px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+    background: var(--tour-color-primary);
+    border-radius: var(--tour-radius-control);
+    transition:
+        background var(--tour-duration-fast) ease,
+        transform var(--tour-duration-fast) ease,
+        box-shadow var(--tour-duration-fast) ease;
+}
+
+.tour-overlay__next:hover {
+    background: var(--tour-color-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(15, 64, 111, 0.25);
+}
+
+.tour-overlay__next:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.tour-overlay__dismiss {
+    display: block;
+    margin-top: var(--tour-space-md);
+    font-size: 0.75rem;
+    color: var(--tour-color-muted);
+    transition: color var(--tour-duration-fast) ease;
+}
+
+.tour-overlay__dismiss:hover {
+    color: var(--tour-color-link);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* Refined visible focus without the default outline. */
+.tour-overlay__skip:focus-visible,
+.tour-overlay__back:focus-visible,
+.tour-overlay__next:focus-visible,
+.tour-overlay__dismiss:focus-visible {
+    outline: none;
+    box-shadow: var(--tour-focus-ring);
+    border-radius: var(--tour-radius-control);
+}
+
+/* Sentinels: focusable but invisible — they only exist to wrap Tab focus. */
+.tour-overlay__sentinel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+/* ---- reduced motion: keep instant fades, kill movement. -------------------- */
+@media (prefers-reduced-motion: reduce) {
+    .tour-overlay,
+    .tour-overlay__card,
+    .tour-overlay__card-inner,
+    .tour-overlay__dot,
+    .tour-overlay__next,
+    .tour-overlay__back,
+    .tour-overlay__skip,
+    .tour-overlay__dismiss {
+        transition-duration: 0.01ms !important;
+    }
+
+    .tour-overlay__next:hover {
+        transform: none;
+    }
+}

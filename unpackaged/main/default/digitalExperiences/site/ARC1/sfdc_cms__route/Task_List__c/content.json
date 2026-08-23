@@ -1,0 +1,12 @@
+{
+  "type" : "sfdc_cms__route",
+  "title" : "Task List",
+  "contentBody" : {
+    "activeViewId" : "Task_List",
+    "configurationTags" : [ ],
+    "pageAccess" : "UseParent",
+    "routeType" : "list-00T",
+    "urlPrefix" : "task"
+  },
+  "urlName" : "task-list"
+}

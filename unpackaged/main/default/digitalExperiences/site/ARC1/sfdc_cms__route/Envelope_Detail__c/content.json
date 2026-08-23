@@ -1,0 +1,12 @@
+{
+  "type" : "sfdc_cms__route",
+  "title" : "Envelope Detail",
+  "contentBody" : {
+    "activeViewId" : "Envelope_Detail",
+    "configurationTags" : [ ],
+    "pageAccess" : "UseParent",
+    "routeType" : "detail-Envelope__c",
+    "urlPrefix" : "envelope"
+  },
+  "urlName" : "envelope-detail"
+}

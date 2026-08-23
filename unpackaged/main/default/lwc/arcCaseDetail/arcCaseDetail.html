@@ -1,0 +1,405 @@
+<template>
+  <div class="arc-case-detail">
+    <template lwc:if={isInitialLoading}>
+      <div class="arc-case-detail__loading">
+        <c-arc-loading-spinner
+          alternative-text="Loading case"
+          size="medium"
+        ></c-arc-loading-spinner>
+      </div>
+    </template>
+
+    <template lwc:elseif={errorMessage}>
+      <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+        {errorMessage}
+      </div>
+    </template>
+
+    <template lwc:elseif={hasDetail}>
+      <!--
+        Structure follows Case_Record_Page.flexipage: highlights and path in the
+        header, then two columns — the work itself on the left, the lists that
+        get glanced at on the right. No left-hand tab strip: that layout has
+        none, its only tabset is the one at the foot of the right rail.
+      -->
+      <header class="arc-case-detail__header">
+        <div class="arc-case-detail__header-top">
+          <div class="arc-case-detail__title-wrap">
+            <span class="arc-case-detail__eyebrow">Case</span>
+            <h1 class="arc-case-detail__title">{detail.subject}</h1>
+          </div>
+          <div class="arc-case-detail__header-right">
+            <div class="arc-case-detail__badges">
+              <template lwc:if={detail.priority}>
+                <span class={priorityPillClass}
+                  >{detail.priority} Priority</span
+                >
+              </template>
+              <template lwc:if={detail.type}>
+                <span class="arc-case-detail__type-pill">{detail.type}</span>
+              </template>
+            </div>
+
+            <!--
+              The two task-creating actions the Lightning page's highlights panel
+              carries. Both are Flow quick actions there (Task_Creator_*), and the
+              same flows run here through arcFlowModal, so the task is created by
+              the one definition rather than a second implementation.
+            -->
+            <template lwc:if={canCreatePitStopTask}>
+              <div class="arc-case-detail__actions">
+                <lightning-button
+                  label="Create Branch Pit Stop Task"
+                  data-flow="branch"
+                  onclick={handleCreatePitStopTask}
+                ></lightning-button>
+                <lightning-button
+                  label="Create Home Office Pit Stop Task"
+                  data-flow="homeOffice"
+                  onclick={handleCreatePitStopTask}
+                ></lightning-button>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <dl class="arc-case-detail__key-facts">
+          <div class="arc-case-detail__key-fact">
+            <dt>Case Number</dt>
+            <dd>{detail.caseNumber}</dd>
+          </div>
+          <template lwc:if={detail.priority}>
+            <div class="arc-case-detail__key-fact">
+              <dt>Priority</dt>
+              <dd>{detail.priority}</dd>
+            </div>
+          </template>
+          <div class="arc-case-detail__key-fact">
+            <dt>Status</dt>
+            <dd>{detail.status}</dd>
+          </div>
+          <template lwc:if={hasAccountLink}>
+            <div class="arc-case-detail__key-fact">
+              <dt>Account Name</dt>
+              <dd>
+                <a href="#" onclick={handleAccountClick}
+                  >{detail.accountName}</a
+                >
+              </dd>
+            </div>
+          </template>
+          <template lwc:if={detail.ownerName}>
+            <div class="arc-case-detail__key-fact">
+              <dt>Case Owner</dt>
+              <dd>{detail.ownerName}</dd>
+            </div>
+          </template>
+          <template lwc:if={detail.financialAdvisorTeamName}>
+            <div class="arc-case-detail__key-fact">
+              <dt>Financial Advisor Team</dt>
+              <dd>{detail.financialAdvisorTeamName}</dd>
+            </div>
+          </template>
+        </dl>
+
+        <template lwc:if={hasStatusPath}>
+          <nav class="case-path" aria-label="Case status">
+            <ol class="case-path__track">
+              <template for:each={statusPath} for:item="step">
+                <li key={step.value} class={step.className}>
+                  <span class="case-path__label">{step.label}</span>
+                </li>
+              </template>
+            </ol>
+          </nav>
+        </template>
+      </header>
+
+      <div class="arc-case-detail__body">
+        <div class="arc-case-detail__main">
+          <!--
+            The same panel the CRM Case record page leads with (caseOverviewTile on
+            Case_Record_Page): on-track badge, the case summary line, the
+            completed/total main-track ratio, and the milestone track.
+
+            Rendered unconditionally, as the Lightning page renders it. It used to be
+            gated on detail.totalMainTrackTasks, a Case rollup that is empty on every
+            case in this org — so the tile was suppressed even when it had data of its
+            own to show. It fetches its own figures through
+            CaseStatusSummaryController and owns its loading and empty states.
+          -->
+          <c-case-overview-tile record-id={detail.id}></c-case-overview-tile>
+
+          <!--
+            All three tracks together, or none. The Lightning page shows every
+            track for a case that tracks tasks — an empty one reads "No Tasks
+            Found." and that absence is information. Gating them individually
+            hid the fact that a track exists and is empty; gating them as a set
+            still keeps all three off a case type that has no tracks at all.
+          -->
+          <template lwc:if={hasAnyTasks}>
+            <c-branch-pit-stop record-id={detail.id}></c-branch-pit-stop>
+            <c-main-track-tasks record-id={detail.id}></c-main-track-tasks>
+            <c-home-office-pit-stop
+              record-id={detail.id}
+            ></c-home-office-pit-stop>
+          </template>
+
+          <!--
+            Case Information, Description Information and System Information, the
+            three sections the Lightning page's Details tab carries.
+
+            Rendered by lightning-record-form rather than a hand-built list so
+            each field arrives the way the platform draws it: real label,
+            formatted currency and date, a lookup as a link, and an inline-edit
+            pencil on the fields the user is allowed to change. An explicit field
+            list is passed instead of layout-type="Full", which renders every
+            field of every case type including the blank ones.
+          -->
+          <template lwc:if={hasCaseInfoFields}>
+            <details class="case-section" open>
+              <summary class="case-section__summary">Case Information</summary>
+              <div class="case-section__body">
+                <lightning-record-form
+                  record-id={detail.id}
+                  object-api-name="Case"
+                  fields={caseInfoFields}
+                  columns="2"
+                  mode="view"
+                ></lightning-record-form>
+              </div>
+            </details>
+          </template>
+
+          <details class="case-section" open>
+            <summary class="case-section__summary">
+              Description Information
+            </summary>
+            <div class="case-section__body">
+              <lightning-record-form
+                record-id={detail.id}
+                object-api-name="Case"
+                fields={descriptionFields}
+                columns="1"
+                mode="view"
+              ></lightning-record-form>
+            </div>
+          </details>
+
+          <!-- Audit fields are not editable, so this one is plainly read-only. -->
+          <details class="case-section">
+            <summary class="case-section__summary">System Information</summary>
+            <div class="case-section__body">
+              <lightning-record-form
+                record-id={detail.id}
+                object-api-name="Case"
+                fields={systemFields}
+                columns="2"
+                mode="readonly"
+              ></lightning-record-form>
+            </div>
+          </details>
+
+          <!-- The wizard-schema sections, for the case types that have them. -->
+          <template lwc:if={hasFieldSections}>
+            <template for:each={fieldSections} for:item="section">
+              <details key={section.key} class="case-section" open>
+                <summary class="case-section__summary">{section.name}</summary>
+                <div class="case-section__body">
+                  <dl class="case-section__grid">
+                    <template for:each={section.fields} for:item="field">
+                      <div key={field.key} class="case-section__field">
+                        <dt>{field.label}</dt>
+                        <dd>{field.value}</dd>
+                      </div>
+                    </template>
+                  </dl>
+                </div>
+              </details>
+            </template>
+          </template>
+
+          <template lwc:if={hasHouseholdSummary}>
+            <details class="case-section" open>
+              <summary class="case-section__summary">
+                Household Information
+              </summary>
+              <div class="case-section__body">
+                <dl class="case-section__grid">
+                  <template for:each={householdFacts} for:item="fact">
+                    <div key={fact.key} class="case-section__field">
+                      <dt>{fact.label}</dt>
+                      <dd>{fact.value}</dd>
+                    </div>
+                  </template>
+                </dl>
+              </div>
+            </details>
+          </template>
+
+          <lightning-card title={allTasksLabel}>
+            <template lwc:if={hasTasks}>
+              <c-styled-data-table
+                aria-label="Tasks for this case"
+                key-field="id"
+                columns={taskColumns}
+                data={tasks}
+                placeholder="-"
+                enable-row-navigation
+              ></c-styled-data-table>
+            </template>
+            <template lwc:else>
+              <div class="slds-p-around_medium">No Tasks Found.</div>
+            </template>
+          </lightning-card>
+
+          <template lwc:if={hasOpenHouseholdCases}>
+            <lightning-card title={openHouseholdCasesLabel}>
+              <c-styled-data-table
+                aria-label="Open cases for this household"
+                key-field="id"
+                columns={relatedCaseColumns}
+                data={openHouseholdCases}
+                placeholder="-"
+                enable-row-navigation
+              ></c-styled-data-table>
+            </lightning-card>
+          </template>
+
+          <template lwc:if={hasClosedHouseholdCases}>
+            <lightning-card title={closedHouseholdCasesLabel}>
+              <c-styled-data-table
+                aria-label="Closed cases for this household"
+                key-field="id"
+                columns={relatedCaseColumns}
+                data={closedHouseholdCases}
+                placeholder="-"
+                enable-row-navigation
+              ></c-styled-data-table>
+            </lightning-card>
+          </template>
+        </div>
+
+        <div class="arc-case-detail__side">
+          <c-case-current-task record-id={detail.id}></c-case-current-task>
+
+          <template lwc:if={showAdvertisingItem}>
+            <lightning-card title="Advertising Item Details">
+              <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+                <template lwc:if={detail.advertisingItemId}>
+                  <dl class="case-section__grid case-section__grid--single">
+                    <div class="case-section__field">
+                      <dt>Advertising Item</dt>
+                      <dd>
+                        <a href="#" onclick={handleAdvertisingItemClick}
+                          >{detail.advertisingItemName}</a
+                        >
+                      </dd>
+                    </div>
+                  </dl>
+                </template>
+                <template lwc:else>
+                  <p class="case-empty">Link a related record.</p>
+                </template>
+              </div>
+            </lightning-card>
+          </template>
+
+          <c-arc-related-list
+            record-id={detail.id}
+            card-label="Case Comments"
+            related-object-api-name="CaseComment"
+            parent-field-api-name="ParentId"
+            columns="Comment:CommentBody,By:CreatedBy.Name,Added:CreatedDate"
+            disable-row-links
+            collapsible
+          ></c-arc-related-list>
+
+          <c-arc-related-list
+            record-id={detail.id}
+            card-label="Order Tickets"
+            related-object-api-name="Order_Ticket__c"
+            parent-field-api-name="Case__c"
+            columns="Order Ticket:Name,Financial Account:Wizard_Financial_Account__r.Name,Created:CreatedDate"
+            collapsible
+          ></c-arc-related-list>
+
+          <c-arc-related-list
+            record-id={detail.id}
+            card-label="Related Products"
+            related-object-api-name="Financial_Account_Related_Product__c"
+            parent-field-api-name="Case__c"
+            columns="Product:Name,Financial Account:Wizard_Financial_Account__r.Name,Created:CreatedDate"
+            collapsible
+          ></c-arc-related-list>
+
+          <c-arc-related-list
+            record-id={detail.id}
+            card-label="Check Logs"
+            related-object-api-name="Check_Log__c"
+            parent-field-api-name="Case__c"
+            columns="Check Log:Name,Amount:Amount__c,Status:Status__c"
+            collapsible
+          ></c-arc-related-list>
+
+          <c-arc-related-list
+            record-id={detail.id}
+            card-label="Trade Errors Log"
+            related-object-api-name="Trade_Error_Log__c"
+            parent-field-api-name="Case__c"
+            columns="Trade Error:Name,Amount:Total_Trade_Error_Amount__c,Status:Status__c"
+            collapsible
+          ></c-arc-related-list>
+
+          <c-arc-related-list
+            record-id={detail.id}
+            card-label="Services"
+            related-object-api-name="Service__c"
+            parent-field-api-name="Case__c"
+            columns="Service:Name,Type:Type__c,Start Date:Start_Date__c"
+            collapsible
+          ></c-arc-related-list>
+
+          <!--
+            The tabset that closes the layout's right rail. Feed is absent
+            rather than empty: the record feed there is an Aura component and
+            Aura has no runtime in an LWR site.
+          -->
+          <!--
+            The rail already lists this case's related records explicitly, so a
+            Related tab would only repeat them — and a table in a 340px rail wraps
+            every cell to three lines. Files is the one thing it adds.
+          -->
+          <div class="case-subtabs">
+            <div class="case-tabs" role="tablist">
+              <button
+                class={filesTabClass}
+                role="tab"
+                type="button"
+                data-tab="files"
+                aria-selected={isFilesTab}
+                onclick={handleTabSelect}
+              >
+                Files
+              </button>
+            </div>
+
+            <c-arc-related-list
+              record-id={detail.id}
+              card-label="Files"
+              related-object-api-name="ContentDocumentLink"
+              parent-field-api-name="LinkedEntityId"
+              columns="Title:ContentDocument.Title,Type:ContentDocument.FileType"
+              collapsible
+              disable-row-links
+            ></c-arc-related-list>
+          </div>
+        </div>
+      </div>
+      <c-arc-flow-modal
+        lwc:ref="flowModal"
+        onflowfinished={handleFlowFinished}
+      ></c-arc-flow-modal>
+    </template>
+  </div>
+</template>

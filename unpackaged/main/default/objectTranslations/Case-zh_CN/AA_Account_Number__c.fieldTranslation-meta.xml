@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <help><!-- If the Source of Funds is an Advisory Account, and the account is already at the firm, provide the account number. --></help>
+        <label><!-- Advisory Account: Account Number --></label>
+        <name>AA_Account_Number__c</name>
+        <relationshipLabel><!-- Cases (AA - Account Number) --></relationshipLabel>
+    </CustomFieldTranslation>

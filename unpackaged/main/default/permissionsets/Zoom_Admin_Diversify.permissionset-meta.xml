@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>This permission is intended for zoom administrators of the ORG, who configures zoom App.</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Zoom Admin Diversify</label>
+    <tabSettings>
+        <tab>standard-report</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+</PermissionSet>

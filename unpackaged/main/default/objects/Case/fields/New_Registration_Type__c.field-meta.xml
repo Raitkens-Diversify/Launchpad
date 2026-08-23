@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>New_Registration_Type__c</fullName>
+    <label>New Registration Type</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Individual</fullName>
+                <default>false</default>
+                <label>Individual</label>
+            </value>
+            <value>
+                <fullName>Community Property</fullName>
+                <default>false</default>
+                <label>Community Property</label>
+            </value>
+            <value>
+                <fullName>JTWROS</fullName>
+                <default>false</default>
+                <label>JTWROS</label>
+            </value>
+            <value>
+                <fullName>Tenants in Common</fullName>
+                <default>false</default>
+                <label>Tenants in Common</label>
+            </value>
+            <value>
+                <fullName>Tenants in the Entirety</fullName>
+                <default>false</default>
+                <label>Tenants in the Entirety</label>
+            </value>
+            <value>
+                <fullName>529 Plan</fullName>
+                <default>false</default>
+                <label>529 Plan</label>
+            </value>
+            <value>
+                <fullName>Conservatorship</fullName>
+                <default>false</default>
+                <label>Conservatorship</label>
+            </value>
+            <value>
+                <fullName>Coverdell ESA</fullName>
+                <default>false</default>
+                <label>Coverdell ESA</label>
+            </value>
+            <value>
+                <fullName>UGMA/UTMA</fullName>
+                <default>false</default>
+                <label>UGMA/UTMA</label>
+            </value>
+            <value>
+                <fullName>Traditional IRA</fullName>
+                <default>false</default>
+                <label>Traditional IRA</label>
+            </value>
+            <value>
+                <fullName>Roth IRA</fullName>
+                <default>false</default>
+                <label>Roth IRA</label>
+            </value>
+            <value>
+                <fullName>Rollover IRA</fullName>
+                <default>false</default>
+                <label>Rollover IRA</label>
+            </value>
+            <value>
+                <fullName>SEP IRA</fullName>
+                <default>false</default>
+                <label>SEP IRA</label>
+            </value>
+            <value>
+                <fullName>401(k) Plan</fullName>
+                <default>false</default>
+                <label>401(k) Plan</label>
+            </value>
+            <value>
+                <fullName>401(k) Roth</fullName>
+                <default>false</default>
+                <label>401(k) Roth</label>
+            </value>
+            <value>
+                <fullName>403(b)</fullName>
+                <default>false</default>
+                <label>403(b)</label>
+            </value>
+            <value>
+                <fullName>457 Plan</fullName>
+                <default>false</default>
+                <label>457 Plan</label>
+            </value>
+            <value>
+                <fullName>457(B) Plan</fullName>
+                <default>false</default>
+                <label>457(B) Plan</label>
+            </value>
+            <value>
+                <fullName>Trust</fullName>
+                <default>false</default>
+                <label>Trust</label>
+            </value>
+            <value>
+                <fullName>Business Account</fullName>
+                <default>false</default>
+                <label>Business Account</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

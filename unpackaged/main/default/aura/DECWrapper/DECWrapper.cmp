@@ -1,0 +1,3 @@
+<aura:component implements="lightning:availableForFlowScreens" access="global">
+	<c:DECWrapper></c:DECWrapper>
+</aura:component>

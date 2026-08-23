@@ -1,0 +1,15 @@
+{
+  "type" : "sfdc_cms__themeLayout",
+  "title" : "Custom Header, Side Nav and Footer",
+  "contentBody" : {
+    "component" : {
+      "children" : [ {
+        "attributes" : {
+          "logoWidth" : "100"
+        },
+        "id" : "35cad31a-4ad4-446e-8e10-8d656c788677"
+      } ]
+    }
+  },
+  "urlName" : "custom-header-side-nav-and-footer"
+}

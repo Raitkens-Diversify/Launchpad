@@ -1,0 +1,43 @@
+<template>
+    <c-ds-modal-v2
+        is-open={isOpen}
+        title="Manage document links"
+        size="small"
+        onclose={handleClose}>
+        <p class="doc-links__tagline">
+            Link file '<strong>{fileNameDisplay}</strong>' to one or more documents.
+        </p>
+
+        <ul class="doc-links__list">
+            <template for:each={rows} for:item="row">
+                <li key={row.id} class={row.rowClass}>
+                    <lightning-input
+                        type="checkbox"
+                        label={row.name}
+                        data-id={row.id}
+                        checked={row.checked}
+                        disabled={row.disabled}
+                        onchange={handleToggle}>
+                    </lightning-input>
+                    <template lwc:if={row.subtext}>
+                        <p class="doc-links__subtext">Linked to {row.subtext}</p>
+                    </template>
+                </li>
+            </template>
+        </ul>
+
+        <div slot="footer" class="doc-links__footer">
+            <lightning-button
+                variant="neutral"
+                label="Cancel"
+                onclick={handleClose}>
+            </lightning-button>
+            <lightning-button
+                variant="brand"
+                label="Accept"
+                disabled={acceptDisabled}
+                onclick={handleAccept}>
+            </lightning-button>
+        </div>
+    </c-ds-modal-v2>
+</template>

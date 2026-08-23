@@ -1,0 +1,56 @@
+<!-- Author: Hoang Long Vu To -->
+<template>
+    <template lwc:if={shouldRender}>
+        <div class="record-detail">
+            <template lwc:if={errorMessage}>
+                <div class="record-detail__error" role="alert">
+                    <lightning-icon
+                        icon-name="utility:error"
+                        size="small"
+                        variant="error"
+                        class="record-detail__error-icon">
+                    </lightning-icon>
+                    <span>{errorMessage}</span>
+                </div>
+            </template>
+
+            <template lwc:elseif={showEmptyState}>
+                <div class="record-detail__empty-state" role="status">
+                    <p class="record-detail__empty-state-text ">{emptyStateMessage}</p>
+                </div>
+            </template>
+
+            <template lwc:elseif={isLoading}>
+                <div class="record-detail__loading">
+                    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <template lwc:else>
+                <template lwc:if={hasTitle}>
+                    <h2 class="record-detail__component-title">{title}</h2>
+                </template>
+                <div class="record-detail__sections">
+                    <template for:each={sectionCards} for:item="section">
+                        <section key={section.key} class="record-detail__section">
+                            <c-card class="record-detail__card">
+                                <c-arc-record-detail-section
+                                    data-section-key={section.key}
+                                    section={section}
+                                    is-editing={section.isEditing}
+                                    is-saving={section.isSaving}
+                                    has-changes={section.hasChanges}
+                                    is-submitted={isSubmitted}
+                                    onedit={handleSectionEdit}
+                                    onsave={handleSectionSave}
+                                    onsectioncancel={handleSectionCancel}
+                                    onvaluechange={handleFieldChange}>
+                                </c-arc-record-detail-section>
+                            </c-card>
+                        </section>
+                    </template>
+                </div>
+            </template>
+        </div>
+    </template>
+</template>

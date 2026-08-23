@@ -1,0 +1,80 @@
+/* ───────── New envelope modal form ───────── */
+.new-envelope-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-4);
+    font-family: var(--slds-g-font-family-base);
+}
+
+.new-envelope-form__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.new-envelope-form__label {
+    font-family: var(--slds-g-font-family-base);
+    font-size: var(--slds-g-font-scale-2);
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--slds-g-color-on-surface-2);
+}
+
+
+/* Segmented household toggle */
+.new-envelope-form__toggle {
+    display: flex;
+    width: 100%;
+}
+
+.new-envelope-form__toggle-button {
+    flex: 1 1 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    height: 36px;
+    padding: 0 var(--slds-g-spacing-4);
+    font-family: inherit;
+    font-size: var(--slds-g-font-scale-2);
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3);
+    background: var(--slds-g-color-surface-container-1);
+    border: 1px solid var(--slds-g-color-border-2);
+    cursor: pointer;
+}
+
+.new-envelope-form__toggle-button + .new-envelope-form__toggle-button {
+    margin-left: -1px;
+}
+
+.new-envelope-form__toggle-button:first-child {
+    border-top-left-radius: var(--slds-g-radius-border-2);
+    border-bottom-left-radius: var(--slds-g-radius-border-2);
+}
+
+.new-envelope-form__toggle-button:last-child {
+    border-top-right-radius: var(--slds-g-radius-border-2);
+    border-bottom-right-radius: var(--slds-g-radius-border-2);
+}
+
+.new-envelope-form__toggle-button.is-active {
+    position: relative;
+    z-index: 1;
+    background: var(--slds-g-color-accent-container-1);
+    border-color: var(--slds-g-color-accent-2);
+    color: var(--slds-g-color-on-accent-1);
+}
+
+.new-envelope-form__toggle-button:focus-visible {
+    outline: 2px solid var(--slds-g-color-accent-container-1);
+    outline-offset: -2px;
+}
+
+/* Footer buttons */
+.new-envelope-form__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--slds-g-spacing-2);
+    font-weight: 600;
+}

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Sleeve_Classification__c</fullName>
+    <description>What kind of sleeve this strategy is. Drives how the Order Ticket wizard lets advisors fund it: each classification maps to an Allowed Funding Basis (Dollar Only / Percent Only / Either) in the Sleeve Basis Rule custom metadata, and the wizard offers the strategy only in the matching list. Fixed-dollar families (structured notes, alternatives, interval funds) are bought as set amounts and must not drift as the account grows. Blank falls back to the Default rule (Percent Only), which is how every strategy behaved before this field existed.</description>
+    <inlineHelpText>What kind of sleeve this is. Determines whether advisors fund it as a fixed dollar amount, a percentage, or either — see the Sleeve Basis Rule metadata.</inlineHelpText>
+    <label>Sleeve Classification</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Model Allocation</fullName>
+                <default>false</default>
+                <label>Model Allocation</label>
+            </value>
+            <value>
+                <fullName>Model Exclusion</fullName>
+                <default>false</default>
+                <label>Model Exclusion</label>
+            </value>
+            <value>
+                <fullName>Billing Exclusion</fullName>
+                <default>false</default>
+                <label>Billing Exclusion</label>
+            </value>
+            <value>
+                <fullName>Fee-Based Alternative</fullName>
+                <default>false</default>
+                <label>Fee-Based Alternative</label>
+            </value>
+            <value>
+                <fullName>Broker Dealer Alternative</fullName>
+                <default>false</default>
+                <label>Broker Dealer Alternative</label>
+            </value>
+            <value>
+                <fullName>Structured Note</fullName>
+                <default>false</default>
+                <label>Structured Note</label>
+            </value>
+            <value>
+                <fullName>Interval Fund</fullName>
+                <default>false</default>
+                <label>Interval Fund</label>
+            </value>
+            <value>
+                <fullName>Bond Ladder</fullName>
+                <default>false</default>
+                <label>Bond Ladder</label>
+            </value>
+            <value>
+                <fullName>Cash / Money Market</fullName>
+                <default>false</default>
+                <label>Cash / Money Market</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

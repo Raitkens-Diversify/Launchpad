@@ -1,0 +1,857 @@
+<!-- sldsValidatorIgnore -->
+<!-- Author: Hoang Long Vu To | Date: 2026-06-02 -->
+<template>
+  <lightning-card title="Activity Timeline">
+    <div slot="actions" class="timeline-card-actions">
+      <template lwc:if={showActivityActions}>
+        <div class="timeline-split-button timeline-split-button--work">
+          <button
+            type="button"
+            class="timeline-split-button__main"
+            aria-label="Work activity options"
+            aria-haspopup="true"
+            aria-expanded={workMenuOpen}
+            onclick={handleWorkMenuToggle}
+          >
+            <lightning-icon
+              icon-name={workActionIcon}
+              size="x-small"
+              class="timeline-split-button__icon timeline-split-button__icon--work"
+              aria-hidden="true"
+            ></lightning-icon>
+          </button>
+          <button
+            type="button"
+            class="timeline-split-button__trigger"
+            aria-label="Work activity options"
+            aria-haspopup="true"
+            aria-expanded={workMenuOpen}
+            onclick={handleWorkMenuToggle}
+          >
+            <lightning-icon
+              icon-name="utility:down"
+              size="xx-small"
+              aria-hidden="true"
+            ></lightning-icon>
+          </button>
+          <template lwc:if={workMenuOpen}>
+            <div class="timeline-split-button__menu" role="menu">
+              <button
+                type="button"
+                class="timeline-split-button__menu-item"
+                role="menuitem"
+                onclick={handleNewTask}
+              >
+                <lightning-icon
+                  icon-name="standard:task"
+                  size="x-small"
+                  class="timeline-split-button__menu-icon timeline-split-button__menu-icon--work"
+                  aria-hidden="true"
+                ></lightning-icon>
+                <span>New Task</span>
+              </button>
+            </div>
+          </template>
+        </div>
+
+        <div class="timeline-split-button timeline-split-button--interactions">
+          <button
+            type="button"
+            class="timeline-split-button__main"
+            aria-label="Interaction activity options"
+            aria-haspopup="true"
+            aria-expanded={interactionMenuOpen}
+            onclick={handleInteractionMenuToggle}
+          >
+            <lightning-icon
+              icon-name={interactionActionIcon}
+              size="x-small"
+              class="timeline-split-button__icon timeline-split-button__icon--interactions"
+              aria-hidden="true"
+            ></lightning-icon>
+          </button>
+          <button
+            type="button"
+            class="timeline-split-button__trigger"
+            aria-label="Interaction activity options"
+            aria-haspopup="true"
+            aria-expanded={interactionMenuOpen}
+            onclick={handleInteractionMenuToggle}
+          >
+            <lightning-icon
+              icon-name="utility:down"
+              size="xx-small"
+              aria-hidden="true"
+            ></lightning-icon>
+          </button>
+          <template lwc:if={interactionMenuOpen}>
+            <div class="timeline-split-button__menu" role="menu">
+              <button
+                type="button"
+                class="timeline-split-button__menu-item"
+                role="menuitem"
+                onclick={handleLogACall}
+              >
+                <lightning-icon
+                  icon-name="standard:call"
+                  size="x-small"
+                  class="timeline-split-button__menu-icon timeline-split-button__menu-icon--interactions"
+                  aria-hidden="true"
+                ></lightning-icon>
+                <span>Log a Call</span>
+              </button>
+              <button
+                type="button"
+                class="timeline-split-button__menu-item"
+                role="menuitem"
+                onclick={handleNewMeeting}
+              >
+                <lightning-icon
+                  icon-name="standard:event"
+                  size="x-small"
+                  class="timeline-split-button__menu-icon timeline-split-button__menu-icon--interactions"
+                  aria-hidden="true"
+                ></lightning-icon>
+                <span>Meeting</span>
+              </button>
+            </div>
+          </template>
+        </div>
+      </template>
+    </div>
+
+    <div class="activity-timeline-wrapper slds-p-around_medium">
+      <!-- ── Search ──────────────────────────────────────────────── -->
+      <div class="timeline-search">
+        <lightning-input
+          type="search"
+          label="Search"
+          variant="label-hidden"
+          placeholder="Search activities..."
+          value={searchTerm}
+          onchange={handleSearch}
+        ></lightning-input>
+      </div>
+
+      <!-- ── Category pills ───────────────────────────────────────── -->
+      <div class="filter-section">
+        <div class="filter-button-row">
+          <div
+            class="filter-button-row__pills"
+            role="group"
+            aria-label="Filter activities by type"
+          >
+            <template for:each={filterButtons} for:item="btn">
+              <button
+                key={btn.value}
+                class={btn.cssClass}
+                data-filter={btn.value}
+                type="button"
+                aria-pressed={btn.ariaPressed}
+                aria-label={btn.ariaLabel}
+                onclick={handleFilterToggle}
+              >
+                <lightning-icon
+                  icon-name={btn.icon}
+                  size="xx-small"
+                  class={btn.iconClass}
+                >
+                </lightning-icon>
+                <span class="filter-pill__label">{btn.label}</span>
+                <span class="filter-pill__count">({btn.count})</span>
+              </button>
+            </template>
+          </div>
+          <template lwc:if={showExternalToggleControl}>
+            <div class="filter-external-toggle">
+              <span class="filter-external-toggle__label">{externalToggleLabel}</span>
+              <lightning-input
+                type="toggle"
+                label={externalToggleLabel}
+                variant="label-hidden"
+                checked={customerOnlyMode}
+                message-toggle-active=""
+                message-toggle-inactive=""
+                aria-label={externalToggleAriaLabel}
+                onchange={handleExternalToggle}
+                class="filter-external-toggle__input"
+              ></lightning-input>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- ── Filters ─────────────────────────────────────────────── -->
+      <div class="tab-filters">
+        <div class="tab-filters__header">
+          <button
+            type="button"
+            class="tab-filters__toggle slds-button_reset"
+            aria-expanded={filterPanelAriaExpanded}
+            aria-controls="activity-filter-panel"
+            aria-label={filterPanelToggleLabel}
+            onclick={handleToggleFilterPanel}
+          >
+            <lightning-icon
+              icon-name={filterPanelToggleIcon}
+              size="x-small"
+              class="tab-filters__chevron"
+              aria-hidden="true"
+            ></lightning-icon>
+            <h2 class="tab-filters__heading slds-text-heading_small">Filters</h2>
+          </button>
+          <div class="tab-filters__sort">
+            <lightning-combobox
+              name="sortOrder"
+              label="Sort order"
+              variant="label-hidden"
+              value={sortOrder}
+              options={sortOptions}
+              onchange={handleSortChange}
+            ></lightning-combobox>
+          </div>
+        </div>
+
+        <template lwc:if={isFilterPanelExpanded}>
+          <div id="activity-filter-panel" class="filter-panel__body">
+          <div class="filter-field filter-field--type-tabs">
+            <lightning-tabset
+              active-tab-value={activeFilterTab}
+              onactive={handleFilterTabChange}
+            >
+              <lightning-tab label="Work" value="Work">
+                <div class="filter-type-options" role="group" aria-label="Work type filters">
+                  <span class="slds-form-element__label">Type</span>
+                  <div class="filter-type-options__checkboxes">
+                    <template for:each={workTypeOptions} for:item="typeOption">
+                      <lightning-input
+                        key={typeOption.value}
+                        type="checkbox"
+                        label={typeOption.label}
+                        checked={typeOption.checked}
+                        data-type={typeOption.value}
+                        onchange={handleTypeFilterChange}
+                      ></lightning-input>
+                    </template>
+                  </div>
+                </div>
+              </lightning-tab>
+              <lightning-tab label="Interactions" value="Interactions">
+                <div
+                  class="filter-type-options"
+                  role="group"
+                  aria-label="Interaction type filters"
+                >
+                  <span class="slds-form-element__label">Type</span>
+                  <div class="filter-type-options__checkboxes">
+                    <template for:each={interactionTypeOptions} for:item="typeOption">
+                      <lightning-input
+                        key={typeOption.value}
+                        type="checkbox"
+                        label={typeOption.label}
+                        checked={typeOption.checked}
+                        data-type={typeOption.value}
+                        onchange={handleTypeFilterChange}
+                      ></lightning-input>
+                    </template>
+                  </div>
+                </div>
+              </lightning-tab>
+            </lightning-tabset>
+          </div>
+
+          <div class="filter-field">
+            <template for:each={ownerPickerInstances} for:item="picker">
+              <lightning-record-picker
+                key={picker.id}
+                label="Record Owner or Team Owner"
+                placeholder="Search owners..."
+                object-api-name="User"
+                value=""
+                filter={ownerUserFilter}
+                onchange={handleOwnerPickerChange}
+              ></lightning-record-picker>
+            </template>
+            <template lwc:if={hasOwnerUserPills}>
+              <div
+                class="participant-pills"
+                role="list"
+                aria-label="Selected record owners"
+              >
+                <template for:each={ownerUserPills} for:item="pill">
+                  <span key={pill.id} class="participant-pill" role="listitem">
+                    <span class="participant-pill__label slds-text-body_small">{pill.name}</span>
+                    <button
+                      type="button"
+                      class="participant-pill__remove slds-button_reset"
+                      data-user-id={pill.id}
+                      aria-label={pill.removeLabel}
+                      onclick={handleRemoveOwnerPill}
+                    >
+                      <lightning-icon
+                        icon-name="utility:close"
+                        size="xx-small"
+                        alternative-text={pill.removeLabel}
+                      ></lightning-icon>
+                    </button>
+                  </span>
+                </template>
+              </div>
+            </template>
+          </div>
+
+          <div class="filter-field">
+            <span class="slds-form-element__label">Due Date</span>
+            <div class="filter-field__date-range">
+              <lightning-input
+                type="date"
+                label="From"
+                value={filterValues.dueDateFrom}
+                data-field="dueDateFrom"
+                onchange={handleFilterChange}
+              ></lightning-input>
+              <lightning-input
+                type="date"
+                label="To"
+                value={filterValues.dueDateTo}
+                data-field="dueDateTo"
+                onchange={handleFilterChange}
+              ></lightning-input>
+            </div>
+          </div>
+
+          <div class="filter-field">
+            <lightning-input
+              type="text"
+              label="Status"
+              placeholder="Search status..."
+              value={filterValues.status}
+              data-field="status"
+              onchange={handleFilterChange}
+            ></lightning-input>
+          </div>
+
+          <div class="filter-panel__clear-row">
+            <lightning-button
+              variant="brand"
+              label="Clear filters"
+              onclick={handleClearFilters}
+            ></lightning-button>
+          </div>
+          </div>
+        </template>
+      </div>
+
+      <!-- ── Timeline ────────────────────────────────────────────── -->
+      <template lwc:if={isLoading}>
+        <div class="timeline-loading slds-align_absolute-center slds-p-around_xx-large" role="status" aria-live="polite">
+          <lightning-spinner
+            alternative-text="Loading activities"
+            size="medium"
+          ></lightning-spinner>
+        </div>
+      </template>
+
+      <template lwc:elseif={loadError}>
+        <div class="timeline-empty-state slds-p-around_large slds-text-align_center">
+          <lightning-icon
+            icon-name="utility:error"
+            size="medium"
+            class="slds-text-color_error"
+          ></lightning-icon>
+          <h3 class="slds-text-heading_small slds-m-top_small">
+            Unable to load activities
+          </h3>
+          <p
+            class="slds-text-body_regular slds-text-color_weak slds-m-top_x-small"
+          >
+            Refresh the page or contact your administrator if the issue
+            persists.
+          </p>
+        </div>
+      </template>
+
+      <template lwc:else>
+        <div class="timeline-panel">
+          <div
+            class="timeline-scroll"
+            tabindex="0"
+            role="region"
+            aria-label="Activity timeline"
+          >
+            <div class={timelineOuterClass}>
+              <template for:each={groupedActivities} for:item="group">
+                <div key={group.id} class={group.groupClass}>
+                  <button
+                    type="button"
+                    class="timeline-date-row timeline-date-row_toggle"
+                    data-group-id={group.id}
+                    aria-expanded={group.ariaExpanded}
+                    aria-controls={group.panelId}
+                    aria-label={group.toggleLabel}
+                    onclick={handleToggleDateGroup}
+                  >
+                    <lightning-icon
+                      icon-name={group.toggleIcon}
+                      size="x-small"
+                      class="timeline-date-row__chevron"
+                      aria-hidden="true"
+                    ></lightning-icon>
+                    <span class="slds-section__title"
+                      >{group.primaryLabel}</span
+                    >
+                    <template lwc:if={group.relativeLabel}>
+                      <span
+                        class="slds-section__title timeline-date-relative"
+                        >{group.relativeLabel}</span
+                      >
+                    </template>
+                  </button>
+
+                  <div
+                    id={group.panelId}
+                    class={group.itemsClass}
+                    aria-hidden={group.itemsAriaHidden}
+                  >
+                    <template for:each={group.items} for:item="activity">
+                        <div key={activity.id} class="timeline-item-row">
+                          <div
+                            class="timeline-item-card slds-box slds-box_x-small slds-m-bottom_small"
+                          >
+                            <div class="activity-card-layout">
+                              <div class={activity.iconClass}>
+                                <lightning-icon
+                                  icon-name={activity.icon}
+                                  size="small"
+                                >
+                                </lightning-icon>
+                              </div>
+
+                              <div class="timeline-item-body">
+                                <div class="activity-title-row">
+                                  <div class="activity-title-main">
+                                    <template lwc:if={activity.objectApiName}>
+                                      <a
+                                        href={activity.recordHref}
+                                        class="activity-title-link"
+                                        data-record-id={activity.id}
+                                        data-object-api-name={activity.objectApiName}
+                                        aria-label={activity.title}
+                                        onclick={handleRecordNavigate}
+                                        onkeydown={handleRecordKeyDown}
+                                        >{activity.title}</a
+                                      >
+                                    </template>
+                                    <template lwc:else>
+                                      <span class="activity-title-text"
+                                        >{activity.title}</span
+                                      >
+                                    </template>
+                                  </div>
+                                  <span class="activity-card-time slds-text-body_small slds-text-color_weak"
+                                    >{activity.timeDisplay}</span
+                                  >
+                                </div>
+
+                                <template lwc:if={activity.showAssociatedAccount}>
+                                  <div class="activity-associated-account">
+                                    <a
+                                      href={activity.associatedAccountLink.href}
+                                      class="activity-associated-account__link activity-summary__link"
+                                      data-record-id={activity.associatedAccountLink.recordId}
+                                      data-object-api-name={activity.associatedAccountLink.objectApiName}
+                                      aria-label={activity.associatedAccountLink.name}
+                                      onclick={handleRecordNavigate}
+                                      onkeydown={handleRecordKeyDown}
+                                    >
+                                      <lightning-icon
+                                        icon-name="utility:account"
+                                        size="xx-small"
+                                        class="activity-associated-account__icon"
+                                        aria-hidden="true"
+                                      ></lightning-icon>
+                                      <span>{activity.associatedAccountLink.name}</span>
+                                    </a>
+                                  </div>
+                                </template>
+
+                                <template lwc:if={activity.showDrpBranchSubline}>
+                                  <div class="activity-associated-account">
+                                    <a
+                                      href={activity.drpBranchSublineLink.href}
+                                      class="activity-associated-account__link activity-summary__link"
+                                      data-record-id={activity.drpBranchSublineLink.recordId}
+                                      data-object-api-name={activity.drpBranchSublineLink.objectApiName}
+                                      aria-label={activity.drpBranchSublineLink.name}
+                                      onclick={handleRecordNavigate}
+                                      onkeydown={handleRecordKeyDown}
+                                    >
+                                      <lightning-icon
+                                        icon-name="utility:account"
+                                        size="xx-small"
+                                        class="activity-associated-account__icon"
+                                        aria-hidden="true"
+                                      ></lightning-icon>
+                                      <span>{activity.drpBranchSublineLink.name}</span>
+                                    </a>
+                                  </div>
+                                </template>
+
+                                <div class="activity-card-details">
+                                <div class="activity-meta">
+                                  <template lwc:if={activity.summary.hasSummary}>
+                                    <span class="activity-summary">
+                                      <template lwc:if={activity.summary.isEmail}>
+                                        <span class="activity-summary__name"
+                                          >{activity.summary.fromAddress}</span
+                                        >
+                                        <span class="activity-summary__text"
+                                          >{activity.summary.actionText}</span
+                                        >
+                                        <template
+                                          lwc:if={activity.summary.recipientLink}
+                                        >
+                                          <template
+                                            lwc:if={activity.summary.recipientLink.isNavigable}
+                                          >
+                                            <a
+                                              href={activity.summary.recipientLink.href}
+                                              class="activity-summary__link"
+                                              data-record-id={activity.summary.recipientLink.recordId}
+                                              data-object-api-name={activity.summary.recipientLink.objectApiName}
+                                              aria-label={activity.summary.recipientLink.name}
+                                              onclick={handleRecordNavigate}
+                                              onkeydown={handleRecordKeyDown}
+                                              >{activity.summary.recipientLink.name}</a
+                                            >
+                                          </template>
+                                          <template lwc:else>
+                                            <span class="activity-summary__name"
+                                              >{activity.summary.recipientLink.name}</span
+                                            >
+                                          </template>
+                                        </template>
+                                        <template
+                                          lwc:if={activity.summary.hasRelated}
+                                        >
+                                          <span class="activity-summary__text"
+                                            >+ {activity.summary.extraRelatedCount}</span
+                                          >
+                                        </template>
+                                      </template>
+                                      <template lwc:elseif={activity.summary.isContactLed}>
+                                        <template
+                                          lwc:if={activity.summary.contactLink.isNavigable}
+                                        >
+                                          <a
+                                            href={activity.summary.contactLink.href}
+                                            class="activity-summary__link"
+                                            data-record-id={activity.summary.contactLink.recordId}
+                                            data-object-api-name={activity.summary.contactLink.objectApiName}
+                                            aria-label={activity.summary.contactLink.name}
+                                            onclick={handleRecordNavigate}
+                                            onkeydown={handleRecordKeyDown}
+                                            >{activity.summary.contactLink.name}</a
+                                          >
+                                        </template>
+                                        <template lwc:else>
+                                          <span class="activity-summary__name"
+                                            >{activity.summary.contactLink.name}</span
+                                          >
+                                        </template>
+                                        <span class="activity-summary__text"
+                                          >{activity.summary.actionText}</span
+                                        >
+                                        <template
+                                          lwc:if={activity.summary.hasRelated}
+                                        >
+                                          <span class="activity-summary__text"
+                                            >+ {activity.summary.extraRelatedCount}</span
+                                          >
+                                        </template>
+                                      </template>
+                                      <template lwc:else>
+                                        <template lwc:if={activity.summary.ownerLink}>
+                                          <template
+                                            lwc:if={activity.summary.ownerLink.isNavigable}
+                                          >
+                                            <a
+                                              href={activity.summary.ownerLink.href}
+                                              class="activity-summary__link"
+                                              data-record-id={activity.summary.ownerLink.recordId}
+                                              data-object-api-name={activity.summary.ownerLink.objectApiName}
+                                              aria-label={activity.summary.ownerLabel}
+                                              onclick={handleRecordNavigate}
+                                              onkeydown={handleRecordKeyDown}
+                                              >{activity.summary.ownerLabel}</a
+                                            >
+                                          </template>
+                                          <template lwc:else>
+                                            <span class="activity-summary__name"
+                                              >{activity.summary.ownerLabel}</span
+                                            >
+                                          </template>
+                                        </template>
+                                        <template lwc:else>
+                                          <span class="activity-summary__name"
+                                            >{activity.summary.ownerLabel}</span
+                                          >
+                                        </template>
+                                        <span class="activity-summary__text"
+                                          >{activity.summary.actionText}</span
+                                        >
+                                        <template
+                                          lwc:if={activity.summary.hasRelated}
+                                        >
+                                          <span class="activity-summary__text"
+                                            >with</span
+                                          >
+                                          <template lwc:if={activity.summary.firstRelated}>
+                                            <template
+                                              lwc:if={activity.summary.firstRelated.isNavigable}
+                                            >
+                                              <a
+                                                href={activity.summary.firstRelated.href}
+                                                class="activity-summary__link"
+                                                data-record-id={activity.summary.firstRelated.recordId}
+                                                data-object-api-name={activity.summary.firstRelated.objectApiName}
+                                                aria-label={activity.summary.firstRelated.name}
+                                                onclick={handleRecordNavigate}
+                                                onkeydown={handleRecordKeyDown}
+                                                >{activity.summary.firstRelated.name}</a
+                                              >
+                                            </template>
+                                            <template lwc:else>
+                                              <span class="activity-summary__name"
+                                                >{activity.summary.firstRelated.name}</span
+                                              >
+                                            </template>
+                                          </template>
+                                          <template
+                                            lwc:if={activity.summary.extraRelatedCount}
+                                          >
+                                            <span class="activity-summary__text"
+                                              >+ {activity.summary.extraRelatedCount}</span
+                                            >
+                                          </template>
+                                        </template>
+                                      </template>
+                                    </span>
+                                  </template>
+                                </div>
+
+                                <template lwc:if={activity.hasExpandableDetails}>
+                                  <button
+                                    type="button"
+                                    class="activity-details-toggle slds-button_reset"
+                                    data-activity-id={activity.id}
+                                    aria-expanded={activity.detailsAriaExpanded}
+                                    aria-controls={activity.detailsPanelId}
+                                    aria-label={activity.detailsToggleLabel}
+                                    onclick={handleToggleActivityDetails}
+                                  >
+                                    <lightning-icon
+                                      icon-name={activity.detailsToggleIcon}
+                                      size="xx-small"
+                                      class="activity-details-toggle__chevron"
+                                      aria-hidden="true"
+                                    ></lightning-icon>
+                                    <span>{activity.detailsToggleLabel}</span>
+                                  </button>
+
+                                  <template lwc:if={activity.isDetailsExpanded}>
+                                    <div
+                                      id={activity.detailsPanelId}
+                                      class="activity-details-panel"
+                                    >
+                                      <template lwc:if={activity.details.showDescriptionAtTop}>
+                                        <p class="activity-description">
+                                          {activity.details.description}
+                                        </p>
+                                      </template>
+
+                                      <template lwc:if={activity.details.endDateDisplay}>
+                                        <div class="activity-details-row">
+                                          <span class="activity-details-label"
+                                            >End Date</span
+                                          >
+                                          <span class="activity-details-value"
+                                            >{activity.details.endDateDisplay}</span
+                                          >
+                                        </div>
+                                      </template>
+
+                                      <template lwc:if={activity.details.linkedRecordLink}>
+                                        <div class="activity-details-row">
+                                          <span class="activity-details-label"
+                                            >Related</span
+                                          >
+                                          <span class="activity-details-value">
+                                            <lightning-icon
+                                              icon-name="utility:link"
+                                              size="xx-small"
+                                              class="activity-details-value__icon"
+                                              aria-hidden="true"
+                                            ></lightning-icon>
+                                            <template
+                                              lwc:if={activity.details.linkedRecordLink.isNavigable}
+                                            >
+                                              <a
+                                                href={activity.details.linkedRecordLink.href}
+                                                class="activity-summary__link"
+                                                data-record-id={activity.details.linkedRecordLink.recordId}
+                                                data-object-api-name={activity.details.linkedRecordLink.objectApiName}
+                                                aria-label={activity.details.linkedRecordLink.name}
+                                                onclick={handleRecordNavigate}
+                                                onkeydown={handleRecordKeyDown}
+                                                >{activity.details.linkedRecordLink.name}</a
+                                              >
+                                            </template>
+                                            <template lwc:else>
+                                              <span>{activity.details.linkedRecordLink.name}</span>
+                                            </template>
+                                          </span>
+                                        </div>
+                                      </template>
+
+                                      <template lwc:if={activity.details.status}>
+                                        <div class="activity-details-row">
+                                          <span class="activity-details-label"
+                                            >{activity.details.statusLabel}</span
+                                          >
+                                          <span
+                                            class="activity-badge activity-badge--status slds-text-body_small"
+                                            data-badge={activity.statusBadgeKey}
+                                            >{activity.details.status}</span
+                                          >
+                                        </div>
+                                      </template>
+
+                                      <template
+                                        lwc:if={activity.details.showParticipants}
+                                      >
+                                        <div class="activity-details-row">
+                                          <span class="activity-details-label"
+                                            >Related to</span
+                                          >
+                                          <span
+                                            class="activity-meta__participants"
+                                          >
+                                            <template
+                                              for:each={activity.details.participantLinks}
+                                              for:item="participant"
+                                            >
+                                              <span
+                                                key={participant.key}
+                                                class="activity-participant"
+                                              >
+                                                <template
+                                                  lwc:if={participant.isNavigable}
+                                                >
+                                                  <a
+                                                    href={participant.href}
+                                                    class="activity-participant-link"
+                                                    data-record-id={participant.recordId}
+                                                    data-object-api-name={participant.objectApiName}
+                                                    aria-label={participant.name}
+                                                    onclick={handleRecordNavigate}
+                                                    onkeydown={handleRecordKeyDown}
+                                                    >{participant.name}</a
+                                                  >
+                                                </template>
+                                                <template lwc:else>
+                                                  <span
+                                                    class="activity-participant-text"
+                                                    >{participant.name}</span
+                                                  >
+                                                </template>
+                                                <template
+                                                  lwc:if={participant.showSeparator}
+                                                >
+                                                  <span
+                                                    class="activity-participant-separator"
+                                                    >,&nbsp;</span
+                                                  >
+                                                </template>
+                                              </span>
+                                            </template>
+                                          </span>
+                                        </div>
+                                      </template>
+                                    </div>
+                                  </template>
+                                </template>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </template>
+                    </div>
+                </div>
+              </template>
+
+              <!-- Empty state when filters/search yield no results -->
+              <template lwc:if={hasFilteredEmptyState}>
+                <div class="timeline-empty-state slds-p-around_large slds-text-align_center">
+                  <h3 class="slds-text-heading_small">
+                    No activities to show.
+                  </h3>
+                  <p
+                    class="timeline-empty-state__filter-notice slds-text-body_regular slds-text-color_weak slds-m-top_x-small"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    To change what's shown, try changing your filters.
+                  </p>
+                </div>
+              </template>
+
+              <template lwc:elseif={hasTrueEmptyState}>
+                <div class="timeline-empty-state slds-p-around_large slds-text-align_center">
+                  <h3 class="slds-text-heading_small">
+                    No activities to show.
+                  </h3>
+                  <p
+                    class="slds-text-body_regular slds-text-color_weak slds-m-top_x-small"
+                  >
+                    Get started by sending an email, scheduling a task, and
+                    more.
+                  </p>
+                </div>
+              </template>
+
+              <template lwc:if={hasNoVisibleResults}>
+                <div class="timeline-empty-state slds-p-around_large slds-text-align_center">
+                  <lightning-icon
+                    icon-name="utility:event"
+                    size="medium"
+                    class="slds-text-color_weak"
+                  ></lightning-icon>
+                  <h3 class="slds-text-heading_small slds-m-top_small">
+                    No activities this month
+                  </h3>
+                  <p
+                    class="slds-text-body_regular slds-text-color_weak slds-m-top_x-small"
+                  >
+                    Load a previous month to see older activities.
+                  </p>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <template lwc:if={hasMoreToLoad}>
+            <div class="load-more-row slds-p-around_small slds-text-align_center">
+              <lightning-button
+                label={loadMoreLabel}
+                variant="neutral"
+                onclick={handleLoadMore}
+              ></lightning-button>
+            </div>
+          </template>
+        </div>
+      </template>
+    </div>
+  </lightning-card>
+</template>

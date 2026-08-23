@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Type of Request --></label>
+        <name>Type_of_Request__c</name>
+        <picklistValues>
+            <masterLabel>Add Systematic Withdrawal</masterLabel>
+            <translation><!-- Add Systematic Withdrawal --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Instructions for Future Deposit</masterLabel>
+            <translation><!-- Instructions for Future Deposit --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>New DMS Instructions</masterLabel>
+            <translation><!-- New DMS Instructions --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Other</masterLabel>
+            <translation><!-- Other --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Raise Cash</masterLabel>
+            <translation><!-- Raise Cash --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Remove Systematic Withdrawal</masterLabel>
+            <translation><!-- Remove Systematic Withdrawal --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Update DMS Instructions</masterLabel>
+            <translation><!-- Update DMS Instructions --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

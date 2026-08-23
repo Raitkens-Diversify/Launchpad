@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Approximate Highest Tax Bracket --></label>
+        <name>Approximate_Highest_Tax_Bracket__c</name>
+        <picklistValues>
+            <masterLabel>0-10%</masterLabel>
+            <translation><!-- 0-10% --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>11%-20%</masterLabel>
+            <translation><!-- 11%-20% --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>21-30%</masterLabel>
+            <translation><!-- 21-30% --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>31%-40%</masterLabel>
+            <translation><!-- 31%-40% --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>41% or higher</masterLabel>
+            <translation><!-- 41% or higher --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

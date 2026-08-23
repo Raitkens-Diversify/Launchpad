@@ -1,0 +1,77 @@
+<template>
+    <div class="ufd__body">
+        <template if:true={showHeader}>
+            <div class="ufd__head">
+                <c-ds-badge label={row.type} variant={row.typeVariant} size="sm"></c-ds-badge>
+                <template if:true={row.hasSeverity}>
+                    <c-ds-badge label={row.severity} variant={row.severityVariant} size="sm"></c-ds-badge>
+                </template>
+                <span class="ufd__headline">{row.headline}</span>
+                <span class="ufd__meta">{row.metaLine}</span>
+            </div>
+        </template>
+        <template if:true={row.originLine}>
+            <p class="ufd__origin">{row.originLine}</p>
+        </template>
+        <template if:true={row.workflowStatus}>
+            <div class="ufd__status">
+                <span class="ufd__block-label">Status</span>
+                <span class="ufd__status-line">
+                    <c-ds-badge label={row.workflowStatus} variant={row.workflowStatusVariant}
+                                size="sm"></c-ds-badge>
+                    <template if:true={row.externalRef}>
+                        <template if:true={row.externalRefIsLink}>
+                            <a class="ufd__status-ref" href={row.externalRef}
+                               target="_blank" rel="noopener">{row.externalRef}</a>
+                        </template>
+                        <template if:false={row.externalRefIsLink}>
+                            <span class="ufd__status-ref">{row.externalRef}</span>
+                        </template>
+                    </template>
+                    <template if:true={allowStatusEdit}>
+                        <lightning-button variant="base" label="Change"
+                                          disabled={busy}
+                                          onclick={handleStatusEdit}></lightning-button>
+                    </template>
+                </span>
+            </div>
+        </template>
+        <template if:true={row.whatHappened}>
+            <div class="ufd__block">
+                <span class="ufd__block-label">What happened</span>
+                <p class="ufd__block-text">{row.whatHappened}</p>
+            </div>
+        </template>
+        <template if:true={row.whatExpected}>
+            <div class="ufd__block">
+                <span class="ufd__block-label">Expected</span>
+                <p class="ufd__block-text">{row.whatExpected}</p>
+            </div>
+        </template>
+        <template if:true={row.whatTesting}>
+            <div class="ufd__block">
+                <span class="ufd__block-label">Testing</span>
+                <p class="ufd__block-text">{row.whatTesting}</p>
+            </div>
+        </template>
+        <template if:true={row.noEvidenceReason}>
+            <div class="ufd__block">
+                <span class="ufd__block-label">Why no evidence</span>
+                <p class="ufd__block-text">{row.noEvidenceReason}</p>
+            </div>
+        </template>
+        <c-uat-evidence-upload record-id={row.id}
+                               label="Evidence"
+                               view-only={viewOnlyEvidence}></c-uat-evidence-upload>
+        <template if:true={showActions}>
+            <span class="ufd__actions">
+                <lightning-button variant="base" label="Edit"
+                                  disabled={busy}
+                                  onclick={handleEdit}></lightning-button>
+                <lightning-button variant="base" label="Delete"
+                                  disabled={busy}
+                                  onclick={handleDelete}></lightning-button>
+            </span>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,71 @@
+<template>
+    <div class="editor">
+        <lightning-input
+            label="Title"
+            value={title}
+            onchange={handleTitle}
+            required
+            max-length="255"
+        ></lightning-input>
+
+        <lightning-input
+            class="editor__selector"
+            label="Target Selector"
+            value={targetSelector}
+            onchange={handleSelector}
+            required
+            max-length="255"
+            field-level-help='CSS selector for the element this step highlights. Recommended: add data-tour-id="your-id" to the target element in its component and use [data-tour-id="your-id"] here.'
+        ></lightning-input>
+        <template lwc:if={selectorInvalid}>
+            <p class="editor__note editor__note--error">This is not a valid CSS selector.</p>
+        </template>
+        <template lwc:if={selectorOffConvention}>
+            <p class="editor__note editor__note--warn">
+                Tip: selectors like [data-tour-id="your-id"] survive markup changes; class-based
+                selectors break easily. Targets inside lightning-* base components can&rsquo;t be
+                reached &mdash; tag your own wrapper element instead.
+            </p>
+        </template>
+
+        <div class="editor__row">
+            <lightning-combobox
+                label="Placement"
+                value={placement}
+                options={placementOptions}
+                onchange={handlePlacement}
+            ></lightning-combobox>
+            <lightning-combobox
+                label="Advance On"
+                value={advanceOn}
+                options={advanceOptions}
+                onchange={handleAdvance}
+            ></lightning-combobox>
+        </div>
+
+        <lightning-input-rich-text
+            label="Body"
+            label-visible
+            value={body}
+            formats={richFormats}
+            onchange={handleBody}
+        ></lightning-input-rich-text>
+
+        <div class="editor__actions">
+            <template lwc:if={canDelete}>
+                <lightning-button
+                    label={deleteLabel}
+                    variant="destructive-text"
+                    onclick={handleDelete}
+                ></lightning-button>
+            </template>
+            <span class="editor__spacer"></span>
+            <lightning-button
+                label="Save step"
+                variant="brand"
+                onclick={handleSave}
+                disabled={saveDisabled}
+            ></lightning-button>
+        </div>
+    </div>
+</template>

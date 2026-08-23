@@ -1,0 +1,184 @@
+/* --slds-g-* declared locally, not inherited: platform-injected SLDS2
+   styling hooks beat values inherited from an ancestor's :host
+   (see nexsHome.css / dsHero.css). */
+:host {
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+}
+
+.ucp {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-lg, 16px);
+}
+.ucp__meta {
+    margin: 0;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* Read-only content blocks — the same vocabulary the runner uses for
+   What-to-do / Expected result, so a previewed case looks like the case the
+   tester will actually run. */
+.ucp__block {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-xs, 4px);
+}
+.ucp__block-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ucp__block-text {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--slds-g-color-on-surface-2, #374151);
+    white-space: pre-line;
+}
+/* The outcome the tester verifies against — a quiet success tint, not a card. */
+.ucp__block--expected {
+    padding: var(--ds-space-md, 12px) var(--ds-space-lg, 16px);
+    background: var(--ds-success-bg, #e8f5e9);
+    border-left: 3px solid var(--ds-success, #2d9f6f);
+    border-radius: var(--ds-radius-sm, 6px);
+}
+
+.ucp__panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-sm, 8px);
+    padding: var(--ds-space-lg, 16px);
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    border-radius: var(--ds-radius-lg, 10px);
+}
+.ucp__panel-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.ucp__steps {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-md, 12px);
+}
+.ucp__steps-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--ds-space-sm, 8px);
+}
+.ucp__steps-count {
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ucp__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+.ucp__step {
+    padding: var(--ds-space-md, 12px) 0;
+    border-top: 1px solid var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+.ucp__step:first-child {
+    border-top: none;
+    padding-top: 0;
+}
+/* Test_Condition__c heads a RUN of steps, so the group label carries the
+   separation and the hairline would only double it (uatStepNav does the same). */
+.ucp__step--grouped {
+    border-top: none;
+    padding-top: var(--ds-space-lg, 16px);
+}
+.ucp__group {
+    margin: 0 0 var(--ds-space-sm, 8px);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ucp__step-body {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ds-space-md, 12px);
+}
+.ucp__step-number {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+.ucp__step-content {
+    min-width: 0;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-sm, 8px);
+}
+.ucp__step-title {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.ucp__tag {
+    align-self: flex-start;
+    padding: 2px var(--ds-space-sm, 8px);
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+
+.ucp__refs {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-xs, 4px);
+}
+.ucp__ref {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-space-sm, 8px);
+    font-size: 0.875rem;
+}
+.ucp__ref-label {
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+.ucp__ref-open {
+    flex: 0 0 auto;
+    font-weight: 600;
+    color: var(--ds-medium-blue, #1a76bb);
+}
+.ucp__ref-open:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}

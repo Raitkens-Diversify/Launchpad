@@ -1,0 +1,158 @@
+:host {
+    display: block;
+    position: relative;
+
+    /* Self-declared --slds-g-* set (same values as nexsLanding/nexsArticleBrowser).
+       Declared locally, not inherited: LWR sites inject real SLDS2 styling hooks
+       under these names into each component scope, and those beat values inherited
+       from an ancestor's :host — keeping the two surfaces identical. */
+    --slds-g-spacing-1: 4px;
+    --slds-g-spacing-2: 0.5rem;
+    --slds-g-spacing-3: 0.75rem;
+    --slds-g-spacing-4: 1rem;
+    --slds-g-spacing-5: 24px;
+    --slds-g-radius-border-2: 0.5rem;
+    --slds-g-font-family-base: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    --slds-g-font-scale-1: 14px;
+    --slds-g-font-scale-2: 0.875rem;
+    --slds-g-font-scale-3: 1.25rem;
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-border-2: #b6bcc5;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-accent-3: #071c31;
+    --slds-g-color-on-accent-1: #ffffff;
+    --slds-g-color-accent-container-1: #0f406f;
+}
+
+.nexs-search {
+    position: relative;
+}
+
+/* Owned input field (search icon + input + clear), styled with the DS tokens. */
+.nexs-search__field {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 8px);
+    padding: 0 var(--slds-g-spacing-3, 12px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+}
+
+.nexs-search__field:focus-within {
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+    box-shadow: 0 0 0 1px var(--slds-g-color-accent-1, #0f406f);
+}
+
+.nexs-search__icon {
+    --sds-c-icon-color-foreground-default: var(--slds-g-color-on-surface-1, #4b5563);
+    flex: none;
+}
+
+.nexs-search__input {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    padding: var(--slds-g-spacing-3, 12px) 0;
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+    font-size: var(--slds-g-font-scale-2, 0.875rem);
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.nexs-search__clear {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: var(--slds-g-spacing-1, 4px);
+}
+
+/* Suggestion dropdown, styled with the V2 --slds-g-* tokens (inherited from the
+   nexsArticleBrowser root; literal fallbacks keep it safe standalone). */
+.nexs-search__menu {
+    position: absolute;
+    z-index: 20;
+    left: 0;
+    right: 0;
+    margin: var(--slds-g-spacing-1, 4px) 0 0;
+    padding: var(--slds-g-spacing-1, 4px);
+    list-style: none;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    box-shadow: var(--ds-shadow-drop, 0 8px 24px rgba(9, 36, 63, 0.12));
+}
+
+.nexs-search__menu-header {
+    padding: var(--slds-g-spacing-2, 8px) var(--slds-g-spacing-3, 12px) var(--slds-g-spacing-1, 4px);
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: 700;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.nexs-search__item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--slds-g-spacing-2, 8px) var(--slds-g-spacing-3, 12px);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.nexs-search__item:hover,
+.nexs-search__item--active {
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+
+/* Matched term emphasis in suggestion titles. */
+.nexs-search__item-title strong {
+    font-weight: 800;
+    color: var(--slds-g-color-accent-1, #0f406f);
+}
+
+.nexs-search__item-title {
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+    font-size: var(--slds-g-font-scale-2, 0.875rem);
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.nexs-search__item-summary {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nexs-search__view-all {
+    padding: var(--slds-g-spacing-2, 8px) var(--slds-g-spacing-3, 12px);
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: 600;
+    color: var(--slds-g-color-accent-1, #0f406f);
+    cursor: pointer;
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    margin-top: var(--slds-g-spacing-1, 4px);
+}
+
+.nexs-search__view-all:hover {
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+
+.nexs-search__empty {
+    padding: var(--slds-g-spacing-3, 12px);
+    font-size: var(--slds-g-font-scale-1, 14px);
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}

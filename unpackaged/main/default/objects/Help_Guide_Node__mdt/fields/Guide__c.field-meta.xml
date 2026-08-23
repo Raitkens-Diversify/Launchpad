@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Guide__c</fullName>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Guide</label>
+    <referenceTo>Help_Guide__mdt</referenceTo>
+    <relationshipLabel>Help Guide Nodes</relationshipLabel>
+    <relationshipName>Help_Guide_Nodes</relationshipName>
+    <required>true</required>
+    <type>MetadataRelationship</type>
+    <unique>false</unique>
+</CustomField>

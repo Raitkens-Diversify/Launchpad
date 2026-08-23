@@ -1,0 +1,50 @@
+<!-- Author: Hoang Long Vu To -->
+<template>
+    <div class="record-detail">
+        <template lwc:if={isLoading}>
+            <div class="record-detail__loading">
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <template lwc:elseif={errorMessage}>
+            <div class="record-detail__error" role="alert">
+                <lightning-icon
+                    icon-name="utility:error"
+                    size="small"
+                    variant="error"
+                    class="record-detail__error-icon">
+                </lightning-icon>
+                <span>{errorMessage}</span>
+            </div>
+        </template>
+
+        <template lwc:else>
+            <template lwc:if={hasFields}>
+                <div class="record-detail__sections">
+                    <section class="record-detail__section">
+                        <c-card class="record-detail__card">
+                            <c-arc-record-detail-section
+                                data-section-key={sectionCard.key}
+                                section={sectionCard}
+                                enable-editing={enableEditing}
+                                is-editing={sectionIsEditing}
+                                is-saving={sectionIsSaving}
+                                has-changes={sectionHasChanges}
+                                is-submitted={isSubmitted}
+                                onedit={handleSectionEdit}
+                                onsave={handleSectionSave}
+                                onsectioncancel={handleSectionCancel}
+                                onvaluechange={handleFieldChange}>
+                            </c-arc-record-detail-section>
+                        </c-card>
+                    </section>
+                </div>
+            </template>
+
+            <template lwc:else>
+                <p class="record-detail__empty">No fields configured for this field set.</p>
+            </template>
+        </template>
+    </div>
+</template>

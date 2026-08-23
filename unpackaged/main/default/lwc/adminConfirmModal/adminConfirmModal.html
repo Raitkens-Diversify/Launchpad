@@ -1,0 +1,24 @@
+<template>
+    <section class="acfm" role="dialog" aria-modal="true" aria-label={header} onkeydown={handleKeydown}>
+        <div class="acfm__panel">
+            <h2 class="acfm__title">{header}</h2>
+            <p class="acfm__message">{message}</p>
+            <template if:true={hasPrompt}>
+                <lightning-textarea class="acfm__prompt"
+                                    label={promptLabel}
+                                    value={comment}
+                                    disabled={busy}
+                                    onchange={handleCommentChange}></lightning-textarea>
+            </template>
+            <div class="acfm__actions">
+                <lightning-button label="Cancel"
+                                  disabled={busy}
+                                  onclick={handleCancel}></lightning-button>
+                <lightning-button variant={confirmVariant}
+                                  label={confirmLabel}
+                                  disabled={confirmDisabled}
+                                  onclick={handleConfirm}></lightning-button>
+            </div>
+        </div>
+    </section>
+</template>

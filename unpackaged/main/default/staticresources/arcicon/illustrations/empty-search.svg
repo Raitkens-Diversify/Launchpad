@@ -1,0 +1,13 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="148.867" height="148.867" viewBox="0 0 148.867 148.867" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Frame 279277">
+<circle id="Ellipse 32" cx="74.4342" cy="74.4341" r="50.9384" stroke="#E5E7EB" stroke-width="0.843137"/>
+<circle id="Ellipse 33" opacity="0.7" cx="74.4343" cy="74.4364" r="62.0264" stroke="#E5E7EB" stroke-width="0.843137"/>
+<circle id="Ellipse 34" opacity="0.5" cx="74.4336" cy="74.4336" r="74.012" stroke="#E5E7EB" stroke-width="0.843137"/>
+<g id="Group 1">
+<path id="Subtract" d="M74.6553 40.8604C93.2509 40.8606 108.325 55.9356 108.325 74.5312C108.325 93.1268 93.2508 108.201 74.6553 108.201C56.0596 108.201 40.9845 93.1269 40.9844 74.5312C40.9844 55.9355 56.0595 40.8604 74.6553 40.8604ZM74.5889 47.9473C59.9437 47.9473 48.0713 59.8197 48.0713 74.4648C48.0715 89.1098 59.9438 100.981 74.5889 100.981C89.2339 100.981 101.106 89.1098 101.106 74.4648C101.106 59.8197 89.234 47.9473 74.5889 47.9473Z" fill="#B6BCC5"/>
+<rect id="Rectangle 1" x="91.0363" y="97.6938" width="8.64184" height="32.762" rx="4.32092" transform="rotate(-45 91.0363 97.6938)" fill="#B6BCC5"/>
+<rect id="Rectangle 3" x="61.4979" y="67.0702" width="8.05594" height="30.5408" rx="4.02797" transform="rotate(-45 61.4979 67.0702)" fill="#B6BCC5"/>
+<rect id="Rectangle 4" x="83.0938" y="61.3735" width="8.05594" height="30.5408" rx="4.02797" transform="rotate(45 83.0938 61.3735)" fill="#B6BCC5"/>
+</g>
+</g>
+</svg>

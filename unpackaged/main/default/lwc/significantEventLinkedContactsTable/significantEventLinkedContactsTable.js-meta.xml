@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Author: Hoang Long Vu To | Date: 2026-07-14 -->
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Significant Event Linked Contacts Table</masterLabel>
+    <description>Custom related-list style table for Significant Event Linked Contacts on Account record pages.</description>
+    <targets>
+        <target>lightning__RecordPage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__RecordPage">
+            <objects>
+                <object>Account</object>
+            </objects>
+            <property
+                name="title"
+                type="String"
+                label="Title"
+                default="Significant Event Linked Contacts"
+                description="Related list title shown in the component header."
+            />
+            <property
+                name="maxRows"
+                type="Integer"
+                label="Max Rows"
+                default="5"
+                description="Number of rows shown before View All."
+            />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

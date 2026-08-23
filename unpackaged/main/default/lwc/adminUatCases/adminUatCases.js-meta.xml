@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>61.0</apiVersion>
+    <isExposed>false</isExposed>
+    <description>UAT Test Cases section of the Admin Console: case list with filters, New Case modal with live Case ID preview, and the case detail drill-in. Embedded by adminConsole only.</description>
+</LightningComponentBundle>

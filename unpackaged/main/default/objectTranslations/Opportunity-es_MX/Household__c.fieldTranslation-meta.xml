@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Household --></label>
+        <lookupFilter>
+            <errorMessage><!-- This field may only lookup to Household Accounts. --></errorMessage>
+        </lookupFilter>
+        <name>Household__c</name>
+        <relationshipLabel><!-- Opportunities (Household) --></relationshipLabel>
+    </CustomFieldTranslation>

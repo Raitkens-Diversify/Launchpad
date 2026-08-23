@@ -1,0 +1,118 @@
+<aura:component controller="FlowCreateMultipleController" implements="flexipage:availableForAllPageTypes,lightning:availableForFlowScreens,force:hasRecordId" access="global">
+    <!-- Attributes specific to Edit Component -->
+    <aura:attribute name="allowCreate" type="Boolean" default="false"/>
+    <aura:attribute name="totalAmountFieldName" type="String" default=""/>
+    <aura:attribute name="totalAmountComparisonValue" type="Integer" default="0"/>
+    <aura:attribute name="totalAmount" type="Integer" />
+    <aura:attribute name="doesTotalMatch" type="Boolean" default="false"/>
+    <aura:attribute name="readOnlyFields" type="String" default=""/>
+    <aura:attribute name="totalAmountObj" type="Object" />
+    
+    <aura:attribute name="sObjectName" type="String" default=""/>
+    <aura:attribute name="recordTypeName" type="String" default=""/>
+    <aura:attribute name="sObjectFields" type="String" default=""/>
+    <aura:attribute name="recordId" type="String" />
+    <aura:attribute name="parentRecordId" type="String" default=""/>
+    <aura:attribute name="parentLookupFieldName" type="String" default=""/>
+    <aura:attribute name="MaximumNumberofRecords" type="Integer" default="10"/>
+    <aura:attribute name="LinestoShow" type="Integer" default="4"/>
+    <aura:attribute name="lstLoop" type="List"/>
+    
+    <aura:attribute name="tableHeaderRecords" type="List"/>
+    <aura:attribute name="tableHeaderRows" type="List"/>
+    <aura:attribute name="fieldsWithDataTypes" type="List"/>
+    <aura:attribute name="existingRecords" type="List"/>
+    <aura:attribute name="pendingChanges" type="Object"/>
+    <aura:attribute name="dynamicFormList" type="Aura.Component[]"/>
+    <aura:attribute name="fetchedResult" type="List"/>
+    <aura:attribute name="autoSaving" type="Boolean" default="false"/>
+    <aura:attribute name="ObjectType" type="Object"/>   
+    <aura:attribute name="currentIndex" type="Integer" default="0"/>
+    <aura:attribute name="spinner" type="boolean" default="false"/>
+    <aura:attribute name="totalFundingPercent" type="Decimal" />
+    <!--Attributes for Check Deposit Object -->
+    <aura:attribute name="varhouseholdId" type="String" />
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="change" value="{!v.totalAmount}" action="{!c.handleTotalComparison}"/>
+    
+    <aura:registerEvent name ="customLookUpRowDisable" type ="c:DisableRowForCustomObjectListLookup"/>
+    
+    <aura:handler event = "c:dynamicFormEvent" action = "{!c.handleDeleteForm}"/>
+    <aura:handler event = "c:dynamicFormChangeEvent" action = "{!c.handleFormChange}"/>
+    <aura:handler event="c:dynamicFormAddRowEvent" action="{!c.handleAddRow}"/>
+    
+    <div class="container-fluid">
+        <aura:if isTrue="{!v.spinner}">
+            <lightning:spinner alternativeText="Loading" size="medium"></lightning:spinner>
+        </aura:if>
+        
+        <!-- Total Field Comparison Section -->
+        <aura:if isTrue="{!not(empty(v.totalAmountFieldName))}">
+            <div class="slds-m-bottom_small">
+                <p>The total amount listed in the table should match the amount entered as the source of these funds: 
+                    <lightning:input aura:id="comparisonInput"
+                                     class="inputStyle" variant="label-hidden"
+                                     formatter="currency" 
+                                     value="{!v.totalAmountComparisonValue}"
+                                     type="number"
+                                     step="0.01"
+                                     onchange="{!c.handleTotalComparison}"/></p>
+            </div>
+        </aura:if>
+        <table class="slds-table slds-table_bordered slds-table_cell-buffer"> 
+            <thead>
+                <tr class="slds-text-title_caps">
+                    <aura:iteration items="{!v.tableHeaderRecords}" var="header">
+                        <th scope="col">
+                            <div class="slds-truncate slds-text-align_center headerWrap" title="{!header}">{!header}</div>
+                        </th>
+                    </aura:iteration>
+                    <th scope="col">
+                        <div class="slds-truncate slds-text-align_center" title=""> </div>
+                    </th>
+                </tr>
+            </thead>   
+            <tbody>
+                {!v.dynamicFormList}
+            </tbody>
+        </table>
+        
+        <!-- Total Field Section -->
+        <aura:if isTrue="{!not(empty(v.totalAmountFieldName))}">
+            <div class="slds-clearfix slds-m-top_small">
+                <div class="slds-float_right">
+                    <p>The total {!v.totalAmountFieldLabel} is <b>
+                        <aura:if isTrue="{!v.totalAmountObj.fieldType == 'CURRENCY'}">
+                            <lightning:formattedNumber value="{!v.totalAmount}" style="currency" currencyCode="{!v.totalAmountObj.currencyCode}" minimumFractionDigits="2" maximumFractionDigits="2"/>
+                            <aura:set attribute="else">
+                                <aura:if isTrue = "{!v.totalAmountObj.fieldType == 'PERCENT'}">
+                                    <lightning:formattedNumber value="{!v.totalAmount}" style="percent-fixed" minimumFractionDigits="2" maximumFractionDigits="2"/>
+                                    <aura:set attribute="else">
+                                        <lightning:formattedNumber value="{!v.totalAmount}"/>
+                                    </aura:set>
+                                </aura:if>
+                            </aura:set>
+                        </aura:if>
+                        </b>.
+                    </p>
+                </div>
+            </div>
+        </aura:if>
+        
+        <!-- Footer Section -->
+        <div class="footer">
+            <div class="footer_btn">
+                <h1 class="slds-text-title_caps">
+                    <aura:if isTrue="{!!v.allowCreate}">
+                        <lightning:button title="Save" label="Save" onclick="{!c.handleSaveAndAddRowBtn}"/>
+                        <aura:set attribute="else">
+                            <lightning:button title="Save and Add Row" label="Save and Add Row" onclick="{!c.handleSaveAndAddRowBtn}"/>
+                        </aura:set>
+                    </aura:if>
+                </h1>
+            </div>    
+        </div> 
+        
+    </div>
+</aura:component>

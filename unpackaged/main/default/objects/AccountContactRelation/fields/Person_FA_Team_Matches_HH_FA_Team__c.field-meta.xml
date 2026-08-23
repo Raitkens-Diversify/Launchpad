@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Person_FA_Team_Matches_HH_FA_Team__c</fullName>
+    <formula>IF(Account.Financial_Advisor_Team__c = Contact.Account.Financial_Advisor_Team__c, TRUE, FALSE)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Person FA Team Matches HH FA Team</label>
+    <type>Checkbox</type>
+</CustomField>

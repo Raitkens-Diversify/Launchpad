@@ -1,0 +1,385 @@
+<template>
+  <lightning-card icon-name="standard:event" title={pageTitle}>
+    <template lwc:if={isLoading}>
+      <div class="loading-state" role="status" aria-live="polite">
+        <lightning-spinner
+          alternative-text="Loading Significant Event"
+          size="small"
+        ></lightning-spinner>
+      </div>
+    </template>
+
+    <template lwc:else>
+      <div class="action-content slds-m-top_medium">
+        <section
+          class="section-card section-card--event-details"
+          aria-labelledby="event-details-title"
+        >
+          <header class="section-card__header">
+            <div class="section-card__header-main">
+              <lightning-icon
+                class="section-card__icon"
+                icon-name="utility:page"
+                size="x-small"
+                alternative-text="Event Details"
+              ></lightning-icon>
+              <h2 id="event-details-title" class="section-card__title">
+                Event Details
+              </h2>
+            </div>
+            <div class="section-card__header-actions" aria-hidden="true"></div>
+          </header>
+
+          <div class="section-card__body section-card__body--stack">
+            <div class="slds-form-element">
+              <lightning-input
+                label="Event Name"
+                name="eventName"
+                value={eventName}
+                required
+                onchange={handleEventNameChange}
+              ></lightning-input>
+              <template lwc:if={eventNameError}>
+                <p class="section-error" role="alert">{eventNameError}</p>
+              </template>
+            </div>
+
+            <div class="slds-form-element">
+              <lightning-combobox
+                label="Event Type"
+                name="eventType"
+                value={eventType}
+                placeholder="Select a type..."
+                options={eventTypeOptions}
+                required
+                onchange={handleEventTypeChange}
+              ></lightning-combobox>
+              <template lwc:if={eventTypeError}>
+                <p class="section-error" role="alert">{eventTypeError}</p>
+              </template>
+            </div>
+
+            <template lwc:if={showOtherEventType}>
+              <div class="slds-form-element">
+                <lightning-input
+                  label="Other Event Type"
+                  name="otherEventType"
+                  value={otherEventType}
+                  max-length="255"
+                  required
+                  onchange={handleOtherEventTypeChange}
+                ></lightning-input>
+                <template lwc:if={otherEventTypeError}>
+                  <p class="section-error" role="alert">
+                    {otherEventTypeError}
+                  </p>
+                </template>
+              </div>
+            </template>
+
+            <div class="slds-form-element">
+              <div class="start-date-row">
+                <label class="slds-form-element__label" for="start-date-input">
+                  <abbr class="slds-required" title="required">*</abbr>
+                  Start Date
+                </label>
+                <lightning-input
+                  class="start-date-row__checkbox"
+                  type="checkbox"
+                  label="Approximate Date"
+                  name="approximateDate"
+                  checked={approximateDate}
+                  onchange={handleApproximateDateChange}
+                ></lightning-input>
+              </div>
+              <lightning-input
+                id="start-date-input"
+                type="date"
+                name="startDate"
+                label="Start Date"
+                variant="label-hidden"
+                value={startDate}
+                required
+                onchange={handleStartDateChange}
+              ></lightning-input>
+              <template lwc:if={startDateError}>
+                <p class="section-error" role="alert">{startDateError}</p>
+              </template>
+            </div>
+
+            <div class="end-date-section">
+              <lightning-input
+                type="date"
+                label="End Date (Optional)"
+                name="endDate"
+                value={endDate}
+                onchange={handleEndDateChange}
+              ></lightning-input>
+            </div>
+
+            <lightning-textarea
+              label="Description"
+              name="description"
+              value={description}
+              onchange={handleDescriptionChange}
+            ></lightning-textarea>
+          </div>
+        </section>
+
+        <section
+          class={linkedContactsSectionClass}
+          aria-labelledby="linked-contacts-title"
+        >
+          <header class="section-card__header">
+            <div class="section-card__header-main">
+              <lightning-icon
+                class="section-card__icon"
+                icon-name="utility:groups"
+                size="x-small"
+                alternative-text="Add Linked Contacts"
+              ></lightning-icon>
+              <h2 id="linked-contacts-title" class="section-card__title">
+                Add Linked Contacts
+              </h2>
+            </div>
+            <div class="section-card__header-actions">
+              <template lwc:if={showCloseContactPickerButton}>
+                <lightning-button
+                  class="section-card__header-button"
+                  icon-name="utility:close"
+                  label="Close"
+                  variant="base"
+                  title="Close"
+                  onclick={handleCollapseContactPicker}
+                ></lightning-button>
+              </template>
+              <template lwc:if={showAddContactButton}>
+                <lightning-button
+                  class="section-card__header-button"
+                  icon-name="utility:add"
+                  label="Add contact"
+                  variant="base"
+                  title="Add contact"
+                  onclick={handleExpandContactPicker}
+                ></lightning-button>
+              </template>
+            </div>
+          </header>
+
+          <template lwc:if={showLinkedContactsBody}>
+            <div
+              class={linkedContactsBodyWrapperClass}
+              aria-hidden={isLinkedContactsBodyHidden}
+            >
+              <div class="section-card__body section-card__body--stack">
+                <div
+                  class="contact-search"
+                  aria-labelledby="linked-contacts-title"
+                >
+                  <lightning-input
+                    type="search"
+                    label="Search contacts"
+                    placeholder="Search contacts..."
+                    value={contactSearchTerm}
+                    onchange={handleContactSearchChange}
+                  ></lightning-input>
+
+                  <template lwc:if={hasVisibleSuggestions}>
+                    <ul
+                      class="search-results suggestion-list"
+                      role="listbox"
+                      aria-label="Suggested contacts"
+                    >
+                      <template
+                        for:each={visibleSuggestedContacts}
+                        for:item="contact"
+                      >
+                        <li key={contact.id} class="contact-row" role="option">
+                          <p class="contact-row__name">{contact.name}</p>
+                          <lightning-button-icon
+                            icon-name="utility:add"
+                            variant="bare"
+                            alternative-text="Add contact"
+                            title="Add contact"
+                            data-contact-id={contact.id}
+                            onclick={handleAddContact}
+                          ></lightning-button-icon>
+                        </li>
+                      </template>
+                    </ul>
+                  </template>
+
+                  <template lwc:if={hasSearchResults}>
+                    <section
+                      class="suggestion-group"
+                      aria-label="Search results"
+                    >
+                      <h3 class="suggestion-group__title">Search Results</h3>
+                      <ul
+                        class="search-results"
+                        role="listbox"
+                        aria-label="Contact search results"
+                      >
+                        <template
+                          for:each={filteredSearchResults}
+                          for:item="contact"
+                        >
+                          <li
+                            key={contact.id}
+                            class="contact-row"
+                            role="option"
+                          >
+                            <p class="contact-row__name">{contact.name}</p>
+                            <lightning-button-icon
+                              icon-name="utility:add"
+                              variant="bare"
+                              alternative-text="Add contact"
+                              title="Add contact"
+                              data-contact-id={contact.id}
+                              onclick={handleAddContact}
+                            ></lightning-button-icon>
+                          </li>
+                        </template>
+                      </ul>
+                    </section>
+                  </template>
+
+                  <template lwc:if={showNoSearchResults}>
+                    <p class="search-empty" role="status">
+                      No matching contacts found.
+                    </p>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <template lwc:if={linkedContactsError}>
+            <p class="section-error section-error--inline" role="alert">
+              {linkedContactsError}
+            </p>
+          </template>
+        </section>
+
+        <template lwc:if={showSelectedContactsPanel}>
+          <section
+            class="section-card section-card--selected-contacts"
+            aria-labelledby="selected-contacts-title"
+          >
+            <header class="section-card__header">
+              <div class="section-card__header-main">
+                <lightning-icon
+                  class="section-card__icon"
+                  icon-name="utility:user"
+                  size="x-small"
+                  alternative-text="Selected Linked Contacts"
+                ></lightning-icon>
+                <h2 id="selected-contacts-title" class="section-card__title">
+                  Selected Linked Contacts
+                </h2>
+              </div>
+              <div class="section-card__header-actions">
+                <span class="contact-count-badge" role="status">
+                  {selectedContactCountLabel}
+                </span>
+              </div>
+            </header>
+
+            <div class="section-card__body section-card__body--flush">
+              <ul
+                class="selected-contacts"
+                aria-label="Selected linked contacts"
+              >
+                <template
+                  for:each={selectedContactViewModels}
+                  for:item="contact"
+                >
+                  <li key={contact.id} class={contact.rowClass}>
+                    <div class="selected-contact-row__main">
+                      <span class={contact.avatarClassList} aria-hidden="true">
+                        <span class="row-avatar__initials">
+                          {contact.initials}
+                        </span>
+                      </span>
+                      <div class="selected-contact-row__text">
+                        <p class={contact.nameClassList}>{contact.name}</p>
+                        <template lwc:if={contact.isPendingRemoval}>
+                          <p
+                            class="selected-contact-row__status selected-contact-row__status--removed"
+                          >
+                            Deleted
+                          </p>
+                        </template>
+                        <template lwc:if={contact.isPendingAddition}>
+                          <p
+                            class="selected-contact-row__status selected-contact-row__status--added"
+                          >
+                            Added
+                          </p>
+                        </template>
+                      </div>
+                    </div>
+                    <template lwc:if={contact.showUndo}>
+                      <button
+                        type="button"
+                        class="contact-undo-button"
+                        title="Undo remove contact"
+                        aria-label="Undo remove contact"
+                        data-contact-id={contact.id}
+                        onclick={handleUndoRemoveContact}
+                      >
+                        <lightning-icon
+                          class="contact-undo-button__icon"
+                          icon-name="utility:undo"
+                          size="x-small"
+                          alternative-text="Undo"
+                        ></lightning-icon>
+                        Undo
+                      </button>
+                    </template>
+                    <template lwc:if={contact.showRemove}>
+                      <lightning-button-icon
+                        icon-name="utility:close"
+                        variant="bare"
+                        alternative-text="Remove contact"
+                        title="Remove contact"
+                        data-contact-id={contact.id}
+                        onclick={handleRemoveContact}
+                      ></lightning-button-icon>
+                    </template>
+                  </li>
+                </template>
+              </ul>
+            </div>
+          </section>
+        </template>
+      </div>
+
+      <div slot="footer" class="action-footer">
+        <lightning-button
+          class="slds-m-right_x-small"
+          label="Cancel"
+          title="Cancel"
+          onclick={handleCancel}
+        ></lightning-button>
+        <div class="action-footer__actions">
+          <template lwc:if={showDeleteButton}>
+            <lightning-button
+              icon-name="utility:delete"
+              variant="destructive"
+              label="Delete"
+              title="Delete"
+              onclick={handleDeleteEvent}
+            ></lightning-button>
+          </template>
+          <lightning-button
+            variant="brand"
+            label={saveButtonLabel}
+            title={saveButtonLabel}
+            onclick={handleSaveEvent}
+          ></lightning-button>
+        </div>
+      </div>
+    </template>
+  </lightning-card>
+</template>

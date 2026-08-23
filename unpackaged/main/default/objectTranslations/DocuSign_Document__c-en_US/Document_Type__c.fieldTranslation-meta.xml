@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Document Type --></label>
+        <name>Document_Type__c</name>
+        <picklistValues>
+            <masterLabel>Concentration Acknowledgement</masterLabel>
+            <translation><!-- Concentration Acknowledgement --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Disclosure - BDC</masterLabel>
+            <translation><!-- Disclosure - BDC --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Disclosure - DPP</masterLabel>
+            <translation><!-- Disclosure - DPP --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Disclosure - Energy</masterLabel>
+            <translation><!-- Disclosure - Energy --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Disclosure - Fixed &amp; Fixed Indexed Annuities</masterLabel>
+            <translation><!-- Disclosure - Fixed &amp; Fixed Indexed Annuities --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Disclosure - Insurance 1035 Exchange or Replacement</masterLabel>
+            <translation><!-- Disclosure - Insurance 1035 Exchange or Replacement --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Disclosure - Interval Funds</masterLabel>
+            <translation><!-- Disclosure - Interval Funds --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Disclosure - Private BDC</masterLabel>
+            <translation><!-- Disclosure - Private BDC --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Disclosure - Private Credit</masterLabel>
+            <translation><!-- Disclosure - Private Credit --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>IMA Exhibit A</masterLabel>
+            <translation><!-- IMA Exhibit A --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>IMA Exhibit A.1</masterLabel>
+            <translation><!-- IMA Exhibit A.1 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>IMA Exhibit B</masterLabel>
+            <translation><!-- IMA Exhibit B --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Investment Management Agreement</masterLabel>
+            <translation><!-- Investment Management Agreement --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

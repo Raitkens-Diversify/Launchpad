@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Five Gear Manual</fullName>
+        <default>false</default>
+        <label>Five Gear Manual</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Four Gear Automatic</fullName>
+        <default>false</default>
+        <label>Four Gear Automatic</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Four Gear Manual</fullName>
+        <default>false</default>
+        <label>Four Gear Manual</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Six Gear Manual</fullName>
+        <default>false</default>
+        <label>Six Gear Manual</label>
+    </standardValue>
+</StandardValueSet>

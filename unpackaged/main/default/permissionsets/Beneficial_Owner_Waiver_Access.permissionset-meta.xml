@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Read/edit on Account.No_Reportable_Beneficial_Owners__c for internal users. The wizard set that grants the same field carries the Company Community licence, which a standard Salesforce user cannot be assigned.</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Beneficial Owner Waiver Access</label>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Account.No_Reportable_Beneficial_Owners__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+</PermissionSet>

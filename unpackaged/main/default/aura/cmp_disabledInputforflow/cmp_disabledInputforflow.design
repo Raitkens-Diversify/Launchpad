@@ -1,0 +1,5 @@
+<design:component>
+    <design:attribute label="fieldLabel" name="fieldLabel" description="field Label that is to be displayed on component"/>
+    <design:attribute label="defaultValue" name="defaultValue" description="value that is to be displayed on component"/>
+    <design:attribute label="dataType" name="dataType" description="data type of the field"/>
+</design:component>

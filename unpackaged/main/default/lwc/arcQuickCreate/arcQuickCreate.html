@@ -1,0 +1,69 @@
+<template>
+  <div
+    class="arc-quick-create__backdrop"
+    role="presentation"
+    onkeydown={handleKeyDown}
+  >
+    <section
+      class="arc-quick-create"
+      role="dialog"
+      aria-modal="true"
+      aria-label={headingLabel}
+    >
+      <header class="arc-quick-create__header">
+        <h2 class="arc-quick-create__title">{headingLabel}</h2>
+        <button
+          class="arc-quick-create__close"
+          type="button"
+          aria-label="Close"
+          onclick={handleClose}
+        >
+          &times;
+        </button>
+      </header>
+
+      <lightning-record-edit-form
+        object-api-name={objectApiName}
+        onsubmit={handleSubmit}
+        onsuccess={handleSuccess}
+        onerror={handleError}
+      >
+        <div class="arc-quick-create__body">
+          <template lwc:if={hasError}>
+            <p class="arc-quick-create__error" role="alert">{errorMessage}</p>
+          </template>
+
+          <lightning-messages></lightning-messages>
+
+          <div class="arc-quick-create__grid">
+            <template for:each={fields} for:item="field">
+              <lightning-input-field
+                key={field.key}
+                field-name={field.name}
+              ></lightning-input-field>
+            </template>
+          </div>
+        </div>
+
+        <footer class="arc-quick-create__footer">
+          <button
+            class="arc-quick-create__button"
+            type="button"
+            onclick={handleClose}
+            disabled={isSaving}
+          >
+            Cancel
+          </button>
+          <button
+            class="arc-quick-create__button arc-quick-create__button--brand"
+            type="button"
+            onclick={handleSave}
+            disabled={isSaving}
+          >
+            Save
+          </button>
+        </footer>
+      </lightning-record-edit-form>
+    </section>
+  </div>
+</template>

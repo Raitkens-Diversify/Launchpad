@@ -1,0 +1,606 @@
+<template>
+  <article class={shellClass}>
+    <template lwc:if={showCardHeader}>
+      <div class="slds-card__header slds-grid">
+        <header class="slds-media slds-media_center slds-has-flexi-truncate">
+          <div class="slds-media__body">
+            <h2 class="slds-card__header-title">
+              <span class="slds-truncate" title={effectiveCardTitle}>{effectiveCardTitle}</span>
+            </h2>
+          </div>
+        </header>
+        <div class="slds-no-flex">
+          <lightning-button
+            variant="brand"
+            label={newRuleButtonLabel}
+            icon-name={icons.ADD}
+            icon-position="left"
+            onclick={handleOpenCreateModal}
+          ></lightning-button>
+        </div>
+      </div>
+    </template>
+
+    <div class={cardBodyClass}>
+      <section class={viewClass}>
+      <template lwc:if={showViewSavingOverlay}>
+        <div class="nc-saving-overlay" role="status" aria-live="polite" aria-busy="true">
+          <lightning-spinner alternative-text={savingOverlayMessage} size="medium"></lightning-spinner>
+          <p class="nc-saving-overlay__message">{savingOverlayMessage}</p>
+        </div>
+      </template>
+      <template lwc:if={showCompactHeader}>
+        <header class={compactHeaderClass}>
+          <div>
+            <template lwc:if={showInlineTitle}>
+              <h3 class="rules-view__title">{effectiveCardTitle}</h3>
+            </template>
+          </div>
+          <div class="rules-view__toolbar-actions">
+            <p class="rules-view__summary">{headerSummary}</p>
+            <template lwc:if={showHeaderNewRuleButton}>
+              <lightning-button
+                variant="brand"
+                label={newRuleButtonLabel}
+                icon-name={icons.ADD}
+                icon-position="left"
+                onclick={handleOpenCreateModal}
+              ></lightning-button>
+            </template>
+          </div>
+        </header>
+      </template>
+
+      <template lwc:if={showFullToolbar}>
+        <div class="rules-view__toolbar">
+          <template lwc:if={showToolbarSummary}>
+            <p class="rules-view__summary">{headerSummary}</p>
+          </template>
+          <div class="rules-view__toolbar-actions">
+            <lightning-button
+              variant="brand"
+              label={newRuleButtonLabel}
+              icon-name={icons.ADD}
+              icon-position="left"
+              onclick={handleOpenCreateModal}
+            ></lightning-button>
+          </div>
+        </div>
+      </template>
+
+      <template lwc:if={showSummaryToolbar}>
+        <div class="rules-view__toolbar rules-view__toolbar--summary-only">
+          <p class="rules-view__summary">{headerSummary}</p>
+        </div>
+      </template>
+
+      <template lwc:if={errorMessage}>
+        <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">{errorMessage}</div>
+      </template>
+
+      <template lwc:if={showNonHouseholdMessage}>
+        <p class="rules-view__empty div-text-weak">Notification rules are available on Household accounts.</p>
+      </template>
+
+      <template lwc:elseif={isLoading}></template>
+
+      <template lwc:elseif={showRulesContent}>
+        <template lwc:if={showRuleSearch}>
+          <div class="rules-view__filter-toolbar div-filter div-filter--toolbar">
+            <div class="rules-view__filter-start">
+              <div class="div-filter__search">
+                <lightning-icon
+                  icon-name="utility:search"
+                  size="xx-small"
+                  class="div-filter__search-icon"
+                  aria-hidden="true"
+                ></lightning-icon>
+                <input
+                  type="search"
+                  class="div-filter__search-input"
+                  placeholder="Search user-defined rules"
+                  value={ruleSearchTerm}
+                  aria-label="Search user-defined rules by rule name or household name"
+                  oninput={handleRuleSearchChange}
+                />
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <template lwc:if={useGroupedRuleSections}>
+          <div class="rules-sections">
+            <template for:each={ruleSections} for:item="section">
+              <section key={section.id} class={section.sectionClass} aria-labelledby={section.labelId}>
+                <template lwc:if={section.showLabel}>
+                  <header class="rules-section__header div-secondary-header">
+                    <div class="rules-section__header-row">
+                      <div class="rules-section__header-copy">
+                        <h3 id={section.labelId} class="div-secondary-header__title">{section.label}</h3>
+                        <p class="div-secondary-header__subtitle div-text-body-xs">{section.description}</p>
+                      </div>
+                      <template lwc:if={section.showActiveSummary}>
+                        <p class="rules-section__summary div-text-body-xs">{section.activeSummary}</p>
+                      </template>
+                    </div>
+                    <template lwc:if={section.showSearchFilterIndicator}>
+                      <div class="rules-section__filter-row">
+                        <div class="rules-section__filter-indicator" role="status" aria-live="polite">
+                          <span class="div-filter-pill div-filter-pill--inline">
+                            <lightning-icon
+                              icon-name="utility:search"
+                              size="xx-small"
+                              aria-hidden="true"
+                            ></lightning-icon>
+                            <span class="rules-section__filter-indicator-label">
+                              Filtered by &ldquo;{section.searchFilterTerm}&rdquo;
+                            </span>
+                            <button
+                              type="button"
+                              class="div-filter-pill__remove"
+                              aria-label="Clear search filter"
+                              title="Clear search filter"
+                              onclick={handleClearRuleSearch}
+                            >
+                              <lightning-icon icon-name="utility:close" size="xx-small"></lightning-icon>
+                            </button>
+                          </span>
+                        </div>
+                      </div>
+                    </template>
+                  </header>
+                </template>
+
+                <div class="rules-subsections">
+                  <template for:each={section.contentBlocks} for:item="block">
+                    <div key={block.id} class={block.blockClass} aria-labelledby={block.blockLabelId}>
+                      <template lwc:if={block.showBlockLabel}>
+                        <header class="rules-subsection__header">
+                          <h4 id={block.blockLabelId} class="rules-subsection__title div-text-body-base-semibold">{block.label}</h4>
+                          <p class="rules-subsection__subtitle div-text-body-xs">{block.description}</p>
+                        </header>
+                      </template>
+
+                      <template lwc:if={block.hasRules}>
+                        <div class="rules-list">
+                          <template for:each={block.rules} for:item="rule">
+                            <article key={rule.id} class={rule.rowClass}>
+                              <div class="rule-card__row">
+                                <button
+                                  type="button"
+                                  class={rule.toggleClass}
+                                  data-rule-id={rule.id}
+                                  data-active={rule.isActive}
+                                  aria-pressed={rule.toggleAriaPressed}
+                                  aria-label={rule.name}
+                                  aria-disabled={rule.isToggleDisabled}
+                                  disabled={rule.isToggleDisabled}
+                                  onclick={handleRuleActiveToggle}
+                                >
+                                  <span class="div-toggle__thumb" aria-hidden="true"></span>
+                                </button>
+
+                                <div class="rule-card__content">
+                                  <div class="rule-card__header">
+                                    <span class="rule-card__name div-text-body-small">{rule.name}</span>
+                                    <template lwc:if={rule.showSystemDefaultBadge}>
+                                      <span class="div-pill rule-card__system-default-badge">System Default</span>
+                                    </template>
+                                  </div>
+                                  <div class="rule-card__meta div-text-body-xs">
+                                    <c-notification-center-meta-strip
+                                      source-type={rule.objectType}
+                                      frequency={rule.frequency}
+                                      digest-frequency={rule.digestFrequency}
+                                      digest-frequency-hour={rule.digestFrequencyHour}
+                                      show-quiet-hours
+                                      quiet-hours-label={rule.quietHoursLabel}
+                                      quiet-hours-class={rule.quietHoursClass}
+                                    ></c-notification-center-meta-strip>
+                                  </div>
+                                  <template lwc:if={rule.showHouseholdInMeta}>
+                                    <div class="rule-card__household div-text-body-xs">
+                                      <lightning-icon
+                                        icon-name={icons.HOME}
+                                        size="xx-small"
+                                        aria-hidden="true"
+                                      ></lightning-icon>
+                                      <span>{rule.householdName}</span>
+                                    </div>
+                                  </template>
+                                </div>
+
+                                <div class="rule-card__channels">
+                                  <template for:each={rule.channelBadges} for:item="badge">
+                                    <span key={badge.id} class={badge.cssClass}>{badge.label}</span>
+                                  </template>
+                                </div>
+
+                                <div class="rule-card__actions">
+                                  <template lwc:if={rule.isEditable}>
+                                    <button
+                                      type="button"
+                                      class="slds-button slds-button_icon slds-button_icon-container rule-card__action-button"
+                                      data-rule-id={rule.id}
+                                      aria-label="Edit rule"
+                                      title="Edit"
+                                      onclick={handleEditRule}
+                                    >
+                                      <lightning-icon icon-name={icons.EDIT} size="xx-small"></lightning-icon>
+                                    </button>
+                                  </template>
+                                  <button
+                                    type="button"
+                                    class="slds-button slds-button_icon slds-button_icon-container rule-card__action-button"
+                                    data-rule-id={rule.id}
+                                    aria-label="Clone rule"
+                                    title="Clone"
+                                    onclick={handleCloneRule}
+                                  >
+                                    <lightning-icon icon-name={icons.COPY} size="xx-small"></lightning-icon>
+                                  </button>
+                                  <template lwc:if={rule.isDeletable}>
+                                    <button
+                                      type="button"
+                                      class="slds-button slds-button_icon slds-button_icon-container rule-card__action-button rule-card__action-button--delete"
+                                      data-rule-id={rule.id}
+                                      aria-label="Delete rule"
+                                      title="Delete"
+                                      onclick={handleDeleteRule}
+                                    >
+                                      <lightning-icon icon-name={icons.DELETE} size="xx-small"></lightning-icon>
+                                    </button>
+                                  </template>
+                                </div>
+                              </div>
+                            </article>
+                          </template>
+                        </div>
+                      </template>
+                      <template lwc:else>
+                        <p class={block.emptyClass}>{block.emptyMessage}</p>
+                      </template>
+                    </div>
+                  </template>
+                </div>
+              </section>
+            </template>
+          </div>
+        </template>
+
+        <template lwc:elseif={hasRules}>
+          <div class="rules-list">
+            <template for:each={filteredRules} for:item="rule">
+              <article key={rule.id} class={rule.rowClass}>
+                <div class="rule-card__row">
+                  <button
+                    type="button"
+                    class={rule.toggleClass}
+                    data-rule-id={rule.id}
+                    data-active={rule.isActive}
+                    aria-pressed={rule.toggleAriaPressed}
+                    aria-label={rule.name}
+                    aria-disabled={rule.isToggleDisabled}
+                    disabled={rule.isToggleDisabled}
+                    onclick={handleRuleActiveToggle}
+                  >
+                    <span class="div-toggle__thumb" aria-hidden="true"></span>
+                  </button>
+
+                  <div class="rule-card__content">
+                    <div class="rule-card__header">
+                      <span class="rule-card__name div-text-body-small">{rule.name}</span>
+                      <template lwc:if={rule.showSystemDefaultBadge}>
+                        <span class="div-pill rule-card__system-default-badge">System Default</span>
+                      </template>
+                    </div>
+                    <div class="rule-card__meta div-text-body-xs">
+                      <c-notification-center-meta-strip
+                        source-type={rule.objectType}
+                        frequency={rule.frequency}
+                        digest-frequency={rule.digestFrequency}
+                        digest-frequency-hour={rule.digestFrequencyHour}
+                        show-quiet-hours
+                        quiet-hours-label={rule.quietHoursLabel}
+                        quiet-hours-class={rule.quietHoursClass}
+                      ></c-notification-center-meta-strip>
+                    </div>
+                    <template lwc:if={rule.showHouseholdInMeta}>
+                      <div class="rule-card__household div-text-body-xs">
+                        <lightning-icon
+                          icon-name={icons.HOME}
+                          size="xx-small"
+                          aria-hidden="true"
+                        ></lightning-icon>
+                        <span>{rule.householdName}</span>
+                      </div>
+                    </template>
+                  </div>
+
+                  <div class="rule-card__channels">
+                    <template for:each={rule.channelBadges} for:item="badge">
+                      <span key={badge.id} class={badge.cssClass}>{badge.label}</span>
+                    </template>
+                  </div>
+
+                  <div class="rule-card__actions">
+                    <template lwc:if={rule.isEditable}>
+                      <button
+                        type="button"
+                        class="slds-button slds-button_icon slds-button_icon-container rule-card__action-button"
+                        data-rule-id={rule.id}
+                        aria-label="Edit rule"
+                        title="Edit"
+                        onclick={handleEditRule}
+                      >
+                        <lightning-icon icon-name={icons.EDIT} size="xx-small"></lightning-icon>
+                      </button>
+                    </template>
+                    <button
+                      type="button"
+                      class="slds-button slds-button_icon slds-button_icon-container rule-card__action-button"
+                      data-rule-id={rule.id}
+                      aria-label="Clone rule"
+                      title="Clone"
+                      onclick={handleCloneRule}
+                    >
+                      <lightning-icon icon-name={icons.COPY} size="xx-small"></lightning-icon>
+                    </button>
+                    <template lwc:if={rule.isDeletable}>
+                      <button
+                        type="button"
+                        class="slds-button slds-button_icon slds-button_icon-container rule-card__action-button rule-card__action-button--delete"
+                        data-rule-id={rule.id}
+                        aria-label="Delete rule"
+                        title="Delete"
+                        onclick={handleDeleteRule}
+                      >
+                        <lightning-icon icon-name={icons.DELETE} size="xx-small"></lightning-icon>
+                      </button>
+                    </template>
+                  </div>
+                </div>
+              </article>
+            </template>
+          </div>
+        </template>
+
+        <template lwc:else>
+          <p class="rules-view__empty div-text-weak">{rulesEmptyMessage}</p>
+        </template>
+
+        <template lwc:if={showLegend}>
+          <div class="div-legend" role="note" aria-label="Notification mode legend">
+            <div class="div-legend__item">
+              <lightning-icon icon-name={modeIcons.IMMEDIATE} size="xx-small" aria-hidden="true"></lightning-icon>
+              <span>
+                <span class="div-legend__term">Immediate</span>
+                — sent right away (or converted to Digest during quiet hours)
+              </span>
+            </div>
+            <div class="div-legend__item">
+              <lightning-icon icon-name={modeIcons.DIGEST} size="xx-small" aria-hidden="true"></lightning-icon>
+              <span>
+                <span class="div-legend__term">Digest</span>
+                — batched and sent on schedule
+              </span>
+            </div>
+            <div class="div-legend__item">
+              <lightning-icon icon-name={icons.HOME} size="xx-small" aria-hidden="true"></lightning-icon>
+              <span>
+                <span class="div-legend__term">Household</span>
+                — linked via FA Team / FA Team Member
+              </span>
+            </div>
+          </div>
+        </template>
+      </template>
+    </section>
+    </div>
+  </article>
+
+  <template lwc:if={showModal}>
+    <section class="rule-modal" role="dialog" aria-modal="true" aria-labelledby="rule-modal-title">
+      <div class="rule-modal__backdrop" onclick={handleCloseModal}></div>
+      <div class="rule-modal__panel">
+        <template lwc:if={showModalSavingOverlay}>
+          <div class="nc-saving-overlay" role="status" aria-live="polite" aria-busy="true">
+            <lightning-spinner alternative-text={savingOverlayMessage} size="medium"></lightning-spinner>
+            <p class="nc-saving-overlay__message">{savingOverlayMessage}</p>
+          </div>
+        </template>
+        <header class="rule-modal__header">
+          <div class="rule-modal__header-copy">
+            <h3 id="rule-modal-title" class="rule-modal__title">{modalTitle}</h3>
+            <p class="rule-modal__subtitle">{modalSubtitle}</p>
+          </div>
+          <button
+            type="button"
+            class="slds-button slds-button_icon slds-button_icon-container rule-modal__close"
+            aria-label="Close dialog"
+            title="Close"
+            disabled={isSaving}
+            onclick={handleCloseModal}
+          >
+            <lightning-icon icon-name={icons.CLOSE} size="x-small"></lightning-icon>
+            <span class="slds-assistive-text">Close</span>
+          </button>
+        </header>
+
+        <div class="rule-modal__body">
+          <div class="rule-modal__fields">
+            <lightning-input
+              type="text"
+              name="ruleName"
+              label="Rule Name"
+              value={formState.ruleName}
+              placeholder={defaultRuleNamePlaceholder}
+              maxlength="255"
+              field-level-help="Optional. Leave blank to use the default name shown in the placeholder."
+              onchange={handleRuleNameChange}
+            ></lightning-input>
+
+            <div class="rule-modal__object-type-field">
+              <lightning-combobox
+                name="objectType"
+                label="Object Type"
+                data-field="objectType"
+                value={formState.objectType}
+                options={objectTypeOptions}
+                dropdown-alignment="top-left"
+                onchange={handleFormFieldChange}
+                required
+              ></lightning-combobox>
+            </div>
+
+            <div class="rule-modal__fields-stack">
+            <lightning-combobox
+              name="frequency"
+              label="Delivery Mode"
+              data-field="frequency"
+              value={formState.frequency}
+              options={frequencyOptions}
+              onchange={handleFormFieldChange}
+              required
+            ></lightning-combobox>
+
+            <template lwc:if={showDigestFrequencyField}>
+              <lightning-combobox
+                name="digestFrequency"
+                label="Digest Frequency"
+                data-field="digestFrequency"
+                value={formState.digestFrequency}
+                options={digestFrequencyOptions}
+                onchange={handleFormFieldChange}
+                required
+              ></lightning-combobox>
+              <p class="rule-modal__digest-help div-text-weak">{digestTimezoneHint}</p>
+            </template>
+
+            <template lwc:if={showDigestFrequencyHourField}>
+              <lightning-combobox
+                name="digestFrequencyHour"
+                label="Delivery Hour"
+                data-field="digestFrequencyHour"
+                value={formState.digestFrequencyHour}
+                options={digestFrequencyHourOptions}
+                field-level-help={digestDeliveryHourHint}
+                onchange={handleFormFieldChange}
+                required
+              ></lightning-combobox>
+            </template>
+
+            <template lwc:if={showLockedHouseholdField}>
+              <div class="rule-modal__household-field">
+                <div class="rule-modal__household-locked">
+                  <span class="rule-modal__household-label">Household</span>
+                  <div class="rule-modal__household-value">
+                    <lightning-icon icon-name={icons.HOME} size="xx-small" aria-hidden="true"></lightning-icon>
+                    <span>{lockedHouseholdLabel}</span>
+                  </div>
+                  <p class="rule-modal__household-help div-text-weak">
+                    Linked to this household. This rule applies only to this account.
+                  </p>
+                </div>
+              </div>
+            </template>
+            <template lwc:elseif={showHouseholdFields}>
+              <div class="rule-modal__household-field">
+                <lightning-record-picker
+                  label="Household"
+                  placeholder="Search households..."
+                  object-api-name="Account"
+                  filter={householdFilter}
+                  matching-info={householdMatchingInfo}
+                  value={formState.householdId}
+                  field-level-help="Optional. Leave blank to apply this rule to all households for your user defaults."
+                  onchange={handleHouseholdChange}
+                ></lightning-record-picker>
+              </div>
+            </template>
+            </div>
+          </div>
+
+          <div class="rule-modal__channels">
+            <div class="rule-modal__channels-header">
+              <span class="rule-modal__channels-label">Channels</span>
+              <span class="rule-modal__channels-hint div-text-weak">{channelSelectionHint}</span>
+            </div>
+            <div class="rule-modal__channel-grid">
+              <template for:each={channelToggleRows} for:item="channel">
+                <button
+                  key={channel.value}
+                  type="button"
+                  class={channel.tileClass}
+                  data-channel={channel.value}
+                  aria-pressed={channel.ariaPressed}
+                  aria-disabled={channel.ariaDisabled}
+                  aria-label={channel.ariaLabel}
+                  disabled={channel.isDisabled}
+                  onclick={handleChannelToggle}
+                >
+                  <span class={channel.iconWrapClass}>
+                    <lightning-icon
+                      icon-name={channel.icon}
+                      size="x-small"
+                      aria-hidden="true"
+                    ></lightning-icon>
+                  </span>
+                  <span class="div-select-tile__label">{channel.label}</span>
+                </button>
+              </template>
+            </div>
+          </div>
+
+          <div class="rule-modal__active-row">
+            <div class="rule-modal__active-label">Active</div>
+            <button
+              type="button"
+              class={activeToggleClass}
+              aria-pressed={activeToggleAriaPressed}
+              aria-label="Toggle rule active"
+              aria-disabled={isActiveToggleDisabled}
+              disabled={isActiveToggleDisabled}
+              onclick={handleActiveToggleClick}
+            >
+              <span class="div-toggle__thumb" aria-hidden="true"></span>
+            </button>
+          </div>
+        </div>
+
+        <footer class="rule-modal__footer slds-modal__footer">
+          <button
+            type="button"
+            class="slds-button slds-button_outline-brand"
+            disabled={isSaving}
+            onclick={handleCloseModal}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="slds-button slds-button_brand"
+            disabled={isSaveDisabled}
+            onclick={handleSaveRule}
+          >
+            {saveRuleButtonLabel}
+          </button>
+        </footer>
+      </div>
+    </section>
+  </template>
+
+  <c-notification-center-confirm-modal
+    is-open={showDuplicateConfirm}
+    elevated
+    is-busy={isSaving}
+    title={duplicateConfirmCopy.title}
+    message={duplicateConfirmCopy.message}
+    list-label={duplicateConfirmCopy.listLabel}
+    list-items={duplicateRuleNames}
+    confirm-label={duplicateConfirmCopy.confirmLabel}
+    cancel-label={duplicateConfirmCopy.cancelLabel}
+    onconfirm={handleDuplicateConfirm}
+    oncancel={handleDuplicateCancel}
+  ></c-notification-center-confirm-modal>
+</template>

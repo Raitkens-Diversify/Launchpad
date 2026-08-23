@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Type__c</fullName>
+    <label>Type</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Account Closure</fullName>
+                <default>false</default>
+                <label>Account Closure</label>
+            </value>
+            <value>
+                <fullName>Additional Funding</fullName>
+                <default>false</default>
+                <label>Additional Funding</label>
+            </value>
+            <value>
+                <fullName>Change of Registration</fullName>
+                <default>false</default>
+                <label>Change of Registration</label>
+            </value>
+            <value>
+                <fullName>Excluded</fullName>
+                <default>false</default>
+                <label>Excluded</label>
+            </value>
+            <value>
+                <fullName>Third Party Money Movement</fullName>
+                <default>false</default>
+                <label>Third Party Money Movement</label>
+            </value>
+            <value>
+                <fullName>Financial Planning</fullName>
+                <default>false</default>
+                <label>Financial Planning</label>
+            </value>
+            <value>
+                <fullName>Multi-Family Office</fullName>
+                <default>false</default>
+                <label>Multi-Family Office</label>
+            </value>
+            <value>
+                <fullName>ERISA</fullName>
+                <default>false</default>
+                <label>ERISA</label>
+            </value>
+            <value>
+                <fullName>Person Account Requested Changes</fullName>
+                <default>false</default>
+                <label>Person Account Requested Changes</label>
+            </value>
+            <value>
+                <fullName>Change Management Style</fullName>
+                <default>false</default>
+                <label>Change Management Style</label>
+            </value>
+            <value>
+                <fullName>Update Trade Instructions</fullName>
+                <default>false</default>
+                <label>Update Trade Instructions</label>
+            </value>
+            <value>
+                <fullName>Purchase Alternative Investment</fullName>
+                <default>false</default>
+                <label>Purchase Alternative Investment</label>
+            </value>
+            <value>
+                <fullName>Variable Annuity Additional Purchase</fullName>
+                <default>false</default>
+                <label>Variable Annuity Additional Purchase</label>
+            </value>
+            <value>
+                <fullName>DMS - Raise Cash</fullName>
+                <default>false</default>
+                <label>DMS - Raise Cash</label>
+            </value>
+            <value>
+                <fullName>DMS - Add/Remove Systematic Withdrawals</fullName>
+                <default>false</default>
+                <label>DMS - Add/Remove Systematic Withdrawals</label>
+            </value>
+            <value>
+                <fullName>DMS - Instructions for Future Deposit</fullName>
+                <default>false</default>
+                <label>DMS - Instructions for Future Deposit</label>
+            </value>
+            <value>
+                <fullName>DMS - Other</fullName>
+                <default>false</default>
+                <label>DMS - Other</label>
+            </value>
+            <value>
+                <fullName>Update IMA</fullName>
+                <default>false</default>
+                <label>Update IMA</label>
+            </value>
+            <value>
+                <fullName>Account Opening</fullName>
+                <default>false</default>
+                <label>Account Opening</label>
+            </value>
+            <value>
+                <fullName>401k Rollover</fullName>
+                <default>false</default>
+                <label>401k Rollover</label>
+            </value>
+            <value>
+                <fullName>Client Passed Away</fullName>
+                <default>false</default>
+                <label>Client Passed Away</label>
+            </value>
+            <value>
+                <fullName>Cancel Move Money Recurring</fullName>
+                <default>false</default>
+                <label>Cancel Move Money Recurring</label>
+            </value>
+            <value>
+                <fullName>Grant Donation</fullName>
+                <default>false</default>
+                <label>Grant Donation</label>
+            </value>
+            <value>
+                <fullName>Journal Between Accounts - On Demand</fullName>
+                <default>false</default>
+                <label>Journal Between Accounts - On Demand</label>
+            </value>
+            <value>
+                <fullName>Donation in Kind</fullName>
+                <default>false</default>
+                <label>Donation in Kind</label>
+            </value>
+            <value>
+                <fullName>Move Money - One Time</fullName>
+                <default>false</default>
+                <label>Move Money - One Time</label>
+            </value>
+            <value>
+                <fullName>Move Money - Recurring</fullName>
+                <default>false</default>
+                <label>Move Money - Recurring</label>
+            </value>
+            <value>
+                <fullName>Qualified Charitable Distribution</fullName>
+                <default>false</default>
+                <label>Qualified Charitable Distribution</label>
+            </value>
+            <value>
+                <fullName>Client Reimbursement</fullName>
+                <default>false</default>
+                <label>Client Reimbursement</label>
+            </value>
+            <value>
+                <fullName>Roth Conversion</fullName>
+                <default>false</default>
+                <label>Roth Conversion</label>
+            </value>
+            <value>
+                <fullName>Trade Error</fullName>
+                <default>false</default>
+                <label>Trade Error</label>
+            </value>
+            <value>
+                <fullName>Transfer</fullName>
+                <default>false</default>
+                <label>Transfer</label>
+            </value>
+            <value>
+                <fullName>Prepare Trades</fullName>
+                <default>false</default>
+                <label>Prepare Trades</label>
+            </value>
+            <value>
+                <fullName>Client Terminated Services</fullName>
+                <default>false</default>
+                <label>Client Terminated Services</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

@@ -1,0 +1,659 @@
+/* --slds-g-* declared locally, not inherited: platform-injected SLDS2
+   styling hooks beat values inherited from an ancestor's :host
+   (see nexsHome.css / dsHero.css). */
+:host {
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-accent-1: #0f406f;
+}
+
+.ues {
+    max-width: var(--uta-content-max-wide, 1280px);
+    margin: 0 auto;
+    /* No reserve under the action bar: it's sticky, so it holds its own slot at
+       the end of this column instead of floating over the last card. */
+    padding-bottom: 0;
+}
+
+.ues__crumbs {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-sm, 8px);
+    margin-bottom: var(--ds-space-md, 12px);
+    font-size: 0.8125rem;
+}
+.ues__crumb-link {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--ds-medium-blue, #1a76bb);
+}
+.ues__crumb-link:hover {
+    text-decoration: underline;
+}
+.ues__crumb-link:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+.ues__crumb-arrow {
+    margin-right: var(--ds-space-xs, 4px);
+}
+
+.ues__error {
+    margin: 0 0 var(--ds-space-md, 12px);
+    font-size: 0.875rem;
+    color: var(--ds-error-text, #a83232);
+}
+
+/* Eyebrow → title → charter → meta, the runner's header grammar. The charter
+   is the subtitle because it is the reason the session exists. */
+.ues__head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-sm, 8px);
+    margin-bottom: var(--ds-space-lg, 16px);
+}
+.ues__eyebrow {
+    margin: 0;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ues__title {
+    margin: calc(-1 * var(--ds-space-sm, 8px)) 0 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    overflow-wrap: anywhere;
+}
+.ues__head-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--ds-space-sm, 8px);
+    font-size: 0.8125rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ues__head-code {
+    font-size: 0.75rem;
+}
+.ues__head-owner {
+    font-style: italic;
+}
+
+/* Two-column workspace, runner grammar; stacks below 1024. */
+.ues__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 28%);
+    gap: var(--ds-space-xl, 24px);
+    align-items: start;
+}
+.ues__main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-lg, 16px);
+}
+.ues__side {
+    min-width: 0;
+}
+
+.ues__card {
+    padding: var(--ds-space-xl, 24px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+}
+.ues__card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-space-md, 12px);
+    margin-bottom: var(--ds-space-md, 12px);
+}
+.ues__card-title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.ues__save-hint {
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ues__save-state {
+    flex-shrink: 0;
+    min-width: 3.5rem;
+    text-align: right;
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.ues__muted {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* The one-line answer to "what are you looking at?", under the title. */
+.ues__lookingat {
+    margin: 0;
+    max-width: 68ch;
+    font-size: 0.9375rem;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+/* ---- The log ---------------------------------------------------------------
+   A timeline, oldest first: a fixed time gutter with a rule running down it, so
+   the eye reads the sequence before it reads any one entry. */
+.ues__timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.ues__entry {
+    position: relative;
+    margin-left: 3.5rem;
+    padding: var(--ds-space-md, 12px) 0 var(--ds-space-md, 12px) var(--ds-space-lg, 16px);
+    border-left: 2px solid var(--slds-g-color-border-1, #d1d5db);
+}
+.ues__entry-gutter {
+    position: absolute;
+    left: -3.5rem;
+    top: var(--ds-space-md, 12px);
+    width: 3rem;
+    text-align: right;
+}
+.ues__entry-time {
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+/* The dot that anchors an entry to the rule. */
+.ues__entry::before {
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: calc(var(--ds-space-md, 12px) + 6px);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--slds-g-color-border-1, #d1d5db);
+}
+.ues__entry-body {
+    min-width: 0;
+}
+.ues__entry-head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--ds-space-sm, 8px);
+    margin-bottom: var(--ds-space-xs, 4px);
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ues__entry-tag {
+    padding: 1px 8px;
+    border-radius: var(--ds-radius-pill, 20px);
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+.ues__entry-run {
+    font-style: italic;
+}
+.ues__entry-author {
+    margin-right: auto;
+}
+.ues__entry-promoted {
+    font-weight: 600;
+    color: var(--ds-medium-blue, #1a76bb);
+}
+/* Row actions stay quiet until the entry is hovered or focused within — a log
+   of twenty entries should not read as forty buttons. */
+.ues__entry-actions {
+    display: flex;
+    gap: var(--ds-space-sm, 8px);
+    opacity: 0;
+    transition: opacity 120ms ease;
+}
+.ues__entry:hover .ues__entry-actions,
+.ues__entry:focus-within .ues__entry-actions {
+    opacity: 1;
+}
+.ues__entry-action {
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ds-medium-blue, #1a76bb);
+}
+.ues__entry-action:hover {
+    text-decoration: underline;
+}
+.ues__entry-action:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+    opacity: 1;
+}
+.ues__entry-action--danger {
+    color: var(--ds-error-text, #a83232);
+}
+.ues__entry-action:disabled {
+    opacity: 0.5;
+    cursor: default;
+    text-decoration: none;
+}
+.ues__entry-text {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--slds-g-color-on-surface-2, #374151);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+.ues__entry-files {
+    margin-top: var(--ds-space-sm, 8px);
+}
+.ues__entry-edit {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-sm, 8px);
+}
+.ues__entry-edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--ds-space-sm, 8px);
+}
+
+/* ---- Composer --------------------------------------------------------------
+   Sits at the foot of the log, where the next entry will appear. */
+.ues__composer {
+    margin-top: var(--ds-space-lg, 16px);
+    padding-top: var(--ds-space-md, 12px);
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+.ues__composer-input,
+.ues__entry-input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: var(--ds-space-md, 12px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-md, 8px);
+    font-family: inherit;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--slds-g-color-on-surface-2, #374151);
+    resize: vertical;
+}
+.ues__composer-input:focus-visible,
+.ues__entry-input:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 1px;
+}
+.ues__composer-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--ds-space-sm, 8px);
+    margin-top: var(--ds-space-sm, 8px);
+}
+.ues__composer-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ds-space-xs, 4px);
+}
+.ues__composer-actions {
+    display: flex;
+    gap: var(--ds-space-sm, 8px);
+    margin-left: auto;
+}
+/* Tag chips: optional, one click, and clickable off again. Not
+   c-ds-filter-chips — that primitive filters a list, this picks a value. */
+.ues__tag {
+    padding: 3px 10px;
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-pill, 20px);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+.ues__tag:hover {
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+}
+.ues__tag:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+.ues__tag--on {
+    background: var(--slds-g-color-accent-1, #0f406f);
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+    color: #ffffff;
+}
+.ues__composer-tray {
+    margin-top: var(--ds-space-md, 12px);
+}
+/* Hidden, not unmounted: unmounting would discard the staged document ids the
+   new entry is about to claim. */
+.ues__composer-tray--hidden {
+    display: none;
+}
+
+.ues__findings {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-md, 12px);
+}
+/* Collapsed identity row; the three blocks and the actions live in the body.
+   A whole finding as an always-open card buried the list. */
+.ues__finding {
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-md, 8px);
+}
+.ues__finding-summary {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--ds-space-sm, 8px);
+    padding: var(--ds-space-md, 12px) var(--ds-space-lg, 16px);
+    cursor: pointer;
+    list-style-position: inside;
+}
+.ues__finding-summary:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: -2px;
+}
+.ues__finding-headline {
+    flex: 1 1 16rem;
+    min-width: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.ues__finding-meta {
+    flex: 0 0 auto;
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ues__finding-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-sm, 8px);
+    padding: 0 var(--ds-space-lg, 16px) var(--ds-space-lg, 16px);
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    padding-top: var(--ds-space-md, 12px);
+}
+/* "From session note · 14:32" — the trail back to the moment it came from. */
+/* .ues__finding-origin, .ues__finding-actions and .ues__block-text moved to
+ * c/uatFindingDetail with the body they style. .ues__block-label stays: the
+ * finish gate ("Before finishing") still uses it outside the finding. */
+.ues__block-label {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ues__files {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ds-space-sm, 8px);
+}
+.ues__thumb {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: var(--ds-radius-sm, 6px);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+.ues__file-link {
+    font-size: 0.8125rem;
+    color: var(--ds-medium-blue, #1a76bb);
+}
+
+/* Stays in view while the notes and findings scroll past it. */
+.ues__overview {
+    position: sticky;
+    top: var(--ds-space-lg, 16px);
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-md, 12px);
+}
+.ues__timebox {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+.ues__timebox--elapsed {
+    color: var(--ds-warning-text, #b8860b);
+}
+.ues__details {
+    margin: 0;
+}
+.ues__detail-row {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--ds-space-md, 12px);
+    padding: var(--ds-space-xs, 4px) 0;
+    font-size: 0.8125rem;
+}
+.ues__detail-row dt {
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ues__detail-row dd {
+    margin: 0;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    font-weight: 500;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+/* Derived, never a gate — Finish stays enabled whatever this says. */
+.ues__checklist {
+    padding-top: var(--ds-space-md, 12px);
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+.ues__checks {
+    list-style: none;
+    margin: var(--ds-space-sm, 8px) 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-xs, 4px);
+}
+.ues__check {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ds-space-sm, 8px);
+    font-size: 0.8125rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+/* The one item that actually blocks Finish, so it does not look like the
+   others. The server throws on it too. */
+.ues__check--blocking {
+    color: var(--ds-error-text, #a83232);
+    font-weight: 600;
+}
+.ues__check--blocking .ues__check-mark {
+    color: var(--ds-error-text, #a83232);
+}
+.ues__check--done {
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+.ues__check-mark {
+    flex-shrink: 0;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ues__check--done .ues__check-mark {
+    color: var(--ds-success-text, #2d7d46);
+}
+
+/* Destructive action, collapsed and out of the metadata it used to sit in. */
+.ues__danger {
+    padding-top: var(--ds-space-md, 12px);
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+.ues__danger-summary {
+    cursor: pointer;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ues__danger-summary:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+
+.ues__delete-link {
+    margin-top: var(--ds-space-md, 12px);
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--ds-error-text, #a83232);
+}
+.ues__delete-link:hover {
+    text-decoration: underline;
+}
+.ues__delete-link:focus-visible {
+    outline: 2px solid var(--ds-error-text, #a83232);
+    outline-offset: 2px;
+}
+.ues__delete-link:disabled {
+    opacity: 0.6;
+    cursor: default;
+    text-decoration: none;
+}
+
+.ues__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-md, 12px);
+}
+/* The modal opts into allow-overflow (combobox dropdowns must escape), which
+   trades away body scrolling — keep the create/edit form compact enough for
+   short viewports by capping the textareas' initial height. */
+.ues__form lightning-textarea {
+    --slds-c-textarea-sizing-min-height: 4.5rem;
+    --sds-c-textarea-sizing-min-height: 4.5rem;
+}
+/* Appears only when the evidence rule is the thing standing between the tester
+   and saving — so it reads as the way out, not as another empty field. */
+.ues__form-gate {
+    padding: var(--ds-space-md, 12px);
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    border-radius: var(--ds-radius-md, 8px);
+}
+.ues__form-gate-hint {
+    margin: 0 0 var(--ds-space-sm, 8px);
+    font-size: 0.8125rem;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.ues__form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--ds-space-md, 12px);
+}
+.ues__form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--ds-space-sm, 8px);
+}
+
+/* Pinned action bar, the runner's ur__navbar: the two terminal actions stay
+   reachable however far the notes and findings grow. Sticky, and offset by the
+   utility-bar height, for the reasons spelled out on .ur__navbar — LEX's
+   scrollport runs behind that strip, so bottom:0 lands under it. */
+.ues__navbar {
+    position: sticky;
+    bottom: 2.75rem;
+    z-index: 50;
+    padding: var(--ds-space-md, 12px) clamp(24px, 3vw, 48px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-bottom: none;
+    border-radius: var(--ds-radius-md, 8px) var(--ds-radius-md, 8px) 0 0;
+    box-shadow: var(--ds-shadow-raised, 0 -4px 12px rgba(9, 36, 63, 0.08));
+}
+.ues__navbar-inner {
+    box-sizing: border-box;
+    max-width: var(--uta-content-max-wide, 1280px);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-space-md, 12px);
+}
+/* Quiet by design — informational chrome, not a feature to notice. */
+.ues__navbar-state {
+    min-width: 0;
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ues__navbar-actions {
+    display: flex;
+    gap: var(--ds-space-md, 12px);
+}
+
+@media (max-width: 1024px) {
+    .ues__layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .ues__side {
+        order: -1; /* overview first when stacked — it frames the work */
+    }
+    /* Sticking a full-width panel to the top of a stacked page just eats the
+       viewport. */
+    .ues__overview {
+        position: static;
+    }
+}
+
+@media (max-width: 640px) {
+    .ues__card {
+        padding: var(--ds-space-lg, 16px);
+    }
+    .ues__form-row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .ues__finding-meta {
+        flex: 1 1 100%;
+    }
+    .ues__navbar-inner {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

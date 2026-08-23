@@ -1,0 +1,666 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <fieldSets>
+        <label><!-- MoveMoneyOneTime --></label>
+        <name>MoveMoneyOneTime</name>
+    </fieldSets>
+    <layouts>
+        <layout>Advertising Review</layout>
+        <sections>
+            <label><!-- Advertising Information --></label>
+            <section>Advertising Information</section>
+        </sections>
+        <sections>
+            <label><!-- Web Information --></label>
+            <section>Web Information</section>
+        </sections>
+    </layouts>
+    <layouts>
+        <layout>Case (Ad Hoc) Layout</layout>
+        <sections>
+            <label><!-- Custom Links --></label>
+            <section>Custom Links</section>
+        </sections>
+        <sections>
+            <label><!-- Fields --></label>
+            <section>Fields</section>
+        </sections>
+    </layouts>
+    <layouts>
+        <layout>Email to Case</layout>
+        <sections>
+            <label><!-- Custom Links --></label>
+            <section>Custom Links</section>
+        </sections>
+        <sections>
+            <label><!-- Fields --></label>
+            <section>Fields</section>
+        </sections>
+    </layouts>
+    <quickActions>
+        <label><!-- Account Opening --></label>
+        <name>Account_Opening</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Add Comment --></label>
+        <name>Add_Comment</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Maestro - Add, Remove, Extend --></label>
+        <name>Add_to_Maestro_Report</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- CancelMoveMoneyRecurring --></label>
+        <name>CancelMoveMoneyRecurring</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Cancel Case --></label>
+        <name>Cancel_Case</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Change Management Style --></label>
+        <name>Change_Management_Style</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Client Reimbursement --></label>
+        <name>Client_Reimbursement</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Client Terminated Services --></label>
+        <name>Client_Terminated_Services</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- CloseCaseLightning --></label>
+        <name>CloseCaseLightning</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- New Action Plan --></label>
+        <name>Create_Action_Plan</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Create Branch Pit Stop Task --></label>
+        <name>Create_Branch_Pit_Stop_Task</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Create Home Office Pit Stop Task --></label>
+        <name>Create_Home_Office_Task</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Create Order Ticket --></label>
+        <name>Create_Order_Ticket</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Deposit Check --></label>
+        <name>Deposit_Check</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Donation in Kind --></label>
+        <name>Donation_in_Kind</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Grant Compliance Exception --></label>
+        <name>Grant_Compliance_Exception</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Grant Donation --></label>
+        <name>Grant_Donation</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Journal Between Accounts - On Demand --></label>
+        <name>Journal_Between_Accounts_On_Demand</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Log a Check --></label>
+        <name>Log_a_Check_Case</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Maestro - Add, Remove, Extend --></label>
+        <name>Maestro_Add_Natina</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Add to Maestro Reports --></label>
+        <name>Maestro_Add_Ops</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- MoveMoneyOneTime --></label>
+        <name>MoveMoneyOneTime</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- MoveMoneyRecurring --></label>
+        <name>MoveMoneyRecurring</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- NewAccountCaseDetails --></label>
+        <name>NewAccountCaseDetails</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- NewChildCase --></label>
+        <name>NewChildCase</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- New Task --></label>
+        <name>New_Task</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Prepare Trades --></label>
+        <name>Prepare_Trades</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Qualified Charitable Distribution --></label>
+        <name>Qualified_Charitable_Distribution</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Request Additional Documents --></label>
+        <name>Request_Additional_Documents</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Return to Advisor --></label>
+        <name>Return_to_Advisor</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Return to Compliance --></label>
+        <name>Return_to_Compliance</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Review Meeting --></label>
+        <name>Review_Meeting</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Roth Conversion --></label>
+        <name>Roth_Conversion</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- SendEmail --></label>
+        <name>SendEmail</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Third Party Money Movement --></label>
+        <name>Third_Party_Money_Movement</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Trade Error --></label>
+        <name>Trade_Error</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Transfer --></label>
+        <name>Transfer</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Update IMA --></label>
+        <name>Update_IMA</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- 401kRollover --></label>
+        <name>X401kRollover</name>
+    </quickActions>
+    <recordTypes>
+        <label><!-- Account Opening --></label>
+        <name>Account_Opening</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- Account Servicing --></label>
+        <name>Account_Servicing</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- Account Servicing - Approval Required --></label>
+        <name>Account_Servicing_Principal_Review</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- Ad Hoc --></label>
+        <name>Ad_Hoc</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- Advertising Review --></label>
+        <name>Advertising_Review</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- Advisor Group Review --></label>
+        <name>Advisor_Group_Review</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- Email to Case --></label>
+        <name>Email_to_Case</name>
+    </recordTypes>
+    <recordTypes>
+        <description><!-- Case Records for Home Office Operations requests --></description>
+        <label><!-- Operations Request --></label>
+        <name>Operations_Request</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- Source of Funds --></label>
+        <name>Source_of_Funds</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- Systems --></label>
+        <name>Systems</name>
+    </recordTypes>
+    <validationRules>
+        <errorMessage><!-- If you need to change the financial advisor team, please reach out to your admin or ops teams. --></errorMessage>
+        <name>RestrictFinancialAdvisorTeamUpdate_Case</name>
+    </validationRules>
+    <webLinks>
+        <label><!-- New_AdHoc_Case --></label>
+        <name>New_AdHoc_Case</name>
+    </webLinks>
+</CustomObjectTranslation>

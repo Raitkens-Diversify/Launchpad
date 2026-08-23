@@ -1,0 +1,7 @@
+Hello [!Case.Contact.FirstName] [!Case.Contact.LastName],
+
+I hope this email finds you well. I am reaching out today to schedule a meeting with you and [!Case.Financial_Advisor_Team__r.Primary_Financial_Advisor__r.FirstName] [!Case.Financial_Advisor_Team__r.Primary_Financial_Advisor__r.LastName]. You can use the calendar link below to schedule a time to meet or call me at [!User.Phone] to schedule a time to meet.
+
+[!Case.Financial_Advisor_Team__r.Primary_Financial_Advisor__r.Calendly__CalendlyLink__c]
+
+Sincerely,

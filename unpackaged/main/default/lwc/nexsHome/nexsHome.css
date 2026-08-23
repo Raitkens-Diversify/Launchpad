@@ -1,0 +1,209 @@
+:host {
+    display: block;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+
+    /* Self-declared --slds-g-* set (same values as nexsLanding/nexsArticleBrowser).
+       Declared locally, not inherited: LWR sites inject real SLDS2 styling hooks
+       under these names into each component scope, and those beat values inherited
+       from an ancestor's :host — the site's brand grey was replacing our white. */
+    --slds-g-spacing-1: 4px;
+    --slds-g-spacing-2: 0.5rem;
+    --slds-g-spacing-3: 0.75rem;
+    --slds-g-spacing-4: 1rem;
+    --slds-g-spacing-5: 24px;
+    --slds-g-radius-border-2: 0.5rem;
+    --slds-g-font-family-base: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    --slds-g-font-scale-1: 14px;
+    --slds-g-font-scale-2: 0.875rem;
+    --slds-g-font-scale-3: 1.25rem;
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-border-2: #b6bcc5;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-accent-3: #071c31;
+    --slds-g-color-on-accent-1: #ffffff;
+    --slds-g-color-accent-container-1: #0f406f;
+}
+
+/* ---- Hero: rendered by the shared c-ds-hero (extracted from the inline
+   .home-hero markup that used to live here). Only the slotted search
+   wrapper below stays owner-styled. ---- */
+
+/* Full-column, tall white bar (Hulu-style) via dsSearchBar's size hooks. */
+.home-hero__search {
+    --ds-search-bar-bg: var(--ds-white, #ffffff);
+    --ds-search-bar-radius: var(--ds-radius-lg, 10px);
+    --ds-search-bar-padding: 14px 16px;
+    --ds-search-bar-font-size: 15px;
+}
+
+/* ---- Body sections ---- */
+.home-body {
+    max-width: calc(var(--nexs-content-max, 1040px) + 2 * var(--slds-g-spacing-5, 24px));
+    margin: 0 auto;
+    padding: var(--ds-space-2xl, 32px) var(--slds-g-spacing-5, 24px) var(--ds-space-3xl, 48px);
+    box-sizing: border-box;
+}
+
+.home-section + .home-section {
+    margin-top: var(--ds-space-3xl, 48px);
+}
+
+.home-section__title {
+    margin: 0 0 var(--slds-g-spacing-5, 24px);
+    font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+    font-size: 1.75rem;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+/* Heading row with a trailing action link ("Popular Topics — See all topics"). */
+.home-section__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--slds-g-spacing-4, 16px);
+    margin-bottom: var(--slds-g-spacing-5, 24px);
+}
+
+.home-section__head .home-section__title {
+    margin: 0;
+}
+
+.home-section__link {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--ds-medium-blue, #1a76bb);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.home-section__link:hover {
+    text-decoration: underline;
+}
+
+/* ---- Popular articles: two blocks of joined rows (Hulu-style) ---- */
+.home-popular {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--slds-g-spacing-5, 24px);
+    align-items: start;
+}
+
+.home-popular__col {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-md, 8px);
+    overflow: hidden;
+}
+
+.home-popular__col li + li {
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+
+.home-popular__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--slds-g-spacing-3, 12px);
+    padding: var(--slds-g-spacing-4, 16px) var(--slds-g-spacing-5, 24px);
+    text-decoration: none;
+    transition: background-color 120ms ease;
+}
+
+.home-popular__row:hover {
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+
+.home-popular__title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ds-medium-blue, #1a76bb);
+}
+
+.home-popular__row lightning-icon {
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* ---- Topic grid: icon-led cards ---- */
+.home-topics {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--slds-g-spacing-4, 16px);
+}
+
+.home-topics__card {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--slds-g-spacing-3, 12px);
+    padding: var(--ds-space-2xl, 32px) var(--ds-space-xl, 24px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.home-topics__card:hover {
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+    box-shadow: var(--ds-shadow-hover, 0 4px 14px rgba(15, 64, 111, 0.08));
+}
+
+/* Brand light-blue circle, medium-blue icon (shared treatment across the
+   help center's icon circles). */
+.home-topics__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--ds-lightest-blue, #e2f8ff);
+    color: var(--ds-medium-blue, #1a76bb);
+}
+
+.home-topics__icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.home-topics__label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 1024px) {
+    .home-topics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    /* Hero step-down now lives in dsHero.css. */
+    .home-popular {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .home-topics {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

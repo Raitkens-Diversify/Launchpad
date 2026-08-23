@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <help><!-- If the Source of Funds is Gift/Inheritance, is the account already at the firm? --></help>
+        <label><!-- Gift: Account Already at Firm? --></label>
+        <name>Gift_Account_Already_at_Firm__c</name>
+    </CustomFieldTranslation>

@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RecordType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Partner</fullName>
+    <active>true</active>
+    <businessProcess>Partner</businessProcess>
+    <label>Partner</label>
+    <picklistValues>
+        <picklist>Accelerator_Loan_Option__c</picklist>
+        <values>
+            <fullName>No</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Yes</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Client_Type__c</picklist>
+        <values>
+            <fullName>Business</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Individual</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Retirement Plan</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Trust</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Current_Plan_Provider_s__c</picklist>
+        <values>
+            <fullName>401Go</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>ADP</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>American Funds</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Ameritas</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Ascensus</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Empower</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Fidelity</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Guideline</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Human Interest</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>JPMorgan</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>John Hancock</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Lincoln Financial Group</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>NWPS</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Nationwide</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Other</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Paychex</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Principal</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Schwab</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>T%2E Rowe Price</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>TIAA</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>The Standard</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Transamerica</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>VOYA</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Vanguard</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Vestwell</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Custodian__c</picklist>
+        <values>
+            <fullName>Fidelity</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Outside Manager</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Schwab</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Fee_Type__c</picklist>
+        <values>
+            <fullName>Flat Fee</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Flat Fee %2B bps</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>bps</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>ForecastCategoryName</picklist>
+        <values>
+            <fullName>Best Case</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Closed</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Commit</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Omitted</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Pipeline</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>LeadSource</picklist>
+        <values>
+            <fullName>Other</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Personal Introduction</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Purchased List</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Social Media</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Loss_Reason__c</picklist>
+        <values>
+            <fullName>Lost to Competitor</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>No Budget %2F Lost Funding</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Other</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Price</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Paid_Lead_Source__c</picklist>
+        <values>
+            <fullName>Dave Ramsey</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Other</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Smart Asset</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Plan_Origin__c</picklist>
+        <values>
+            <fullName>Conversion</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Start-Up</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Plan_Type__c</picklist>
+        <values>
+            <fullName>401%28a%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>401%28k%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>403%28b%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>457</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Cash Balance</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Defined Benefit</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Employee Stock Ownership Plan %28ESOP%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Money Purchase</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Profit-Sharing</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Solo 401%28k%29</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Potential_Service__c</picklist>
+        <values>
+            <fullName>BD</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Broker Dealer</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Delaware Statutory Trust %28DST%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Family Office Service Agreement</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Fee Based Wealth Management</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Financial Planning</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>RIA 1099</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>RIA 1099 %2B BD</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>RIA W2</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>RIA W2 %2B BD</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Retirement Planning or ERISA</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Tax Services</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Referral_Source__c</picklist>
+        <values>
+            <fullName>401k</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Client Referral</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Diversify Advisor Referral</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Home Office Referral</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Personal Relationship</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Website Lead</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Source_of_Funds__c</picklist>
+        <values>
+            <fullName>Advisory Account</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Employer Sponsored Plan</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Gift%2FInheritance</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Income</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Other</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Sale of Property %28Including 1031%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Sale of a Mutual Fund</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Sale of an Annuity %28Including 1035%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Savings %2812%2B Months%29</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Type</picklist>
+        <values>
+            <fullName>Existing Business</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>New Business</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+</RecordType>

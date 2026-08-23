@@ -1,0 +1,6 @@
+<design:component>
+    <design:attribute name="Size" label="Button Size" description="Small, Medium, or Large? Next buttons are Small, Card buttons are Large"/>
+	<design:attribute name="ButtonText" label="Text of the Button" description="What would you like the button to say?" />
+    <design:attribute name="ButtonType" label="Button Type" description="What type of Button is this? Active Button, Inactive Button, Selected Button, or Link?"/>   
+    <design:attribute name="ValueClicked" label="Value Returned from the Button" description="What variable would you like to store the returned value in?" />
+</design:component>

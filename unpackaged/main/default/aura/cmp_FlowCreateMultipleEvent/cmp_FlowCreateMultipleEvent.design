@@ -1,0 +1,11 @@
+<design:component>
+    <design:attribute name="sObjectName" label="Name" description="API name of the Object that the records will be." />
+    <design:attribute name="recordTypeName" label="Record Type" description="All records shown/created will be of this type" />
+    <design:attribute name="MaximumNumberofRecords" label="Maximum Number of Records" description="If there is a maximum number of records, put that value here." />
+    <design:attribute name="LinestoShow" label="Lines to Show" description="Number of lines to show initially." />
+    <design:attribute name="interviewId" label="Interview Id" description="Interview ID of the Flow." />
+    <design:attribute name="parentLookupFieldName" label="Parent Lookup" description="API Name of the parent lookup." />
+    <design:attribute name="sObjectFields" label="Fields" description="API names of Fields separated by commas." />
+    
+    <!--<design:attribute name="fetchedResult" label="DynamicTableFetchedData" description="fetched Result in List" />-->
+</design:component>

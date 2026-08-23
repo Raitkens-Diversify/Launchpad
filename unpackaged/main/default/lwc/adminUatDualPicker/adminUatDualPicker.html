@@ -1,0 +1,85 @@
+<template>
+    <div class="audp">
+        <section class="audp__pane">
+            <h3 class="audp__pane-title">{selectedLabel}</h3>
+            <template if:true={hasSelected}>
+                <template if:true={orderable}>
+                    <c-admin-sortable-tree items={treeItems}
+                                           editable
+                                           hide-edit
+                                           removable
+                                           remove-label="Remove"
+                                           busy={busy}
+                                           onreorder={handleTreeReorder}
+                                           onremove={handleTreeRemove}></c-admin-sortable-tree>
+                </template>
+                <template if:false={orderable}>
+                    <ul class="audp__rows">
+                        <template for:each={plainSelected} for:item="item">
+                            <li key={item.id} class="audp__row">
+                                <div class="audp__row-text">
+                                    <span class="audp__row-label">{item.label}</span>
+                                    <template if:true={item.sublabel}>
+                                        <span class="audp__row-sub">{item.sublabel}</span>
+                                    </template>
+                                </div>
+                                <lightning-button-icon icon-name="utility:close"
+                                                       size="small"
+                                                       alternative-text="Remove"
+                                                       title="Remove"
+                                                       disabled={busy}
+                                                       data-id={item.id}
+                                                       data-label={item.label}
+                                                       onclick={handleRowRemove}></lightning-button-icon>
+                            </li>
+                        </template>
+                    </ul>
+                </template>
+            </template>
+            <template if:false={hasSelected}>
+                <p class="audp__empty">{selectedEmptyText}</p>
+            </template>
+        </section>
+
+        <section class="audp__pane">
+            <h3 class="audp__pane-title">{availableLabel}</h3>
+            <div class="audp__filters">
+                <lightning-input type="search"
+                                 label="Search"
+                                 variant="label-hidden"
+                                 placeholder={searchPlaceholder}
+                                 value={searchTerm}
+                                 onchange={handleSearchChange}></lightning-input>
+                <template if:true={showSystemFilter}>
+                    <lightning-combobox label="System"
+                                        variant="label-hidden"
+                                        options={systemFilterOptions}
+                                        value={systemFilter}
+                                        onchange={handleSystemFilterChange}></lightning-combobox>
+                </template>
+            </div>
+            <template if:true={hasAvailable}>
+                <ul class="audp__rows audp__rows--scroll">
+                    <template for:each={filteredAvailable} for:item="item">
+                        <li key={item.id} class="audp__row">
+                            <div class="audp__row-text">
+                                <span class="audp__row-label">{item.label}</span>
+                                <template if:true={item.sublabel}>
+                                    <span class="audp__row-sub">{item.sublabel}</span>
+                                </template>
+                            </div>
+                            <lightning-button label="+ Add"
+                                              size="small"
+                                              disabled={busy}
+                                              data-id={item.id}
+                                              onclick={handleAdd}></lightning-button>
+                        </li>
+                    </template>
+                </ul>
+            </template>
+            <template if:false={hasAvailable}>
+                <p class="audp__empty">{availableEmptyText}</p>
+            </template>
+        </section>
+    </div>
+</template>

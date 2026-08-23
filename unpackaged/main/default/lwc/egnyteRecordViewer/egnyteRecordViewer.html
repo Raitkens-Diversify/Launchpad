@@ -1,0 +1,63 @@
+<template>
+  <section
+    class="egnyte-record-viewer"
+    style={containerStyle}
+    aria-label="Egnyte documents"
+  >
+    <template if:true={showDesignPlaceholder}>
+      <div class="egnyte-record-viewer__placeholder" role="status">
+        <p class="egnyte-record-viewer__placeholder-title">Egnyte Record Viewer</p>
+        <p class="egnyte-record-viewer__placeholder-copy">
+          Displays the Egnyte folder for the current record after the page is published.
+          Bind Record Id to the page recordId property on record detail pages.
+        </p>
+      </div>
+    </template>
+
+    <template if:false={showDesignPlaceholder}>
+      <template if:true={showEmptyPlaceholder}>
+        <div class="egnyte-record-viewer__placeholder" role="status">
+          <p class="egnyte-record-viewer__placeholder-title">Egnyte Record Viewer</p>
+          <p class="egnyte-record-viewer__placeholder-copy">
+            Open a record page or bind Record Id to the page recordId property to load Egnyte documents.
+          </p>
+        </div>
+      </template>
+
+      <template if:true={isLoading}>
+        <div class="egnyte-record-viewer__status">
+          <lightning-spinner
+            alternative-text="Loading Egnyte"
+            size="medium"
+          ></lightning-spinner>
+        </div>
+      </template>
+
+      <template if:true={errorMessage}>
+        <div class="egnyte-record-viewer__status egnyte-record-viewer__error" role="alert">
+          <p>{errorMessage}</p>
+          <template if:true={showOAuthConnectLink}>
+            <p class="egnyte-record-viewer__connect">
+              <a href={oauthConnectUrl} target="_blank" rel="noopener noreferrer">
+                Connect Egnyte (admin login)
+              </a>
+            </p>
+            <p class="egnyte-record-viewer__connect-copy">
+              After login, copy the refresh token into Egnyte Settings custom metadata.
+            </p>
+          </template>
+        </div>
+      </template>
+
+      <template if:true={hasIframe}>
+        <iframe
+          class="egnyte-record-viewer__frame"
+          src={egnyteUrl}
+          title="Egnyte Connect"
+          style={iframeStyle}
+          sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-downloads"
+        ></iframe>
+      </template>
+    </template>
+  </section>
+</template>

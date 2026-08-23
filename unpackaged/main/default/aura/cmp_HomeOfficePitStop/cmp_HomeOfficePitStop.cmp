@@ -1,0 +1,68 @@
+<aura:component controller="HomeOfficePitStopController"
+                implements="force:hasRecordId,flexipage:availableForRecordHome,force:lightningQuickAction"
+                access="global">
+    <lightning:messageChannel type="CaseStatusUpdated__c" scope="APPLICATION" onMessage="{!c.handleMessage}" />
+    <lightning:empApi aura:id="empApi" />
+    <aura:attribute name="subscription" type="Map" />
+    <aura:attribute name="tasks" type="Task[]" />
+    <aura:attribute name="recordId" type="Id" />
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    <lightning:workspaceAPI aura:id="workspace"/>
+
+    <lightning:card title="Home Office Pit Stop Tasks">
+        <aura:if isTrue="{!empty(v.tasks)}">
+            <div class="slds-p-around_medium">
+                No Tasks Found.
+                <!--lightning:spinner alternativeText="Loading..." size="small" /-->
+            </div>
+            <aura:set attribute="else">
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                    <thead>
+                        <tr class="slds-line-height_reset">
+                            <th scope="col" style="width: 40%;"><div class="slds-truncate">Subject</div></th>
+                            <th scope="col"><div class="slds-truncate">Status</div></th>
+                            <th scope="col"><div class="slds-truncate">Owner</div></th>
+                            <th scope="col"><div class="slds-truncate">Completed Date</div></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <aura:iteration items="{!v.tasks}" var="task">
+                            <tr>
+                                <td class="slds-truncate">
+                                    <div class="slds-grid" style="width:250px">
+                                        <div class="slds-grid slds-has-flexi-truncate">
+                                            <a  class="slds-truncate"  href="javascript:void(0);" 
+                                           onclick="{!c.navigateToTask}"
+                                           data-taskid="{!task.Id}"
+                                           data-tasksub="{!task.Subject}">
+                                        		{!task.Subject}
+                                            </a>    	
+                                        </div>
+                                    </div>
+                                </td>      
+                                <td>{!task.Status}</td>
+                                <td>{!task.Owner.Name}</td>
+                                <td>{!task.Completed_Date__c}</td>
+                            </tr>
+
+                            <!-- Milestones -->
+                            <aura:if isTrue="{!task.Task_Template_Item__r.Home_Office_Submission_Milestone__c}">
+                                <tr><td style="color: #1b76bb;font-size: 18px;" colspan="5"><center> ----- Home Office Submission Milestone ----- </center></td></tr>
+                            </aura:if>
+                            <aura:if isTrue="{!task.Task_Template_Item__r.Home_Office_Approval_Milestone__c}">
+                                <tr><td style="color: #1b76bb;font-size: 18px;" colspan="5"><center> ----- Home Office Approval Milestone ----- </center></td></tr>
+                            </aura:if>
+                            <aura:if isTrue="{!task.Task_Template_Item__r.Branch_Goal_Milestone__c}">
+                                <tr><td style="color: #1b76bb;font-size: 18px;" colspan="5"><center> ----- Branch Goal Milestone ----- </center></td></tr>
+                            </aura:if>
+                            <aura:if isTrue="{!task.Task_Template_Item__r.Home_Office_Goal_Milestone__c}">
+                                <tr><td style="color: #1b76bb;font-size: 18px;" colspan="5"><center> ----- Home Office Goal Milestone ----- </center></td></tr>
+                            </aura:if>
+
+                        </aura:iteration>
+                    </tbody>
+                </table>
+            </aura:set>
+        </aura:if>
+    </lightning:card>
+</aura:component>

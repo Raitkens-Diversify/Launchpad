@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- 1031 Exchanges Investment Years Exp --></label>
+        <name>X1031_Exchanges_Investment_Years_Exp__c</name>
+    </CustomFieldTranslation>

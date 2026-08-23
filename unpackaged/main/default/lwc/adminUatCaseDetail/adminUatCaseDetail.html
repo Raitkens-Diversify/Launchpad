@@ -1,0 +1,467 @@
+<template>
+    <div class="aud">
+        <template if:true={errorMessage}>
+            <p class="aud__error" role="alert">{errorMessage}</p>
+        </template>
+
+        <template if:true={loading}>
+            <div class="aud__loading">
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={loading}>
+            <template if:true={detail}>
+                <nav class="aud__crumbs" aria-label="Breadcrumb">
+                    <template if:true={cameFromCycle}>
+                        <button type="button" class="aud__crumb-link" onclick={handleBack}>All Test Cycles</button>
+                        <span class="aud__crumb-sep">/</span>
+                        <button type="button" class="aud__crumb-link" onclick={handleCrumbCycle}>{originCycleName}</button>
+                        <span class="aud__crumb-sep">/</span>
+                        <span class="aud__crumb-current">{detail.moduleName}</span>
+                    </template>
+                    <template if:false={cameFromCycle}>
+                        <button type="button" class="aud__crumb-link" onclick={handleBack}>All Test Cases</button>
+                        <span class="aud__crumb-sep">/</span>
+                        <span class="aud__crumb-current">{detail.moduleName}</span>
+                    </template>
+                </nav>
+
+                <div class="aud__bar">
+                    <lightning-button-icon icon-name="utility:back"
+                                           alternative-text="Back"
+                                           onclick={handleBack}></lightning-button-icon>
+                    <div class="aud__bar-text">
+                        <h2 class="aud__title">{headerTitle}</h2>
+                        <p class="aud__meta">{metaLine}</p>
+                    </div>
+                    <!-- Visible label on purpose: this is the AUTHORING status
+                         of the definition, not the run status testers see —
+                         an unlabeled Draft/In Progress/Complete dropdown here
+                         reads as the latter. -->
+                    <lightning-combobox label="Creation status"
+                                        field-level-help="Authoring progress of this case definition — only Complete cases can be added to books and cycles. Not the run status testers see."
+                                        options={statusOptions}
+                                        value={creationStatus}
+                                        onchange={handleStatusChange}></lightning-combobox>
+                    <div class="aud__bar-actions">
+                        <template if:false={isRetired}>
+                            <lightning-button label="Retire case"
+                                              title="Hide from the book/cycle pickers; keeps everything it's already part of"
+                                              disabled={busy}
+                                              onclick={handleRetireClick}></lightning-button>
+                        </template>
+                        <template if:true={isRetired}>
+                            <lightning-button label="Restore case"
+                                              title="Back to Complete — visible in the pickers again"
+                                              disabled={busy}
+                                              onclick={handleRestoreClick}></lightning-button>
+                        </template>
+                        <lightning-button variant="destructive-text"
+                                          label="Delete case"
+                                          disabled={busy}
+                                          onclick={handleDeleteCaseClick}></lightning-button>
+                        <lightning-button variant="brand"
+                                          label="Save"
+                                          disabled={saveDisabled}
+                                          onclick={handleSave}></lightning-button>
+                    </div>
+                </div>
+
+                <lightning-input label="Title"
+                                 field-level-help="The human-readable headline shown on dashboards and in My Queue/Open Pool. Case ID stays the technical identifier."
+                                 placeholder="e.g. Verify household record merge retains linked accounts"
+                                 max-length="255"
+                                 value={title}
+                                 onchange={handleTitleChange}></lightning-input>
+
+                <lightning-textarea label="Description"
+                                    field-level-help="One or two tester-facing sentences on what this case verifies — the card blurb on the dashboard and Open Pool. The steps carry the detail."
+                                    placeholder="e.g. Verify that the order ticket saves and persists correctly."
+                                    max-length="32768"
+                                    value={description}
+                                    onchange={handleDescriptionChange}></lightning-textarea>
+
+                <lightning-textarea label="Pre-conditions"
+                                    field-level-help="Setup the tester must have in place before starting — data, permissions, environment state. Shown in the 'Before you start' panel above the steps in the runner — start with a 'Start:' line naming where the tester begins."
+                                    placeholder="e.g. Log in as an advisor with at least one household that has two member accounts."
+                                    max-length="32768"
+                                    value={preConditions}
+                                    onchange={handlePreConditionsChange}></lightning-textarea>
+
+                <div class="aud__filing">
+                    <lightning-combobox label="Module"
+                                        field-level-help="Where this case is filed in the taxonomy. Moving it re-files the case and rewrites its Case ID; test books, cycles and recorded runs are unaffected."
+                                        options={moduleOptions}
+                                        value={moduleId}
+                                        onchange={handleModuleChange}
+                                        class="aud__module"></lightning-combobox>
+                    <template if:true={movePreview}>
+                        <p class="aud__hint aud__hint--move">
+                            On Save this case moves, and its Case ID becomes
+                            <strong>{movePreview}</strong> — the last segment is
+                            assigned from the destination module, so the final
+                            number may differ.
+                        </p>
+                    </template>
+
+                    <div class="aud__books">
+                        <span class="aud__books-label">Test books</span>
+                        <template if:true={booksError}>
+                            <p class="aud__error" role="alert">{booksError}</p>
+                        </template>
+                        <template if:true={hasBooks}>
+                            <ul class="aud__chips">
+                                <template for:each={bookRows} for:item="book">
+                                    <li key={book.bookItemId} class="aud__chip">
+                                        <span class="aud__chip-text">{book.bookName}</span>
+                                        <lightning-button-icon icon-name="utility:close"
+                                                               size="x-small"
+                                                               variant="bare"
+                                                               alternative-text={book.removeLabel}
+                                                               title={book.removeLabel}
+                                                               disabled={busy}
+                                                               data-itemid={book.bookItemId}
+                                                               data-name={book.bookName}
+                                                               onclick={handleRemoveBookClick}></lightning-button-icon>
+                                    </li>
+                                </template>
+                            </ul>
+                        </template>
+                        <template if:false={hasBooks}>
+                            <p class="aud__empty">Not in any test book yet.</p>
+                        </template>
+                        <lightning-combobox label={addBookLabel}
+                                            field-level-help={addBookHelp}
+                                            options={addBookOptions}
+                                            value={addBookValue}
+                                            data-id="addbook-select"
+                                            disabled={busy}
+                                            onchange={handleAddBookChange}
+                                            class="aud__targetbook"></lightning-combobox>
+                    </div>
+                </div>
+
+                <div class="aud__poolrow">
+                    <lightning-combobox label="Priority"
+                                        options={priorityOptions}
+                                        value={priority}
+                                        onchange={handlePriorityChange}></lightning-combobox>
+                    <lightning-combobox label="Estimated effort"
+                                        options={effortOptions}
+                                        value={estimatedEffort}
+                                        onchange={handleEffortChange}></lightning-combobox>
+                    <lightning-input type="number"
+                                     label="Max testers override"
+                                     field-level-help="Seats for this case wherever it runs. Blank inherits each cycle's Max Testers default."
+                                     min="1" max="999" step="1"
+                                     value={maxTestersOverride}
+                                     onchange={handleMaxTestersOverrideChange}></lightning-input>
+                </div>
+
+                <template if:true={hasExecutions}>
+                    <div class="aud__runbar">
+                        <!-- Labelled as a viewer on purpose: an unqualified
+                             "run" picker on an editable form reads as the
+                             control that MOVES the case between runs. It
+                             doesn't — scope comes from the cycles this case's
+                             books are in. -->
+                        <lightning-combobox label="Viewing results for run"
+                                            field-level-help="Read-only: which recorded run's findings and evidence are shown below. A case's runs come from the cycles its test books are in, so switching here never moves the case."
+                                            options={viewingOptions}
+                                            value={viewingId}
+                                            placeholder="Select a run…"
+                                            onchange={handleViewingChange}
+                                            class="aud__runbar-select"></lightning-combobox>
+                        <template if:true={execView}>
+                            <div class="aud__runbar-meta">
+                                <span class="aud__runbar-item">Team: <strong>{execView.teamName}</strong></span>
+                                <lightning-combobox label="Tester"
+                                                    field-level-help="Picking a different tester switches to THAT tester's own independent run — it never renames this one. If no run exists yet, you'll be asked before one is created."
+                                                    options={testerOptions}
+                                                    value={currentTesterValue}
+                                                    data-id="tester-select"
+                                                    onchange={handleTesterChange}></lightning-combobox>
+                                <span class="aud__badge">{execStatusBadge}</span>
+                                <span class="aud__badge aud__badge--result">{execResultBadge}</span>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <div class="aud__tabs" role="tablist">
+                    <button type="button" class={stepsTabClass} data-tab="steps"
+                            onclick={handleTabClick}>Steps</button>
+                    <button type="button" class={referenceTabClass} data-tab="reference"
+                            onclick={handleTabClick}>Reference Material</button>
+                    <template if:true={showFindings}>
+                        <button type="button" class={evidenceTabClass} data-tab="evidence"
+                                onclick={handleTabClick}>Evidence &amp; Feedback</button>
+                    </template>
+                </div>
+
+                <template if:true={isStepsTab}>
+                    <template if:true={hasSteps}>
+                        <div class="aud__groups">
+                            <template for:each={stepGroups} for:item="group">
+                                <section key={group.key} class="aud__group">
+                                    <lightning-input label="Test condition"
+                                                     variant="label-hidden"
+                                                     placeholder="Test condition (groups the steps below)"
+                                                     value={group.condition}
+                                                     max-length="120"
+                                                     data-group={group.key}
+                                                     onchange={handleConditionChange}
+                                                     class="aud__condition"></lightning-input>
+                                    <template for:each={group.steps} for:item="step">
+                                        <div key={step.key} class="aud__step">
+                                            <div class="aud__step-head">
+                                                <span class="aud__step-number">Step {step.displayNumber}</span>
+                                                <template if:true={step.isExplore}>
+                                                    <span class="aud__step-badge">Exploratory</span>
+                                                </template>
+                                                <div class="aud__step-tools">
+                                                    <lightning-button-icon icon-name="utility:arrowup"
+                                                                           variant="bare"
+                                                                           alternative-text="Move up"
+                                                                           title="Move up"
+                                                                           disabled={step.moveUpDisabled}
+                                                                           data-key={step.key}
+                                                                           onclick={handleMoveStepUp}></lightning-button-icon>
+                                                    <lightning-button-icon icon-name="utility:arrowdown"
+                                                                           variant="bare"
+                                                                           alternative-text="Move down"
+                                                                           title="Move down"
+                                                                           disabled={step.moveDownDisabled}
+                                                                           data-key={step.key}
+                                                                           onclick={handleMoveStepDown}></lightning-button-icon>
+                                                    <lightning-button variant="base"
+                                                                      label="Remove"
+                                                                      disabled={busy}
+                                                                      data-key={step.key}
+                                                                      onclick={handleRemoveStepClick}></lightning-button>
+                                                </div>
+                                            </div>
+                                            <lightning-input label="Step title (optional)"
+                                                             placeholder="Short name shown in the runner's step list"
+                                                             max-length="120"
+                                                             value={step.title}
+                                                             data-key={step.key}
+                                                             data-field="title"
+                                                             onchange={handleStepFieldChange}></lightning-input>
+                                            <template if:true={step.isScripted}>
+                                                <div class="aud__step-fields">
+                                                    <lightning-textarea label="What to do"
+                                                                        value={step.description}
+                                                                        data-key={step.key}
+                                                                        data-field="description"
+                                                                        onchange={handleStepFieldChange}></lightning-textarea>
+                                                    <lightning-textarea label="Expected result"
+                                                                        value={step.expected}
+                                                                        data-key={step.key}
+                                                                        data-field="expected"
+                                                                        onchange={handleStepFieldChange}></lightning-textarea>
+                                                </div>
+                                            </template>
+                                            <template if:true={step.isExplore}>
+                                                <lightning-textarea label="Explore prompt (“try this”)"
+                                                                    value={step.explorePrompt}
+                                                                    data-key={step.key}
+                                                                    data-field="explorePrompt"
+                                                                    onchange={handleStepFieldChange}></lightning-textarea>
+                                            </template>
+                                            <template if:true={showFindings}>
+                                                <template if:true={step.hasFinding}>
+                                                    <div class="aud__finding">
+                                                        <span class="aud__finding-label">Tester’s finding (read-only)</span>
+                                                        <template if:true={step.findingResult}>
+                                                            <span class="aud__badge aud__badge--result">{step.findingResult}</span>
+                                                        </template>
+                                                        <template if:true={step.findingActual}>
+                                                            <p class="aud__finding-text">{step.findingActual}</p>
+                                                        </template>
+                                                        <template if:true={step.findingNotes}>
+                                                            <p class="aud__finding-text">{step.findingNotes}</p>
+                                                        </template>
+                                                    </div>
+                                                </template>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </section>
+                            </template>
+                        </div>
+                    </template>
+                    <template if:false={hasSteps}>
+                        <p class="aud__empty">No steps yet — add the first one.</p>
+                    </template>
+
+                    <div class="aud__step-actions">
+                        <lightning-button label="+ Add step"
+                                          disabled={busy}
+                                          onclick={handleAddStep}></lightning-button>
+                        <lightning-button label="+ Add test condition"
+                                          disabled={busy}
+                                          onclick={handleAddCondition}></lightning-button>
+                        <lightning-button label="+ Add exploratory note"
+                                          disabled={busy}
+                                          onclick={handleAddExplore}></lightning-button>
+                    </div>
+                </template>
+
+                <template if:true={isReferenceTab}>
+                    <p class="aud__hint">
+                        Case-level context for testers — authored once, read-only in the runner
+                        on every run.
+                    </p>
+                    <template if:true={hasRefRows}>
+                        <ul class="aud__refs">
+                            <template for:each={refRows} for:item="row">
+                                <li key={row.id} class="aud__ref">
+                                    <template if:true={row.showThumb}>
+                                        <img class="aud__ref-thumb" src={row.file.thumbnailUrl} alt={row.displayLabel} />
+                                    </template>
+                                    <div class="aud__ref-text">
+                                        <span class="aud__ref-label">{row.displayLabel}</span>
+                                        <span class="aud__ref-type">{row.type}</span>
+                                    </div>
+                                    <template if:true={row.openUrl}>
+                                        <a class="aud__ref-open" href={row.openUrl} target="_blank" rel="noopener">Open</a>
+                                    </template>
+                                    <template if:true={row.needsFile}>
+                                        <lightning-file-upload label="Upload file"
+                                                               record-id={row.id}
+                                                               accept={acceptedFormats}
+                                                               data-refid={row.id}
+                                                               onuploadfinished={handleUploadFinished}></lightning-file-upload>
+                                    </template>
+                                    <lightning-button variant="base"
+                                                      label="Remove"
+                                                      disabled={busy}
+                                                      data-id={row.id}
+                                                      onclick={handleRemoveRefClick}></lightning-button>
+                                </li>
+                            </template>
+                        </ul>
+                    </template>
+                    <template if:false={hasRefRows}>
+                        <p class="aud__empty">No reference material yet.</p>
+                    </template>
+
+                    <div class="aud__ref-actions">
+                        <lightning-button label="+ Add link"
+                                          disabled={busy}
+                                          onclick={handleAddLinkOpen}></lightning-button>
+                        <lightning-button label="+ Add file"
+                                          disabled={busy}
+                                          onclick={handleAddFile}></lightning-button>
+                    </div>
+
+                    <template if:true={addLinkOpen}>
+                        <div class="aud__addlink">
+                            <lightning-input label="Label"
+                                             value={addLink.label}
+                                             max-length="255"
+                                             data-field="label"
+                                             onchange={handleAddLinkField}></lightning-input>
+                            <lightning-input type="url"
+                                             label="URL"
+                                             value={addLink.url}
+                                             data-field="url"
+                                             onchange={handleAddLinkField}></lightning-input>
+                            <div class="aud__addlink-actions">
+                                <lightning-button label="Cancel"
+                                                  disabled={saving}
+                                                  onclick={handleAddLinkCancel}></lightning-button>
+                                <lightning-button variant="brand"
+                                                  label="Add link"
+                                                  disabled={saving}
+                                                  onclick={handleAddLinkSave}></lightning-button>
+                            </div>
+                        </div>
+                    </template>
+                </template>
+
+                <template if:true={isEvidenceTab}>
+                    <div class="aud__evidence">
+                        <section class="aud__group">
+                            <h3 class="aud__section-title">How was this experience? (tester’s product feedback)</h3>
+                            <p class="aud__finding-text">Rating: <strong>{uxRatingDisplay}</strong></p>
+                            <p class="aud__finding-text">{uxRecommendationDisplay}</p>
+                        </section>
+
+                        <section class="aud__group">
+                            <h3 class="aud__section-title">Case-level evidence for this run</h3>
+                            <template if:true={hasCaseEvidence}>
+                                <ul class="aud__evidence-grid">
+                                    <template for:each={caseEvidence} for:item="file">
+                                        <li key={file.contentDocumentId} class="aud__evidence-item">
+                                            <template if:true={file.isImage}>
+                                                <a href={file.downloadUrl} target="_blank" rel="noopener">
+                                                    <img class="aud__evidence-thumb" src={file.thumbnailUrl} alt={file.title} />
+                                                </a>
+                                            </template>
+                                            <template if:false={file.isImage}>
+                                                <a class="aud__ref-open" href={file.downloadUrl} target="_blank" rel="noopener">{file.title}</a>
+                                            </template>
+                                            <div class="aud__evidence-meta">
+                                                <span class="aud__ref-label">{file.title}</span>
+                                                <lightning-button variant="base"
+                                                                  label="Remove"
+                                                                  disabled={busy}
+                                                                  data-docid={file.contentDocumentId}
+                                                                  data-title={file.title}
+                                                                  onclick={handleRemoveEvidenceClick}></lightning-button>
+                                            </div>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </template>
+                            <template if:false={hasCaseEvidence}>
+                                <p class="aud__empty">No case-level evidence on this run yet.</p>
+                            </template>
+                        </section>
+
+                        <section class="aud__group">
+                            <h3 class="aud__section-title">Per-step evidence (read-only — testers attach it)</h3>
+                            <template if:true={hasStepEvidence}>
+                                <template for:each={stepEvidence} for:item="entry">
+                                    <div key={entry.stepId} class="aud__stepfiles">
+                                        <span class="aud__finding-label">{entry.label}</span>
+                                        <ul class="aud__evidence-grid">
+                                            <template for:each={entry.files} for:item="file">
+                                                <li key={file.contentDocumentId} class="aud__evidence-item">
+                                                    <template if:true={file.isImage}>
+                                                        <a href={file.downloadUrl} target="_blank" rel="noopener">
+                                                            <img class="aud__evidence-thumb" src={file.thumbnailUrl} alt={file.title} />
+                                                        </a>
+                                                    </template>
+                                                    <template if:false={file.isImage}>
+                                                        <a class="aud__ref-open" href={file.downloadUrl} target="_blank" rel="noopener">{file.title}</a>
+                                                    </template>
+                                                </li>
+                                            </template>
+                                        </ul>
+                                    </div>
+                                </template>
+                            </template>
+                            <template if:false={hasStepEvidence}>
+                                <p class="aud__empty">No per-step evidence on this run yet.</p>
+                            </template>
+                        </section>
+                    </div>
+                </template>
+            </template>
+        </template>
+
+        <template if:true={confirmOpen}>
+            <c-admin-confirm-modal header={confirm.header}
+                                   message={confirm.message}
+                                   confirm-label={confirm.confirmLabel}
+                                   variant={confirm.variant}
+                                   busy={saving}
+                                   onconfirm={handleConfirmProceed}
+                                   oncancel={handleConfirmCancel}></c-admin-confirm-modal>
+        </template>
+    </div>
+</template>

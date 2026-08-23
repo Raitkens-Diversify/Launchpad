@@ -1,0 +1,117 @@
+<template>
+    <div class="arq">
+        <div class="arq__toolbar">
+            <p class="arq__hint">
+                Contributor submissions waiting for review. Promoting creates a real
+                Knowledge draft (readers see nothing until you publish it from the
+                Articles tab).
+            </p>
+            <lightning-button-icon icon-name="utility:refresh"
+                                   alternative-text="Refresh"
+                                   onclick={handleRefresh}
+                                   disabled={working}></lightning-button-icon>
+        </div>
+
+        <template if:true={errorMessage}>
+            <p class="arq__error" role="alert">{errorMessage}</p>
+        </template>
+
+        <template if:true={loading}>
+            <div class="arq__loading">
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={loading}>
+            <template if:true={hasRows}>
+                <table class="arq__table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Title</th>
+                            <th scope="col">Author</th>
+                            <th scope="col">Submitted</th>
+                            <th scope="col" class="arq__actions-col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={rows} for:item="row">
+                            <tr key={row.id}>
+                                <td>
+                                    <span class="arq__title">{row.title}</span>
+                                    <span class="arq__urlname">{row.proposedUrlName}</span>
+                                </td>
+                                <td>{row.createdByName}</td>
+                                <td>
+                                    <lightning-formatted-date-time value={row.lastModified}
+                                                                   year="numeric" month="short" day="numeric"
+                                                                   hour="2-digit" minute="2-digit"></lightning-formatted-date-time>
+                                </td>
+                                <td>
+                                    <lightning-button label="Review"
+                                                      size="small"
+                                                      data-id={row.id}
+                                                      onclick={handleOpen}></lightning-button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </template>
+            <template if:false={hasRows}>
+                <p class="arq__empty">The queue is empty — nothing waiting for review.</p>
+            </template>
+        </template>
+
+        <template if:true={selected}>
+            <section class="arq-modal" role="dialog" aria-modal="true" aria-label="Review submission">
+                <div class="arq-modal__panel">
+                    <div class="arq-modal__head">
+                        <h2 class="arq-modal__title">{selected.title}</h2>
+                        <lightning-button-icon icon-name="utility:close"
+                                               alternative-text="Close"
+                                               onclick={handleClosePreview}></lightning-button-icon>
+                    </div>
+                    <dl class="arq-modal__meta">
+                        <dt>URL name</dt><dd>{selected.proposedUrlName}</dd>
+                        <dt>Type</dt><dd>{selected.recordTypeName}</dd>
+                        <dt>Author</dt><dd>{selected.createdByName}</dd>
+                        <dt>Help topics</dt><dd>{selectedCategories}</dd>
+                        <dt>Suggested</dt><dd>{selectedSuggested}</dd>
+                        <dt>Resources</dt><dd>{selectedResourceCount} attached</dd>
+                        <dt>Keywords</dt><dd>{selected.keywords}</dd>
+                        <dt>Summary</dt><dd>{selected.summary}</dd>
+                    </dl>
+                    <div class="arq-modal__body">
+                        <lightning-formatted-rich-text value={selected.content}></lightning-formatted-rich-text>
+                    </div>
+                    <div class="arq-modal__actions">
+                        <lightning-button label="Request changes"
+                                          onclick={handleNotesOpen}
+                                          disabled={working}></lightning-button>
+                        <lightning-button variant="brand"
+                                          label="Promote to draft"
+                                          onclick={handlePromote}
+                                          disabled={working}></lightning-button>
+                    </div>
+                </div>
+            </section>
+        </template>
+
+        <template if:true={notesOpen}>
+            <section class="arq-modal arq-modal--notes" role="dialog" aria-modal="true" aria-label="Request changes">
+                <div class="arq-modal__panel arq-modal__panel--small">
+                    <h2 class="arq-modal__title">Request changes</h2>
+                    <lightning-textarea label="Notes for the author"
+                                        value={notesText}
+                                        required
+                                        onchange={handleNotesChange}></lightning-textarea>
+                    <div class="arq-modal__actions">
+                        <lightning-button label="Cancel" onclick={handleNotesCancel}></lightning-button>
+                        <lightning-button variant="brand" label="Send back"
+                                          onclick={handleNotesSend}></lightning-button>
+                    </div>
+                </div>
+            </section>
+        </template>
+    </div>
+</template>

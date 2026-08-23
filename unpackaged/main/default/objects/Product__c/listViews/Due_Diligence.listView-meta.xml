@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Due_Diligence</fullName>
+    <columns>NAME</columns>
+    <columns>Asset_Category__c</columns>
+    <columns>Status__c</columns>
+    <columns>Performance_Status__c</columns>
+    <columns>Performance_Status_Color__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Asset_Category__c</field>
+        <operation>equals</operation>
+        <value>Alternative Investment</value>
+    </filters>
+    <label>Due Diligence</label>
+</ListView>

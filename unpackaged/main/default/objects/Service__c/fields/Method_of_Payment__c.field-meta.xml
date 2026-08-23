@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Method_of_Payment__c</fullName>
+    <label>Method of Payment</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Check</fullName>
+                <default>false</default>
+                <label>Check</label>
+            </value>
+            <value>
+                <fullName>From Advisory Account</fullName>
+                <default>false</default>
+                <label>From Advisory Account</label>
+            </value>
+            <value>
+                <fullName>Credit Card/ACH</fullName>
+                <default>false</default>
+                <label>Credit Card/ACH</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

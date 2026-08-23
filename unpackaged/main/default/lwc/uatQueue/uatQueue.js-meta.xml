@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>61.0</apiVersion>
+    <isExposed>false</isExposed>
+    <description>My Queue: two-tab tester page — a featured Continue Testing card over a dense assigned-test list, plus the exploratory tab. Embedded by uatTesterApp only.</description>
+</LightningComponentBundle>

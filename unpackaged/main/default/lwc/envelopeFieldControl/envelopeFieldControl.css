@@ -1,0 +1,54 @@
+/* Author: Mile Cacanovic */
+
+/* Key Point header: a "Key Point" field's label shown as a heading with a small flag icon, above
+   the control (which renders with its own label hidden). The "Key Point" pill sits on the section
+   header (envelopeFormSection). */
+.field-keypoint {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-1, 4px);
+    margin-bottom: var(--slds-g-spacing-2, 8px);
+}
+
+.field-keypoint__label {
+    font-weight: var(--slds-g-font-weight-7, 700);
+    font-size: var(--slds-g-font-scale-2, 16px);
+    line-height: 22px;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+/* Small flag next to the label — blue to match the "Key Point" badge. */
+.field-keypoint__flag {
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-on-info-1, #0369a1);
+}
+
+/* Radio label row: a radio group can't be deselected natively, so its label is moved out of the base
+   control into this row, which also hosts the "Clear" link beside it. Typography mirrors the V2 field
+   label used by the other inputs so the swapped-in label reads identically. */
+.field-label-row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--slds-g-spacing-2, 8px);
+    margin-bottom: var(--slds-g-spacing-2, 8px);
+}
+
+.field-label-row__label {
+    font-size: var(--slds-g-font-scale-2, 0.875rem);
+    font-weight: var(--slds-g-font-weight-5, 500);
+    line-height: 1.4;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+/* "Updated" marker under the control — informational blue, matching the section header's own
+   "Inputs updated" status. */
+.field-updated {
+    margin-top: var(--slds-g-spacing-2, 8px);
+    font-size: var(--slds-g-font-scale-neg-1, 12px);
+    line-height: 17px;
+    color: var(--slds-g-color-on-info-1, #0369a1);
+}
+
+:host {
+    display: block;
+    width: 100%;
+}

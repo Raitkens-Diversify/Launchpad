@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Request_Allocation_Originated_From__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <label>Request Allocation Originated From</label>
+    <referenceTo>Order_Ticket__c</referenceTo>
+    <relationshipLabel>Allocations</relationshipLabel>
+    <relationshipName>Allocations</relationshipName>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

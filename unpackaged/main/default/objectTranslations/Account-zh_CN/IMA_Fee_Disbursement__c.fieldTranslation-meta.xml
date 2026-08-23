@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- IMA Fee Disbursement --></label>
+        <name>IMA_Fee_Disbursement__c</name>
+        <picklistValues>
+            <masterLabel>Deduct fees directly from each account</masterLabel>
+            <translation><!-- Deduct fees directly from each account --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Deduct fees for all of my accounts</masterLabel>
+            <translation><!-- Deduct fees for all of my accounts --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

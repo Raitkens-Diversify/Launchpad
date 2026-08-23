@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Module_Group__c</fullName>
+    <description>Owning Module Group. Master-detail: a module cannot exist outside its group.</description>
+    <label>Module Group</label>
+    <referenceTo>Module_Group__c</referenceTo>
+    <relationshipLabel>Modules</relationshipLabel>
+    <relationshipName>Modules</relationshipName>
+    <relationshipOrder>0</relationshipOrder>
+    <reparentableMasterDetail>false</reparentableMasterDetail>
+    <trackTrending>false</trackTrending>
+    <type>MasterDetail</type>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+</CustomField>

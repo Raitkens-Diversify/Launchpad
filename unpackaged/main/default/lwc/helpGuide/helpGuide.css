@@ -1,0 +1,75 @@
+:host {
+    display: block;
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-accent-1: #0f406f;
+    --ds-medium-blue: #1a76bb;
+    --ds-lightest-blue: #e2f8ff;
+    --ds-font-heading: "Libre Baskerville", Georgia, serif;
+    --ds-space-sm: 8px;
+    --ds-space-md: 12px;
+    --ds-space-lg: 16px;
+    --ds-space-xl: 24px;
+    --ds-radius-lg: 10px;
+    --ds-radius-md: 8px;
+}
+.hg {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: var(--ds-space-xl, 24px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+}
+.hg__crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ds-space-sm, 8px);
+    margin-bottom: var(--ds-space-lg, 16px);
+    font-size: 0.8125rem;
+}
+.hg__crumb {
+    background: none;
+    border: none;
+    color: var(--ds-medium-blue, #1a76bb);
+    cursor: pointer;
+    padding: 0;
+}
+.hg__crumb:hover { text-decoration: underline; }
+.hg__crumb-sep { color: var(--slds-g-color-on-surface-1, #4b5563); margin-right: var(--ds-space-sm, 8px); }
+
+.hg__question {
+    margin: 0 0 var(--ds-space-lg, 16px);
+    font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+    font-size: 1.375rem;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.hg__options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-md, 12px);
+}
+.hg__option {
+    text-align: left;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-md, 8px);
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+.hg__option:hover {
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+    background: var(--ds-lightest-blue, #e2f8ff);
+}
+.hg__status {
+    padding: var(--ds-space-xl, 24px);
+    text-align: center;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}

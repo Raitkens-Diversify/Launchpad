@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Maestro_Party_Type__c</fullName>
+    <externalId>false</externalId>
+    <formula>IF(
+OR(
+ISPICKVAL(FinServ__FinancialAccount__r.FinServ__FinancialAccountType__c, &quot;Joint&quot;),
+ISPICKVAL(FinServ__FinancialAccount__r.Registration_Type__c,&quot;JNT&quot;),
+ISPICKVAL(FinServ__FinancialAccount__r.Registration_Type__c,&quot;Joint&quot;),
+ISPICKVAL(FinServ__FinancialAccount__r.Registration_Type__c,&quot;Joint Tenants WROS&quot;),
+ISPICKVAL(FinServ__FinancialAccount__r.Registration_Type__c,&quot;Community Property&quot;),
+ISPICKVAL(FinServ__FinancialAccount__r.Registration_Type__c,&quot;Joint Tenants in Common&quot;),
+ISPICKVAL(FinServ__FinancialAccount__r.Registration_Type__c,&quot;Joint Tenants by the Entirety&quot;)
+),
+&quot;JO&quot;,
+IF(
+OR(
+ISPICKVAL(FinServ__FinancialAccount__r.FinServ__FinancialAccountType__c, &quot;Trust&quot;),
+ISPICKVAL(FinServ__FinancialAccount__r.Registration_Type__c,&quot;Trust&quot;),
+ISPICKVAL(FinServ__FinancialAccount__r.Registration_Type__c,&quot;Revocable Trust&quot;),
+ISPICKVAL(FinServ__FinancialAccount__r.Registration_Type__c,&quot;Irrevocable Trust&quot;)
+),
+&quot;TT&quot;,
+IF(
+OR(
+ISPICKVAL(FinServ__FinancialAccount__r.FinServ__FinancialAccountType__c, &quot;Custodial&quot;),
+ISPICKVAL(FinServ__FinancialAccount__r.Registration_Type__c,&quot;529 Plan&quot;),
+ISPICKVAL(FinServ__FinancialAccount__r.Registration_Type__c,&quot;Conservatorship&quot;),
+ISPICKVAL(FinServ__FinancialAccount__r.Registration_Type__c,&quot;UGMA/UTMA&quot;),
+ISPICKVAL(FinServ__FinancialAccount__r.Registration_Type__c,&quot;ABLE&quot;)
+),
+&quot;MI&quot;,
+IF(
+OR(
+ISPICKVAL(FinServ__FinancialAccount__r.FinServ__FinancialAccountType__c, &quot;Business&quot;),
+ISPICKVAL(FinServ__FinancialAccount__r.Registration_Type__c,&quot;UTMA&quot;),
+ISPICKVAL(FinServ__FinancialAccount__r.Registration_Type__c,&quot;Coverdell ESA&quot;),
+NOT(ISBLANK(TEXT(FinServ__Household__r.Entity_Type__c )))
+),
+&quot;AP&quot;,
+NULL
+)
+)
+)
+)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Maestro Party Type</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

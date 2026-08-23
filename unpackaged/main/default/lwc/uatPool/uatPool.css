@@ -1,0 +1,335 @@
+/* --slds-g-* declared locally, not inherited: platform-injected SLDS2
+   styling hooks beat values inherited from an ancestor's :host
+   (see nexsHome.css / dsHero.css). */
+:host {
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-accent-3: #071c31;
+    --slds-g-color-on-accent-1: #ffffff;
+}
+
+.uap__error {
+    margin: 0 0 var(--ds-space-md, 12px);
+    font-size: 0.875rem;
+    color: var(--ds-error-text, #a83232);
+}
+
+/* ---- Toolbar: priority chips left, quick toggle + search + Filters right --- */
+
+.uap__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-space-lg, 16px);
+    flex-wrap: wrap;
+    margin-bottom: var(--ds-space-lg, 16px);
+}
+
+.uap__chips {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.uap__toolbar-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-md, 12px);
+    flex: none;
+}
+
+.uap__search {
+    width: 260px;
+}
+
+.uap__filters-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-sm, 8px);
+    padding: 7px 14px;
+    border-radius: var(--ds-radius-md, 8px);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-2, #374151);
+    white-space: nowrap;
+}
+.uap__filters-toggle:hover {
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+}
+.uap__filters-toggle:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+.uap__filters-icon {
+    --sds-c-icon-color-foreground-default: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* Inline panel under the toolbar (not an overlay — no focus trap needed). */
+.uap__filters {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(150px, 210px));
+    align-items: end;
+    gap: var(--ds-space-lg, 16px);
+    padding: var(--ds-space-lg, 16px);
+    margin-bottom: var(--ds-space-lg, 16px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+}
+
+.uap__clear {
+    justify-self: start;
+    background: none;
+    border: none;
+    padding: 0 0 6px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--ds-medium-blue, #1a76bb);
+    white-space: nowrap;
+}
+.uap__clear:hover {
+    text-decoration: underline;
+}
+.uap__clear:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+
+/* ---- Cycle sections over the card grid ------------------------------------- */
+
+.uap__group {
+    margin-bottom: var(--ds-space-xl, 24px);
+}
+.uap__group-head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--ds-space-sm, 8px) var(--ds-space-md, 12px);
+    margin-bottom: var(--ds-space-md, 12px);
+}
+.uap__group-title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.uap__group-date {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-xs, 4px);
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.uap__meta-icon {
+    --sds-c-icon-color-foreground-default: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.uap__group-hint {
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.uap__group-hint--limit {
+    color: var(--ds-warning-text, #b8860b);
+    font-weight: 600;
+}
+.uap__group-bulk {
+    margin-left: auto;
+}
+
+/* The dashboard's .ud__avail-grid / .ud__pool-card recipe. */
+.uap__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--ds-space-lg, 16px);
+}
+
+.uap__card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-sm, 8px);
+    padding: var(--ds-space-lg, 16px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.uap__card:hover {
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+    box-shadow: var(--ds-shadow-hover, 0 4px 14px rgba(15, 64, 111, 0.08));
+}
+
+.uap__card-badges {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--ds-space-xs, 4px) var(--ds-space-sm, 8px);
+}
+
+/* A real button (it opens the preview), reset to read as the card's heading.
+   The line-clamp needs the -webkit-box display, so the button's own layout
+   defaults are overridden rather than inherited. */
+.uap__card-title {
+    padding: 0;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.uap__card-title:hover {
+    text-decoration: underline;
+}
+.uap__card-title:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+
+.uap__card-desc {
+    font-size: 0.8125rem;
+    color: var(--slds-g-color-on-surface-2, #374151);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.uap__card-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--ds-space-xs, 4px) var(--ds-space-sm, 8px);
+}
+.uap__card-area {
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.uap__chip {
+    padding: 1px 8px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: 999px;
+}
+.uap__chip--seats {
+    color: var(--slds-g-color-accent-1, #0f406f);
+    background: var(--ds-lightest-blue, #e2f8ff);
+    border-color: var(--ds-medium-blue, #1a76bb);
+}
+.uap__waiting {
+    font-size: 0.6875rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* Lost-race note: informational tone, not an error — someone was simply
+   faster; the delayed refresh flips the card to reality. */
+.uap__card-note {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.uap__card-footer {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-space-sm, 8px);
+    padding-top: var(--ds-space-md, 12px);
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+.uap__card-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-sm, 8px);
+}
+.uap__card-id {
+    font-size: 0.6875rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    white-space: nowrap;
+}
+
+/* ---- Preview modal ---------------------------------------------------------- */
+
+.uap__preview-error {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--ds-error-text, #a83232);
+}
+.uap__preview-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--ds-space-sm, 8px);
+}
+
+.uap__pager {
+    margin-top: var(--ds-space-lg, 16px);
+}
+
+/* ---- Responsive ------------------------------------------------------------- */
+
+@media (max-width: 768px) {
+    .uap__toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .uap__toolbar-controls {
+        flex-wrap: wrap;
+    }
+    .uap__search {
+        flex: 1 1 auto;
+        width: auto;
+    }
+    .uap__filters {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .uap__group-bulk {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 640px) {
+    .uap__grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .uap__card-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .uap__card-actions {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+    }
+    .uap__card-footer lightning-button {
+        display: block;
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .uap__card,
+    .uap__filters-toggle {
+        transition-duration: 0.01ms;
+    }
+}

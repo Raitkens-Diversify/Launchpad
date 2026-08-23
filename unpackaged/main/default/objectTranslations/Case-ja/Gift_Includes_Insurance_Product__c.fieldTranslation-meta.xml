@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <help><!-- If the Source of Funds is a Gift/Inheritance, does the money funding this account include an insurance product? --></help>
+        <label><!-- Gift: Includes Insurance Product? --></label>
+        <name>Gift_Includes_Insurance_Product__c</name>
+    </CustomFieldTranslation>

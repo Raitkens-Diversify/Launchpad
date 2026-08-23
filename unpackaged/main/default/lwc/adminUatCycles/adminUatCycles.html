@@ -1,0 +1,331 @@
+<template>
+    <div class="aucy">
+        <template if:true={errorMessage}>
+            <p class="aucy__error" role="alert">{errorMessage}</p>
+        </template>
+
+        <template if:true={loading}>
+            <div class="aucy__loading">
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={loading}>
+            <template if:true={isList}>
+                <div class="aucy__toolbar">
+                    <p class="aucy__hint">
+                        One sprint’s test pass. Scope = every attached book’s cases plus
+                        directly-added cases, de-duplicated.
+                    </p>
+                    <div class="aucy__toolbar-actions">
+                        <template if:true={hasClosedRows}>
+                            <lightning-input type="toggle"
+                                             label={showClosedLabel}
+                                             checked={showClosed}
+                                             onchange={handleShowClosedToggle}></lightning-input>
+                        </template>
+                        <lightning-button variant="brand"
+                                          label="New cycle"
+                                          disabled={busy}
+                                          onclick={handleNewCycle}></lightning-button>
+                    </div>
+                </div>
+
+                <template if:true={hasRows}>
+                    <div class="aucy__table-wrap">
+                        <table class="aucy__table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Cycle</th>
+                                    <th scope="col">Books</th>
+                                    <th scope="col">Team</th>
+                                    <th scope="col">Target date</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Progress</th>
+                                    <th scope="col"><span class="aucy__sr">Actions</span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={listRows} for:item="row">
+                                    <tr key={row.id}>
+                                        <td>
+                                            <button type="button" class="aucy__link"
+                                                    data-id={row.id}
+                                                    onclick={handleEdit}>{row.name}</button>
+                                        </td>
+                                        <td>
+                                            {row.booksDisplay}
+                                            <template if:true={row.hasDirectCases}>
+                                                <span class="aucy__direct-chip">+ direct cases</span>
+                                            </template>
+                                        </td>
+                                        <td>{row.teamDisplay}</td>
+                                        <td>
+                                            <lightning-formatted-date-time value={row.targetDate}></lightning-formatted-date-time>
+                                        </td>
+                                        <td><span class={row.statusClass}>{row.status}</span></td>
+                                        <td>{row.progress}</td>
+                                        <td class="aucy__actions">
+                                            <lightning-button label="Edit"
+                                                              size="small"
+                                                              data-id={row.id}
+                                                              onclick={handleEdit}></lightning-button>
+                                            <lightning-button label="Clone"
+                                                              size="small"
+                                                              title="New cycle with the same books, cases, and team"
+                                                              disabled={busy}
+                                                              data-id={row.id}
+                                                              onclick={handleClone}></lightning-button>
+                                            <span class="aucy__findings">{row.findingsLabel}</span>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+                <template if:false={hasRows}>
+                    <template if:true={hasClosedRows}>
+                        <p class="aucy__empty">No open cycles — flip “Show closed” to see finished ones.</p>
+                    </template>
+                    <template if:false={hasClosedRows}>
+                        <p class="aucy__empty">No test cycles yet — create one, or use “Run this book”.</p>
+                    </template>
+                </template>
+            </template>
+
+            <template if:true={isEditor}>
+                <div class="aucy__bar">
+                    <lightning-button-icon icon-name="utility:back"
+                                           alternative-text="Back"
+                                           onclick={handleBack}></lightning-button-icon>
+                    <h2 class="aucy__title">{editorTitle}</h2>
+                    <template if:true={isClosed}>
+                        <span class="aucy__status aucy__status--closed">Closed</span>
+                        <lightning-button label="Reopen cycle"
+                                          disabled={busy}
+                                          onclick={handleReopenCycle}></lightning-button>
+                    </template>
+                    <template if:true={isPaused}>
+                        <span class="aucy__status">Claims paused</span>
+                        <lightning-button label="Resume claims"
+                                          disabled={busy}
+                                          onclick={handleResumeClaims}></lightning-button>
+                    </template>
+                    <template if:true={isActiveExistingCycle}>
+                        <lightning-button label="Pause claims"
+                                          title="Stop new claims while in-flight work continues"
+                                          disabled={busy}
+                                          onclick={handlePauseClaims}></lightning-button>
+                    </template>
+                    <template if:true={isOpenExistingCycle}>
+                        <lightning-button label="Close cycle"
+                                          disabled={busy}
+                                          onclick={handleCloseCycle}></lightning-button>
+                    </template>
+                    <template if:true={isExistingCycle}>
+                        <lightning-button variant="destructive-text"
+                                          label="Delete cycle"
+                                          disabled={busy}
+                                          onclick={handleDeleteCycle}></lightning-button>
+                    </template>
+                    <lightning-button variant="brand"
+                                      label="Save"
+                                      disabled={busy}
+                                      onclick={handleSave}></lightning-button>
+                </div>
+
+                <div class="aucy__fields">
+                    <lightning-input label="Name"
+                                     value={name}
+                                     required
+                                     max-length="120"
+                                     onchange={handleNameChange}></lightning-input>
+                    <lightning-input type="date"
+                                     label="Target date"
+                                     value={targetDate}
+                                     onchange={handleDateChange}></lightning-input>
+                    <lightning-combobox label="Assigned team"
+                                        field-level-help="The pool audience. Changing the team only re-targets UNCLAIMED runs — anything a tester already claimed keeps its original visibility. Leave Unassigned to open the pool to every tester."
+                                        options={teamOptions}
+                                        value={teamId}
+                                        onchange={handleTeamChange}></lightning-combobox>
+                    <lightning-input type="number"
+                                     label="Max testers per case"
+                                     field-level-help="Seats per case in this cycle. A case's own Max Testers Override wins when set."
+                                     min="1" max="999" step="1"
+                                     value={maxTesters}
+                                     onchange={handleMaxTestersChange}></lightning-input>
+                    <lightning-input type="number"
+                                     label="Claim limit per tester"
+                                     field-level-help="How many incomplete claims one tester may hold in this cycle at once. Blank = no limit."
+                                     min="1" max="999" step="1"
+                                     value={claimLimit}
+                                     onchange={handleClaimLimitChange}></lightning-input>
+                    <lightning-input type="number"
+                                     label="Stale claim days"
+                                     field-level-help="Claims still Not Started after this many days go back to the pool automatically. Blank = never."
+                                     min="1" max="999" step="1"
+                                     value={staleDays}
+                                     onchange={handleStaleDaysChange}></lightning-input>
+                    <lightning-textarea class="aucy__prompts"
+                                        label="Focus prompts"
+                                        field-level-help="Chips offered in this cycle's exploratory-session notes. One per line, &quot;Label | Insert text&quot; — with no pipe the label is used and &quot;: &quot; is appended. Blank = inherit the org defaults."
+                                        placeholder={promptsPlaceholder}
+                                        value={focusPrompts}
+                                        onchange={handleFocusPromptsChange}></lightning-textarea>
+                </div>
+
+                <template if:true={isExistingCycle}>
+                    <h3 class="aucy__section-title">Books in this cycle</h3>
+                    <c-admin-uat-dual-picker selected-items={booksSelected}
+                                             available-items={booksAvailable}
+                                             busy={busy}
+                                             selected-label="Attached books"
+                                             available-label="Available books"
+                                             selected-empty-text="No books attached yet."
+                                             search-placeholder="Search books…"
+                                             onadd={handleBookAdd}
+                                             onremove={handleBookRemove}></c-admin-uat-dual-picker>
+
+                    <h3 class="aucy__section-title">Cases added directly</h3>
+                    <c-admin-uat-dual-picker selected-items={casesSelected}
+                                             available-items={casesAvailable}
+                                             busy={busy}
+                                             selected-label="Direct cases"
+                                             available-label="All cases"
+                                             selected-empty-text="No directly-added cases."
+                                             available-empty-text="Nothing matches. Only cases marked Complete can be added to a cycle."
+                                             search-placeholder="Search by Case ID or module…"
+                                             onadd={handleCaseAdd}
+                                             onremove={handleCaseRemove}></c-admin-uat-dual-picker>
+
+                    <h3 class="aucy__section-title">All Cases &amp; Executions</h3>
+                    <template if:true={hasScopeRows}>
+                        <div class="aucy__table-wrap">
+                            <table class="aucy__table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Case</th>
+                                        <th scope="col">Module</th>
+                                        <th scope="col">Source</th>
+                                        <th scope="col">Executions</th>
+                                        <th scope="col">Add tester</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={scopeRows} for:item="row">
+                                        <tr key={row.caseId}>
+                                            <td>
+                                                <div class="aucy__case-cell">
+                                                    <span class="aucy__case-title">{row.titleDisplay}</span>
+                                                    <span class="aucy__case-code">{row.caseCode}</span>
+                                                </div>
+                                            </td>
+                                            <td>{row.moduleName}</td>
+                                            <td>{row.sourceLabel}</td>
+                                            <td>
+                                                <div class="aucy__chips">
+                                                    <template for:each={row.chips} for:item="chip">
+                                                        <span key={chip.id} class="aucy__chip-group">
+                                                            <button type="button"
+                                                                    class={chip.chipClass}
+                                                                    data-execid={chip.id}
+                                                                    data-caseid={row.caseId}
+                                                                    onclick={handleChipClick}>{chip.label}</button>
+                                                            <template if:true={chip.canUnassign}>
+                                                                <lightning-button-icon icon-name="utility:change_owner"
+                                                                                       alternative-text="Reassign"
+                                                                                       title="Reassign to another tester"
+                                                                                       size="x-small"
+                                                                                       variant="bare"
+                                                                                       data-execid={chip.id}
+                                                                                       data-caseid={row.caseId}
+                                                                                       data-tester={chip.testerName}
+                                                                                       onclick={handleReassignClick}></lightning-button-icon>
+                                                                <lightning-button-icon icon-name="utility:close"
+                                                                                       alternative-text="Unassign"
+                                                                                       title="Force-unassign (seat returns to the pool)"
+                                                                                       size="x-small"
+                                                                                       variant="bare"
+                                                                                       data-execid={chip.id}
+                                                                                       data-tester={chip.testerName}
+                                                                                       onclick={handleUnassignClick}></lightning-button-icon>
+                                                            </template>
+                                                        </span>
+                                                    </template>
+                                                </div>
+                                                <template if:true={row.isReassignRow}>
+                                                    <div class="aucy__reassign">
+                                                        <span class="aucy__reassign-title">{reassignTitle}</span>
+                                                        <lightning-combobox label="New tester"
+                                                                            variant="label-hidden"
+                                                                            placeholder="Pick a tester…"
+                                                                            options={row.addTesterOptions}
+                                                                            value={reassign.newTesterId}
+                                                                            onchange={handleReassignPick}></lightning-combobox>
+                                                        <lightning-input label="Reason"
+                                                                         variant="label-hidden"
+                                                                         placeholder="Reason (required — goes in the log)"
+                                                                         value={reassign.reason}
+                                                                         onchange={handleReassignReason}></lightning-input>
+                                                        <lightning-button label="Cancel"
+                                                                          size="small"
+                                                                          onclick={handleReassignCancel}></lightning-button>
+                                                        <lightning-button variant="brand"
+                                                                          label="Reassign"
+                                                                          size="small"
+                                                                          disabled={reassignDisabled}
+                                                                          onclick={handleReassignConfirm}></lightning-button>
+                                                    </div>
+                                                </template>
+                                            </td>
+                                            <td class="aucy__addtester">
+                                                <template if:true={hasTeamMembers}>
+                                                    <lightning-combobox label="Tester"
+                                                                        variant="label-hidden"
+                                                                        placeholder="Pick a tester…"
+                                                                        options={row.addTesterOptions}
+                                                                        value={row.addTesterValue}
+                                                                        data-caseid={row.caseId}
+                                                                        onchange={handleAddTesterPick}></lightning-combobox>
+                                                    <template if:true={row.hasAddTesterPick}>
+                                                        <lightning-button label="+ Add tester"
+                                                                          size="small"
+                                                                          disabled={busy}
+                                                                          data-caseid={row.caseId}
+                                                                          onclick={handleAddTester}></lightning-button>
+                                                    </template>
+                                                </template>
+                                                <template if:false={hasTeamMembers}>
+                                                    <span class="aucy__hint">Assign a team first</span>
+                                                </template>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
+                    <template if:false={hasScopeRows}>
+                        <p class="aucy__empty">Nothing in scope yet — attach a book or add cases directly.</p>
+                    </template>
+                </template>
+                <template if:false={isExistingCycle}>
+                    <p class="aucy__hint">Save the cycle first, then attach books and cases.</p>
+                </template>
+            </template>
+        </template>
+
+        <template if:true={confirmOpen}>
+            <c-admin-confirm-modal header={confirm.header}
+                                   message={confirm.message}
+                                   confirm-label={confirm.confirmLabel}
+                                   prompt-label={confirm.promptLabel}
+                                   prompt-required={confirm.promptRequired}
+                                   busy={saving}
+                                   onconfirm={handleConfirmProceed}
+                                   oncancel={handleConfirmCancel}></c-admin-confirm-modal>
+        </template>
+    </div>
+</template>

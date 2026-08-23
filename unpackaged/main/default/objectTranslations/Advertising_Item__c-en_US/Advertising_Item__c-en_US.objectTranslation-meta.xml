@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Advertising Item</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Advertising Items</value>
+    </caseValues>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <layouts>
+        <layout>Advertising Item Layout</layout>
+        <sections>
+            <label><!-- Custom Links --></label>
+            <section>Custom Links</section>
+        </sections>
+    </layouts>
+    <quickActions>
+        <label><!-- Update Advertising Item --></label>
+        <name>Update_Advertising_item</name>
+    </quickActions>
+    <startsWith>Vowel</startsWith>
+    <validationRules>
+        <errorMessage><!-- The Case status is set to Approved, therefore the Advertising Item cannot be updated. --></errorMessage>
+        <name>Prevent_Modification_if_Case_is_Approved</name>
+    </validationRules>
+    <validationRules>
+        <errorMessage><!-- The Status is set to Approved, therefore the Advertising Item cannot be updated. --></errorMessage>
+        <name>Prevent_Modification_if_Record_Locked</name>
+    </validationRules>
+</CustomObjectTranslation>

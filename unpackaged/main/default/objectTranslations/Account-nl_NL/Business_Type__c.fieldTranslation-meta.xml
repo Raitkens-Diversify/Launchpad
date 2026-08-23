@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Business Type --></label>
+        <name>Business_Type__c</name>
+        <picklistValues>
+            <masterLabel>type 1</masterLabel>
+            <translation><!-- type 1 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>type 2</masterLabel>
+            <translation><!-- type 2 --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

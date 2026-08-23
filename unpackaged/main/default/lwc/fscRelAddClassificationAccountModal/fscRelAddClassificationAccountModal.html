@@ -1,0 +1,56 @@
+<template>
+    <!-- Author: Hoang Long Vu To | Date: 2026-07-20 -->
+    <lightning-modal-header>
+        <div class="modal-header__group">
+            <div class="modal-header__breadcrumb">
+                <lightning-icon icon-name="standard:account" alternative-text="Account"></lightning-icon>
+                <h2 class="slds-text-heading_small">{rootAccountName}</h2>
+            </div>
+            <h3 class="slds-text-heading_medium">{modalTitle}</h3>
+            <p class="modal-header__instruction slds-text-body_small">{modalInstruction}</p>
+        </div>
+    </lightning-modal-header>
+
+    <lightning-modal-body class="modal-body" onclick={handleModalBodyClick}>
+        <template if:true={hasBanner}>
+            <div class={bannerClass} role="alert">
+                <span>{bannerMessage}</span>
+            </div>
+        </template>
+
+        <template if:true={isSaving}>
+            <div class="modal-loading-overlay">
+                <lightning-spinner alternative-text="Saving account..." size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <div class="slds-form-element">
+            <c-fsc-rel-record-lookup
+                object-api-name="Account"
+                label="Account"
+                value={accountId}
+                record-label={accountName}
+                placeholder="Search accounts..."
+                classification-search-value={classificationValue}
+                create-enabled={lookupCreateEnabled}
+                disabled={isSaving}
+                onchange={handleAccountChange}
+            ></c-fsc-rel-record-lookup>
+        </div>
+    </lightning-modal-body>
+
+    <lightning-modal-footer>
+        <lightning-button
+            label={cancelButtonLabel}
+            onclick={handleCancel}
+            disabled={isSaving}
+        ></lightning-button>
+        <lightning-button
+            class="slds-m-left_x-small"
+            variant="brand"
+            label={saveButtonLabel}
+            onclick={handleSave}
+            disabled={isSaveDisabled}
+        ></lightning-button>
+    </lightning-modal-footer>
+</template>

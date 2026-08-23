@@ -1,0 +1,50 @@
+/* ───────── Slotted header (icon + title) ─────────
+   The header is slotted into ds-modal-v2, so it lives in this component's
+   shadow DOM and can't use the modal's scoped .ds-modal-v2__title classes —
+   typography is re-created here to match dsModalV2.css. */
+.confirm-removal__heading {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-2);
+    font-family: var(--slds-g-font-family-base);
+}
+
+.confirm-removal__title-row {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2);
+}
+
+.confirm-removal__title-icon {
+    flex-shrink: 0;
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-on-surface-1);
+}
+
+.confirm-removal__title {
+    margin: 0;
+    font-family: var(--slds-g-font-family-base);
+    font-size: var(--slds-g-font-scale-3);
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--slds-g-color-on-surface-3);
+}
+
+.confirm-removal__message {
+    margin: 0;
+    font-family: var(--slds-g-font-family-base);
+    font-size: var(--slds-g-font-scale-2);
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--slds-g-color-on-surface-1);
+}
+
+.confirm-removal__message strong {
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-2);
+}
+
+.confirm-removal__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--slds-g-spacing-2);
+}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Suggested_UrlNames__c</fullName>
+    <description>Curated suggested-article UrlNames, one per line; maps to Knowledge__kav.Suggested_Articles__c on promotion.</description>
+    <label>Suggested Article URL Names</label>
+    <length>32768</length>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>4</visibleLines>
+</CustomField>

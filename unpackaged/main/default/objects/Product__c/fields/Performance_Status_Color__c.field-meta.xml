@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Performance_Status_Color__c</fullName>
+    <externalId>false</externalId>
+    <formula>CASE(Text(Performance_Status__c),
+&quot;Under Performing&quot;, IMAGE(&quot;/resource/RedCircle&quot;, &quot;Under Performing&quot;, 20, 20),
+&quot;Watch List&quot;, IMAGE(&quot;/resource/YellowCircle&quot;, &quot;Watch List&quot;, 20, 20),
+&quot;Performing&quot;, IMAGE(&quot;/resource/GreenCircle&quot;, &quot;Performing&quot;, 20, 20), null
+)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Performance Status Color</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

@@ -1,0 +1,6 @@
+Hello [!Case.Contact.FirstName] [!Case.Contact.LastName],
+
+I hope this email finds you well. I am reaching out with a confirmation that your donation of [!Case.Amount__c] has been initiated to [!Case.Name_of_Charity__c]. We expect the funds to arrive within **X** business days. 
+
+Please don't hesitate to reach out with any follow up questions.
+Sincerely,

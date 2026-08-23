@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>54.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Toast Component</masterLabel>
+    <targets>
+        <target>lightning__RecordPage</target>
+        <target>lightning__AppPage</target>
+        <target>lightning__HomePage</target>
+        <target>lightning__FlowScreen</target>
+    </targets>
+    <!-- Configuring the design attributes -->
+    <targetConfigs>
+        <targetConfig targets="lightning__FlowScreen, lightning__RecordPage, lightning__AppPage, lightning__HomePage">
+            <property name="title" type="String" label="Toast Title" description="Title to display. For Example, Record Created"/>
+            <property name="message" type="String" label="Toast Message"
+                description="Message you want to display. For Example, 'Record {0} created! See it {1}!'"/>
+            <property name="variant" type="String" default="info"
+                label="Toast Variant"
+                description="Type of toast you want to display. Valid values are info, success, warning, error"
+            />
+            <property name="delay" type="Integer" label="Delay"
+                description="Time in milli seconds If you want the delay to display the toast."/>
+            <property name="recordName" type="String" label="Record Name"
+                description="The Name of the record which has been created. For Example, Oil Gas Account"/>
+            <property name="url" type="String" label="Navigate to URL"
+                description="URL where user will be redirected after clicking on the link"/>
+            <property name="actionLabel" type="String" label="Button Label"
+                description="The text which will be dislayed over the url. For Example, Click Here, Here, Go to"/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

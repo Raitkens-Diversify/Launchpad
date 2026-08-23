@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>61.0</apiVersion>
+    <isExposed>false</isExposed>
+    <description>Read-only view of one test case — description, pre-conditions, every step&#39;s what-to-do and expected result, reference material. Rendered inside uatPool&#39;s preview modal so a tester can read a case before claiming a seat.</description>
+</LightningComponentBundle>

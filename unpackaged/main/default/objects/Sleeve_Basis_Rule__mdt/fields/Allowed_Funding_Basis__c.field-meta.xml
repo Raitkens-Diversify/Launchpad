@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Allowed_Funding_Basis__c</fullName>
+    <description>How a sleeve of this classification may be funded, enforced by the Order Ticket wizard: Dollar Only sleeves are fixed carve-outs, Percent Only sleeves are actively traded model weights, and Either lets the advisor choose per submission. The wizard filters each list&#39;s strategy picker by this value, so a Dollar Only strategy is never offered as a percentage sleeve. See TradeInstructionController (mirror) and c/envelopeFormSchema STRATEGY_BASIS.</description>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <inlineHelpText>Dollar Only = fixed carve-out. Percent Only = traded model weight. Either = the advisor chooses.</inlineHelpText>
+    <label>Allowed Funding Basis</label>
+    <required>true</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Percent Only</fullName>
+                <default>true</default>
+                <label>Percent Only</label>
+            </value>
+            <value>
+                <fullName>Dollar Only</fullName>
+                <default>false</default>
+                <label>Dollar Only</label>
+            </value>
+            <value>
+                <fullName>Either</fullName>
+                <default>false</default>
+                <label>Either</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

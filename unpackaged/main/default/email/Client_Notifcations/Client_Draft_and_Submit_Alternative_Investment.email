@@ -1,0 +1,7 @@
+Hello [!Case.Contact.FirstName] [!Case.Contact.LastName],
+I hope this email finds you well. I'm reaching out today with a confirmation that your request to purchase {Asset Name - rachel fill this out with a list} is complete as of **date**.
+
+Account: [!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.Name] [!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.OASP_FSC__Registration_Type__r.Name] XXXX[!Case.FinServ__FinancialAccount__r.Account_Number_Last_4__c], [!Case.FinServ__FinancialAccount__r.OASP_FSC__Custodian__r.Name]
+[!Case.Amount__c]
+
+Please don't hesitate to reach out with any follow up questions concerning this transaction.

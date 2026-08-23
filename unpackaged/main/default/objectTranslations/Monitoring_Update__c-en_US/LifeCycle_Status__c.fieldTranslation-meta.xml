@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Life-Cycle Status --></label>
+        <name>LifeCycle_Status__c</name>
+        <picklistValues>
+            <masterLabel>Capital Raising</masterLabel>
+            <translation><!-- Capital Raising --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Full-Cycle</masterLabel>
+            <translation><!-- Full-Cycle --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Liquidating</masterLabel>
+            <translation><!-- Liquidating --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Operating</masterLabel>
+            <translation><!-- Operating --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

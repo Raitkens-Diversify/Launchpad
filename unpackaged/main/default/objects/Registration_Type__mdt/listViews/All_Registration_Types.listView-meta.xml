@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>All_Registration_Types</fullName>
+    <columns>MasterLabel</columns>
+    <columns>Code__c</columns>
+    <columns>DeveloperName</columns>
+    <columns>Qualified__c</columns>
+    <columns>Business_Account__c</columns>
+    <columns>Joint_Account__c</columns>
+    <columns>Beneficiary_Account__c</columns>
+    <columns>Category__c</columns>
+    <filterScope>Everything</filterScope>
+    <label>All Registration Types</label>
+</ListView>

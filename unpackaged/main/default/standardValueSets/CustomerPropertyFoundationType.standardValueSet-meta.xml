@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>false</sorted>
+    <standardValue>
+        <fullName>Basement</fullName>
+        <default>false</default>
+        <label>Basement</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Crawlspace</fullName>
+        <default>false</default>
+        <label>Crawlspace</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Pier and Beam</fullName>
+        <default>false</default>
+        <label>Pier and Beam</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Slab</fullName>
+        <default>false</default>
+        <label>Slab</label>
+    </standardValue>
+</StandardValueSet>

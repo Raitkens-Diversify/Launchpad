@@ -1,0 +1,7 @@
+Hello [!Case.Contact.FirstName] [!Case.Contact.LastName],
+
+I hope this email finds you well. I am reaching out with an update today to let you know the new [!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.OASP_FSC__Registration_Type__r.Name] account has been opened at [!Case.FinServ__FinancialAccount__r.OASP_FSC__Custodian__r.Name]. 
+
+I can be reached via phone or email in the meantime, with any follow up questions.
+
+Sincerely,

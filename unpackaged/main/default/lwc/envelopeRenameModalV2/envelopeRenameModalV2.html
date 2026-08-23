@@ -1,0 +1,56 @@
+<template>
+    <c-ds-modal-v2
+        is-open={isOpen}
+        title="Rename envelope"
+        size="small"
+        allow-overflow
+        onclose={handleClose}>
+        <div slot="header" class="rename-envelope__heading">
+            <div class="rename-envelope__title-row">
+                <svg
+                    class="rename-envelope__title-icon"
+                    viewBox="0 0 19 19"
+                    aria-hidden="true"
+                    focusable="false">
+                    <path d={pencilIcon}></path>
+                </svg>
+                <h2 class="rename-envelope__title">Rename envelope</h2>
+            </div>
+            <p class="rename-envelope__subtitle">Rename the envelope '<strong>{envelopeName}</strong>'.</p>
+        </div>
+
+        <div class="rename-envelope__form">
+            <lightning-input
+                variant="label-hidden"
+                label="New envelope name"
+                placeholder="New envelope name"
+                value={newName}
+                onchange={handleNameChange}>
+            </lightning-input>
+        </div>
+
+        <div slot="footer" class="rename-envelope__footer">
+            <lightning-button
+                variant="secondary"
+                label="Cancel"
+                disabled={isSaving}
+                onclick={handleCancel}
+            ></lightning-button>
+            <div class="env-busy-button">
+                <lightning-button
+                    variant="brand"
+                    label="Accept"
+                    disabled={isAcceptDisabled}
+                    onclick={handleAccept}
+                ></lightning-button>
+                <template lwc:if={isSaving}>
+                    <lightning-spinner
+                        size="small"
+                        variant="brand"
+                        alternative-text="Saving">
+                    </lightning-spinner>
+                </template>
+            </div>
+        </div>
+    </c-ds-modal-v2>
+</template>

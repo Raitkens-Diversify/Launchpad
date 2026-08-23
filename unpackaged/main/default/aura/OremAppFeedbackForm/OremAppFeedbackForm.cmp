@@ -1,0 +1,4 @@
+<aura:component implements="flexipage:availableForAllPageTypes" access="global">
+<center><iframe width="700px" height="600px" border="50px" src="https://forms.clickup.com/14212603/f/dhqfv-11557/Q1J196ZBF2BK7DF9JL?Intake%20Source%20-%20SFP=Orem%20Feedback%20Form"/></center>
+
+</aura:component>

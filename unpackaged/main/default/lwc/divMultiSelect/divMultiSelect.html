@@ -1,0 +1,141 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-07-14 -->
+<template>
+  <div class={rootClass} onfocusout={handleRootFocusOut}>
+    <template lwc:if={showLabel}>
+      <label class="div-multiselect__label slds-form-element__label">{label}</label>
+    </template>
+
+    <div class="div-multiselect__control-wrap">
+      <div
+        class={controlClass}
+        role="combobox"
+        aria-expanded={ariaExpanded}
+        aria-haspopup="listbox"
+        aria-label={label}
+      >
+        <template lwc:if={isSearchVariant}>
+          <lightning-icon
+            icon-name="utility:search"
+            size="xx-small"
+            class="div-multiselect__search-icon"
+            aria-hidden="true"
+          ></lightning-icon>
+        </template>
+
+        <div class="div-multiselect__chips">
+          <template lwc:if={showOverflowBadge}>
+            <span
+              class="div-multiselect__overflow-stack"
+              title={overflowAriaLabel}
+              aria-label={overflowAriaLabel}
+            >
+              <span class="div-multiselect__overflow-count">{overflowTotal}</span>
+            </span>
+          </template>
+          <template for:each={visibleChips} for:item="chip">
+            <span key={chip.value} class="div-multiselect__chip">
+              <span class="div-multiselect__chip-label slds-truncate">{chip.label}</span>
+              <button
+                type="button"
+                class="div-multiselect__chip-remove"
+                data-value={chip.value}
+                title="Remove"
+                aria-label={chip.removeAriaLabel}
+                disabled={disabled}
+                onclick={handleChipRemove}
+              >
+                ×
+              </button>
+            </span>
+          </template>
+          <input
+            type="text"
+            class="div-multiselect__input"
+            aria-label={searchAriaLabel}
+            placeholder={inputPlaceholder}
+            value={searchTerm}
+            disabled={disabled}
+            oninput={handleInput}
+            onkeydown={handleInputKeydown}
+            onclick={handleInputClick}
+          />
+        </div>
+
+        <template lwc:if={showToggleButton}>
+          <button
+            type="button"
+            class="div-multiselect__toggle"
+            title="Toggle options"
+            aria-label="Toggle options"
+            disabled={disabled}
+            onclick={handleToggleClick}
+          >
+            <lightning-icon
+              icon-name="utility:down"
+              size="xx-small"
+              alternative-text="Toggle"
+            ></lightning-icon>
+          </button>
+        </template>
+      </div>
+
+      <template lwc:if={isOpen}>
+        <ul
+          class={menuClass}
+          style={menuStyle}
+          role="listbox"
+          aria-label={label}
+          onmousedown={handleMenuMouseDown}
+        >
+          <template for:each={filteredOptions} for:item="option">
+            <li
+              key={option.value}
+              class={option.optionClass}
+              role="option"
+              aria-selected={option.isSelected}
+              data-value={option.value}
+              onmousedown={handleOptionMouseDown}
+              onclick={handleOptionClick}
+            >
+              <template lwc:if={option.isSelected}>
+                <lightning-icon
+                  class="div-multiselect__option-check"
+                  icon-name="utility:check"
+                  size="xx-small"
+                  alternative-text="Selected"
+                ></lightning-icon>
+              </template>
+              <span class="div-multiselect__option-label">{option.label}</span>
+            </li>
+          </template>
+          <template lwc:if={hasNoFilteredOptions}>
+            <li class="div-multiselect__empty" role="presentation">
+              {emptyMessage}
+            </li>
+          </template>
+        </ul>
+      </template>
+    </div>
+
+    <template lwc:if={hasBelowChips}>
+      <div class="div-multiselect__chips-below" aria-label="Selected options">
+        <template for:each={belowChips} for:item="chip">
+          <span key={chip.value} class="div-multiselect__chip div-multiselect__chip_below">
+            <span class="div-multiselect__chip-label slds-truncate">{chip.label}</span>
+            <button
+              type="button"
+              class="div-multiselect__chip-remove"
+              data-value={chip.value}
+              title="Remove"
+              aria-label={chip.removeAriaLabel}
+              disabled={disabled}
+              onclick={handleChipRemove}
+            >
+              ×
+            </button>
+          </span>
+        </template>
+      </div>
+    </template>
+  </div>
+</template>

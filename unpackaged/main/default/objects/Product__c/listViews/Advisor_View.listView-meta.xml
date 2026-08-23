@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Advisor_View</fullName>
+    <columns>NAME</columns>
+    <columns>Sponsor__c</columns>
+    <columns>Asset_Category__c</columns>
+    <columns>Asset_Class__c</columns>
+    <columns>Asset_Subclass__c</columns>
+    <columns>Date_Approved__c</columns>
+    <columns>Anticipated_Hold_Period_years__c</columns>
+    <columns>Status__c</columns>
+    <columns>Date_of_Last_Review__c</columns>
+    <columns>Current_Distribution__c</columns>
+    <columns>Current_NAV__c</columns>
+    <columns>Performance_Status__c</columns>
+    <columns>Performance_Status_Color__c</columns>
+    <filterScope>Everything</filterScope>
+    <label>Advisor View</label>
+</ListView>

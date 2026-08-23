@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Timebox_Minutes__c</fullName>
+    <description>Optional planned session length in minutes. Display-only: the workspace shows elapsed/remaining and flips to &quot;Timebox elapsed&quot; — nothing blocks or auto-finishes at expiry.</description>
+    <externalId>false</externalId>
+    <label>Timebox (Minutes)</label>
+    <precision>3</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

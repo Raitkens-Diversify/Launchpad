@@ -1,0 +1,19 @@
+<template>
+    <template if:true={visible}>
+        <lightning-button-menu class="ucs__menu"
+                               label={buttonLabel}
+                               title={buttonTitle}
+                               menu-alignment="right"
+                               onselect={handleSelect}>
+            <lightning-menu-item value="all"
+                                 label="All cycles"
+                                 checked={allChecked}></lightning-menu-item>
+            <template for:each={options} for:item="opt">
+                <lightning-menu-item key={opt.cycleId}
+                                     value={opt.cycleId}
+                                     label={opt.label}
+                                     checked={opt.checked}></lightning-menu-item>
+            </template>
+        </lightning-button-menu>
+    </template>
+</template>

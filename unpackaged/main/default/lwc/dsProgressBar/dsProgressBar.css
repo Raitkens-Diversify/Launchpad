@@ -1,0 +1,56 @@
+/* --slds-g-* declared locally, not inherited: platform-injected SLDS2
+   styling hooks beat values inherited from an ancestor's :host
+   (see nexsHome.css / dsHero.css). --ds-* names are custom and inherit
+   safely with fallbacks. */
+:host {
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-accent-1: #0f406f;
+}
+
+.ds-progress {
+    display: flex;
+    height: 8px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--slds-g-color-border-1, #d1d5db);
+}
+
+.ds-progress__seg {
+    height: 100%;
+    transition: width 200ms ease;
+}
+
+.ds-progress__seg--track {
+    background: var(--slds-g-color-border-1, #d1d5db);
+}
+
+.ds-progress__seg--accent {
+    background: var(--slds-g-color-accent-1, #0f406f);
+}
+
+.ds-progress__seg--success {
+    background: var(--ds-success, #2d9f6f);
+}
+
+.ds-progress__seg--warning {
+    background: var(--ds-warning, #e8b84b);
+}
+
+.ds-progress__seg--error {
+    background: var(--ds-error, #d94545);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ds-progress__seg {
+        transition-duration: 0.01ms;
+    }
+}
+
+/* On a navy/accent-colored background, the accent segment (same navy as
+   the background) would be nearly invisible — swap to the bright accent
+   Help Center already uses for eyebrow text/hover rings on this exact
+   gradient. The track segment (light gray) already has strong contrast on
+   navy, so it needs no override. */
+.ds-progress--light .ds-progress__seg--accent {
+    background: var(--ds-light-blue, #14bef0);
+}

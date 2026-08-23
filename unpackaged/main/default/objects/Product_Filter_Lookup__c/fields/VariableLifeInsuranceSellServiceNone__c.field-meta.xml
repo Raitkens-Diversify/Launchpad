@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>VariableLifeInsuranceSellServiceNone__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>WHERE Type__c = &#39;Variable Life Insurance&#39; AND Status__c = &#39;Sell/Service&#39;</description>
+    <label>VariableLifeInsuranceSellServiceNone</label>
+    <lookupFilter>
+        <active>true</active>
+        <filterItems>
+            <field>Product__c.Asset_Category__c</field>
+            <operation>equals</operation>
+            <value>Variable Life Insurance</value>
+        </filterItems>
+        <isOptional>false</isOptional>
+    </lookupFilter>
+    <referenceTo>Product__c</referenceTo>
+    <relationshipLabel>Product Filter Lookups (VariableLifeInsuranceSellServiceNone)</relationshipLabel>
+    <relationshipName>Product_Filter_Lookups0VPk</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

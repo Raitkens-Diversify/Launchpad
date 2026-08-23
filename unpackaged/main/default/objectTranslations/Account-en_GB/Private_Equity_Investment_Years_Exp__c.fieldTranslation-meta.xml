@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Private Equity Investment Years Exp --></label>
+        <name>Private_Equity_Investment_Years_Exp__c</name>
+    </CustomFieldTranslation>

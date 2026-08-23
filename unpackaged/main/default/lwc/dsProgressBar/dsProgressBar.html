@@ -1,0 +1,8 @@
+<template>
+    <div class={rootClass} role="progressbar" aria-label={ariaLabel}
+         aria-valuenow={ariaValueNow} aria-valuemin="0" aria-valuemax="100">
+        <template for:each={segmentViews} for:item="seg">
+            <div key={seg.key} class={seg.cssClass} style={seg.style} title={seg.label}></div>
+        </template>
+    </div>
+</template>

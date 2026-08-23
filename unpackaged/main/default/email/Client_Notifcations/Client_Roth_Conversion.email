@@ -1,0 +1,10 @@
+Hello [!Case.Contact.FirstName] [!Case.Contact.LastName],
+
+I hope this email finds you well. I am reaching out today with a confirmation that we have successfully converted [!Case.Amount__c], from Traditional IRA funds, to ROTH IRA funds, as of **date conversion occurred**. This conversion has been coded as a **current/prior** year contribution.
+
+Traditional IRA Account: [!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.Name] [!Case.FinServ__FinancialAccount__r.OASP_FSC__Registration__r.OASP_FSC__Registration_Type__r.Name] XXXX[!Case.FinServ__FinancialAccount__r.Account_Number_Last_4__c], [!Case.FinServ__FinancialAccount__r.OASP_FSC__Custodian__r.Name]
+ROTH IRA Account: [!Case.To_Account__r.OASP_FSC__Registration__r.Name] [!Case.To_Account__r.OASP_FSC__Registration__r.OASP_FSC__Registration_Type__r.Name] XXXX[!Case.To_Account__r.Account_Number_Last_4__c], [!Case.To_Account__r.OASP_FSC__Custodian__r.Name]
+Tax Year: **Current/Prior Year**
+
+Please don't hesitate to reach out with any follow up questions.
+Sincerely,

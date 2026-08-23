@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Recurring_Transfer_Frequency__c</fullName>
+    <label>Recurring Transfer Frequency</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>2 Times/Month</fullName>
+                <default>false</default>
+                <label>2 Times/Month</label>
+            </value>
+            <value>
+                <fullName>Monthly</fullName>
+                <default>false</default>
+                <label>Monthly</label>
+            </value>
+            <value>
+                <fullName>Last Biz Day</fullName>
+                <default>false</default>
+                <label>Last Biz Day</label>
+            </value>
+            <value>
+                <fullName>Every 2 Months</fullName>
+                <default>false</default>
+                <label>Every 2 Months</label>
+            </value>
+            <value>
+                <fullName>Quarterly</fullName>
+                <default>false</default>
+                <label>Quarterly</label>
+            </value>
+            <value>
+                <fullName>Semi-Annual</fullName>
+                <default>false</default>
+                <label>Semi-Annual</label>
+            </value>
+            <value>
+                <fullName>Annual</fullName>
+                <default>false</default>
+                <label>Annual</label>
+            </value>
+            <value>
+                <fullName>Weekly - Mon</fullName>
+                <default>false</default>
+                <label>Weekly - Mon</label>
+            </value>
+            <value>
+                <fullName>Weekly - Tues</fullName>
+                <default>false</default>
+                <label>Weekly - Tues</label>
+            </value>
+            <value>
+                <fullName>Weekly - Wed</fullName>
+                <default>false</default>
+                <label>Weekly - Wed</label>
+            </value>
+            <value>
+                <fullName>Weekly - Thurs</fullName>
+                <default>false</default>
+                <label>Weekly - Thurs</label>
+            </value>
+            <value>
+                <fullName>Weekly - Fri</fullName>
+                <default>false</default>
+                <label>Weekly - Fri</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

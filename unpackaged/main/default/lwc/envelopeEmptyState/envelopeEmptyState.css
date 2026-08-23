@@ -1,0 +1,54 @@
+:host {
+    display: block;
+}
+
+/* The bordered/rounded/white shell comes from c-card; this component owns only the
+   internal padding override and the column layout of the illustration + copy. */
+.empty-state-card {
+    --card-padding: var(--slds-g-spacing-5, 24px) var(--slds-g-spacing-5, 24px)
+        var(--slds-g-spacing-7, 40px);
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 8px);
+}
+
+.empty-state__art {
+    display: block;
+    width: 510px;
+    max-width: 100%;
+    height: auto;
+    /* Pull the illustration up so the arrows break above the card's top edge toward
+       the CTA buttons, as in the design (card overflow is visible). */
+    margin-top: -40px;
+}
+
+.empty-state__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 8px);
+    max-width: 576px;
+    text-align: center;
+    /* DS illustration/text color — no matching token, kept as a literal. */
+    color: #383330;
+}
+
+.empty-state__title {
+    margin: 0;
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+    font-size: var(--slds-g-font-scale-3, 20px);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    line-height: 24px;
+}
+
+.empty-state__text {
+    margin: 0;
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: var(--slds-g-font-weight-4, 400);
+    line-height: 19px;
+}

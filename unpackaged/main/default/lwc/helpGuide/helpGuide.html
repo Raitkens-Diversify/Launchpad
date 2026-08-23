@@ -1,0 +1,40 @@
+<template>
+    <div class="hg">
+        <template if:true={loading}>
+            <div class="hg__status">
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:true={hasGuide}>
+            <template if:true={showBreadcrumb}>
+                <nav class="hg__crumbs" aria-label="Your choices">
+                    <button class="hg__crumb" type="button" onclick={handleStartOver}>Start over</button>
+                    <template for:each={history} for:item="h" for:index="i">
+                        <span key={h.key} class="hg__crumb-wrap">
+                            <span class="hg__crumb-sep">›</span>
+                            <button class="hg__crumb" type="button" data-idx={i}
+                                    onclick={handleCrumb}>{h.label}</button>
+                        </span>
+                    </template>
+                </nav>
+            </template>
+
+            <h2 class="hg__question">{currentNode.question}</h2>
+
+            <div class="hg__options">
+                <template for:each={options} for:item="opt">
+                    <button key={opt.label} class="hg__option" type="button"
+                            data-type={opt.targetType} data-value={opt.targetValue}
+                            data-label={opt.label} onclick={handleOption}>
+                        {opt.label}
+                    </button>
+                </template>
+            </div>
+        </template>
+
+        <template if:true={error}>
+            <p class="hg__status">{error}</p>
+        </template>
+    </div>
+</template>

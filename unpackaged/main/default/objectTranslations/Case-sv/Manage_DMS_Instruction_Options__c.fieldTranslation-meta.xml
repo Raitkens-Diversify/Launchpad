@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Manage DMS Instruction Options --></label>
+        <name>Manage_DMS_Instruction_Options__c</name>
+        <picklistValues>
+            <masterLabel>Add/Remove Systematic Withdrawals</masterLabel>
+            <translation><!-- Add/Remove Systematic Withdrawals --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Instructions for Future Deposits</masterLabel>
+            <translation><!-- Instructions for Future Deposits --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Other</masterLabel>
+            <translation><!-- Other --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Raise Cash</masterLabel>
+            <translation><!-- Raise Cash --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Update Trade Instructions</masterLabel>
+            <translation><!-- Update Trade Instructions --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

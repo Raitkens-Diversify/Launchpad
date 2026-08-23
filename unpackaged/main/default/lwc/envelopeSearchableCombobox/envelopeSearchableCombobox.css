@@ -1,0 +1,134 @@
+:host {
+    display: block;
+}
+
+.escb__label {
+    display: block;
+    margin-bottom: var(--div-input-gap, var(--slds-g-spacing-2, 8px));
+    font-size: var(--div-input-font-size, var(--slds-g-font-scale-2, 0.875rem));
+    font-weight: var(--slds-g-font-weight-5, 500);
+    line-height: var(--div-input-line-height, 1.4);
+    color: var(--div-input-color-text, var(--slds-g-color-on-surface-2, #374151));
+}
+
+.escb__wrap {
+    position: relative;
+}
+
+/* Trigger box — uses standard diversify input tokens from diversifyStyles.css */
+.escb__control {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: var(--div-input-gap, var(--slds-g-spacing-2, 8px));
+    height: var(--div-input-height, 3.625rem);
+    min-height: var(--div-input-height, 3.625rem);
+    padding: 0 var(--div-input-padding-x, 1.25rem);
+    background: var(--div-input-color-background, var(--slds-g-color-surface-container-1, #ffffff));
+    border: 1px solid var(--div-input-color-border, var(--slds-g-color-border-1, #d1d5db));
+    border-radius: var(--div-input-radius, var(--slds-g-radius-border-2, 0.5rem));
+}
+
+.escb__control_open,
+.escb__control:focus-within {
+    box-shadow: var(
+        --div-input-focus-ring,
+        0 0 0 2px var(--slds-g-color-surface-container-1, #ffffff),
+        0 0 0 4px var(--slds-g-color-on-surface-4, #1a76bb)
+    );
+}
+
+.escb__control_disabled {
+    background: var(--slds-g-color-surface-2, #f3f4f6);
+}
+
+.escb__control_error {
+    border-color: var(--slds-g-color-error-container-1, #dc2626);
+}
+
+.escb__input {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: var(--div-font-family-base, inherit);
+    font-size: var(--div-input-font-size, 0.875rem);
+    line-height: var(--div-input-line-height, 1.25rem);
+    color: var(--div-input-color-text, var(--slds-g-color-on-surface-2, #374151));
+}
+
+.escb__input::placeholder {
+    color: var(--slds-g-color-neutral-base-60, #838a97);
+}
+
+.escb__toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.escb__toggle:disabled {
+    cursor: default;
+}
+
+/* Dropdown — mirrors the combobox listbox theming (radius, elevation, option hover tint). */
+.escb__menu {
+    position: absolute;
+    z-index: 9000;
+    top: calc(100% + var(--slds-g-spacing-1, 4px));
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: var(--slds-g-spacing-1, 4px) 0;
+    list-style: none;
+    max-height: 240px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border-radius: var(--div-input-radius, var(--slds-g-radius-border-2, 0.5rem));
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.16), 0 3px 3px 0 rgba(0, 0, 0, 0.16),
+        0 -1px 2px 0 rgba(0, 0, 0, 0.09);
+}
+
+.escb__menu_fixed {
+    position: fixed;
+    right: auto;
+}
+
+.escb__option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--slds-g-spacing-2, 8px);
+    padding: 6px var(--slds-g-spacing-3, 12px);
+    font-size: var(--div-input-font-size, var(--slds-g-font-size-base, 0.875rem));
+    line-height: var(--div-input-line-height, 1.25rem);
+    color: var(--div-input-color-text, var(--slds-g-color-on-surface-2, #374151));
+    cursor: pointer;
+}
+
+.escb__option:hover,
+.escb__option_active {
+    background-color: var(--slds-g-color-brand-base-90, #e2f8ff);
+}
+
+.escb__option-label {
+    min-width: 0;
+}
+
+.escb__check {
+    --slds-c-icon-color-foreground-default: var(--slds-g-color-accent-1, #0f406f);
+}
+
+.escb__empty {
+    padding: 6px var(--slds-g-spacing-3, 12px);
+    font-size: var(--div-input-font-size, var(--slds-g-font-size-base, 0.875rem));
+    color: var(--slds-g-color-neutral-base-60, #838a97);
+}

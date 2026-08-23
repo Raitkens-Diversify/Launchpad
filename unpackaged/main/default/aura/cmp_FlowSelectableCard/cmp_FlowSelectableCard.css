@@ -1,0 +1,60 @@
+.THIS {
+}
+
+/*
+ .THIS .slds-card_narrow{
+    border: 1px;
+    padding-bottom: 16px;
+    padding-top: 16px;
+    margin-left: auto;
+  	margin-right: auto;
+  	width: 30%;
+}
+ */
+.THIS .slds-card {
+    background: none;
+}
+
+.THIS .slds-text-heading_small{
+    font-size: 0.95rem !important;
+}
+
+.THIS .card_container { 
+    border-radius: 4px;
+    /*padding: 10px 12px;*/
+    cursor: pointer;
+    background-color: none;
+    transition: background-color 0.3s ease;
+}
+
+.THIS .card_container:hover {
+    background-color: #DFDFDF;
+    transition: background-color 0.3s ease;
+}
+
+.THIS .is_selected {
+    background-color: #DFDFDF;
+    transition: background-color 0.3s ease;
+}
+
+.THIS .text-wrap a {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 100%;
+    display: inline-block;
+}
+
+.THIS .HouseHold{
+    zoom:80%;
+}
+.THIS .disableop {
+    pointer-events: none;
+    color: black !important;
+    text-decoration: none;
+}
+
+.THIS .custom-color > * {
+   color: black !important;
+    text-decoration: none; 
+}

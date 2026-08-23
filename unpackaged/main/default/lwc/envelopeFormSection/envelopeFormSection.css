@@ -1,0 +1,98 @@
+:host {
+  display: block;
+}
+
+.section {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-4, 16px);
+}
+
+/* Active section: an electric-blue left marker flush to the card's inner-left edge (offset by the card padding). */
+.section_active::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(-1 * var(--slds-g-spacing-5, 24px));
+  width: 4px;
+  border-radius: var(--slds-g-radius-border-1, 4px);
+  background: var(--slds-g-color-on-surface-4, #1a76bb);
+}
+
+.section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--slds-g-spacing-4, 16px);
+}
+
+/* Right of the section header: the "Inputs missing" and "Inputs updated" statuses, which a section
+   can carry at the same time. */
+.section__statuses {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-4, 16px);
+  flex-shrink: 0;
+}
+
+.section__status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-2, 8px);
+  font-size: var(--slds-g-font-size-base, 13px);
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+/* Amber, with a warning icon; blue and text-only. */
+.section__status_missing {
+  color: var(--slds-g-color-warning-base-30, #92400e);
+}
+
+.section__status_updated {
+  color: var(--slds-g-color-on-info-1, #0369a1);
+}
+
+/* Left cluster of the header: the title plus an optional "Key Point" badge. */
+.section__heading {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-2, 8px);
+  min-width: 0;
+}
+
+.section__title {
+  margin: 0;
+  font-weight: var(--slds-g-font-weight-7, 700);
+  font-size: var(--slds-g-font-scale-2, 16px);
+  line-height: 22px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+/* "Key Point" badge — themes the lightning-badge base component (matches the Review Missing Items
+   badge): informational light-blue container with darker text/icon and a rounded corner. */
+.section__badge {
+  --slds-c-badge-color-background: var(--slds-g-color-info-container-1, #e0f2fe);
+  --slds-c-badge-text-color: var(--slds-g-color-on-info-1, #0369a1);
+  --slds-c-badge-icon-color-foreground: var(--slds-g-color-on-info-1, #0369a1);
+  --slds-c-badge-radius-border: var(--slds-g-radius-border-2, 8px);
+  flex-shrink: 0;
+}
+
+.section__badge::part(badge) {
+  font-weight: var(--slds-g-font-weight-5, 500);
+}
+
+/* Fields stack one per row; each control is capped to the design's width. */
+.section__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-4, 16px);
+}
+
+.section__field {
+  width: 360px;
+  max-width: 100%;
+}

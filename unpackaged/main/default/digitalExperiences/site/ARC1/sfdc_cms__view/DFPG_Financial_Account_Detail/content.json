@@ -1,0 +1,109 @@
+{
+  "type" : "sfdc_cms__view",
+  "title" : "DFPG Financial Account Detail",
+  "contentBody" : {
+    "component" : {
+      "children" : [ {
+        "children" : [ {
+          "attributes" : {
+            "backgroundImageConfig" : "",
+            "backgroundImageOverlay" : "rgba(0,0,0,0)",
+            "componentSpacerSize" : "",
+            "dxpStyle" : { },
+            "layoutDirectionDesktop" : "row",
+            "layoutDirectionMobile" : "column",
+            "layoutDirectionTablet" : "column",
+            "maxContentWidth" : "",
+            "sectionColumnGutterWidth" : "",
+            "sectionConfig" : "{\"UUID\":\"03470057-e8f3-4260-9496-85f030c2ea1e\",\"columns\":[{\"UUID\":\"3172b953-a5e5-4229-87ec-6db25aca0a44\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":[]}]}",
+            "sectionMinHeight" : "",
+            "sectionVerticalAlign" : "flex-start"
+          },
+          "children" : [ {
+            "children" : [ {
+              "attributes" : {
+                "ariaLabel" : "Breadcrumb",
+                "currentLabel" : "",
+                "dxpStyle" : { },
+                "listLabel" : "",
+                "listPath" : "/account/Account/Default?c__tabId=tab1",
+                "nameField" : "Name",
+                "objectApiName" : "Account",
+                "parentKey" : "",
+                "parentLabel" : ""
+              },
+              "definition" : "c:arcBreadcrumb",
+              "id" : "114b51d7-ab53-44d9-8847-42af8ada4bb2",
+              "type" : "component"
+            }, {
+              "attributes" : {
+                "backgroundColor" : "",
+                "dxpStyle" : { },
+                "layout" : "{!Item._layout}",
+                "mainTitlePaddingHorizontal" : "none",
+                "mainTitlePaddingVertical" : "none",
+                "mainTitleText" : "Your text",
+                "mainTitleTextDisplayInfo" : "{}",
+                "metadata" : "{!Item._metadata._context}",
+                "recordIdFromDataProvider" : "{!Item.Id}",
+                "showTitle" : true
+              },
+              "children" : [ {
+                "children" : [ {
+                  "attributes" : {
+                    "dxpStyle" : { }
+                  },
+                  "definition" : "dxp_page_layout:placeHolder",
+                  "id" : "993257c1-0ccd-4834-a268-0b7e72b4d2f6",
+                  "type" : "component"
+                } ],
+                "id" : "bf710aac-4ed9-40cf-92b5-f23e6ae0ee28",
+                "name" : "placeholder",
+                "title" : "placeholder",
+                "type" : "region"
+              } ],
+              "definition" : "dxp_records:detailPanel",
+              "id" : "45917242-5fd3-4cb9-930a-1cc5f900f250",
+              "type" : "component"
+            } ],
+            "id" : "3172b953-a5e5-4229-87ec-6db25aca0a44",
+            "name" : "col1",
+            "title" : "Column 1",
+            "type" : "region"
+          } ],
+          "definition" : "community_layout:section",
+          "id" : "03470057-e8f3-4260-9496-85f030c2ea1e",
+          "type" : "component"
+        } ],
+        "id" : "a6fe499a-f61d-41dd-aabe-7c1d4e57a6f7",
+        "name" : "content",
+        "title" : "Content",
+        "type" : "region"
+      }, {
+        "children" : [ {
+          "attributes" : {
+            "customHeadTags" : "",
+            "description" : "",
+            "dxpStyle" : { },
+            "pageTitle" : "{!Record._Object}: {!Record._Title}",
+            "recordId" : "{!recordId}"
+          },
+          "definition" : "community_builder:seoAssistant",
+          "id" : "d8ac4f8f-668c-45d3-8b8c-918228e8a55a",
+          "type" : "component"
+        } ],
+        "id" : "ad757890-f3bb-475f-a3ee-f95a1aa837d6",
+        "name" : "sfdcHiddenRegion",
+        "title" : "sfdcHiddenRegion",
+        "type" : "region"
+      } ],
+      "definition" : "community_layout:sldsFlexibleLayout",
+      "id" : "9d239ab8-5d32-457c-ac9b-d22efb093d6d",
+      "type" : "component"
+    },
+    "dataProviders" : [ ],
+    "themeLayoutType" : "OHzbXAVux6mZ7VVDb7Pb8F2YUFBAXR",
+    "viewType" : "detail-Financial_Account__c"
+  },
+  "urlName" : "dfpg-financial-account-detail"
+}

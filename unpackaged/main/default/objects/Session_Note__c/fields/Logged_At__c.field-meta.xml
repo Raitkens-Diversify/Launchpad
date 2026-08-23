@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Logged_At__c</fullName>
+    <description>When the entry was logged. Stamped server-side at insert and never edited afterwards, so editing an entry&#39;s text does not move it in the timeline. Distinct from CreatedDate only for the migrated legacy blobs, which are back-dated to their session&#39;s start.</description>
+    <label>Logged At</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>DateTime</type>
+</CustomField>

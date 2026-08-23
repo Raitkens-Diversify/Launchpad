@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Test_Cycle__c</fullName>
+    <deleteConstraint>Restrict</deleteConstraint>
+    <description>Nullable: blank = logged in a standalone (cycle-less) session, visible only in that session&#39;s workspace. Cycled findings form the team log: anyone in the cycle audience reads them; edit/delete is author-or-UAT_Console-admin, enforced in Apex. Restricted delete: UatCycleAdminController.deleteCycle purges a cycle&#39;s findings explicitly.</description>
+    <label>Test Cycle</label>
+    <referenceTo>Test_Cycle__c</referenceTo>
+    <relationshipLabel>Exploratory Findings</relationshipLabel>
+    <relationshipName>Exploratory_Findings</relationshipName>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

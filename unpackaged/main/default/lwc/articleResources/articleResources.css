@@ -1,0 +1,74 @@
+:host {
+    display: block;
+    /* Self-declared so the card matches NexS even if placed as a sibling. */
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --ds-medium-blue: #1a76bb;
+    --ds-light-blue: #14bef0;
+    --ds-lightest-blue: #e2f8ff;
+    --ds-space-sm: 8px;
+    --ds-space-md: 12px;
+    --ds-space-lg: 16px;
+    --ds-radius-lg: 10px;
+}
+
+.ar-card {
+    /* The rail (nexsArticleBrowser) owns spacing between its cards. */
+    margin: 0;
+    padding: var(--ds-space-lg, 16px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+}
+.ar-card__title {
+    margin: 0 0 var(--ds-space-md, 12px);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.ar-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.ar-row {
+    display: flex;
+    align-items: center;
+    gap: var(--ds-space-md, 12px);
+    padding: var(--ds-space-sm, 8px) 0;
+}
+.ar-row + .ar-row {
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+.ar-row__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--ds-lightest-blue, #e2f8ff);
+    color: var(--ds-medium-blue, #1a76bb);
+    flex: 0 0 auto;
+}
+.ar-row__icon svg {
+    width: 16px;
+    height: 16px;
+}
+.ar-row__name {
+    flex: 1 1 auto;
+    font-size: 0.9375rem;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.ar-row__link {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ds-medium-blue, #1a76bb);
+    text-decoration: none;
+    flex: 0 0 auto;
+}
+.ar-row__link:hover {
+    text-decoration: underline;
+}

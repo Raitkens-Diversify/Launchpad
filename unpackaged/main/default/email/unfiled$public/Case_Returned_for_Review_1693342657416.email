@@ -1,0 +1,6 @@
+<html>
+<head>
+	<title></title>
+</head>
+<body style="height: auto; min-height: auto;">Please refer to&nbsp;<a href="https://dfpginvestments--partial.sandbox.lightning.force.com/{{{Case.Id}}}">{{{Case.CaseNumber}}}</a>&nbsp;to see what additional steps must be taken for approval.</body>
+</html>

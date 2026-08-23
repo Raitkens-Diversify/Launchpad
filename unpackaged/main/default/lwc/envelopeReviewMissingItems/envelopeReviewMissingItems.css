@@ -1,0 +1,302 @@
+/* Renders directly in the shell body (a full-screen focused view, like the action interview).
+   Scrolling is delegated to the inner .missing__scroll wrapper — the host stays overflow-visible
+   so it never competes with the app body as a scroll container. Mirrors envelopeActionDetails. */
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  background: var(--slds-g-color-surface-2, #f3f4f6);
+  font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+}
+
+/* The single, full-width scroll surface: everything scrolls as one page, and the scrollbar sits
+   at the viewport edge. Mirrors .action-details__scroll. Positioned so it is the containing block
+   for any absolutely-positioned descendant without a closer positioned ancestor — otherwise such
+   a box anchors outside this scroll container, escapes its clip, and stretches the LEX page. */
+.missing__scroll {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.missing {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--slds-g-spacing-6, 32px) var(--slds-g-spacing-7, 40px)
+    var(--slds-g-spacing-10, 64px);
+}
+
+/* Action Items rail | section cards. Mirrors .action-details__body. */
+.missing__body {
+  display: grid;
+  grid-template-columns: clamp(280px, 24vw, 384px) minmax(0, 1fr);
+  gap: var(--slds-g-spacing-5, 24px);
+  /* Let the sticky rail resolve against the grid item, not stretch it full height. */
+  align-items: start;
+}
+
+/* Action Items rail — scrolls inside itself only if it's taller than the viewport. */
+.missing__toc {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
+}
+
+/* Floating "Section X of Y" navigation: pinned above the bottom of the scroll view and
+   right-aligned to the content column. The dock shares the content's capped, centered box
+   (max-width + side padding) so flex-end lands the pill on the card's right edge; it ignores
+   pointer events so it never blocks the content scrolling beneath it, and the pill re-enables them. */
+.missing__fab-dock {
+  position: sticky;
+  bottom: var(--slds-g-spacing-6, 32px);
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--slds-g-spacing-7, 40px);
+  display: flex;
+  justify-content: flex-end;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.missing__fab-dock > * {
+  pointer-events: auto;
+}
+
+.missing__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-6, 32px);
+}
+
+.missing__action-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-5, 24px);
+  scroll-margin-top: var(--slds-g-spacing-5, 24px);
+}
+
+.missing__action-item + .missing__action-item {
+  border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+  padding-top: var(--slds-g-spacing-6, 32px);
+}
+
+.missing__action-title {
+  margin: 0;
+  font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+  font-size: var(--slds-g-font-scale-4, 24px);
+  font-weight: var(--slds-g-font-weight-6, 600);
+  line-height: 32px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+/* A section: 20px heading above one card (mirrors Figma's "Section" → "Account Details"). */
+.missing__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-5, 24px);
+}
+
+.missing__section-title {
+  margin: 0;
+  font-weight: var(--slds-g-font-weight-6, 600);
+  font-size: var(--slds-g-font-scale-3, 20px);
+  line-height: 24px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.missing__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-5, 24px);
+  padding: var(--slds-g-spacing-5, 24px);
+  background: var(--slds-g-color-surface-1, #ffffff);
+  border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+  border-radius: 14px;
+}
+
+/* Parts stack inside the card; every part after the first gets a full-width divider above it.
+   Requirement blocks inside the Related Parties part stack the same way. */
+.missing__part,
+.missing__requirement {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-4, 16px);
+}
+
+.missing__part + .missing__part,
+.missing__requirement + .missing__requirement {
+  border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+  padding-top: var(--slds-g-spacing-5, 24px);
+}
+
+/* Each part is a scroll anchor; the offset keeps its header clear of the top edge on landings. */
+.missing__part {
+  scroll-margin-top: var(--slds-g-spacing-5, 24px);
+}
+
+/* Active part: an electric-blue left marker flush to the card's inner-left edge (offset by the
+   card padding), mirroring the action interview's active-section stripe. */
+.missing__part_active {
+  position: relative;
+}
+
+.missing__part_active::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(-1 * var(--slds-g-spacing-5, 24px));
+  width: 4px;
+  border-radius: var(--slds-g-radius-border-1, 4px);
+  background: var(--slds-g-color-on-surface-4, #1a76bb);
+}
+
+.missing__requirements {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-5, 24px);
+}
+
+/* Requirement title: one step under the part title in the type scale. */
+.missing__requirement-title {
+  margin: 0;
+  font-weight: var(--slds-g-font-weight-6, 600);
+  font-size: var(--slds-g-font-scale-1, 14px);
+  line-height: 19px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.missing__part-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--slds-g-spacing-4, 16px);
+}
+
+.missing__part-heading {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-2, 8px);
+}
+
+.missing__part-title {
+  margin: 0;
+  font-weight: var(--slds-g-font-weight-7, 700);
+  font-size: var(--slds-g-font-scale-2, 16px);
+  line-height: 22px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+/* Informational "Key Point" badge next to a part title — themes the lightning-badge base component. */
+.missing__badge {
+  --slds-c-badge-color-background: var(
+    --slds-g-color-info-container-1,
+    #e0f2fe
+  );
+  --slds-c-badge-text-color: var(--slds-g-color-on-info-1, #0369a1);
+  --slds-c-badge-icon-color-foreground: var(--slds-g-color-on-info-1, #0369a1);
+  --slds-c-badge-radius-border: var(--slds-g-radius-border-2, 8px);
+}
+
+.missing__badge::part(badge) {
+  font-weight: var(--slds-g-font-weight-5, 500);
+}
+
+/* Right-aligned "Inputs missing" status in a part header. */
+.missing__status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-2, 8px);
+  color: var(--slds-g-color-warning-base-30, #92400e);
+  font-size: var(--slds-g-font-size-base, 13px);
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.missing__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-4, 16px);
+}
+
+.missing__field {
+  width: 360px;
+  max-width: 100%;
+}
+
+/* Empty-state part (e.g. Account Owner with no owner selected yet). */
+.missing__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--slds-g-spacing-5, 24px);
+  padding: var(--slds-g-spacing-5, 24px) 0;
+  text-align: center;
+}
+
+.missing__empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--slds-g-spacing-4, 16px);
+  max-width: 576px;
+}
+
+.missing__empty-title {
+  margin: 0;
+  font-weight: var(--slds-g-font-weight-6, 600);
+  font-size: var(--slds-g-font-scale-3, 20px);
+  line-height: 24px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.missing__empty-message {
+  margin: 0;
+  font-size: var(--slds-g-font-scale-1, 14px);
+  line-height: 19px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.missing__empty-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-4, 16px);
+}
+
+.missing__owners {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-4, 16px);
+}
+
+.missing__owners-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--slds-g-spacing-4, 16px);
+}
+
+.missing__owners-label {
+  margin: 0;
+  font-size: var(--slds-g-font-scale-1, 14px);
+  line-height: 19px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.missing__owners-buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-4, 16px);
+}
+
+.missing__owners-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-4, 16px);
+}

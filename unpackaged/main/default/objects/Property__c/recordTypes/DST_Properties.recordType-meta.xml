@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RecordType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>DST_Properties</fullName>
+    <active>true</active>
+    <label>DST Properties</label>
+    <picklistValues>
+        <picklist>Assumable_Loan__c</picklist>
+        <values>
+            <fullName>No</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Yes</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Interest_Rate_Hedge__c</picklist>
+        <values>
+            <fullName>No</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Yes</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Interest_Rate_Type__c</picklist>
+        <values>
+            <fullName>Fixed</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Variable</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Prepayment_Penalty__c</picklist>
+        <values>
+            <fullName>No</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Yes</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Property_Type__c</picklist>
+        <values>
+            <fullName>Hospitality</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Industrial</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Multi-Tenant Office</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Multi-Tenant Retail</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Multifamily</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Other</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Self-Storage</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Seniors Housing</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Singe-Tenant Retail</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Single-Family Rental</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Single-Tenant Office</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Student Housing</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+</RecordType>

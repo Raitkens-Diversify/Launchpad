@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>checking_in_ops</fullName>
+    <booleanFilter>1 OR 2 OR 3 OR 4 OR 5</booleanFilter>
+    <columns>Client__c</columns>
+    <columns>NAME</columns>
+    <columns>CREATEDBY_USER</columns>
+    <columns>CREATED_DATE</columns>
+    <columns>Received_Date__c</columns>
+    <columns>Financial_Account__c</columns>
+    <columns>Status__c</columns>
+    <columns>Amount__c</columns>
+    <columns>Financial_Advisor_Team__c</columns>
+    <columns>Sent_Date__c</columns>
+    <columns>Case__c</columns>
+    <columns>Tracking_Number__c</columns>
+    <columns>Custodian__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Amount__c</field>
+        <operation>equals</operation>
+    </filters>
+    <filters>
+        <field>Received_Date__c</field>
+        <operation>equals</operation>
+    </filters>
+    <filters>
+        <field>Financial_Account__c</field>
+        <operation>equals</operation>
+    </filters>
+    <filters>
+        <field>Status__c</field>
+        <operation>equals</operation>
+    </filters>
+    <filters>
+        <field>Sent_Date__c</field>
+        <operation>equals</operation>
+    </filters>
+    <label>OPS - CHECKING IN</label>
+</ListView>

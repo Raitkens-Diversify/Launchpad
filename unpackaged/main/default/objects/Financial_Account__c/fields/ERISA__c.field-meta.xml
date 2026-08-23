@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>ERISA__c</fullName>
+    <label>ERISA Fee Type</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Annual Fee of % per year</fullName>
+                <default>false</default>
+                <label>Annual Fee of % per year</label>
+            </value>
+            <value>
+                <fullName>Flat Fee $ per year</fullName>
+                <default>false</default>
+                <label>Flat Fee $ per year</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

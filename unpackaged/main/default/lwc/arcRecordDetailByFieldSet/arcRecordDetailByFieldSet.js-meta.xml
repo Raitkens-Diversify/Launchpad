@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Arc Record Detail By Field Set</masterLabel>
+    <description>Renders a record detail section from an SObject field set, styled like Arc Record Detail.</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+        <target>lightning__RecordPage</target>
+        <target>lightning__AppPage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property
+                name="objectApiName"
+                type="String"
+                label="SObject API Name"
+                description="API name of the object, e.g. Account"
+            />
+            <property
+                name="fieldSetApiName"
+                type="String"
+                label="Field Set API Name"
+                description="Developer name of the field set to render"
+            />
+            <property
+                name="sectionTitle"
+                type="String"
+                label="Section Title"
+                description="Optional title shown above the field list"
+            />
+            <property
+                name="enableEditing"
+                type="Boolean"
+                label="Enable Editing"
+                description="When enabled, users can edit fields and save changes for this section."
+                default="false"
+            />
+        </targetConfig>
+        <targetConfig targets="lightning__RecordPage,lightning__AppPage">
+            <property
+                name="objectApiName"
+                type="String"
+                label="SObject API Name"
+                description="API name of the object, e.g. Account"
+            />
+            <property
+                name="fieldSetApiName"
+                type="String"
+                label="Field Set API Name"
+                description="Developer name of the field set to render"
+            />
+            <property
+                name="sectionTitle"
+                type="String"
+                label="Section Title"
+                description="Optional title shown above the field list"
+            />
+            <property
+                name="enableEditing"
+                type="Boolean"
+                label="Enable Editing"
+                description="When enabled, users can edit fields and save changes for this section."
+                default="false"
+            />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>
