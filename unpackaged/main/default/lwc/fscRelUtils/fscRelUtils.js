@@ -9,10 +9,20 @@ import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import fscRelModalOverflow from "@salesforce/resourceUrl/fscRelModalOverflow";
 
 export const FIDUCIARY_LEGAL_RECORD_TYPE = "Fiduciary_Legal";
+export const HOUSEHOLD_AAR_RECORD_TYPE = "Household";
 
 export const normalizeAccountRelationRecordTypeDeveloperName = (
   recordTypeDeveloperName
 ) => String(recordTypeDeveloperName || "").trim();
+
+export const isExcludedMemberRelationshipRecordType = (
+  recordTypeDeveloperName
+) => {
+  return (
+    normalizeAccountRelationRecordTypeDeveloperName(recordTypeDeveloperName) ===
+    HOUSEHOLD_AAR_RECORD_TYPE
+  );
+};
 
 export const isReadOnlyMemberRelationshipRecordType = (
   recordTypeDeveloperName

@@ -55,7 +55,7 @@
                     aria-label={menuAriaLabel}
                     onmousedown={handleMenuMouseDown}
                 >
-                    <template for:each={filteredOptions} for:item="option">
+                    <template for:each={visibleOptions} for:item="option">
                         <li
                             key={option.value}
                             id={option.optionId}
@@ -78,8 +78,11 @@
                             </template>
                         </li>
                     </template>
+                    <template if:true={isTruncated}>
+                        <li class="escb__footer" role="presentation">{truncationLabel}</li>
+                    </template>
                     <template if:false={hasOptions}>
-                        <li class="escb__empty" role="presentation">No matches</li>
+                        <li class="escb__empty" role="presentation">{emptyLabel}</li>
                     </template>
                 </ul>
             </template>

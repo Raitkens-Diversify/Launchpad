@@ -124,6 +124,55 @@ private class FscRelAarVisibilityServiceTest {
   }
 
   @IsTest
+  static void selectReadableHouseholdMembership_includesStructuralLinksBidirectionally() {
+    User ownerUser = createStandardUser();
+    Account householdAccount;
+    Account memberAccount;
+
+    System.runAs(ownerUser) {
+      householdAccount = createHouseholdAccount('FscAarVisibility Membership Household');
+      memberAccount = createPersonAccount('FscAarVisibility Membership Member');
+      FscDataTestDataFactory.createHouseholdMembershipRelations(
+        new List<Account>{ memberAccount },
+        householdAccount.Id
+      );
+    }
+
+    Test.startTest();
+    List<Account_Account_Relationship__c> outgoingMembership;
+    List<Account_Account_Relationship__c> incomingMembership;
+    System.runAs(ownerUser) {
+      outgoingMembership = FscRelAccountRelationVisibilityService.selectReadableHouseholdMembershipByHouseholdId(
+        householdAccount.Id
+      );
+      incomingMembership = FscRelAccountRelationVisibilityService.selectReadableHouseholdMembershipByMemberAccountId(
+        memberAccount.Id
+      );
+    }
+    Test.stopTest();
+
+    System.assertEquals(
+      1,
+      outgoingMembership.size(),
+      'Household membership read should include structural links from the household.'
+    );
+    System.assertEquals(
+      memberAccount.Id,
+      outgoingMembership[0].Related_Account__c
+    );
+    System.assertEquals(
+      1,
+      incomingMembership.size(),
+      'Household membership read should include structural links from the member account.'
+    );
+    System.assertEquals(
+      householdAccount.Id,
+      incomingMembership[0].Account__c,
+      'Incoming membership read should expose the household root on Account__c.'
+    );
+  }
+
+  @IsTest
   static void getMemberAccountRelationshipsForAccounts_usesRelatedAccountVisibility() {
     User ownerUser = createStandardUser();
     User readerUser = createStandardUser();

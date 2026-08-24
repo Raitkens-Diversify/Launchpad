@@ -35,6 +35,10 @@ private class FscRelHouseholdServiceTest {
     FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
     scenario.relatedBusinessAccount.Household__c = scenario.rootAccount.Id;
     update scenario.relatedBusinessAccount;
+    FscDataTestDataFactory.createHouseholdMembershipRelations(
+      new List<Account>{ scenario.relatedBusinessAccount },
+      scenario.rootAccount.Id
+    );
     FscRelHouseholdService service = new FscRelHouseholdService();
 
     Test.startTest();
@@ -58,9 +62,12 @@ private class FscRelHouseholdServiceTest {
       'Lead',
       'Prospect Member ' + System.currentTimeMillis()
     );
-    leadProspectAccount.Household__c = scenario.rootAccount.Id;
     leadProspectAccount.Type = leadProspectType;
     update leadProspectAccount;
+    FscDataTestDataFactory.assignClientHousehold(
+      new List<Account>{ leadProspectAccount },
+      scenario.rootAccount.Id
+    );
 
     FscRelHouseholdService service = new FscRelHouseholdService();
 
@@ -86,9 +93,12 @@ private class FscRelHouseholdServiceTest {
       'Lead',
       'Prospect Vendor Member ' + System.currentTimeMillis()
     );
-    leadProspectAccount.Household__c = scenario.rootAccount.Id;
     leadProspectAccount.Type = leadProspectType;
     update leadProspectAccount;
+    FscDataTestDataFactory.assignClientHousehold(
+      new List<Account>{ leadProspectAccount },
+      scenario.rootAccount.Id
+    );
     FscDataTestDataFactory.assignClassification(
       leadProspectAccount,
       FscRelClassificationUtils.VENDOR
@@ -120,6 +130,60 @@ private class FscRelHouseholdServiceTest {
 
     System.assertEquals(true, foundInLeadProspect);
     System.assertEquals(true, foundInClassified);
+  }
+
+  @IsTest
+  static void getRelationshipTree_includesUnclassifiedFromHouseholdMembershipArrOnly() {
+    if (!FscDataTestDataFactory.hasClassificationField()) {
+      return;
+    }
+
+    FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
+    FscDataTestDataFactory.assignClassification(
+      scenario.relatedBusinessAccount,
+      FscRelClassificationUtils.UNCLASSIFIED
+    );
+    FscDataTestDataFactory.createHouseholdMembershipRelations(
+      new List<Account>{ scenario.relatedBusinessAccount },
+      scenario.rootAccount.Id
+    );
+
+    FscRelHouseholdService service = new FscRelHouseholdService();
+
+    Test.startTest();
+    FscRelHouseholdModels.RelationshipTreeData treeData = service.getRelationshipTree(
+      scenario.rootAccount.Id
+    );
+    Test.stopTest();
+
+    String accountId = String.valueOf(scenario.relatedBusinessAccount.Id);
+    Boolean foundInClassified = false;
+    Boolean foundInRelated = false;
+
+    for (FscRelHouseholdModels.TreeAccount account : treeData.classifiedAccounts) {
+      if (account.accountId == accountId) {
+        foundInClassified = true;
+        System.assertNotEquals(null, account.relationId);
+      }
+    }
+
+    for (FscRelHouseholdModels.TreeAccount account : treeData.relatedAccounts) {
+      if (account.accountId == accountId) {
+        foundInRelated = true;
+        System.assertNotEquals(null, account.relationId);
+      }
+    }
+
+    System.assertEquals(
+      true,
+      foundInClassified,
+      'Unclassified household members should resolve through Household AAR.'
+    );
+    System.assertEquals(
+      true,
+      foundInRelated,
+      'Household membership entities should appear in related accounts for lazy groups.'
+    );
   }
 
   @IsTest
@@ -610,6 +674,14 @@ private class FscRelHouseholdServiceTest {
       'Service Vendor ' + System.currentTimeMillis(),
       FscRelClassificationUtils.VENDOR
     );
+    Id householdMembershipRecordTypeId = FscRelRecordTypeUtils.selectAccountRelationRecordTypeId(
+      FscRelRecordTypeUtils.HOUSEHOLD_AAR_RECORD_TYPE
+    );
+
+    if (householdMembershipRecordTypeId == null) {
+      return;
+    }
+
     FscRelHouseholdService service = new FscRelHouseholdService();
 
     Test.startTest();
@@ -629,6 +701,17 @@ private class FscRelHouseholdServiceTest {
       LIMIT 1
     ];
     System.assertEquals(scenario.rootAccount.Id, updatedAccount.Household__c);
+
+    Account_Account_Relationship__c membershipRelation = [
+      SELECT Id, Active__c
+      FROM Account_Account_Relationship__c
+      WHERE
+        Account__c = :scenario.rootAccount.Id
+        AND Related_Account__c = :vendorAccount.Id
+        AND RecordTypeId = :householdMembershipRecordTypeId
+      LIMIT 1
+    ];
+    System.assertEquals(true, membershipRelation.Active__c);
   }
 
   @IsTest

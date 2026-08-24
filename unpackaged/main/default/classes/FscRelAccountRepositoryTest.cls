@@ -133,6 +133,138 @@ private class FscRelAccountRepositoryTest {
   }
 
   @IsTest
+  static void selectClientAccountsByHouseholdId_usesHouseholdMembershipArr() {
+    FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
+    Account arrOnlyClient = FscDataTestDataFactory.createPersonAccount(
+      'ArrOnly',
+      'Client Member ' + System.currentTimeMillis()
+    );
+    FscDataTestDataFactory.assignActiveClientAccountType(
+      new List<Account>{ arrOnlyClient }
+    );
+    FscDataTestDataFactory.createHouseholdMembershipRelations(
+      new List<Account>{ arrOnlyClient },
+      scenario.rootAccount.Id
+    );
+
+    FscRelAccountRepository accountRepository = new FscRelAccountRepository();
+
+    Test.startTest();
+    List<Account> clientAccounts = accountRepository.selectClientAccountsByHouseholdId(
+      scenario.rootAccount.Id
+    );
+    Test.stopTest();
+
+    Set<Id> clientAccountIds = new Set<Id>();
+    for (Account account : clientAccounts) {
+      clientAccountIds.add(account.Id);
+    }
+
+    System.assert(
+      clientAccountIds.contains(arrOnlyClient.Id),
+      'Client roster should include members linked only through Household AAR.'
+    );
+  }
+
+  @IsTest
+  static void selectLeadProspectAccountsByHouseholdId_usesHouseholdMembershipArr() {
+    FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
+    String leadProspectType = resolveLeadProspectType();
+
+    if (String.isBlank(leadProspectType)) {
+      return;
+    }
+
+    Account leadProspectAccount = FscDataTestDataFactory.createPersonAccount(
+      'Lead',
+      'Prospect Arr Member ' + System.currentTimeMillis()
+    );
+    leadProspectAccount.Type = leadProspectType;
+    update leadProspectAccount;
+    FscDataTestDataFactory.createHouseholdMembershipRelations(
+      new List<Account>{ leadProspectAccount },
+      scenario.rootAccount.Id
+    );
+
+    FscRelAccountRepository accountRepository = new FscRelAccountRepository();
+
+    Test.startTest();
+    List<Account> leadProspectAccounts = accountRepository.selectLeadProspectAccountsByHouseholdId(
+      scenario.rootAccount.Id
+    );
+    Test.stopTest();
+
+    Set<Id> leadProspectAccountIds = new Set<Id>();
+    for (Account account : leadProspectAccounts) {
+      leadProspectAccountIds.add(account.Id);
+    }
+
+    System.assert(
+      leadProspectAccountIds.contains(leadProspectAccount.Id),
+      'Lead/prospect roster should include members linked only through Household AAR.'
+    );
+  }
+
+  @IsTest
+  static void selectHouseholdIdByMemberAccountId_resolvesHouseholdFromIncomingArr() {
+    FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
+    FscRelAccountRepository accountRepository = new FscRelAccountRepository();
+
+    Test.startTest();
+    Id householdId = accountRepository.selectHouseholdIdByMemberAccountId(
+      scenario.linkedPersonAccount.Id
+    );
+    Test.stopTest();
+
+    System.assertEquals(
+      scenario.rootAccount.Id,
+      householdId,
+      'Member account should resolve its household through incoming Household AAR.'
+    );
+  }
+
+  @IsTest
+  static void selectMemberAccountsByHouseholdId_returnsHouseholdMembershipMembers() {
+    FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
+    FscRelAccountRepository accountRepository = new FscRelAccountRepository();
+
+    Test.startTest();
+    List<Account> memberAccounts = accountRepository.selectMemberAccountsByHouseholdId(
+      scenario.rootAccount.Id
+    );
+    Test.stopTest();
+
+    Set<Id> memberAccountIds = new Set<Id>();
+    for (Account account : memberAccounts) {
+      memberAccountIds.add(account.Id);
+    }
+
+    System.assert(
+      memberAccountIds.contains(scenario.linkedPersonAccount.Id),
+      'Expected household membership members from Household AAR.'
+    );
+    System.assert(
+      memberAccountIds.contains(scenario.secondPersonAccount.Id),
+      'Expected all linked household members from Household AAR.'
+    );
+  }
+
+  private static String resolveLeadProspectType() {
+    Schema.DescribeFieldResult typeDescribe = Account.Type.getDescribe();
+
+    for (Schema.PicklistEntry picklistEntry : typeDescribe.getPicklistValues()) {
+      if (
+        picklistEntry.isActive() &&
+        FscRelClientAccountUtils.isLeadProspectAccountType(picklistEntry.getValue())
+      ) {
+        return picklistEntry.getValue();
+      }
+    }
+
+    return null;
+  }
+
+  @IsTest
   static void searchAccountsByClassification_returnsEmptyForInvalidInput() {
     FscRelAccountRepository accountRepository = new FscRelAccountRepository();
 

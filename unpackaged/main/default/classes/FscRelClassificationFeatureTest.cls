@@ -84,28 +84,46 @@ private class FscRelClassificationFeatureTest {
     }
 
     FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
+    Account vendorAccount = FscDataTestDataFactory.createClassifiedBusinessAccount(
+      'Service Vendor ' + System.currentTimeMillis(),
+      FscRelClassificationUtils.VENDOR
+    );
+    Id householdMembershipRecordTypeId = FscRelRecordTypeUtils.selectAccountRelationRecordTypeId(
+      FscRelRecordTypeUtils.HOUSEHOLD_AAR_RECORD_TYPE
+    );
+
+    if (householdMembershipRecordTypeId == null) {
+      return;
+    }
 
     Test.startTest();
     FscRelHouseholdModels.TreeAccountResult result = FscRelHouseholdController.linkClassificationAccountToHousehold(
       scenario.rootAccount.Id,
-      scenario.vendorAccount.Id,
+      vendorAccount.Id,
       FscRelClassificationUtils.VENDOR
     );
     Test.stopTest();
 
     System.assertEquals(true, result.success, result.message);
-    System.assertEquals(
-      String.valueOf(scenario.vendorAccount.Id),
-      result.accountId
-    );
 
     Account updatedAccount = [
       SELECT Id, Household__c
       FROM Account
-      WHERE Id = :scenario.vendorAccount.Id
+      WHERE Id = :vendorAccount.Id
       LIMIT 1
     ];
     System.assertEquals(scenario.rootAccount.Id, updatedAccount.Household__c);
+
+    Account_Account_Relationship__c membershipRelation = [
+      SELECT Id, Active__c
+      FROM Account_Account_Relationship__c
+      WHERE
+        Account__c = :scenario.rootAccount.Id
+        AND Related_Account__c = :vendorAccount.Id
+        AND RecordTypeId = :householdMembershipRecordTypeId
+      LIMIT 1
+    ];
+    System.assertEquals(true, membershipRelation.Active__c);
   }
 
   @IsTest
@@ -150,11 +168,6 @@ private class FscRelClassificationFeatureTest {
       null,
       FscRelClassificationUtils.VENDOR
     );
-    FscRelHouseholdModels.TreeAccountResult missingClassificationResult = FscRelHouseholdController.linkClassificationAccountToHousehold(
-      scenario.rootAccount.Id,
-      scenario.relatedBusinessAccount.Id,
-      ''
-    );
     FscRelHouseholdModels.TreeAccountResult selfLinkResult = FscRelHouseholdController.linkClassificationAccountToHousehold(
       scenario.rootAccount.Id,
       scenario.rootAccount.Id,
@@ -164,17 +177,23 @@ private class FscRelClassificationFeatureTest {
 
     System.assertEquals(false, missingRootResult.success);
     System.assertEquals(false, missingAccountResult.success);
-    System.assertEquals(false, missingClassificationResult.success);
     System.assertEquals(false, selfLinkResult.success);
   }
 
   @IsTest
-  static void linkClassificationAccountToHousehold_rejectsMissingClassification() {
+  static void linkClassificationAccountToHousehold_allowsAccountsWithoutMatchingClassification() {
     if (!FscDataTestDataFactory.hasClassificationField()) {
       return;
     }
 
     FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
+    Id householdMembershipRecordTypeId = FscRelRecordTypeUtils.selectAccountRelationRecordTypeId(
+      FscRelRecordTypeUtils.HOUSEHOLD_AAR_RECORD_TYPE
+    );
+
+    if (householdMembershipRecordTypeId == null) {
+      return;
+    }
 
     Test.startTest();
     FscRelHouseholdModels.TreeAccountResult result = FscRelHouseholdController.linkClassificationAccountToHousehold(
@@ -184,9 +203,21 @@ private class FscRelClassificationFeatureTest {
     );
     Test.stopTest();
 
-    System.assertEquals(false, result.success);
-    System.assert(
-      result.message.contains('required classification')
+    System.assertEquals(true, result.success, result.message);
+
+    List<Account_Account_Relationship__c> membershipRelations = [
+      SELECT Id
+      FROM Account_Account_Relationship__c
+      WHERE
+        Account__c = :scenario.rootAccount.Id
+        AND Related_Account__c = :scenario.relatedBusinessAccount.Id
+        AND RecordTypeId = :householdMembershipRecordTypeId
+        AND Active__c = TRUE
+    ];
+    System.assertEquals(
+      1,
+      membershipRelations.size(),
+      'Expected Household AAR when linking from classification modal.'
     );
   }
 

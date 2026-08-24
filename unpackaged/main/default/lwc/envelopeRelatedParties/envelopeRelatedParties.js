@@ -1,9 +1,11 @@
-import { LightningElement, api } from 'lwc';
+import { LightningElement, api, track } from 'lwc';
 import {
     memberRecordTypesFor,
     pendingPartyIds,
     relatedPartyPeers,
-    partyAlternativesLabel
+    partyAlternativesLabel,
+    partyTypeChoices,
+    exclusivePartyIds
 } from 'c/envelopeFormSchema';
 
 /**
@@ -21,6 +23,10 @@ import {
 
 // Shown in a subsection until its first party is added.
 const EMPTY_MESSAGE = 'No related party added yet.';
+
+// Shown when a pick would name the same entity in two slots that must differ.
+const DUPLICATE_OWNER_MESSAGE =
+    'That entity is already named in another owner slot. Each owner must be a different entity.';
 
 export default class EnvelopeRelatedParties extends LightningElement {
     // The party types this entity needs: [{ key, title, type, types, min, max, group }], in render
@@ -55,6 +61,17 @@ export default class EnvelopeRelatedParties extends LightningElement {
     // The subsection whose buttons opened the current dialog, so the result lands in the right list.
     _pendingKey = null;
 
+    // Shown when a pick would put the same entity in two slots that must name different ones. The
+    // picker normally excludes those entities outright, so this only surfaces for a value that was
+    // already held when the section loaded.
+    @track duplicateMessage = null;
+
+    // Cache of the create dialog's type options, keyed by the slot that opened it. Two reasons, both
+    // load-bearing: the options are an @api value on the dialog, and handing it a fresh array
+    // identity for the same option set reads to LWC as a change and re-renders it needlessly; and
+    // reopening the same slot should not rebuild what it already computed.
+    _typeOptionsMemo = { key: undefined, value: null };
+
     // One subsection per requirement. Requirements sharing a `group` are satisfied together, which
     // neither title says on its own, so the first of each set carries a note naming the alternatives
     // — stated once rather than repeated on every subsection it covers.
@@ -84,13 +101,29 @@ export default class EnvelopeRelatedParties extends LightningElement {
         });
     }
 
-    // Member Type options for the create dialog: the party types this entity needs, so the dropdown
-    // offers exactly the subsections a new member could belong to.
-    get memberTypeOptions() {
-        return (this.requirements || []).map((requirement) => ({
-            label: requirement.title,
-            value: requirement.key
-        }));
+    // Member Type options for the create dialog. A slot accepting one entity type is named by its
+    // subsection, so the dropdown offers the subsections a new member could belong to and the dialog
+    // opens locked on one. A slot accepting several — a service agreement's owner, which may be an
+    // Individual, a Business or a Trust — cannot be named that way: the type decides which record
+    // gets created, so the dropdown offers the entity types themselves and the dialog opens unlocked.
+    //
+    // Set on the dialog just before it opens rather than bound in the template. The set depends on
+    // which subsection opened the dialog, and that is not reactive state — a template binding would
+    // still be showing the previous slot's options at the moment open() ran. Assigning here makes the
+    // order explicit instead of racing a re-render.
+    _typeOptionsFor(key) {
+        if (this._typeOptionsMemo.key === key && this._typeOptionsMemo.value) {
+            return this._typeOptionsMemo.value;
+        }
+        const requirement = this._requirementFor(key);
+        const value = this._isMultiTypeSlot(requirement)
+            ? partyTypeChoices(requirement.types)
+            : (this.requirements || []).map((entry) => ({
+                  label: entry.title,
+                  value: entry.key
+              }));
+        this._typeOptionsMemo = { key, value };
+        return value;
     }
 
     handlePartyAction(event) {
@@ -104,9 +137,14 @@ export default class EnvelopeRelatedParties extends LightningElement {
                 this.envelopeId
             );
         } else if (action === 'createNew') {
-            // The subsection already determines the member type, so the dialog opens on it locked
-            // and capped to the slots it has left.
-            this.refs.createMemberModal.open(key, this._remainingSlotsFor(key));
+            // A single-type subsection already determines the member type, so the dialog opens on it
+            // locked. A multi-type slot opens unlocked so the user picks the entity type; either way
+            // it is capped to the slots this subsection has left.
+            const requirement = this._requirementFor(key);
+            const preset = this._isMultiTypeSlot(requirement) ? null : key;
+            const dialog = this.refs.createMemberModal;
+            dialog.memberTypeOptions = this._typeOptionsFor(key);
+            dialog.open(preset, this._remainingSlotsFor(key));
         }
     }
 
@@ -120,16 +158,24 @@ export default class EnvelopeRelatedParties extends LightningElement {
     }
 
     // The members the given subsection must not offer: the record itself, which cannot be its own
-    // related party, and the parties it already holds, so the list shows only what can still be added.
+    // related party, the parties it already holds, so the list shows only what can still be added,
+    // and — for a slot that must name a different entity than its siblings — whatever those siblings
+    // hold. exclusivePartyIds is empty for every slot carrying no exclusivity, so the account and
+    // member subsections still offer an entity a sibling slot already holds.
     _excludedIdsFor(key) {
         return [
             ...(this.entityId ? [this.entityId] : []),
-            ...this._partiesFor(key).map((party) => party.id)
+            ...this._partiesFor(key).map((party) => party.id),
+            ...exclusivePartyIds(this.requirements, key, this.value)
         ];
     }
 
     // Add the picked member to the subsection that opened the dialog. The picker is single-select, so
     // ignore a member already in this subsection rather than listing them twice.
+    //
+    // A pick already held by a slot this one must differ from is refused with a message rather than
+    // ignored: the picker excludes those entities, so reaching here means the value was already held
+    // when the section loaded, and doing nothing silently would read as a broken button.
     handleMemberSelected(event) {
         const { id, name } = event.detail;
         const key = this._pendingKey;
@@ -140,13 +186,23 @@ export default class EnvelopeRelatedParties extends LightningElement {
         if (parties.some((party) => party.id === id)) {
             return;
         }
+        if (exclusivePartyIds(this.requirements, key, this.value).includes(id)) {
+            this.duplicateMessage = DUPLICATE_OWNER_MESSAGE;
+            return;
+        }
+        this.duplicateMessage = null;
         this._commit(key, [...parties, { id, name }]);
     }
 
-    // Created members carry the type chosen in the dialog, which is a requirement key — route each to
-    // its own subsection so one dialog can fill several at once, falling back to the subsection that
-    // opened it when the type doesn't match a requirement. Each gets a temporary id until its person
-    // record is created on save, sequenced past the ids the section already holds.
+    // Created members carry the type chosen in the dialog. For a single-type slot that is a
+    // requirement key, so each member routes to its own subsection and one dialog can fill several at
+    // once. For a multi-type slot it is a member type instead, which matches no requirement, so the
+    // existing fallback files it under the subsection that opened the dialog — and the chosen type is
+    // carried on the party as `partyType`, because it is the only record of which kind of entity to
+    // create and the slot's own `types` no longer answers that on its own.
+    //
+    // Each gets a temporary id until its record is created on save, sequenced past the ids the
+    // section already holds.
     handleMembersCreated(event) {
         const members = event.detail?.members || [];
         if (!members.length) {
@@ -162,13 +218,19 @@ export default class EnvelopeRelatedParties extends LightningElement {
             if (!key) {
                 return;
             }
+            const isRequirementKey = (this.requirements || []).some(
+                (requirement) => requirement.key === member.type
+            );
             next[key] = [
                 ...(next[key] || []),
                 {
                     id: ids[index],
                     name: member.name,
                     isNew: true,
-                    missingLabel: member.missingLabel
+                    missingLabel: member.missingLabel,
+                    // Only a multi-type slot's chosen entity type is worth carrying: a requirement
+                    // key says nothing the slot's own types do not already say.
+                    ...(isRequirementKey ? {} : { partyType: member.type })
                 }
             ];
         });
@@ -189,8 +251,24 @@ export default class EnvelopeRelatedParties extends LightningElement {
         this._pendingKey = null;
     }
 
+    // Dismiss the duplicate-owner message. Held until dismissed or superseded so it survives the
+    // dialog closing over it.
+    handleDuplicateDismiss() {
+        this.duplicateMessage = null;
+    }
+
     _partiesFor(key) {
         return (this.value || {})[key] || [];
+    }
+
+    _requirementFor(key) {
+        return (this.requirements || []).find((entry) => entry.key === key);
+    }
+
+    // True for a slot accepting more than one entity type, which therefore cannot infer from its own
+    // configuration which kind of record "Create new" should make.
+    _isMultiTypeSlot(requirement) {
+        return (requirement?.types || []).length > 1;
     }
 
     // The note naming every role a shared minimum accepts, e.g. "Required: a trustee or an

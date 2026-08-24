@@ -16,6 +16,12 @@ public without sharing class FscRelAccountRelationVisibilityService {
     'Inverse_Reciprocal_Role__c, Inverse_Reciprocal_Role__r.Role__c, Inverse_Reciprocal_Role__r.Name, ' +
     'RecordTypeId, RecordType.DeveloperName, Active__c';
 
+  private static final String HOUSEHOLD_MEMBERSHIP_FIELDS =
+    'Id, Account__c, Account__r.Name, Account__r.IsPersonAccount, Account__r.RecordType.DeveloperName, Account__r.RecordType.Name, ' +
+    'Related_Account__c, Related_Account__r.Name, Related_Account__r.Type, Related_Account__r.IsPersonAccount, Related_Account__r.PersonContactId, ' +
+    'Related_Account__r.RecordType.DeveloperName, Related_Account__r.RecordType.Name, Related_Account__r.Classification__c, ' +
+    'RecordTypeId, RecordType.DeveloperName, Active__c';
+
   public static List<Account_Account_Relationship__c> selectVisibleByAccountIds(
     Set<Id> accountIds
   ) {
@@ -176,6 +182,32 @@ public without sharing class FscRelAccountRelationVisibilityService {
     return accountIdToCount;
   }
 
+  public static List<Account_Account_Relationship__c> selectReadableHouseholdMembershipByHouseholdId(
+    Id householdId
+  ) {
+    if (householdId == null) {
+      return new List<Account_Account_Relationship__c>();
+    }
+
+    List<Account_Account_Relationship__c> relations = new FscRelAccountRelationRepository()
+      .selectHouseholdMembershipByHouseholdId(householdId);
+
+    return filterByRelatedAccountAccess(relations);
+  }
+
+  public static List<Account_Account_Relationship__c> selectReadableHouseholdMembershipByMemberAccountId(
+    Id memberAccountId
+  ) {
+    if (memberAccountId == null) {
+      return new List<Account_Account_Relationship__c>();
+    }
+
+    List<Account_Account_Relationship__c> relations = new FscRelAccountRelationRepository()
+      .selectHouseholdMembershipByMemberAccountId(memberAccountId);
+
+    return filterByAccountAccess(relations);
+  }
+
   public static Boolean isRelationshipMapManagedRelation(
     Account_Account_Relationship__c relation
   ) {
@@ -223,6 +255,37 @@ public without sharing class FscRelAccountRelationVisibilityService {
         relation.Active__c == true &&
         relation.Related_Account__c != null &&
         readableRelatedAccountIds.contains(relation.Related_Account__c)
+      ) {
+        visibleRelations.add(relation);
+      }
+    }
+
+    return visibleRelations;
+  }
+
+  public static List<Account_Account_Relationship__c> filterByAccountAccess(
+    List<Account_Account_Relationship__c> relations
+  ) {
+    if (relations == null || relations.isEmpty()) {
+      return new List<Account_Account_Relationship__c>();
+    }
+
+    Set<Id> accountIds = new Set<Id>();
+
+    for (Account_Account_Relationship__c relation : relations) {
+      if (relation?.Account__c != null) {
+        accountIds.add(relation.Account__c);
+      }
+    }
+
+    Set<Id> readableAccountIds = loadReadableAccountIds(accountIds);
+    List<Account_Account_Relationship__c> visibleRelations = new List<Account_Account_Relationship__c>();
+
+    for (Account_Account_Relationship__c relation : relations) {
+      if (
+        relation.Active__c == true &&
+        relation.Account__c != null &&
+        readableAccountIds.contains(relation.Account__c)
       ) {
         visibleRelations.add(relation);
       }

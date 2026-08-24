@@ -49,7 +49,7 @@
                             variant="label-hidden"
                             label="Financial Advisor Team"
                             placeholder="Select financial advisor team"
-                            options={advisorTeamOptions}
+                            options={advisorTeamOptionsPlain}
                             value={newEnvelope.advisorTeam}
                             data-field="advisorTeam"
                             dropdown-alignment="auto"
@@ -64,8 +64,10 @@
                     <c-envelope-searchable-combobox
                         variant="label-hidden"
                         label="Household"
-                        placeholder="Select household"
+                        placeholder="Type to search households"
                         options={householdOptions}
+                        empty-message={householdEmptyMessage}
+                        onsearch={handleHouseholdSearch}
                         value={newEnvelope.householdId}
                         data-field="householdId"
                         onchange={handleFieldChange}>

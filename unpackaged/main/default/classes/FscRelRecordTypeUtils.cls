@@ -11,6 +11,7 @@ public class FscRelRecordTypeUtils {
   public static final String BUSINESS_RECORD_TYPE = 'Business';
   public static final String SERVICE_PROVIDER_RECORD_TYPE = 'Service_Provider';
   public static final String FIDUCIARY_LEGAL_RECORD_TYPE = 'Fiduciary_Legal';
+  public static final String HOUSEHOLD_AAR_RECORD_TYPE = 'Household';
   public static final String OTHER_RECORD_TYPE = 'Other';
 
   private static Map<String, FSC_Relationship_Record_Type_Mapping__mdt> aarDeveloperNameToMapping;
@@ -176,6 +177,16 @@ public class FscRelRecordTypeUtils {
   }
 
   public static List<FscRelHouseholdModels.RecordTypeOption> selectActiveAccountRelationRecordTypes() {
+    return selectAccountRelationRecordTypes(false);
+  }
+
+  public static List<FscRelHouseholdModels.RecordTypeOption> selectManageableAccountRelationRecordTypes() {
+    return selectAccountRelationRecordTypes(true);
+  }
+
+  private static List<FscRelHouseholdModels.RecordTypeOption> selectAccountRelationRecordTypes(
+    Boolean excludeHouseholdRecordType
+  ) {
     List<FscRelHouseholdModels.RecordTypeOption> options = new List<FscRelHouseholdModels.RecordTypeOption>();
 
     for (RecordType recordType : [
@@ -184,6 +195,13 @@ public class FscRelRecordTypeUtils {
       WHERE SObjectType = 'Account_Account_Relationship__c' AND IsActive = TRUE
       ORDER BY Name
     ]) {
+      if (
+        excludeHouseholdRecordType &&
+        recordType.DeveloperName == HOUSEHOLD_AAR_RECORD_TYPE
+      ) {
+        continue;
+      }
+
       options.add(
         new FscRelHouseholdModels.RecordTypeOption(
           recordType.DeveloperName,

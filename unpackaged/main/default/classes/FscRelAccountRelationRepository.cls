@@ -11,6 +11,12 @@ public with sharing class FscRelAccountRelationRepository {
     'Inverse_Reciprocal_Role__c, Inverse_Reciprocal_Role__r.Role__c, Inverse_Reciprocal_Role__r.Name, ' +
     'RecordTypeId, RecordType.DeveloperName, Active__c';
 
+  private static final String HOUSEHOLD_MEMBERSHIP_FIELDS =
+    'Id, Account__c, Account__r.Name, Account__r.IsPersonAccount, Account__r.RecordType.DeveloperName, Account__r.RecordType.Name, ' +
+    'Related_Account__c, Related_Account__r.Name, Related_Account__r.Type, Related_Account__r.IsPersonAccount, Related_Account__r.PersonContactId, ' +
+    'Related_Account__r.RecordType.DeveloperName, Related_Account__r.RecordType.Name, Related_Account__r.Classification__c, ' +
+    'Roles__c, Association_Type__c, RecordTypeId, RecordType.DeveloperName, Active__c';
+
   public List<Account_Account_Relationship__c> selectByRootAccount(Id rootAccountId) {
     if (rootAccountId == null) {
       return new List<Account_Account_Relationship__c>();
@@ -28,9 +34,43 @@ public with sharing class FscRelAccountRelationRepository {
         Related_Account__r.RecordType.Name,
         Related_Account__r.Type
       FROM Account_Account_Relationship__c
-      WHERE Account__c = :rootAccountId
+      WHERE
+        Account__c = :rootAccountId
+        AND (RecordType.DeveloperName != :FscRelRecordTypeUtils.HOUSEHOLD_AAR_RECORD_TYPE OR RecordTypeId = NULL)
       ORDER BY Related_Account__r.Name
     ];
+  }
+
+  public List<Account_Account_Relationship__c> selectHouseholdMembershipByHouseholdId(
+    Id householdId
+  ) {
+    if (householdId == null) {
+      return new List<Account_Account_Relationship__c>();
+    }
+
+    String householdRecordTypeDeveloperName = FscRelRecordTypeUtils.HOUSEHOLD_AAR_RECORD_TYPE;
+
+    return Database.query(
+      'SELECT ' +
+        HOUSEHOLD_MEMBERSHIP_FIELDS +
+        ' FROM Account_Account_Relationship__c WHERE Account__c = :householdId AND RecordType.DeveloperName = :householdRecordTypeDeveloperName AND Active__c = TRUE AND Related_Account__c != NULL ORDER BY Related_Account__r.Name'
+    );
+  }
+
+  public List<Account_Account_Relationship__c> selectHouseholdMembershipByMemberAccountId(
+    Id memberAccountId
+  ) {
+    if (memberAccountId == null) {
+      return new List<Account_Account_Relationship__c>();
+    }
+
+    String householdRecordTypeDeveloperName = FscRelRecordTypeUtils.HOUSEHOLD_AAR_RECORD_TYPE;
+
+    return Database.query(
+      'SELECT ' +
+        HOUSEHOLD_MEMBERSHIP_FIELDS +
+        ' FROM Account_Account_Relationship__c WHERE Related_Account__c = :memberAccountId AND RecordType.DeveloperName = :householdRecordTypeDeveloperName AND Active__c = TRUE AND Account__c != NULL ORDER BY Account__r.Name'
+    );
   }
 
   public List<Account_Account_Relationship__c> selectByAccountAndRecordType(

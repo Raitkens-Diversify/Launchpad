@@ -558,6 +558,76 @@ public class FscDataTestDataFactory {
         }
       }
     }
+
+    createHouseholdMembershipRelations(accounts, householdId);
+  }
+
+  public static void createHouseholdMembershipRelations(
+    List<Account> memberAccounts,
+    Id householdId
+  ) {
+    if (memberAccounts == null || memberAccounts.isEmpty() || householdId == null) {
+      return;
+    }
+
+    Id householdRecordTypeId = FscRelRecordTypeUtils.selectAccountRelationRecordTypeId(
+      FscRelRecordTypeUtils.HOUSEHOLD_AAR_RECORD_TYPE
+    );
+
+    if (householdRecordTypeId == null) {
+      return;
+    }
+
+    Set<Id> memberAccountIds = new Set<Id>();
+    for (Account memberAccount : memberAccounts) {
+      if (memberAccount?.Id != null) {
+        memberAccountIds.add(memberAccount.Id);
+      }
+    }
+
+    if (memberAccountIds.isEmpty()) {
+      return;
+    }
+
+    Set<String> existingMembershipKeys = new Set<String>();
+    for (Account_Account_Relationship__c existingRelation : [
+      SELECT Account__c, Related_Account__c
+      FROM Account_Account_Relationship__c
+      WHERE
+        Account__c = :householdId
+        AND Related_Account__c IN :memberAccountIds
+        AND RecordTypeId = :householdRecordTypeId
+    ]) {
+      existingMembershipKeys.add(
+        String.valueOf(existingRelation.Account__c) +
+          ':' +
+          String.valueOf(existingRelation.Related_Account__c)
+      );
+    }
+
+    List<Account_Account_Relationship__c> relationsToInsert = new List<Account_Account_Relationship__c>();
+    for (Id memberAccountId : memberAccountIds) {
+      String membershipKey =
+        String.valueOf(householdId) + ':' + String.valueOf(memberAccountId);
+
+      if (existingMembershipKeys.contains(membershipKey)) {
+        continue;
+      }
+
+      relationsToInsert.add(
+        new Account_Account_Relationship__c(
+          Account__c = householdId,
+          Related_Account__c = memberAccountId,
+          RecordTypeId = householdRecordTypeId,
+          Association_Type__c = resolveDefaultAssociationTypeValue(),
+          Active__c = true
+        )
+      );
+    }
+
+    if (!relationsToInsert.isEmpty()) {
+      insert relationsToInsert;
+    }
   }
 
   private static Boolean isHouseholdLookupFilterException(DmlException ex) {

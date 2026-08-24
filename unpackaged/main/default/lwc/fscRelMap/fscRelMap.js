@@ -28,6 +28,7 @@ import {
     computePreviewPanelCenterPosition,
     dispatchToast,
     extractApexError,
+    isExcludedMemberRelationshipRecordType,
     isReadOnlyMemberRelationshipRecordType,
     mapMemberAccountRelationshipsForModal
 } from 'c/fscRelUtils';
@@ -1650,6 +1651,10 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
         selectMemberFromClients = false
     }) {
         if (!recordTypeDeveloperName) {
+            return;
+        }
+
+        if (isExcludedMemberRelationshipRecordType(recordTypeDeveloperName)) {
             return;
         }
 

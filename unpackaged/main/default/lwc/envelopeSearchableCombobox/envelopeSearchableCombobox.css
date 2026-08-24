@@ -4,38 +4,35 @@
 
 .escb__label {
     display: block;
-    margin-bottom: var(--div-input-gap, var(--slds-g-spacing-2, 8px));
-    font-size: var(--div-input-font-size, var(--slds-g-font-scale-2, 0.875rem));
+    margin-bottom: var(--slds-g-spacing-2, 8px);
+    font-size: var(--slds-g-font-scale-2, 0.875rem);
     font-weight: var(--slds-g-font-weight-5, 500);
-    line-height: var(--div-input-line-height, 1.4);
-    color: var(--div-input-color-text, var(--slds-g-color-on-surface-2, #374151));
+    line-height: 1.4;
+    color: var(--slds-g-color-on-surface-2, #374151);
 }
 
 .escb__wrap {
     position: relative;
 }
 
-/* Trigger box — uses standard diversify input tokens from diversifyStyles.css */
+/* Trigger box — sized to match the themed lightning-combobox input (36px). */
 .escb__control {
     box-sizing: border-box;
     display: flex;
     align-items: center;
-    gap: var(--div-input-gap, var(--slds-g-spacing-2, 8px));
-    height: var(--div-input-height, 3.625rem);
-    min-height: var(--div-input-height, 3.625rem);
-    padding: 0 var(--div-input-padding-x, 1.25rem);
-    background: var(--div-input-color-background, var(--slds-g-color-surface-container-1, #ffffff));
-    border: 1px solid var(--div-input-color-border, var(--slds-g-color-border-1, #d1d5db));
-    border-radius: var(--div-input-radius, var(--slds-g-radius-border-2, 0.5rem));
+    gap: var(--slds-g-spacing-2, 8px);
+    height: 36px;
+    min-height: 36px;
+    padding: 0 var(--slds-g-spacing-3, 12px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
 }
 
 .escb__control_open,
 .escb__control:focus-within {
-    box-shadow: var(
-        --div-input-focus-ring,
-        0 0 0 2px var(--slds-g-color-surface-container-1, #ffffff),
-        0 0 0 4px var(--slds-g-color-on-surface-4, #1a76bb)
-    );
+    box-shadow: 0 0 0 2px var(--slds-g-color-surface-container-1, #ffffff),
+        0 0 0 4px var(--slds-g-color-on-surface-4, #1a76bb);
 }
 
 .escb__control_disabled {
@@ -52,10 +49,10 @@
     border: none;
     outline: none;
     background: transparent;
-    font-family: var(--div-font-family-base, inherit);
-    font-size: var(--div-input-font-size, 0.875rem);
-    line-height: var(--div-input-line-height, 1.25rem);
-    color: var(--div-input-color-text, var(--slds-g-color-on-surface-2, #374151));
+    font-family: inherit;
+    font-size: var(--slds-g-font-scale-1, 14px);
+    line-height: var(--slds-g-font-lineheight-2, 19px);
+    color: var(--slds-g-color-on-surface-2, #374151);
 }
 
 .escb__input::placeholder {
@@ -92,7 +89,7 @@
     overflow-y: auto;
     overscroll-behavior: contain;
     background: var(--slds-g-color-surface-container-1, #ffffff);
-    border-radius: var(--div-input-radius, var(--slds-g-radius-border-2, 0.5rem));
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
     box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.16), 0 3px 3px 0 rgba(0, 0, 0, 0.16),
         0 -1px 2px 0 rgba(0, 0, 0, 0.09);
 }
@@ -108,9 +105,9 @@
     justify-content: space-between;
     gap: var(--slds-g-spacing-2, 8px);
     padding: 6px var(--slds-g-spacing-3, 12px);
-    font-size: var(--div-input-font-size, var(--slds-g-font-size-base, 0.875rem));
-    line-height: var(--div-input-line-height, 1.25rem);
-    color: var(--div-input-color-text, var(--slds-g-color-on-surface-2, #374151));
+    font-size: var(--slds-g-font-size-base, 13px);
+    line-height: 18px;
+    color: var(--slds-g-color-on-surface-2, #374151);
     cursor: pointer;
 }
 
@@ -129,6 +126,16 @@
 
 .escb__empty {
     padding: 6px var(--slds-g-spacing-3, 12px);
-    font-size: var(--div-input-font-size, var(--slds-g-font-size-base, 0.875rem));
+    font-size: var(--slds-g-font-size-base, 13px);
     color: var(--slds-g-color-neutral-base-60, #838a97);
+}
+
+/* Not an option: the note at the end of a capped list. Same treatment as the empty state,
+   with a hairline to separate it from the last real row. */
+.escb__footer {
+    padding: 6px var(--slds-g-spacing-3, 12px);
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    font-size: var(--slds-g-font-size-base, 13px);
+    color: var(--slds-g-color-neutral-base-60, #838a97);
+    cursor: default;
 }

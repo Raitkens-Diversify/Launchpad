@@ -1,5 +1,28 @@
 <!-- Author: Mile Cacanovic -->
 <template>
+    <!-- Refusal of a pick that would name one entity in two slots that must differ. Only reachable
+         for a duplicate already held when the section loaded — the picker excludes the rest. -->
+    <template lwc:if={duplicateMessage}>
+        <div class="related-parties__alert" role="alert">
+            <lightning-icon
+                icon-name="utility:warning"
+                size="x-small"
+                class="related-parties__alert-icon"
+                alternative-text="Warning">
+            </lightning-icon>
+            <p class="related-parties__alert-text">{duplicateMessage}</p>
+            <lightning-button-icon
+                icon-name="utility:close"
+                variant="bare"
+                size="small"
+                alternative-text="Dismiss"
+                title="Dismiss"
+                class="related-parties__alert-dismiss"
+                onclick={handleDuplicateDismiss}>
+            </lightning-button-icon>
+        </div>
+    </template>
+
     <div class="related-parties">
         <template for:each={groups} for:item="group">
             <div key={group.key} class="related-parties__group">
@@ -40,11 +63,11 @@
 
     <!-- "Create new" dialog, opened imperatively from a subsection's Create New button; on save it
          bubbles the created pending member(s) back via membercreated, each carrying the party type
-         to file it under. -->
+         to file it under. Its type options are set imperatively alongside open(), because which set
+         applies depends on the subsection that opened it — see _typeOptionsFor. -->
     <c-envelope-create-pending-member-modal
         lwc:ref="createMemberModal"
         variant="relatedParty"
-        member-type-options={memberTypeOptions}
         onmembercreated={handleMembersCreated}
         onclose={handleModalClose}>
     </c-envelope-create-pending-member-modal>

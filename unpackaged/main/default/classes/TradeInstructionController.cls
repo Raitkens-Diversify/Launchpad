@@ -32,6 +32,10 @@ public with sharing class TradeInstructionController {
     private static final String ALLOWED_EITHER = 'Either';
     private static final String DEFAULT_RULE_KEY = 'Default';
 
+    // @TestVisible so a test can seed the rule table directly. Custom metadata cannot be
+    // inserted in a test, so a test left to read the org's rules asserts on live configuration
+    // that this feature exists to let people change.
+    @TestVisible
     private static Map<String, String> basisRules;
 
     /**
@@ -55,8 +59,9 @@ public with sharing class TradeInstructionController {
 
     /**
      * The basis a strategy of this classification may be funded on. An unclassified strategy, or one
-     * whose classification has no rule, follows the Default rule — Percent Only unless configured
-     * otherwise, which is how every strategy behaved before the classification existed.
+     * whose classification has no rule, follows the Default rule; with no Default rule either, the
+     * strategy is unrestricted. A missing rule is an absence of configuration, not a restriction —
+     * a sleeve is locked to one unit only where someone has said so.
      */
     private static String allowedBasisFor(String classification) {
         Map<String, String> configured = rules();
@@ -64,7 +69,7 @@ public with sharing class TradeInstructionController {
         if (String.isBlank(allowed)) {
             allowed = configured.get(DEFAULT_RULE_KEY);
         }
-        return String.isBlank(allowed) ? ALLOWED_PERCENT_ONLY : allowed;
+        return String.isBlank(allowed) ? ALLOWED_EITHER : allowed;
     }
 
     /**

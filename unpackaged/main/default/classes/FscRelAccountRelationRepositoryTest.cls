@@ -107,6 +107,85 @@ private class FscRelAccountRelationRepositoryTest {
   }
 
   @IsTest
+  static void selectByRootAccount_excludesHouseholdMembershipRecordType() {
+    FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
+    Id householdRecordTypeId = FscRelRecordTypeUtils.selectAccountRelationRecordTypeId(
+      FscRelRecordTypeUtils.HOUSEHOLD_AAR_RECORD_TYPE
+    );
+
+    if (householdRecordTypeId == null) {
+      return;
+    }
+
+    insert new Account_Account_Relationship__c(
+      Account__c = scenario.rootAccount.Id,
+      Related_Account__c = scenario.linkedPersonAccount.Id,
+      RecordTypeId = householdRecordTypeId,
+      Association_Type__c = 'Member',
+      Active__c = true
+    );
+
+    FscRelAccountRelationRepository repository = new FscRelAccountRelationRepository();
+
+    Test.startTest();
+    List<Account_Account_Relationship__c> results = repository.selectByRootAccount(
+      scenario.rootAccount.Id
+    );
+    Test.stopTest();
+
+    Set<Id> relatedAccountIds = new Set<Id>();
+    for (Account_Account_Relationship__c relation : results) {
+      if (relation.Related_Account__c != null) {
+        relatedAccountIds.add(relation.Related_Account__c);
+      }
+    }
+
+    System.assertEquals(
+      false,
+      relatedAccountIds.contains(scenario.linkedPersonAccount.Id),
+      'Household membership links should not appear in related-account queries.'
+    );
+  }
+
+  @IsTest
+  static void selectHouseholdMembership_queriesBidirectionally() {
+    FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
+    Id householdRecordTypeId = FscRelRecordTypeUtils.selectAccountRelationRecordTypeId(
+      FscRelRecordTypeUtils.HOUSEHOLD_AAR_RECORD_TYPE
+    );
+
+    if (householdRecordTypeId == null) {
+      return;
+    }
+
+    FscRelAccountRelationRepository repository = new FscRelAccountRelationRepository();
+
+    Test.startTest();
+    List<Account_Account_Relationship__c> outgoingRelations = repository.selectHouseholdMembershipByHouseholdId(
+      scenario.rootAccount.Id
+    );
+    List<Account_Account_Relationship__c> incomingRelations = repository.selectHouseholdMembershipByMemberAccountId(
+      scenario.linkedPersonAccount.Id
+    );
+    Test.stopTest();
+
+    System.assert(
+      outgoingRelations.size() >= 2,
+      'Expected household membership rows for linked client accounts.'
+    );
+    System.assertEquals(
+      1,
+      incomingRelations.size(),
+      'Member account should resolve back to its household membership row.'
+    );
+    System.assertEquals(
+      scenario.rootAccount.Id,
+      incomingRelations[0].Account__c,
+      'Incoming membership query should expose the household on Account__c.'
+    );
+  }
+
+  @IsTest
   static void selectByAccountIdsAndRelatedAccountMethods_returnRows() {
     FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
     List<FscRelHouseholdModels.RecordTypeOption> recordTypes = FscRelRecordTypeUtils.selectActiveAccountRelationRecordTypes();

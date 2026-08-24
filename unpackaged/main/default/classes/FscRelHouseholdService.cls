@@ -102,6 +102,7 @@ public with sharing class FscRelHouseholdService {
     data.clientAccounts = buildClientAccounts(rootAccountId);
     data.members = buildMembersFromClientAccounts(data.clientAccounts);
     data.leadProspectAccounts = buildLeadProspectAccounts(rootAccountId);
+    mergeHouseholdMembershipEntityAccounts(data, rootAccountId);
     data.householdLinkedAccounts = buildHouseholdLinkedAccounts(rootAccountId);
     promoteLeadProspectRelatedAccounts(data);
     data.classifiedAccounts = buildClassifiedAccounts(
@@ -294,14 +295,6 @@ public with sharing class FscRelHouseholdService {
       );
     }
 
-    if (String.isBlank(classificationValue)) {
-      return new FscRelHouseholdModels.TreeAccountResult(
-        false,
-        'No classification value provided.',
-        null
-      );
-    }
-
     if (accountId == rootAccountId) {
       return new FscRelHouseholdModels.TreeAccountResult(
         false,
@@ -319,25 +312,7 @@ public with sharing class FscRelHouseholdService {
       );
     }
 
-    if (
-      !FscRelClassificationUtils.includesClassification(account, classificationValue)
-    ) {
-      return new FscRelHouseholdModels.TreeAccountResult(
-        false,
-        'The selected account does not include the required classification.',
-        null
-      );
-    }
-
-    if (account.Household__c != null) {
-      if (account.Household__c == rootAccountId) {
-        return new FscRelHouseholdModels.TreeAccountResult(
-          true,
-          'Account is already linked to this household.',
-          String.valueOf(accountId)
-        );
-      }
-
+    if (account.Household__c != null && account.Household__c != rootAccountId) {
       return new FscRelHouseholdModels.TreeAccountResult(
         false,
         'The selected account is already linked to another household.',
@@ -345,13 +320,81 @@ public with sharing class FscRelHouseholdService {
       );
     }
 
-    accountRepository.updateHouseholdLink(accountId, rootAccountId);
+    Id householdMembershipRecordTypeId = FscRelRecordTypeUtils.selectAccountRelationRecordTypeId(
+      FscRelRecordTypeUtils.HOUSEHOLD_AAR_RECORD_TYPE
+    );
+
+    if (householdMembershipRecordTypeId == null) {
+      return new FscRelHouseholdModels.TreeAccountResult(
+        false,
+        'Household relationship record type is not available.',
+        null
+      );
+    }
+
+    Id linkedHouseholdId = accountRepository.selectHouseholdIdByMemberAccountId(
+      accountId
+    );
+
+    if (linkedHouseholdId != null && linkedHouseholdId != rootAccountId) {
+      return new FscRelHouseholdModels.TreeAccountResult(
+        false,
+        'The selected account is already linked to another household.',
+        null
+      );
+    }
+
+    Account_Account_Relationship__c existingRelation = accountRelationRepository.selectByAccountRelatedAccountAndRecordType(
+      rootAccountId,
+      accountId,
+      householdMembershipRecordTypeId
+    );
+
+    if (existingRelation != null && existingRelation.Active__c == true) {
+      return new FscRelHouseholdModels.TreeAccountResult(
+        true,
+        'Account is already linked to this household.',
+        String.valueOf(accountId)
+      );
+    }
+
+    if (existingRelation != null) {
+      existingRelation.Active__c = true;
+      accountRelationRepository.updateRelation(existingRelation);
+    } else {
+      accountRelationRepository.insertRelation(
+        new Account_Account_Relationship__c(
+          Account__c = rootAccountId,
+          Related_Account__c = accountId,
+          RecordTypeId = householdMembershipRecordTypeId,
+          Association_Type__c = resolveHouseholdMembershipAssociationType(),
+          Active__c = true
+        )
+      );
+    }
+
+    if (account.Household__c == null) {
+      accountRepository.updateHouseholdLink(accountId, rootAccountId);
+    }
 
     return new FscRelHouseholdModels.TreeAccountResult(
       true,
       'Account linked to household.',
       String.valueOf(accountId)
     );
+  }
+
+  private String resolveHouseholdMembershipAssociationType() {
+    for (
+      Schema.PicklistEntry entry : Account_Account_Relationship__c.Association_Type__c.getDescribe()
+        .getPicklistValues()
+    ) {
+      if (entry.isActive() && entry.getValue() == 'Member') {
+        return entry.getValue();
+      }
+    }
+
+    return 'Member';
   }
 
   public List<FscRelHouseholdModels.LookupOption> getAccountsByIds(
@@ -672,7 +715,7 @@ public with sharing class FscRelHouseholdService {
   ) {
     List<FscRelHouseholdModels.TreeAccount> householdLinkedAccounts = new List<FscRelHouseholdModels.TreeAccount>();
 
-    for (Account account : accountRepository.selectAccountsByHouseholdId(householdId)) {
+    for (Account account : accountRepository.selectMemberAccountsByHouseholdId(householdId)) {
       householdLinkedAccounts.add(mapAccountToTreeAccount(account));
     }
 
@@ -696,10 +739,8 @@ public with sharing class FscRelHouseholdService {
   ) {
     List<FscRelHouseholdModels.TreeAccount> leadProspectAccounts = new List<FscRelHouseholdModels.TreeAccount>();
 
-    for (Account account : accountRepository.selectAccountsByHouseholdId(householdId)) {
-      if (FscRelClientAccountUtils.isLeadProspectAccount(account)) {
-        leadProspectAccounts.add(mapAccountToTreeAccount(account));
-      }
+    for (Account account : accountRepository.selectLeadProspectAccountsByHouseholdId(householdId)) {
+      leadProspectAccounts.add(mapAccountToTreeAccount(account));
     }
 
     return leadProspectAccounts;
@@ -807,7 +848,7 @@ public with sharing class FscRelHouseholdService {
     }
 
     if (householdId != null) {
-      for (Account account : accountRepository.selectAccountsByHouseholdId(householdId)) {
+      for (Account account : accountRepository.selectMemberAccountsByHouseholdId(householdId)) {
         if (FscRelClientAccountUtils.isClientAccount(account)) {
           continue;
         }
@@ -854,6 +895,92 @@ public with sharing class FscRelHouseholdService {
         account,
         FscRelClassificationUtils.UNCLASSIFIED
       );
+  }
+
+  private void mergeHouseholdMembershipEntityAccounts(
+    FscRelHouseholdModels.RelationshipTreeData data,
+    Id householdId
+  ) {
+    if (data == null || householdId == null) {
+      return;
+    }
+
+    Set<Id> excludedAccountIds = collectHouseholdMembershipExcludedAccountIds(data);
+    Map<Id, FscRelHouseholdModels.TreeAccount> relatedAccountById = new Map<Id, FscRelHouseholdModels.TreeAccount>();
+
+    for (FscRelHouseholdModels.TreeAccount relatedAccount : data.relatedAccounts) {
+      if (String.isNotBlank(relatedAccount.accountId)) {
+        relatedAccountById.put((Id) relatedAccount.accountId, relatedAccount);
+      }
+    }
+
+    List<Account_Account_Relationship__c> membershipRelations = new List<Account_Account_Relationship__c>();
+
+    for (
+      Account_Account_Relationship__c relation : FscRelAccountRelationVisibilityService.selectReadableHouseholdMembershipByHouseholdId(
+        householdId
+      )
+    ) {
+      if (
+        relation.Related_Account__c == null ||
+        relation.Related_Account__r == null ||
+        excludedAccountIds.contains(relation.Related_Account__c) ||
+        relatedAccountById.containsKey(relation.Related_Account__c) ||
+        FscRelAccountRepository.isPersonAccountRecord(relation.Related_Account__r)
+      ) {
+        continue;
+      }
+
+      membershipRelations.add(relation);
+    }
+
+    if (membershipRelations.isEmpty()) {
+      return;
+    }
+
+    for (
+      FscRelHouseholdModels.TreeAccount relatedAccount : buildRelatedAccounts(
+        membershipRelations
+      )
+    ) {
+      if (String.isBlank(relatedAccount.accountId)) {
+        continue;
+      }
+
+      relatedAccountById.put((Id) relatedAccount.accountId, relatedAccount);
+    }
+
+    data.relatedAccounts = relatedAccountById.values();
+  }
+
+  private Set<Id> collectHouseholdMembershipExcludedAccountIds(
+    FscRelHouseholdModels.RelationshipTreeData data
+  ) {
+    Set<Id> excludedAccountIds = new Set<Id>();
+
+    if (data == null) {
+      return excludedAccountIds;
+    }
+
+    collectTreeAccountIds(data.clientAccounts, excludedAccountIds);
+    collectTreeAccountIds(data.leadProspectAccounts, excludedAccountIds);
+
+    return excludedAccountIds;
+  }
+
+  private void collectTreeAccountIds(
+    List<FscRelHouseholdModels.TreeAccount> treeAccounts,
+    Set<Id> accountIds
+  ) {
+    if (treeAccounts == null || treeAccounts.isEmpty()) {
+      return;
+    }
+
+    for (FscRelHouseholdModels.TreeAccount treeAccount : treeAccounts) {
+      if (String.isNotBlank(treeAccount.accountId)) {
+        accountIds.add((Id) treeAccount.accountId);
+      }
+    }
   }
 
   private List<FscRelHouseholdModels.TreeAccount> buildRelatedAccounts(
@@ -946,7 +1073,7 @@ public with sharing class FscRelHouseholdService {
   }
 
   public List<FscRelHouseholdModels.RecordTypeOption> getMemberRelationshipRecordTypes() {
-    return FscRelRecordTypeUtils.selectActiveAccountRelationRecordTypes();
+    return FscRelRecordTypeUtils.selectManageableAccountRelationRecordTypes();
   }
 
   public List<FscRelHouseholdModels.TreeMemberAccountRelationship> getMemberAccountRelationships(

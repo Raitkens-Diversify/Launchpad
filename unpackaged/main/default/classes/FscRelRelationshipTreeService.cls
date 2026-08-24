@@ -53,6 +53,13 @@ public with sharing class FscRelRelationshipTreeService {
       return contextAccount.Household__c;
     }
 
+    Id householdIdFromMembership = accountRepository.selectHouseholdIdByMemberAccountId(
+      contextAccount.Id
+    );
+    if (householdIdFromMembership != null) {
+      return householdIdFromMembership;
+    }
+
     FscRelHouseholdModels.RootAccountResolveResult resolveResult = householdService.resolveRootAccount(
       contextAccount.Id
     );

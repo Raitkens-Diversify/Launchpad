@@ -14,6 +14,7 @@ import {
   isClientAccount,
   isClientRoleValue,
   isLeadProspectAccount,
+  isExcludedMemberRelationshipRecordType,
   isReadOnlyMemberRelationshipRecordType,
   memberHasClientRole,
   normalizeAccountRelationRecordTypeDeveloperName
@@ -492,7 +493,10 @@ const MEMBER_RELATIONSHIP_GROUP_LABELS = Object.freeze({
 });
 
 export { normalizeAccountRelationRecordTypeDeveloperName } from "c/fscRelUtils";
-export { isReadOnlyMemberRelationshipRecordType } from "c/fscRelUtils";
+export {
+  isExcludedMemberRelationshipRecordType,
+  isReadOnlyMemberRelationshipRecordType
+} from "c/fscRelUtils";
 
 const resolveMemberRelationshipActionLabel = (recordType = {}) => {
   const developerName = normalizeAccountRelationRecordTypeDeveloperName(
@@ -743,6 +747,10 @@ export const buildGroupedMemberRelationNodes = (
         relationship.recordTypeDeveloperName
       ) || "Other";
 
+    if (isExcludedMemberRelationshipRecordType(recordTypeDeveloperName)) {
+      return;
+    }
+
     if (!contactsByRecordType.has(recordTypeDeveloperName)) {
       contactsByRecordType.set(recordTypeDeveloperName, []);
     }
@@ -780,7 +788,10 @@ export const buildGroupedMemberRelationNodes = (
   [...contactsByRecordType.keys()]
     .sort((first, second) => first.localeCompare(second))
     .forEach((developerName) => {
-      if (!seenRecordTypes.has(developerName)) {
+      if (
+        !seenRecordTypes.has(developerName) &&
+        !isExcludedMemberRelationshipRecordType(developerName)
+      ) {
         orderedRecordTypes.push(developerName);
       }
     });
@@ -1055,15 +1066,20 @@ const buildMemberNode = (
   { supportsMemberRelations = true, memberRelationshipRecordTypes = [] } = {}
 ) => {
   const memberRelationshipActions = supportsMemberRelations
-    ? (memberRelationshipRecordTypes || []).map((recordType) => ({
-        name: `manageaar:${recordType.developerName}`,
-        label: buildMemberRelationshipActionLabel(recordType),
-        recordTypeDeveloperName: recordType.developerName,
-        recordTypeLabel: recordType.label,
-        reciprocalRoleRecordTypeDeveloperName:
-          recordType.reciprocalRoleRecordTypeDeveloperName ||
-          recordType.developerName
-      }))
+    ? (memberRelationshipRecordTypes || [])
+        .filter(
+          (recordType) =>
+            !isExcludedMemberRelationshipRecordType(recordType.developerName)
+        )
+        .map((recordType) => ({
+          name: `manageaar:${recordType.developerName}`,
+          label: buildMemberRelationshipActionLabel(recordType),
+          recordTypeDeveloperName: recordType.developerName,
+          recordTypeLabel: recordType.label,
+          reciprocalRoleRecordTypeDeveloperName:
+            recordType.reciprocalRoleRecordTypeDeveloperName ||
+            recordType.developerName
+        }))
     : [];
 
   return {

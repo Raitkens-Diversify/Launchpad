@@ -231,6 +231,15 @@ const SAVEABLE_MEMBER_TYPES = new Set([
     'retirementPlan'
 ]);
 
+// How each member type is named to the user. Kept beside the saveable set because the two are the
+// same list seen twice: what can be created, and what it is called when offered.
+const MEMBER_TYPE_LABELS = {
+    client: 'Individual',
+    business: 'Business',
+    trust: 'Trust',
+    retirementPlan: 'Retirement Plan'
+};
+
 // Prefix for the temporary id a related party carries between being created in the "Create new"
 // dialog and its person Account existing. A party whose id is not a record id is still pending.
 const PENDING_PARTY_ID_PREFIX = 'pending-';
@@ -339,6 +348,76 @@ const ACCOUNT_RELATED_PARTY_RULES = {
             whereStatement: null
         }
     ]
+};
+
+// The outline group whose entities are Service Agreements, and the Service__c field whose value
+// selects their related-party rules. Services resolve their slots from the service type the
+// interview itself asks for, the way an account resolves its own from the selected registration.
+const SERVICE_GROUP_ID = 'serviceAgreements';
+const SERVICE_TYPE_FIELD = 'Type__c';
+
+// The party record types a service agreement's owner slots accept. Unlike every member-held role,
+// which is held by a person, a service agreement can be owned by the household's Individual,
+// Business or Trust entity — so all three are offered and the picker is narrowed to them rather
+// than to one. Retirement plans are absent because getHouseholdRoster already excludes them from
+// the roster an owner is picked from.
+const SERVICE_OWNER_TYPES = [
+    'Client - Individual',
+    'Client - Business',
+    'Client - Trust'
+];
+
+// The token the two owner slots share so neither may hold an entity the other holds. Held as a
+// named group rather than a boolean because it reads at the call site as what it is — a set of
+// slots that must name distinct entities — and because a third slot could join it later.
+const SERVICE_OWNER_EXCLUSIVE = 'serviceOwner';
+
+// Related parties a Service Agreement must have, keyed by the Service__c.Type__c value and listed
+// in render order. The third rule table alongside RELATED_PARTY_RULES (keyed on a member type) and
+// ACCOUNT_RELATED_PARTY_RULES (keyed on a registration group): a service has no type token of its
+// own, so its group is the service type answered in the interview.
+//
+// `serviceField` is the Service__c lookup the slot persists into — the service-side counterpart of
+// `faRole` on the account rules and `aarRole` on the member rules. A service agreement holds
+// exactly one primary and at most one secondary owner, with no dates and no unbounded role, so the
+// two lookups are the whole store and no junction object stands behind them.
+//
+// `exclusiveWith` names slots that must not share an entity: the secondary owner cannot be the
+// primary. Only rules carrying the token cross-exclude, so the account rules — where one person
+// may legitimately hold both the Primary Owner and a Joint Owner slot — keep their behavior.
+const SERVICE_PRIMARY_OWNER_FIELD = 'Primary_Owner__c';
+const SERVICE_SECONDARY_OWNER_FIELD = 'Secondary_Owner__c';
+
+// Both service types take the same two slots. Held as one shared list rather than duplicated per
+// type so the two services are provably identical, and keyed per type anyway so a third service
+// type has to opt in rather than inheriting owners by default.
+const SERVICE_OWNER_RULES = [
+    {
+        key: 'primaryOwner',
+        title: 'Primary Owner',
+        types: SERVICE_OWNER_TYPES,
+        serviceField: SERVICE_PRIMARY_OWNER_FIELD,
+        min: 1,
+        max: 1,
+        exclusiveWith: SERVICE_OWNER_EXCLUSIVE,
+        whereStatement: null
+    },
+    {
+        key: 'secondaryOwner',
+        title: 'Secondary Owner',
+        types: SERVICE_OWNER_TYPES,
+        serviceField: SERVICE_SECONDARY_OWNER_FIELD,
+        // Offered rather than owed: a service agreement with one owner is not short an input.
+        min: 0,
+        max: 1,
+        exclusiveWith: SERVICE_OWNER_EXCLUSIVE,
+        whereStatement: null
+    }
+];
+
+const SERVICE_RELATED_PARTY_RULES = {
+    'Financial Planning': SERVICE_OWNER_RULES,
+    'Multi-Family Office': SERVICE_OWNER_RULES
 };
 
 // Custodian__c's own options narrow once its Financial Account has a BD or RIA answer: BD offers
@@ -1408,6 +1487,32 @@ function hasPriorAnswer(draft = {}, apiName) {
 }
 
 /**
+ * Whether re-answering `apiName` with `nextValue` would wipe an answer the user has already given.
+ *
+ * The fields a change hides are reset by clearHiddenAnswers, so apply the candidate value and compare
+ * what comes back against what the draft holds. The changed field itself is excluded — replacing its
+ * own answer is the edit, not a loss.
+ *
+ * This gates the Key Point confirmation, whose whole subject is the answers a rebuilt branch
+ * discards. A change that only reveals questions loses nothing and must not interrupt: a first
+ * answer, another option ticked on a multi-select, or a Key Point no other field's Shown WHERE
+ * depends on.
+ * @param {Array} fields  raw Envelope_Field__mdt field shapes the draft spans
+ * @param {object} draft  field apiName -> value
+ * @param {object} userContext  $User.<Field> -> running-user value
+ * @param {string} apiName  the field being re-answered
+ * @param {*} nextValue  the candidate answer
+ * @returns {boolean}
+ */
+function changeClearsAnswers(fields, draft = {}, userContext = {}, apiName, nextValue) {
+    const next = { ...draft, [apiName]: nextValue };
+    const cleared = clearHiddenAnswers(fields, next, userContext);
+    return Object.keys(next).some(
+        (key) => key !== apiName && !isEmptyValue(next[key]) && isEmptyValue(cleared[key])
+    );
+}
+
+/**
  * Digits of a raw input, with separator-backspace handling: when the user deletes a mask separator
  * (a dash or paren the mask inserted), the digit count is unchanged but the string got shorter —
  * without dropping the trailing digit too, re-masking instantly re-inserts the separator and the
@@ -1653,23 +1758,31 @@ function resolveRelatedPartyRequirements(
         rules = RELATED_PARTY_RULES[entity.type] || [];
     } else if (ACCOUNT_GROUP_IDS.has(entity.groupId)) {
         rules = accountRulesFor(entity, draft, registrationAttributes);
+    } else if (entity.groupId === SERVICE_GROUP_ID) {
+        rules = serviceRulesFor(entity, draft);
     }
 
     return rules
         .filter((rule) => evaluateWhereStatement(rule.whereStatement, draft))
-        .map(({ key, title, type, types, faRole, min, max, group, waiver }) => ({
-            key,
-            title,
-            type,
-            types,
-            faRole,
-            min,
-            max,
-            group,
+        .map((rule) => ({
+            key: rule.key,
+            title: rule.title,
+            type: rule.type,
+            types: rule.types,
+            faRole: rule.faRole,
+            // The Service__c lookup a service agreement's owner slot persists into. Undefined on
+            // every other rule table, which serviceOwnerFieldForKey reads as "not a service".
+            serviceField: rule.serviceField,
+            min: rule.min,
+            max: rule.max,
+            group: rule.group,
+            // Slots that must name distinct entities (a service agreement's two owners). Absent on
+            // the account and member rules, where one person may fill sibling slots.
+            exclusiveWith: rule.exclusiveWith,
             // Carried through so a role that can be satisfied by affirmation still says so to the
             // section body and to waivedRelatedPartyKeys. This projection is deliberately explicit,
             // so anything not named here is dropped.
-            waiver
+            waiver: rule.waiver
         }));
 }
 
@@ -1691,6 +1804,63 @@ function accountRulesFor(entity, draft = {}, registrationAttributes = {}) {
         draft[REGISTRATION_TYPE_FIELD]
     );
     return ACCOUNT_RELATED_PARTY_RULES[resolveRegistrationGroup(attributes)] || [];
+}
+
+/**
+ * The raw owner rules a Service Agreement's selected service type resolves to, unfiltered by
+ * condition. The single place Service__c.Type__c is turned into a rule set, so the type-to-slots
+ * join is expressed once. Returns [] for a non-service entity, and for a service whose type is not
+ * yet answered — the section is absent until the interview's first question has a value.
+ * @param {{groupId: string}} entity
+ * @param {object} draft  field apiName -> value
+ * @returns {Array<object>}
+ */
+function serviceRulesFor(entity, draft = {}) {
+    if (entity?.groupId !== SERVICE_GROUP_ID) {
+        return [];
+    }
+    return SERVICE_RELATED_PARTY_RULES[draft[SERVICE_TYPE_FIELD]] || [];
+}
+
+/**
+ * The Service__c lookup field a service agreement's owner slot persists into — the service-side
+ * counterpart of accountRoleForKey and aarRoleForKey. Null for a slot with no configured field, and
+ * for a requirement on anything that is not a Service Agreement.
+ * @param {{groupId: string}} entity
+ * @param {string} requirementKey
+ * @param {object} draft  field apiName -> value
+ * @returns {string|null}
+ */
+function serviceOwnerFieldForKey(entity, requirementKey, draft = {}) {
+    const rule = serviceRulesFor(entity, draft).find(
+        (entry) => entry.key === requirementKey
+    );
+    return rule ? rule.serviceField || null : null;
+}
+
+/**
+ * The owner slot a Service__c lookup field belongs to — the inverse of serviceOwnerFieldForKey,
+ * used to group the persisted lookups back under the requirement that owns them when the section is
+ * rebuilt from the record. Independent of the service type because both types share one slot list
+ * and each field appears in exactly one slot. Null for a field no slot claims.
+ * @param {string} fieldApiName  a Service__c field API name
+ * @returns {string|null}
+ */
+function serviceOwnerKeyForField(fieldApiName) {
+    const rule = SERVICE_OWNER_RULES.find(
+        (entry) => entry.serviceField === fieldApiName
+    );
+    return rule ? rule.key : null;
+}
+
+/**
+ * Every Service__c lookup the wizard owns for a service agreement's owner slots. This is the
+ * reconcile scope: it is what the server is told it may clear, so a lookup outside it is never
+ * touched. Independent of the service type, for the same reason as serviceOwnerKeyForField.
+ * @returns {Array<string>}
+ */
+function managedServiceOwnerFields() {
+    return SERVICE_OWNER_RULES.map((rule) => rule.serviceField).filter(Boolean);
 }
 
 /**
@@ -1884,6 +2054,34 @@ function memberTypeForPartyTypes(types) {
 }
 
 /**
+ * The entity types a slot accepts, as create-dialog options — { label, value } with the value being
+ * the member type token saveEntity persists under. memberTypeForPartyTypes reads only the first
+ * accepted type, which is all a single-type slot needs; a slot accepting several (a service
+ * agreement's owner, which may be an Individual, a Business or a Trust) has to let the user say
+ * which one they are creating, and this is the list they choose from.
+ *
+ * Labels match the Add Member card's own options so the same entity is named the same way wherever
+ * it is created. A type with no saveable member token is dropped — nothing could create it.
+ * @param {Array<string>} types  Envelope_Field__mdt Type__c values the slot accepts
+ * @returns {Array<{label: string, value: string}>}
+ */
+function partyTypeChoices(types) {
+    return (types || [])
+        .map((accepted) =>
+            Object.keys(MEMBER_TYPE_TO_MDT).find(
+                (memberType) =>
+                    SAVEABLE_MEMBER_TYPES.has(memberType) &&
+                    MEMBER_TYPE_TO_MDT[memberType] === accepted
+            )
+        )
+        .filter(Boolean)
+        .map((memberType) => ({
+            label: MEMBER_TYPE_LABELS[memberType] || memberType,
+            value: memberType
+        }));
+}
+
+/**
  * The member type an entity's Account record persists under — the value saveEntity accepts in the
  * RecordTypeId key, which it resolves to a real record type. The household member types persist as
  * themselves; a member presented as a related-party role is a person Account and so persists as a
@@ -2063,6 +2261,34 @@ function countMissingRelatedParties(requirements, value = {}, waived = null) {
         unmet.map((requirement) => requirement.group).filter(Boolean)
     );
     return unmet.filter((requirement) => !requirement.group).length + groups.size;
+}
+
+/**
+ * The party ids held by the slots a requirement must name a distinct entity from — the siblings
+ * sharing its `exclusiveWith` token, itself excluded. Empty for a requirement carrying no token, so
+ * a caller can splice this into an exclusion list unconditionally and the account and member rules
+ * keep their existing behavior (where one person may fill sibling slots).
+ * @param {Array<{key: string, exclusiveWith?: string}>} requirements  output of resolveRelatedPartyRequirements
+ * @param {string} requirementKey
+ * @param {object} value  requirement key -> parties
+ * @returns {Array<string>}
+ */
+function exclusivePartyIds(requirements, requirementKey, value = {}) {
+    const requirement = (requirements || []).find(
+        (entry) => entry.key === requirementKey
+    );
+    if (!requirement || !requirement.exclusiveWith) {
+        return [];
+    }
+    return (requirements || [])
+        .filter(
+            (entry) =>
+                entry.exclusiveWith === requirement.exclusiveWith &&
+                entry.key !== requirement.key
+        )
+        .flatMap((entry) => (value || {})[entry.key] || [])
+        .map((party) => party.id)
+        .filter(Boolean);
 }
 
 /**
@@ -2485,23 +2711,86 @@ const ALLOWED_BASIS = {
 
 /**
  * The funding unit a strategy's configured Allowed Funding Basis dictates for an allocation row.
- * Dollar Only and Percent Only lock the row to that unit — the advisor sees the unit, never a
- * choice, which is how the configured lock needs no error message — while Either leaves the unit to
- * the advisor (`unit: null`, meaning keep whatever the row already carries). An option with no
- * resolved rule reads as Percent Only, matching the Default rule and how every strategy behaved
- * before the classification existed.
+ * Dollar Only and Percent Only lock the row to that unit — the advisor may only type into the cell
+ * for that unit, and the counterpart cell is a calculated read-out — while Either leaves the unit to
+ * the advisor (`unit: null`, meaning keep whatever the row already carries) and makes both cells
+ * live. An option with no resolved rule reads as Either: a missing rule is an absence of
+ * configuration, not a restriction, so a sleeve is locked to one unit only where someone has
+ * said so. Mirrors TradeInstructionController.allowedBasisFor.
+ *
+ * `allowed` is returned alongside so the allocation table can decide per-cell editability without
+ * re-deriving the rule; callers that only need the unit read `unit`/`locked` as before.
  * @param {{allowedBasis}} [option]  a shaped strategy option from the shell
- * @returns {{unit: string|null, locked: boolean}}  unit is a STRATEGY_BASIS token when locked
+ * @returns {{unit: string|null, locked: boolean, allowed: string}}  unit is a STRATEGY_BASIS token
+ *          when locked; allowed is an ALLOWED_BASIS value
  */
 function basisForOption(option) {
-    const allowed = option?.allowedBasis || ALLOWED_BASIS.PERCENT_ONLY;
+    const allowed = option?.allowedBasis || ALLOWED_BASIS.EITHER;
     if (allowed === ALLOWED_BASIS.EITHER) {
-        return { unit: null, locked: false };
+        return { unit: null, locked: false, allowed };
     }
     return {
         unit: allowed === ALLOWED_BASIS.DOLLAR_ONLY ? STRATEGY_BASIS.DOLLAR : STRATEGY_BASIS.PERCENT,
-        locked: true
+        locked: true,
+        allowed
     };
+}
+
+/**
+ * The dollar equivalent of a percentage allocation row: its share of the *modeled pool*, which is
+ * the Expected Account Value less every fixed-dollar carve-out (`strategyTotals().remainder`).
+ *
+ * Null — never a fictional $0 — whenever the pool is unknown or the percentage is not a positive
+ * number, so a row with nothing to say renders an em dash rather than an arithmetic claim.
+ *
+ * There is deliberately no helper going the other way. A fixed-dollar sleeve is carved out before
+ * the pool exists, so it holds no weight in the allocation at all — `strategyTotals` excludes it
+ * from the percentage total and `Order__c.Funding_Basis_Matches_Value` forbids it from even storing
+ * a percentage. A dollar row's weight is absent, not calculable.
+ * @param {number|string} percent  percentage points
+ * @param {number|string} pool     the modeled pool in dollars
+ * @returns {number|null}
+ */
+function dollarsForPercentRow(percent, pool) {
+    const pct = Number(percent);
+    const base = Number(pool);
+    if (!Number.isFinite(pct) || pct <= 0) {
+        return null;
+    }
+    if (pool === null || pool === undefined || !Number.isFinite(base) || base < 0) {
+        return null;
+    }
+    return (base * pct) / 100;
+}
+
+/**
+ * The account value the Trade Instructions section derives from: what the advisor typed, or — only
+ * where nothing has been typed — a value captured elsewhere in the interview (the Financial
+ * Account's Source of Funds Amount, or the current allocation seeded from Apex).
+ *
+ * The fallback is never written back into the draft, so the section keeps tracking its source if
+ * that source later changes. Resolved here rather than at each call site so the section body, the
+ * completeness badge and the submit payload cannot disagree about which number is in play.
+ * @param {number|string} typed     the Expected Account Value as entered
+ * @param {number|string} fallback  the value to stand in when nothing was entered
+ * @returns {number|null}  null when neither is a positive number
+ */
+function resolveExpectedValue(typed, fallback) {
+    const entered = Number(typed);
+    if (typed !== null && typed !== undefined && typed !== '' && Number.isFinite(entered) && entered > 0) {
+        return entered;
+    }
+    const spare = Number(fallback);
+    if (
+        fallback !== null &&
+        fallback !== undefined &&
+        fallback !== '' &&
+        Number.isFinite(spare) &&
+        spare > 0
+    ) {
+        return spare;
+    }
+    return null;
 }
 
 /**
@@ -2520,12 +2809,13 @@ function basisForOption(option) {
  * warning the section shows without blocking, mirroring how the legacy screens ask for an
  * expected-value reason rather than refusing the entry.
  *
- * `expectedValue` is optional. The Edit Existing Trade Instructions entry point has no funded amount
- * at all, so nothing may be derived from it there: `remainder`, `allocatedAmount` and `isOverFunded`
- * come back null/false and completeness is judged on the rows alone.
+ * `expectedValue` is optional. Every entry point captures one now (see resolveExpectedValue), but it
+ * can still be unknown — nothing typed and no fallback to stand in — and nothing may be derived from
+ * a number we don't have: `remainder`, `allocatedAmount` and `isOverFunded` come back null/false and
+ * completeness is judged on the rows alone. Completeness never reads it either way.
  *
  * @param {Array<{type, strategy, fundingAmount, fundingPercent}>} strategies
- * @param {number} [expectedValue]  the Expected Account Value, where the entry point has one
+ * @param {number} [expectedValue]  the Expected Account Value, once one is known
  * @returns {{fixedDollarSum: number, percentSum: number, remainder: number|null,
  *            allocatedAmount: number|null, hasPercentRows: boolean, hasDollarRows: boolean,
  *            isOverFunded: boolean, isComplete: boolean, incompleteRows: Array<object>}}
@@ -2677,6 +2967,7 @@ export {
     clearHiddenAnswers,
     clearDependentCustodian,
     hasPriorAnswer,
+    changeClearsAnswers,
     isEmptyValue,
     draftValuesEqual,
     strategyRowsEqual,
@@ -2696,8 +2987,13 @@ export {
     managedAccountRolesFor,
     requirementKeyForAccountRole,
     accountRoleLimits,
+    serviceOwnerFieldForKey,
+    serviceOwnerKeyForField,
+    managedServiceOwnerFields,
+    exclusivePartyIds,
     partyRoleLabel,
     memberTypeForPartyTypes,
+    partyTypeChoices,
     persistedMemberTypeFor,
     derivePartyRoles,
     pendingPartyIds,
@@ -2722,5 +3018,7 @@ export {
     ALLOWED_BASIS,
     normalizeStrategyRows,
     basisForOption,
+    dollarsForPercentRow,
+    resolveExpectedValue,
     formatFieldDisplayValue
 };

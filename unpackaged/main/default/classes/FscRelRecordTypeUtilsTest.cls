@@ -14,6 +14,21 @@ private class FscRelRecordTypeUtilsTest {
   }
 
   @IsTest
+  static void selectManageableAccountRelationRecordTypes_excludesHouseholdRecordType() {
+    Test.startTest();
+    List<FscRelHouseholdModels.RecordTypeOption> options = FscRelRecordTypeUtils.selectManageableAccountRelationRecordTypes();
+    Test.stopTest();
+
+    for (FscRelHouseholdModels.RecordTypeOption option : options) {
+      System.assertNotEquals(
+        FscRelRecordTypeUtils.HOUSEHOLD_AAR_RECORD_TYPE,
+        option.developerName,
+        'Household membership record type should not appear in relationship-map actions.'
+      );
+    }
+  }
+
+  @IsTest
   static void normalizeAccountRelationRecordTypeDeveloperName_trimsInput() {
     System.assertEquals(
       'COI_Referral',

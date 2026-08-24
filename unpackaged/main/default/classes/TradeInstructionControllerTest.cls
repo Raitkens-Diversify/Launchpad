@@ -89,8 +89,26 @@ private class TradeInstructionControllerTest {
         };
     }
 
+    /**
+     * Seed the rule table this class asserts against.
+     *
+     * Custom metadata cannot be inserted in a test, so a test left to itself reads whatever
+     * Sleeve_Basis_Rule__mdt happens to say in the org it runs in — which is live configuration that
+     * this feature exists to let people change. Every basis assertion below is written against this
+     * map, so restricting or unrestricting a real sleeve can no longer break the suite.
+     */
+    private static void seedRules() {
+        TradeInstructionController.basisRules = new Map<String, String>{
+            'Model Allocation' => 'Percent Only',
+            'Structured Note' => 'Dollar Only',
+            'Model Exclusion' => 'Either',
+            'Default' => 'Percent Only'
+        };
+    }
+
     @isTest
     static void getStrategyOptionsKeepsBlankStatusAndResolvesTheAllowedBasis() {
+        seedRules();
         Test.startTest();
         List<Map<String, Object>> options = TradeInstructionController.getStrategyOptions();
         Test.stopTest();
@@ -119,6 +137,7 @@ private class TradeInstructionControllerTest {
 
     @isTest
     static void rejectsARowWhoseStrategyForbidsThatBasis() {
+        seedRules();
         // A structured note is Dollar Only, so it cannot be filed as a percentage sleeve...
         try {
             TradeInstructionController.saveTradeInstructions(payload(null, new List<Object>{
@@ -141,6 +160,7 @@ private class TradeInstructionControllerTest {
 
     @isTest
     static void acceptsEitherStrategyOnBothBases() {
+        seedRules();
         Test.startTest();
         Id dollarTicket = TradeInstructionController.saveTradeInstructions(payload(null, new List<Object>{
             row(strategyId('EX'), 'fixed-dollar', 25000),
@@ -156,6 +176,7 @@ private class TradeInstructionControllerTest {
 
     @isTest
     static void saveCreatesTicketWithBasisRows() {
+        seedRules();
         Test.startTest();
         Id ticketId = TradeInstructionController.saveTradeInstructions(payload(null, new List<Object>{
             row(strategyId('SN'), 'fixed-dollar', 25000),
@@ -200,6 +221,7 @@ private class TradeInstructionControllerTest {
 
     @isTest
     static void resaveReplacesRowsOnTheSameTicket() {
+        seedRules();
         Id first = TradeInstructionController.saveTradeInstructions(payload(null, new List<Object>{
             row(strategyId('SN'), 'fixed-dollar', 25000),
             row(strategyId('CE'), 'fixed-percentage', 100)
@@ -223,6 +245,7 @@ private class TradeInstructionControllerTest {
 
     @isTest
     static void caseLinkedTicketIsKeyedApartFromTheAccountTicket() {
+        seedRules();
         Case dmsCase = new Case(Subject = 'Update Trade Instructions', Origin = 'Wizard');
         insert dmsCase;
 
@@ -243,6 +266,7 @@ private class TradeInstructionControllerTest {
 
     @isTest
     static void resolvesTheAccountOpeningCaseWhenNoCaseIdIsGiven() {
+        seedRules();
         Case openingCase = new Case(
             Wizard_Financial_Account__c = faId(),
             Origin = 'Wizard',
@@ -266,6 +290,7 @@ private class TradeInstructionControllerTest {
 
     @isTest
     static void resubmitWithNoCaseIdReusesTheSameResolvedTicket() {
+        seedRules();
         Case openingCase = new Case(
             Wizard_Financial_Account__c = faId(),
             Origin = 'Wizard',
@@ -292,6 +317,7 @@ private class TradeInstructionControllerTest {
 
     @isTest
     static void leavesTheTicketUnlinkedWhenTheAccountHasNoAccountOpeningCase() {
+        seedRules();
         // A Case of a different Type on the same account (e.g. an unrelated servicing request)
         // must never be picked up in place of the Account Opening Case.
         insert new Case(
@@ -313,6 +339,7 @@ private class TradeInstructionControllerTest {
 
     @isTest
     static void anExplicitCaseIdIsNeverOverriddenByTheResolvedAccountOpeningCase() {
+        seedRules();
         Case openingCase = new Case(
             Wizard_Financial_Account__c = faId(),
             Origin = 'Wizard',
@@ -336,6 +363,7 @@ private class TradeInstructionControllerTest {
 
     @isTest
     static void rejectsBadPayloads() {
+        seedRules();
         try {
             TradeInstructionController.saveTradeInstructions(null);
             Assert.fail('A null payload must throw.');
@@ -365,6 +393,7 @@ private class TradeInstructionControllerTest {
 
     @isTest
     static void readsBackFromTheLatestTicketThenTheAllocationSnapshot() {
+        seedRules();
         Id ticketId = TradeInstructionController.saveTradeInstructions(payload(null, new List<Object>{
             row(strategyId('SN'), 'fixed-dollar', 25000),
             row(strategyId('CE'), 'fixed-percentage', 100)
@@ -399,6 +428,7 @@ private class TradeInstructionControllerTest {
 
     @isTest
     static void recoversTheExpectedValueForAnAllPercentageAllocation() {
+        seedRules();
         // No dollar rows, so no row carries Total_Initial_Funding_Amount__c — the expected value has
         // to come from the originating ticket or the seeded interview opens without one.
         Id ticketId = TradeInstructionController.saveTradeInstructions(payload(null, new List<Object>{
@@ -422,6 +452,7 @@ private class TradeInstructionControllerTest {
 
     @isTest
     static void legacyRowsWithoutABasisInferDollarFromTheMarkerShape() {
+        seedRules();
         Order_Ticket__c ticket = new Order_Ticket__c(
             Wizard_Financial_Account__c = faId(),
             Status__c = 'New',

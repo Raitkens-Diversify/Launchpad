@@ -55,8 +55,11 @@ private class FscRelTreeControllerTest {
 
     update new Account(
       Id = scenario.relatedBusinessAccount.Id,
-      Household__c = scenario.rootAccount.Id,
       Classification__c = FscRelClassificationUtils.UNCLASSIFIED
+    );
+    FscDataTestDataFactory.assignClientHousehold(
+      new List<Account>{ scenario.relatedBusinessAccount },
+      scenario.rootAccount.Id
     );
 
     Test.startTest();
@@ -79,8 +82,11 @@ private class FscRelTreeControllerTest {
 
     update new Account(
       Id = scenario.relatedBusinessAccount.Id,
-      Household__c = scenario.rootAccount.Id,
       Classification__c = FscRelClassificationUtils.UNCLASSIFIED
+    );
+    FscDataTestDataFactory.assignClientHousehold(
+      new List<Account>{ scenario.relatedBusinessAccount },
+      scenario.rootAccount.Id
     );
 
     Test.startTest();

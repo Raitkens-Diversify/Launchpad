@@ -821,7 +821,6 @@ public with sharing class EnvelopeLandingApex {
                 .get('Household').getRecordTypeId(),
                 Financial_Advisor_Team__c = advisorTeamId
             );
-            System.debug('household: ' + household);
             insert household;
             targetHouseholdId = household.Id;
         }
@@ -847,10 +846,13 @@ public with sharing class EnvelopeLandingApex {
             || !Schema.sObjectType.Envelope_Content__c.isCreateable()) {
                 throw new AuraHandledException('You do not have permission to create envelopes.');
             }
-        
+        if(advisorTeamId == null){
+            advisorTeamId = [SELECT Financial_Advisor_Team__c FROM  Account WHERE Id =:targetHouseholdId].Financial_Advisor_Team__c;
+        }
         // Status 'New' is required for the envelope to appear in getWizEnvelopes,
         // which filters Status__c IN ('New','In Progress').
-        Envelope__c wizEnvelope = new Envelope__c(Name = trimmedTitle, Status__c = 'New', Household__c = targetHouseholdId, Household_Name__c = resolvedHouseholdName);
+        Envelope__c wizEnvelope = new Envelope__c(Name = trimmedTitle, Status__c = 'New', Household__c = targetHouseholdId, 
+                                                  Household_Name__c = resolvedHouseholdName, Financial_Advisor_Team__c = advisorTeamId);
         insert wizEnvelope;
         insert new Envelope_Content__c(
             Envelope__c = wizEnvelope.Id,

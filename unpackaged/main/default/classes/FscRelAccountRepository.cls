@@ -390,13 +390,86 @@ public with sharing class FscRelAccountRepository {
   public List<Account> selectClientAccountsByHouseholdId(Id householdId) {
     List<Account> clientAccounts = new List<Account>();
 
-    for (Account account : selectAccountsByHouseholdId(householdId)) {
+    for (Account account : selectMemberAccountsFromHouseholdMembership(householdId)) {
       if (FscRelClientAccountUtils.isClientAccount(account)) {
         clientAccounts.add(account);
       }
     }
 
     return clientAccounts;
+  }
+
+  public List<Account> selectLeadProspectAccountsByHouseholdId(Id householdId) {
+    List<Account> leadProspectAccounts = new List<Account>();
+
+    for (Account account : selectMemberAccountsFromHouseholdMembership(householdId)) {
+      if (FscRelClientAccountUtils.isLeadProspectAccount(account)) {
+        leadProspectAccounts.add(account);
+      }
+    }
+
+    return leadProspectAccounts;
+  }
+
+  public Id selectHouseholdIdByMemberAccountId(Id memberAccountId) {
+    if (memberAccountId == null) {
+      return null;
+    }
+
+    for (
+      Account_Account_Relationship__c relation : FscRelAccountRelationVisibilityService.selectReadableHouseholdMembershipByMemberAccountId(
+        memberAccountId
+      )
+    ) {
+      if (
+        relation.Account__r != null &&
+        isHouseholdRecordType(relation.Account__r)
+      ) {
+        return relation.Account__c;
+      }
+    }
+
+    return null;
+  }
+
+  public List<Account> selectMemberAccountsByHouseholdId(Id householdId) {
+    return selectMemberAccountsFromHouseholdMembership(householdId);
+  }
+
+  private List<Account> selectMemberAccountsFromHouseholdMembership(Id householdId) {
+    return mapHouseholdMembershipRelationsToAccounts(
+      FscRelAccountRelationVisibilityService.selectReadableHouseholdMembershipByHouseholdId(
+        householdId
+      )
+    );
+  }
+
+  private List<Account> mapHouseholdMembershipRelationsToAccounts(
+    List<Account_Account_Relationship__c> relations
+  ) {
+    Map<Id, Account> accountIdToAccount = new Map<Id, Account>();
+
+    if (relations == null || relations.isEmpty()) {
+      return new List<Account>();
+    }
+
+    for (Account_Account_Relationship__c relation : relations) {
+      if (
+        relation.Related_Account__c != null &&
+        relation.Related_Account__r != null &&
+        !accountIdToAccount.containsKey(relation.Related_Account__c)
+      ) {
+        accountIdToAccount.put(
+          relation.Related_Account__c,
+          relation.Related_Account__r
+        );
+      }
+    }
+
+    List<Account> memberAccounts = accountIdToAccount.values();
+    memberAccounts.sort();
+
+    return memberAccounts;
   }
 
   public Map<Id, Integer> selectClientAccountCountsByHouseholdIds(
@@ -412,19 +485,17 @@ public with sharing class FscRelAccountRepository {
       householdIdToCount.put(householdId, 0);
     }
 
-    for (Account account : [
-      SELECT Id, Household__c, Type, RecordType.DeveloperName, RecordType.Name
-      FROM Account
-      WHERE Household__c IN :householdIds
-    ]) {
-      if (!FscRelClientAccountUtils.isClientAccount(account)) {
-        continue;
-      }
+    for (Id householdId : householdIds) {
+      for (Account account : selectMemberAccountsFromHouseholdMembership(householdId)) {
+        if (!FscRelClientAccountUtils.isClientAccount(account)) {
+          continue;
+        }
 
-      householdIdToCount.put(
-        account.Household__c,
-        householdIdToCount.get(account.Household__c) + 1
-      );
+        householdIdToCount.put(
+          householdId,
+          householdIdToCount.get(householdId) + 1
+        );
+      }
     }
 
     return householdIdToCount;
