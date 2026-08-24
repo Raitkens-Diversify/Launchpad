@@ -100,7 +100,7 @@ public without sharing class FscRelAccountRelationVisibilityService {
     }
 
     List<Account_Account_Relationship__c> relations = [
-      SELECT Account__c, Related_Account__c, RecordTypeId, Active__c, Reciprocal_Role__c
+      SELECT Id, Account__c, Related_Account__c, RecordTypeId, Active__c, Reciprocal_Role__c
       FROM Account_Account_Relationship__c
       WHERE
         (Account__c IN :accountIds OR Related_Account__c IN :accountIds)
@@ -108,39 +108,68 @@ public without sharing class FscRelAccountRelationVisibilityService {
         AND Reciprocal_Role__c != NULL
     ];
 
-    Map<Id, Set<String>> accountIdToRelatedAccountKeys = new Map<Id, Set<String>>();
+    Map<Id, Set<Id>> accountIdToRelationIds = new Map<Id, Set<Id>>();
+    Map<Id, Set<String>> accountIdToOutgoingPairKeys = new Map<Id, Set<String>>();
 
     for (
       Account_Account_Relationship__c relation : filterByRelatedAccountAccess(
         relations
       )
     ) {
-      if (relation.Account__c != null && accountIds.contains(relation.Account__c)) {
-        addExpansionCountKey(
-          accountIdToRelatedAccountKeys,
-          relation.Account__c,
-          relation.Related_Account__c,
-          relation.RecordTypeId
-        );
-      }
-
       if (
-        relation.Related_Account__c != null &&
-        accountIds.contains(relation.Related_Account__c)
+        relation.Account__c != null &&
+        accountIds.contains(relation.Account__c)
       ) {
-        addExpansionCountKey(
-          accountIdToRelatedAccountKeys,
-          relation.Related_Account__c,
+        addExpansionRelationId(
+          accountIdToRelationIds,
           relation.Account__c,
+          relation.Id
+        );
+        addExpansionOutgoingPairKey(
+          accountIdToOutgoingPairKeys,
+          relation.Account__c,
+          relation.Related_Account__c,
           relation.RecordTypeId
         );
       }
     }
 
-    for (Id accountId : accountIdToRelatedAccountKeys.keySet()) {
+    for (
+      Account_Account_Relationship__c relation : filterByRelatedAccountAccess(
+        relations
+      )
+    ) {
+      if (
+        relation.Related_Account__c == null ||
+        !accountIds.contains(relation.Related_Account__c)
+      ) {
+        continue;
+      }
+
+      String pairKey = buildExpansionPairKey(
+        relation.Related_Account__c,
+        relation.Account__c,
+        relation.RecordTypeId
+      );
+      Set<String> outgoingPairKeys = accountIdToOutgoingPairKeys.get(
+        relation.Related_Account__c
+      );
+
+      if (outgoingPairKeys != null && outgoingPairKeys.contains(pairKey)) {
+        continue;
+      }
+
+      addExpansionRelationId(
+        accountIdToRelationIds,
+        relation.Related_Account__c,
+        relation.Id
+      );
+    }
+
+    for (Id accountId : accountIdToRelationIds.keySet()) {
       accountIdToCount.put(
         String.valueOf(accountId),
-        accountIdToRelatedAccountKeys.get(accountId).size()
+        accountIdToRelationIds.get(accountId).size()
       );
     }
 
@@ -223,8 +252,24 @@ public without sharing class FscRelAccountRelationVisibilityService {
     return readableAccountIds;
   }
 
-  private static void addExpansionCountKey(
-    Map<Id, Set<String>> accountIdToRelatedAccountKeys,
+  private static void addExpansionRelationId(
+    Map<Id, Set<Id>> accountIdToRelationIds,
+    Id accountId,
+    Id relationId
+  ) {
+    if (accountId == null || relationId == null) {
+      return;
+    }
+
+    if (!accountIdToRelationIds.containsKey(accountId)) {
+      accountIdToRelationIds.put(accountId, new Set<Id>());
+    }
+
+    accountIdToRelationIds.get(accountId).add(relationId);
+  }
+
+  private static void addExpansionOutgoingPairKey(
+    Map<Id, Set<String>> accountIdToOutgoingPairKeys,
     Id viewerAccountId,
     Id otherAccountId,
     Id recordTypeId
@@ -233,13 +278,23 @@ public without sharing class FscRelAccountRelationVisibilityService {
       return;
     }
 
-    if (!accountIdToRelatedAccountKeys.containsKey(viewerAccountId)) {
-      accountIdToRelatedAccountKeys.put(viewerAccountId, new Set<String>());
+    if (!accountIdToOutgoingPairKeys.containsKey(viewerAccountId)) {
+      accountIdToOutgoingPairKeys.put(viewerAccountId, new Set<String>());
     }
 
-    accountIdToRelatedAccountKeys.get(viewerAccountId)
-      .add(
-        String.valueOf(otherAccountId) + ':' + String.valueOf(recordTypeId)
-      );
+    accountIdToOutgoingPairKeys.get(viewerAccountId)
+      .add(buildExpansionPairKey(viewerAccountId, otherAccountId, recordTypeId));
+  }
+
+  private static String buildExpansionPairKey(
+    Id viewerAccountId,
+    Id otherAccountId,
+    Id recordTypeId
+  ) {
+    return String.valueOf(viewerAccountId) +
+      ':' +
+      String.valueOf(otherAccountId) +
+      ':' +
+      String.valueOf(recordTypeId);
   }
 }

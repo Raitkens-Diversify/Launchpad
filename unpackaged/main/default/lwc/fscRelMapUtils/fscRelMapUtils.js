@@ -995,6 +995,20 @@ const mergeLeadProspectAccounts = (
   return [...leadProspectByAccountId.values()];
 };
 
+const PERSON_ACCOUNT_RECORD_TYPE_DEVELOPER_NAMES = new Set([
+  "PersonAccount",
+  "Person_Account"
+]);
+
+const isPersonAccountRecord = (account = {}) => {
+  if (account.isPersonAccount === true) {
+    return true;
+  }
+
+  const developerName = String(account.recordTypeDeveloperName || "").trim();
+  return PERSON_ACCOUNT_RECORD_TYPE_DEVELOPER_NAMES.has(developerName);
+};
+
 const categorizeRelatedAccount = (account) => {
   const developerName = String(account.recordTypeDeveloperName || "").trim();
 
@@ -1537,6 +1551,10 @@ export const buildMapTree = ({
     }
 
     if (leadProspectAccountIds.has(account.accountId)) {
+      return;
+    }
+
+    if (isPersonAccountRecord(account)) {
       return;
     }
 

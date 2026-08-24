@@ -885,6 +885,8 @@ public with sharing class FscRelHouseholdService {
       account.accountType = relation.Related_Account__r != null
         ? relation.Related_Account__r.Type
         : null;
+      account.isPersonAccount = relation.Related_Account__r != null &&
+        relation.Related_Account__r.IsPersonAccount == true;
       accounts.add(account);
     }
 
@@ -963,7 +965,8 @@ public with sharing class FscRelHouseholdService {
     }
 
     List<FscRelHouseholdModels.TreeMemberAccountRelationship> results = new List<FscRelHouseholdModels.TreeMemberAccountRelationship>();
-    Map<String, FscRelHouseholdModels.TreeMemberAccountRelationship> pairKeyToRow = new Map<String, FscRelHouseholdModels.TreeMemberAccountRelationship>();
+    Map<String, FscRelHouseholdModels.TreeMemberAccountRelationship> relationIdToRow = new Map<String, FscRelHouseholdModels.TreeMemberAccountRelationship>();
+    Set<String> outgoingPairKeys = new Set<String>();
 
     for (
       Account_Account_Relationship__c relation : FscRelAccountRelationVisibilityService.selectVisibleByAccountAndRecordType(
@@ -975,12 +978,15 @@ public with sharing class FscRelHouseholdService {
         continue;
       }
 
-      pairKeyToRow.put(
+      outgoingPairKeys.add(
         buildMemberRelationPairKey(
           memberAccountId,
           relation.Related_Account__c,
           relation.RecordTypeId
-        ),
+        )
+      );
+      relationIdToRow.put(
+        String.valueOf(relation.Id),
         mapMemberAccountRelationship(relation)
       );
     }
@@ -991,23 +997,27 @@ public with sharing class FscRelHouseholdService {
         recordTypeId
       )
     ) {
+      if (relation.Active__c != true) {
+        continue;
+      }
+
       String pairKey = buildMemberRelationPairKey(
         memberAccountId,
         relation.Account__c,
         relation.RecordTypeId
       );
 
-      if (pairKeyToRow.containsKey(pairKey)) {
+      if (outgoingPairKeys.contains(pairKey)) {
         continue;
       }
 
-      pairKeyToRow.put(
-        pairKey,
+      relationIdToRow.put(
+        String.valueOf(relation.Id),
         mapIncomingMemberAccountRelationship(relation, memberAccountId)
       );
     }
 
-    results.addAll(pairKeyToRow.values());
+    results.addAll(relationIdToRow.values());
     return results;
   }
 
@@ -1018,7 +1028,8 @@ public with sharing class FscRelHouseholdService {
       return new List<FscRelHouseholdModels.TreeMemberAccountRelationship>();
     }
 
-    Map<Id, Map<String, FscRelHouseholdModels.TreeMemberAccountRelationship>> accountIdToPairKeyToRow = new Map<Id, Map<String, FscRelHouseholdModels.TreeMemberAccountRelationship>>();
+    Map<Id, Map<String, FscRelHouseholdModels.TreeMemberAccountRelationship>> accountIdToRelationIdToRow = new Map<Id, Map<String, FscRelHouseholdModels.TreeMemberAccountRelationship>>();
+    Map<Id, Set<String>> accountIdToOutgoingPairKeys = new Map<Id, Set<String>>();
 
     for (
       Account_Account_Relationship__c relation : FscRelAccountRelationVisibilityService.selectVisibleByAccountIds(
@@ -1029,7 +1040,11 @@ public with sharing class FscRelHouseholdService {
         continue;
       }
 
-      addOutgoingMemberAccountRelationship(accountIdToPairKeyToRow, relation);
+      addOutgoingMemberAccountRelationship(
+        accountIdToRelationIdToRow,
+        accountIdToOutgoingPairKeys,
+        relation
+      );
     }
 
     for (
@@ -1037,12 +1052,20 @@ public with sharing class FscRelHouseholdService {
         accountIds
       )
     ) {
-      addIncomingMemberAccountRelationship(accountIdToPairKeyToRow, relation);
+      if (relation.Active__c != true) {
+        continue;
+      }
+
+      addIncomingMemberAccountRelationship(
+        accountIdToRelationIdToRow,
+        accountIdToOutgoingPairKeys,
+        relation
+      );
     }
 
     List<FscRelHouseholdModels.TreeMemberAccountRelationship> results = new List<FscRelHouseholdModels.TreeMemberAccountRelationship>();
-    for (Map<String, FscRelHouseholdModels.TreeMemberAccountRelationship> pairKeyToRow : accountIdToPairKeyToRow.values()) {
-      results.addAll(pairKeyToRow.values());
+    for (Map<String, FscRelHouseholdModels.TreeMemberAccountRelationship> relationIdToRow : accountIdToRelationIdToRow.values()) {
+      results.addAll(relationIdToRow.values());
     }
 
     return results;
@@ -1345,7 +1368,8 @@ public with sharing class FscRelHouseholdService {
   }
 
   private void addOutgoingMemberAccountRelationship(
-    Map<Id, Map<String, FscRelHouseholdModels.TreeMemberAccountRelationship>> accountIdToPairKeyToRow,
+    Map<Id, Map<String, FscRelHouseholdModels.TreeMemberAccountRelationship>> accountIdToRelationIdToRow,
+    Map<Id, Set<String>> accountIdToOutgoingPairKeys,
     Account_Account_Relationship__c relation
   ) {
     if (relation.Account__c == null || relation.Related_Account__c == null) {
@@ -1357,15 +1381,25 @@ public with sharing class FscRelHouseholdService {
       relation.Related_Account__c,
       relation.RecordTypeId
     );
-    Map<String, FscRelHouseholdModels.TreeMemberAccountRelationship> pairKeyToRow = getMemberRelationPairMap(
-      accountIdToPairKeyToRow,
+    Map<String, FscRelHouseholdModels.TreeMemberAccountRelationship> relationIdToRow = getMemberRelationIdToRowMap(
+      accountIdToRelationIdToRow,
       relation.Account__c
     );
-    pairKeyToRow.put(pairKey, mapMemberAccountRelationship(relation));
+    Set<String> outgoingPairKeys = getOutgoingPairKeySet(
+      accountIdToOutgoingPairKeys,
+      relation.Account__c
+    );
+
+    outgoingPairKeys.add(pairKey);
+    relationIdToRow.put(
+      String.valueOf(relation.Id),
+      mapMemberAccountRelationship(relation)
+    );
   }
 
   private void addIncomingMemberAccountRelationship(
-    Map<Id, Map<String, FscRelHouseholdModels.TreeMemberAccountRelationship>> accountIdToPairKeyToRow,
+    Map<Id, Map<String, FscRelHouseholdModels.TreeMemberAccountRelationship>> accountIdToRelationIdToRow,
+    Map<Id, Set<String>> accountIdToOutgoingPairKeys,
     Account_Account_Relationship__c relation
   ) {
     if (relation.Account__c == null || relation.Related_Account__c == null) {
@@ -1378,33 +1412,48 @@ public with sharing class FscRelHouseholdService {
       relation.Account__c,
       relation.RecordTypeId
     );
-    Map<String, FscRelHouseholdModels.TreeMemberAccountRelationship> pairKeyToRow = getMemberRelationPairMap(
-      accountIdToPairKeyToRow,
+    Set<String> outgoingPairKeys = getOutgoingPairKeySet(
+      accountIdToOutgoingPairKeys,
       viewerAccountId
     );
 
-    if (pairKeyToRow.containsKey(pairKey)) {
+    if (outgoingPairKeys.contains(pairKey)) {
       return;
     }
 
-    pairKeyToRow.put(
-      pairKey,
+    Map<String, FscRelHouseholdModels.TreeMemberAccountRelationship> relationIdToRow = getMemberRelationIdToRowMap(
+      accountIdToRelationIdToRow,
+      viewerAccountId
+    );
+    relationIdToRow.put(
+      String.valueOf(relation.Id),
       mapIncomingMemberAccountRelationship(relation, viewerAccountId)
     );
   }
 
-  private Map<String, FscRelHouseholdModels.TreeMemberAccountRelationship> getMemberRelationPairMap(
-    Map<Id, Map<String, FscRelHouseholdModels.TreeMemberAccountRelationship>> accountIdToPairKeyToRow,
+  private Map<String, FscRelHouseholdModels.TreeMemberAccountRelationship> getMemberRelationIdToRowMap(
+    Map<Id, Map<String, FscRelHouseholdModels.TreeMemberAccountRelationship>> accountIdToRelationIdToRow,
     Id accountId
   ) {
-    if (!accountIdToPairKeyToRow.containsKey(accountId)) {
-      accountIdToPairKeyToRow.put(
+    if (!accountIdToRelationIdToRow.containsKey(accountId)) {
+      accountIdToRelationIdToRow.put(
         accountId,
         new Map<String, FscRelHouseholdModels.TreeMemberAccountRelationship>()
       );
     }
 
-    return accountIdToPairKeyToRow.get(accountId);
+    return accountIdToRelationIdToRow.get(accountId);
+  }
+
+  private Set<String> getOutgoingPairKeySet(
+    Map<Id, Set<String>> accountIdToOutgoingPairKeys,
+    Id accountId
+  ) {
+    if (!accountIdToOutgoingPairKeys.containsKey(accountId)) {
+      accountIdToOutgoingPairKeys.put(accountId, new Set<String>());
+    }
+
+    return accountIdToOutgoingPairKeys.get(accountId);
   }
 
   private static String buildMemberRelationPairKey(

@@ -23,6 +23,7 @@ public with sharing class FscRelAccountRelationRepository {
         Association_Type__c,
         Related_Account__c,
         Related_Account__r.Name,
+        Related_Account__r.IsPersonAccount,
         Related_Account__r.RecordType.DeveloperName,
         Related_Account__r.RecordType.Name,
         Related_Account__r.Type
