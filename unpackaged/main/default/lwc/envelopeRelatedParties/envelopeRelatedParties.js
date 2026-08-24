@@ -42,6 +42,16 @@ export default class EnvelopeRelatedParties extends LightningElement {
     // envelope alongside the household's already-formalized roster.
     @api envelopeId;
 
+    // The requirement keys whose waiver is currently affirmed, comma-separated. A primitive so the
+    // host can rebuild its section descriptor every render without this reading as a new value.
+    @api waived = '';
+
+    get _waivedKeys() {
+        return String(this.waived || '')
+            .split(',')
+            .filter(Boolean);
+    }
+
     // The subsection whose buttons opened the current dialog, so the result lands in the right list.
     _pendingKey = null;
 
@@ -60,7 +70,16 @@ export default class EnvelopeRelatedParties extends LightningElement {
                 ...requirement,
                 parties: this._partiesFor(requirement.key),
                 emptyMessage: EMPTY_MESSAGE,
-                note: isFirstOfGroup ? this._groupNoteFor(requirement.key) : null
+                note: isFirstOfGroup ? this._groupNoteFor(requirement.key) : null,
+                // Present only on a role that can be affirmed away instead of filled, so the
+                // template renders the checkbox for that subsection alone.
+                waiverLabel: requirement.waiver?.label || null,
+                waived: this._waivedKeys.includes(requirement.key),
+                // The affirmation and the parties are mutually exclusive, enforced from both
+                // sides: the add buttons are disabled while the affirmation stands (see the group
+                // component's `waived`), and the affirmation cannot be ticked while the role holds
+                // anyone. Remove the last party to make it available again.
+                waiverDisabled: this._partiesFor(requirement.key).length > 0
             };
         });
     }
@@ -213,5 +232,23 @@ export default class EnvelopeRelatedParties extends LightningElement {
     // would not re-render.
     _emit(value) {
         this.dispatchEvent(new CustomEvent('partieschange', { detail: { value } }));
+    }
+
+    // The affirmation is a field on the record, not part of the parties value, so it travels as its
+    // own event carrying the field name — the host persists it through the same path as any other
+    // field answer rather than folding it into this section's composite value.
+    handleWaiverChange(event) {
+        const key = event.currentTarget.dataset.key;
+        const field = (this.requirements || []).find(
+            (requirement) => requirement.key === key
+        )?.waiver?.field;
+        if (!field) {
+            return;
+        }
+        this.dispatchEvent(
+            new CustomEvent('waiverchange', {
+                detail: { field, value: event.currentTarget.checked }
+            })
+        );
     }
 }

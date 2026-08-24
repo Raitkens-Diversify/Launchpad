@@ -68,6 +68,7 @@ import {
   isFormatValid,
   resolveRelatedPartyRequirements,
   unmetRelatedPartyRequirements,
+  waivedRelatedPartyKeys,
   partyAlternativesLabel,
   aarRoleForKey,
   managedAarRolesFor,
@@ -136,7 +137,23 @@ const NON_FIELD_FORM_KEYS = new Set([
   "registrationType",
   "custodian",
   "bdOrRia",
-  "managedAccountPlatform"
+  "managedAccountPlatform",
+  // Wrapper fields on WizardEnvelopeStateService's member DTO, in the same category as accountType
+  // and recordTypeId above: they carry a value read off the record, under a name the record does not
+  // have. None of the five exists on Account -- EntityType mirrors Account.Type, EntityJurisdiction
+  // stands for Entity_Jurisdiction__c -- so any draft carrying one made applyFields reject the key
+  // and abort the whole account write with "These fields could not be saved", losing every other
+  // answer in the same save. Routed out here rather than renamed, because the DTO shape is what the
+  // shell prefills a business or trust interview from.
+  "EntityType",
+  // The wrapper's camelCase carrier for the beneficial-owner affirmation. The value is re-seeded
+  // under the field's own api name just below (see mapHouseholdResponse), so this key must never
+  // reach a write itself.
+  "noReportableBeneficialOwners",
+  "EntityJurisdiction",
+  "PrimaryTrustee",
+  "TaxId",
+  "FormationDate"
 ]);
 
 // The object an account interview's product answer is stored on. It is a related record rather than a
@@ -399,7 +416,17 @@ function mapHouseholdResponse(data) {
           iconVariant: GROUPS.householdMembers.cardIconVariant,
           title: GROUPS.householdMembers.actionTitle,
           statusLabel: "In Progress",
-          formData: m
+          // The wrapper is the draft, so a field whose api name Apex cannot express as an
+          // identifier is re-keyed here. Only set when the server actually sent a boolean, so a
+          // member type the affirmation does not apply to keeps a clean draft.
+          formData:
+            typeof m.noReportableBeneficialOwners === "boolean"
+              ? {
+                  ...m,
+                  No_Reportable_Beneficial_Owners__c:
+                    m.noReportableBeneficialOwners
+                }
+              : m
         }
       ]
     }))
@@ -911,7 +938,65 @@ export default class EnvelopeShellV2 extends LightningElement {
   // Lookup options are merged in on read rather than at assignment, so options that arrive after
   // an interview is already open still reach the rendered form.
   get actionSchema() {
-    return applyLookupOptions(this._rawActionSchema, this._lookupOptions);
+    // A lookup with one candidate is dropped rather than rendered — see
+    // _applySingleOptionLookups for the value that goes to the record in its place.
+    return this._withoutSingleOptionLookups(
+      applyLookupOptions(this._rawActionSchema, this._lookupOptions)
+    );
+  }
+
+  /**
+   * The lookups that resolved to exactly one candidate, as { fieldApiName: value }.
+   *
+   * Read straight off _lookupOptions rather than off a flag the schema module could set, so this
+   * component carries the whole feature. LWC bundles are versioned and cached independently: a
+   * shell calling a helper that a still-cached envelopeFormSchema does not export yet throws inside
+   * this getter and takes the entire interview down with it. Keeping it here means there is no
+   * version to be out of step with.
+   */
+  _singleOptionLookupValues() {
+    const values = {};
+    Object.entries(this._lookupOptions || {}).forEach(([key, options]) => {
+      if (!Array.isArray(options) || options.length !== 1) {
+        return;
+      }
+      // Keys are either a bare field name or "Object|Field" — see applyLookupOptions.
+      const fieldName = key.includes("|") ? key.split("|")[1] : key;
+      values[fieldName] = options[0].value;
+    });
+    return values;
+  }
+
+  /**
+   * Drop the single-candidate lookup fields, and any section left empty by that. Memoized on the
+   * applied sections' identity plus the set of dropped names: the result binds into the template,
+   * so a fresh array per read would rebuild the interview on every re-render.
+   */
+  _withoutSingleOptionLookups(sections) {
+    if (!sections || !sections.length) {
+      return sections;
+    }
+    const values = this._singleOptionLookupValues();
+    const names = Object.keys(values);
+    const signature = names.slice().sort().join(",");
+    if (!names.length) {
+      return sections;
+    }
+    const memo = this._singleOptionSchemaMemo;
+    if (memo && memo.source === sections && memo.signature === signature) {
+      return memo.result;
+    }
+    const dropped = new Set(names);
+    const result = sections
+      .map((section) => ({
+        ...section,
+        fields: (section.fields || []).filter(
+          (field) => !dropped.has(field.fieldPath)
+        )
+      }))
+      .filter((section) => (section.fields || []).length > 0);
+    this._singleOptionSchemaMemo = { source: sections, signature, result };
+    return result;
   }
 
   // Exposed to the action-details form, which resolves an account's related parties from the
@@ -1180,11 +1265,108 @@ export default class EnvelopeShellV2 extends LightningElement {
           value: code.Id
         }))
       };
+      // The interview may already be open — the options resolve after it renders.
+      this._applySingleOptionLookups();
     } catch (error) {
       // Non-fatal: the field falls back to its unsupported-type state rather than blocking
       // the rest of the interview.
       console.error("getRepCodesRelatedToFAT failed", error);
     }
+  }
+
+  /**
+   * The values for the open action's single-candidate lookups. Read from the schema *with* options
+   * applied, which is the only place the candidate count is known — the raw cached schema the
+   * missing-inputs count reads has no options on it.
+   */
+  _singleOptionValuesForOpenAction() {
+    if (!this.selectedAction) {
+      return {};
+    }
+    // Only the ones this action's schema actually asks for — _lookupOptions is shared across every
+    // entity type, and writing a field this record has no business holding would be a real bug.
+    const values = this._singleOptionLookupValues();
+    const present = new Set();
+    applyLookupOptions(this._rawActionSchema, this._lookupOptions).forEach(
+      (section) => {
+        (section.fields || []).forEach((field) => present.add(field.fieldPath));
+      }
+    );
+    const scoped = {};
+    Object.keys(values).forEach((name) => {
+      if (present.has(name)) {
+        scoped[name] = values[name];
+      }
+    });
+    return scoped;
+  }
+
+  /**
+   * Write the single-candidate lookup values into the open action's form data.
+   *
+   * The field is never rendered, so the interview cannot collect it, and two things read form data
+   * rather than the schema: the save, and the missing-inputs count. Seeding here keeps the count
+   * honest the moment the interview opens rather than only after the first save.
+   *
+   * Runs after the schema resolves and again after the options land, since either can arrive first.
+   * Idempotent — an already-answered field is left alone, so this never overwrites a value a
+   * multi-candidate list collected before the team's codes were pruned to one.
+   */
+  _applySingleOptionLookups() {
+    const action = this.selectedAction;
+    if (!action) {
+      return;
+    }
+    const values = this._singleOptionValuesForOpenAction();
+    const names = Object.keys(values);
+    if (!names.length) {
+      return;
+    }
+    const found = this._findEntityByActionId(action.actionId);
+    if (!found) {
+      return;
+    }
+    const current = found.action.formData || {};
+    const patch = {};
+    names.forEach((name) => {
+      const held = current[name];
+      if (held === undefined || held === null || held === "") {
+        patch[name] = values[name];
+      }
+    });
+    if (!Object.keys(patch).length) {
+      return;
+    }
+    this._updateEntity(found.entity.id, (entity) => ({
+      ...entity,
+      actions: entity.actions.map((entry) =>
+        entry.id === action.actionId
+          ? { ...entry, formData: { ...entry.formData, ...patch } }
+          : entry
+      )
+    }));
+    // The Review Missing Items write sends the dirty set rather than the whole form data, so a
+    // value nobody typed has to be marked or it would sit in the model and never reach the record.
+    const dirty = this._missingItemsDirty[action.actionId] || new Set();
+    Object.keys(patch).forEach((name) => dirty.add(name));
+    this._missingItemsDirty[action.actionId] = dirty;
+    // And arm the autosave cycle. Nothing else will: the arming above hangs off a field edit, and
+    // by design nobody edits this field — the whole point is that it is never shown. Without this
+    // the value waits in memory for an unrelated edit to carry it, and an interview opened and
+    // closed again would leave the record without the only rep code it could have had.
+    this._clearSavedHideTimer();
+    this.saveStatus = SAVE_STATUS.PENDING;
+    this._resetAutoSaveTimer();
+    // And write it now rather than waiting out the idle window. Backing out of an interview flushes
+    // the draft into the model but does not run the record-persist cycle — that hangs off the timer
+    // — so an interview opened and closed inside six seconds armed a save that teardown then threw
+    // away, leaving the record without the only rep code it could have had. This value is not
+    // typing: it is a discrete, already-final answer, so it is written immediately, the same way
+    // _reconcileRelatedPartiesNow treats adding a party.
+    this._persistOpenAccountFields().catch((error) => {
+      // Non-fatal: the arming above leaves it pending, so the next cycle retries.
+      console.error("[envelopeShellV2] single-option lookup write failed", error);
+    });
   }
 
   // Load the candidate records for the lookup fields configured server-side, keyed by object and
@@ -2274,7 +2456,18 @@ export default class EnvelopeShellV2 extends LightningElement {
     const invalid = [];
     for (const groupId of GROUP_IDS) {
       for (const entity of this.model[groupId] || []) {
-        const actions = entity.actions || [];
+        // Only this envelope's own action items owe inputs — the same set the workspace
+        // (sortedItems) and the Missing Items count (_missingItemsTotalForSave) already use.
+        // The household fetch hands every member, account, DPI and service agreement a
+        // synthetic action, so testing actions.length alone swept in every record in the
+        // household: opening an envelope on a 149-account household made submit report
+        // missing inputs for records the envelope never touched. A submitted record is
+        // locked and owes nothing; adding an action item to one raises a new unsubmitted
+        // entity, which is caught here on its own merits.
+        if (!entity.actions?.length || !entity.isNew) {
+          continue;
+        }
+        const actions = entity.actions;
         let invalidCount = 0;
         for (const action of actions) {
           const formData = action.formData || {};
@@ -2288,11 +2481,7 @@ export default class EnvelopeShellV2 extends LightningElement {
         }
         // An invalid value also holds the entity short of complete, so name it under "missing"
         // only when nothing of its own is invalid — the invalid list already names the exact field.
-        if (
-          actions.length &&
-          !invalidCount &&
-          !this._entityActionsComplete(entity)
-        ) {
+        if (!invalidCount && !this._entityActionsComplete(entity)) {
           incomplete.push(entity.name);
         }
       }
@@ -2301,6 +2490,9 @@ export default class EnvelopeShellV2 extends LightningElement {
     // percentage rows covering 100% of the remainder) — actionCompletion only measures the
     // metadata-driven fields, so the basis rules are checked here explicitly.
     const tradeIncomplete = this._collectTradeSources()
+      // A submitted account's trade instructions are locked history, not an outstanding input
+      // of this envelope, so they cannot block its submit.
+      .filter((source) => source.isActionItem)
       .filter(
         (source) =>
           !strategyTotals(
@@ -2343,6 +2535,9 @@ export default class EnvelopeShellV2 extends LightningElement {
         }
         sources.push({
           entityName: entity.name,
+          // Carried so submit validation can ignore rows that are not this envelope's action
+          // items; persistence deliberately still writes every source it finds.
+          isActionItem: Boolean(entity.isNew),
           trade,
           financialAccountId: entity.id,
           caseId: null,
@@ -2359,6 +2554,7 @@ export default class EnvelopeShellV2 extends LightningElement {
       }
       sources.push({
         entityName: entity.name,
+        isActionItem: Boolean(entity.isNew),
         trade,
         financialAccountId: entity.financialAccountId,
         caseId: this._isRecordId(entity.id) ? entity.id : null,
@@ -2776,6 +2972,7 @@ export default class EnvelopeShellV2 extends LightningElement {
         this._schemaCache[cacheKey],
         key.accountType
       );
+      this._applySingleOptionLookups();
       return;
     }
     getFormSchema({ objectName: key.objectName, type: key.type })
@@ -2790,6 +2987,7 @@ export default class EnvelopeShellV2 extends LightningElement {
             resolved,
             key.accountType
           );
+          this._applySingleOptionLookups();
         }
       })
       .catch((error) => {
@@ -2943,13 +3141,17 @@ export default class EnvelopeShellV2 extends LightningElement {
     this.saveStatus = SAVE_STATUS.SAVING;
     try {
       this._saveNow();
+      const missingItems = this._missingItemsTotalForSave();
       await saveEnvelopeState({
         wizardEnvelopeId: this.model?.id,
         envelopeJson: JSON.stringify(
           withoutRelatedParties(withoutRecordBackedEntities(this.model || {}))
         ),
         envelopeName: this.model?.name,
-        householdName: this.model?.householdName
+        householdName: this.model?.householdName,
+        // The list's Missing Items column reads these back; null leaves the stored pair untouched.
+        missingItemsCount: missingItems ? missingItems.count : null,
+        missingItemsHasPlus: missingItems ? missingItems.hasPlus : null
       });
       // The record-level persists below write to different records, so each runs even when an earlier
       // one failed — otherwise one bad field would keep skipping the steps after it, cycle after
@@ -3244,21 +3446,18 @@ export default class EnvelopeShellV2 extends LightningElement {
     ) {
       this._relatedPartiesDirty[actionId] = true;
     }
+    // This assignment replaces the action's form data with the interview's draft, and the draft
+    // cannot carry a field the interview never rendered. Re-apply them here or the first autosave
+    // drops the value seeded when the action opened.
+    const merged = { ...values, ...this._singleOptionValuesForOpenAction() };
     this._updateEntity(found.entity.id, (entity) => ({
       ...entity,
       actions: entity.actions.map((action) => {
         return action.id === actionId
-          ? { ...action, formData: values }
+          ? { ...action, formData: merged }
           : action;
       })
     }));
-    // Log a plain snapshot, not the live reactive Proxy — Chrome's console preview renders nested
-    // proxies as empty {} even when populated, which reads as "nothing saved".
-    console.info(
-      "[envelopeShellV2] Auto-saved",
-      actionId,
-      JSON.parse(JSON.stringify(values))
-    );
   }
 
   // Merge the Review Missing Items draft into the model, one action at a time. The draft comes
@@ -3840,13 +4039,17 @@ export default class EnvelopeShellV2 extends LightningElement {
   // toast, but still count toward the recurrent-failure escalation.
   async _persistFlushedState(openActionId) {
     try {
+      const missingItems = this._missingItemsTotalForSave();
       await saveEnvelopeState({
         wizardEnvelopeId: this.model?.id,
         envelopeJson: JSON.stringify(
           withoutRelatedParties(withoutRecordBackedEntities(this.model || {}))
         ),
         envelopeName: this.model?.name,
-        householdName: this.model?.householdName
+        householdName: this.model?.householdName,
+        // The list's Missing Items column reads these back; null leaves the stored pair untouched.
+        missingItemsCount: missingItems ? missingItems.count : null,
+        missingItemsHasPlus: missingItems ? missingItems.hasPlus : null
       });
       if (openActionId) {
         // Leaving an open interview: write its just-flushed field values to the backing record, so
@@ -4479,7 +4682,8 @@ export default class EnvelopeShellV2 extends LightningElement {
     );
     const unmet = unmetRelatedPartyRequirements(
       requirements,
-      formData[RELATED_PARTIES_FIELD_KEY] || {}
+      formData[RELATED_PARTIES_FIELD_KEY] || {},
+      waivedRelatedPartyKeys(requirements, formData)
     );
     if (!unmet.length) {
       return null;
@@ -4536,6 +4740,49 @@ export default class EnvelopeShellV2 extends LightningElement {
         };
       })
       .filter(Boolean);
+    return sumMissingInputs(items, {
+      schemaCache: this._schemaCache,
+      registrationAttributes: this._registrationAttributes,
+      userContext: this.userContext
+    });
+  }
+
+  // The envelope's whole outstanding-input total, persisted with the envelope state so the landing
+  // list's Missing Items column can render a real number.
+  //
+  // The list cannot compute this itself any more. Its answers live on the records now — the
+  // Accounts, Financial Accounts, Services and action-item Cases — and withoutRecordBackedEntities
+  // strips every record-backed entity out of the saved blob, so a reader of the blob sees almost
+  // nothing and counts zero. Here the whole model is in hand, already overlaid with the record
+  // values, so the number is the same one the workspace cards and the Review Missing Items header
+  // show (see sortedItems and _missingItemsCountState): outstanding fields plus unmet related-party
+  // requirements, over every action of every unsubmitted entity.
+  //
+  // Returns null when any counted entity's schema has not loaded — sumMissingInputs skips such an
+  // item, and a total silently short by one entity's worth is worse than the last stored one, which
+  // saveEnvelopeState keeps when the count arrives null.
+  _missingItemsTotalForSave() {
+    const items = [];
+    let unresolved = false;
+    GROUP_IDS.forEach((groupId) => {
+      // The same set the workspace treats as outstanding: unsubmitted entities carrying actions.
+      // A submitted record is locked and owes nothing.
+      (this.model?.[groupId] || [])
+        .filter((entity) => entity.actions?.length && entity.isNew)
+        .forEach((entity) => {
+          const key = resolveSchemaKey(entity);
+          if (key && !this._schemaCache[schemaCacheKey(key)]) {
+            unresolved = true;
+            return;
+          }
+          entity.actions.forEach((action) => {
+            items.push({ entity, formData: action.formData || {} });
+          });
+        });
+    });
+    if (unresolved) {
+      return null;
+    }
     return sumMissingInputs(items, {
       schemaCache: this._schemaCache,
       registrationAttributes: this._registrationAttributes,

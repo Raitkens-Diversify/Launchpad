@@ -1408,32 +1408,6 @@ function hasPriorAnswer(draft = {}, apiName) {
 }
 
 /**
- * Whether re-answering `apiName` with `nextValue` would wipe an answer the user has already given.
- *
- * The fields a change hides are reset by clearHiddenAnswers, so apply the candidate value and compare
- * what comes back against what the draft holds. The changed field itself is excluded — replacing its
- * own answer is the edit, not a loss.
- *
- * This gates the Key Point confirmation, whose whole subject is the answers a rebuilt branch
- * discards. A change that only reveals questions loses nothing and must not interrupt: a first
- * answer, another option ticked on a multi-select, or a Key Point no other field's Shown WHERE
- * depends on.
- * @param {Array} fields  raw Envelope_Field__mdt field shapes the draft spans
- * @param {object} draft  field apiName -> value
- * @param {object} userContext  $User.<Field> -> running-user value
- * @param {string} apiName  the field being re-answered
- * @param {*} nextValue  the candidate answer
- * @returns {boolean}
- */
-function changeClearsAnswers(fields, draft = {}, userContext = {}, apiName, nextValue) {
-    const next = { ...draft, [apiName]: nextValue };
-    const cleared = clearHiddenAnswers(fields, next, userContext);
-    return Object.keys(next).some(
-        (key) => key !== apiName && !isEmptyValue(next[key]) && isEmptyValue(cleared[key])
-    );
-}
-
-/**
  * Digits of a raw input, with separator-backspace handling: when the user deletes a mask separator
  * (a dash or paren the mask inserted), the digit count is unchanged but the string got shorter —
  * without dropping the trailing digit too, re-masking instantly re-inserts the separator and the
@@ -2703,7 +2677,6 @@ export {
     clearHiddenAnswers,
     clearDependentCustodian,
     hasPriorAnswer,
-    changeClearsAnswers,
     isEmptyValue,
     draftValuesEqual,
     strategyRowsEqual,

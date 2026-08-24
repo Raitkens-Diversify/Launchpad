@@ -47,10 +47,12 @@
             <c-envelope-related-parties
                 requirements={section.requirements}
                 value={section.value}
+                waived={section.waived}
                 entity-id={section.entityId}
                 household-id={section.householdId}
                 envelope-id={section.envelopeId}
-                onpartieschange={handleBodyChange}>
+                onpartieschange={handleBodyChange}
+                onwaiverchange={handleWaiverChange}>
             </c-envelope-related-parties>
         </template>
         <template lwc:else>

@@ -1,15 +1,11 @@
 import { LightningElement, track } from 'lwc';
 import LightningToast from 'lightning/toast';
-import getWizEnvelopes from '@salesforce/apex/EnvelopeLandingApex.getWizEnvelopes';
-import getAllFormSchemas from '@salesforce/apex/FieldDetailController.getAllFormSchemas';
-import getRegistrationTypeAttributes from '@salesforce/apex/EnvelopeISAController.getRegistrationTypeAttributes';
-import getUserPreferences from '@salesforce/apex/WizardEnvelopeStateService.getUserPreferences';
+import getEnvelopeListData from '@salesforce/apex/EnvelopeLandingApex.getEnvelopeListData';
 import EMPTY_ENVELOPE from '@salesforce/resourceUrl/EmptyEnvelopeV2';
 import ENVELOPE_NO_RESULTS from '@salesforce/resourceUrl/EnvelopeNoResults';
 import {
     formatEnvelopeContentsLabel,
-    missingInputsCountLabel,
-    sumMissingInputs
+    missingInputsCountLabel
 } from 'c/envelopeFormSchema';
 
 // Column config for c-ds-data-table-v2 (custom styled <table>). `wrapText` lets
@@ -39,13 +35,10 @@ export default class EnvelopeListV2 extends LightningElement {
     emptyEnvelopeIllustration = EMPTY_ENVELOPE;
     noResultsEnvelopeIllustration = ENVELOPE_NO_RESULTS;
 
-    // Loaded from the same source the landing page uses. Households / advisor
-    // teams feed the New Envelope dialog and the advisor-team column join;
-    // envelopes + envelopeRecords build the table rows.
-    @track households = [];
-    @track financialAdvisorTeams = [];
+    // The envelope rows as the server resolves them (EnvelopeLandingApex.EnvelopeRow: envelope plus
+    // the household and advisor team its junction row points at). The page no longer receives the
+    // user's household list at all — the Existing Household picker searches server-side.
     @track envelopes = [];
-    @track envelopeRecords = [];
 
     // Table rows, built from the queried envelopes in loadData(). A rename/delete
     // updates this working copy in place (those handlers are still stubs).
@@ -56,18 +49,18 @@ export default class EnvelopeListV2 extends LightningElement {
     // the Apex call resolves.
     @track isLoading = true;
 
-    // Form context for the Action Items / Missing Items columns, fetched once in loadData and
-    // reused for every row. These are the same envelope-independent sources the wizard shell uses
-    // to compute its "N inputs missing" header, so the list's Missing Items count matches it.
-    // Non-reactive: buildRows runs only after they resolve.
-    _schemaCache = {};
-    _registrationAttributes = {};
-    _userContext = {};
-
-    // Per-envelope metrics (entity counts + each unsubmitted action's form data) extracted
-    // server-side, keyed by envelope id. Feeds the Action Items / Missing Items columns without
-    // shipping each envelope's full saved-state blob.
+    // Per-envelope metrics (entity counts and the stored missing-inputs total), keyed by envelope
+    // id. Feeds the Action Items / Missing Items columns without shipping each envelope's full
+    // saved-state blob.
     _metricsById = {};
+
+    // Dropdown payloads for the New Envelope dialog and the toolbar, built once per load and held in
+    // plain, non-tracked fields so each keeps its identity across renders. They used to be getters:
+    // every list render (every search keystroke, every modal open/close) rebuilt them and handed the
+    // children a fresh array, which under Lightning Locker re-ran an O(n²)–O(n³) copy in each child
+    // — see envelopeSearchableCombobox's header for the measurement behind this.
+    advisorTeamOptions = [];
+    teamOptions = [];
 
     columns = COLUMNS;
     rowActions = ROW_ACTIONS;
@@ -97,14 +90,15 @@ export default class EnvelopeListV2 extends LightningElement {
         // Fetch the envelopes and the form context (schemas, registration attributes, user
         // preferences) together; the context feeds the Action Items / Missing Items columns and is
         // the same data the wizard shell prefetches. Context loading is non-fatal on its own.
-        return Promise.all([getWizEnvelopes(), this._loadFormContext()])
-            .then(([result]) => {
-                // Serialize so the console shows plain data instead of LWC read-only proxies.
-                console.log('getWizEnvelopes →', JSON.parse(JSON.stringify(result)));
-                this.households = result.households || [];
-                this.financialAdvisorTeams = result.financialAdvisorTeams || [];
+        return getEnvelopeListData()
+            .then((result) => {
+                // Copied from the raw result before anything is assigned to a tracked field, so
+                // the dialog gets plain objects with a stable identity.
+                this.advisorTeamOptions = (result.advisorTeamOptions || []).map((option) => ({
+                    label: option.label,
+                    value: option.value
+                }));
                 this.envelopes = result.envelopes || [];
-                this.envelopeRecords = result.envelopeRecords || [];
                 this._metricsById = {};
                 (result.envelopeMetrics || []).forEach((metric) => {
                     this._metricsById[metric.envelopeId] = metric;
@@ -120,81 +114,64 @@ export default class EnvelopeListV2 extends LightningElement {
             });
     }
 
-    // Map the queried envelopes onto the table's column keys. The advisor team is
-    // resolved with a client-side join: envelope -> envelopeRecord (Account) ->
-    // household (Financial_Advisor_Team__c) -> financialAdvisorTeams (Name).
+    // Map the server's envelope rows onto the table's column keys. The household and advisor team
+    // arrive already resolved per row (getEnvelopeListData joins them through the junction row).
     // Action Items summarizes the envelope's contents ("N members • M ISAs"), counted server-side
     // from its records so the figure matches the wizard's Household Outline; it falls back to blank
     // only when that count could not be derived. Missing Items is the same "inputs missing" count
     // the wizard's Review Missing Items header shows — including its trailing '+' when an unfilled
-    // Key Point gates further fields — computed from the saved model and the fetched form context,
-    // and blank when there is no saved model.
+    // Key Point gates further fields — read from the total the wizard stores on the envelope, and
+    // rendered as 0 when no save has computed one yet rather than as a placeholder.
     buildRows() {
-        const recordToAccount = {};
-        (this.envelopeRecords || []).forEach((r) => {
-            recordToAccount[r.Envelope__c] = r.Account__c;
-        });
-        const accountToTeamId = {};
-        (this.households || []).forEach((h) => {
-            accountToTeamId[h.Id] = h.Financial_Advisor_Team__c;
-        });
-        const teamName = {};
-        (this.financialAdvisorTeams || []).forEach((t) => {
-            teamName[t.Id] = t.Name;
-        });
-
-        // Missing Items needs the field schema to count; without it, leave the cell blank rather
-        // than reporting a misleading zero. Action Items needs only the record-derived counts.
-        const hasSchema = Object.keys(this._schemaCache || {}).length > 0;
-        const context = {
-            schemaCache: this._schemaCache,
-            registrationAttributes: this._registrationAttributes,
-            userContext: this._userContext
-        };
-
         this.rows = (this.envelopes || []).map((env) => {
-            const teamId = accountToTeamId[recordToAccount[env.Id]];
-            const metrics = this._metricsById[env.Id];
-            const hasState = Boolean(metrics?.hasState);
+            const metrics = this._metricsById[env.id];
             const hasCounts = Boolean(metrics?.hasCounts);
-            const missing =
-                hasState && hasSchema
-                    ? sumMissingInputs(this._missingInputItems(metrics.actionSources), context)
-                    : null;
+            // Never a placeholder: an envelope that owes nothing owes zero, and one whose total has
+            // not been computed yet reads the same way rather than as an unexplained dash.
+            const missingCount = metrics?.missingItemsCount ?? 0;
             return {
-                id: env.Id,
-                name: env.Name || '',
-                household: env.Household_Name__c || '',
-                // Household Account id resolved via the envelope's content link; carried on the
-                // row so opening the envelope can pass it to the shell's data load.
-                householdId: recordToAccount[env.Id] || null,
-                advisorTeam: teamName[teamId] || '',
-                created: env.CreatedDate
-                    ? `${this.formatDateTime(env.CreatedDate)} - ${env.CreatedBy ? env.CreatedBy.Name : ''}`
+                id: env.id,
+                name: env.name || '',
+                household: env.householdName || '',
+                // Household Account id resolved server-side via the envelope's content link;
+                // carried on the row so opening the envelope can pass it to the shell's data load.
+                householdId: env.householdId || null,
+                advisorTeam: env.advisorTeamName || '',
+                created: env.createdDate
+                    ? `${this.formatDateTime(env.createdDate)} - ${env.createdByName || ''}`
                     : '',
                 // Raw datetime kept so the Created column sorts chronologically
                 // rather than by its formatted display string.
-                createdRaw: env.CreatedDate || null,
+                createdRaw: env.createdDate || null,
                 actionItems: hasCounts
                     ? formatEnvelopeContentsLabel({
                           members: metrics.members,
                           isas: metrics.isas
                       })
                     : '',
-                missingItems: missing
-                    ? missingInputsCountLabel(missing.count, missing.hasPlus)
-                    : null,
+                missingItems: missingInputsCountLabel(
+                    missingCount,
+                    Boolean(metrics?.missingItemsHasPlus)
+                ),
                 // Raw count kept so the column sorts numerically rather than by its
                 // display string (where "10" would order before "2").
-                missingItemsCount: missing ? missing.count : null,
-                lastActivity: env.LastModifiedDate
-                    ? `${this.formatDateTime(env.LastModifiedDate)} - ${env.LastModifiedBy ? env.LastModifiedBy.Name : ''}`
+                missingItemsCount: missingCount,
+                lastActivity: env.lastModifiedDate
+                    ? `${this.formatDateTime(env.lastModifiedDate)} - ${env.lastModifiedByName || ''}`
                     : '',
                 // Raw datetime feeding both the toolbar date filter and the
                 // chronological sort of the Last Activity column.
-                lastActivityRaw: env.LastModifiedDate || null
+                lastActivityRaw: env.lastModifiedDate || null
             };
         });
+
+        // Toolbar team filter: the distinct teams present in the rows, rebuilt only here so the
+        // lightning-combobox keeps the same array between renders.
+        const teams = [...new Set(this.rows.map((row) => row.advisorTeam))].filter(Boolean).sort();
+        this.teamOptions = [
+            { label: 'Team: All', value: TEAM_ALL },
+            ...teams.map((team) => ({ label: team, value: team }))
+        ];
     }
 
     // Figma-style absolute timestamp, e.g. "May 26, 2026 12:31".
@@ -258,22 +235,6 @@ export default class EnvelopeListV2 extends LightningElement {
     // Rows survive the active filter — drives table vs the "No results found" card.
     get hasResults() {
         return this.filteredRows.length > 0;
-    }
-
-    get teamOptions() {
-        const teams = [...new Set(this.rows.map((row) => row.advisorTeam))].filter(Boolean).sort();
-        return [
-            { label: 'Team: All', value: TEAM_ALL },
-            ...teams.map((team) => ({ label: team, value: team }))
-        ];
-    }
-
-    get householdOptions() {
-        return (this.households || []).map((hh) => ({ label: hh.Name, value: hh.Id }));
-    }
-
-    get advisorTeamOptions() {
-        return (this.financialAdvisorTeams || []).map((t) => ({ label: t.Name, value: t.Id }));
     }
 
     handleSearchChange(event) {
@@ -367,32 +328,5 @@ export default class EnvelopeListV2 extends LightningElement {
 
     showToast(title, message, variant) {
         LightningToast.show({ label: title, message, variant }, this);
-    }
-
-    // Fetch the envelope-independent form context once per load. Each source is non-fatal: on
-    // failure it falls back to an empty default, and buildRows simply leaves Missing Items blank
-    // (see hasSchema) rather than reporting a misleading count. userContext mirrors the shape the
-    // wizard shell builds so $User.<field> WHERE conditions resolve the same way.
-    _loadFormContext() {
-        return Promise.all([
-            getAllFormSchemas().catch(() => ({})),
-            getRegistrationTypeAttributes().catch(() => ({})),
-            getUserPreferences().catch(() => null)
-        ]).then(([schemas, registrationAttributes, prefs]) => {
-            this._schemaCache = schemas || {};
-            this._registrationAttributes = registrationAttributes || {};
-            this._userContext = {
-                Relationship_to_Firm__c: prefs?.relationshipToFirm ?? null
-            };
-        });
-    }
-    // Adapt the server-extracted action sources to the (entity, formData) shape sumMissingInputs
-    // expects. Only groupId and type are needed to resolve each entity's schema and related-party
-    // rules — the same fields the wizard shell passes.
-    _missingInputItems(actionSources) {
-        return (actionSources || []).map((source) => ({
-            entity: { groupId: source.groupId, type: source.entityType },
-            formData: source.formData
-        }));
     }
 }

@@ -2,18 +2,31 @@
 <template>
     <div class="related-parties">
         <template for:each={groups} for:item="group">
-            <c-envelope-related-party-group
-                key={group.key}
-                class="related-parties__group"
-                party-key={group.key}
-                title={group.title}
-                note={group.note}
-                parties={group.parties}
-                max-parties={group.max}
-                empty-message={group.emptyMessage}
-                onpartyaction={handlePartyAction}
-                onpartyremove={handlePartyRemove}>
-            </c-envelope-related-party-group>
+            <div key={group.key} class="related-parties__group">
+                <c-envelope-related-party-group
+                    party-key={group.key}
+                    title={group.title}
+                    note={group.note}
+                    parties={group.parties}
+                    max-parties={group.max}
+                    waived={group.waived}
+                    empty-message={group.emptyMessage}
+                    onpartyaction={handlePartyAction}
+                    onpartyremove={handlePartyRemove}>
+                </c-envelope-related-party-group>
+                <!-- Only a role that can be satisfied by affirmation carries a waiverLabel. -->
+                <template lwc:if={group.waiverLabel}>
+                    <lightning-input
+                        type="checkbox"
+                        class="related-parties__waiver"
+                        label={group.waiverLabel}
+                        checked={group.waived}
+                        disabled={group.waiverDisabled}
+                        data-key={group.key}
+                        onchange={handleWaiverChange}>
+                    </lightning-input>
+                </template>
+            </div>
         </template>
     </div>
 

@@ -13,3 +13,11 @@
     padding-top: var(--slds-g-spacing-5, 24px);
     border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
 }
+
+/* The affirmation that stands in for adding a party. Indented to the subsection's content so it
+   reads as part of that role rather than as a section-level setting, and spaced off the empty state
+   above it. */
+.related-parties__waiver {
+    display: block;
+    margin: 0.75rem 0 0 0.25rem;
+}

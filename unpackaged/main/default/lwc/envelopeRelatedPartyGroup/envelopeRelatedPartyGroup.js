@@ -39,8 +39,14 @@ export default class EnvelopeRelatedPartyGroup extends LightningElement {
     // still lists what it holds; only the add buttons are disabled.
     @api maxParties;
 
+    // Whether this role has been satisfied by affirming it has no parties rather than by adding
+    // one. Adding a party would contradict the affirmation, so both add buttons are disabled while
+    // it stands — the same treatment as a subsection at its limit. Clearing the affirmation enables
+    // them again.
+    @api waived = false;
+
     get actions() {
-        const disabled = this.isAtLimit;
+        const disabled = this.isAtLimit || this.waived;
         return ACTIONS.map((action) => ({ ...action, disabled }));
     }
 

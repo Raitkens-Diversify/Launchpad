@@ -142,4 +142,18 @@ export default class EnvelopeFormSection extends LightningElement {
             })
         );
     }
+
+    // A related-party waiver is a field on the record rather than part of the section's composite
+    // value, so it names its own field instead of the section's fieldKey and otherwise travels the
+    // same path as any other answer.
+    handleWaiverChange(event) {
+        this.dispatchEvent(
+            new CustomEvent('valuechange', {
+                detail: {
+                    field: event.detail?.field,
+                    value: event.detail?.value
+                }
+            })
+        );
+    }
 }

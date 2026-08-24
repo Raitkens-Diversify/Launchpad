@@ -7,7 +7,7 @@ import {
   shapeVisibleFields,
   clearHiddenAnswers,
   clearDependentCustodian,
-  changeClearsAnswers,
+  hasPriorAnswer,
   draftValuesEqual,
   sectionStatus,
   markUpdatedFields,
@@ -620,10 +620,7 @@ export default class EnvelopeActionDetails extends LightningElement {
     if (draftValuesEqual(this.draft[field], value)) {
       return;
     }
-    if (
-      this._isKeyPoint(field) &&
-      changeClearsAnswers(this._allFields, this.draft, this.userContext, field, value)
-    ) {
+    if (this._isKeyPoint(field) && hasPriorAnswer(this.draft, field)) {
       this._pendingKeyPoint = { field, value };
       this.refs.keyPointModal.open();
       return;
