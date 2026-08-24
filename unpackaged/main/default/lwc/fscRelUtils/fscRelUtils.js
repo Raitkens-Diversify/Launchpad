@@ -140,6 +140,39 @@ export const buildReadOnlyMemberRelationshipEmptyState = (
   return `No ${label} ${collectionLabel} defined.`;
 };
 
+const MEMBER_RELATIONSHIP_RECORD_TYPE_ICONS = Object.freeze({
+  Personal_and_Family: "standard:groups",
+  COI_Referral: "standard:channel_programs",
+  Business: "standard:account",
+  Service_Provider: "standard:buyer_account",
+  Fiduciary_Legal: "standard:contract",
+  Other: "standard:account"
+});
+
+export const resolveMemberRelationshipHeaderIconName = ({
+  memberIconName = "",
+  recordTypeDeveloperName = "",
+  isClientSelectMode = false
+} = {}) => {
+  const explicitIcon = String(memberIconName || "").trim();
+  if (explicitIcon) {
+    return explicitIcon;
+  }
+
+  const normalizedRecordType = normalizeAccountRelationRecordTypeDeveloperName(
+    recordTypeDeveloperName
+  );
+
+  if (isClientSelectMode) {
+    return (
+      MEMBER_RELATIONSHIP_RECORD_TYPE_ICONS[normalizedRecordType] ||
+      "standard:account"
+    );
+  }
+
+  return "standard:account";
+};
+
 const CLIENT_RECORD_TYPE_LABELS = new Set([
   "Person Account",
   "Business",
@@ -513,6 +546,8 @@ export const buildMemberAccountRelationshipViewModels = (rawRelationships = []) 
         relationId: relationship.relationId || "",
         relatedAccountId: relationship.relatedAccountId || "",
         relatedAccountName: relationship.relatedAccountName || "",
+        relatedAccountRecordTypeDeveloperName:
+          relationship.relatedAccountRecordTypeDeveloperName || "",
         role: roleLabel,
         roleLabel,
         inverseRole: inverseRoleLabel,

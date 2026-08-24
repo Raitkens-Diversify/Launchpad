@@ -8,11 +8,12 @@ import saveMemberAccountRelationships from "@salesforce/apex/FscRelHouseholdCont
 import deleteMemberAccountRelationships from "@salesforce/apex/FscRelHouseholdController.deleteMemberAccountRelationships";
 import FscRelCreateReciprocalRoleModal from "c/fscRelCreateReciprocalRoleModal";
 import FscRelCreateRecordModal from "c/fscRelCreateRecordModal";
-import { buildModalSaveMessage, buildMemberRelationshipModalTitle, buildReadOnlyMemberRelationshipEmptyState, buildReadOnlyMemberRelationshipInstruction, ensureFscRelModalStyles, isReadOnlyMemberRelationshipRecordType } from "c/fscRelUtils";
+import { buildModalSaveMessage, buildMemberRelationshipModalTitle, buildReadOnlyMemberRelationshipEmptyState, buildReadOnlyMemberRelationshipInstruction, ensureFscRelModalStyles, isReadOnlyMemberRelationshipRecordType, resolveMemberRelationshipHeaderIconName } from "c/fscRelUtils";
 
 export default class FscRelManageContactRelationshipModal extends LightningModal {
   @api memberAccountId;
   @api memberName;
+  @api memberIconName;
   @api recordTypeDeveloperName;
   @api recordTypeLabel;
   @api reciprocalRoleRecordTypeDeveloperName;
@@ -79,6 +80,14 @@ export default class FscRelManageContactRelationshipModal extends LightningModal
     }
 
     return this.memberName || "This member";
+  }
+
+  get resolvedHeaderIconName() {
+    return resolveMemberRelationshipHeaderIconName({
+      memberIconName: this.memberIconName,
+      recordTypeDeveloperName: this.recordTypeDeveloperName,
+      isClientSelectMode: this.isClientSelectMode
+    });
   }
 
   get resolvedMemberName() {

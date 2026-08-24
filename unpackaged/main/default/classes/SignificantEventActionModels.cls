@@ -166,6 +166,10 @@ public with sharing class SignificantEventActionModels {
     public Boolean approximateDate;
     @AuraEnabled
     public String description;
+    @AuraEnabled
+    public String householdId;
+    @AuraEnabled
+    public String householdName;
 
     public SignificantEventRow() {
       this.approximateDate = false;

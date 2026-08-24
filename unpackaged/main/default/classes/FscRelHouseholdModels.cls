@@ -295,6 +295,8 @@ public class FscRelHouseholdModels {
     @AuraEnabled
     public String recordTypeDeveloperName;
     @AuraEnabled
+    public String relatedAccountRecordTypeDeveloperName;
+    @AuraEnabled
     public Boolean isActive;
 
     public TreeMemberAccountRelationship() {

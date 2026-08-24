@@ -177,6 +177,32 @@ public with sharing class SignificantEventActionService {
     return rows;
   }
 
+  public List<SignificantEventActionModels.LinkedContactRow> getLinkedContactsForSignificantEvent(
+    Id significantEventId
+  ) {
+    if (significantEventId == null) {
+      throw new AuraHandledException('No significant event id provided.');
+    }
+
+    Significant_Event__c eventRecord = repository.selectSignificantEventById(
+      significantEventId
+    );
+    if (eventRecord == null) {
+      throw new AuraHandledException('Significant Event not found.');
+    }
+
+    List<SignificantEventActionModels.LinkedContactRow> rows = new List<SignificantEventActionModels.LinkedContactRow>();
+    for (
+      Significant_Event_Contact__c participant : repository.selectParticipantsByEventId(
+        significantEventId
+      )
+    ) {
+      rows.add(buildLinkedContactRow(participant));
+    }
+
+    return rows;
+  }
+
   public List<SignificantEventActionModels.SignificantEventRow> getSignificantEventsForAccount(
     Id accountId
   ) {
@@ -750,6 +776,8 @@ public with sharing class SignificantEventActionService {
     row.endDate = contactRow.endDate;
     row.approximateDate = contactRow.approximateDate;
     row.description = contactRow.description;
+    row.householdId = contactRow.householdId;
+    row.householdName = contactRow.householdName;
     return row;
   }
 

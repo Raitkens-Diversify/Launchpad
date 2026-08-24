@@ -152,7 +152,7 @@
                   <div
                     class="lookup__new-option"
                     role="option"
-                    aria-expanded={isCreateRecordTypeMenuOpen}
+                    aria-expanded={showCreateRecordTypeMenu}
                     onclick={handleCreateClick}
                   >
                     <span>{createNewOptionLabel}</span>
@@ -166,7 +166,7 @@
                     </template>
                   </div>
 
-                  <template if:true={isCreateRecordTypeMenuOpen}>
+                  <template if:true={showCreateRecordTypeMenu}>
                     <ul
                       class="lookup__new-record-type-list"
                       role="presentation"

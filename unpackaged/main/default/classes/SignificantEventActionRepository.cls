@@ -94,7 +94,24 @@ public with sharing class SignificantEventActionRepository {
     }
 
     return [
-      SELECT Id, Account__c, Account__r.Name, Financial_Advisor_Team__c
+      SELECT
+        Id,
+        Name,
+        Account__c,
+        Account__r.Name,
+        Significant_Event__c,
+        Significant_Event__r.Name,
+        Significant_Event__r.Event_Type__c,
+        Significant_Event__r.Other_Event_Type__c,
+        Significant_Event__r.Start_Date__c,
+        Significant_Event__r.End_Date_Optional__c,
+        Significant_Event__r.Approximate_Date__c,
+        Significant_Event__r.Description__c,
+        Significant_Event__r.Household__c,
+        Significant_Event__r.Household__r.Name,
+        Significant_Event__r.Financial_Advisor_Team__c,
+        Significant_Event__r.Financial_Advisor_Team__r.Name,
+        Financial_Advisor_Team__c
       FROM Significant_Event_Contact__c
       WHERE Significant_Event__c = :significantEventId
       ORDER BY Account__r.Name

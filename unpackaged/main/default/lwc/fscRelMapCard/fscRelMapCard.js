@@ -769,6 +769,7 @@ export default class FscRelMapCard extends LightningElement {
       objectApiName: this.previewObjectApiName,
       relationId: this.node?.relationId,
       memberName: this.node?.label,
+      memberIconName: this.node?.iconName || "",
       selectMemberFromClients:
         Boolean(this.node?.isLazyFamilyGroup) ||
         Boolean(this.node?.isLazyNetworkGroup)

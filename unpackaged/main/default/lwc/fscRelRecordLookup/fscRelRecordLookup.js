@@ -366,6 +366,13 @@ export default class FscRelRecordLookup extends LightningElement {
     return this.effectiveCreateRecordTypeOptions.length > 1;
   }
 
+  get showCreateRecordTypeMenu() {
+    return (
+      this.isCreateRecordTypeMenuOpen &&
+      !String(this.searchTerm || "").trim()
+    );
+  }
+
   get effectiveCreateRecordTypeOptions() {
     if (this.recordTypeId) {
       return [
@@ -559,6 +566,7 @@ export default class FscRelRecordLookup extends LightningElement {
 
   handleInput(event) {
     this.searchTerm = event.target.value;
+    this.closeCreateRecordTypeMenu();
     this.openDropdown();
     this.scheduleSearch();
   }
@@ -621,6 +629,15 @@ export default class FscRelRecordLookup extends LightningElement {
     event.stopPropagation();
     this.clearSelection();
     this.beginEditing();
+  }
+
+  closeCreateRecordTypeMenu() {
+    if (!this.isCreateRecordTypeMenuOpen) {
+      return;
+    }
+
+    this.isCreateRecordTypeMenuOpen = false;
+    this._needsDropdownPosition = true;
   }
 
   handleCreateClick(event) {
@@ -803,7 +820,7 @@ export default class FscRelRecordLookup extends LightningElement {
 
     let footerHeight = DROPDOWN_FOOTER_HEIGHT_PX;
 
-    if (this.isCreateRecordTypeMenuOpen && this.hasMultipleCreateRecordTypes) {
+    if (this.showCreateRecordTypeMenu && this.hasMultipleCreateRecordTypes) {
       footerHeight +=
         this.effectiveCreateRecordTypeOptions.length *
         DROPDOWN_RECORD_TYPE_ROW_HEIGHT_PX;

@@ -1,4 +1,4 @@
-// Author: Hoang Long Vu To | Date: 2026-06-02
+// Author: Hoang Long Vu To | Date: 2026-08-24
 import { LightningElement, api, track, wire } from "lwc";
 import { NavigationMixin, CurrentPageReference } from "lightning/navigation";
 import { getRecord, getFieldValue } from "lightning/uiRecordApi";
@@ -398,6 +398,41 @@ const buildNavigableParticipant = (participant, key) => {
   };
 };
 
+const buildSignificantEventActivitySummary = (
+  activity,
+  { isHouseholdRecordContext = false } = {}
+) => {
+  const relatedParticipants = activity.relatedParticipants || [];
+  const participantsToShow = isHouseholdRecordContext
+    ? relatedParticipants
+    : relatedParticipants.slice(0, 1);
+  const participantLinks = participantsToShow
+    .map((participant, index) =>
+      buildNavigableParticipant(
+        participant,
+        `${activity.id}-significant-event-participant-${index}`
+      )
+    )
+    .filter((participant) => participant.name)
+    .map((participant, index, participants) => ({
+      ...participant,
+      showSeparator: index < participants.length - 1
+    }));
+
+  if (participantLinks.length === 0) {
+    return { hasSummary: false };
+  }
+
+  return {
+    hasSummary: true,
+    isSignificantEventLed: true,
+    participantLinks,
+    actionText: getSummaryActionText(activity.activityType, {
+      category: activity.category
+    })
+  };
+};
+
 const buildEmailActivitySummary = (activity) => {
   const fromAddress = activity.fromAddress || activity.ownerName || "";
   const relatedParticipants = activity.relatedParticipants || [];
@@ -425,7 +460,11 @@ const buildEmailActivitySummary = (activity) => {
   };
 };
 
-const buildActivitySummary = (activity, currentUserId) => {
+const buildActivitySummary = (activity, currentUserId, options = {}) => {
+  if (activity.activityType === "Significant Event") {
+    return buildSignificantEventActivitySummary(activity, options);
+  }
+
   if (activity.activityType === "Email") {
     return buildEmailActivitySummary(activity);
   }
@@ -1034,7 +1073,9 @@ export default class ActivityTimeline extends NavigationMixin(
           getRecordObjectApiNameFromIcon(activity.icon) ||
           null;
 
-        const summary = buildActivitySummary(activity, USER_ID);
+        const summary = buildActivitySummary(activity, USER_ID, {
+          isHouseholdRecordContext: this.isHouseholdRecordContext
+        });
         const linkedRecordLink = buildRelatedToLink(activity);
         const contextBranch =
           !this.customerOnlyMode &&
@@ -1077,10 +1118,18 @@ export default class ActivityTimeline extends NavigationMixin(
         }
 
         const associatedAccountLink = buildAssociatedAccountLink(activity);
+        const isHouseholdSignificantEvent =
+          activity.activityType === "Significant Event" &&
+          this.isHouseholdRecordContext;
+        const isPersonAccountSignificantEvent =
+          activity.activityType === "Significant Event" &&
+          !this.isHouseholdRecordContext;
         details.showParticipants =
           details.participantLinks.length > 0 &&
           activity.activityType !== "Email" &&
-          (details.participantLinks.length > 1 || !summary.hasRelated);
+          (isHouseholdSignificantEvent ||
+            (!isPersonAccountSignificantEvent &&
+              (details.participantLinks.length > 1 || !summary.hasRelated)));
         const isDetailsExpanded = !!this.expandedActivityIds[activity.id];
 
         return {
@@ -1093,7 +1142,10 @@ export default class ActivityTimeline extends NavigationMixin(
           summary,
           details,
           showAssociatedAccount:
-            associatedAccountLink !== null && this.showAssociatedAccountContext,
+            associatedAccountLink !== null &&
+            (this.showAssociatedAccountContext ||
+              (activity.activityType === "Significant Event" &&
+                !this.isHouseholdRecordContext)),
           associatedAccountLink,
           showDrpBranchSubline,
           drpBranchSublineLink: showDrpBranchSubline

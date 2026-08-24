@@ -114,6 +114,17 @@ export const ACTIVITY_TYPES = Object.freeze({
     summaryText: Object.freeze({
       default: "had a chat"
     })
+  }),
+  SIGNIFICANT_EVENT: Object.freeze({
+    key: "Significant Event",
+    label: "Significant Event",
+    category: ACTIVITY_CATEGORIES.INTERACTIONS,
+    icon: "standard:event",
+    badgeKey: "meeting",
+    recordObjectApiName: "Significant_Event__c",
+    summaryText: Object.freeze({
+      default: "has a significant event"
+    })
   })
 });
 

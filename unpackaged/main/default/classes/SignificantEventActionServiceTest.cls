@@ -229,6 +229,58 @@ private class SignificantEventActionServiceTest {
   }
 
   @IsTest
+  static void getLinkedContactsForSignificantEvent_returnsParticipantRows() {
+    SignificantEventTestDataFactory.Scenario scenario = SignificantEventTestDataFactory.loadScenario();
+    Account household = SignificantEventTestDataFactory.createHouseholdAccount(
+      'SE Service Event Participants Household'
+    );
+    SignificantEventActionService service = newService();
+
+    Significant_Event__c eventRecord = new Significant_Event__c(
+      Name = SignificantEventTestDataFactory.DEFAULT_EVENT_NAME,
+      Event_Type__c = SignificantEventTestDataFactory.DEFAULT_EVENT_TYPE,
+      Start_Date__c = Date.today(),
+      Household__c = household.Id
+    );
+    insert eventRecord;
+
+    insert new Significant_Event_Contact__c(
+      Significant_Event__c = eventRecord.Id,
+      Account__c = scenario.treeScenario.linkedPersonAccount.Id
+    );
+
+    Test.startTest();
+    List<SignificantEventActionModels.LinkedContactRow> rows = service.getLinkedContactsForSignificantEvent(
+      eventRecord.Id
+    );
+    Test.stopTest();
+
+    System.assertEquals(1, rows.size());
+    System.assertEquals(
+      SignificantEventTestDataFactory.DEFAULT_EVENT_NAME,
+      rows[0].eventName
+    );
+  }
+
+  @IsTest
+  static void getLinkedContactsForSignificantEvent_missingEvent_throwsHandledException() {
+    SignificantEventActionService service = newService();
+    Boolean threw = false;
+
+    Test.startTest();
+    try {
+      service.getLinkedContactsForSignificantEvent(
+        SignificantEventTestDataFactory.generateFakeId(Significant_Event__c.SObjectType)
+      );
+    } catch (AuraHandledException error) {
+      threw = true;
+    }
+    Test.stopTest();
+
+    System.assertEquals(true, threw);
+  }
+
+  @IsTest
   static void testVisibleConstructor_usesInjectedDependencies() {
     SignificantEventTestDataFactory.Scenario scenario = SignificantEventTestDataFactory.loadSeededScenario();
     SignificantEventActionService service = new SignificantEventActionService(

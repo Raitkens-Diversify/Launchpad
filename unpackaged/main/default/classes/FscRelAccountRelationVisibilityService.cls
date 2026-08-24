@@ -11,7 +11,8 @@
  */
 public without sharing class FscRelAccountRelationVisibilityService {
   private static final String MEMBER_RELATION_FIELDS =
-    'Id, Account__c, Account__r.Name, Account__r.IsPersonAccount, Related_Account__c, Related_Account__r.Name, Related_Account__r.IsPersonAccount, ' +
+    'Id, Account__c, Account__r.Name, Account__r.RecordType.DeveloperName, ' +
+    'Related_Account__c, Related_Account__r.Name, Related_Account__r.RecordType.DeveloperName, ' +
     'Reciprocal_Role__c, Reciprocal_Role__r.Role__c, Reciprocal_Role__r.Name, ' +
     'Inverse_Reciprocal_Role__c, Inverse_Reciprocal_Role__r.Role__c, Inverse_Reciprocal_Role__r.Name, ' +
     'RecordTypeId, RecordType.DeveloperName, Active__c';

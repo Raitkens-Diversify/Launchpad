@@ -539,6 +539,50 @@
                                           >
                                         </template>
                                       </template>
+                                      <template
+                                        lwc:elseif={activity.summary.isSignificantEventLed}
+                                      >
+                                        <template
+                                          for:each={activity.summary.participantLinks}
+                                          for:item="participant"
+                                        >
+                                          <span
+                                            key={participant.key}
+                                            class="activity-participant"
+                                          >
+                                            <template
+                                              lwc:if={participant.isNavigable}
+                                            >
+                                              <a
+                                                href={participant.href}
+                                                class="activity-summary__link"
+                                                data-record-id={participant.recordId}
+                                                data-object-api-name={participant.objectApiName}
+                                                aria-label={participant.name}
+                                                onclick={handleRecordNavigate}
+                                                onkeydown={handleRecordKeyDown}
+                                                >{participant.name}</a
+                                              >
+                                            </template>
+                                            <template lwc:else>
+                                              <span class="activity-summary__name"
+                                                >{participant.name}</span
+                                              >
+                                            </template>
+                                            <template
+                                              lwc:if={participant.showSeparator}
+                                            >
+                                              <span
+                                                class="activity-participant-separator"
+                                                >,&nbsp;</span
+                                              >
+                                            </template>
+                                          </span>
+                                        </template>
+                                        <span class="activity-summary__text"
+                                          >{activity.summary.actionText}</span
+                                        >
+                                      </template>
                                       <template lwc:elseif={activity.summary.isContactLed}>
                                         <template
                                           lwc:if={activity.summary.contactLink.isNavigable}

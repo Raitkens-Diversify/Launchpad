@@ -42,6 +42,7 @@ import {
     cloneDomRect,
     collectLazyExpandableMemberAccountIds,
     collectLazyExpandableAccountIds,
+    collectMemberRelationCountAccountIds,
     collectNodeIds,
     collectWireBusGroups,
     computeVisibleMapColumnCount,
@@ -593,7 +594,11 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
                 node.isLazyExpandable &&
                 node.accountId
             ) {
-                accountIdsToReload.add(node.accountId);
+                if (node.showManageMemberRelationships) {
+                    memberAccountIdsToReload.add(node.accountId);
+                } else {
+                    accountIdsToReload.add(node.accountId);
+                }
             }
 
             if (
@@ -883,6 +888,7 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
             }
 
             this.loadedGroupIds = mergeLoadedGroupIds(this.loadedGroupIds);
+            await this.loadMemberRelationCountsForVisibleMembers();
 
             const relatedAccountIds = buildAccountViewModels(this.treeData.relatedAccounts || [])
                 .map((account) => account.accountId)
@@ -905,7 +911,13 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
                 return;
             }
 
-            const memberAccountIds = collectLazyExpandableMemberAccountIds(fullyLoadedTree);
+            const memberAccountIds = collectMemberRelationCountAccountIds(
+                fullyLoadedTree,
+                {
+                    treeData: this.treeData,
+                    loadedGroupIds: this.loadedGroupIds
+                }
+            );
             const nextMemberRelations = { ...this.nestedMemberRelationsByAccountId };
 
             memberAccountIds.forEach((accountId) => {
@@ -977,7 +989,12 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
         const clientAccounts = this.isUnlinkedPersonCentricMap
             ? buildAccountViewModels(this.personTreeData?.clientAccounts || [])
             : buildAccountViewModels(this.treeData?.clientAccounts || []);
-        const accountIds = collectLazyExpandableMemberAccountIds(baseTree);
+        const accountIds = collectMemberRelationCountAccountIds(baseTree, {
+            treeData: this.isUnlinkedPersonCentricMap
+                ? this.personTreeData
+                : this.treeData,
+            loadedGroupIds: this.loadedGroupIds
+        });
         const memberAccountIds = clientAccounts
             .map((account) => account.accountId)
             .filter(Boolean);
@@ -1164,17 +1181,6 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
         }
     }
 
-    loadAccountMemberCountsForVisibleAccounts() {
-        const baseTree = this.baseMapTree;
-        if (!baseTree) {
-            return;
-        }
-
-        void this.loadAccountMemberCountsForAccountIds(
-            collectLazyExpandableAccountIds(baseTree)
-        );
-    }
-
     get showPreviewPanel() {
         return this.previewPanel.isOpen && Boolean(this.previewPanel.recordId);
     }
@@ -1209,6 +1215,7 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
             this.openManageMemberRelationshipModal({
                 memberAccountId: detail.accountId,
                 memberName: detail.memberName,
+                memberIconName: detail.memberIconName,
                 recordTypeDeveloperName: detail.recordTypeDeveloperName,
                 recordTypeLabel: detail.recordTypeLabel,
                 reciprocalRoleRecordTypeDeveloperName:
@@ -1370,7 +1377,17 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
                     ...this.loadedGroupIds,
                     [nodeId]: true
                 };
-                this.loadAccountMemberCountsForVisibleAccounts();
+                await this.loadMemberRelationCountsForVisibleMembers();
+            } else if (
+                node?.nodeType === MAP_NODE_TYPE.ACCOUNT &&
+                node?.showManageMemberRelationships &&
+                node?.isLazyExpandable &&
+                node?.accountId
+            ) {
+                const cachedCount = this.memberRelationCountByAccountId[node.accountId];
+                if (cachedCount === undefined || cachedCount !== 0) {
+                    await this.loadMemberRelationsForAccountId(node.accountId);
+                }
             } else if (
                 node?.nodeType === MAP_NODE_TYPE.ACCOUNT &&
                 node?.isLazyExpandable &&
@@ -1612,6 +1629,37 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
         return clientMatch?.name || '';
     }
 
+    resolveMemberIconName(accountId) {
+        if (!accountId || !this.baseMapTree) {
+            return '';
+        }
+
+        const mapNode = findMemberNodeByAccountId(this.baseMapTree, accountId);
+        if (mapNode?.iconName) {
+            return mapNode.iconName;
+        }
+
+        if (this.isUnlinkedPersonCentricMap) {
+            const personMember = this.personTreeData?.members?.[0];
+            if (personMember?.accountId === accountId) {
+                return 'standard:contact';
+            }
+        }
+
+        const memberMatch = buildMemberViewModels(this.treeData?.members || []).find(
+            (member) => member.accountId === accountId
+        );
+        if (memberMatch?.iconName) {
+            return memberMatch.iconName;
+        }
+
+        const clientMatch = buildAccountViewModels(this.treeData?.clientAccounts || []).find(
+            (account) => account.accountId === accountId
+        );
+
+        return clientMatch?.iconName || '';
+    }
+
     async loadClientMemberRelationships(recordTypeDeveloperName) {
         const clientMembers = this.resolveClientMembers();
         const relationships = [];
@@ -1644,6 +1692,7 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
     async openManageMemberRelationshipModal({
         memberAccountId,
         memberName,
+        memberIconName,
         recordTypeDeveloperName,
         recordTypeLabel,
         reciprocalRoleRecordTypeDeveloperName,
@@ -1744,6 +1793,10 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
             description: buildFscRelModalDescription(modalTitle),
             memberAccountId: memberAccountId || '',
             memberName: memberName || '',
+            memberIconName:
+                memberIconName ||
+                this.resolveMemberIconName(memberAccountId) ||
+                '',
             recordTypeDeveloperName,
             recordTypeLabel: recordTypeLabel || '',
             reciprocalRoleRecordTypeDeveloperName:

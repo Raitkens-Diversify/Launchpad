@@ -331,7 +331,9 @@ const buildClassificationChildNode = (
     classificationValue,
     nestedMembersByAccountId,
     nestedAccountMemberCountByAccountId,
-    memberRelationshipRecordTypes
+    memberRelationshipRecordTypes,
+    nestedMemberRelationsByAccountId,
+    nestedMemberRelationCountByAccountId
   );
 };
 
@@ -341,7 +343,9 @@ const buildClassificationAccountNode = (
   classificationValue,
   nestedMembersByAccountId = {},
   nestedAccountMemberCountByAccountId = {},
-  memberRelationshipRecordTypes = []
+  memberRelationshipRecordTypes = [],
+  nestedMemberRelationsByAccountId = {},
+  nestedMemberRelationCountByAccountId = {}
 ) => {
   const accountId = account.accountId || account.id || "";
   const memberRelationshipActions = buildMemberRelationshipActions(
@@ -350,33 +354,42 @@ const buildClassificationAccountNode = (
   const supportsMemberRelations = memberRelationshipActions.length > 0;
   const presentation = resolveAccountPresentation(account);
 
-  const node = enrichLazyAccountNodeWithMembersOrCount(
-    {
-      id: `${parentGroupId}::classification-account::${classificationValue || "Other"}::${accountId}`,
-      label: account.name || "",
-      sub: presentation.sub,
-      iconName: presentation.iconName,
-      kind: presentation.kind,
-      nodeType: MAP_NODE_TYPE.ACCOUNT,
-      isAccountNode: true,
-      isClassificationAccountNode: true,
-      relationId: account.relationId || "",
-      accountId,
-      classificationValue: classificationValue || "",
-      isLazyExpandable: true,
-      accountMembersLoaded: false,
-      showManageRelatedContacts: supportsMemberRelations,
-      showManageMemberRelationships: supportsMemberRelations,
-      memberRelationshipActions,
-      defaultOpen: false,
-      children: []
-    },
+  const baseNode = {
+    id: `${parentGroupId}::classification-account::${classificationValue || "Other"}::${accountId}`,
+    label: account.name || "",
+    sub: presentation.sub,
+    iconName: presentation.iconName,
+    kind: presentation.kind,
+    nodeType: MAP_NODE_TYPE.ACCOUNT,
+    isAccountNode: true,
+    isClassificationAccountNode: true,
+    relationId: account.relationId || "",
+    accountId,
+    classificationValue: classificationValue || "",
+    isLazyExpandable: true,
+    accountMembersLoaded: false,
+    showManageRelatedContacts: supportsMemberRelations,
+    showManageMemberRelationships: supportsMemberRelations,
+    memberRelationshipActions,
+    defaultOpen: false,
+    children: []
+  };
+
+  if (supportsMemberRelations) {
+    return attachMemberRelationsToMemberNode(
+      baseNode,
+      nestedMemberRelationsByAccountId,
+      nestedMemberRelationCountByAccountId,
+      memberRelationshipRecordTypes
+    );
+  }
+
+  return enrichLazyAccountNodeWithMembersOrCount(
+    baseNode,
     accountId,
     nestedMembersByAccountId,
     nestedAccountMemberCountByAccountId
   );
-
-  return node;
 };
 
 const buildClassificationAccountChildren = (
@@ -780,6 +793,42 @@ const resolveMemberRelationshipGroupLabel = (
   );
 };
 
+const resolveRelationshipGroupIconName = (recordTypeDeveloperName) => {
+  if (isFamilyRelationshipRecordType(recordTypeDeveloperName)) {
+    return "standard:groups";
+  }
+
+  return resolveRecordTypePresentation(recordTypeDeveloperName).iconName;
+};
+
+const resolveRelatedContactPresentation = (relationship = {}) => {
+  const presentation = resolveRecordTypePresentation(
+    relationship.relatedAccountRecordTypeDeveloperName
+  );
+
+  return {
+    iconName: presentation.iconName,
+    kind: presentation.kind
+  };
+};
+
+const resolveRelatedContactSub = (relationship = {}, roleLabel = "") => {
+  const relatedRecordType = String(
+    relationship.relatedAccountRecordTypeDeveloperName || ""
+  ).trim();
+
+  if (
+    !relatedRecordType ||
+    PERSON_ACCOUNT_RECORD_TYPE_DEVELOPER_NAMES.has(relatedRecordType)
+  ) {
+    return roleLabel;
+  }
+
+  return (
+    resolveRecordTypePresentation(relatedRecordType).label || roleLabel
+  );
+};
+
 const buildRelationshipGroupNode = (
   memberNodeId,
   recordTypeDeveloperName,
@@ -789,9 +838,7 @@ const buildRelationshipGroupNode = (
   id: `${memberNodeId}::relationship-group::${recordTypeDeveloperName || "Other"}`,
   label: recordTypeLabel,
   sub: "",
-  iconName: isFamilyRelationshipRecordType(recordTypeDeveloperName)
-    ? "standard:groups"
-    : "standard:contact",
+  iconName: resolveRelationshipGroupIconName(recordTypeDeveloperName),
   nodeType: MAP_NODE_TYPE.RELATIONSHIP_GROUP,
   isRelationshipGroupNode: true,
   recordTypeDeveloperName: recordTypeDeveloperName || "Other",
@@ -1061,9 +1108,20 @@ const buildLazyAccountNode = (
   account,
   nestedMembersByAccountId = {},
   nestedAccountMemberCountByAccountId = {},
-  memberRelationshipRecordTypes = []
+  memberRelationshipRecordTypes = [],
+  nestedMemberRelationsByAccountId = {},
+  nestedMemberRelationCountByAccountId = {}
 ) => {
   const node = buildAccountNode(account, { memberRelationshipRecordTypes });
+
+  if (node.showManageMemberRelationships) {
+    return attachMemberRelationsToMemberNode(
+      node,
+      nestedMemberRelationsByAccountId,
+      nestedMemberRelationCountByAccountId,
+      memberRelationshipRecordTypes
+    );
+  }
 
   return enrichLazyAccountNodeWithMembersOrCount(
     node,
@@ -1077,14 +1135,18 @@ const buildAccountNodesForCategory = (
   accounts,
   nestedMembersByAccountId,
   nestedAccountMemberCountByAccountId = {},
-  memberRelationshipRecordTypes = []
+  memberRelationshipRecordTypes = [],
+  nestedMemberRelationsByAccountId = {},
+  nestedMemberRelationCountByAccountId = {}
 ) => {
   return accounts.map((account) =>
     buildLazyAccountNode(
       account,
       nestedMembersByAccountId,
       nestedAccountMemberCountByAccountId,
-      memberRelationshipRecordTypes
+      memberRelationshipRecordTypes,
+      nestedMemberRelationsByAccountId,
+      nestedMemberRelationCountByAccountId
     )
   );
 };
@@ -1243,6 +1305,8 @@ export const buildContactRelationNode = (
       inverseRoleLabel,
       memberRoleLabel
     );
+  const relatedPresentation = resolveRelatedContactPresentation(relationship);
+  const roleOrTypeSub = resolveRelatedContactSub(relationship, roleLabel);
 
   return {
     id: `related-account-${relationship.relationId || relationship.relatedAccountId || relationship.relatedContactId}`,
@@ -1250,9 +1314,9 @@ export const buildContactRelationNode = (
       relationship.relatedAccountName ||
       relationship.relatedContactName ||
       "Related person account",
-    sub: useRelatedToSubline ? "" : roleLabel,
-    iconName: "standard:contact",
-    kind: MAP_KIND.PERSON,
+    sub: useRelatedToSubline ? "" : roleOrTypeSub,
+    iconName: relatedPresentation.iconName,
+    kind: relatedPresentation.kind,
     nodeType: MAP_NODE_TYPE.RELATED_CONTACT,
     isRelatedContactNode: true,
     relationId: relationship.relationId || "",
@@ -1747,7 +1811,9 @@ export const buildMapTree = ({
           account,
           nestedMembersByAccountId,
           nestedAccountMemberCountByAccountId,
-          memberRelationshipRecordTypes
+          memberRelationshipRecordTypes,
+          nestedMemberRelationsByAccountId,
+          nestedMemberRelationCountByAccountId
         )
       );
 
@@ -1802,7 +1868,9 @@ export const buildMapTree = ({
           account,
           nestedMembersByAccountId,
           nestedAccountMemberCountByAccountId,
-          memberRelationshipRecordTypes
+          memberRelationshipRecordTypes,
+          nestedMemberRelationsByAccountId,
+          nestedMemberRelationCountByAccountId
         )
       );
 
@@ -1922,7 +1990,9 @@ export const buildMapTree = ({
           accounts,
           nestedMembersByAccountId,
           nestedAccountMemberCountByAccountId,
-          memberRelationshipRecordTypes
+          memberRelationshipRecordTypes,
+          nestedMemberRelationsByAccountId,
+          nestedMemberRelationCountByAccountId
         )
       : [];
     const groupNode = buildGroupNode(definition, accountNodes);
@@ -2001,7 +2071,9 @@ export const collectLazyExpandableMemberAccountIds = (
   }
 
   if (
-    node.nodeType === MAP_NODE_TYPE.MEMBER &&
+    (node.nodeType === MAP_NODE_TYPE.MEMBER ||
+      (node.nodeType === MAP_NODE_TYPE.ACCOUNT &&
+        node.showManageMemberRelationships)) &&
     node.isLazyExpandable &&
     node.accountId
   ) {
@@ -2015,6 +2087,70 @@ export const collectLazyExpandableMemberAccountIds = (
   return accountIds;
 };
 
+const LAZY_GROUP_ID_BY_CATEGORY = Object.freeze({
+  trusts: GROUP_IDS.TRUSTS,
+  businesses: GROUP_IDS.BUSINESSES,
+  households: GROUP_IDS.HOUSEHOLDS
+});
+
+export const collectMemberRelationCountAccountIds = (
+  node,
+  { treeData, loadedGroupIds = {} } = {}
+) => {
+  const accountIds = new Set(collectLazyExpandableMemberAccountIds(node));
+
+  if (!treeData) {
+    return [...accountIds];
+  }
+
+  buildAccountViewModels(treeData.clientAccounts || [])
+    .filter((account) => account.accountId && !isPersonAccountRecord(account))
+    .forEach((account) => accountIds.add(account.accountId));
+
+  if (!treeData.relatedAccounts?.length) {
+    return [...accountIds];
+  }
+
+  const classifiedAccountIds = new Set(
+    buildAccountViewModels(treeData.classifiedAccounts || [])
+      .map((account) => account.accountId)
+      .filter(Boolean)
+  );
+  const leadProspectAccountIds = new Set(
+    mergeLeadProspectAccounts(
+      buildAccountViewModels(treeData.leadProspectAccounts || []).filter(
+        (account) => isLeadProspectAccount(account)
+      ),
+      buildAccountViewModels(treeData.relatedAccounts || [])
+    )
+      .map((account) => account.accountId)
+      .filter(Boolean)
+  );
+
+  buildAccountViewModels(treeData.relatedAccounts).forEach((account) => {
+    const accountId = account.accountId;
+
+    if (!accountId || isPersonAccountRecord(account)) {
+      return;
+    }
+
+    if (
+      classifiedAccountIds.has(accountId) ||
+      leadProspectAccountIds.has(accountId)
+    ) {
+      return;
+    }
+
+    const groupId = LAZY_GROUP_ID_BY_CATEGORY[categorizeRelatedAccount(account)];
+
+    if (groupId && loadedGroupIds[groupId] === true) {
+      accountIds.add(accountId);
+    }
+  });
+
+  return [...accountIds];
+};
+
 export const collectLazyExpandableAccountIds = (node, accountIds = []) => {
   if (!node) {
     return accountIds;
@@ -2023,7 +2159,8 @@ export const collectLazyExpandableAccountIds = (node, accountIds = []) => {
   if (
     node.nodeType === MAP_NODE_TYPE.ACCOUNT &&
     node.isLazyExpandable &&
-    node.accountId
+    node.accountId &&
+    !node.showManageMemberRelationships
   ) {
     accountIds.push(node.accountId);
   }
@@ -2174,8 +2311,13 @@ export const applyOpenState = (node, openState) => {
   const familyCardsLoaded = node.familyCardsLoaded === true;
   const networkCardsLoaded = node.networkCardsLoaded === true;
   const isLazyExpandable = Boolean(node.isLazyExpandable);
+  const isLazyAccountRelations =
+    isAccountNode && isLazyExpandable && Boolean(node.showManageMemberRelationships);
+  const isLazyAccountMembers =
+    isAccountNode && isLazyExpandable && !node.showManageMemberRelationships;
   const isLazyMember = isMemberNode && isLazyExpandable;
-  const isLazyAccount = isAccountNode && isLazyExpandable;
+  const isLazyAccount = isLazyAccountMembers;
+  const isLazyMemberOrAccountRelations = isLazyMember || isLazyAccountRelations;
   const memberRelationsLoaded = node.memberRelationsLoaded === true;
   const memberRelationCountLoaded = node.memberRelationCountLoaded === true;
   const accountMembersLoaded = node.accountMembersLoaded === true;
@@ -2185,7 +2327,7 @@ export const applyOpenState = (node, openState) => {
   const hasNoAccountMembers =
     accountMembersLoaded && (node.memberCount ?? 0) === 0;
   const isLazyMemberPendingOpen =
-    isLazyMember &&
+    isLazyMemberOrAccountRelations &&
     isRequestedOpen &&
     !memberRelationsLoaded &&
     !hasNoMemberRelations;
@@ -2195,7 +2337,7 @@ export const applyOpenState = (node, openState) => {
     !accountMembersLoaded &&
     !hasNoAccountMembers;
   const isOpen =
-    isLazyMember && isRequestedOpen
+    isLazyMemberOrAccountRelations && isRequestedOpen
       ? memberRelationsLoaded || hasNoMemberRelations || isLazyMemberPendingOpen
       : isLazyAccount && isRequestedOpen
         ? accountMembersLoaded || hasNoAccountMembers || isLazyAccountPendingOpen
@@ -2227,17 +2369,19 @@ export const applyOpenState = (node, openState) => {
           ? (node.recordCount ?? childCount)
           : isLeadProspectGroup
             ? (node.recordCount ?? childCount)
-        : isLazyAccount
-          ? accountMembersLoaded
-            ? accountMemberCount
-            : accountMemberCountLoaded
-              ? (node.memberCount ?? 0)
-              : null
-          : isAccountNode
-            ? accountMemberCount
-            : isLazyMember
-              ? memberRelatedContactCount
-              : childCount;
+        : isLazyAccountRelations
+          ? memberRelatedContactCount
+          : isLazyAccount
+            ? accountMembersLoaded
+              ? accountMemberCount
+              : accountMemberCountLoaded
+                ? (node.memberCount ?? 0)
+                : null
+            : isAccountNode
+              ? accountMemberCount
+              : isLazyMember
+                ? memberRelatedContactCount
+                : childCount;
   const hasExpandableContent =
     childCount > 0 ||
     isAccountNode ||
@@ -2274,6 +2418,9 @@ export const applyOpenState = (node, openState) => {
         isClassificationTopLevelGroup ||
         isLeadProspectGroup ||
         (isLazyAccount && !accountMembersLoaded) ||
+        (isLazyAccountRelations &&
+          !memberRelationCountLoaded &&
+          !memberRelationsLoaded) ||
         (isLazyMember && !memberRelationCountLoaded && !memberRelationsLoaded)),
     chevronIcon: isOpen ? "utility:chevronleft" : "utility:chevronright"
   };

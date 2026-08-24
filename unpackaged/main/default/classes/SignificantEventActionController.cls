@@ -108,6 +108,17 @@ public with sharing class SignificantEventActionController {
   }
 
   @AuraEnabled(cacheable=true)
+  public static List<SignificantEventActionModels.LinkedContactRow> getLinkedContactsForSignificantEvent(
+    Id significantEventId
+  ) {
+    try {
+      return SERVICE.getLinkedContactsForSignificantEvent(significantEventId);
+    } catch (Exception error) {
+      throw handleError(error);
+    }
+  }
+
+  @AuraEnabled(cacheable=true)
   public static List<SignificantEventActionModels.SignificantEventRow> getSignificantEventsForAccount(
     Id accountId
   ) {

@@ -2087,7 +2087,7 @@ public with sharing class ActivityTimelineService {
         if (!itemByEventId.containsKey(row.significantEventId)) {
           itemByEventId.put(
             row.significantEventId,
-            mapLinkedContactRowToActivityItem(row)
+            mapLinkedContactRowToActivityItem(row, contextAccount)
           );
           continue;
         }
@@ -2111,14 +2111,15 @@ public with sharing class ActivityTimelineService {
         continue;
       }
 
-      items.add(mapSignificantEventRowToActivityItem(row));
+      items.add(mapSignificantEventRowToActivityItem(row, contextAccount));
     }
 
     return items;
   }
 
   private static ActivityTimelineModels.ActivityItem mapLinkedContactRowToActivityItem(
-    SignificantEventActionModels.LinkedContactRow row
+    SignificantEventActionModels.LinkedContactRow row,
+    Account householdAccount
   ) {
     ActivityTimelineModels.ActivityItem item = buildSignificantEventActivityItem(
       row.significantEventId,
@@ -2130,15 +2131,25 @@ public with sharing class ActivityTimelineService {
       row.approximateDate,
       row.description
     );
-    item.associatedAccountId = row.accountId;
-    item.associatedAccountName = row.accountName;
+
+    if (householdAccount != null) {
+      item.associatedAccountId = String.valueOf(householdAccount.Id);
+      item.associatedAccountName = householdAccount.Name;
+    }
+
+    addParticipant(
+      item.relatedParticipants,
+      String.isBlank(row.accountId) ? null : Id.valueOf(row.accountId),
+      row.accountName
+    );
     return item;
   }
 
   private static ActivityTimelineModels.ActivityItem mapSignificantEventRowToActivityItem(
-    SignificantEventActionModels.SignificantEventRow row
+    SignificantEventActionModels.SignificantEventRow row,
+    Account contextAccount
   ) {
-    return buildSignificantEventActivityItem(
+    ActivityTimelineModels.ActivityItem item = buildSignificantEventActivityItem(
       row.significantEventId,
       row.eventName,
       row.eventType,
@@ -2148,6 +2159,21 @@ public with sharing class ActivityTimelineService {
       row.approximateDate,
       row.description
     );
+
+    if (String.isNotBlank(row.householdId) && String.isNotBlank(row.householdName)) {
+      item.associatedAccountId = row.householdId;
+      item.associatedAccountName = row.householdName;
+    }
+
+    if (contextAccount != null) {
+      addParticipant(
+        item.relatedParticipants,
+        contextAccount.Id,
+        contextAccount.Name
+      );
+    }
+
+    return item;
   }
 
   private static ActivityTimelineModels.ActivityItem buildSignificantEventActivityItem(
@@ -2191,10 +2217,6 @@ public with sharing class ActivityTimelineService {
     SignificantEventActionModels.LinkedContactRow row
   ) {
     if (item == null || row == null || String.isBlank(row.accountId)) {
-      return;
-    }
-
-    if (row.accountId == item.associatedAccountId) {
       return;
     }
 

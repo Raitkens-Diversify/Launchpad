@@ -1555,6 +1555,7 @@ public with sharing class FscRelHouseholdService {
     row.recordTypeDeveloperName = FscRelRecordTypeUtils.normalizeAccountRelationRecordTypeDeveloperName(
       relation.RecordType?.DeveloperName
     );
+    row.relatedAccountRecordTypeDeveloperName = relation.Related_Account__r?.RecordType?.DeveloperName;
     row.isActive = relation.Active__c == true;
     return row;
   }
@@ -1688,6 +1689,7 @@ public with sharing class FscRelHouseholdService {
     row.recordTypeDeveloperName = FscRelRecordTypeUtils.normalizeAccountRelationRecordTypeDeveloperName(
       relation.RecordType?.DeveloperName
     );
+    row.relatedAccountRecordTypeDeveloperName = relation.Account__r?.RecordType?.DeveloperName;
     row.isActive = relation.Active__c == true;
     return row;
   }

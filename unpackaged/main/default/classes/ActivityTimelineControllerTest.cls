@@ -1377,8 +1377,75 @@ private class ActivityTimelineControllerTest {
     System.assertEquals(
       String.valueOf(household.Id),
       significantEventItem.associatedAccountId,
-      'Household timeline should expose the linked participant account.'
+      'Household timeline should expose the current household account.'
+    );
+    System.assertEquals(
+      household.Name,
+      significantEventItem.associatedAccountName,
+      'Household timeline should expose the current household name.'
+    );
+    System.assertEquals(
+      1,
+      significantEventItem.relatedParticipants.size(),
+      'Household timeline should expose linked contacts as related participants.'
+    );
+    System.assertEquals(
+      String.valueOf(household.Id),
+      significantEventItem.relatedParticipants[0].id,
+      'Linked household participant should appear in related participants.'
     );
     System.assertEquals(true, data.isHouseholdRecordContext);
+  }
+
+  @IsTest
+  static void getTimelineData_personAccount_includesSignificantEventHouseholdContext() {
+    SignificantEventTestDataFactory.Scenario scenario = SignificantEventTestDataFactory.createScenario(
+      new SignificantEventTestDataFactory.ScenarioOptions()
+        .withFinancialAdvisorTeam()
+        .withSignificantEvent()
+        .withParticipant()
+    );
+
+    Test.startTest();
+    ActivityTimelineModels.ActivityTimelineData data = ActivityTimelineController.getTimelineData(
+      scenario.treeScenario.linkedPersonAccount.Id,
+      false
+    );
+    Test.stopTest();
+
+    ActivityTimelineModels.ActivityItem significantEventItem;
+    for (ActivityTimelineModels.ActivityItem item : data.activities) {
+      if (item.activityType == 'Significant Event') {
+        significantEventItem = item;
+        break;
+      }
+    }
+
+    System.assertNotEquals(
+      null,
+      significantEventItem,
+      'Person account timeline should include significant events.'
+    );
+    System.assertEquals(
+      String.valueOf(scenario.household.Id),
+      significantEventItem.associatedAccountId,
+      'Person account timeline should expose the event household.'
+    );
+    System.assertEquals(
+      scenario.household.Name,
+      significantEventItem.associatedAccountName,
+      'Person account timeline should expose the event household name.'
+    );
+    System.assertEquals(
+      1,
+      significantEventItem.relatedParticipants.size(),
+      'Person account timeline should expose only the current person account participant.'
+    );
+    System.assertEquals(
+      String.valueOf(scenario.treeScenario.linkedPersonAccount.Id),
+      significantEventItem.relatedParticipants[0].id,
+      'Person account timeline should expose the viewed person account as the participant.'
+    );
+    System.assertEquals(false, data.isHouseholdRecordContext);
   }
 }

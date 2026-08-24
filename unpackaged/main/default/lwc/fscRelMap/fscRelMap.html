@@ -203,6 +203,14 @@
 
                                                                                     <template lwc:if={classificationAccount.isOpen}>
                                                                                         <div class="map-node-row__children">
+                                                                                            <template lwc:if={classificationAccount.showManageMemberRelationships}>
+                                                                                                <c-fsc-rel-map-relationship-groups
+                                                                                                    groups={classificationAccount.children}
+                                                                                                    active-preview-source-id={activePreviewSourceId}
+                                                                                                    oncardaction={handleCardAction}
+                                                                                                ></c-fsc-rel-map-relationship-groups>
+                                                                                            </template>
+                                                                                            <template lwc:elseif={classificationAccount.isAccountNode}>
                                                                                             <template
                                                                                                 for:each={classificationAccount.children}
                                                                                                 for:item="member"
@@ -233,13 +241,21 @@
                                                                                                     </template>
                                                                                                 </div>
                                                                                             </template>
+                                                                                            </template>
                                                                                         </div>
                                                                                     </template>
                                                                                 </div>
                                                                             </template>
                                                                         </template>
 
-                                                                        <template lwc:if={child.isAccountNode}>
+                                                                        <template lwc:if={child.showManageMemberRelationships}>
+                                                                            <c-fsc-rel-map-relationship-groups
+                                                                                groups={child.children}
+                                                                                active-preview-source-id={activePreviewSourceId}
+                                                                                oncardaction={handleCardAction}
+                                                                            ></c-fsc-rel-map-relationship-groups>
+                                                                        </template>
+                                                                        <template lwc:elseif={child.isAccountNode}>
                                                                             <template
                                                                                 for:each={child.children}
                                                                                 for:item="member"
@@ -270,14 +286,6 @@
                                                                                     </template>
                                                                                 </div>
                                                                             </template>
-                                                                        </template>
-
-                                                                        <template lwc:if={child.isMemberNode}>
-                                                                            <c-fsc-rel-map-relationship-groups
-                                                                                groups={child.children}
-                                                                                active-preview-source-id={activePreviewSourceId}
-                                                                                oncardaction={handleCardAction}
-                                                                            ></c-fsc-rel-map-relationship-groups>
                                                                         </template>
                                                                     </div>
                                                                 </template>
