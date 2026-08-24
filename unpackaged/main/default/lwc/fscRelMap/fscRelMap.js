@@ -24,6 +24,7 @@ import FscRelAddClassificationAccountModal from 'c/fscRelAddClassificationAccoun
 import {
     buildAccountViewModels,
     buildFscRelModalDescription,
+    buildMemberRelationshipModalTitle,
     buildMemberViewModels,
     computePreviewPanelCenterPosition,
     dispatchToast,
@@ -1733,7 +1734,11 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
             }
         }
 
-        const modalTitle = `Manage ${recordTypeLabel || 'Member'} Contacts`;
+        const modalTitle = buildMemberRelationshipModalTitle(
+            recordTypeDeveloperName,
+            recordTypeLabel,
+            { isReadOnly: isReadOnlyRecordType }
+        );
         const result = await FscRelManageContactRelationshipModal.open({
             size: 'medium',
             description: buildFscRelModalDescription(modalTitle),

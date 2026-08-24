@@ -178,6 +178,21 @@ public class FscRelHouseholdModels {
     }
   }
 
+  public class CreateRecordTypeOption {
+    @AuraEnabled
+    public String recordTypeId;
+    @AuraEnabled
+    public String developerName;
+    @AuraEnabled
+    public String label;
+    @AuraEnabled
+    public Boolean isPersonType;
+
+    public CreateRecordTypeOption() {
+      this.isPersonType = false;
+    }
+  }
+
   public class PicklistOption {
     @AuraEnabled
     public String label;

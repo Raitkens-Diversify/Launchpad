@@ -9,6 +9,7 @@ import {
   buildAccountViewModels,
   buildMemberAccountRelationshipViewModels,
   buildRoleLabels,
+  buildMemberRelationshipActionLabel,
   CLIENT_ROLE_VALUE,
   computeInitials,
   isClientAccount,
@@ -18,7 +19,8 @@ import {
   isExcludedMemberRelationshipRecordType,
   isReadOnlyMemberRelationshipRecordType,
   memberHasClientRole,
-  normalizeAccountRelationRecordTypeDeveloperName
+  normalizeAccountRelationRecordTypeDeveloperName,
+  resolveMemberRelationshipRecordTypeLabel
 } from "c/fscRelUtils";
 
 export const MAP_KIND = Object.freeze({
@@ -561,43 +563,18 @@ const buildHouseholdNetworkChildren = (
 
 const PERSONAL_AND_FAMILY_RECORD_TYPE = "Personal_and_Family";
 
-const MEMBER_RELATIONSHIP_GROUP_LABELS = Object.freeze({
-  Personal_and_Family: "Family and Friends",
-  COI_Referral: "COI / Referral",
-  Service_Provider: "Service Provider",
-  Business: "Business",
-  Fiduciary_Legal: "Fiduciary / Regulatory",
-  Other: "Other"
-});
-
 export { normalizeAccountRelationRecordTypeDeveloperName } from "c/fscRelUtils";
 export {
   isExcludedMemberRelationshipRecordType,
-  isReadOnlyMemberRelationshipRecordType
+  isReadOnlyMemberRelationshipRecordType,
+  MEMBER_RELATIONSHIP_GROUP_LABELS,
+  resolveMemberRelationshipRecordTypeLabel,
+  resolveMemberRelationshipCollectionLabel,
+  buildMemberRelationshipActionLabel,
+  buildMemberRelationshipModalTitle,
+  buildReadOnlyMemberRelationshipInstruction,
+  buildReadOnlyMemberRelationshipEmptyState
 } from "c/fscRelUtils";
-
-const resolveMemberRelationshipActionLabel = (recordType = {}) => {
-  const developerName = normalizeAccountRelationRecordTypeDeveloperName(
-    recordType.developerName
-  );
-
-  return (
-    recordType.label ||
-    MEMBER_RELATIONSHIP_GROUP_LABELS[developerName] ||
-    recordType.developerName ||
-    "Member"
-  );
-};
-
-const buildMemberRelationshipActionLabel = (recordType = {}) => {
-  const label = resolveMemberRelationshipActionLabel(recordType);
-
-  if (isReadOnlyMemberRelationshipRecordType(recordType.developerName)) {
-    return `View ${label} Contacts`;
-  }
-
-  return `Manage ${label} Contacts`;
-};
 
 export const isFamilyRelationshipRecordType = (recordTypeDeveloperName) => {
   const developerName = normalizeAccountRelationRecordTypeDeveloperName(
@@ -784,15 +761,12 @@ const resolveMemberRelationshipGroupLabel = (
     (recordType) => recordType.developerName === developerName
   );
 
-  if (MEMBER_RELATIONSHIP_GROUP_LABELS[developerName]) {
-    return MEMBER_RELATIONSHIP_GROUP_LABELS[developerName];
-  }
-
-  if (matchedType?.label) {
-    return matchedType.label;
-  }
-
-  return formatRecordTypeLabel(developerName);
+  return (
+    resolveMemberRelationshipRecordTypeLabel(
+      developerName,
+      matchedType?.label
+    ) || formatRecordTypeLabel(developerName)
+  );
 };
 
 const buildRelationshipGroupNode = (
@@ -1739,6 +1713,7 @@ export const buildMapTree = ({
           memberRelationshipRecordTypes
         )
       );
+
       const clientAccountNodes = clientEntityAccounts.map((account) =>
         buildLazyAccountNode(
           account,

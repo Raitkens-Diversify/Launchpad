@@ -191,6 +191,12 @@ public with sharing class FscRelHouseholdService {
     return recordTypeId == null ? null : String.valueOf(recordTypeId);
   }
 
+  public List<FscRelHouseholdModels.CreateRecordTypeOption> getCreateableRecordTypes(
+    String objectApiName
+  ) {
+    return FscRelRecordTypeUtils.selectCreateableRecordTypes(objectApiName);
+  }
+
   public FscRelHouseholdModels.RecordTypeInfo getRecordTypeByDeveloperName(
     String objectApiName,
     String recordTypeDeveloperName

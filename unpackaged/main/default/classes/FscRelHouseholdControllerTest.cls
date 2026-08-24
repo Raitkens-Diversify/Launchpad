@@ -48,13 +48,13 @@ private class FscRelHouseholdControllerTest {
 
     Test.startTest();
     List<FscRelHouseholdModels.LookupOption> scopedResults = FscRelHouseholdController.searchAccountsInScope(
-      'FscData',
-      true,
+      FscDataTestDataFactory.LINKED_PERSON_LAST_NAME,
+      null,
       new List<String>{ scenario.linkedPersonAccount.Id }
     );
     List<FscRelHouseholdModels.LookupOption> excludedResults = FscRelHouseholdController.searchAccountsInScope(
-      'FscData',
-      true,
+      FscDataTestDataFactory.LINKED_PERSON_LAST_NAME,
+      null,
       new List<String>{ scenario.rootAccount.Id }
     );
     Test.stopTest();
@@ -78,6 +78,17 @@ private class FscRelHouseholdControllerTest {
     System.assertEquals(1, results.size());
     System.assertEquals(scenario.linkedPersonAccount.Id, results[0].id);
     System.assertEquals(scenario.linkedPersonAccount.Name, results[0].label);
+  }
+
+  @IsTest
+  static void getCreateableRecordTypes_returnsAccountOptions() {
+    Test.startTest();
+    List<FscRelHouseholdModels.CreateRecordTypeOption> options = FscRelHouseholdController.getCreateableRecordTypes(
+      'Account'
+    );
+    Test.stopTest();
+
+    System.assert(!options.isEmpty(), 'Expected creatable Account record types.');
   }
 
   @IsTest

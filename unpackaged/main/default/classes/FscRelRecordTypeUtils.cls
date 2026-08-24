@@ -176,6 +176,75 @@ public class FscRelRecordTypeUtils {
     return developerNames;
   }
 
+  public static List<FscRelHouseholdModels.CreateRecordTypeOption> selectCreateableRecordTypes(
+    String objectApiName
+  ) {
+    List<FscRelHouseholdModels.CreateRecordTypeOption> options = new List<FscRelHouseholdModels.CreateRecordTypeOption>();
+
+    if (String.isBlank(objectApiName)) {
+      return options;
+    }
+
+    Schema.SObjectType sobjectType = Schema.getGlobalDescribe().get(objectApiName);
+    if (sobjectType == null) {
+      return options;
+    }
+
+    Schema.DescribeSObjectResult describe = sobjectType.getDescribe();
+    if (!describe.isCreateable()) {
+      return options;
+    }
+
+    Map<Id, Schema.RecordTypeInfo> recordTypeInfoById = describe.getRecordTypeInfosById();
+    List<RecordType> activeRecordTypes = [
+      SELECT Id, DeveloperName, Name, IsPersonType
+      FROM RecordType
+      WHERE SObjectType = :objectApiName AND IsActive = TRUE
+      ORDER BY Name
+    ];
+
+    for (RecordType recordType : activeRecordTypes) {
+      Schema.RecordTypeInfo recordTypeInfo = recordTypeInfoById.get(recordType.Id);
+      if (recordTypeInfo == null || !recordTypeInfo.isAvailable()) {
+        continue;
+      }
+
+      options.add(buildCreateRecordTypeOption(recordType));
+    }
+
+    if (!options.isEmpty()) {
+      return options;
+    }
+
+    for (Schema.RecordTypeInfo recordTypeInfo : describe.getRecordTypeInfos()) {
+      if (recordTypeInfo == null || !recordTypeInfo.isAvailable() || !recordTypeInfo.isMaster()) {
+        continue;
+      }
+
+      FscRelHouseholdModels.CreateRecordTypeOption option = new FscRelHouseholdModels.CreateRecordTypeOption();
+      Id recordTypeId = recordTypeInfo.getRecordTypeId();
+      option.recordTypeId = recordTypeId == null ? null : String.valueOf(recordTypeId);
+      option.developerName = recordTypeInfo.getDeveloperName();
+      option.label = recordTypeInfo.getName();
+      option.isPersonType = false;
+      options.add(option);
+      break;
+    }
+
+    return options;
+  }
+
+  private static FscRelHouseholdModels.CreateRecordTypeOption buildCreateRecordTypeOption(
+    RecordType recordType
+  ) {
+    FscRelHouseholdModels.CreateRecordTypeOption option = new FscRelHouseholdModels.CreateRecordTypeOption();
+    option.recordTypeId = String.valueOf(recordType.Id);
+    option.developerName = recordType.DeveloperName;
+    option.label = recordType.Name;
+    option.isPersonType = recordType.IsPersonType == true;
+    return option;
+  }
+
   public static List<FscRelHouseholdModels.RecordTypeOption> selectActiveAccountRelationRecordTypes() {
     return selectAccountRelationRecordTypes(false);
   }

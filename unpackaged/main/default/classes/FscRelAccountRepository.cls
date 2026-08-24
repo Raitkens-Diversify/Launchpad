@@ -317,24 +317,10 @@ public with sharing class FscRelAccountRepository {
       tokens,
       safeLimit
     );
-    String whereClause;
-    if (personAccountsOnly == null) {
-      whereClause =
-        '(' +
-        FscRelNameSearchUtils.buildPersonNameTokenWhereClause(tokens) +
-        ')';
-    } else {
-      Boolean resolvedPersonAccountsOnly = personAccountsOnly == true;
-      String nameWhereClause = resolvedPersonAccountsOnly
-        ? FscRelNameSearchUtils.buildPersonNameTokenWhereClause(tokens)
-        : FscRelNameSearchUtils.buildNameTokenWhereClause(tokens);
-      whereClause =
-        'IsPersonAccount = ' +
-        (resolvedPersonAccountsOnly ? 'true' : 'false') +
-        ' AND (' +
-        nameWhereClause +
-        ')';
-    }
+    String whereClause =
+      '(' +
+      FscRelNameSearchUtils.buildPersonNameTokenWhereClause(tokens) +
+      ')';
     List<Account> accounts;
 
     if (allowedAccountIds != null && !allowedAccountIds.isEmpty()) {

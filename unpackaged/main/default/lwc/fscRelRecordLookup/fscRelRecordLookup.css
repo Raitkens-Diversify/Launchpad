@@ -163,6 +163,10 @@
 }
 
 .lookup__new-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
     padding: 0.55rem 0.75rem;
     color: #0176d3;
     font-size: 0.8125rem;
@@ -171,6 +175,37 @@
 }
 
 .lookup__new-option:hover {
+    background: #f3f3f3;
+}
+
+.lookup__new-option-chevron {
+    flex-shrink: 0;
+    color: #747474;
+}
+
+.lookup__new-record-type-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid #e5e5e5;
+    background: #ffffff;
+}
+
+.lookup__new-record-type-item {
+    margin: 0;
+    padding: 0;
+}
+
+.lookup__new-record-type-option {
+    padding: 0.5rem 0.75rem 0.5rem 1.5rem;
+    color: #181818;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    background: #ffffff;
+}
+
+.lookup__new-record-type-option:hover,
+.lookup__new-record-type-option:focus {
     background: #f3f3f3;
 }
 

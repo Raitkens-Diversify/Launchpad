@@ -102,6 +102,30 @@ private class FscRelRecordTypeUtilsTest {
   }
 
   @IsTest
+  static void selectCreateableRecordTypes_returnsAccountOptions() {
+    Test.startTest();
+    List<FscRelHouseholdModels.CreateRecordTypeOption> options = FscRelRecordTypeUtils.selectCreateableRecordTypes(
+      'Account'
+    );
+    Test.stopTest();
+
+    System.assert(!options.isEmpty(), 'Expected creatable Account record types.');
+
+    for (FscRelHouseholdModels.CreateRecordTypeOption option : options) {
+      System.assert(String.isNotBlank(option.label));
+      System.assert(String.isNotBlank(option.recordTypeId));
+    }
+  }
+
+  @IsTest
+  static void selectCreateableRecordTypes_returnsEmptyForBlankObject() {
+    System.assertEquals(
+      0,
+      FscRelRecordTypeUtils.selectCreateableRecordTypes('').size()
+    );
+  }
+
+  @IsTest
   static void selectRecordTypeByDeveloperName_returnsMatchingRecordType() {
     Test.startTest();
     RecordType personRecordType = FscRelRecordTypeUtils.selectRecordTypeByDeveloperName(

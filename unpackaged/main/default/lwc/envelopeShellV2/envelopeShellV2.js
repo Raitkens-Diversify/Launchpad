@@ -743,6 +743,66 @@ function buildMeta(segments) {
   return segments.filter(Boolean).join(" • ");
 }
 
+// What an ISA row shows under its name, for all three ISA groups. The subtitle used to be frozen
+// when the row was added, out of whatever display label the entry point handed over, and was never
+// reconciled with the record — so a row sat blank when the record had nothing to describe it, or
+// showed a destination group name as though it were a type.
+//
+// Neither add path can supply a real value. The rail's "+" asks for no type at all (handleAddClick
+// passes an empty label). The content CTA's ISA form does ask, but its options name where the item
+// should go — Accounts, DPIs - Sponsor Reported, Service Agreements — which is a group, not a field
+// value any record holds. And the create calls carry only a nickname, so a newly added record has
+// none of these fields set yet regardless.
+//
+// So the subtitle is resolved at render time from the live interview draft, falling back to what the
+// record was loaded with, and finally to the row's own kind so it is always identifiable.
+
+// The fields whose values describe each ISA kind, in the order the design reads them. These are the
+// same fields the server projection builds its subtitle from, named as the interview holds them so
+// the draft can be read directly.
+const ISA_META_FIELDS = {
+  accounts: ["Registration_Type__c", "Custodian__c"],
+  // A DPI is a Financial Account too, but its 'ISA - DPI' schema does not carry registration type or
+  // custodian, so its draft has nothing to read and it relies on the loaded value or the fallback.
+  dpisSponsor: ["Registration_Type__c", "Custodian__c"],
+  serviceAgreements: ["Type__c"]
+};
+
+// Shown when nothing describes the record yet. Singular, because it names one row.
+const ISA_KIND_LABELS = {
+  accounts: "Account",
+  dpisSponsor: "DPI - Sponsor Reported",
+  serviceAgreements: "Service Agreement"
+};
+
+// The group names the ISA form offers as its "type". None is a value any record holds, so none may
+// survive into a subtitle.
+const ISA_GROUP_LABELS = new Set([
+  "Accounts",
+  "DPIs - Sponsor Reported",
+  "Service Agreements"
+]);
+
+function isaMeta(entity) {
+  const kind = ISA_KIND_LABELS[entity?.groupId];
+  if (!kind) {
+    return entity?.meta || "";
+  }
+  const draft =
+    (entity?.actions || []).reduce(
+      (found, action) => found || action?.formData,
+      null
+    ) || {};
+  const live = (ISA_META_FIELDS[entity.groupId] || [])
+    .map((field) => draft[field])
+    .filter(Boolean);
+  if (live.length) {
+    return buildMeta(live);
+  }
+  const loaded = ISA_GROUP_LABELS.has(entity?.meta) ? null : entity?.meta;
+  return loaded || kind;
+}
+
 // Resolve either add entry point to a single target group id. The Household Outline "+"
 // already carries the group id; the content CTA form carries a variant + type instead.
 function resolveGroup({ group, variant, type }) {
@@ -2059,7 +2119,11 @@ export default class EnvelopeShellV2 extends LightningElement {
         (entity) => ({
           ...entity,
           canAddActions: resolveActionCatalog(entity).length > 0,
-          isComplete: this._entityActionsComplete(entity)
+          isComplete: this._entityActionsComplete(entity),
+          // Resolved here rather than carried on the model entry so the row picks up its describing
+          // fields the moment the interview captures them, instead of keeping whatever its add path
+          // happened to pass. See isaMeta.
+          ...(ISA_KIND_LABELS[groupId] ? { meta: isaMeta(entity) } : {})
         })
       );
     });
@@ -2111,7 +2175,13 @@ export default class EnvelopeShellV2 extends LightningElement {
             statusLabel: isComplete ? "Completed" : action.statusLabel
           };
         });
-        items.push({ ...entity, actions });
+        items.push({
+          ...entity,
+          actions,
+          // Keeps the card's type text in step with the sidebar subtitle (see isaMeta); without it
+          // the same record reads one way in the rail and another in the workspace.
+          ...(ISA_KIND_LABELS[groupId] ? { typeLabel: isaMeta(entity) } : {})
+        });
       });
     });
     return items;

@@ -152,10 +152,48 @@
                   <div
                     class="lookup__new-option"
                     role="option"
+                    aria-expanded={isCreateRecordTypeMenuOpen}
                     onclick={handleCreateClick}
                   >
-                    {createNewOptionLabel}
+                    <span>{createNewOptionLabel}</span>
+                    <template if:true={hasMultipleCreateRecordTypes}>
+                      <lightning-icon
+                        icon-name="utility:chevronright"
+                        size="xx-small"
+                        alternative-text="Show record types"
+                        class="lookup__new-option-chevron"
+                      ></lightning-icon>
+                    </template>
                   </div>
+
+                  <template if:true={isCreateRecordTypeMenuOpen}>
+                    <ul
+                      class="lookup__new-record-type-list"
+                      role="presentation"
+                    >
+                      <template
+                        for:each={effectiveCreateRecordTypeOptions}
+                        for:item="recordTypeOption"
+                      >
+                        <li
+                          key={recordTypeOption.recordTypeId}
+                          role="presentation"
+                          class="lookup__new-record-type-item"
+                        >
+                          <div
+                            class="lookup__new-record-type-option"
+                            role="option"
+                            data-record-type-id={recordTypeOption.recordTypeId}
+                            data-label={recordTypeOption.label}
+                            data-is-person-type={recordTypeOption.isPersonType}
+                            onclick={handleCreateRecordTypeSelect}
+                          >
+                            {recordTypeOption.label}
+                          </div>
+                        </li>
+                      </template>
+                    </ul>
+                  </template>
                 </div>
               </template>
             </div>

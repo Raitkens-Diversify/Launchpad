@@ -33,6 +33,113 @@ export const isReadOnlyMemberRelationshipRecordType = (
   );
 };
 
+export const MEMBER_RELATIONSHIP_GROUP_LABELS = Object.freeze({
+  Personal_and_Family: "Family and Friends",
+  COI_Referral: "COI / Referral",
+  Service_Provider: "Service Provider",
+  Business: "Business",
+  Fiduciary_Legal: "Fiduciary / Regulatory",
+  Other: "Other"
+});
+
+const formatMemberRelationshipRecordTypeLabel = (developerName = "") =>
+  String(developerName || "")
+    .replace(/_/g, " ")
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .trim();
+
+export const resolveMemberRelationshipRecordTypeLabel = (
+  recordTypeDeveloperName = "",
+  recordTypeLabel = ""
+) => {
+  const developerName = normalizeAccountRelationRecordTypeDeveloperName(
+    recordTypeDeveloperName
+  );
+
+  if (MEMBER_RELATIONSHIP_GROUP_LABELS[developerName]) {
+    return MEMBER_RELATIONSHIP_GROUP_LABELS[developerName];
+  }
+
+  const label = String(recordTypeLabel || "").trim();
+  if (label) {
+    return label;
+  }
+
+  return formatMemberRelationshipRecordTypeLabel(developerName) || "Member";
+};
+
+export const resolveMemberRelationshipCollectionLabel = (
+  recordTypeDeveloperName = ""
+) =>
+  isReadOnlyMemberRelationshipRecordType(recordTypeDeveloperName)
+    ? "Related Parties"
+    : "Contacts";
+
+export const buildMemberRelationshipActionLabel = (recordType = {}) => {
+  const developerName = normalizeAccountRelationRecordTypeDeveloperName(
+    recordType.developerName
+  );
+  const label = resolveMemberRelationshipRecordTypeLabel(
+    developerName,
+    recordType.label
+  );
+  const collectionLabel =
+    resolveMemberRelationshipCollectionLabel(developerName);
+  const verb = isReadOnlyMemberRelationshipRecordType(developerName)
+    ? "View"
+    : "Manage";
+
+  return `${verb} ${label} ${collectionLabel}`;
+};
+
+export const buildMemberRelationshipModalTitle = (
+  recordTypeDeveloperName = "",
+  recordTypeLabel = "",
+  { isReadOnly = false } = {}
+) => {
+  const label = resolveMemberRelationshipRecordTypeLabel(
+    recordTypeDeveloperName,
+    recordTypeLabel
+  );
+  const collectionLabel = resolveMemberRelationshipCollectionLabel(
+    recordTypeDeveloperName
+  );
+  const verb = isReadOnly ? "View" : "Manage";
+
+  return `${verb} ${label} ${collectionLabel}`;
+};
+
+export const buildReadOnlyMemberRelationshipInstruction = (
+  memberName = "This member",
+  recordTypeDeveloperName = "",
+  recordTypeLabel = ""
+) => {
+  const label = resolveMemberRelationshipRecordTypeLabel(
+    recordTypeDeveloperName,
+    recordTypeLabel
+  );
+  const collectionLabel = resolveMemberRelationshipCollectionLabel(
+    recordTypeDeveloperName
+  ).toLowerCase();
+
+  return `Review ${memberName}'s ${label} relationships. These ${collectionLabel} cannot be changed here.`;
+};
+
+export const buildReadOnlyMemberRelationshipEmptyState = (
+  recordTypeDeveloperName = "",
+  recordTypeLabel = ""
+) => {
+  const label = resolveMemberRelationshipRecordTypeLabel(
+    recordTypeDeveloperName,
+    recordTypeLabel
+  );
+  const collectionLabel = resolveMemberRelationshipCollectionLabel(
+    recordTypeDeveloperName
+  ).toLowerCase();
+
+  return `No ${label} ${collectionLabel} defined.`;
+};
+
 const CLIENT_RECORD_TYPE_LABELS = new Set([
   "Person Account",
   "Business",

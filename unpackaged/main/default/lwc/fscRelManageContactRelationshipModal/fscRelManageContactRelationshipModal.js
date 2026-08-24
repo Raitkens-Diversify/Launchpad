@@ -8,7 +8,7 @@ import saveMemberAccountRelationships from "@salesforce/apex/FscRelHouseholdCont
 import deleteMemberAccountRelationships from "@salesforce/apex/FscRelHouseholdController.deleteMemberAccountRelationships";
 import FscRelCreateReciprocalRoleModal from "c/fscRelCreateReciprocalRoleModal";
 import FscRelCreateRecordModal from "c/fscRelCreateRecordModal";
-import { buildModalSaveMessage, ensureFscRelModalStyles, isReadOnlyMemberRelationshipRecordType } from "c/fscRelUtils";
+import { buildModalSaveMessage, buildMemberRelationshipModalTitle, buildReadOnlyMemberRelationshipEmptyState, buildReadOnlyMemberRelationshipInstruction, ensureFscRelModalStyles, isReadOnlyMemberRelationshipRecordType } from "c/fscRelUtils";
 
 const PERSON_ACCOUNT_FILTER = Object.freeze({
   criteria: [
@@ -130,8 +130,11 @@ export default class FscRelManageContactRelationshipModal extends LightningModal
   }
 
   get modalTitle() {
-    const verb = this.isReadOnly ? "View" : "Manage";
-    return `${verb} ${this.recordTypeLabel || "Member"} Contacts`;
+    return buildMemberRelationshipModalTitle(
+      this.recordTypeDeveloperName,
+      this.recordTypeLabel,
+      { isReadOnly: this.isReadOnly }
+    );
   }
 
   get cancelButtonLabel() {
@@ -160,7 +163,11 @@ export default class FscRelManageContactRelationshipModal extends LightningModal
 
   get relationshipInstruction() {
     if (this.isReadOnly) {
-      return `Review ${this.resolvedMemberName}'s ${this.recordTypeLabel || "member"} relationships. These contacts cannot be changed here.`;
+      return buildReadOnlyMemberRelationshipInstruction(
+        this.resolvedMemberName,
+        this.recordTypeDeveloperName,
+        this.recordTypeLabel
+      );
     }
 
     if (this.isClientSelectMode) {
@@ -195,6 +202,13 @@ export default class FscRelManageContactRelationshipModal extends LightningModal
 
   get showReadOnlyEmptyState() {
     return this.isReadOnly && this.relationshipRows.length === 0;
+  }
+
+  get readOnlyEmptyStateMessage() {
+    return buildReadOnlyMemberRelationshipEmptyState(
+      this.recordTypeDeveloperName,
+      this.recordTypeLabel
+    );
   }
 
   get modalTableClass() {

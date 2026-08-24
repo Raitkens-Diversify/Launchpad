@@ -174,6 +174,16 @@ public with sharing class FscRelHouseholdController {
   }
 
   /**
+   * Returns creatable record types for inline lookup create actions.
+   */
+  @AuraEnabled(cacheable=true)
+  public static List<FscRelHouseholdModels.CreateRecordTypeOption> getCreateableRecordTypes(
+    String objectApiName
+  ) {
+    return SERVICE.getCreateableRecordTypes(objectApiName);
+  }
+
+  /**
    * Resolves a record type id (and person-type flag) from object + developer name.
    */
   @AuraEnabled(cacheable=true)

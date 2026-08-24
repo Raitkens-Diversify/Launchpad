@@ -6,10 +6,10 @@
  */
 import { LightningElement, api } from "lwc";
 import getAccountName from "@salesforce/apex/FscRelHouseholdController.getAccountName";
-import getAccountRecordTypeId from "@salesforce/apex/FscRelHouseholdController.getAccountRecordTypeId";
 import getContactName from "@salesforce/apex/FscRelHouseholdController.getContactName";
 import getReciprocalRoleName from "@salesforce/apex/FscRelHouseholdController.getReciprocalRoleName";
 import getRecordTypeByDeveloperName from "@salesforce/apex/FscRelHouseholdController.getRecordTypeByDeveloperName";
+import getCreateableRecordTypes from "@salesforce/apex/FscRelHouseholdController.getCreateableRecordTypes";
 import searchAccounts from "@salesforce/apex/FscRelHouseholdController.searchAccounts";
 import searchAccountsByClassification from "@salesforce/apex/FscRelHouseholdController.searchAccountsByClassification";
 import searchAccountsInScope from "@salesforce/apex/FscRelHouseholdController.searchAccountsInScope";
@@ -22,6 +22,7 @@ const MIN_SEARCH_LENGTH = 2;
 const DROPDOWN_MAX_HEIGHT_PX = 220;
 const DROPDOWN_MIN_HEIGHT_PX = 80;
 const DROPDOWN_FOOTER_HEIGHT_PX = 36;
+const DROPDOWN_RECORD_TYPE_ROW_HEIGHT_PX = 32;
 const DROPDOWN_VIEWPORT_PADDING_PX = 8;
 
 export default class FscRelRecordLookup extends LightningElement {
@@ -63,6 +64,9 @@ export default class FscRelRecordLookup extends LightningElement {
   _dropdownStyle = "";
   _dropdownOpensAbove = false;
   _isDropdownPointerDown = false;
+  _createRecordTypeOptions = [];
+  _createRecordTypesLoadPromise = null;
+  isCreateRecordTypeMenuOpen = false;
 
   @api
   get value() {
@@ -192,6 +196,7 @@ export default class FscRelRecordLookup extends LightningElement {
   connectedCallback() {
     this._instanceId = `lookup-${Math.random().toString(36).slice(2)}`;
     this.loadRecordTypeId();
+    void this.loadCreateRecordTypes();
     if (this._value) {
       this.syncSelectedLabel();
     }
@@ -357,6 +362,35 @@ export default class FscRelRecordLookup extends LightningElement {
     return `+ ${this.createButtonText}`;
   }
 
+  get hasMultipleCreateRecordTypes() {
+    return this.effectiveCreateRecordTypeOptions.length > 1;
+  }
+
+  get effectiveCreateRecordTypeOptions() {
+    if (this.recordTypeId) {
+      return [
+        {
+          recordTypeId: this.recordTypeId,
+          label: this.createButtonText.replace(/^New\s+/i, ""),
+          isPersonType: this.resolveIsPersonAccount()
+        }
+      ];
+    }
+
+    if (this._recordTypeDeveloperName && this._resolvedRecordTypeId) {
+      return [
+        {
+          recordTypeId: this._resolvedRecordTypeId,
+          developerName: this._recordTypeDeveloperName,
+          label: this.createButtonText.replace(/^New\s+/i, ""),
+          isPersonType: this._resolvedIsPersonType === true
+        }
+      ];
+    }
+
+    return this._createRecordTypeOptions;
+  }
+
   get createModalHeaderLabel() {
     return this.createModalLabel || "New Record";
   }
@@ -404,6 +438,47 @@ export default class FscRelRecordLookup extends LightningElement {
     this._recordTypeLoadStarted = false;
     this._resolvedRecordTypeId = null;
     this._resolvedIsPersonType = null;
+    this._createRecordTypeOptions = [];
+    this._createRecordTypesLoadPromise = null;
+    this.isCreateRecordTypeMenuOpen = false;
+  }
+
+  async loadCreateRecordTypes() {
+    if (this.createEnabled === false || !this.objectApiName) {
+      this._createRecordTypeOptions = [];
+      return;
+    }
+
+    if (this.recordTypeId || this._recordTypeDeveloperName) {
+      return;
+    }
+
+    if (this._createRecordTypesLoadPromise) {
+      await this._createRecordTypesLoadPromise;
+      return;
+    }
+
+    this._createRecordTypesLoadPromise = getCreateableRecordTypes({
+      objectApiName: this.objectApiName
+    })
+      .then((options) => {
+        this._createRecordTypeOptions = Array.isArray(options)
+          ? [...options].sort((left, right) =>
+              String(left?.label || "").localeCompare(String(right?.label || ""))
+            )
+          : [];
+      })
+      .catch(() => {
+        this._createRecordTypeOptions = [];
+      })
+      .finally(() => {
+        this._createRecordTypesLoadPromise = null;
+        if (this.isOpen) {
+          this._needsDropdownPosition = true;
+        }
+      });
+
+    await this._createRecordTypesLoadPromise;
   }
 
   loadRecordTypeId() {
@@ -437,35 +512,10 @@ export default class FscRelRecordLookup extends LightningElement {
     if (this.objectApiName !== "Account") {
       return;
     }
-
-    const personAccountsOnly = this.filterWantsPersonAccount() === true;
-
-    getAccountRecordTypeId({ personAccountsOnly })
-      .then((recordTypeId) => {
-        if (!this.recordTypeId && recordTypeId) {
-          this._resolvedRecordTypeId = recordTypeId;
-          this._resolvedIsPersonType = personAccountsOnly;
-        }
-      })
-      .catch(() => {
-        // Create can fall back to org default when record type is unavailable.
-      });
-  }
-
-  resolvePersonAccountsOnly() {
-    if (this._resolvedIsPersonType !== null) {
-      return this._resolvedIsPersonType === true;
-    }
-
-    return this.filterWantsPersonAccount() === true;
   }
 
   resolveIsPersonAccount() {
-    if (this._resolvedIsPersonType !== null) {
-      return this._resolvedIsPersonType === true;
-    }
-
-    return this.filterWantsPersonAccount() === true;
+    return this._resolvedIsPersonType === true;
   }
 
   async loadSelectedLabel(recordId) {
@@ -491,23 +541,6 @@ export default class FscRelRecordLookup extends LightningElement {
       // eslint-disable-next-line no-console
       console.error("[fscRelRecordLookup] failed to load record name", error);
     }
-  }
-
-  filterWantsPersonAccount() {
-    const criteria = this.filter?.criteria;
-    if (!Array.isArray(criteria)) {
-      return null;
-    }
-
-    const personAccountCriterion = criteria.find(
-      (criterion) => criterion.fieldPath === "IsPersonAccount"
-    );
-
-    if (!personAccountCriterion) {
-      return null;
-    }
-
-    return personAccountCriterion.value === true;
   }
 
   handleControlClick() {
@@ -592,19 +625,68 @@ export default class FscRelRecordLookup extends LightningElement {
 
   handleCreateClick(event) {
     event.stopPropagation();
+
+    const createOptions = this.effectiveCreateRecordTypeOptions;
+
+    if (createOptions.length === 0) {
+      this.dispatchCreateRequest(null);
+      return;
+    }
+
+    if (createOptions.length > 1) {
+      this.isCreateRecordTypeMenuOpen = !this.isCreateRecordTypeMenuOpen;
+      this._needsDropdownPosition = true;
+      return;
+    }
+
+    this.dispatchCreateRequest(createOptions[0]);
+  }
+
+  handleCreateRecordTypeSelect(event) {
+    event.stopPropagation();
+
+    const recordTypeId = event.currentTarget?.dataset?.recordTypeId || "";
+    const selectedOption =
+      this.effectiveCreateRecordTypeOptions.find(
+        (option) => option.recordTypeId === recordTypeId
+      ) ||
+      (recordTypeId
+        ? {
+            recordTypeId,
+            label: event.currentTarget?.dataset?.label || "",
+            isPersonType: event.currentTarget?.dataset?.isPersonType === "true"
+          }
+        : null);
+
+    if (!selectedOption) {
+      return;
+    }
+
+    this.dispatchCreateRequest(selectedOption);
+  }
+
+  dispatchCreateRequest(recordTypeOption) {
     this.closeDropdown();
 
     if (!this.objectApiName) {
       return;
     }
 
+    const recordTypeLabel = String(recordTypeOption?.label || "").trim();
+    const headerLabel = recordTypeLabel
+      ? `New ${recordTypeLabel}`
+      : this.createModalHeaderLabel;
+
     this.dispatchEvent(
       new CustomEvent("createrequest", {
         detail: {
           objectApiName: this.objectApiName,
-          recordTypeId: this.effectiveRecordTypeId,
-          headerLabel: this.createModalHeaderLabel,
-          isPersonAccount: this.resolveIsPersonAccount()
+          recordTypeId:
+            recordTypeOption?.recordTypeId || this.effectiveRecordTypeId,
+          headerLabel,
+          isPersonAccount:
+            recordTypeOption?.isPersonType === true ||
+            this.resolveIsPersonAccount()
         },
         bubbles: true,
         composed: true
@@ -625,6 +707,7 @@ export default class FscRelRecordLookup extends LightningElement {
     this._needsDropdownPosition = true;
     this.bindDropdownPositionListeners();
     this.template.host?.setAttribute("data-open", "true");
+    void this.loadCreateRecordTypes();
 
     if (this.isReciprocalRoleLookup) {
       void this.runSearch();
@@ -645,6 +728,7 @@ export default class FscRelRecordLookup extends LightningElement {
     this.isOpen = false;
     this.isEditing = false;
     this.isLoading = false;
+    this.isCreateRecordTypeMenuOpen = false;
     this.searchTerm = "";
     this.searchResults = [];
     this._dropdownStyle = "";
@@ -701,7 +785,7 @@ export default class FscRelRecordLookup extends LightningElement {
     maxHeight = Math.max(Math.round(maxHeight), DROPDOWN_MIN_HEIGHT_PX);
 
     const footerReserve = this.showCreateInDropdown
-      ? DROPDOWN_FOOTER_HEIGHT_PX
+      ? this.createFooterHeightPx
       : 0;
     const scrollMaxHeight = Math.max(
       maxHeight - footerReserve,
@@ -710,6 +794,22 @@ export default class FscRelRecordLookup extends LightningElement {
 
     this._dropdownOpensAbove = opensAbove;
     this._dropdownStyle = `max-height:${maxHeight}px;--lookup-scroll-max:${scrollMaxHeight}px`;
+  }
+
+  get createFooterHeightPx() {
+    if (!this.showCreateInDropdown) {
+      return 0;
+    }
+
+    let footerHeight = DROPDOWN_FOOTER_HEIGHT_PX;
+
+    if (this.isCreateRecordTypeMenuOpen && this.hasMultipleCreateRecordTypes) {
+      footerHeight +=
+        this.effectiveCreateRecordTypeOptions.length *
+        DROPDOWN_RECORD_TYPE_ROW_HEIGHT_PX;
+    }
+
+    return footerHeight;
   }
 
   clearSelection() {
@@ -837,18 +937,16 @@ export default class FscRelRecordLookup extends LightningElement {
         });
         this.searchResults = Array.isArray(results) ? results : [];
       } else if (this.isAccountLookupWithScope) {
-        const personAccountsOnly = this.resolvePersonAccountsOnly();
         const results = await searchAccountsInScope({
           searchTerm: trimmedTerm,
-          personAccountsOnly,
+          personAccountsOnly: null,
           allowedAccountIds: this.normalizedAllowedRecordIds
         });
         this.searchResults = Array.isArray(results) ? results : [];
       } else {
-        const personAccountsOnly = this.resolvePersonAccountsOnly();
         const results = await searchAccounts({
           searchTerm: trimmedTerm,
-          personAccountsOnly
+          personAccountsOnly: null
         });
         this.searchResults = Array.isArray(results) ? results : [];
       }
