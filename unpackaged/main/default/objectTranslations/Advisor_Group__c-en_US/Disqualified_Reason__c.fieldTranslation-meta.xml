@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Disqualified Reason --></label>
+        <name>Disqualified_Reason__c</name>
+        <picklistValues>
+            <masterLabel>Chose Another Firm</masterLabel>
+            <translation><!-- Chose Another Firm --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Compliance / Risk Concern</masterLabel>
+            <translation><!-- Compliance / Risk Concern --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Cultural / Strategic Fit</masterLabel>
+            <translation><!-- Cultural / Strategic Fit --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Economics / Deal Terms</masterLabel>
+            <translation><!-- Economics / Deal Terms --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Insufficient Assets</masterLabel>
+            <translation><!-- Insufficient Assets --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Non-Responsive</masterLabel>
+            <translation><!-- Non-Responsive --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Not the Right Time</masterLabel>
+            <translation><!-- Not the Right Time --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Platform / Services Fit</masterLabel>
+            <translation><!-- Platform / Services Fit --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Started Own RIA</masterLabel>
+            <translation><!-- Started Own RIA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Stayed with Current Firm</masterLabel>
+            <translation><!-- Stayed with Current Firm --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Timing / Not Ready</masterLabel>
+            <translation><!-- Timing / Not Ready --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Went with Competitor</masterLabel>
+            <translation><!-- Went with Competitor --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

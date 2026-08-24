@@ -1236,6 +1236,109 @@
         </values>
     </picklistValues>
     <picklistValues>
+        <picklist>Current_Plan_Provider_s__c</picklist>
+        <values>
+            <fullName>401Go</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>ADP</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>American Funds</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Ameritas</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Ascensus</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Empower</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Fidelity</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Guideline</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Human Interest</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>JPMorgan</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>John Hancock</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Lincoln Financial Group</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>NWPS</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Nationwide</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Other</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Paychex</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Principal</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Schwab</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>T%2E Rowe Price</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>TIAA</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>The Standard</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Transamerica</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>VOYA</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Vanguard</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Vestwell</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
         <picklist>Customer_Advisor_ID__c</picklist>
         <values>
             <fullName>C10076</fullName>
@@ -1254,6 +1357,57 @@
         </values>
         <values>
             <fullName>Moderate</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Disqualified_Reason__c</picklist>
+        <values>
+            <fullName>Chose Another Firm</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Compliance %2F Risk Concern</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Cultural %2F Strategic Fit</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Economics %2F Deal Terms</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Insufficient Assets</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Non-Responsive</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Not the Right Time</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Platform %2F Services Fit</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Started Own RIA</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Stayed with Current Firm</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Timing %2F Not Ready</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Went with Competitor</fullName>
             <default>false</default>
         </values>
     </picklistValues>
@@ -3593,6 +3747,57 @@
         </values>
     </picklistValues>
     <picklistValues>
+        <picklist>Potential_Service__c</picklist>
+        <values>
+            <fullName>BD</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Broker Dealer</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Delaware Statutory Trust %28DST%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Family Office Service Agreement</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Fee Based Wealth Management</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Financial Planning</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>RIA 1099</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>RIA 1099 %2B BD</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>RIA W2</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>RIA W2 %2B BD</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Retirement Planning or ERISA</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Tax Services</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
         <picklist>Primary_Address__c</picklist>
         <values>
             <fullName>Billing Address</fullName>
@@ -3604,6 +3809,29 @@
         </values>
         <values>
             <fullName>Other Address</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Prospect_Status__c</picklist>
+        <values>
+            <fullName>Attempted Contact</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Connected</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>New</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Nurturing</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Qualified</fullName>
             <default>false</default>
         </values>
     </picklistValues>
@@ -3780,6 +4008,33 @@
         </values>
         <values>
             <fullName>Semi-Annual</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Referral_Source__c</picklist>
+        <values>
+            <fullName>401k</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Client Referral</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Diversify Advisor Referral</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Home Office Referral</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Personal Relationship</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Website Lead</fullName>
             <default>false</default>
         </values>
     </picklistValues>

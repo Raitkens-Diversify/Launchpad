@@ -7,15 +7,39 @@
             <translation><!-- Active --></translation>
         </picklistValues>
         <picklistValues>
+            <masterLabel>Disqualified</masterLabel>
+            <translation><!-- Disqualified --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Engaged Lead</masterLabel>
+            <translation><!-- Engaged Lead --></translation>
+        </picklistValues>
+        <picklistValues>
             <masterLabel>Inactive</masterLabel>
             <translation><!-- Inactive --></translation>
         </picklistValues>
         <picklistValues>
-            <masterLabel>Lead</masterLabel>
-            <translation><!-- Lead --></translation>
+            <masterLabel>Initial Lead Discovery</masterLabel>
+            <translation><!-- Initial Lead Discovery --></translation>
         </picklistValues>
         <picklistValues>
-            <masterLabel>Prospect</masterLabel>
-            <translation><!-- Prospect --></translation>
+            <masterLabel>Marketing Outreach</masterLabel>
+            <translation><!-- Marketing Outreach --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Marketing Qualified Lead</masterLabel>
+            <translation><!-- Marketing Qualified Lead --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Sales Accepted Lead</masterLabel>
+            <translation><!-- Sales Accepted Lead --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Sales Qualified Lead</masterLabel>
+            <translation><!-- Sales Qualified Lead --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Target Account</masterLabel>
+            <translation><!-- Target Account --></translation>
         </picklistValues>
     </CustomFieldTranslation>

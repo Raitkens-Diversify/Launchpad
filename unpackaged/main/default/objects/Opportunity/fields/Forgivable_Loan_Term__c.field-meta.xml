@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Forgivable_Loan_Term__c</fullName>
+    <label>Forgivable Loan Term</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>5YR</fullName>
+                <default>false</default>
+                <label>5YR</label>
+            </value>
+            <value>
+                <fullName>7YR</fullName>
+                <default>false</default>
+                <label>7YR</label>
+            </value>
+            <value>
+                <fullName>10YR</fullName>
+                <default>false</default>
+                <label>10YR</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

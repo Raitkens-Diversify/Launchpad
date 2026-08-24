@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Potential Service --></label>
+        <name>Potential_Service__c</name>
+        <picklistValues>
+            <masterLabel>RIA 1099</masterLabel>
+            <translation><!-- RIA 1099 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>RIA 1099 + BD</masterLabel>
+            <translation><!-- RIA 1099 + BD --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>RIA W2</masterLabel>
+            <translation><!-- RIA W2 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>RIA W2 + BD</masterLabel>
+            <translation><!-- RIA W2 + BD --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

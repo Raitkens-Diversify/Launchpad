@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <help><!-- Please list any outside money managers needed on platform --></help>
+        <label><!-- Outside Money Managers Details --></label>
+        <name>Outside_Money_Managers_Details__c</name>
+    </CustomFieldTranslation>

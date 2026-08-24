@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Wealth_Prospects_with_No_FA_Team</fullName>
+    <columns>ACCOUNT.NAME</columns>
+    <columns>ACCOUNT.TYPE</columns>
+    <columns>Prospect_Status__c</columns>
+    <columns>Financial_Advisor_Team__c</columns>
+    <columns>CORE.USERS.ALIAS</columns>
+    <columns>ACCOUNT.CREATED_DATE</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>ACCOUNT.TYPE</field>
+        <operation>equals</operation>
+        <value>Lead,Prospect</value>
+    </filters>
+    <filters>
+        <field>Financial_Advisor_Team__c</field>
+        <operation>equals</operation>
+    </filters>
+    <label>Wealth Prospects with No FA Team</label>
+</ListView>

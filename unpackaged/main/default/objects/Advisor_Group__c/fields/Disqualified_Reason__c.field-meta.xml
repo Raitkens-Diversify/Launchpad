@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Disqualified_Reason__c</fullName>
+    <label>Disqualified Reason</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Chose Another Firm</fullName>
+                <default>false</default>
+                <label>Chose Another Firm</label>
+            </value>
+            <value>
+                <fullName>Compliance / Risk Concern</fullName>
+                <default>false</default>
+                <label>Compliance / Risk Concern</label>
+            </value>
+            <value>
+                <fullName>Cultural / Strategic Fit</fullName>
+                <default>false</default>
+                <label>Cultural / Strategic Fit</label>
+            </value>
+            <value>
+                <fullName>Economics / Deal Terms</fullName>
+                <default>false</default>
+                <label>Economics / Deal Terms</label>
+            </value>
+            <value>
+                <fullName>Insufficient Assets</fullName>
+                <default>false</default>
+                <label>Insufficient Assets</label>
+            </value>
+            <value>
+                <fullName>Non-Responsive</fullName>
+                <default>false</default>
+                <label>Non-Responsive</label>
+            </value>
+            <value>
+                <fullName>Not the Right Time</fullName>
+                <default>false</default>
+                <label>Not the Right Time</label>
+            </value>
+            <value>
+                <fullName>Platform / Services Fit</fullName>
+                <default>false</default>
+                <label>Platform / Services Fit</label>
+            </value>
+            <value>
+                <fullName>Started Own RIA</fullName>
+                <default>false</default>
+                <label>Started Own RIA</label>
+            </value>
+            <value>
+                <fullName>Stayed with Current Firm</fullName>
+                <default>false</default>
+                <label>Stayed with Current Firm</label>
+            </value>
+            <value>
+                <fullName>Timing / Not Ready</fullName>
+                <default>false</default>
+                <label>Timing / Not Ready</label>
+            </value>
+            <value>
+                <fullName>Went with Competitor</fullName>
+                <default>false</default>
+                <label>Went with Competitor</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

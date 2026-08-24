@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <help><!-- Assets we expect to manage for this prospect. For total assets held anywhere, use Approximate Total Assets. --></help>
+        <label><!-- Estimated AUM --></label>
+        <name>Estimated_AUM__c</name>
+    </CustomFieldTranslation>

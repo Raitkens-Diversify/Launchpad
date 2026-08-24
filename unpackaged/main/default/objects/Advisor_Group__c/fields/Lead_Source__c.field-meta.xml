@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Lead_Source__c</fullName>
+    <label>Lead Source</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Advertisement</fullName>
+                <default>false</default>
+                <label>Advertisement</label>
+            </value>
+            <value>
+                <fullName>Center of Influence</fullName>
+                <default>false</default>
+                <label>Center of Influence</label>
+            </value>
+            <value>
+                <fullName>Customer Event</fullName>
+                <default>false</default>
+                <label>Customer Event</label>
+            </value>
+            <value>
+                <fullName>Diversify Advisor Referral</fullName>
+                <default>false</default>
+                <label>Diversify Advisor Referral</label>
+            </value>
+            <value>
+                <fullName>Diversify Team Member Referral</fullName>
+                <default>false</default>
+                <label>Diversify Team Member Referral</label>
+            </value>
+            <value>
+                <fullName>Employee Referral</fullName>
+                <default>false</default>
+                <label>Employee Referral</label>
+            </value>
+            <value>
+                <fullName>Existing Client Referral</fullName>
+                <default>false</default>
+                <label>Existing Client Referral</label>
+            </value>
+            <value>
+                <fullName>Former Employee Relationship</fullName>
+                <default>false</default>
+                <label>Former Employee Relationship</label>
+            </value>
+            <value>
+                <fullName>Google AdWords</fullName>
+                <default>false</default>
+                <label>Google AdWords</label>
+            </value>
+            <value>
+                <fullName>Home Office Referral</fullName>
+                <default>false</default>
+                <label>Home Office Referral</label>
+            </value>
+            <value>
+                <fullName>Outreach</fullName>
+                <default>false</default>
+                <label>Outreach</label>
+            </value>
+            <value>
+                <fullName>Paid Lead</fullName>
+                <default>false</default>
+                <label>Paid Lead</label>
+            </value>
+            <value>
+                <fullName>Partner</fullName>
+                <default>false</default>
+                <label>Partner</label>
+            </value>
+            <value>
+                <fullName>Personal Relationship</fullName>
+                <default>false</default>
+                <label>Personal Relationship</label>
+            </value>
+            <value>
+                <fullName>Personal Relationship - Dave</fullName>
+                <default>false</default>
+                <label>Personal Relationship - Dave</label>
+            </value>
+            <value>
+                <fullName>Personal Relationship - Todd</fullName>
+                <default>false</default>
+                <label>Personal Relationship - Todd</label>
+            </value>
+            <value>
+                <fullName>Professional Association</fullName>
+                <default>false</default>
+                <label>Professional Association</label>
+            </value>
+            <value>
+                <fullName>Professional Partner Referral</fullName>
+                <default>false</default>
+                <label>Professional Partner Referral</label>
+            </value>
+            <value>
+                <fullName>Promoter Relationship</fullName>
+                <default>false</default>
+                <label>Promoter Relationship</label>
+            </value>
+            <value>
+                <fullName>Purchased List</fullName>
+                <default>false</default>
+                <label>Purchased List</label>
+            </value>
+            <value>
+                <fullName>Referral - External</fullName>
+                <default>false</default>
+                <label>Referral - External</label>
+            </value>
+            <value>
+                <fullName>Referral - Internal</fullName>
+                <default>false</default>
+                <label>Referral - Internal</label>
+            </value>
+            <value>
+                <fullName>Self Sourced List</fullName>
+                <default>false</default>
+                <label>Self Sourced List</label>
+            </value>
+            <value>
+                <fullName>Trade Show</fullName>
+                <default>false</default>
+                <label>Trade Show</label>
+            </value>
+            <value>
+                <fullName>Vendor or Sponsor Referral</fullName>
+                <default>false</default>
+                <label>Vendor or Sponsor Referral</label>
+            </value>
+            <value>
+                <fullName>Webinar</fullName>
+                <default>false</default>
+                <label>Webinar</label>
+            </value>
+            <value>
+                <fullName>Webinar/Seminar Attendee</fullName>
+                <default>false</default>
+                <label>Webinar/Seminar Attendee</label>
+            </value>
+            <value>
+                <fullName>Website</fullName>
+                <default>false</default>
+                <label>Website</label>
+            </value>
+            <value>
+                <fullName>Website Lead</fullName>
+                <default>false</default>
+                <label>Website Lead</label>
+            </value>
+            <value>
+                <fullName>Other</fullName>
+                <default>false</default>
+                <label>Other</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

@@ -3,7 +3,6 @@
     <fullName>Affiliations__c</fullName>
     <label>Affiliations</label>
     <required>false</required>
-    <trackFeedHistory>true</trackFeedHistory>
     <trackHistory>true</trackHistory>
     <trackTrending>false</trackTrending>
     <type>MultiselectPicklist</type>

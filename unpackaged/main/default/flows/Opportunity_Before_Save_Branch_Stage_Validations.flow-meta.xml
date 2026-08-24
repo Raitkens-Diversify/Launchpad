@@ -1,0 +1,933 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <customErrors>
+        <name>Show_Closed_Lost_Reason_Validation_Error</name>
+        <label>Show Closed Lost Reason Validation Error</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <customErrorMessages>
+            <errorMessage>Please add a Loss Reason when changing the Stage to Closed Lost. Error Location: BSF Opp Branch Validations</errorMessage>
+            <fieldSelection>StageName</fieldSelection>
+            <isFieldError>true</isFieldError>
+        </customErrorMessages>
+    </customErrors>
+    <customErrors>
+        <name>Show_Closed_Won_Validation_Error</name>
+        <label>Show Closed Won Validation Error</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <customErrorMessages>
+            <errorMessage>Closed Won requires either Promissory Note or RIA Agreement to be marked Yes. Please update one of those fields before closing the opportunity. Error Location: BSF: Branch Before Save Validation</errorMessage>
+            <fieldSelection>StageName</fieldSelection>
+            <isFieldError>true</isFieldError>
+        </customErrorMessages>
+    </customErrors>
+    <customErrors>
+        <name>Show_List_of_Services_Validation_Error</name>
+        <label>Show List of Services Validation Error</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <customErrorMessages>
+            <errorMessage>List of Services requires a Signed MNDA. Please update the fields before changing the stage. Error Location: BSF: Branch Before Save Validation</errorMessage>
+            <fieldSelection>StageName</fieldSelection>
+            <isFieldError>true</isFieldError>
+        </customErrorMessages>
+    </customErrors>
+    <customErrors>
+        <name>Show_Negotiation_Validation_Error</name>
+        <label>Show Negotiation Validation Error</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <customErrorMessages>
+            <errorMessage>Negotiation requires Platform Fee Type. Please update the fields before changing the stage. Error Location: BSF: Branch Before Save Validation</errorMessage>
+            <fieldSelection>StageName</fieldSelection>
+            <isFieldError>true</isFieldError>
+        </customErrorMessages>
+    </customErrors>
+    <customErrors>
+        <name>Show_Onboarding_Validation_Error</name>
+        <label>Show Onboarding Validation Error</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <customErrorMessages>
+            <errorMessage>{!fxTxt_ErrorMessageOnboarding}</errorMessage>
+            <fieldSelection>StageName</fieldSelection>
+            <isFieldError>true</isFieldError>
+        </customErrorMessages>
+    </customErrors>
+    <customErrors>
+        <name>Show_Proposal_Validation_Error</name>
+        <label>Show Proposal Validation Error</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <customErrorMessages>
+            <errorMessage>{!fxTxt_ErrorMessageProposal}</errorMessage>
+            <fieldSelection>StageName</fieldSelection>
+            <isFieldError>true</isFieldError>
+        </customErrorMessages>
+    </customErrors>
+    <customErrors>
+        <name>Show_Sales_Accepted_Validation_Error</name>
+        <label>Show Sales Accepted Validation Error</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <customErrorMessages>
+            <errorMessage>{!fxTxt_ErrorMessageSalesAccepted}</errorMessage>
+            <fieldSelection>StageName</fieldSelection>
+            <isFieldError>true</isFieldError>
+        </customErrorMessages>
+    </customErrors>
+    <decisions>
+        <name>Missing_Lost_Fields</name>
+        <label>Missing Lost Fields</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnectorLabel>Validated</defaultConnectorLabel>
+        <rules>
+            <name>Missing_Lost_Other</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Loss_Reason__c</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <stringValue>Other</stringValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Lost_Other_Details__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <label>Missing Lost Other</label>
+        </rules>
+        <rules>
+            <name>Missing_Lost_Reason</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Loss_Reason__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Show_Closed_Lost_Reason_Validation_Error</targetReference>
+            </connector>
+            <label>Missing Lost Reason</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Stage_Closed_Lost</name>
+        <label>Stage Closed Lost</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnector>
+            <targetReference>Validate_Sales_Accepted</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Continue</defaultConnectorLabel>
+        <rules>
+            <name>Validate_Closed_Lost</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>fxNum_StageOrder</leftValueReference>
+                <operator>LessThan</operator>
+                <rightValue>
+                    <numberValue>1.0</numberValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Missing_Lost_Fields</targetReference>
+            </connector>
+            <label>Validate Closed Lost</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Validate_Closed_Won</name>
+        <label>Validate Closed Won</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnectorLabel>Validated</defaultConnectorLabel>
+        <rules>
+            <name>Not_at_stage_yet_Validate_Closed_Won</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>fxNum_StageOrder</leftValueReference>
+                <operator>LessThan</operator>
+                <rightValue>
+                    <numberValue>7.0</numberValue>
+                </rightValue>
+            </conditions>
+            <label>Not at stage yet</label>
+        </rules>
+        <rules>
+            <name>Missing_Check_Validate_Closed_Won</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Promissory_Note__c</leftValueReference>
+                <operator>NotEqualTo</operator>
+                <rightValue>
+                    <stringValue>Yes</stringValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.RIA_Agreement__c</leftValueReference>
+                <operator>NotEqualTo</operator>
+                <rightValue>
+                    <stringValue>Yes</stringValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Show_Closed_Won_Validation_Error</targetReference>
+            </connector>
+            <label>Missing Fields</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Validate_List_of_Services</name>
+        <label>Validate List of Services</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnector>
+            <targetReference>Validate_Proposal</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Validated</defaultConnectorLabel>
+        <rules>
+            <name>Not_at_stage_yet_Validate_List_of_Services</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>fxNum_StageOrder</leftValueReference>
+                <operator>LessThan</operator>
+                <rightValue>
+                    <numberValue>3.0</numberValue>
+                </rightValue>
+            </conditions>
+            <label>Not at stage yet</label>
+        </rules>
+        <rules>
+            <name>Missing_Check_Validate_List_of_Services</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Signed_MNDA__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Show_List_of_Services_Validation_Error</targetReference>
+            </connector>
+            <label>Missing Fields</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Validate_Negotiate</name>
+        <label>Validate Negotiate</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnector>
+            <targetReference>Validate_Onboarding</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Validated</defaultConnectorLabel>
+        <rules>
+            <name>Not_at_stage_yet_Validate_Negotiate</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>fxNum_StageOrder</leftValueReference>
+                <operator>LessThan</operator>
+                <rightValue>
+                    <numberValue>5.0</numberValue>
+                </rightValue>
+            </conditions>
+            <label>Not at stage yet</label>
+        </rules>
+        <rules>
+            <name>Missing_Check_Validate_Negotiate</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Platform_Fee_Type__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Show_Negotiation_Validation_Error</targetReference>
+            </connector>
+            <label>Missing Fields</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Validate_Onboarding</name>
+        <label>Validate Onboarding</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnector>
+            <targetReference>Validate_Closed_Won</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Validated</defaultConnectorLabel>
+        <rules>
+            <name>Not_at_stage_yet_Validate_Onboarding</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>fxNum_StageOrder</leftValueReference>
+                <operator>LessThan</operator>
+                <rightValue>
+                    <numberValue>6.0</numberValue>
+                </rightValue>
+            </conditions>
+            <label>Not at stage yet</label>
+        </rules>
+        <rules>
+            <name>Missing_Check_Validate_Onboarding</name>
+            <conditionLogic>or</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Count_of_HH_s__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Number_of_RIA_Accounts__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Number_of_BD_Accounts__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Fee_Structure_for_Clients__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Avg_Client_Fee_bps__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Avg_Client_Age__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Custodian__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Aggregation_and_Reporting__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Current_CRM__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Current_Financial_Planning_Tool__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Current_Estate_Planning_Tool__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Phone_and_Interoffice_Communication__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Portfolio_Management__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.AI_Tech__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Other_Tech__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Manages_Own_Models__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Outside_Money_Managers_Needed__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Unique_Strategies_Implemented__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Annuities__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.DAM_Interest__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Financial_Planning_Interest__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Estate_Planning_Interest__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Tax_Planning_Interest__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Insurance_Interest__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.DST_1031_Interest__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Term_Sheet_Provided__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Fee_Based_Payout__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.BD_Based_Payout__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Forgivable_Loan__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Production_Amount__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Minimum_Production__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Accelerator_Loan_Option__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Show_Onboarding_Validation_Error</targetReference>
+            </connector>
+            <label>Missing Fields</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Validate_Proposal</name>
+        <label>Validate Proposal</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnector>
+            <targetReference>Validate_Negotiate</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Validated</defaultConnectorLabel>
+        <rules>
+            <name>Not_at_stage_yet_Validate_Proposal</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>fxNum_StageOrder</leftValueReference>
+                <operator>LessThan</operator>
+                <rightValue>
+                    <numberValue>4.0</numberValue>
+                </rightValue>
+            </conditions>
+            <label>Not at stage yet</label>
+        </rules>
+        <rules>
+            <name>Missing_Check_Validate_Proposal</name>
+            <conditionLogic>or</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Total_AUM__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Fee_AUM__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Total_AUA__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.BD_AUA__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Revenue_T12__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Show_Proposal_Validation_Error</targetReference>
+            </connector>
+            <label>Missing Fields</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Validate_Sales_Accepted</name>
+        <label>Validate Sales Accepted</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnector>
+            <targetReference>Validate_List_of_Services</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Validated</defaultConnectorLabel>
+        <rules>
+            <name>Missing_Check_Validate_Sales_Accepted</name>
+            <conditionLogic>or</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.LeadSource</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Current_Affiliation__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Current_Custodian__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Office_Team_Structure__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Specialties__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Pain_Points__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Affiliation_Type__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Number_of_Advisors__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Number_of_Staff__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.IAPD_BrokerCheck__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Disclosures__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Required_to_Make_a_Move__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Advisor_Group__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.LeadSource</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Main_Growth_Levers__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.How_You_Manage_Assets__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Cultural_Fit__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Potential_Service__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.Affiliation__c</leftValueReference>
+                <operator>IsBlank</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Show_Sales_Accepted_Validation_Error</targetReference>
+            </connector>
+            <label>Missing Fields</label>
+        </rules>
+    </decisions>
+    <description>Created by CCC (KM) for DAN-117. Stage-based before-save validation with dynamic missing-field messages. Moved sales accepted validations to requirements on the layout.</description>
+    <environments>Default</environments>
+    <formulas>
+        <name>fxDateTime_TodayMinus2Minutes</name>
+        <dataType>DateTime</dataType>
+        <expression>{!$Flow.InterviewStartTime} - (2/1440)</expression>
+    </formulas>
+    <formulas>
+        <name>fxNum_StageOrder</name>
+        <dataType>Number</dataType>
+        <expression>CASE(
+    TEXT({!$Record.StageName}),
+    &quot;Sales Accepted&quot;, 1,
+    &quot;Diligence&quot;, 2,
+    &quot;List of Services&quot;, 3,
+    &quot;Proposal&quot;, 4,
+    &quot;Negotiate&quot;, 5,
+    &quot;Onboarding&quot;, 6,
+    &quot;Closed Won&quot;, 7,
+    &quot;Closed Lost&quot;, 0,
+    0
+)</expression>
+        <scale>0</scale>
+    </formulas>
+    <formulas>
+        <name>fxTxt_ErrorMessageOnboarding</name>
+        <dataType>String</dataType>
+        <expression>LEFT(
+    &quot;Required before Onboarding: &quot;
+    &amp;
+    IF(ISBLANK({!$Record.Count_of_HH_s__c}), &quot; Count Households, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Number_of_RIA_Accounts__c}), &quot;# RIA Accts, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Number_of_BD_Accounts__c}), &quot;# BD Accts, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Fee_Structure_for_Clients__c}), &quot;Fee Structure, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Avg_Client_Fee_bps__c}), &quot;Avg Fee (bps), &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Avg_Client_Age__c}), &quot;Avg Age, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISPICKVAL({!$Record.Custodian__c}, &quot;&quot;), &quot;Custodian, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Aggregation_and_Reporting__c}), &quot;Aggregation, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISPICKVAL({!$Record.Current_CRM__c}, &quot;&quot;), &quot;CRM, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISPICKVAL({!$Record.Current_Financial_Planning_Tool__c}, &quot;&quot;), &quot;Fin Planning, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISPICKVAL({!$Record.Current_Estate_Planning_Tool__c}, &quot;&quot;), &quot;Estate Planning, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Phone_and_Interoffice_Communication__c}), &quot;Phone/Comms, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Portfolio_Management__c}), &quot;Portfolio Mgmt, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.AI_Tech__c}), &quot;AI Tech, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Other_Tech__c}), &quot;Other Tech, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISPICKVAL({!$Record.Manages_Own_Models__c}, &quot;&quot;), &quot;Own Models, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISPICKVAL({!$Record.Outside_Money_Managers_Needed__c}, &quot;&quot;), &quot;Outside $ Mgr, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISPICKVAL({!$Record.Unique_Strategies_Implemented__c}, &quot;&quot;), &quot;Unique Strategies, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISPICKVAL({!$Record.Annuities__c}, &quot;&quot;), &quot;Annuities, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISPICKVAL({!$Record.DAM_Interest__c}, &quot;&quot;), &quot;DAM, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISPICKVAL({!$Record.Financial_Planning_Interest__c}, &quot;&quot;), &quot;Fin Plan Interest, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISPICKVAL({!$Record.Estate_Planning_Interest__c}, &quot;&quot;), &quot;Est. Plan Interest, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISPICKVAL({!$Record.Tax_Planning_Interest__c}, &quot;&quot;), &quot;Tax Plan Interest, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISPICKVAL({!$Record.Insurance_Interest__c}, &quot;&quot;), &quot;Insurance Interest, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISPICKVAL({!$Record.DST_1031_Interest__c}, &quot;&quot;), &quot;DST/1031 Interest, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISPICKVAL({!$Record.Term_Sheet_Provided__c}, &quot;&quot;), &quot;Term Sheet, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Fee_Based_Payout__c}), &quot;Fee Payout, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.BD_Based_Payout__c}), &quot;BD Payout, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISPICKVAL({!$Record.Forgivable_Loan__c}, &#39;&#39;), &quot;Forgivable Loan, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Production_Amount__c}), &quot;Production $, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Minimum_Production__c}), &quot;Min Production, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISPICKVAL({!$Record.Accelerator_Loan_Option__c}, &quot;&quot;), &quot;Accelerator, &quot;, &quot;&quot;)
+    &amp;
+    &quot;Update missing fields. Error Location: BSF Branch Before Save Validation&quot;,
+    255
+)</expression>
+    </formulas>
+    <formulas>
+        <name>fxTxt_ErrorMessageProposal</name>
+        <dataType>String</dataType>
+        <expression>LEFT(
+    &quot;Required before Proposal: &quot;
+    &amp;
+    IF(ISBLANK({!$Record.Total_AUM__c}), &quot;Total AUM, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Fee_AUM__c}), &quot;Fee-Based AUM, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Total_AUA__c}), &quot;Total AUA, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.BD_AUA__c}), &quot;BD AUA, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Revenue_T12__c}), &quot;T12 Total Revenue, &quot;, &quot;&quot;)
+    &amp;
+    &quot;Please update missing fields. Error Location: BSF Branch Before Save Validation&quot;,
+    255
+)</expression>
+    </formulas>
+    <formulas>
+        <name>fxTxt_ErrorMessageSalesAccepted</name>
+        <dataType>String</dataType>
+        <expression>LEFT(
+    &quot;Required before Sales Accepted: &quot;
+    &amp;
+    IF(ISPICKVAL({!$Record.LeadSource}, &quot;&quot;), &quot;Lead Source, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Current_Affiliation__c}), &quot;Affiliation, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Current_Custodian__c}), &quot;Custodian, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Office_Team_Structure__c}), &quot;Office/Team, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Specialties__c}), &quot;Specialties, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISPICKVAL({!$Record.Potential_Service__c}, &#39;&#39;), &quot;Potential Service, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Pain_Points__c}), &quot;Pain Points, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISPICKVAL({!$Record.Affiliation_Type__c}, &quot;&quot;), &quot;Affiliation Type, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISPICKVAL({!$Record.Affiliation__c}, &quot;&quot;), &quot;Affiliation, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Number_of_Advisors__c}), &quot;Advisors, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Number_of_Staff__c}), &quot;Staff, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.IAPD_BrokerCheck__c}), &quot;IAPD/BrokerCheck, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISPICKVAL({!$Record.Disclosures__c}, &quot;&quot;), &quot;Disclosures, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Required_to_Make_a_Move__c}), &quot;eq, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Advisor_Group__c}), &quot;Branch, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Main_Growth_Levers__c}), &quot;Growth Levers, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.How_You_Manage_Assets__c}), &quot;Asset Mgmt, &quot;, &quot;&quot;)
+    &amp;
+    IF(ISBLANK({!$Record.Cultural_Fit__c}), &quot;Cultural Fit, &quot;, &quot;&quot;)
+    &amp;
+    &quot;Update missing fields. Error Location: BSF Branch Before Save Validation&quot;,
+    255
+)</expression>
+    </formulas>
+    <interviewLabel>Opportunity: Before Save: Branch Stage Validations {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Opportunity: Before Save: Branch Stage Validations</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Stage_Closed_Lost</targetReference>
+        </connector>
+        <filterFormula>AND(
+    {!$Record.RecordType.DeveloperName} = &quot;Branch&quot;,
+    ISCHANGED({!$Record.StageName})
+)</filterFormula>
+        <object>Opportunity</object>
+        <recordTriggerType>Update</recordTriggerType>
+        <triggerType>RecordBeforeSave</triggerType>
+    </start>
+    <status>Active</status>
+</Flow>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>Chose Another Firm</fullName>
+        <default>false</default>
+        <label>Chose Another Firm</label>
+    </customValue>
+    <customValue>
+        <fullName>Compliance / Risk Concern</fullName>
+        <default>false</default>
+        <label>Compliance / Risk Concern</label>
+    </customValue>
+    <customValue>
+        <fullName>Cultural / Strategic Fit</fullName>
+        <default>false</default>
+        <label>Cultural / Strategic Fit</label>
+    </customValue>
+    <customValue>
+        <fullName>Economics / Deal Terms</fullName>
+        <default>false</default>
+        <label>Economics / Deal Terms</label>
+    </customValue>
+    <customValue>
+        <fullName>Insufficient Assets</fullName>
+        <default>false</default>
+        <label>Insufficient Assets</label>
+    </customValue>
+    <customValue>
+        <fullName>Non-Responsive</fullName>
+        <default>false</default>
+        <label>Non-Responsive</label>
+    </customValue>
+    <customValue>
+        <fullName>Not the Right Time</fullName>
+        <default>false</default>
+        <label>Not the Right Time</label>
+    </customValue>
+    <customValue>
+        <fullName>Platform / Services Fit</fullName>
+        <default>false</default>
+        <label>Platform / Services Fit</label>
+    </customValue>
+    <customValue>
+        <fullName>Started Own RIA</fullName>
+        <default>false</default>
+        <label>Started Own RIA</label>
+    </customValue>
+    <customValue>
+        <fullName>Stayed with Current Firm</fullName>
+        <default>false</default>
+        <label>Stayed with Current Firm</label>
+    </customValue>
+    <customValue>
+        <fullName>Timing / Not Ready</fullName>
+        <default>false</default>
+        <label>Timing / Not Ready</label>
+    </customValue>
+    <customValue>
+        <fullName>Went with Competitor</fullName>
+        <default>false</default>
+        <label>Went with Competitor</label>
+    </customValue>
+    <description>Shared disqualification reasons for prospecting across wealth (Account) and Branch. Values are exposed per record type: the wealth prospect record types use Insufficient Assets, Non-Responsive, Not the Right Time and Went with Competitor; the remaining values are advisor-recruiting reasons used by Branch.</description>
+    <masterLabel>Disqualified Reason</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

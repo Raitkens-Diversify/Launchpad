@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WebLink xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>New_Branch_Opportunity</fullName>
+    <availability>online</availability>
+    <displayType>massActionButton</displayType>
+    <encodingKey>UTF-8</encodingKey>
+    <height>600</height>
+    <linkType>url</linkType>
+    <masterLabel>New Branch Opportunity</masterLabel>
+    <openType>noSidebar</openType>
+    <protected>false</protected>
+    <requireRowSelection>true</requireRowSelection>
+    <url>/lightning/o/Opportunity/new?nooverride=1&amp;recordTypeId=012cY000001KZx7QAG&amp;defaultFieldValues=Advisor_Group__c={!Advisor_Group__c.Id}&amp;backgroundContext=%2Flightning%2Fr%2FAdvisor_Group__c%2F{!Advisor_Group__c.Id}%2Fview&amp;navigationLocation=RELATED_LIST</url>
+</WebLink>

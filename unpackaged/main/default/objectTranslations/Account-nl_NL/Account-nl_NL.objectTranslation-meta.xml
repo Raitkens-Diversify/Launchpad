@@ -276,6 +276,10 @@
         <name>Trust</name>
     </recordTypes>
     <validationRules>
+        <errorMessage><!-- Please specify a Follow Up Date for Nurturing Status. --></errorMessage>
+        <name>Follow_Up_Date_Required_for_Nurturing</name>
+    </validationRules>
+    <validationRules>
         <errorMessage><!-- To request an update to this field please contact the Ops team or submit an envelope for the change request. --></errorMessage>
         <name>Prevent_Type_Classification_Edit</name>
     </validationRules>
@@ -355,6 +359,20 @@
         <label><!-- SendWithDocuSign --></label>
         <name>SendWithDocuSign</name>
     </webLinks>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Platform Fee Type --></label>
+        <name>Platform_Fee_Type__c</name>
+        <picklistValues>
+            <masterLabel>Basis Points (bps)</masterLabel>
+            <translation><!-- Basis Points (bps) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Percent</masterLabel>
+            <translation><!-- Percent --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

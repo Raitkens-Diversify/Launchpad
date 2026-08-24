@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Disqualified_Reason__c</fullName>
+    <description>Why a prospect was lost. Set alongside Account.Type = Former Prospect. Backed by the shared Disqualified Reason global value set; wealth record types expose only the four wealth reasons.</description>
+    <inlineHelpText>Reason this prospect was lost. Set this when you set Account Type to Former Prospect.</inlineHelpText>
+    <label>Disqualified Reason</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetName>Disqualified_Reason</valueSetName>
+    </valueSet>
+</CustomField>

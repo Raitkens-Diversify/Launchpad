@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <help><!-- The Branch Opportunity this Branch mirrors while the deal is open. Set automatically when a Branch Opportunity is created; only administrators can change it. --></help>
+        <label><!-- Primary Branch Opportunity --></label>
+        <name>Primary_Branch_Opportunity__c</name>
+        <relationshipLabel><!-- Primary Branch (Advisor Groups) --></relationshipLabel>
+    </CustomFieldTranslation>

@@ -3,7 +3,6 @@
     <fullName>Status__c</fullName>
     <label>Status</label>
     <required>false</required>
-    <trackFeedHistory>true</trackFeedHistory>
     <trackHistory>true</trackHistory>
     <trackTrending>false</trackTrending>
     <type>Picklist</type>
@@ -12,23 +11,65 @@
         <valueSetDefinition>
             <sorted>false</sorted>
             <value>
-                <fullName>Active</fullName>
-                <default>false</default>
-                <label>Active</label>
-            </value>
-            <value>
                 <fullName>Inactive</fullName>
                 <default>false</default>
                 <label>Inactive</label>
             </value>
             <value>
+                <fullName>Target Account</fullName>
+                <default>false</default>
+                <label>Target Account</label>
+            </value>
+            <value>
+                <fullName>Marketing Outreach</fullName>
+                <default>false</default>
+                <label>Marketing Outreach</label>
+            </value>
+            <value>
+                <fullName>Engaged Lead</fullName>
+                <default>false</default>
+                <label>Engaged Lead</label>
+            </value>
+            <value>
+                <fullName>Marketing Qualified Lead</fullName>
+                <default>false</default>
+                <label>Marketing Qualified Lead</label>
+            </value>
+            <value>
+                <fullName>Sales Accepted Lead</fullName>
+                <default>false</default>
+                <label>Sales Accepted Lead</label>
+            </value>
+            <value>
+                <fullName>Initial Lead Discovery</fullName>
+                <default>false</default>
+                <label>Initial Lead Discovery</label>
+            </value>
+            <value>
+                <fullName>Sales Qualified Lead</fullName>
+                <default>false</default>
+                <label>Sales Qualified Lead</label>
+            </value>
+            <value>
+                <fullName>Disqualified</fullName>
+                <default>false</default>
+                <label>Disqualified</label>
+            </value>
+            <value>
+                <fullName>Active</fullName>
+                <default>false</default>
+                <label>Active</label>
+            </value>
+            <value>
                 <fullName>Lead</fullName>
                 <default>false</default>
+                <isActive>false</isActive>
                 <label>Lead</label>
             </value>
             <value>
                 <fullName>Prospect</fullName>
-                <default>true</default>
+                <default>false</default>
+                <isActive>false</isActive>
                 <label>Prospect</label>
             </value>
         </valueSetDefinition>

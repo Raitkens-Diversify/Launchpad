@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>Wealthbox</fullName>
+        <default>false</default>
+        <label>Wealthbox</label>
+    </customValue>
+    <customValue>
+        <fullName>SFDC</fullName>
+        <default>false</default>
+        <label>SFDC</label>
+    </customValue>
+    <customValue>
+        <fullName>Cosmo</fullName>
+        <default>false</default>
+        <label>Cosmo</label>
+    </customValue>
+    <customValue>
+        <fullName>Redtail</fullName>
+        <default>false</default>
+        <label>Redtail</label>
+    </customValue>
+    <customValue>
+        <fullName>Other</fullName>
+        <default>false</default>
+        <label>Other</label>
+    </customValue>
+    <masterLabel>Current CRM</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

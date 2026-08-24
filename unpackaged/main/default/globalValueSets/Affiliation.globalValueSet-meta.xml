@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>DAS</fullName>
+        <default>false</default>
+        <label>DAS</label>
+    </customValue>
+    <customValue>
+        <fullName>DWM</fullName>
+        <default>false</default>
+        <label>DWM</label>
+    </customValue>
+    <customValue>
+        <fullName>DAS/BD</fullName>
+        <default>false</default>
+        <label>DAS/BD</label>
+    </customValue>
+    <customValue>
+        <fullName>DWM/BD</fullName>
+        <default>false</default>
+        <label>DWM/BD</label>
+    </customValue>
+    <masterLabel>Affiliation</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

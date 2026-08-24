@@ -3,7 +3,6 @@
     <fullName>Project_Branch__c</fullName>
     <label>Project-Branch</label>
     <required>false</required>
-    <trackFeedHistory>false</trackFeedHistory>
     <trackHistory>true</trackHistory>
     <trackTrending>false</trackTrending>
     <type>Picklist</type>

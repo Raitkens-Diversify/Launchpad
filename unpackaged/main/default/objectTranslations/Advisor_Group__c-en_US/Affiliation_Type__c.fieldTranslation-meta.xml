@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Affiliation Type --></label>
+        <name>Affiliation_Type__c</name>
+        <picklistValues>
+            <masterLabel>1099</masterLabel>
+            <translation><!-- 1099 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>W2</masterLabel>
+            <translation><!-- W2 --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

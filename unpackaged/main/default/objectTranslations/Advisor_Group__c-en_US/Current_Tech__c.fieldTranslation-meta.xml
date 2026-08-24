@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Current Tech --></label>
+        <name>Current_Tech__c</name>
+        <picklistValues>
+            <masterLabel>Black Diamond</masterLabel>
+            <translation><!-- Black Diamond --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>MGP</masterLabel>
+            <translation><!-- MGP --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Orion</masterLabel>
+            <translation><!-- Orion --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Other</masterLabel>
+            <translation><!-- Other --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Redtail</masterLabel>
+            <translation><!-- Redtail --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Wealthbox</masterLabel>
+            <translation><!-- Wealthbox --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>eMoney</masterLabel>
+            <translation><!-- eMoney --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

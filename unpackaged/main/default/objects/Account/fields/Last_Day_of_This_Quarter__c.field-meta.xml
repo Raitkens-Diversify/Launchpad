@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Last_Day_of_This_Quarter__c</fullName>
+    <description>Created by CCC(KM) for retirement opportunity creation prefills and used in the custom button to create new retirement plan</description>
+    <externalId>false</externalId>
+    <formula>TEXT(DATE(YEAR(TODAY()), CEILING(MONTH(TODAY()) / 3) * 3 + 1, 1) - 1)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Last Day of This Quarter</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

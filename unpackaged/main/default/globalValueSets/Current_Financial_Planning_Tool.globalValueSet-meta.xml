@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>MoneyGuidePro</fullName>
+        <default>false</default>
+        <label>MoneyGuidePro</label>
+    </customValue>
+    <customValue>
+        <fullName>eMoney</fullName>
+        <default>false</default>
+        <label>eMoney</label>
+    </customValue>
+    <customValue>
+        <fullName>Orion Planning</fullName>
+        <default>false</default>
+        <label>Orion Planning</label>
+    </customValue>
+    <customValue>
+        <fullName>Right Capital</fullName>
+        <default>false</default>
+        <label>Right Capital</label>
+    </customValue>
+    <masterLabel>Current Financial Planning Tool</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

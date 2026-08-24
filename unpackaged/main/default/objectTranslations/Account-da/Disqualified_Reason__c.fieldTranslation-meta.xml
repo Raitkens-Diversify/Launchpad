@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <help><!-- Reason this prospect was lost. Set this when you set Account Type to Former Prospect. --></help>
+        <label><!-- Disqualified Reason --></label>
+        <name>Disqualified_Reason__c</name>
+    </CustomFieldTranslation>

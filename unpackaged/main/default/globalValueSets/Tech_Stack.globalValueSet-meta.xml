@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>Orion</fullName>
+        <default>false</default>
+        <label>Orion</label>
+    </customValue>
+    <customValue>
+        <fullName>Black Diamond</fullName>
+        <default>false</default>
+        <label>Black Diamond</label>
+    </customValue>
+    <customValue>
+        <fullName>Redtail</fullName>
+        <default>false</default>
+        <label>Redtail</label>
+    </customValue>
+    <customValue>
+        <fullName>Wealthbox</fullName>
+        <default>false</default>
+        <label>Wealthbox</label>
+    </customValue>
+    <customValue>
+        <fullName>eMoney</fullName>
+        <default>false</default>
+        <label>eMoney</label>
+    </customValue>
+    <customValue>
+        <fullName>MGP</fullName>
+        <default>false</default>
+        <label>MGP</label>
+    </customValue>
+    <customValue>
+        <fullName>Other</fullName>
+        <default>false</default>
+        <label>Other</label>
+    </customValue>
+    <masterLabel>Tech Stack</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

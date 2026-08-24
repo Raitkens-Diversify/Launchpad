@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Primary_Branch_Opportunity__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>The single Branch Opportunity this Advisor Group is kept in sync with. Set by the New Branch Opportunity flow; admin-editable only. While this Opportunity is open, field edits mirror both ways between the two records; once it closes, the link stays but the sync freezes.</description>
+    <inlineHelpText>The Branch Opportunity this Branch mirrors while the deal is open. Set automatically when a Branch Opportunity is created; only administrators can change it.</inlineHelpText>
+    <label>Primary Branch Opportunity</label>
+    <lookupFilter>
+        <active>true</active>
+        <filterItems>
+            <field>Opportunity.RecordTypeId</field>
+            <operation>equals</operation>
+            <value>Branch</value>
+        </filterItems>
+        <isOptional>false</isOptional>
+    </lookupFilter>
+    <referenceTo>Opportunity</referenceTo>
+    <relationshipLabel>Primary Branch (Advisor Groups)</relationshipLabel>
+    <relationshipName>Primary_Branch_Advisor_Groups</relationshipName>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

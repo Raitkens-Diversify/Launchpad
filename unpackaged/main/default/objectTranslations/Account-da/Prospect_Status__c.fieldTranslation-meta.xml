@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <help><!-- Where this prospect sits in the nurture funnel. Set this to New when creating a prospect, and set Account Type to Prospect once the prospect is actively engaged. --></help>
+        <label><!-- Prospect Status --></label>
+        <name>Prospect_Status__c</name>
+        <picklistValues>
+            <masterLabel>Attempted Contact</masterLabel>
+            <translation><!-- Attempted Contact --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Connected</masterLabel>
+            <translation><!-- Connected --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>New</masterLabel>
+            <translation><!-- New --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Nurturing</masterLabel>
+            <translation><!-- Nurturing --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Qualified</masterLabel>
+            <translation><!-- Qualified --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

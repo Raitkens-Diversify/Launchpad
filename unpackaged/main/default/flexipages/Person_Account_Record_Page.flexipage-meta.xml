@@ -34,6 +34,10 @@
         </itemInstances>
         <itemInstances>
             <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
                 <fieldItem>Record.Employer__c</fieldItem>
                 <identifier>RecordEmployer__cField</identifier>
             </fieldInstance>
@@ -242,7 +246,7 @@
             <fieldInstance>
                 <fieldInstanceProperties>
                     <name>uiBehavior</name>
-                    <value>none</value>
+                    <value>required</value>
                 </fieldInstanceProperties>
                 <fieldItem>Record.Financial_Advisor_Team__c</fieldItem>
                 <identifier>RecordFinancial_Advisor_Team_cField2</identifier>

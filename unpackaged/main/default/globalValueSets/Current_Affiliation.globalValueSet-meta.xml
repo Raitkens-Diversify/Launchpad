@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>Investment Advisor</fullName>
+        <default>false</default>
+        <label>Investment Advisor</label>
+    </customValue>
+    <customValue>
+        <fullName>Broker-Dealer</fullName>
+        <default>false</default>
+        <label>Broker-Dealer</label>
+    </customValue>
+    <customValue>
+        <fullName>Investment Advisor + Broker-Dealer</fullName>
+        <default>false</default>
+        <isActive>false</isActive>
+        <label>Investment Advisor + Broker-Dealer</label>
+    </customValue>
+    <masterLabel>Current Affiliation</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

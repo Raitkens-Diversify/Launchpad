@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>401Go</fullName>
+        <default>false</default>
+        <label>401Go</label>
+    </customValue>
+    <customValue>
+        <fullName>ADP</fullName>
+        <default>false</default>
+        <label>ADP</label>
+    </customValue>
+    <customValue>
+        <fullName>American Funds</fullName>
+        <default>false</default>
+        <label>American Funds</label>
+    </customValue>
+    <customValue>
+        <fullName>Ameritas</fullName>
+        <default>false</default>
+        <label>Ameritas</label>
+    </customValue>
+    <customValue>
+        <fullName>Ascensus</fullName>
+        <default>false</default>
+        <label>Ascensus</label>
+    </customValue>
+    <customValue>
+        <fullName>Empower</fullName>
+        <default>false</default>
+        <label>Empower</label>
+    </customValue>
+    <customValue>
+        <fullName>Fidelity</fullName>
+        <default>false</default>
+        <label>Fidelity</label>
+    </customValue>
+    <customValue>
+        <fullName>Guideline</fullName>
+        <default>false</default>
+        <label>Guideline</label>
+    </customValue>
+    <customValue>
+        <fullName>Human Interest</fullName>
+        <default>false</default>
+        <label>Human Interest</label>
+    </customValue>
+    <customValue>
+        <fullName>John Hancock</fullName>
+        <default>false</default>
+        <label>John Hancock</label>
+    </customValue>
+    <customValue>
+        <fullName>JPMorgan</fullName>
+        <default>false</default>
+        <label>JPMorgan</label>
+    </customValue>
+    <customValue>
+        <fullName>Lincoln Financial Group</fullName>
+        <default>false</default>
+        <label>Lincoln Financial Group</label>
+    </customValue>
+    <customValue>
+        <fullName>Nationwide</fullName>
+        <default>false</default>
+        <label>Nationwide</label>
+    </customValue>
+    <customValue>
+        <fullName>NWPS</fullName>
+        <default>false</default>
+        <label>NWPS</label>
+    </customValue>
+    <customValue>
+        <fullName>Paychex</fullName>
+        <default>false</default>
+        <label>Paychex</label>
+    </customValue>
+    <customValue>
+        <fullName>Principal</fullName>
+        <default>false</default>
+        <label>Principal</label>
+    </customValue>
+    <customValue>
+        <fullName>Schwab</fullName>
+        <default>false</default>
+        <label>Schwab</label>
+    </customValue>
+    <customValue>
+        <fullName>T. Rowe Price</fullName>
+        <default>false</default>
+        <label>T. Rowe Price</label>
+    </customValue>
+    <customValue>
+        <fullName>The Standard</fullName>
+        <default>false</default>
+        <label>The Standard</label>
+    </customValue>
+    <customValue>
+        <fullName>TIAA</fullName>
+        <default>false</default>
+        <label>TIAA</label>
+    </customValue>
+    <customValue>
+        <fullName>Transamerica</fullName>
+        <default>false</default>
+        <label>Transamerica</label>
+    </customValue>
+    <customValue>
+        <fullName>Vanguard</fullName>
+        <default>false</default>
+        <label>Vanguard</label>
+    </customValue>
+    <customValue>
+        <fullName>Vestwell</fullName>
+        <default>false</default>
+        <label>Vestwell</label>
+    </customValue>
+    <customValue>
+        <fullName>VOYA</fullName>
+        <default>false</default>
+        <label>VOYA</label>
+    </customValue>
+    <customValue>
+        <fullName>Other</fullName>
+        <default>false</default>
+        <label>Other</label>
+    </customValue>
+    <masterLabel>Current Plan Provider(s)</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

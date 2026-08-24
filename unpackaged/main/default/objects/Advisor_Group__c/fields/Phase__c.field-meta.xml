@@ -3,7 +3,6 @@
     <fullName>Phase__c</fullName>
     <label>Phase</label>
     <required>false</required>
-    <trackFeedHistory>false</trackFeedHistory>
     <trackHistory>true</trackHistory>
     <trackTrending>false</trackTrending>
     <type>Picklist</type>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BusinessProcess xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Branch Opportunity</fullName>
+    <isActive>true</isActive>
+    <values>
+        <fullName>Closed Lost</fullName>
+        <default>false</default>
+    </values>
+    <values>
+        <fullName>Closed Won</fullName>
+        <default>false</default>
+    </values>
+    <values>
+        <fullName>Diligence</fullName>
+        <default>false</default>
+    </values>
+    <values>
+        <fullName>List of Services</fullName>
+        <default>false</default>
+    </values>
+    <values>
+        <fullName>Negotiate</fullName>
+        <default>false</default>
+    </values>
+    <values>
+        <fullName>Onboarding</fullName>
+        <default>false</default>
+    </values>
+    <values>
+        <fullName>Proposal</fullName>
+        <default>false</default>
+    </values>
+    <values>
+        <fullName>Sales Accepted</fullName>
+        <default>false</default>
+    </values>
+</BusinessProcess>

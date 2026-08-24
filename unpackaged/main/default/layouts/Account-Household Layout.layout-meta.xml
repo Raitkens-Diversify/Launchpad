@@ -7,7 +7,9 @@
     <customButtons>Deca2CTO000000799p2AA</customButtons>
     <customButtons>Deca1s74000000DxAsAAK</customButtons>
     <customButtons>Deca2C8X000004TGsmUAG</customButtons>
-    <excludeButtons>OpenSlackRecordChannel</excludeButtons>
+    <excludeButtons>DataDotComAccountInsights</excludeButtons>
+    <excludeButtons>DataDotComClean</excludeButtons>
+    <excludeButtons>DataDotComCompanyHierarchy</excludeButtons>
     <layoutSections>
         <customLabel>true</customLabel>
         <detailHeading>true</detailHeading>
@@ -289,13 +291,13 @@
         <relatedList>Notes__c.Client__c</relatedList>
     </relatedLists>
     <relatedLists>
-        <fields>CONTACT.FULL_NAME</fields>
-        <fields>CONTACT.ACCOUNT_NAME</fields>
-        <fields>CONTACT.TITLE</fields>
-        <fields>CONTACT.EMAIL</fields>
-        <fields>CONTACT.PHONE1</fields>
-        <fields>ACCCONRELATION.ROLES</fields>
-        <relatedList>RelatedAccountContactRelationList</relatedList>
+        <fields>ACCOUNT.NAME</fields>
+        <fields>ACCOUNT.RECORDTYPE</fields>
+        <fields>Billing_Address_text_string__c</fields>
+        <fields>CREATEDBY_USER.ALIAS</fields>
+        <fields>FinServ__SourceSystemId__c</fields>
+        <fields>Financial_Advisor_Team__c</fields>
+        <relatedList>Account.Household__c</relatedList>
     </relatedLists>
     <relatedLists>
         <excludeButtons>MassChangeOwner</excludeButtons>

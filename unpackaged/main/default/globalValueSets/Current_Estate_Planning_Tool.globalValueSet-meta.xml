@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>Estate Guru</fullName>
+        <default>false</default>
+        <label>Estate Guru</label>
+    </customValue>
+    <customValue>
+        <fullName>Wealth.com</fullName>
+        <default>false</default>
+        <label>Wealth.com</label>
+    </customValue>
+    <customValue>
+        <fullName>Estately</fullName>
+        <default>false</default>
+        <label>Estately</label>
+    </customValue>
+    <customValue>
+        <fullName>Vanilla</fullName>
+        <default>false</default>
+        <label>Vanilla</label>
+    </customValue>
+    <customValue>
+        <fullName>Other</fullName>
+        <default>false</default>
+        <label>Other</label>
+    </customValue>
+    <masterLabel>Current Estate Planning Tool</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

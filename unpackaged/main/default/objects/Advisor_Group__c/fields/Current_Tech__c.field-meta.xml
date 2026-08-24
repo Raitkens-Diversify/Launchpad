@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Current_Tech__c</fullName>
+    <label>Current Tech</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>MultiselectPicklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Black Diamond</fullName>
+                <default>false</default>
+                <label>Black Diamond</label>
+            </value>
+            <value>
+                <fullName>eMoney</fullName>
+                <default>false</default>
+                <label>eMoney</label>
+            </value>
+            <value>
+                <fullName>MGP</fullName>
+                <default>false</default>
+                <label>MGP</label>
+            </value>
+            <value>
+                <fullName>Orion</fullName>
+                <default>false</default>
+                <label>Orion</label>
+            </value>
+            <value>
+                <fullName>Redtail</fullName>
+                <default>false</default>
+                <label>Redtail</label>
+            </value>
+            <value>
+                <fullName>Wealthbox</fullName>
+                <default>false</default>
+                <label>Wealthbox</label>
+            </value>
+            <value>
+                <fullName>Other</fullName>
+                <default>false</default>
+                <label>Other</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+    <visibleLines>4</visibleLines>
+</CustomField>

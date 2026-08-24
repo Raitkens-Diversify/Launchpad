@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Potential_Service__c</fullName>
+    <description>Service the prospect is a candidate for. Mirrors Lead.Potential_Service__c and Opportunity.Potential_Service__c via the Potential Services global value set.</description>
+    <label>Potential Service</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetName>Potential_Services</valueSetName>
+    </valueSet>
+</CustomField>

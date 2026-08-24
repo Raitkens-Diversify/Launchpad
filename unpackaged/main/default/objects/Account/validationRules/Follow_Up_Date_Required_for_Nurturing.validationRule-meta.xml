@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Follow_Up_Date_Required_for_Nurturing</fullName>
+    <active>true</active>
+    <description>Requires a Follow Up Date whenever a wealth prospect is in Nurturing status, on the four wealth prospect record types. Mirrors Lead.Follow_Up_Date_Required_for_Nurturing but enforces on every save, so the date cannot be cleared afterward.</description>
+    <errorConditionFormula>AND(
+  OR(
+    RecordType.DeveloperName = &quot;Business&quot;,
+    RecordType.DeveloperName = &quot;Retirement_Plan&quot;,
+    RecordType.DeveloperName = &quot;Trust&quot;,
+    RecordType.DeveloperName = &quot;PersonAccount&quot;
+  ),
+  ISPICKVAL(Prospect_Status__c, &quot;Nurturing&quot;),
+  ISBLANK(Follow_Up_Date__c)
+)</errorConditionFormula>
+    <errorDisplayField>Follow_Up_Date__c</errorDisplayField>
+    <errorMessage>Please specify a Follow Up Date for Nurturing Status.</errorMessage>
+</ValidationRule>

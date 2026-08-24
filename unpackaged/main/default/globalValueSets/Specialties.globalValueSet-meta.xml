@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>Planning</fullName>
+        <default>false</default>
+        <label>Planning</label>
+    </customValue>
+    <customValue>
+        <fullName>Tax</fullName>
+        <default>false</default>
+        <label>Tax</label>
+    </customValue>
+    <customValue>
+        <fullName>401</fullName>
+        <default>false</default>
+        <label>401</label>
+    </customValue>
+    <customValue>
+        <fullName>Alts</fullName>
+        <default>false</default>
+        <label>Alts</label>
+    </customValue>
+    <masterLabel>Specialties</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>
