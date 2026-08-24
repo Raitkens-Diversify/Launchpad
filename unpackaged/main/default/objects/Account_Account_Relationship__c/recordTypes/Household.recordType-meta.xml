@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RecordType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Household</fullName>
+    <active>true</active>
+    <label>Household</label>
+    <picklistValues>
+        <picklist>Association_Type__c</picklist>
+        <values>
+            <fullName>Member</fullName>
+            <default>true</default>
+        </values>
+        <values>
+            <fullName>Peer</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Role__c</picklist>
+        <values>
+            <fullName>529 Beneficiary</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Account Beneficiary</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Attorney</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Attorney %E2%80%94 Estate Planning</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Attorney %E2%80%94 General %2F Other</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Aunt</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Aunt %2F Uncle</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Authorized Person</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Banker</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Beneficial Owner</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Business Partner</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>COI %2F Strategic Partner</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>CPA</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>CPA %2F Accountant</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Care Recipient</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Caretaker</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Child</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Client</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Client %28Attorney - Estate Planning%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Client %28Attorney - General %2F Other%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Client %28Banker%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Client %28CPA %2F Accountant%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Client %28Insurance Agent%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Client %28Mortgage %2F Lending Officer%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Client %28Real Estate Agent%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Client Entity</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Co-worker %2F Colleague</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Control Person</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Custodian %28Minor%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Employee</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Employer</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Ex-Spouse</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Executor %2F Personal Representative</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Friend</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Grandchild</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Grandchild %28or Great%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Grandparent</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Grandparent %28or Great%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Grantor</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Guardian %2F Conservator</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>In-Law</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Insurance Agent</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Life Partner</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Mortgage %2F Lending Officer</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Nephew</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Niece</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Niece %2F Nephew</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Other</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Parent</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Patient %28Physician%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Physician</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Plan Administrator</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Plan Participant</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Power of Attorney</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Real Estate Agent</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Referred</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Referrer</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Sibling</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Spouse</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Spouse %E2%80%94 Current</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Spouse %E2%80%94 Former</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Trust Beneficiary</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Trusted Contact</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Trustee</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Uncle</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+    <picklistValues>
+        <picklist>Roles__c</picklist>
+        <values>
+            <fullName>529 Beneficiary</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Account Beneficiary</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Attorney</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Attorney %E2%80%94 Estate Planning</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Attorney %E2%80%94 General %2F Other</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Aunt</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Aunt %2F Uncle</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Authorized Person</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Banker</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Beneficial Owner</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Business Partner</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>COI %2F Strategic Partner</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>CPA</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>CPA %2F Accountant</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Care Recipient</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Caretaker</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Child</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Client</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Client %28Attorney - Estate Planning%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Client %28Attorney - General %2F Other%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Client %28Banker%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Client %28CPA %2F Accountant%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Client %28Insurance Agent%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Client %28Mortgage %2F Lending Officer%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Client %28Real Estate Agent%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Client Entity</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Co-worker %2F Colleague</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Control Person</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Custodian %28Minor%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Employee</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Employer</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Ex-Spouse</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Executor %2F Personal Representative</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Friend</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Grandchild</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Grandchild %28or Great%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Grandparent</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Grandparent %28or Great%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Grantor</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Guardian %2F Conservator</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>In-Law</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Insurance Agent</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Life Partner</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Mortgage %2F Lending Officer</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Nephew</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Niece</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Niece %2F Nephew</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Other</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Parent</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Patient %28Physician%29</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Physician</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Plan Administrator</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Plan Participant</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Power of Attorney</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Real Estate Agent</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Referred</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Referrer</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Sibling</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Spouse</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Spouse %E2%80%94 Current</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Spouse %E2%80%94 Former</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Trust Beneficiary</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Trusted Contact</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Trustee</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Uncle</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+</RecordType>

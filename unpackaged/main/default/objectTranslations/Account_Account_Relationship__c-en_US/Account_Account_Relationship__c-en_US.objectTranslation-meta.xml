@@ -8,16 +8,6 @@
         <plural>true</plural>
         <value>Account Account Relationshipa</value>
     </caseValues>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     <layouts>
         <layout>Account Account Relationship Layout</layout>
         <sections>
@@ -38,6 +28,10 @@
         <name>Fiduciary_Legal</name>
     </recordTypes>
     <recordTypes>
+        <label><!-- Household --></label>
+        <name>Household</name>
+    </recordTypes>
+    <recordTypes>
         <label><!-- Other --></label>
         <name>Other</name>
     </recordTypes>
@@ -49,5 +43,15 @@
         <label><!-- Service Provider --></label>
         <name>Service_Provider</name>
     </recordTypes>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <startsWith>Vowel</startsWith>
 </CustomObjectTranslation>

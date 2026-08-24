@@ -171,7 +171,7 @@
             <fieldInstance>
                 <fieldInstanceProperties>
                     <name>uiBehavior</name>
-                    <value>readonly</value>
+                    <value>required</value>
                 </fieldInstanceProperties>
                 <fieldItem>Record.Financial_Advisor_Team__c</fieldItem>
                 <identifier>RecordFinancial_Advisor_Team_cField</identifier>

@@ -43,6 +43,7 @@ import {
     collectNodeIds,
     collectWireBusGroups,
     computeVisibleMapColumnCount,
+    countUniqueRelatedContactsFromRelationships,
     createInitialOpenState,
     findMapNode,
     findMemberNodeByAccountId,
@@ -1461,7 +1462,8 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
                     ? relationshipsByAccountId[accountId]
                     : [];
                 nextNestedMemberRelations[accountId] = relationships;
-                nextMemberRelationCounts[accountId] = relationships.length;
+                nextMemberRelationCounts[accountId] =
+                    countUniqueRelatedContactsFromRelationships(relationships);
             });
 
             this.nestedMemberRelationsByAccountId = nextNestedMemberRelations;
@@ -1506,7 +1508,7 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
             };
             this.memberRelationCountByAccountId = {
                 ...this.memberRelationCountByAccountId,
-                [accountId]: relationships.length
+                [accountId]: countUniqueRelatedContactsFromRelationships(relationships)
             };
         } catch (error) {
             dispatchToast(this, {

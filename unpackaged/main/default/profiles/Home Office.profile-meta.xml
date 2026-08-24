@@ -16746,6 +16746,10 @@
     </layoutAssignments>
     <layoutAssignments>
         <layout>Account_Account_Relationship__c-Account Account Relationship Layout</layout>
+        <recordType>Account_Account_Relationship__c.Household</recordType>
+    </layoutAssignments>
+    <layoutAssignments>
+        <layout>Account_Account_Relationship__c-Account Account Relationship Layout</layout>
         <recordType>Account_Account_Relationship__c.Other</recordType>
     </layoutAssignments>
     <layoutAssignments>
@@ -18342,6 +18346,11 @@
         <visible>false</visible>
     </recordTypeVisibilities>
     <recordTypeVisibilities>
+        <default>true</default>
+        <recordType>Account_Account_Relationship__c.Household</recordType>
+        <visible>true</visible>
+    </recordTypeVisibilities>
+    <recordTypeVisibilities>
         <default>false</default>
         <recordType>Account_Account_Relationship__c.Other</recordType>
         <visible>false</visible>
@@ -18534,10 +18543,10 @@
         <visible>true</visible>
     </recordTypeVisibilities>
     <recordTypeVisibilities>
-        <default>false</default>
-        <recordType>Opportunity.Existing_Client_Wallet_Share</recordType>
-        <visible>true</visible>
-    </recordTypeVisibilities>
+    <default>false</default>
+    <recordType>Opportunity.Existing_Client_Wallet_Share</recordType>
+    <visible>false</visible>
+</recordTypeVisibilities>
     <recordTypeVisibilities>
         <default>false</default>
         <recordType>Opportunity.Independent</recordType>
@@ -18559,10 +18568,10 @@
         <visible>false</visible>
     </recordTypeVisibilities>
     <recordTypeVisibilities>
-        <default>false</default>
-        <recordType>Opportunity.Retirement_Plan</recordType>
-        <visible>true</visible>
-    </recordTypeVisibilities>
+    <default>false</default>
+    <recordType>Opportunity.Retirement_Plan</recordType>
+    <visible>false</visible>
+</recordTypeVisibilities>
     <recordTypeVisibilities>
         <default>false</default>
         <recordType>Reciprocal_Role__c.Business</recordType>

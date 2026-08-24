@@ -232,19 +232,22 @@
                 <span class="map-card__pill-text">{node.sub}</span>
               </span>
             </template>
-            <template lwc:if={showRoleFooterPill}>
-              <span
-                class="map-card__role-pill map-card__role-pill_footer map-card__pill"
-                data-tooltip={node.sub}
-                tabindex="0"
-                onmouseenter={handleTooltipShow}
-                onmouseleave={handleTooltipHide}
-                onfocus={handleTooltipShow}
-                onblur={handleTooltipHide}
-                onclick={handleTooltipTargetClick}
-              >
-                <span class="map-card__pill-text">{node.sub}</span>
-              </span>
+            <template lwc:if={showRoleFooterPills}>
+              <template for:each={roleFooterPills} for:item="rolePill">
+                <span
+                  key={rolePill.key}
+                  class="map-card__role-pill map-card__role-pill_footer map-card__pill"
+                  data-tooltip={rolePill.label}
+                  tabindex="0"
+                  onmouseenter={handleTooltipShow}
+                  onmouseleave={handleTooltipHide}
+                  onfocus={handleTooltipShow}
+                  onblur={handleTooltipHide}
+                  onclick={handleTooltipTargetClick}
+                >
+                  <span class="map-card__pill-text">{rolePill.label}</span>
+                </span>
+              </template>
             </template>
           </div>
         </template>

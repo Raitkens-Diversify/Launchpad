@@ -6657,6 +6657,10 @@
     </layoutAssignments>
     <layoutAssignments>
         <layout>Account_Account_Relationship__c-Account Account Relationship Layout</layout>
+        <recordType>Account_Account_Relationship__c.Household</recordType>
+    </layoutAssignments>
+    <layoutAssignments>
+        <layout>Account_Account_Relationship__c-Account Account Relationship Layout</layout>
         <recordType>Account_Account_Relationship__c.Other</recordType>
     </layoutAssignments>
     <layoutAssignments>

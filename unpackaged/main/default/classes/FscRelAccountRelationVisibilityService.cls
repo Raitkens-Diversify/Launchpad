@@ -108,7 +108,7 @@ public without sharing class FscRelAccountRelationVisibilityService {
         AND Reciprocal_Role__c != NULL
     ];
 
-    Map<Id, Set<Id>> accountIdToRelationIds = new Map<Id, Set<Id>>();
+    Map<Id, Set<Id>> accountIdToRelatedAccountIds = new Map<Id, Set<Id>>();
     Map<Id, Set<String>> accountIdToOutgoingPairKeys = new Map<Id, Set<String>>();
 
     for (
@@ -120,10 +120,10 @@ public without sharing class FscRelAccountRelationVisibilityService {
         relation.Account__c != null &&
         accountIds.contains(relation.Account__c)
       ) {
-        addExpansionRelationId(
-          accountIdToRelationIds,
+        addExpansionRelatedAccountId(
+          accountIdToRelatedAccountIds,
           relation.Account__c,
-          relation.Id
+          relation.Related_Account__c
         );
         addExpansionOutgoingPairKey(
           accountIdToOutgoingPairKeys,
@@ -159,17 +159,17 @@ public without sharing class FscRelAccountRelationVisibilityService {
         continue;
       }
 
-      addExpansionRelationId(
-        accountIdToRelationIds,
+      addExpansionRelatedAccountId(
+        accountIdToRelatedAccountIds,
         relation.Related_Account__c,
-        relation.Id
+        relation.Account__c
       );
     }
 
-    for (Id accountId : accountIdToRelationIds.keySet()) {
+    for (Id accountId : accountIdToRelatedAccountIds.keySet()) {
       accountIdToCount.put(
         String.valueOf(accountId),
-        accountIdToRelationIds.get(accountId).size()
+        accountIdToRelatedAccountIds.get(accountId).size()
       );
     }
 
@@ -252,20 +252,20 @@ public without sharing class FscRelAccountRelationVisibilityService {
     return readableAccountIds;
   }
 
-  private static void addExpansionRelationId(
-    Map<Id, Set<Id>> accountIdToRelationIds,
-    Id accountId,
-    Id relationId
+  private static void addExpansionRelatedAccountId(
+    Map<Id, Set<Id>> accountIdToRelatedAccountIds,
+    Id viewerAccountId,
+    Id relatedAccountId
   ) {
-    if (accountId == null || relationId == null) {
+    if (viewerAccountId == null || relatedAccountId == null) {
       return;
     }
 
-    if (!accountIdToRelationIds.containsKey(accountId)) {
-      accountIdToRelationIds.put(accountId, new Set<Id>());
+    if (!accountIdToRelatedAccountIds.containsKey(viewerAccountId)) {
+      accountIdToRelatedAccountIds.put(viewerAccountId, new Set<Id>());
     }
 
-    accountIdToRelationIds.get(accountId).add(relationId);
+    accountIdToRelatedAccountIds.get(viewerAccountId).add(relatedAccountId);
   }
 
   private static void addExpansionOutgoingPairKey(

@@ -378,34 +378,10 @@
             <fieldInstance>
                 <fieldInstanceProperties>
                     <name>uiBehavior</name>
-                    <value>readonly</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Financial_Advisor_Team__c</fieldItem>
-                <identifier>RecordFinancial_Advisor_Team_cField</identifier>
-                <visibilityRule>
-                    <criteria>
-                        <leftValue>{!$User.Profile.Name}</leftValue>
-                        <operator>NE</operator>
-                        <rightValue>System Administrator</rightValue>
-                    </criteria>
-                </visibilityRule>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
                     <value>required</value>
                 </fieldInstanceProperties>
                 <fieldItem>Record.Financial_Advisor_Team__c</fieldItem>
                 <identifier>RecordFinancial_Advisor_Team_cField2</identifier>
-                <visibilityRule>
-                    <criteria>
-                        <leftValue>{!$User.Profile.Name}</leftValue>
-                        <operator>EQUAL</operator>
-                        <rightValue>System Administrator</rightValue>
-                    </criteria>
-                </visibilityRule>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -528,6 +504,16 @@
                 </fieldInstanceProperties>
                 <fieldItem>Record.Classification__c</fieldItem>
                 <identifier>RecordClassification_cField2</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>required</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Financial_Advisor_Team__c</fieldItem>
+                <identifier>RecordFinancial_Advisor_Team_cField5</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -666,34 +652,10 @@
             <fieldInstance>
                 <fieldInstanceProperties>
                     <name>uiBehavior</name>
-                    <value>readonly</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Financial_Advisor_Team__c</fieldItem>
-                <identifier>RecordFinancial_Advisor_Team_cField3</identifier>
-                <visibilityRule>
-                    <criteria>
-                        <leftValue>{!$User.Profile.Name}</leftValue>
-                        <operator>NE</operator>
-                        <rightValue>System Administrator</rightValue>
-                    </criteria>
-                </visibilityRule>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
+                    <value>required</value>
                 </fieldInstanceProperties>
                 <fieldItem>Record.Financial_Advisor_Team__c</fieldItem>
                 <identifier>RecordFinancial_Advisor_Team_cField4</identifier>
-                <visibilityRule>
-                    <criteria>
-                        <leftValue>{!$User.Profile.Name}</leftValue>
-                        <operator>EQUAL</operator>
-                        <rightValue>System Administrator</rightValue>
-                    </criteria>
-                </visibilityRule>
             </fieldInstance>
         </itemInstances>
         <name>Facet-be710762-b893-46dd-929f-6d46c6dafd04</name>

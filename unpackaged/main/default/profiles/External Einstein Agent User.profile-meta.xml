@@ -15807,6 +15807,10 @@
     </layoutAssignments>
     <layoutAssignments>
         <layout>Account_Account_Relationship__c-Account Account Relationship Layout</layout>
+        <recordType>Account_Account_Relationship__c.Household</recordType>
+    </layoutAssignments>
+    <layoutAssignments>
+        <layout>Account_Account_Relationship__c-Account Account Relationship Layout</layout>
         <recordType>Account_Account_Relationship__c.Other</recordType>
     </layoutAssignments>
     <layoutAssignments>
@@ -16939,6 +16943,11 @@
     <recordTypeVisibilities>
         <default>false</default>
         <recordType>Account_Account_Relationship__c.Fiduciary_Legal</recordType>
+        <visible>true</visible>
+    </recordTypeVisibilities>
+    <recordTypeVisibilities>
+        <default>false</default>
+        <recordType>Account_Account_Relationship__c.Household</recordType>
         <visible>true</visible>
     </recordTypeVisibilities>
     <recordTypeVisibilities>

@@ -279,6 +279,68 @@ private class FscRelAarVisibilityServiceTest {
     );
   }
 
+  @IsTest
+  static void selectVisibleExpansionCountsByAccountIds_countsUniqueRelatedAccounts() {
+    User ownerUser = createStandardUser();
+    Account memberAccount;
+    Account relatedAccount;
+
+    System.runAs(ownerUser) {
+      memberAccount = createPersonAccount('FscAarVisibility Unique Member');
+      relatedAccount = createPersonAccount('FscAarVisibility Unique Related');
+      insertManagedRelationship(memberAccount.Id, relatedAccount.Id);
+      insertManagedRelationshipWithRoles(
+        memberAccount.Id,
+        relatedAccount.Id,
+        'Unique Grantor',
+        'Unique Principal'
+      );
+    }
+
+    Test.startTest();
+    Map<String, Integer> expansionCounts;
+    System.runAs(ownerUser) {
+      expansionCounts = FscRelAccountRelationVisibilityService.selectVisibleExpansionCountsByAccountIds(
+        new Set<Id>{ memberAccount.Id }
+      );
+    }
+    Test.stopTest();
+
+    System.assertEquals(
+      1,
+      expansionCounts.get(String.valueOf(memberAccount.Id)),
+      'Duplicate relationships to the same related account should count once.'
+    );
+  }
+
+  private static Account_Account_Relationship__c insertManagedRelationshipWithRoles(
+    Id memberAccountId,
+    Id relatedAccountId,
+    String memberRoleName,
+    String relatedRoleName
+  ) {
+    String recordTypeDeveloperName = resolveFirstAccountRelationRecordTypeDeveloperName();
+    Reciprocal_Role__c role = FscDataTestDataFactory.createReciprocalRoleForMemberRelationship(
+      recordTypeDeveloperName,
+      memberRoleName,
+      relatedRoleName
+    );
+    Id recordTypeId = FscRelRecordTypeUtils.selectAccountRelationRecordTypeId(
+      recordTypeDeveloperName
+    );
+
+    Account_Account_Relationship__c relation = new Account_Account_Relationship__c(
+      Account__c = memberAccountId,
+      Related_Account__c = relatedAccountId,
+      RecordTypeId = recordTypeId,
+      Reciprocal_Role__c = role.Id,
+      Inverse_Reciprocal_Role__c = role.Id,
+      Active__c = true
+    );
+    insert relation;
+    return relation;
+  }
+
   private static Account_Account_Relationship__c insertManagedRelationship(
     Id memberAccountId,
     Id relatedAccountId

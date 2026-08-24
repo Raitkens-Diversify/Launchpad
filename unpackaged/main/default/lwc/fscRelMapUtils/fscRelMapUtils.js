@@ -99,7 +99,7 @@ const GROUP_DEFINITIONS = Object.freeze([
   },
   {
     id: GROUP_IDS.FAMILY,
-    label: "Family",
+    label: "Family and Friends",
     iconName: "standard:groups",
     kind: MAP_KIND.GROUP
   },
@@ -483,7 +483,7 @@ const buildHouseholdNetworkChildren = (
 const PERSONAL_AND_FAMILY_RECORD_TYPE = "Personal_and_Family";
 
 const MEMBER_RELATIONSHIP_GROUP_LABELS = Object.freeze({
-  Personal_and_Family: "Personal and Family",
+  Personal_and_Family: "Family and Friends",
   COI_Referral: "COI / Referral",
   Service_Provider: "Service Provider",
   Business: "Business",
@@ -786,7 +786,9 @@ export const buildGroupedMemberRelationNodes = (
     });
 
   return orderedRecordTypes.map((recordTypeDeveloperName) => {
-    const contacts = contactsByRecordType.get(recordTypeDeveloperName) || [];
+    const contacts = consolidateContactRelationNodes(
+      contactsByRecordType.get(recordTypeDeveloperName) || []
+    );
 
     return buildRelationshipGroupNode(
       memberNodeId,
@@ -1157,6 +1159,19 @@ const buildRelationshipLink = (node) => ({
   relationshipRole: node.relationshipRole || ""
 });
 
+const collectUniqueRoleLabels = (nodes = []) =>
+  [
+    ...new Set(
+      (nodes || [])
+        .map((node) => String(node.sub || "").trim())
+        .filter(Boolean)
+    )
+  ].sort((first, second) =>
+    first.localeCompare(second, undefined, {
+      sensitivity: "base"
+    })
+  );
+
 const hasRelatedToSublineData = (node) =>
   Boolean(
     String(node?.relatedToName || "").trim() &&
@@ -1164,6 +1179,25 @@ const hasRelatedToSublineData = (node) =>
     (String(node?.relatedToInverseRole || "").trim() ||
       String(node?.relationshipRole || "").trim())
   );
+
+export const countUniqueRelatedContactsFromRelationships = (
+  rawRelationships = []
+) => {
+  const uniqueKeys = new Set();
+
+  (rawRelationships || []).forEach((relationship) => {
+    const key =
+      String(relationship?.relatedAccountId || "").trim() ||
+      String(relationship?.relatedContactAccountId || "").trim() ||
+      String(relationship?.relatedContactId || "").trim();
+
+    if (key) {
+      uniqueKeys.add(key);
+    }
+  });
+
+  return uniqueKeys.size;
+};
 
 export const consolidateContactRelationNodes = (nodes = []) => {
   const groupedByContact = new Map();
@@ -1213,7 +1247,7 @@ export const consolidateContactRelationNodes = (nodes = []) => {
             )
           )
       );
-
+      const roleLabels = collectUniqueRoleLabels(group);
       const accountId = String(primary.accountId || "").trim();
 
       return {
@@ -1227,7 +1261,17 @@ export const consolidateContactRelationNodes = (nodes = []) => {
         relatedToName: "",
         relationshipRole: "",
         relatedToInverseRole: "",
-        sub: relationshipLinks.length ? "" : primary.sub
+        roleLabels:
+          relationshipLinks.length || roleLabels.length <= 1
+            ? undefined
+            : roleLabels,
+        sub: relationshipLinks.length
+          ? ""
+          : roleLabels.length === 1
+            ? roleLabels[0]
+            : roleLabels.length > 1
+              ? ""
+              : primary.sub
       };
     })
     .sort((first, second) =>
@@ -1368,8 +1412,10 @@ const attachMemberRelationsToMemberNode = (
       memberNode,
       memberRelationshipRecordTypes
     );
-    const relatedContactCount =
-      buildMemberAccountRelationshipViewModels(relations).length;
+    const relatedContactCount = relationGroups.reduce(
+      (total, group) => total + (group.children?.length || 0),
+      0
+    );
 
     return {
       ...memberNode,
@@ -1451,7 +1497,7 @@ export const buildPersonCentricMapTree = ({
   const familyGroup = buildGroupNode(
     {
       id: `${memberNode.id}::${GROUP_IDS.FAMILY}`,
-      label: "Family",
+      label: "Family and Friends",
       iconName: "standard:groups",
       kind: MAP_KIND.GROUP
     },
