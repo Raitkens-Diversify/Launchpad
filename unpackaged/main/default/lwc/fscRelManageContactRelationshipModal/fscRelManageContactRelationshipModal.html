@@ -71,7 +71,6 @@
                                                 value={row.memberAccountId}
                                                 record-label={row.memberAccountName}
                                                 placeholder="Search Accounts..."
-                                                filter={personAccountFilter}
                                                 allowed-record-ids={allowedClientMemberAccountIds}
                                                 create-enabled={isSubjectLookupCreateEnabled}
                                                 disabled={row.isMemberAccountDisabled}
@@ -107,13 +106,12 @@
                                             data-row-id={row.id}
                                             object-api-name="Account"
                                             variant="label-hidden"
-                                            label="Related Person Account"
+                                            label="Related Account"
                                             value={row.relatedAccountId}
                                             record-label={row.relatedAccountName}
                                             placeholder="Search Accounts..."
-                                            filter={personAccountFilter}
                                             create-button-label="New Account"
-                                            create-modal-label="New Person Account"
+                                            create-modal-label="New Account"
                                             disabled={row.isRelatedAccountDisabled}
                                             onchange={handleRelatedAccountChange}
                                             oncreaterequest={handleRelatedAccountCreateRequest}

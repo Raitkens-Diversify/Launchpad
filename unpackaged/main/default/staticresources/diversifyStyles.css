@@ -421,79 +421,6 @@
   --div-pill-line-height: 1.25;
   --div-pill-color-coming-soon-bg: #fef3c7;
   --div-pill-color-coming-soon-text: #b45309;
-
-  /* SLDS input styling hooks — inherit into all LWC shadow trees */
-  --slds-c-label-font-size: var(--div-input-font-size);
-  --slds-c-label-font-weight: 500;
-  --slds-c-label-text-color: var(--div-input-color-text);
-  --slds-c-label-spacing-block-end: var(--div-input-gap);
-
-  --slds-c-input-color-background: var(--div-input-color-background);
-  --slds-c-input-color-border: var(--div-input-color-border);
-  --slds-c-input-color-border-hover: var(--div-input-color-border-hover);
-  --slds-c-input-color-border-focus: var(--div-input-color-border);
-  --slds-c-input-radius-border: var(--div-input-radius);
-  --slds-c-input-shadow: none;
-  --slds-c-input-shadow-focus: var(--div-input-focus-ring);
-  --slds-c-input-spacing-horizontal: var(--div-input-padding-x);
-  --slds-c-input-spacing-block-start: var(--div-input-padding-y);
-  --slds-c-input-spacing-block-end: var(--div-input-padding-y);
-  --slds-c-input-font-size: var(--div-input-font-size);
-  --slds-c-input-font-family: var(--div-font-family-base);
-  --slds-c-input-text-color: var(--div-input-color-text);
-  --slds-c-input-text-color-focus: var(--div-input-color-text-focus);
-
-  --sds-c-input-sizing-min-height: var(--div-input-height);
-  --sds-c-input-font-size: var(--div-input-font-size);
-  --sds-c-input-text-color: var(--div-input-color-text);
-  --sds-c-input-color-background: var(--div-input-color-background);
-  --sds-c-input-color-border: var(--div-input-color-border);
-  --sds-c-input-color-border-hover: var(--div-input-color-border-hover);
-  --sds-c-input-color-border-focus: var(--div-input-color-border);
-  --sds-c-input-radius-border: var(--div-input-radius);
-  --sds-c-input-shadow-focus: var(--div-input-focus-ring);
-
-  --slds-c-textarea-color-background: var(--div-input-color-background);
-  --slds-c-textarea-color-border: var(--div-input-color-border);
-  --slds-c-textarea-color-border-hover: var(--div-input-color-border-hover);
-  --slds-c-textarea-color-border-focus: var(--div-input-color-border);
-  --slds-c-textarea-radius-border: var(--div-input-radius);
-  --slds-c-textarea-shadow: none;
-  --slds-c-textarea-shadow-focus: var(--div-input-focus-ring);
-  --slds-c-textarea-spacing-horizontal: var(--div-input-padding-x);
-  --slds-c-textarea-spacing-block-start: var(--div-input-padding-y);
-  --slds-c-textarea-spacing-block-end: var(--div-input-padding-y);
-  --slds-c-textarea-font-size: var(--div-input-font-size);
-  --slds-c-textarea-font-family: var(--div-font-family-base);
-  --slds-c-textarea-text-color: var(--div-input-color-text);
-
-  --lwc-colorBorderInput: var(--div-input-color-border);
-  --slds-c-combobox-color-background: var(--div-input-color-background);
-  --slds-c-combobox-color-border: var(--div-input-color-border);
-  --slds-c-combobox-color-border-hover: var(--div-input-color-border-hover);
-  --slds-c-combobox-color-border-focus: var(--div-input-color-border);
-  --slds-c-combobox-radius-border: var(--div-input-radius);
-  --slds-c-combobox-shadow-focus: var(--div-input-focus-ring);
-  --sds-c-combobox-shadow-focus: var(--div-input-focus-ring);
-  --lwc-shadowButtonFocus: var(--div-input-focus-ring);
-  --slds-g-shadow-outline-focus-1: var(--div-input-focus-ring);
-  --slds-g-radius-border-3: var(--div-control-radius);
-  --slds-c-combobox-spacing-horizontal: var(--div-input-padding-x);
-  --slds-c-combobox-spacing-block-start: var(--div-input-padding-y);
-  --slds-c-combobox-spacing-block-end: var(--div-input-padding-y);
-
-  --slds-c-checkbox-color-background: var(--div-input-color-background);
-  --slds-c-checkbox-color-border: var(--div-input-color-border);
-  --slds-c-checkbox-color-border-hover: var(--div-input-color-border-hover);
-  --slds-c-checkbox-color-border-focus: var(--div-input-color-border);
-  --slds-c-checkbox-radius-border: 0.125rem;
-  --slds-c-checkbox-shadow: none;
-  --slds-c-checkbox-shadow-focus: var(--div-input-focus-ring);
-  --sds-c-checkbox-color-border: var(--div-input-color-border);
-  --sds-c-checkbox-color-border-hover: var(--div-input-color-border-hover);
-  --sds-c-checkbox-color-border-focus: var(--div-input-color-border);
-  --sds-c-checkbox-radius-border: 0.125rem;
-  --sds-c-checkbox-shadow-focus: var(--div-input-focus-ring);
 }
 
 /* ── Standard native form controls (--div-input-*) ─────────────────────────── */
@@ -1678,7 +1605,82 @@ iframe html {
 
 /* ── SLDS input overrides ────────────────────────────────────────────────────── */
 
-/* Input tokens live on :root above; .app-shell keeps shell button tokens only. */
+/* SLDS form styling hooks scoped to app shells (inherit into child LWC shadow trees). */
+.app-shell,
+.div-app {
+  --slds-c-label-font-size: var(--div-input-font-size);
+  --slds-c-label-font-weight: 500;
+  --slds-c-label-text-color: var(--div-input-color-text);
+  --slds-c-label-spacing-block-end: var(--div-input-gap);
+
+  --slds-c-input-color-background: var(--div-input-color-background);
+  --slds-c-input-color-border: var(--div-input-color-border);
+  --slds-c-input-color-border-hover: var(--div-input-color-border-hover);
+  --slds-c-input-color-border-focus: var(--div-input-color-border);
+  --slds-c-input-radius-border: var(--div-input-radius);
+  --slds-c-input-shadow: none;
+  --slds-c-input-shadow-focus: var(--div-input-focus-ring);
+  --slds-c-input-spacing-horizontal: var(--div-input-padding-x);
+  --slds-c-input-spacing-block-start: var(--div-input-padding-y);
+  --slds-c-input-spacing-block-end: var(--div-input-padding-y);
+  --slds-c-input-font-size: var(--div-input-font-size);
+  --slds-c-input-font-family: var(--div-font-family-base);
+  --slds-c-input-text-color: var(--div-input-color-text);
+  --slds-c-input-text-color-focus: var(--div-input-color-text-focus);
+
+  --sds-c-input-sizing-min-height: var(--div-input-height);
+  --sds-c-input-font-size: var(--div-input-font-size);
+  --sds-c-input-text-color: var(--div-input-color-text);
+  --sds-c-input-color-background: var(--div-input-color-background);
+  --sds-c-input-color-border: var(--div-input-color-border);
+  --sds-c-input-color-border-hover: var(--div-input-color-border-hover);
+  --sds-c-input-color-border-focus: var(--div-input-color-border);
+  --sds-c-input-radius-border: var(--div-input-radius);
+  --sds-c-input-shadow-focus: var(--div-input-focus-ring);
+
+  --slds-c-textarea-color-background: var(--div-input-color-background);
+  --slds-c-textarea-color-border: var(--div-input-color-border);
+  --slds-c-textarea-color-border-hover: var(--div-input-color-border-hover);
+  --slds-c-textarea-color-border-focus: var(--div-input-color-border);
+  --slds-c-textarea-radius-border: var(--div-input-radius);
+  --slds-c-textarea-shadow: none;
+  --slds-c-textarea-shadow-focus: var(--div-input-focus-ring);
+  --slds-c-textarea-spacing-horizontal: var(--div-input-padding-x);
+  --slds-c-textarea-spacing-block-start: var(--div-input-padding-y);
+  --slds-c-textarea-spacing-block-end: var(--div-input-padding-y);
+  --slds-c-textarea-font-size: var(--div-input-font-size);
+  --slds-c-textarea-font-family: var(--div-font-family-base);
+  --slds-c-textarea-text-color: var(--div-input-color-text);
+
+  --lwc-colorBorderInput: var(--div-input-color-border);
+  --slds-c-combobox-color-background: var(--div-input-color-background);
+  --slds-c-combobox-color-border: var(--div-input-color-border);
+  --slds-c-combobox-color-border-hover: var(--div-input-color-border-hover);
+  --slds-c-combobox-color-border-focus: var(--div-input-color-border);
+  --slds-c-combobox-radius-border: var(--div-input-radius);
+  --slds-c-combobox-shadow-focus: var(--div-input-focus-ring);
+  --sds-c-combobox-shadow-focus: var(--div-input-focus-ring);
+  --lwc-shadowButtonFocus: var(--div-input-focus-ring);
+  --slds-g-shadow-outline-focus-1: var(--div-input-focus-ring);
+  --slds-g-radius-border-3: var(--div-control-radius);
+  --slds-c-combobox-spacing-horizontal: var(--div-input-padding-x);
+  --slds-c-combobox-spacing-block-start: var(--div-input-padding-y);
+  --slds-c-combobox-spacing-block-end: var(--div-input-padding-y);
+
+  --slds-c-checkbox-color-background: var(--div-input-color-background);
+  --slds-c-checkbox-color-border: var(--div-input-color-border);
+  --slds-c-checkbox-color-border-hover: var(--div-input-color-border-hover);
+  --slds-c-checkbox-color-border-focus: var(--div-input-color-border);
+  --slds-c-checkbox-radius-border: 0.125rem;
+  --slds-c-checkbox-shadow: none;
+  --slds-c-checkbox-shadow-focus: var(--div-input-focus-ring);
+  --sds-c-checkbox-color-border: var(--div-input-color-border);
+  --sds-c-checkbox-color-border-hover: var(--div-input-color-border-hover);
+  --sds-c-checkbox-color-border-focus: var(--div-input-color-border);
+  --sds-c-checkbox-radius-border: 0.125rem;
+  --sds-c-checkbox-shadow-focus: var(--div-input-focus-ring);
+}
+
 .app-shell {
   /* Shared button tokens (inherit into child LWC shadow trees) */
   --slds-c-button-brand-color-background: var(--div-color-button-primary);
@@ -1797,6 +1799,30 @@ iframe html {
   color: var(--div-color-text-muted, #706e6b);
   background-color: var(--div-color-surface-muted, #f4f6f9);
   border-color: var(--div-color-border, #dddbda);
+}
+
+/* Native SLDS inputs inside diversify app shells */
+.app-shell .slds-input,
+.app-shell .slds-input[type="search"],
+.div-app .slds-input,
+.div-app .slds-input[type="search"] {
+  font-size: var(--div-input-font-size) !important;
+}
+
+.app-shell .slds-input::placeholder,
+.div-app .slds-input::placeholder {
+  font-size: var(--div-input-font-size) !important;
+  color: var(--div-color-neutral-500, #838a97);
+  opacity: 1;
+}
+
+.app-shell .slds-input[type="search"],
+.div-app .slds-input[type="search"] {
+  height: var(--div-input-height) !important;
+  border-radius: var(--div-radius-border-2, 0.5rem) !important;
+  border: 1px solid var(--div-color-border-2, #b6bcc5) !important;
+  color: var(--div-color-text-primary, #181818) !important;
+  min-width: 300px;
 }
 
 
@@ -6623,25 +6649,6 @@ iframe html {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.375rem;
-}
-
-.slds-input,
-.slds-input[type="search"] {
-  font-size: var(--div-input-font-size) !important;
-}
-
-.slds-input::placeholder {
-  font-size: var(--div-input-font-size) !important;
-  color: var(--div-color-neutral-500, #838a97);
-  opacity: 1;
-}
-
-.slds-input[type="search"] {
-  height: var(--div-input-height) !important;
-  border-radius: var(--div-radius-border-2, 0.5rem) !important;
-  border: 1px solid var(--div-color-border-2, #b6bcc5) !important;
-  color: var(--div-color-text-primary, #181818) !important;
-  min-width: 300px;
 }
 
 .margin-bottom-0 {

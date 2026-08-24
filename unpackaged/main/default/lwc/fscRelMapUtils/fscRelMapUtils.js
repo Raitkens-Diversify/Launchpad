@@ -330,7 +330,8 @@ const buildClassificationChildNode = (
     parentGroupId,
     classificationValue,
     nestedMembersByAccountId,
-    nestedAccountMemberCountByAccountId
+    nestedAccountMemberCountByAccountId,
+    memberRelationshipRecordTypes
   );
 };
 
@@ -339,12 +340,17 @@ const buildClassificationAccountNode = (
   parentGroupId,
   classificationValue,
   nestedMembersByAccountId = {},
-  nestedAccountMemberCountByAccountId = {}
+  nestedAccountMemberCountByAccountId = {},
+  memberRelationshipRecordTypes = []
 ) => {
   const accountId = account.accountId || account.id || "";
+  const memberRelationshipActions = buildMemberRelationshipActions(
+    memberRelationshipRecordTypes
+  );
+  const supportsMemberRelations = memberRelationshipActions.length > 0;
   const presentation = resolveAccountPresentation(account);
 
-  return enrichLazyAccountNodeWithMembersOrCount(
+  const node = enrichLazyAccountNodeWithMembersOrCount(
     {
       id: `${parentGroupId}::classification-account::${classificationValue || "Other"}::${accountId}`,
       label: account.name || "",
@@ -359,6 +365,9 @@ const buildClassificationAccountNode = (
       classificationValue: classificationValue || "",
       isLazyExpandable: true,
       accountMembersLoaded: false,
+      showManageRelatedContacts: supportsMemberRelations,
+      showManageMemberRelationships: supportsMemberRelations,
+      memberRelationshipActions,
       defaultOpen: false,
       children: []
     },
@@ -366,6 +375,8 @@ const buildClassificationAccountNode = (
     nestedMembersByAccountId,
     nestedAccountMemberCountByAccountId
   );
+
+  return node;
 };
 
 const buildClassificationAccountChildren = (
@@ -1049,9 +1060,11 @@ const enrichLazyAccountNodeWithMembersOrCount = (
 const buildLazyAccountNode = (
   account,
   nestedMembersByAccountId = {},
-  nestedAccountMemberCountByAccountId = {}
+  nestedAccountMemberCountByAccountId = {},
+  memberRelationshipRecordTypes = []
 ) => {
-  const node = buildAccountNode(account);
+  const node = buildAccountNode(account, { memberRelationshipRecordTypes });
+
   return enrichLazyAccountNodeWithMembersOrCount(
     node,
     account.accountId,
@@ -1063,13 +1076,15 @@ const buildLazyAccountNode = (
 const buildAccountNodesForCategory = (
   accounts,
   nestedMembersByAccountId,
-  nestedAccountMemberCountByAccountId = {}
+  nestedAccountMemberCountByAccountId = {},
+  memberRelationshipRecordTypes = []
 ) => {
   return accounts.map((account) =>
     buildLazyAccountNode(
       account,
       nestedMembersByAccountId,
-      nestedAccountMemberCountByAccountId
+      nestedAccountMemberCountByAccountId,
+      memberRelationshipRecordTypes
     )
   );
 };
@@ -1121,8 +1136,31 @@ const categorizeRelatedAccount = (account) => {
   return "households";
 };
 
-const buildAccountNode = (account) => {
+const buildMemberRelationshipActions = (memberRelationshipRecordTypes = []) =>
+  (memberRelationshipRecordTypes || [])
+    .filter(
+      (recordType) =>
+        !isExcludedMemberRelationshipRecordType(recordType.developerName)
+    )
+    .map((recordType) => ({
+      name: `manageaar:${recordType.developerName}`,
+      label: buildMemberRelationshipActionLabel(recordType),
+      recordTypeDeveloperName: recordType.developerName,
+      recordTypeLabel: recordType.label,
+      reciprocalRoleRecordTypeDeveloperName:
+        recordType.reciprocalRoleRecordTypeDeveloperName ||
+        recordType.developerName
+    }));
+
+const buildAccountNode = (
+  account,
+  { memberRelationshipRecordTypes = [] } = {}
+) => {
   const presentation = resolveAccountPresentation(account);
+  const memberRelationshipActions = buildMemberRelationshipActions(
+    memberRelationshipRecordTypes
+  );
+  const supportsMemberRelations = memberRelationshipActions.length > 0;
 
   return {
     id: `account-${account.relationId || account.id}`,
@@ -1136,6 +1174,9 @@ const buildAccountNode = (account) => {
     accountId: account.accountId || "",
     isLazyExpandable: true,
     accountMembersLoaded: false,
+    showManageRelatedContacts: supportsMemberRelations,
+    showManageMemberRelationships: supportsMemberRelations,
+    memberRelationshipActions,
     defaultOpen: false,
     children: []
   };
@@ -1145,20 +1186,7 @@ const buildMemberNode = (
   { supportsMemberRelations = true, memberRelationshipRecordTypes = [] } = {}
 ) => {
   const memberRelationshipActions = supportsMemberRelations
-    ? (memberRelationshipRecordTypes || [])
-        .filter(
-          (recordType) =>
-            !isExcludedMemberRelationshipRecordType(recordType.developerName)
-        )
-        .map((recordType) => ({
-          name: `manageaar:${recordType.developerName}`,
-          label: buildMemberRelationshipActionLabel(recordType),
-          recordTypeDeveloperName: recordType.developerName,
-          recordTypeLabel: recordType.label,
-          reciprocalRoleRecordTypeDeveloperName:
-            recordType.reciprocalRoleRecordTypeDeveloperName ||
-            recordType.developerName
-        }))
+    ? buildMemberRelationshipActions(memberRelationshipRecordTypes)
     : [];
 
   return {
@@ -1718,7 +1746,8 @@ export const buildMapTree = ({
         buildLazyAccountNode(
           account,
           nestedMembersByAccountId,
-          nestedAccountMemberCountByAccountId
+          nestedAccountMemberCountByAccountId,
+          memberRelationshipRecordTypes
         )
       );
 
@@ -1772,7 +1801,8 @@ export const buildMapTree = ({
         buildLazyAccountNode(
           account,
           nestedMembersByAccountId,
-          nestedAccountMemberCountByAccountId
+          nestedAccountMemberCountByAccountId,
+          memberRelationshipRecordTypes
         )
       );
 
@@ -1891,7 +1921,8 @@ export const buildMapTree = ({
       ? buildAccountNodesForCategory(
           accounts,
           nestedMembersByAccountId,
-          nestedAccountMemberCountByAccountId
+          nestedAccountMemberCountByAccountId,
+          memberRelationshipRecordTypes
         )
       : [];
     const groupNode = buildGroupNode(definition, accountNodes);
@@ -2435,7 +2466,12 @@ export const findMemberNodeByAccountId = (node, accountId) => {
     return null;
   }
 
-  if (node.nodeType === MAP_NODE_TYPE.MEMBER && node.accountId === accountId) {
+  if (
+    node.accountId === accountId &&
+    (node.nodeType === MAP_NODE_TYPE.MEMBER ||
+      (node.nodeType === MAP_NODE_TYPE.ACCOUNT &&
+        node.showManageMemberRelationships))
+  ) {
     return node;
   }
 

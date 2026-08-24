@@ -903,6 +903,58 @@ private class FscRelHouseholdServiceTest {
   }
 
   @IsTest
+  static void saveMemberAccountRelationships_allowsBusinessRelatedAccount() {
+    FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
+    String recordTypeDeveloperName = FscRelRecordTypeUtils.BUSINESS_RECORD_TYPE;
+    Id recordTypeId = FscRelRecordTypeUtils.selectAccountRelationRecordTypeId(
+      recordTypeDeveloperName
+    );
+    if (recordTypeId == null) {
+      return;
+    }
+
+    Reciprocal_Role__c employeeRole = FscDataTestDataFactory.createReciprocalRoleForMemberRelationship(
+      recordTypeDeveloperName,
+      'Employee',
+      'Employer'
+    );
+    Reciprocal_Role__c employerRole = [
+      SELECT Id, Role__c
+      FROM Reciprocal_Role__c
+      WHERE Role__c = 'Employer'
+      LIMIT 1
+    ];
+    FscRelHouseholdModels.TreeMemberAccountRelationshipInput input = FscDataTestDataFactory.buildMemberAccountRelationshipInput(
+      scenario.relatedBusinessAccount,
+      employeeRole,
+      employerRole,
+      true,
+      'row-business'
+    );
+    FscRelHouseholdService service = new FscRelHouseholdService();
+
+    Test.startTest();
+    FscRelHouseholdModels.MemberAccountRelationshipsSaveResult saveResult = service.saveMemberAccountRelationships(
+      scenario.linkedPersonAccount.Id,
+      recordTypeDeveloperName,
+      new List<FscRelHouseholdModels.TreeMemberAccountRelationshipInput>{ input }
+    );
+    Test.stopTest();
+
+    System.assertEquals(true, saveResult.success, saveResult.message);
+    System.assertEquals(
+      1,
+      [
+        SELECT COUNT()
+        FROM Account_Account_Relationship__c
+        WHERE
+          Account__c = :scenario.linkedPersonAccount.Id
+          AND Related_Account__c = :scenario.relatedBusinessAccount.Id
+      ]
+    );
+  }
+
+  @IsTest
   static void deleteMemberAccountRelationships_removesPrimaryAndMirrorRows() {
     FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
     String recordTypeDeveloperName = resolveFirstAccountRelationRecordTypeDeveloperName();

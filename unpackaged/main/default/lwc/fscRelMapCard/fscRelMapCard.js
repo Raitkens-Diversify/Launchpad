@@ -486,7 +486,8 @@ export default class FscRelMapCard extends LightningElement {
     }
 
     if (
-      this.node?.nodeType === MAP_NODE_TYPE.MEMBER &&
+      (this.node?.nodeType === MAP_NODE_TYPE.MEMBER ||
+        this.node?.nodeType === MAP_NODE_TYPE.ACCOUNT) &&
       (this.node?.showManageMemberRelationships || this.node?.showManageRelatedContacts)
     ) {
       return (this.node?.memberRelationshipActions || []).map((action) => ({

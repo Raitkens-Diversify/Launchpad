@@ -82,17 +82,16 @@ lightning-modal-body.modal-body {
 .modal-table__header,
 .modal-table__row {
     display: grid;
-    grid-template-columns: minmax(720px, 1fr) 80px 36px;
+    grid-template-columns: minmax(0, 1fr) 4.5rem 2.25rem;
     gap: 0.75rem;
     align-items: center;
-    min-width: 900px;
+    min-width: 0;
     overflow: visible;
 }
 
 .modal-table_read-only .modal-table__header,
 .modal-table_read-only .modal-table__row {
-    grid-template-columns: minmax(720px, 1fr) 80px;
-    min-width: 860px;
+    grid-template-columns: minmax(0, 1fr) 4.5rem;
 }
 
 .modal-table__header {
@@ -203,28 +202,17 @@ lightning-modal-body.modal-body {
 }
 
 .relationship-sentence {
-    --relationship-subject-width: max-content;
-    --relationship-role-width: 13rem;
-    --relationship-contact-width: minmax(12rem, 1fr);
-    display: grid;
-    grid-template-columns:
-        var(--relationship-subject-width)
-        max-content
-        var(--relationship-role-width)
-        max-content
-        var(--relationship-contact-width)
-        max-content
-        var(--relationship-role-width);
-    column-gap: 0.5rem;
-    row-gap: 0.35rem;
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
+    gap: 0.35rem 0.5rem;
     min-width: 0;
     width: 100%;
     overflow: visible;
 }
 
 .relationship-sentence_client-select {
-    --relationship-subject-width: 14rem;
+    --relationship-subject-min-width: 12rem;
 }
 
 .relationship-sentence__static {
@@ -240,8 +228,9 @@ lightning-modal-body.modal-body {
 .relationship-sentence__subject {
     display: flex;
     align-items: center;
-    min-width: 0;
-    width: 100%;
+    flex: 1 1 10rem;
+    min-width: min(100%, var(--relationship-subject-min-width, 8rem));
+    max-width: 100%;
     overflow: visible;
     position: relative;
 }
@@ -268,8 +257,9 @@ lightning-modal-body.modal-body {
 .relationship-sentence__role {
     display: flex;
     align-items: center;
-    min-width: 0;
-    width: 100%;
+    flex: 1 1 11rem;
+    min-width: min(100%, 10rem);
+    max-width: 100%;
     overflow: visible;
     position: relative;
 }
@@ -277,8 +267,9 @@ lightning-modal-body.modal-body {
 .relationship-sentence__contact {
     display: flex;
     align-items: center;
-    min-width: 0;
-    width: 100%;
+    flex: 1 1 12rem;
+    min-width: min(100%, 12rem);
+    max-width: 100%;
     overflow: visible;
     position: relative;
 }
@@ -291,4 +282,72 @@ lightning-modal-body.modal-body {
 
 .modal-banner {
     margin-bottom: 0.75rem;
+}
+
+@media (max-width: 48rem) {
+    .modal-header__instruction {
+        font-size: 0.8125rem;
+        line-height: 1.4;
+    }
+
+    .modal-body__scroll {
+        max-height: calc(90vh - 9rem);
+    }
+
+    .modal-table__header {
+        display: none;
+    }
+
+    .modal-table__row {
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+            "relationship relationship"
+            "active actions";
+        gap: 0.5rem 0.75rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--modal-divider);
+    }
+
+    .modal-table_read-only .modal-table__row {
+        grid-template-areas:
+            "relationship relationship"
+            "active active";
+    }
+
+    .modal-table__col_relationship {
+        grid-area: relationship;
+    }
+
+    .modal-table__row > .modal-table__col:nth-child(2) {
+        grid-area: active;
+        justify-content: flex-start;
+    }
+
+    .modal-table__row > .modal-table__col:nth-child(3) {
+        grid-area: actions;
+        justify-content: flex-end;
+    }
+
+    .relationship-sentence,
+    .relationship-sentence_client-select {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .relationship-sentence__static {
+        white-space: normal;
+        min-height: auto;
+    }
+
+    .relationship-sentence__subject,
+    .relationship-sentence__role,
+    .relationship-sentence__contact {
+        flex: 1 1 auto;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .modal-table__add {
+        margin-top: 0.75rem;
+    }
 }

@@ -1706,7 +1706,7 @@ public with sharing class FscRelHouseholdService {
     }
 
     if (String.isBlank(relationship.relatedAccountId)) {
-      errors.add('Related person account is required.');
+      errors.add('Related account is required.');
       return errors;
     }
 
@@ -1714,7 +1714,7 @@ public with sharing class FscRelHouseholdService {
     try {
       relatedAccountId = Id.valueOf(relationship.relatedAccountId);
     } catch (Exception ignored) {
-      errors.add('Related person account is invalid.');
+      errors.add('Related account is invalid.');
       return errors;
     }
 
@@ -1724,9 +1724,7 @@ public with sharing class FscRelHouseholdService {
 
     Account relatedAccount = accountRepository.selectById(relatedAccountId);
     if (relatedAccount == null) {
-      errors.add('Related person account was not found.');
-    } else if (!FscRelAccountRepository.isPersonAccountRecord(relatedAccount)) {
-      errors.add('Related account must be a person account.');
+      errors.add('Related account was not found.');
     }
 
     if (String.isBlank(relationship.reciprocalRoleId)) {
@@ -1933,7 +1931,7 @@ public with sharing class FscRelHouseholdService {
 
         rowResult.success = false;
         rowResult.messages = new List<String>{
-          'Each related person account can only appear once.'
+          'Each related account can only appear once.'
         };
         bulkResult.success = false;
       }

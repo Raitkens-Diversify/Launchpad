@@ -10,16 +10,6 @@ import FscRelCreateReciprocalRoleModal from "c/fscRelCreateReciprocalRoleModal";
 import FscRelCreateRecordModal from "c/fscRelCreateRecordModal";
 import { buildModalSaveMessage, buildMemberRelationshipModalTitle, buildReadOnlyMemberRelationshipEmptyState, buildReadOnlyMemberRelationshipInstruction, ensureFscRelModalStyles, isReadOnlyMemberRelationshipRecordType } from "c/fscRelUtils";
 
-const PERSON_ACCOUNT_FILTER = Object.freeze({
-  criteria: [
-    {
-      fieldPath: "IsPersonAccount",
-      operator: "eq",
-      value: true
-    }
-  ]
-});
-
 export default class FscRelManageContactRelationshipModal extends LightningModal {
   @api memberAccountId;
   @api memberName;
@@ -31,8 +21,6 @@ export default class FscRelManageContactRelationshipModal extends LightningModal
   @api selectMemberFromClients = false;
   @api clientMemberAccountIds = [];
   @api clientMembers = [];
-
-  personAccountFilter = PERSON_ACCOUNT_FILTER;
 
   @track relationshipRows = [];
   @track pendingDeleteRelationIds = [];
@@ -247,7 +235,7 @@ export default class FscRelManageContactRelationshipModal extends LightningModal
         subjectName,
         roleLabel,
         inverseRoleLabel,
-        relatedAccountName: row.relatedAccountName || "related person account",
+        relatedAccountName: row.relatedAccountName || "related account",
         includePlaceholderRole: false
       });
 
@@ -275,7 +263,7 @@ export default class FscRelManageContactRelationshipModal extends LightningModal
           subjectName,
           roleLabel,
           inverseRoleLabel,
-          relatedAccountName: row.relatedAccountName || "related person account",
+          relatedAccountName: row.relatedAccountName || "related account",
           includePlaceholderRole: !roleLabel
         })
       };
@@ -368,7 +356,7 @@ export default class FscRelManageContactRelationshipModal extends LightningModal
   }) {
     const subject = subjectName || "Selected client";
     const roleText = roleLabel || (includePlaceholderRole ? "role" : "—");
-    const relatedText = relatedAccountName || "related person account";
+    const relatedText = relatedAccountName || "related account";
     const inverseText =
       inverseRoleLabel || (includePlaceholderRole ? "role" : "—");
 
@@ -579,7 +567,7 @@ export default class FscRelManageContactRelationshipModal extends LightningModal
       size: "large",
       objectApiName: detail.objectApiName || "Account",
       recordTypeId: detail.recordTypeId,
-      headerLabel: detail.headerLabel || "New Person Account"
+      headerLabel: detail.headerLabel || "New Account"
     });
 
     if (!result?.recordId) {
@@ -896,7 +884,7 @@ export default class FscRelManageContactRelationshipModal extends LightningModal
 
       if (!row.relatedAccountId) {
         this.updateRow(row.id, {
-          errorMessage: "Select a related person account from the list."
+          errorMessage: "Select a related account from the list."
         });
         skippedCount += 1;
         return;
@@ -934,7 +922,7 @@ export default class FscRelManageContactRelationshipModal extends LightningModal
       if (seenRelationshipKeys.has(relationshipKey)) {
         this.updateRow(row.id, {
           errorMessage:
-            "This person account is already related for the selected client. Remove the duplicate row."
+            "This related account is already linked for the selected client. Remove the duplicate row."
         });
         skippedCount += 1;
         return;

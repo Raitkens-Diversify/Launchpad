@@ -52,3 +52,13 @@
 .modal-body__scroll:has(c-fsc-rel-record-lookup[data-open="true"]) {
     overflow: visible;
 }
+
+@media (max-width: 48rem) {
+    [aria-description*="fsc-rel-allow-overflow"] .slds-modal__container,
+    .slds-modal__container:has(c-fsc-rel-record-lookup),
+    .slds-modal__container:has(c-fsc-rel-multi-select-combobox) {
+        width: calc(100vw - 1rem);
+        max-width: none;
+        margin: 0.5rem auto;
+    }
+}

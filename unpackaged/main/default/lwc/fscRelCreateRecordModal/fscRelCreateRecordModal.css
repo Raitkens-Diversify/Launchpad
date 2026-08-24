@@ -3,3 +3,9 @@
     max-height: min(32rem, 70vh);
     overflow-y: auto;
 }
+
+@media (max-width: 48rem) {
+    .create-record-body {
+        max-height: calc(90vh - 8rem);
+    }
+}
