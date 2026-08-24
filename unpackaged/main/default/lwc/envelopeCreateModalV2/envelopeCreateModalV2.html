@@ -5,6 +5,7 @@
         subtitle="Create new envelope."
         size="small"
         allow-overflow
+        disable-backdrop-close
         onclose={handleClose}>
         <div class="new-envelope-form">
             <lightning-input
@@ -49,7 +50,7 @@
                             variant="label-hidden"
                             label="Financial Advisor Team"
                             placeholder="Select financial advisor team"
-                            options={advisorTeamOptionsPlain}
+                            options={advisorTeamOptions}
                             value={newEnvelope.advisorTeam}
                             data-field="advisorTeam"
                             dropdown-alignment="auto"
@@ -64,10 +65,8 @@
                     <c-envelope-searchable-combobox
                         variant="label-hidden"
                         label="Household"
-                        placeholder="Type to search households"
+                        placeholder="Select household"
                         options={householdOptions}
-                        empty-message={householdEmptyMessage}
-                        onsearch={handleHouseholdSearch}
                         value={newEnvelope.householdId}
                         data-field="householdId"
                         onchange={handleFieldChange}>

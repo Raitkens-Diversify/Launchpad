@@ -12,6 +12,7 @@ import {
   CLIENT_ROLE_VALUE,
   computeInitials,
   isClientAccount,
+  isHouseholdMapClientAccount,
   isClientRoleValue,
   isLeadProspectAccount,
   isExcludedMemberRelationshipRecordType,
@@ -277,6 +278,60 @@ const buildClassificationGroupNode = (
   recordCount: accountNodes.length
 });
 
+const buildClassificationPersonMemberNode = (
+  account,
+  parentGroupId,
+  classificationValue,
+  nestedMemberRelationsByAccountId = {},
+  nestedMemberRelationCountByAccountId = {},
+  memberRelationshipRecordTypes = []
+) => {
+  const accountId = account.accountId || account.id || "";
+  const memberNode = buildClientMemberNode(
+    account,
+    nestedMemberRelationsByAccountId,
+    nestedMemberRelationCountByAccountId,
+    memberRelationshipRecordTypes
+  );
+
+  return {
+    ...memberNode,
+    id: `${parentGroupId}::classification-member::${classificationValue || "Other"}::${accountId}`,
+    isClassificationAccountNode: true,
+    classificationValue: classificationValue || ""
+  };
+};
+
+const buildClassificationChildNode = (
+  account,
+  parentGroupId,
+  classificationValue,
+  nestedMembersByAccountId = {},
+  nestedAccountMemberCountByAccountId = {},
+  nestedMemberRelationsByAccountId = {},
+  nestedMemberRelationCountByAccountId = {},
+  memberRelationshipRecordTypes = []
+) => {
+  if (isPersonAccountRecord(account)) {
+    return buildClassificationPersonMemberNode(
+      account,
+      parentGroupId,
+      classificationValue,
+      nestedMemberRelationsByAccountId,
+      nestedMemberRelationCountByAccountId,
+      memberRelationshipRecordTypes
+    );
+  }
+
+  return buildClassificationAccountNode(
+    account,
+    parentGroupId,
+    classificationValue,
+    nestedMembersByAccountId,
+    nestedAccountMemberCountByAccountId
+  );
+};
+
 const buildClassificationAccountNode = (
   account,
   parentGroupId,
@@ -316,7 +371,10 @@ const buildClassificationAccountChildren = (
   classificationValue,
   parentGroupId = "",
   nestedMembersByAccountId = {},
-  nestedAccountMemberCountByAccountId = {}
+  nestedAccountMemberCountByAccountId = {},
+  nestedMemberRelationsByAccountId = {},
+  nestedMemberRelationCountByAccountId = {},
+  memberRelationshipRecordTypes = []
 ) => {
   const seenAccountIds = new Set();
   const children = [];
@@ -331,12 +389,15 @@ const buildClassificationAccountChildren = (
 
       seenAccountIds.add(accountId);
       children.push(
-        buildClassificationAccountNode(
+        buildClassificationChildNode(
           account,
           parentGroupId,
           classificationValue,
           nestedMembersByAccountId,
-          nestedAccountMemberCountByAccountId
+          nestedAccountMemberCountByAccountId,
+          nestedMemberRelationsByAccountId,
+          nestedMemberRelationCountByAccountId,
+          memberRelationshipRecordTypes
         )
       );
     }
@@ -351,7 +412,10 @@ const buildClassificationGroupChildren = (
   classifiedAccounts = [],
   accountNodes = null,
   nestedMembersByAccountId = {},
-  nestedAccountMemberCountByAccountId = {}
+  nestedAccountMemberCountByAccountId = {},
+  nestedMemberRelationsByAccountId = {},
+  nestedMemberRelationCountByAccountId = {},
+  memberRelationshipRecordTypes = []
 ) => {
   const classificationGroupId = `${parentGroupId}::classification-group::${classificationValue || "Other"}`;
   const children =
@@ -361,7 +425,10 @@ const buildClassificationGroupChildren = (
       classificationValue,
       classificationGroupId,
       nestedMembersByAccountId,
-      nestedAccountMemberCountByAccountId
+      nestedAccountMemberCountByAccountId,
+      nestedMemberRelationsByAccountId,
+      nestedMemberRelationCountByAccountId,
+      memberRelationshipRecordTypes
     );
 
   return [
@@ -409,7 +476,10 @@ const buildCoiClassificationGroupChildren = (
   classifiedAccounts = [],
   clientAccountIds = new Set(),
   nestedMembersByAccountId = {},
-  nestedAccountMemberCountByAccountId = {}
+  nestedAccountMemberCountByAccountId = {},
+  nestedMemberRelationsByAccountId = {},
+  nestedMemberRelationCountByAccountId = {},
+  memberRelationshipRecordTypes = []
 ) =>
   buildClassificationGroupChildren(
     GROUP_IDS.NETWORK,
@@ -419,7 +489,10 @@ const buildCoiClassificationGroupChildren = (
     ),
     null,
     nestedMembersByAccountId,
-    nestedAccountMemberCountByAccountId
+    nestedAccountMemberCountByAccountId,
+    nestedMemberRelationsByAccountId,
+    nestedMemberRelationCountByAccountId,
+    memberRelationshipRecordTypes
   );
 
 const countCoiGroupRecords = (
@@ -450,7 +523,9 @@ const buildHouseholdNetworkChildren = (
   classifiedAccounts = [],
   networkCardsLoaded = false,
   nestedMembersByAccountId = {},
-  nestedAccountMemberCountByAccountId = {}
+  nestedAccountMemberCountByAccountId = {},
+  nestedMemberRelationCountByAccountId = {},
+  memberRelationshipRecordTypes = []
 ) => {
   const clientAccountIds = buildClientAccountIdSet(
     clientPersonAccounts,
@@ -460,7 +535,10 @@ const buildHouseholdNetworkChildren = (
     classifiedAccounts,
     clientAccountIds,
     nestedMembersByAccountId,
-    nestedAccountMemberCountByAccountId
+    nestedAccountMemberCountByAccountId,
+    nestedMemberRelationsByAccountId,
+    nestedMemberRelationCountByAccountId,
+    memberRelationshipRecordTypes
   );
   const coiClassifiedIds = new Set(
     (coiGroupNodes[0]?.children || [])
@@ -661,8 +739,34 @@ const RECORD_TYPE_PRESENTATIONS = Object.freeze({
     kind: MAP_KIND.BUSINESS,
     label: "Business",
     category: "businesses"
+  },
+  PersonAccount: {
+    iconName: "standard:contact",
+    kind: MAP_KIND.PERSON,
+    label: "Contact",
+    category: "households"
+  },
+  Person_Account: {
+    iconName: "standard:contact",
+    kind: MAP_KIND.PERSON,
+    label: "Contact",
+    category: "households"
   }
 });
+
+const PERSON_ACCOUNT_RECORD_TYPE_DEVELOPER_NAMES = new Set([
+  "PersonAccount",
+  "Person_Account"
+]);
+
+const isPersonAccountRecord = (account = {}) => {
+  if (account.isPersonAccount === true) {
+    return true;
+  }
+
+  const developerName = String(account.recordTypeDeveloperName || "").trim();
+  return PERSON_ACCOUNT_RECORD_TYPE_DEVELOPER_NAMES.has(developerName);
+};
 
 const formatRecordTypeLabel = (developerName) => {
   return String(developerName || "")
@@ -894,7 +998,22 @@ const formatAccountSub = (account = {}, presentation = {}) => {
   return [recordTypeLabel, ...roleLabels].join(" · ");
 };
 
+const resolveRoleSubline = (account = {}) => {
+  return (Array.isArray(account.roles) ? account.roles : [])
+    .map((role) => String(role || "").trim())
+    .filter(Boolean)
+    .join(" · ");
+};
+
 const resolveAccountPresentation = (account = {}) => {
+  if (isPersonAccountRecord(account)) {
+    return {
+      iconName: "standard:contact",
+      kind: MAP_KIND.PERSON,
+      sub: resolveRoleSubline(account)
+    };
+  }
+
   const presentation = resolveRecordTypePresentation(
     account.recordTypeDeveloperName
   );
@@ -1006,20 +1125,6 @@ const mergeLeadProspectAccounts = (
   });
 
   return [...leadProspectByAccountId.values()];
-};
-
-const PERSON_ACCOUNT_RECORD_TYPE_DEVELOPER_NAMES = new Set([
-  "PersonAccount",
-  "Person_Account"
-]);
-
-const isPersonAccountRecord = (account = {}) => {
-  if (account.isPersonAccount === true) {
-    return true;
-  }
-
-  const developerName = String(account.recordTypeDeveloperName || "").trim();
-  return PERSON_ACCOUNT_RECORD_TYPE_DEVELOPER_NAMES.has(developerName);
 };
 
 const categorizeRelatedAccount = (account) => {
@@ -1578,7 +1683,7 @@ export const buildMapTree = ({
     treeData.relatedAccounts || []
   );
   const clientAccounts = buildAccountViewModels(treeData.clientAccounts || []).filter(
-    (account) => isClientAccount(account)
+    (account) => isHouseholdMapClientAccount(account)
   );
   const clientPersonAccounts = clientAccounts.filter(
     (account) => account.isPersonAccount
@@ -1726,7 +1831,9 @@ export const buildMapTree = ({
         classifiedAccounts,
         networkCardsLoaded,
         nestedMembersByAccountId,
-        nestedAccountMemberCountByAccountId
+        nestedAccountMemberCountByAccountId,
+        nestedMemberRelationCountByAccountId,
+        memberRelationshipRecordTypes
       );
       const groupNode = buildGroupNode(definition, networkChildren);
 
@@ -1755,7 +1862,10 @@ export const buildMapTree = ({
           CLASSIFICATION_VALUES.VENDOR,
           GROUP_IDS.VENDORS,
           nestedMembersByAccountId,
-          nestedAccountMemberCountByAccountId
+          nestedAccountMemberCountByAccountId,
+          nestedMemberRelationsByAccountId,
+          nestedMemberRelationCountByAccountId,
+          memberRelationshipRecordTypes
         )
       );
 
@@ -1779,7 +1889,10 @@ export const buildMapTree = ({
           CLASSIFICATION_VALUES.UNCLASSIFIED,
           GROUP_IDS.UNCLASSIFIED,
           nestedMembersByAccountId,
-          nestedAccountMemberCountByAccountId
+          nestedAccountMemberCountByAccountId,
+          nestedMemberRelationsByAccountId,
+          nestedMemberRelationCountByAccountId,
+          memberRelationshipRecordTypes
         )
       );
 
@@ -2065,11 +2178,21 @@ export const applyOpenState = (node, openState) => {
     memberRelationCountLoaded && (node.relatedContactCount ?? 0) === 0;
   const hasNoAccountMembers =
     accountMembersLoaded && (node.memberCount ?? 0) === 0;
+  const isLazyMemberPendingOpen =
+    isLazyMember &&
+    isRequestedOpen &&
+    !memberRelationsLoaded &&
+    !hasNoMemberRelations;
+  const isLazyAccountPendingOpen =
+    isLazyAccount &&
+    isRequestedOpen &&
+    !accountMembersLoaded &&
+    !hasNoAccountMembers;
   const isOpen =
     isLazyMember && isRequestedOpen
-      ? memberRelationsLoaded || hasNoMemberRelations
+      ? memberRelationsLoaded || hasNoMemberRelations || isLazyMemberPendingOpen
       : isLazyAccount && isRequestedOpen
-        ? accountMembersLoaded || hasNoAccountMembers
+        ? accountMembersLoaded || hasNoAccountMembers || isLazyAccountPendingOpen
         : isRequestedOpen;
   const children = (node.children || []).map((child) =>
     applyOpenState(child, openState)

@@ -34,9 +34,7 @@ public with sharing class FscRelAccountRelationRepository {
         Related_Account__r.RecordType.Name,
         Related_Account__r.Type
       FROM Account_Account_Relationship__c
-      WHERE
-        Account__c = :rootAccountId
-        AND (RecordType.DeveloperName != :FscRelRecordTypeUtils.HOUSEHOLD_AAR_RECORD_TYPE OR RecordTypeId = NULL)
+      WHERE Account__c = :rootAccountId
       ORDER BY Related_Account__r.Name
     ];
   }

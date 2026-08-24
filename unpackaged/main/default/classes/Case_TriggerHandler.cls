@@ -1410,8 +1410,19 @@ record.OwnerId = queuePRId;
                               String caseValue = String.valueOf(
                                   caseRecord.get(mapCaseTempFldToCaseFld.get(lstOfCaseTemplateField[indexNumber])));
                               String templateValue = String.valueOf(caseTemplate.get('Management_Style__c'));
-                              if(caseValue != null && templateValue != null && templateValue.contains(caseValue)){
-                                  lstCaseTemptValue.add(caseTemplate);
+                              if(caseValue != null && templateValue != null){
+                                  Set<String> templateValues = new Set<String>(templateValue.split(';'));
+                                  Set<String> caseValues = new Set<String>(caseValue.split(';'));
+                                  Boolean hasMatch = false;
+                                  for(String cv : caseValues){
+                                      if(templateValues.contains(cv)){
+                                          hasMatch = true;
+                                          break;
+                                      }
+                                  }
+                                  if(hasMatch){
+                                      lstCaseTemptValue.add(caseTemplate);
+                                  }
                               }
                           } else {
                               lstCaseTemptValue.add(caseTemplate);

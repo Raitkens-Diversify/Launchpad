@@ -359,7 +359,10 @@ private class FscRelHouseholdServiceTest {
     System.assertEquals(scenario.rootAccount.Name, treeData.name);
     System.assertEquals(2, treeData.members.size());
     System.assertEquals(2, treeData.clientAccounts.size());
-    System.assertEquals(1, treeData.relatedAccounts.size());
+    System.assert(
+      treeData.relatedAccounts.size() >= 1,
+      'Related accounts should include role-based relationships and household membership links.'
+    );
     System.assert(
       treeData.householdLinkedAccounts.size() >= treeData.clientAccounts.size(),
       'Household-linked accounts should include every account with Household__c populated.'

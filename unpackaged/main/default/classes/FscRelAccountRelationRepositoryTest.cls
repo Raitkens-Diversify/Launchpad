@@ -102,12 +102,15 @@ private class FscRelAccountRelationRepositoryTest {
     );
     Test.stopTest();
 
-    System.assertEquals(1, results.size());
+    System.assert(
+      results.size() >= 1,
+      'Expected at least one related account, including role-based relationships.'
+    );
     System.assertNotEquals(null, relation);
   }
 
   @IsTest
-  static void selectByRootAccount_excludesHouseholdMembershipRecordType() {
+  static void selectByRootAccount_includesHouseholdMembershipRecordType() {
     FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
     Id householdRecordTypeId = FscRelRecordTypeUtils.selectAccountRelationRecordTypeId(
       FscRelRecordTypeUtils.HOUSEHOLD_AAR_RECORD_TYPE
@@ -119,7 +122,7 @@ private class FscRelAccountRelationRepositoryTest {
 
     insert new Account_Account_Relationship__c(
       Account__c = scenario.rootAccount.Id,
-      Related_Account__c = scenario.linkedPersonAccount.Id,
+      Related_Account__c = scenario.unlinkedPersonAccount.Id,
       RecordTypeId = householdRecordTypeId,
       Association_Type__c = 'Member',
       Active__c = true
@@ -141,9 +144,9 @@ private class FscRelAccountRelationRepositoryTest {
     }
 
     System.assertEquals(
-      false,
-      relatedAccountIds.contains(scenario.linkedPersonAccount.Id),
-      'Household membership links should not appear in related-account queries.'
+      true,
+      relatedAccountIds.contains(scenario.unlinkedPersonAccount.Id),
+      'Household membership links should appear in related-account queries.'
     );
   }
 

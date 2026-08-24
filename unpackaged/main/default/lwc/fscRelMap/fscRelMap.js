@@ -720,6 +720,15 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
     wiredMemberRelationshipRecordTypes({ data, error }) {
         if (data) {
             this.memberRelationshipRecordTypes = Array.isArray(data) ? data : [];
+
+            if (this.treeData && this._householdMapHydratedKey) {
+                void this.loadMemberRelationCountsForVisibleMembers();
+            }
+
+            if (this.personTreeData && this._personMapHydratedKey) {
+                void this.loadPersonCentricCounts();
+            }
+
             return;
         }
 
@@ -1385,7 +1394,7 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
                 node?.accountId
             ) {
                 const cachedCount = this.memberRelationCountByAccountId[node.accountId];
-                if (cachedCount !== 0) {
+                if (cachedCount === undefined || cachedCount !== 0) {
                     await this.loadMemberRelationsForAccountId(node.accountId);
                 }
             } else if (node?.isClassificationGroupNode) {

@@ -96,6 +96,18 @@ export const isClientAccount = (account = {}) => {
   );
 };
 
+export const isHouseholdMembershipPersonAccount = (account = {}) => {
+  return (
+    account.isPersonAccount === true &&
+    String(account.associationType || account.detail || "").trim() === "Member" &&
+    Boolean(account.relationId)
+  );
+};
+
+export const isHouseholdMapClientAccount = (account = {}) => {
+  return isClientAccount(account) || isHouseholdMembershipPersonAccount(account);
+};
+
 export const isLeadProspectAccount = (account = {}) => {
   return (
     isClientRecordType(
@@ -311,6 +323,7 @@ export const buildAccountViewModels = (rawAccounts) => {
         roles,
         selectedRoles: [...roles],
         detail: associationTypeLabel,
+        associationType: associationTypeLabel,
         recordTypeDeveloperName: account.recordTypeDeveloperName || "",
         recordTypeLabel: account.recordTypeLabel || "",
         accountType: account.accountType || "",

@@ -40,7 +40,7 @@ export default class FscRelAddClassificationAccountModal extends LightningModal 
   }
 
   get modalInstruction() {
-    return "Search for any account to link to this household. Saving creates a Household account relationship.";
+    return `Search for an unassigned account whose Classification includes ${this.resolvedClassificationLabel}. Saving links the account to this household.`;
   }
 
   get hasBanner() {
