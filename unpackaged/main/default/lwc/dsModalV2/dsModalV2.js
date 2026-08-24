@@ -29,6 +29,7 @@ export default class DsModalV2 extends LightningElement {
     @api size = 'small';
     @api hideFooter = false;
     @api allowOverflow = false;
+    @api disableBackdropClose = false;
 
     _keydownHandler = null;
     _wasOpen = false;
@@ -36,7 +37,7 @@ export default class DsModalV2 extends LightningElement {
 
     connectedCallback() {
         this._keydownHandler = (event) => {
-            if (event.key === 'Escape' && this.isOpen) {
+            if (event.key === 'Escape' && this.isOpen && !this.disableBackdropClose) {
                 this._fireClose();
             }
         };
@@ -88,7 +89,7 @@ export default class DsModalV2 extends LightningElement {
     }
 
     handleBackdropClick(event) {
-        if (event.target === event.currentTarget) {
+        if (event.target === event.currentTarget && !this.disableBackdropClose) {
             this._fireClose();
         }
     }
