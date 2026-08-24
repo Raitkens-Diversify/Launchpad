@@ -3,11 +3,13 @@
  * Date: 2026-07-20
  */
 import { LightningElement, api, wire } from "lwc";
+import { CurrentPageReference } from "lightning/navigation";
 import { getObjectInfo } from "lightning/uiObjectInfoApi";
 import { getRecord } from "lightning/uiRecordApi";
 import { refreshApex } from "@salesforce/apex";
 import getSignificantEventsForAccount from "@salesforce/apex/SignificantEventActionController.getSignificantEventsForAccount";
 import getLinkedContactsForAccount from "@salesforce/apex/SignificantEventActionController.getLinkedContactsForAccount";
+import getLinkedContactsForSignificantEvent from "@salesforce/apex/SignificantEventActionController.getLinkedContactsForSignificantEvent";
 import SIGNIFICANT_EVENT_OBJECT from "@salesforce/schema/Significant_Event__c";
 import RECORD_TYPE_DEVELOPER_NAME from "@salesforce/schema/Account.RecordType.DeveloperName";
 import { SORT_DESC, sortRecords } from "c/dataTableSortUtils";
@@ -27,6 +29,8 @@ import SignificantEventCreateActionModal from "c/significantEventCreateActionMod
 
 const DEFAULT_TITLE = "Significant Events";
 const DEFAULT_MAX_ROWS = 5;
+const ACCOUNT_OBJECT_API_NAME = "Account";
+const SIGNIFICANT_EVENT_OBJECT_API_NAME = "Significant_Event__c";
 
 const ROW_ACTIONS = [{ label: "Edit", name: "edit_event" }];
 
@@ -208,7 +212,9 @@ export default class SignificantEventTable extends LightningElement {
   sortedRows = [];
   wiredSignificantEventsResult;
   wiredLinkedContactsResult;
+  wiredLinkedContactsForEventResult;
   objectInfo;
+  recordObjectApiName = "";
   recordTypeDeveloperName = "";
   isAccountContextResolved = false;
   accountContextError = false;
@@ -230,11 +236,38 @@ export default class SignificantEventTable extends LightningElement {
   _previewPointerState = createPreviewPointerState();
   _ignoreOutsideClick = false;
 
+  @wire(CurrentPageReference)
+  wiredPageReference(pageRef) {
+    const objectApiName = pageRef?.attributes?.objectApiName;
+    if (objectApiName) {
+      this.recordObjectApiName = objectApiName;
+    }
+  }
+
+  @wire(getRecord, { recordId: "$contextRecordId" })
+  wiredContextRecord({ data }) {
+    if (data?.apiName) {
+      this.recordObjectApiName = data.apiName;
+    }
+  }
+
+  get contextRecordId() {
+    return this.recordId || undefined;
+  }
+
+  get accountContextRecordId() {
+    return this.isAccountRecordView ? this.recordId : undefined;
+  }
+
   @wire(getRecord, {
-    recordId: "$recordId",
+    recordId: "$accountContextRecordId",
     fields: [RECORD_TYPE_DEVELOPER_NAME]
   })
   wiredAccount({ data, error }) {
+    if (!this.isAccountRecordView) {
+      return;
+    }
+
     if (data) {
       this.recordTypeDeveloperName = resolveRecordTypeDeveloperName(data);
       this.isAccountContextResolved = true;
@@ -270,12 +303,33 @@ export default class SignificantEventTable extends LightningElement {
     }
   }
 
+  get isAccountRecordView() {
+    return this.recordObjectApiName === ACCOUNT_OBJECT_API_NAME;
+  }
+
+  get isSignificantEventRecordView() {
+    return this.recordObjectApiName === SIGNIFICANT_EVENT_OBJECT_API_NAME;
+  }
+
   get isHouseholdAccount() {
-    return isHouseholdRecordType(this.recordTypeDeveloperName);
+    return this.isAccountRecordView && isHouseholdRecordType(this.recordTypeDeveloperName);
   }
 
   get isEventLevelView() {
-    return this.isAccountContextResolved && !this.isHouseholdAccount;
+    return (
+      this.isAccountRecordView &&
+      this.isAccountContextResolved &&
+      !this.isHouseholdAccount
+    );
+  }
+
+  get isHouseholdLikeView() {
+    return (
+      (this.isAccountRecordView &&
+        this.isAccountContextResolved &&
+        this.isHouseholdAccount) ||
+      this.isSignificantEventRecordView
+    );
   }
 
   get significantEventsAccountId() {
@@ -292,20 +346,44 @@ export default class SignificantEventTable extends LightningElement {
       : undefined;
   }
 
+  get linkedContactsSignificantEventId() {
+    return this.isSignificantEventRecordView ? this.recordId : undefined;
+  }
+
   get showLoading() {
-    return !this.isAccountContextResolved;
+    if (!this.recordId) {
+      return true;
+    }
+
+    if (this.isSignificantEventRecordView) {
+      return false;
+    }
+
+    if (this.isAccountRecordView) {
+      return !this.isAccountContextResolved;
+    }
+
+    return !this.recordObjectApiName;
   }
 
   get showTable() {
+    if (this.isSignificantEventRecordView) {
+      return Boolean(this.recordId);
+    }
+
     return this.isAccountContextResolved && !this.accountContextError;
   }
 
   get showAccountContextError() {
-    return this.isAccountContextResolved && this.accountContextError;
+    return (
+      this.isAccountRecordView &&
+      this.isAccountContextResolved &&
+      this.accountContextError
+    );
   }
 
   get isHouseholdView() {
-    return this.isAccountContextResolved && this.isHouseholdAccount;
+    return this.isHouseholdLikeView;
   }
 
   clearTableState() {
@@ -355,6 +433,29 @@ export default class SignificantEventTable extends LightningElement {
     }
   }
 
+  @wire(getLinkedContactsForSignificantEvent, {
+    significantEventId: "$linkedContactsSignificantEventId"
+  })
+  wiredLinkedContactsForEvent(result) {
+    if (!this.isSignificantEventRecordView) {
+      return;
+    }
+
+    this.wiredLinkedContactsForEventResult = result;
+    const { data, error } = result;
+
+    if (data) {
+      this.lastLoadedAt = Date.now();
+      this.applySort();
+      return;
+    }
+
+    if (error) {
+      this.clearTableState();
+      this.lastLoadedAt = Date.now();
+    }
+  }
+
   get showHeaderCount() {
     return this.totalCount > 0;
   }
@@ -383,6 +484,12 @@ export default class SignificantEventTable extends LightningElement {
     return this.isEventLevelView
       ? PERSON_DATATABLE_TO_SORT_FIELD
       : HOUSEHOLD_DATATABLE_TO_SORT_FIELD;
+  }
+
+  get linkedContactsWireResult() {
+    return this.isSignificantEventRecordView
+      ? this.wiredLinkedContactsForEventResult
+      : this.wiredLinkedContactsResult;
   }
 
   get datatableColumns() {
@@ -521,7 +628,7 @@ export default class SignificantEventTable extends LightningElement {
       return data.map(mapEventRow);
     }
 
-    const data = this.wiredLinkedContactsResult?.data || [];
+    const data = this.linkedContactsWireResult?.data || [];
     return data.filter((row) => row.accountId).map(mapLinkedContactRow);
   }
 
@@ -775,7 +882,7 @@ export default class SignificantEventTable extends LightningElement {
   handleRefresh = async () => {
     const wireResult = this.isEventLevelView
       ? this.wiredSignificantEventsResult
-      : this.wiredLinkedContactsResult;
+      : this.linkedContactsWireResult;
 
     if (!wireResult) {
       return;
@@ -794,6 +901,11 @@ export default class SignificantEventTable extends LightningElement {
   };
 
   handleNew = async () => {
+    if (this.isSignificantEventRecordView) {
+      await this.handleEdit(this.recordId);
+      return;
+    }
+
     const result = await SignificantEventCreateActionModal.open({
       description: "Create a new Significant Event",
       recordId: this.recordId,

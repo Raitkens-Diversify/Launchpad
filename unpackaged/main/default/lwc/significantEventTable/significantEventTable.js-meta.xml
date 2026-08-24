@@ -4,7 +4,7 @@
     <apiVersion>66.0</apiVersion>
     <isExposed>true</isExposed>
     <masterLabel>Significant Event Table</masterLabel>
-    <description>Dynamic Significant Events table for Account record pages. Shows one row per event on Person Accounts and linked contacts on other account types.</description>
+    <description>Dynamic Significant Events table for Account and Significant Event record pages. Shows one row per event on Person Accounts, linked contacts on household accounts, and linked contacts for a Significant Event record.</description>
     <targets>
         <target>lightning__RecordPage</target>
     </targets>
@@ -12,6 +12,7 @@
         <targetConfig targets="lightning__RecordPage">
             <objects>
                 <object>Account</object>
+                <object>Significant_Event__c</object>
             </objects>
             <property
                 name="title"
