@@ -622,20 +622,7 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
             await Promise.all(reloadTasks);
         }
 
-        if (!this.isUnlinkedPersonCentricMap) {
-            const members = this.resolveClientMembers();
-            const memberAccountIds = members
-                .map((member) => member.accountId)
-                .filter(Boolean);
-
-            this.householdFamilyRecordCount = undefined;
-            this.householdNetworkRecordCount = undefined;
-
-            await Promise.all([
-                this.loadHouseholdFamilyRecordCount(memberAccountIds),
-                this.loadHouseholdNetworkRecordCount(memberAccountIds)
-            ]);
-        }
+        await this.loadMemberRelationCountsForVisibleMembers();
     }
 
     async loadPersonCentricCounts() {
@@ -980,7 +967,7 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
         this.scheduleWireDraw();
     }
 
-    loadMemberRelationCountsForVisibleMembers() {
+    async loadMemberRelationCountsForVisibleMembers() {
         const baseTree = this.baseMapTree;
         if (!baseTree) {
             return;
@@ -994,12 +981,14 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
             .map((account) => account.accountId)
             .filter(Boolean);
 
-        void this.loadMemberRelationCountsForAccountIds(accountIds);
-        void this.loadAccountMemberCountsForAccountIds(
-            collectLazyExpandableAccountIds(baseTree)
-        );
-        void this.loadHouseholdFamilyRecordCount(memberAccountIds);
-        void this.loadHouseholdNetworkRecordCount(memberAccountIds);
+        await Promise.all([
+            this.loadMemberRelationCountsForAccountIds(accountIds),
+            this.loadAccountMemberCountsForAccountIds(
+                collectLazyExpandableAccountIds(baseTree)
+            ),
+            this.loadHouseholdFamilyRecordCount(memberAccountIds),
+            this.loadHouseholdNetworkRecordCount(memberAccountIds)
+        ]);
     }
 
     async loadHouseholdFamilyRecordCount(memberAccountIds = []) {
@@ -1770,15 +1759,11 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
 
         savedMemberAccountId = result?.memberAccountId || savedMemberAccountId;
 
-        if (!savedMemberAccountId) {
+        if (!savedMemberAccountId || !result?.confirmed) {
             return;
         }
 
         await this.refresh();
-
-        const nextRelations = { ...this.nestedMemberRelationsByAccountId };
-        delete nextRelations[savedMemberAccountId];
-        this.nestedMemberRelationsByAccountId = nextRelations;
 
         const memberWasExpanded = this.isMemberRelationsExpanded(savedMemberAccountId);
 
@@ -1794,21 +1779,9 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
                     [memberNode.id]: true
                 };
             }
-        } else {
-            delete this.memberRelationCountByAccountId[savedMemberAccountId];
-            void this.loadMemberRelationCountsForAccountIds([savedMemberAccountId]);
         }
 
-        const members = this.resolveClientMembers();
-        this.householdFamilyRecordCount = undefined;
-        this.householdNetworkRecordCount = undefined;
-        void this.loadHouseholdFamilyRecordCount(
-            members.map((member) => member.accountId).filter(Boolean)
-        );
-        void this.loadHouseholdNetworkRecordCount(
-            members.map((member) => member.accountId).filter(Boolean)
-        );
-
+        await this.loadMemberRelationCountsForVisibleMembers();
         this.scheduleWireDraw();
     }
 

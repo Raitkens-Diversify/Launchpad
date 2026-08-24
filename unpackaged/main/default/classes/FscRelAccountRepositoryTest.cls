@@ -484,6 +484,27 @@ private class FscRelAccountRepositoryTest {
   }
 
   @IsTest
+  static void searchAccountsByName_returnsPersonAndBusinessWhenUnrestricted() {
+    FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
+    FscRelAccountRepository accountRepository = new FscRelAccountRepository();
+
+    Test.startTest();
+    List<Account> results = accountRepository.searchAccountsByName(
+      'FscData',
+      null,
+      25
+    );
+    Test.stopTest();
+
+    Set<Id> resultIds = new Map<Id, Account>(results).keySet();
+    System.assert(
+      resultIds.contains(scenario.linkedPersonAccount.Id) ||
+        resultIds.contains(scenario.relatedBusinessAccount.Id),
+      'Expected unrestricted search to return person and/or business matches.'
+    );
+  }
+
+  @IsTest
   static void selectAccountsByIdsWithClassifications_returnsAccounts() {
     FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
     FscRelAccountRepository accountRepository = new FscRelAccountRepository();
