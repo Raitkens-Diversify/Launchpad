@@ -74,8 +74,6 @@ public class FscDataTestDataFactory {
     public Account secondPersonAccount;
     public Account vendorAccount;
     public Account unclassifiedAccount;
-    public AccountContactRelation primaryMembership;
-    public AccountContactRelation secondMembership;
     public Account_Account_Relationship__c primaryAccountRelationship;
 
     public TreeScenario reload() {
@@ -129,24 +127,6 @@ public class FscDataTestDataFactory {
       },
       scenario.rootAccount.Id
     );
-
-    scenario.primaryMembership = createMembership(
-      scenario.rootAccount,
-      scenario.linkedPersonAccount,
-      true,
-      true,
-      resolveDefaultRoleValue()
-    );
-
-    if (resolvedOptions.includeSecondHouseholdMember) {
-      scenario.secondMembership = createMembership(
-        scenario.rootAccount,
-        scenario.secondPersonAccount,
-        false,
-        false,
-        resolveDefaultRoleValue()
-      );
-    }
 
     if (resolvedOptions.includeBusinessRelationship) {
       scenario.primaryAccountRelationship = createAccountRelationship(
@@ -207,14 +187,6 @@ public class FscDataTestDataFactory {
     );
     scenario.secondPersonAccount = queryPersonAccountByLastName(SECOND_PERSON_LAST_NAME);
 
-    scenario.primaryMembership = queryPrimaryMembership(
-      scenario.rootAccount.Id,
-      scenario.linkedPersonAccount.PersonContactId
-    );
-    scenario.secondMembership = queryMembership(
-      scenario.rootAccount.Id,
-      scenario.secondPersonAccount.PersonContactId
-    );
     scenario.primaryAccountRelationship = queryPrimaryAccountRelationship(
       scenario.rootAccount.Id,
       scenario.relatedBusinessAccount.Id
@@ -492,10 +464,7 @@ public class FscDataTestDataFactory {
       return defaultRoleValue;
     }
 
-    defaultRoleValue = resolveFirstActivePicklistValue(
-      AccountContactRelation.Roles,
-      null
-    );
+    defaultRoleValue = 'Client';
     return defaultRoleValue;
   }
 
@@ -660,34 +629,6 @@ public class FscDataTestDataFactory {
       ORDER BY CreatedDate DESC
       LIMIT 1
     ];
-  }
-
-  private static AccountContactRelation queryPrimaryMembership(
-    Id rootAccountId,
-    Id contactId
-  ) {
-    List<AccountContactRelation> memberships = [
-      SELECT Id, AccountId, ContactId, Roles
-      FROM AccountContactRelation
-      WHERE AccountId = :rootAccountId AND ContactId = :contactId
-      LIMIT 1
-    ];
-
-    return memberships.isEmpty() ? null : memberships[0];
-  }
-
-  private static AccountContactRelation queryMembership(
-    Id rootAccountId,
-    Id contactId
-  ) {
-    List<AccountContactRelation> memberships = [
-      SELECT Id, AccountId, ContactId, Roles
-      FROM AccountContactRelation
-      WHERE AccountId = :rootAccountId AND ContactId = :contactId
-      LIMIT 1
-    ];
-
-    return memberships.isEmpty() ? null : memberships[0];
   }
 
   private static Account_Account_Relationship__c queryPrimaryAccountRelationship(

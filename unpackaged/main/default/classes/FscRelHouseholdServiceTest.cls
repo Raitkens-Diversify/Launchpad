@@ -249,7 +249,7 @@ private class FscRelHouseholdServiceTest {
   }
 
   @IsTest
-  static void resolveRootAccount_returnsPrimaryGroupWhenNoHouseholdField() {
+  static void resolveRootAccount_returnsNullWhenNoHouseholdField() {
     FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
     scenario.linkedPersonAccount.Household__c = null;
     update scenario.linkedPersonAccount;
@@ -262,7 +262,7 @@ private class FscRelHouseholdServiceTest {
     Test.stopTest();
 
     System.assertEquals(true, resolveResult.isPersonAccount);
-    System.assertEquals(scenario.rootAccount.Id, resolveResult.rootAccountId);
+    System.assertEquals(null, resolveResult.rootAccountId);
   }
 
   @IsTest

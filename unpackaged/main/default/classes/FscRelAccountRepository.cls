@@ -398,4 +398,35 @@ public with sharing class FscRelAccountRepository {
 
     return clientAccounts;
   }
+
+  public Map<Id, Integer> selectClientAccountCountsByHouseholdIds(
+    Set<Id> householdIds
+  ) {
+    Map<Id, Integer> householdIdToCount = new Map<Id, Integer>();
+
+    if (householdIds == null || householdIds.isEmpty()) {
+      return householdIdToCount;
+    }
+
+    for (Id householdId : householdIds) {
+      householdIdToCount.put(householdId, 0);
+    }
+
+    for (Account account : [
+      SELECT Id, Household__c, Type, RecordType.DeveloperName, RecordType.Name
+      FROM Account
+      WHERE Household__c IN :householdIds
+    ]) {
+      if (!FscRelClientAccountUtils.isClientAccount(account)) {
+        continue;
+      }
+
+      householdIdToCount.put(
+        account.Household__c,
+        householdIdToCount.get(account.Household__c) + 1
+      );
+    }
+
+    return householdIdToCount;
+  }
 }

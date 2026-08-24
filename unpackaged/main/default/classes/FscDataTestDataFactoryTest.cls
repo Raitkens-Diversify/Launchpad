@@ -9,7 +9,7 @@ private class FscDataTestDataFactoryTest {
     FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.createTreeScenario();
 
     System.assertNotEquals(null, scenario.rootAccount.Id);
-    System.assertNotEquals(null, scenario.primaryMembership.Id);
+    System.assertNotEquals(null, scenario.linkedPersonAccount.Id);
     System.assertNotEquals(null, scenario.primaryAccountRelationship.Id);
   }
 

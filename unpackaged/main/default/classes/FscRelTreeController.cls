@@ -10,9 +10,9 @@ public with sharing class FscRelTreeController {
 
   /**
    * Resolves the root Account id for the supplied Account.
-   * Person Accounts: returns Account.Household__c when populated, otherwise
-   * the AccountId from the most recently modified active AccountContactRelation.
-   * Non-person Accounts: returns the same Account id.
+   * Person Accounts: returns Account.Household__c when populated, otherwise null.
+   * Non-person Accounts: returns the household root when Household__c is populated,
+   * otherwise the same Account id when it is a household record type.
    */
   @AuraEnabled(cacheable=true)
   public static FscRelHouseholdModels.RootAccountResolveResult resolveRootAccountId(

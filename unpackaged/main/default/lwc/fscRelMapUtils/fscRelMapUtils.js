@@ -1498,7 +1498,6 @@ export const buildMapTree = ({
     return null;
   }
 
-  const members = buildMemberViewModels(treeData.members || []);
   const relatedAccounts = buildAccountViewModels(
     treeData.relatedAccounts || []
   );

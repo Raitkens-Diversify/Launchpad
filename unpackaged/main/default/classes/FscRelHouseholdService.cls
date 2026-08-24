@@ -8,7 +8,6 @@ public with sharing class FscRelHouseholdService {
   private static final Integer RECIPROCAL_ROLE_LOOKUP_LIMIT = 50;
 
   private final FscRelAccountRepository accountRepository;
-  private final FscRelRelationRepository relationRepository;
   private final FscRelAccountRelationRepository accountRelationRepository;
   private final FscRelContactRepository contactRepository;
   private final FscRelReciprocalRoleRepository reciprocalRoleRepository;
@@ -16,7 +15,6 @@ public with sharing class FscRelHouseholdService {
   public FscRelHouseholdService() {
     this(
       new FscRelAccountRepository(),
-      new FscRelRelationRepository(),
       new FscRelAccountRelationRepository(),
       new FscRelContactRepository(),
       new FscRelReciprocalRoleRepository()
@@ -26,13 +24,11 @@ public with sharing class FscRelHouseholdService {
   @TestVisible
   private FscRelHouseholdService(
     FscRelAccountRepository accountRepository,
-    FscRelRelationRepository relationRepository,
     FscRelAccountRelationRepository accountRelationRepository,
     FscRelContactRepository contactRepository,
     FscRelReciprocalRoleRepository reciprocalRoleRepository
   ) {
     this.accountRepository = accountRepository;
-    this.relationRepository = relationRepository;
     this.accountRelationRepository = accountRelationRepository;
     this.contactRepository = contactRepository;
     this.reciprocalRoleRepository = reciprocalRoleRepository;
@@ -76,15 +72,8 @@ public with sharing class FscRelHouseholdService {
 
     if (account.Household__c != null) {
       resolveResult.rootAccountId = account.Household__c;
-      return resolveResult;
     }
 
-    AccountContactRelation primaryGroupRelation = relationRepository.selectPrimaryGroupByContact(
-      account.PersonContactId
-    );
-    resolveResult.rootAccountId = primaryGroupRelation == null
-      ? null
-      : primaryGroupRelation.AccountId;
     return resolveResult;
   }
 
@@ -107,11 +96,11 @@ public with sharing class FscRelHouseholdService {
     data.recordTypeLabel = rootAccount.RecordType == null
       ? null
       : rootAccount.RecordType.Name;
-    data.members = buildMembers(relationRepository.selectByRootAccount(rootAccountId));
     data.relatedAccounts = buildRelatedAccounts(
       accountRelationRepository.selectByRootAccount(rootAccountId)
     );
     data.clientAccounts = buildClientAccounts(rootAccountId);
+    data.members = buildMembersFromClientAccounts(data.clientAccounts);
     data.leadProspectAccounts = buildLeadProspectAccounts(rootAccountId);
     data.householdLinkedAccounts = buildHouseholdLinkedAccounts(rootAccountId);
     promoteLeadProspectRelatedAccounts(data);
@@ -902,38 +891,34 @@ public with sharing class FscRelHouseholdService {
     return accounts;
   }
 
-  private List<FscRelHouseholdModels.TreeMember> buildMembers(
-    List<AccountContactRelation> relations
+  private List<FscRelHouseholdModels.TreeMember> buildMembersFromClientAccounts(
+    List<FscRelHouseholdModels.TreeAccount> clientAccounts
   ) {
     List<FscRelHouseholdModels.TreeMember> members = new List<FscRelHouseholdModels.TreeMember>();
 
-    for (AccountContactRelation relation : relations) {
-      if (relation.Contact == null) {
+    if (clientAccounts == null || clientAccounts.isEmpty()) {
+      return members;
+    }
+
+    for (FscRelHouseholdModels.TreeAccount clientAccount : clientAccounts) {
+      if (clientAccount.isPersonAccount != true) {
         continue;
       }
 
       FscRelHouseholdModels.TreeMember member = new FscRelHouseholdModels.TreeMember();
-      member.relationId = String.valueOf(relation.Id);
-      member.accountId = relation.Contact.AccountId == null
-        ? null
-        : String.valueOf(relation.Contact.AccountId);
-      member.contactId = String.valueOf(relation.ContactId);
-      member.name = relation.Contact.Name;
-      member.roles = FscRelRoleUtils.parseRoles(relation.Roles);
+      member.relationId = clientAccount.relationId;
+      member.accountId = clientAccount.accountId;
+      member.contactId = clientAccount.contactId;
+      member.name = clientAccount.name;
+      member.roles = clientAccount.roles == null
+        ? new List<String>()
+        : clientAccount.roles;
       member.isPrimaryMember = false;
       member.isPrimaryGroup = false;
-      member.isActive = relation.IsActive;
-      member.recordTypeDeveloperName = relation.Contact.Account != null &&
-        relation.Contact.Account.RecordType != null
-        ? relation.Contact.Account.RecordType.DeveloperName
-        : null;
-      member.recordTypeLabel = relation.Contact.Account != null &&
-        relation.Contact.Account.RecordType != null
-        ? relation.Contact.Account.RecordType.Name
-        : null;
-      member.accountType = relation.Contact.Account != null
-        ? relation.Contact.Account.Type
-        : null;
+      member.isActive = true;
+      member.recordTypeDeveloperName = clientAccount.recordTypeDeveloperName;
+      member.recordTypeLabel = clientAccount.recordTypeLabel;
+      member.accountType = clientAccount.accountType;
       members.add(member);
     }
 
@@ -1078,7 +1063,7 @@ public with sharing class FscRelHouseholdService {
       return new Map<String, Integer>();
     }
 
-    Map<Id, Integer> rootAccountIdToMemberCount = relationRepository.selectActiveMemberCountsByRootAccountIds(
+    Map<Id, Integer> rootAccountIdToMemberCount = accountRepository.selectClientAccountCountsByHouseholdIds(
       new Set<Id>(accountIds)
     );
     Map<String, Integer> accountIdToMemberCount = new Map<String, Integer>();
