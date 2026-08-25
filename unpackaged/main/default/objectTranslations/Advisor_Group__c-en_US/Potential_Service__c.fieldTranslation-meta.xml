@@ -3,19 +3,35 @@
         <label><!-- Potential Service --></label>
         <name>Potential_Service__c</name>
         <picklistValues>
-            <masterLabel>RIA 1099</masterLabel>
-            <translation><!-- RIA 1099 --></translation>
+            <masterLabel>Broker Dealer</masterLabel>
+            <translation><!-- Broker Dealer --></translation>
         </picklistValues>
         <picklistValues>
-            <masterLabel>RIA 1099 + BD</masterLabel>
-            <translation><!-- RIA 1099 + BD --></translation>
+            <masterLabel>Delaware Statutory Trust (DST)</masterLabel>
+            <translation><!-- Delaware Statutory Trust (DST) --></translation>
         </picklistValues>
         <picklistValues>
-            <masterLabel>RIA W2</masterLabel>
-            <translation><!-- RIA W2 --></translation>
+            <masterLabel>Diversify Asset Management</masterLabel>
+            <translation><!-- Diversify Asset Management --></translation>
         </picklistValues>
         <picklistValues>
-            <masterLabel>RIA W2 + BD</masterLabel>
-            <translation><!-- RIA W2 + BD --></translation>
+            <masterLabel>Family Office Service Agreement</masterLabel>
+            <translation><!-- Family Office Service Agreement --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Fee Based Wealth Management</masterLabel>
+            <translation><!-- Fee Based Wealth Management --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Financial Planning</masterLabel>
+            <translation><!-- Financial Planning --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Retirement Planning or ERISA</masterLabel>
+            <translation><!-- Retirement Planning or ERISA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Tax Services</masterLabel>
+            <translation><!-- Tax Services --></translation>
         </picklistValues>
     </CustomFieldTranslation>
