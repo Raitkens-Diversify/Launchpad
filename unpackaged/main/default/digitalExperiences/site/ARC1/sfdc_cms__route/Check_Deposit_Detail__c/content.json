@@ -1,0 +1,12 @@
+{
+  "type" : "sfdc_cms__route",
+  "title" : "Check Deposit Detail",
+  "contentBody" : {
+    "activeViewId" : "Check_Deposit_Detail",
+    "configurationTags" : [ ],
+    "pageAccess" : "UseParent",
+    "routeType" : "detail-Check_Deposit__c",
+    "urlPrefix" : "check-deposit"
+  },
+  "urlName" : "check-deposit-detail"
+}

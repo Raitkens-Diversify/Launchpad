@@ -167,14 +167,17 @@
             <value>
                 <fullName>Check Deposit</fullName>
                 <default>false</default>
-                <isActive>false</isActive>
                 <label>Check Deposit</label>
             </value>
             <value>
                 <fullName>Check Log</fullName>
                 <default>false</default>
-                <isActive>false</isActive>
                 <label>Check Log</label>
+            </value>
+            <value>
+                <fullName>Task</fullName>
+                <default>false</default>
+                <label>Task</label>
             </value>
             <value>
                 <fullName>Client - Authorized Person</fullName>
@@ -217,12 +220,6 @@
                 <default>false</default>
                 <isActive>false</isActive>
                 <label>Regulated Fields</label>
-            </value>
-            <value>
-                <fullName>Task</fullName>
-                <default>false</default>
-                <isActive>false</isActive>
-                <label>Task</label>
             </value>
         </valueSetDefinition>
     </valueSet>

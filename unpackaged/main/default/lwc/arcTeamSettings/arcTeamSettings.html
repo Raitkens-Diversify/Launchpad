@@ -70,13 +70,18 @@
             </p>
             <template lwc:if={myAssignment.hasPermissions}>
               <div class="chips">
-                <template for:each={myAssignment.permissionChips} for:item="chip">
+                <template
+                  for:each={myAssignment.permissionChips}
+                  for:item="chip"
+                >
                   <span class="chip" key={chip.key}>{chip.label}</span>
                 </template>
               </div>
             </template>
             <template lwc:else>
-              <p class="mine__none">No permissions assigned to you on this team.</p>
+              <p class="mine__none">
+                No permissions assigned to you on this team.
+              </p>
             </template>
           </div>
         </template>
@@ -115,7 +120,9 @@
                       <span class="chip chip--you">You</span>
                     </template>
                   </td>
-                  <td class="roster__td roster__td--role">{member.roleLabel}</td>
+                  <td class="roster__td roster__td--role">
+                    {member.roleLabel}
+                  </td>
                   <td class="roster__td">
                     <template lwc:if={member.hasPermissions}>
                       <div class="chips">
@@ -143,7 +150,9 @@
         <header class="card__header">
           <div>
             <h2 class="card__title">Permissions</h2>
-            <p class="card__tagline">Who on this team is tied to each permission</p>
+            <p class="card__tagline">
+              Who on this team is tied to each permission
+            </p>
           </div>
         </header>
 
@@ -168,7 +177,9 @@
         <header class="card__header">
           <div>
             <h2 class="card__title">Rep Codes</h2>
-            <p class="card__tagline">Held by the team, not by an individual member</p>
+            <p class="card__tagline">
+              Held by the team, not by an individual member
+            </p>
           </div>
           <span class="count">{repCodes.length}</span>
         </header>

@@ -15,6 +15,14 @@
             <translation><!-- Case --></translation>
         </picklistValues>
         <picklistValues>
+            <masterLabel>Check_Deposit__c</masterLabel>
+            <translation><!-- Check_Deposit__c --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Check_Log__c</masterLabel>
+            <translation><!-- Check_Log__c --></translation>
+        </picklistValues>
+        <picklistValues>
             <masterLabel>FinServ__FinancialAccount__c</masterLabel>
             <translation><!-- FinServ__FinancialAccount__c --></translation>
         </picklistValues>
@@ -41,5 +49,9 @@
         <picklistValues>
             <masterLabel>Standing_Letter_of_Authorization__c</masterLabel>
             <translation><!-- Standing_Letter_of_Authorization__c --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Task</masterLabel>
+            <translation><!-- Task --></translation>
         </picklistValues>
     </CustomFieldTranslation>

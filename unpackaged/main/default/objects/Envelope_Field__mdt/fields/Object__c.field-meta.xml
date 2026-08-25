@@ -62,19 +62,16 @@
             <value>
                 <fullName>Check_Deposit__c</fullName>
                 <default>false</default>
-                <isActive>false</isActive>
                 <label>Check_Deposit__c</label>
             </value>
             <value>
                 <fullName>Check_Log__c</fullName>
                 <default>false</default>
-                <isActive>false</isActive>
                 <label>Check_Log__c</label>
             </value>
             <value>
                 <fullName>Task</fullName>
                 <default>false</default>
-                <isActive>false</isActive>
                 <label>Task</label>
             </value>
         </valueSetDefinition>

@@ -35,9 +35,9 @@
                   "attributes" : {
                     "alignment" : "left",
                     "dxpStyle" : { },
-                    "imageInfo" : "",
-                    "imageInfoMobile" : "",
-                    "logoWidth" : 250
+                    "imageInfo" : "{\"imageInfoV1\": {\"url\": \"/ARC/sfsites/c/resource/ArcLogoLite\", \"altText\": \"ARC Lite\", \"contentKey\": null, \"contentType\": null}}",
+                    "imageInfoMobile" : "{\"imageInfoV1\": {\"url\": \"/ARC/sfsites/c/resource/ArcLogoLite\", \"altText\": \"ARC Lite\", \"contentKey\": null, \"contentType\": null}}",
+                    "logoWidth" : 118
                   },
                   "definition" : "dxp_content_layout:siteLogo",
                   "id" : "896400db-6c80-4061-a23d-b852f1c0f10c",

@@ -93,9 +93,7 @@ export default class ArcTeamSettings extends LightningElement {
       id: team.id,
       name: team.name,
       buttonClass:
-        team.id === this.activeTeamId
-          ? "team-tab team-tab--active"
-          : "team-tab"
+        team.id === this.activeTeamId ? "team-tab team-tab--active" : "team-tab"
     }));
   }
 
@@ -129,7 +127,11 @@ export default class ArcTeamSettings extends LightningElement {
             ? null
             : String(team.orionId)
       },
-      { key: "states", label: "Registered States", value: team.registeredStates },
+      {
+        key: "states",
+        label: "Registered States",
+        value: team.registeredStates
+      },
       { key: "owner", label: "Owner", value: team.ownerName },
       {
         key: "tiered",
@@ -139,7 +141,10 @@ export default class ArcTeamSettings extends LightningElement {
       }
     ];
 
-    return facts.filter((fact) => fact.value !== null && fact.value !== "" && fact.value !== undefined);
+    return facts.filter(
+      (fact) =>
+        fact.value !== null && fact.value !== "" && fact.value !== undefined
+    );
   }
 
   /**
@@ -197,7 +202,9 @@ export default class ArcTeamSettings extends LightningElement {
   get permissionRows() {
     return (this.activeTeam?.permissions || []).map((row) => ({
       ...row,
-      holderText: row.holders?.length ? row.holders.join(", ") : "No one assigned",
+      holderText: row.holders?.length
+        ? row.holders.join(", ")
+        : "No one assigned",
       holderClass: row.holders?.length
         ? "permissions__holders"
         : "permissions__holders permissions__holders--empty",
@@ -233,9 +240,7 @@ export default class ArcTeamSettings extends LightningElement {
       return null;
     }
 
-    const roles = mine
-      .map((member) => member.role)
-      .filter(Boolean);
+    const roles = mine.map((member) => member.role).filter(Boolean);
 
     const chips = [];
     const seenLabels = new Set();

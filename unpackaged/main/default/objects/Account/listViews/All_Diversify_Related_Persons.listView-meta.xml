@@ -6,6 +6,7 @@
     <columns>PersonWorkPhone__c</columns>
     <columns>User__c</columns>
     <columns>Financial_Advisor_Team__c</columns>
+    <columns>ACCOUNT.CREATED_DATE</columns>
     <filterScope>Everything</filterScope>
     <filters>
         <field>ACCOUNT.RECORDTYPE</field>

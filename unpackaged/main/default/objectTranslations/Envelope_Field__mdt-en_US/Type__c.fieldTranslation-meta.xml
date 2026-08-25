@@ -39,6 +39,14 @@
             <translation><!-- Change of Registration --></translation>
         </picklistValues>
         <picklistValues>
+            <masterLabel>Check Deposit</masterLabel>
+            <translation><!-- Check Deposit --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Check Log</masterLabel>
+            <translation><!-- Check Log --></translation>
+        </picklistValues>
+        <picklistValues>
             <masterLabel>Client - Business</masterLabel>
             <translation><!-- Client - Business --></translation>
         </picklistValues>
@@ -109,6 +117,10 @@
         <picklistValues>
             <masterLabel>Standard Case</masterLabel>
             <translation><!-- Standard Case --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Task</masterLabel>
+            <translation><!-- Task --></translation>
         </picklistValues>
         <picklistValues>
             <masterLabel>Third Party Money Movement</masterLabel>

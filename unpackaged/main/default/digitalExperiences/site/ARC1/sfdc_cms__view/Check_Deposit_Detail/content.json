@@ -1,0 +1,71 @@
+{
+  "type" : "sfdc_cms__view",
+  "title" : "Check Deposit Detail",
+  "contentBody" : {
+    "component" : {
+      "children" : [ {
+        "children" : [ {
+          "attributes" : {
+            "backgroundImageConfig" : "",
+            "backgroundImageOverlay" : "rgba(0,0,0,0)",
+            "componentSpacerSize" : "",
+            "dxpStyle" : { },
+            "layoutDirectionDesktop" : "row",
+            "layoutDirectionMobile" : "column",
+            "layoutDirectionTablet" : "column",
+            "maxContentWidth" : "",
+            "sectionColumnGutterWidth" : "",
+            "sectionConfig" : "{\"UUID\":\"1f60c8a3-49b2-4d17-93e5-820af61c7d34\",\"columns\":[{\"UUID\":\"8e27b504-6a13-49cf-b2d8-70e51f9a3c62\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":[]}]}",
+            "sectionMinHeight" : "",
+            "sectionVerticalAlign" : "flex-start"
+          },
+          "children" : [ {
+            "children" : [ {
+              "attributes" : {
+                "dxpStyle" : { }
+              },
+              "definition" : "c:arcRecordDetail",
+              "id" : "b5d3f81e-0c47-4a29-86f1-3947ec20d5ba",
+              "type" : "component"
+            } ],
+            "id" : "8e27b504-6a13-49cf-b2d8-70e51f9a3c62",
+            "name" : "col1",
+            "title" : "Column 1",
+            "type" : "region"
+          } ],
+          "definition" : "community_layout:section",
+          "id" : "1f60c8a3-49b2-4d17-93e5-820af61c7d34",
+          "type" : "component"
+        } ],
+        "id" : "42c8ea70-9b16-4d53-8f2a-61c07de9451b",
+        "name" : "content",
+        "title" : "Content",
+        "type" : "region"
+      }, {
+        "children" : [ {
+          "attributes" : {
+            "customHeadTags" : "",
+            "description" : "",
+            "dxpStyle" : { },
+            "pageTitle" : "Check Deposit: {!Record._Title}",
+            "recordId" : "{!recordId}"
+          },
+          "definition" : "community_builder:seoAssistant",
+          "id" : "cf19a462-38d5-4e71-90b3-6a24f0851ecd",
+          "type" : "component"
+        } ],
+        "id" : "7d0b3e59-14af-42c6-95d1-8e63bf042a17",
+        "name" : "sfdcHiddenRegion",
+        "title" : "sfdcHiddenRegion",
+        "type" : "region"
+      } ],
+      "definition" : "community_layout:sldsFlexibleLayout",
+      "id" : "a6f42d81-59e3-4b70-8c25-1d907eb35f4c",
+      "type" : "component"
+    },
+    "dataProviders" : [ ],
+    "themeLayoutType" : "OHzbXAVux6mZ7VVDb7Pb8F2YUFBAXR",
+    "viewType" : "detail-Check_Deposit__c"
+  },
+  "urlName" : "check-deposit-detail"
+}
