@@ -92,3 +92,14 @@
   margin: 0;
   padding: 0;
 }
+
+/*
+ * A lookup keeps its record picker in read mode so the row shows the record's
+ * name rather than the 18-character id the plain value box would print. The
+ * picker's internals live in its own shadow root and cannot be restyled from
+ * here, so read mode only stops it accepting input; it keeps the base
+ * component's own disabled appearance.
+ */
+.rdf-lookup--readonly {
+  pointer-events: none;
+}

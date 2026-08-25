@@ -31,6 +31,14 @@
                 label="Related Record Lookup Field"
                 description="API name of the lookup field on the page record that points to the record to display (e.g. Service__c). Required when Use Related Record is enabled."
             />
+            <property
+                name="fieldLayout"
+                type="String"
+                label="Field Layout"
+                default="rows"
+                datasource="rows,grid"
+                description="rows = label left, value right (the contact page's frame). grid = responsive multi-column with the label above its value, which reads better on a page of many short fields."
+            />
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>

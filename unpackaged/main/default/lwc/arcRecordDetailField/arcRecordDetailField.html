@@ -63,6 +63,19 @@
             </div>
         </template>
 
+        <template lwc:elseif={showReferencePicker}>
+            <lightning-record-picker
+                class={lookupClass}
+                label={ariaLabel}
+                variant="label-hidden"
+                placeholder={lookupPlaceholder}
+                object-api-name={referenceObjectApiName}
+                value={referenceValue}
+                disabled={readOnly}
+                onchange={handleReferenceChange}>
+            </lightning-record-picker>
+        </template>
+
         <template lwc:elseif={isBoolean}>
             <label class="rdf-boolean">
                 <input

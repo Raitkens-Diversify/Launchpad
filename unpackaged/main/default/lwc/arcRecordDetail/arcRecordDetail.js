@@ -85,6 +85,13 @@ export default class ArcRecordDetail extends LightningElement {
   }
 
   @api title = '';
+  /**
+   * How read-mode fields are laid out: "rows" is the label-left/value-right
+   * pair the Figma contact page specifies, "grid" is a responsive multi-column
+   * grid with the label above its value, which scans far better on a page of
+   * fifteen short fields. Edit mode is unaffected either way.
+   */
+  @api fieldLayout = 'rows';
   _sectionFilter = '';
 
   @api

@@ -18,6 +18,13 @@ import {
 
 export default class ArcRecordDetailField extends LightningElement {
   @api field;
+  /**
+   * Renders the control disabled. Only lookups use it: a reference field has no
+   * readable text to fall back on — the raw value is an 18-character id — so the
+   * row keeps its record picker in read mode and disables it, rather than
+   * printing the id the way the plain value box would.
+   */
+  @api readOnly = false;
 
   _stylesLoaded = false;
   _validationMessage = '';
@@ -42,8 +49,35 @@ export default class ArcRecordDetailField extends LightningElement {
     );
   }
 
+  /*
+   * COMBOBOX is a real Salesforce display type, not a UI widget: Task.Subject is
+   * one — free text that also offers the values of a picklist. It stores a
+   * string, so it edits as one. Left out of this list it fell through to
+   * isUnsupported, which is what put "Unsupported DataType: ComboBox" on every
+   * Task and made the whole form refuse to save.
+   */
   get isText() {
-    return ['STRING', 'EMAIL', 'PHONE', 'URL'].includes(this.field?.type);
+    return ['STRING', 'EMAIL', 'PHONE', 'URL', 'COMBOBOX'].includes(
+      this.normalizedType
+    );
+  }
+
+  get isReference() {
+    return this.normalizedType === 'REFERENCE';
+  }
+
+  /** The object a lookup's candidates come from; blank hides the picker. */
+  get referenceObjectApiName() {
+    return this.field?.referenceTo || '';
+  }
+
+  get showReferencePicker() {
+    return this.isReference && Boolean(this.referenceObjectApiName);
+  }
+
+  get referenceValue() {
+    const value = this.field?.value;
+    return value === null || value === undefined ? null : String(value);
   }
 
   get isTextarea() {
@@ -93,7 +127,8 @@ export default class ArcRecordDetailField extends LightningElement {
       !this.isDate &&
       !this.isDateTime &&
       !this.isPicklist &&
-      !this.isMultiPicklist
+      !this.isMultiPicklist &&
+      !this.showReferencePicker
     );
   }
 
@@ -199,6 +234,14 @@ export default class ArcRecordDetailField extends LightningElement {
     return undefined;
   }
 
+  get lookupClass() {
+    return this.readOnly ? 'rdf-lookup rdf-lookup--readonly' : 'rdf-lookup';
+  }
+
+  get lookupPlaceholder() {
+    return `Search ${this.humanizeLabel(this.field?.label)}...`;
+  }
+
   get maxLength() {
     return (this.isText || this.isTextarea) && this.field?.maxLength > 0
       ? this.field.maxLength
@@ -243,21 +286,36 @@ export default class ArcRecordDetailField extends LightningElement {
   }
 
   get inputClass() {
-    const base = 'div-input div-input--record-detail';
+    const base = 'rdf-input div-input div-input--record-detail';
     return this.hasValidationError ? `${base} div-input--error` : base;
   }
 
   get textareaClass() {
-    const base = 'div-textarea div-input--record-detail';
+    const base = 'rdf-textarea div-textarea div-input--record-detail';
     return this.hasValidationError ? `${base} div-input--error` : base;
   }
 
   get selectClass() {
-    const base = 'div-select div-input--record-detail';
+    const base = 'rdf-select div-select div-input--record-detail';
     return this.hasValidationError ? `${base} div-input--error` : base;
   }
 
   renderedCallback() {
+    /*
+     * <textarea> has no value attribute — its value is its child text — so the
+     * template binding never populated it and every long-text field opened
+     * blank however much the record held. Assigned here instead, and only when
+     * it differs, so a keystroke is never overwritten mid-edit.
+     */
+    if (this.isTextarea) {
+      const textarea = this.template.querySelector('textarea.rdf-textarea');
+      const nextText = String(this.textareaValue ?? '');
+      if (textarea && textarea.value !== nextText) {
+        textarea.value = nextText;
+      }
+      return;
+    }
+
     if (!this.isPicklist) {
       return;
     }
@@ -313,6 +371,12 @@ export default class ArcRecordDetailField extends LightningElement {
 
     this.clearValidationMessage();
     this.emitChange(next);
+  }
+
+  /* record-picker clears to null, which is what the save payload needs too. */
+  handleReferenceChange(event) {
+    this.clearValidationMessage();
+    this.emitChange(event.detail?.recordId ?? null);
   }
 
   handleBlur() {

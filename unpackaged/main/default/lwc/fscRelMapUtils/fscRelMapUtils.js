@@ -180,7 +180,10 @@ const sortTopLevelGroupNodes = (groupNodes = []) =>
 
 const DEFAULT_OPEN_IDS = new Set([GROUP_IDS.INDIVIDUALS]);
 
-const PERMANENTLY_HIDDEN_GROUP_IDS = new Set([GROUP_IDS.TRUSTS]);
+const PERMANENTLY_HIDDEN_GROUP_IDS = new Set([
+  GROUP_IDS.TRUSTS,
+  GROUP_IDS.BUSINESSES
+]);
 
 const LAZY_ACCOUNT_GROUP_IDS = new Set([
   GROUP_IDS.TRUSTS,

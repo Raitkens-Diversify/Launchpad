@@ -15,67 +15,66 @@
             "layoutDirectionTablet" : "column",
             "maxContentWidth" : "",
             "sectionColumnGutterWidth" : "",
-            "sectionConfig" : "{\"UUID\":\"453d7b14-3d24-4c1b-ba64-46af3c61d889\",\"columns\":[{\"UUID\":\"85b77750-c7ae-4d0d-be5a-32a2957facfe\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":[]}]}",
+            "sectionConfig" : "{\"UUID\":\"2f714f93-b068-7fd3-15b4-f13aecaeaca1\",\"columns\":[{\"UUID\":\"dbabc9f1-5b2b-f6ba-1368-bef741c0e236\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":[]}]}",
             "sectionMinHeight" : "",
             "sectionVerticalAlign" : "flex-start"
           },
           "children" : [ {
             "children" : [ {
               "attributes" : {
-                "ariaLabel" : "Breadcrumb",
-                "currentLabel" : "",
                 "dxpStyle" : { },
-                "listLabel" : "",
-                "listPath" : "/account/Account/Default?c__tabId=tab1",
-                "nameField" : "Name",
-                "objectApiName" : "Account",
-                "parentKey" : "",
-                "parentLabel" : ""
+                "fieldLayout" : "grid"
               },
-              "definition" : "c:arcBreadcrumb",
-              "id" : "43bec90a-6d1c-4808-ae00-580b66142270",
+              "definition" : "c:arcRecordDetail",
+              "id" : "d04a7d2e-d9cd-32e2-1fe5-caf73401c74f",
               "type" : "component"
             }, {
               "attributes" : {
-                "backgroundColor" : "",
+                "cardLabel" : "Check Deposits",
+                "columns" : "Check Deposit:Name,Financial Account:Financial_Account__r.Name,Amount:Amount__c",
                 "dxpStyle" : { },
-                "layout" : "{!Item._layout}",
-                "mainTitlePaddingHorizontal" : "none",
-                "mainTitlePaddingVertical" : "none",
-                "mainTitleText" : "Your text",
-                "mainTitleTextDisplayInfo" : "{}",
-                "metadata" : "{!Item._metadata._context}",
-                "recordIdFromDataProvider" : "{!Item.Id}",
-                "showTitle" : false
+                "parentFieldApiName" : "Check__c",
+                "relatedObjectApiName" : "Check_Deposit__c"
               },
-              "children" : [ {
-                "children" : [ {
-                  "attributes" : {
-                    "dxpStyle" : { }
-                  },
-                  "definition" : "dxp_page_layout:placeHolder",
-                  "id" : "dc18f0a4-565e-4b91-9584-0997cbb6af2d",
-                  "type" : "component"
-                } ],
-                "id" : "35c6ba26-2551-46c5-9435-f51ef6cfdcb9",
-                "name" : "placeholder",
-                "title" : "placeholder",
-                "type" : "region"
-              } ],
-              "definition" : "dxp_records:detailPanel",
-              "id" : "8ab1e9d2-f7b4-4b97-b84e-2379f1ccff1c",
+              "definition" : "c:arcRelatedList",
+              "id" : "1e33488e-4a3a-10a8-0d41-f2124dc5eeb8",
+              "type" : "component"
+            }, {
+              "attributes" : {
+                "cardLabel" : "Files",
+                "columns" : "File:ContentDocument.Title,Type:ContentDocument.FileExtension,Updated:ContentDocument.ContentModifiedDate",
+                "dxpStyle" : { },
+                "linkFieldApiName" : "ContentDocumentId",
+                "linkObjectApiName" : "ContentDocument",
+                "parentFieldApiName" : "LinkedEntityId",
+                "relatedObjectApiName" : "ContentDocumentLink"
+              },
+              "definition" : "c:arcRelatedList",
+              "id" : "e5a19a77-6e13-5064-af67-4c64e51b0b0d",
+              "type" : "component"
+            }, {
+              "attributes" : {
+                "cardLabel" : "Check Log History",
+                "columns" : "Field:Field,Changed:CreatedDate,By:CreatedBy.Name,From:OldValue,To:NewValue",
+                "disableRowLinks" : true,
+                "dxpStyle" : { },
+                "parentFieldApiName" : "ParentId",
+                "relatedObjectApiName" : "Check_Log__History"
+              },
+              "definition" : "c:arcRelatedList",
+              "id" : "de0c7f03-79f2-6ec3-3786-184bb4d037a4",
               "type" : "component"
             } ],
-            "id" : "85b77750-c7ae-4d0d-be5a-32a2957facfe",
+            "id" : "dbabc9f1-5b2b-f6ba-1368-bef741c0e236",
             "name" : "col1",
             "title" : "Column 1",
             "type" : "region"
           } ],
           "definition" : "community_layout:section",
-          "id" : "453d7b14-3d24-4c1b-ba64-46af3c61d889",
+          "id" : "2f714f93-b068-7fd3-15b4-f13aecaeaca1",
           "type" : "component"
         } ],
-        "id" : "47b21645-0780-4f8a-a34d-cb99623b3208",
+        "id" : "fff3ffcc-bd05-ae2c-0e8c-6ba314d4f71a",
         "name" : "content",
         "title" : "Content",
         "type" : "region"
@@ -85,20 +84,20 @@
             "customHeadTags" : "",
             "description" : "",
             "dxpStyle" : { },
-            "pageTitle" : "{!Record._Object}: {!Record._Title}",
+            "pageTitle" : "Check Log: {!Record._Title}",
             "recordId" : "{!recordId}"
           },
           "definition" : "community_builder:seoAssistant",
-          "id" : "ade801e6-66a6-4324-b0ec-a6296c7e951c",
+          "id" : "7dc80df7-eb83-a8c8-f3de-d8498e39fbf6",
           "type" : "component"
         } ],
-        "id" : "d3090f84-cc05-4cf0-bd89-7bc31e554d41",
+        "id" : "a9960142-41f2-7ad7-2380-8ed571cc4157",
         "name" : "sfdcHiddenRegion",
         "title" : "sfdcHiddenRegion",
         "type" : "region"
       } ],
       "definition" : "community_layout:sldsFlexibleLayout",
-      "id" : "2a15d190-c532-4504-9a0a-085e1c9c7929",
+      "id" : "513d7527-dc10-0f2c-d210-ea3699ad35d2",
       "type" : "component"
     },
     "dataProviders" : [ ],
