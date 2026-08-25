@@ -116,7 +116,7 @@ public class Case_TriggerHandler {
             }
             if (team != null)
                 branchParts.add(fullName(team.Primary_Financial_Advisor__r));
-    		if(c.Amount__c != null)
+            if(c.Amount__c != null)
             branchParts.add('$ ' + String.valueOf(c.Amount__c.format()));
     
             c.Case_Branch_Name__c = joinNonNull(branchParts);
@@ -292,10 +292,10 @@ public class Case_TriggerHandler {
 
         for(Case triggeringRecord : newList) {
             if((triggeringRecord.Total_Main_Track_Tasks__c == NULL ) || (triggeringRecord.Total_Main_Track_Tasks__c != oldMap.get(triggeringRecord.Id).Total_Main_Track_Tasks__c)) {
-	            caseList.add(triggeringRecord);     		
+                caseList.add(triggeringRecord);             
                 if (triggeringRecord.Case_Template__c != null) {
-                	templateIds.add(triggeringRecord.Case_Template__c);
-            	}
+                    templateIds.add(triggeringRecord.Case_Template__c);
+                }
             }
         }
         System.debug('caseList :' + caseList);
@@ -393,7 +393,7 @@ public class Case_TriggerHandler {
             }
             if(c.Wizard_Financial_Account__c != null){
                 finAcctIds.add(c.Wizard_Financial_Account__c);
-            }
+            } 
         }
         
         if(finAcctIds.isEmpty()){
@@ -413,7 +413,7 @@ public class Case_TriggerHandler {
             if(c.Wizard_Financial_Account__c != null && finAcctMap.containsKey(c.Wizard_Financial_Account__c)){
                 c.Custodian__c = finAcctMap.get(c.Wizard_Financial_Account__c).Custodian__c;
             }
-        }
+        } 
     }
     
     private static Boolean shouldSetCustodianFromFinancialAccount(Case c, Map<Id, Case> oldMap){
@@ -464,12 +464,12 @@ public  Map<Id,Case> setCaseTemplateForWizard(List<Case> newList){
         String caseTemplateType;
         
         lstOfCaseTemplateField = new List<String>{'Type__c', 'Compliance_Needed__c', 'Check_in_Hand__c',
-            'Management_Style__c','Custodian__c'};
+            'Management_Style__c' /* ,'Custodian__c' */};
                 
                 caseTemplateFieldDefaultValue = 'EXCLUDED';
         
-        mapCaseTempFldToCaseFld = new Map< String, String>{ 'Type__c' => 'Type','Compliance_Needed__c' => 'SOF_Compliance__c', 
-            'Check_in_Hand__c' => 'Check_in_Hand__c', 'Management_Style__c' => 'Management_Style__c','Custodian__c' => 'Custodian__c'};
+         mapCaseTempFldToCaseFld = new Map< String, String>{ 'Type__c' => 'Type','Compliance_Needed__c' => 'SOF_Compliance__c', 
+            'Check_in_Hand__c' => 'Check_in_Hand__c', 'Management_Style__c' => 'Management_Style__c','Custodian__c' => 'Custodian__c'}; 
                 
         Id newAccountRecordTypeId = Schema.SObjectType.Case.getRecordTypeInfosByName().get('Account Opening').getRecordTypeId();
         Id servicingRecordTypeId = Schema.SObjectType.Case.getRecordTypeInfosByName().get('Account Servicing').getRecordTypeId();
@@ -628,7 +628,7 @@ setOfTypeToName.add('Account Servicing - Approval Required');
         List<Case_Template__c> lstCaseTemplate = new List<Case_Template__c>();
         
         lstOfCaseTemplateField = new List<String>{'Previous_Management_Style__c', 'Management_Style__c', 'Charity_Sponsor__c',
-            'Enough_Cash__c', 'Custodian__c',
+            'Enough_Cash__c', 'Custodian__c' , 
             'Live_SLOA_on_File__c', 'Money_Movement_Direction__c', 'Compliance_Needed__c', 'Check_in_Hand__c' };
                 
                 caseTemplateFieldDefaultValue = 'EXCLUDED';

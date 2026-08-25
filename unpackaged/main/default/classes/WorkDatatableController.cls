@@ -15,6 +15,8 @@ public with sharing class WorkDatatableController {
   private static final String PILL_COMPLETED = PILL_BASE + ' div-work-pill--completed';
   private static final String PILL_NOT_STARTED = PILL_BASE + ' div-work-pill--not-started';
   private static final String PILL_HO_SUBMISSION = PILL_BASE + ' div-work-pill--ho-submission';
+  private static final String PILL_BRANCH_PIT_STOP = PILL_BASE + ' div-work-pill--branch-pit-stop';
+  private static final String PILL_HO_PIT_STOP = PILL_BASE + ' div-work-pill--ho-pit-stop';
 
   private static final Set<String> CASE_FIELDS = new Set<String>{
     'Id',
@@ -302,6 +304,39 @@ public with sharing class WorkDatatableController {
     if (allNotStarted) {
       row.overallStatus = 'Not started';
       row.overallStatusPillClass = PILL_NOT_STARTED;
+      return;
+    }
+
+    /*
+     * A case with an open pit stop task is not on track: it is waiting on
+     * somebody else's queue, which is the one thing this column exists to
+     * surface. Home office outranks branch, being the pit stop the advisor
+     * cannot clear themselves. The pill styles for both have been in
+     * diversifyStyles since the column was built; nothing had set them.
+     */
+    Boolean hasOpenBranchPitStop = false;
+    Boolean hasOpenHomeOfficePitStop = false;
+
+    for (Task taskRecord : caseTasks) {
+      if (taskRecord.Status == 'Completed') {
+        continue;
+      }
+      if (taskRecord.Home_Office_Pit_Stop__c == true) {
+        hasOpenHomeOfficePitStop = true;
+      } else if (taskRecord.Branch_Pit_Stop__c == true) {
+        hasOpenBranchPitStop = true;
+      }
+    }
+
+    if (hasOpenHomeOfficePitStop) {
+      row.overallStatus = 'Home office pit stop';
+      row.overallStatusPillClass = PILL_HO_PIT_STOP;
+      return;
+    }
+
+    if (hasOpenBranchPitStop) {
+      row.overallStatus = 'Branch pit stop';
+      row.overallStatusPillClass = PILL_BRANCH_PIT_STOP;
       return;
     }
 

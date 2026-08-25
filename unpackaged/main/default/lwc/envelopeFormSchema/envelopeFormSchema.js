@@ -1107,6 +1107,10 @@ function emptyValueForField(field) {
     return '';
 }
 
+function isBooleanField(field) {
+    return field.inputType === 'checkbox' || field.type === 'BOOLEAN';
+}
+
 /**
  * Whether a control value counts as blank (unfilled): an empty array, false, null/undefined, or a
  * blank string. A required checkbox is therefore "empty" until checked.
@@ -2444,7 +2448,7 @@ function hasUnfilledKeyPointDependents(sections, draft = {}, userContext = {}) {
     const allFields = (sections || []).flatMap((section) => section.fields || []);
     const emptyKeyPointNames = (sections || [])
         .flatMap((section) => shapeVisibleFields(section.fields, draft, userContext))
-        .filter((field) => field.keyDecision && field.required && isEmptyValue(field.value))
+        .filter((field) => field.keyDecision && field.required && isEmptyValue(field.value) && !isBooleanField(field))
         .map((field) => field.apiName);
     if (emptyKeyPointNames.length === 0) {
         return false;
@@ -2548,11 +2552,13 @@ function selectMissingSections(sections, draft = {}, userContext = {}) {
                 return;
             }
             // Only a blank Key Point gates hidden fields; one holding an invalid value is answered,
-            // so its dependents already show.
-            if (isBlank && field.keyDecision) {
+            // so its dependents already show. A boolean/checkbox Key Point is answered when unchecked
+            // (false is a deliberate answer, not a missing one).
+            const isKeyDecisionBlank = field.keyDecision && isBlank && !isBooleanField(field);
+            if (isKeyDecisionBlank) {
                 emptyKeyPointNames.push(field.apiName);
             }
-            if (isInvalid || field.required || field.keyDecision) {
+            if (isInvalid || field.required || isKeyDecisionBlank) {
                 included.add(field.apiName);
             }
         });
@@ -2974,6 +2980,7 @@ export {
     COMMIT_IDLE_MS,
     isFormatValid,
     applyInputMask,
+    isBooleanField,
     isFieldOutstanding,
     sectionStatus,
     markUpdatedFields,

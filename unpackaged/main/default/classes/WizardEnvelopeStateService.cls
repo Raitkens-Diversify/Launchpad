@@ -1666,6 +1666,27 @@ return result;
             scopedServices.add(ser);
         }
 
+        // Flag each client that has their own Required_Documents__c profile — these are
+        // primary Individuals, not party-only members. The client uses this to keep them
+        // as Individual even when they also play a related-party role on another member.
+        Set<Id> clientAccountIds = new Set<Id>();
+        for (MemberData c : clients) {
+            clientAccountIds.add(c.id);
+        }
+        if (!clientAccountIds.isEmpty()) {
+            Set<Id> idsWithProfile = new Set<Id>();
+            for (Required_Documents__c rd : [
+                SELECT Person__c
+                FROM Required_Documents__c
+                WHERE Person__c IN :clientAccountIds
+            ]) {
+                idsWithProfile.add(rd.Person__c);
+            }
+            for (MemberData c : clients) {
+                c.hasClientProfile = idsWithProfile.contains(c.id);
+            }
+        }
+
         HouseholdMembersAndAccountsWrapper wrapper =
             new HouseholdMembersAndAccountsWrapper(clients, businesses, trusts, retirementPlans, accounts, scopedServices);
         wrapper.actionCases = readActionCases(envelopeId);
@@ -1973,6 +1994,9 @@ return result;
         // Whether the member's Account has been submitted to the home office. The caller treats an
         // unsubmitted record as a still-editable draft (isNew) and a submitted one as locked.
         @AuraEnabled public Boolean submitted { get; set; }
+        // True when this person has their own Required_Documents__c client profile — a primary
+        // Individual added to the envelope, not just a related party on another member.
+        @AuraEnabled public Boolean hasClientProfile { get; set; }
     }
     
     public class AccountData {

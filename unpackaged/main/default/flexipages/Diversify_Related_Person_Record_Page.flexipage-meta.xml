@@ -100,7 +100,7 @@
                             </visibilityRule>
                         </valueListItems>
                         <valueListItems>
-                            <value>EnableCustomerPortalUser</value>
+                            <value>Account.Enable_Disable_Portal_User</value>
                         </valueListItems>
                     </valueList>
                 </componentInstanceProperties>

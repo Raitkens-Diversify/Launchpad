@@ -410,6 +410,7 @@ function mapHouseholdResponse(data) {
       iconVariant: "member",
       isNew: !m.submitted,
       removable: !m.submitted,
+      hasClientProfile: m.hasClientProfile === true,
       actions: [
         {
           id: `${m.id}-1`,
@@ -541,11 +542,20 @@ function mapHouseholdResponse(data) {
 // role lists them all in the label, and the first drives the form — the model carries one type per
 // entity. A member with no role is returned untouched, which is what keeps the presentation
 // self-correcting: a role removed since the last save reverts the row on the next fetch.
+// A member with hasClientProfile (their own Required_Documents__c) is a primary Individual: they
+// keep their client type and field set even when they also serve as a related party, and the
+// party role appears in their outline meta so the sidebar reflects both.
 function applyPartyRoles(members, roles) {
   return (members || []).map((entity) => {
     const held = (roles[entity.id] || []).filter(partyRoleLabel);
     if (entity.type !== "client" || !held.length) {
       return entity;
+    }
+    if (entity.hasClientProfile) {
+      return {
+        ...entity,
+        meta: buildMeta([entity.typeLabel, ...held.map(partyRoleLabel)])
+      };
     }
     const typeLabel = buildMeta(held.map(partyRoleLabel));
     return {
@@ -2016,7 +2026,11 @@ export default class EnvelopeShellV2 extends LightningElement {
             // account's type comes from its add form and is absent from the server projection, so
             // copying it would erase it.
             ...(groupId === "householdMembers"
-              ? { type: server.type, typeLabel: server.typeLabel }
+              ? {
+                  type: server.type,
+                  typeLabel: server.typeLabel,
+                  hasClientProfile: server.hasClientProfile
+                }
               : {})
           };
           return withRecordValues(merged);

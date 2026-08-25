@@ -2,6 +2,7 @@ import { LightningElement, api } from "lwc";
 import {
   changeClearsAnswers,
   clearHiddenAnswers,
+  isBooleanField,
   isEmptyValue,
   isFieldOutstanding,
   shapeVisibleFields
@@ -464,7 +465,7 @@ export default class EnvelopeReviewMissingItems extends LightningElement {
     const hasOutstanding = fields.some(
       (field) =>
         isFieldOutstanding(field) ||
-        (field.keyDecision && isEmptyValue(field.value))
+        (field.keyDecision && isEmptyValue(field.value) && !isBooleanField(field))
     );
     return {
       key: part.key,

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>isPortalUserEnabled__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Set by the Enable/Disable Portal User flow. Indicates this person has been provisioned as a community user. Machine-managed - do not edit by hand.</description>
+    <inlineHelpText>Managed automatically by the Enable/Disable Portal User flow.</inlineHelpText>
+    <label>Is Portal User Enabled</label>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Checkbox</type>
+</CustomField>

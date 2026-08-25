@@ -21,13 +21,15 @@
     display: inline-flex;
     align-items: center;
     gap: var(--ds-space-sm, 8px);
-    padding: var(--ds-space-sm, 8px) var(--ds-space-lg, 16px);
+    padding: var(--ds-tabs-padding-y, var(--ds-space-sm, 8px)) var(--ds-tabs-padding-x, var(--ds-space-lg, 16px));
     margin-bottom: -1px; /* the active underline sits ON the strip's rule */
     background: transparent;
     border: none;
     border-bottom: 2px solid transparent;
-    font-size: 0.9375rem;
-    font-weight: 500;
+    font-family: var(--ds-tabs-font-family, inherit);
+    font-size: var(--ds-tabs-font-size, 0.9375rem);
+    line-height: var(--ds-tabs-line-height, normal);
+    font-weight: var(--ds-tabs-font-weight, 500);
     color: var(--slds-g-color-on-surface-1, #4b5563);
     cursor: pointer;
     transition: color 0.15s ease, border-color 0.15s ease;
@@ -42,7 +44,7 @@
 }
 .ds-tabs__tab--active {
     color: var(--slds-g-color-on-surface-3, #09243f);
-    font-weight: 600;
+    font-weight: var(--ds-tabs-active-font-weight, 600);
     border-bottom-color: var(--slds-g-color-accent-1, #0f406f);
 }
 

@@ -615,6 +615,17 @@ public with sharing class ResourceCenterService {
         }
     }
 
+    /**
+     * Resolves the actual download URL at click time rather than reusing the
+     * one baked into the cacheable resource/detail read (which is only ever
+     * an authenticated Shepherd URL — see ResourceFileService). Non-cacheable
+     * because creating the ContentDistribution behind a public link is DML.
+     */
+    @AuraEnabled
+    public static String getResourceDownloadUrl(Id contentDocumentId) {
+        return ResourceFileService.resolvePublicDownloadUrl(contentDocumentId);
+    }
+
     // ---- Public API: shareable links -----------------------------------------
 
     /**

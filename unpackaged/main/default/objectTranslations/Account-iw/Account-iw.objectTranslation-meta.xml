@@ -167,26 +167,6 @@
             <section>Personal Information</section>
         </sections>
     </layouts>
-    <layouts>
-        <layout>Person Account Layout</layout>
-        <layoutType>PersonAccount</layoutType>
-        <sections>
-            <label><!-- Employment Information --></label>
-            <section>Employment Information</section>
-        </sections>
-        <sections>
-            <label><!-- Know Your Customer --></label>
-            <section>Know Your Customer</section>
-        </sections>
-        <sections>
-            <label><!-- Marketing Information --></label>
-            <section>Marketing Information</section>
-        </sections>
-        <sections>
-            <label><!-- Personal Financial Statement --></label>
-            <section>Personal Financial Statement</section>
-        </sections>
-    </layouts>
     <quickActions>
         <label><!-- AML Documentation Information --></label>
         <name>AML_Documentation_Information</name>
@@ -206,6 +186,10 @@
     <quickActions>
         <label><!-- Create Household Account --></label>
         <name>Create_Household_Account</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- Enable/Disable Portal User --></label>
+        <name>Enable_Disable_Portal_User</name>
     </quickActions>
     <quickActions>
         <label><!-- Grant Customization --></label>
@@ -359,6 +343,7 @@
         <label><!-- SendWithDocuSign --></label>
         <name>SendWithDocuSign</name>
     </webLinks>
+    
     
     
     

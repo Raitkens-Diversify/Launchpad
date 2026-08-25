@@ -4,7 +4,11 @@
    dialog and top-anchors a tall one so the overlay can scroll it — the
    adminReviewQueue panel precedent. This is what makes allow-overflow dialogs
    (which cannot scroll their own body) reach their footers on short
-   viewports. */
+   viewports.
+
+   Below that, everything is a consumer-overridable hook. Every one defaults
+   to the value this modal already used, so existing consumers are untouched;
+   a consumer that has to hit a specific frame overrides only what it needs. */
 .ds-modal-v2 {
   position: fixed;
   inset: 0;
@@ -12,13 +16,14 @@
   overflow-y: auto;
   padding: var(--slds-g-spacing-4);
   z-index: var(--env-z-modal, 9000);
-  font-family: var(--slds-g-font-family-base);
+  font-family: var(--ds-modal-font-family, var(--slds-g-font-family-base));
   color: var(--slds-g-color-on-surface-1);
 }
 
 .ds-modal-v2__container {
   background: var(--slds-g-color-surface-container-1);
-  border-radius: var(--slds-g-radius-border-2, 0.5rem);
+  border-radius: var(--ds-modal-radius, var(--slds-g-radius-border-2, 0.5rem));
+  box-shadow: var(--ds-modal-shadow, none);
   margin: auto;
   max-height: 90vh;
   display: flex;
@@ -47,7 +52,7 @@
 }
 
 .ds-modal-v2__container--small {
-  width: min(396px, 94vw);
+  width: min(var(--ds-modal-width, 396px), 94vw);
 }
 
 .ds-modal-v2__container--medium {
@@ -76,8 +81,9 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--slds-g-spacing-2);
-  padding: var(--slds-g-spacing-5);
-  border-radius: var(--slds-g-radius-border-2, 0.5rem) var(--slds-g-radius-border-2, 0.5rem) 0 0;
+  padding: var(--ds-modal-padding, var(--slds-g-spacing-5));
+  border-radius: var(--ds-modal-radius, var(--slds-g-radius-border-2, 0.5rem))
+    var(--ds-modal-radius, var(--slds-g-radius-border-2, 0.5rem)) 0 0;
   background: var(--slds-g-color-surface-container-1);
 }
 
@@ -89,11 +95,11 @@
 
 .ds-modal-v2__title {
   margin: 0;
-  font-family: var(--slds-g-font-family-base);
-  font-size: var(--slds-g-font-scale-3, 1.25rem);
+  font-family: var(--ds-modal-font-family, var(--slds-g-font-family-base));
+  font-size: var(--ds-modal-title-size, var(--slds-g-font-scale-3, 1.25rem));
   font-weight: 600;
-  line-height: 1.4;
-  color: var(--slds-g-color-on-surface-3);
+  line-height: var(--ds-modal-title-line-height, 1.4);
+  color: var(--ds-modal-title-color, var(--slds-g-color-on-surface-3));
 }
 
 .ds-modal-v2__subtitle {
@@ -105,11 +111,18 @@
 }
 
 .ds-modal-v2__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--ds-modal-close-size, auto);
+  height: var(--ds-modal-close-size, auto);
+  box-sizing: border-box;
   border: none;
   background: transparent;
   cursor: pointer;
   padding: 0.35rem;
-  border-radius: var(--slds-g-radius-border-2, 0.5rem);
+  border-radius: var(--ds-modal-radius, var(--slds-g-radius-border-2, 0.5rem));
   color: var(--slds-g-color-on-surface-1);
   line-height: 0;
   transition: background var(--env-transition-fast, 0.15s ease);
@@ -125,11 +138,11 @@
 }
 
 .ds-modal-v2__body {
-  padding: 0 var(--slds-g-spacing-5) var(--slds-g-spacing-5);
+  padding: var(--ds-modal-body-padding, 0 var(--slds-g-spacing-5) var(--slds-g-spacing-5));
   flex: 1 1 auto;
   min-height: 0;
   overflow: auto;
-  color: var(--slds-g-color-on-surface-1);
+  color: var(--ds-modal-body-color, var(--slds-g-color-on-surface-1));
 }
 
 .ds-modal-v2__body--allow-overflow {
@@ -141,19 +154,20 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: flex-end;
-  gap: var(--slds-g-spacing-2);
-  padding: var(--slds-g-spacing-5);
+  gap: var(--ds-modal-footer-gap, var(--slds-g-spacing-2));
+  padding: var(--ds-modal-padding, var(--slds-g-spacing-5));
   background: var(--slds-g-color-surface-container-1);
   /* Mirror the header's top radii so the bottom corners stay rounded when the
      container opts into overflow: visible (allow-overflow), which disables the
      container's own border-radius clipping. */
-  border-radius: 0 0 var(--slds-g-radius-border-2, 0.5rem) var(--slds-g-radius-border-2, 0.5rem);
+  border-radius: 0 0 var(--ds-modal-radius, var(--slds-g-radius-border-2, 0.5rem))
+    var(--ds-modal-radius, var(--slds-g-radius-border-2, 0.5rem));
 }
 
 .ds-modal-v2__backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(17, 26, 44, 0.45);
+  background: var(--ds-modal-backdrop-bg, rgba(17, 26, 44, 0.45));
   z-index: var(--env-z-modal-backdrop, 8500);
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(var(--ds-modal-backdrop-blur, 2px));
 }

@@ -29,40 +29,171 @@ public with sharing class CaseStatusSummaryController {
     public static CaseStatusWrapper getCaseStatusSummary(Id caseId, Id userId) {
         CaseStatusWrapper wrap = new CaseStatusWrapper();
         if (caseId == null) {
-        	return wrap;    
+            return wrap;    
         }
 
             String membershipField = getMembershipField(userId);
             Case c = fetchCase(caseId, membershipField);
 
             wrap.currentTaskId = c.Current_Task_Id__c;
-            wrap.membership = (membershipField == 'Case_Branch_Name__c') ?
-                                c.Case_Branch_Name__c : c.Case_Home_Office_Name__c;
+            wrap.membership = resolveMembership(c, membershipField);
 
             Task currentTask = fetchCurrentTask(c.Current_Task_Id__c);
             processCurrentTask(currentTask, wrap);
             wrap.wrappedMilestones = buildMilestones(caseId, wrap);
 
-            wrap.totalTasks = c.Total_Main_Track_Tasks__c != null ? Integer.valueOf(c.Total_Main_Track_Tasks__c) : 0;
-            wrap.completedTasks = c.Completed_Main_Track_Tasks__c != null ? Integer.valueOf(c.Completed_Main_Track_Tasks__c) : 0;
+            applyMainTrackTaskCounts(caseId, wrap);
             return wrap;
+    }
+
+    /**
+     * Main-track task counts, read from the tasks themselves.
+     *
+     * These were read from Case.Total_Main_Track_Tasks__c and
+     * Completed_Main_Track_Tasks__c, which UpdateCaseTaskCountsBatch writes.
+     * Those fields are null until the batch has run against a case and go stale
+     * between runs, so the tile's ratio showed 0/0 on cases that did have
+     * main-track tasks. Counting here means the figure is right on first load
+     * and needs no batch to have run.
+     *
+     * The criteria are the batch's own -- tasks on the case with Order__c set --
+     * which is also what MainTrackTasksController selects for the Main Track
+     * Tasks list, so the ratio and that list cannot disagree. One query rather
+     * than two COUNT() aggregates, since the statuses are needed anyway.
+     */
+    private static void applyMainTrackTaskCounts(Id caseId, CaseStatusWrapper wrap) {
+        Integer total = 0;
+        Integer completed = 0;
+
+        for (Task t : [
+            SELECT Id, Status
+            FROM Task
+            WHERE WhatId = :caseId AND Order__c != NULL
+        ]) {
+            total++;
+            if (t.Status == 'Completed') {
+                completed++;
+            }
+        }
+
+        wrap.totalTasks = total;
+        wrap.completedTasks = completed;
     }
 
     private static String getMembershipField(Id userId) {
         for (GroupMember gm : [
-            SELECT Group.DeveloperName 
-            FROM GroupMember 
+            SELECT Group.DeveloperName
+            FROM GroupMember
             WHERE UserOrGroupId = :userId
         ]) { if (gm.Group.DeveloperName == 'Home_Office')return 'Case_Home_Office_Name__c';
-            
+
         }
         return 'Case_Branch_Name__c';
     }
 
+    /**
+     * The tile's centre summary line: the case type, the account's registration
+     * and custody details, then the client, the advisor and the amount.
+     *
+     * Case_Branch_Name__c / Case_Home_Office_Name__c hold this text on orgs whose
+     * Case trigger writes it. Nothing writes it here -- every Case in this org has
+     * both fields null -- so the line rendered blank while the rest of the tile
+     * worked off live queries. It is assembled from the same fields, in the same
+     * order, as Case_TriggerHandler.populateBranchAndHomeNames does elsewhere, so
+     * both render identically. A stored value still wins, which keeps this correct
+     * if that trigger is ever brought across.
+     *
+     * The literal '</br>' is a part, not markup: joinNonNull turns it into
+     * ' | </br> | ', which caseOverviewTile rewrites into a line break.
+     */
+    private static String resolveMembership(Case c, String membershipField) {
+        Boolean isHomeOffice = (membershipField == 'Case_Home_Office_Name__c');
+
+        String stored = isHomeOffice ? c.Case_Home_Office_Name__c : c.Case_Branch_Name__c;
+        if (String.isNotBlank(stored)) {
+            return stored;
+        }
+
+        Financial_Account__c fa = c.Wizard_Financial_Account__r;
+        Financial_Advisor_Team__c team = c.Financial_Advisor_Team__r;
+
+        /*
+         * The people on a case do not describe it. Without a type, an account or an
+         * amount there is nothing to say about the work itself, and the line came
+         * out as a bare advisor name sitting alone in the middle of the tile as
+         * though it were the case's title. Fall back to the subject in that case --
+         * the same intent as populateNullNameFields, applied before the names are
+         * added rather than only when every part is null.
+         */
+        Boolean describesCase = String.isNotBlank(c.Type) || fa != null || c.Amount__c != null;
+        if (!describesCase) {
+            return c.Subject;
+        }
+
+        List<String> parts = new List<String>{ c.Type };
+        if (fa != null) {
+            parts.add(fa.Registration_Type__c);
+            parts.add(fa.Custodian__c);
+            parts.add(fa.Managed_Account_Platform__c);
+            parts.add(fa.BD_or_RIA__c);
+            parts.add('</br>');
+        }
+
+        // Branch reads owner then advisor; home office reads advisor then owner.
+        String owner = (fa == null) ? null : fullName(fa.Primary_Owner__r);
+        String advisor = (team == null) ? null : fullName(team.Primary_Financial_Advisor__r);
+        if (isHomeOffice) {
+            parts.add(advisor);
+            parts.add(owner);
+        } else {
+            parts.add(owner);
+            parts.add(advisor);
+        }
+
+        if (c.Amount__c != null) {
+            parts.add('$ ' + c.Amount__c.format());
+        }
+
+        String built = joinNonNull(parts);
+        return String.isNotBlank(built) ? built : c.Subject;
+    }
+
+    private static String joinNonNull(List<String> items) {
+        List<String> cleaned = new List<String>();
+        for (String s : items) {
+            if (s != null && s.trim() != '') {
+                cleaned.add(s.trim());
+            }
+        }
+        return cleaned.isEmpty() ? null : String.join(cleaned, ' | ');
+    }
+
+    /** FirstName/LastName exist on User and on person accounts; null elsewhere. */
+    private static String fullName(SObject person) {
+        if (person == null) {
+            return null;
+        }
+        String first = (String) person.get('FirstName');
+        String last = (String) person.get('LastName');
+        if (String.isBlank(first) && String.isBlank(last)) {
+            return null;
+        }
+        return ((first == null ? '' : first) + ' ' + (last == null ? '' : last)).trim();
+    }
+
     private static Case fetchCase(Id caseId, String membershipField) {
-        String query = 
+        String query =
             'SELECT Id, Current_Task_Id__c, Case_Template__c,' +
             ' Total_Main_Track_Tasks__c, Completed_Main_Track_Tasks__c,' +
+            ' Type, Subject, Amount__c,' +
+            ' Wizard_Financial_Account__r.Registration_Type__c,' +
+            ' Wizard_Financial_Account__r.Custodian__c,' +
+            ' Wizard_Financial_Account__r.Managed_Account_Platform__c,' +
+            ' Wizard_Financial_Account__r.BD_or_RIA__c,' +
+            ' Wizard_Financial_Account__r.Primary_Owner__r.FirstName,' +
+            ' Wizard_Financial_Account__r.Primary_Owner__r.LastName,' +
+            ' Financial_Advisor_Team__r.Primary_Financial_Advisor__r.FirstName,' +
+            ' Financial_Advisor_Team__r.Primary_Financial_Advisor__r.LastName,' +
             ' ' + membershipField +
             ' FROM Case WHERE Id = :caseId LIMIT 1';
         return Database.query(query);
