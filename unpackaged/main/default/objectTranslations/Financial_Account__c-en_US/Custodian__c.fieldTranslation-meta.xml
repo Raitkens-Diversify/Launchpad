@@ -7,10 +7,6 @@
             <translation><!-- 401 GO --></translation>
         </picklistValues>
         <picklistValues>
-            <masterLabel>AMERICAN FUNDS</masterLabel>
-            <translation><!-- AMERICAN FUNDS --></translation>
-        </picklistValues>
-        <picklistValues>
             <masterLabel>AMERICAN FUNDS F2</masterLabel>
             <translation><!-- AMERICAN FUNDS F2 --></translation>
         </picklistValues>
@@ -25,6 +21,10 @@
         <picklistValues>
             <masterLabel>Alerus</masterLabel>
             <translation><!-- Alerus --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>American Funds</masterLabel>
+            <translation><!-- American Funds --></translation>
         </picklistValues>
         <picklistValues>
             <masterLabel>American Funds (A shrs)</masterLabel>

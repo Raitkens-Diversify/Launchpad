@@ -58,7 +58,7 @@
             <!-- Collapsible sections of article links -->
             <template if:false={showViewer}>
                 <template if:true={loadingArticles}>
-                    <c-arc-loading-spinner alternative-text="Loading articles" size="small"></c-arc-loading-spinner>
+                    <lightning-spinner alternative-text="Loading articles" size="small"></lightning-spinner>
                 </template>
 
                 <template if:true={showFuzzyBanner}>
