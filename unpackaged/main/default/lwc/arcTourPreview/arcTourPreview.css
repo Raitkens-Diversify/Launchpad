@@ -1,0 +1,1355 @@
+/**
+ * A half-scale ARC. Sizes are absolute, not token-derived: this is a picture of
+ * the app, not a piece of it, so it must not inherit page type sizes and grow
+ * out of the modal it sits in. Colours DO come from the same tokens the real
+ * chrome uses, with the same literal fallbacks, so it stays on-brand.
+ *
+ * Type is held at a readable floor (~8px) rather than scaled proportionally —
+ * a true 0.45 scale would put body text at 6px and the replica would be a
+ * blurry grey smear instead of something a new user can actually read.
+ */
+:host {
+  --tp-ink: var(--div-color-sidebar-text, #09243f);
+  --tp-muted: #6b7280;
+  --tp-faint: #9aa5b1;
+  --tp-line: var(--div-color-border-1, #e5e7eb);
+  --tp-hair: #eef1f4;
+  --tp-rail: #ffffff;
+  --tp-lit-bg: var(--div-color-sidebar-active-bg, #e2f8ff);
+  --tp-lit-ink: var(--div-color-sidebar-active-text, #071c31);
+  --tp-lit-ring: var(--ds-light-blue, #14bef0);
+  --tp-accent: var(--slds-g-color-accent-1, #0f406f);
+  --tp-link: #1a76bb;
+
+  display: block;
+}
+
+.tp {
+  display: flex;
+  flex-direction: column;
+  height: 442px;
+  overflow: hidden;
+  border: 1px solid var(--tp-line);
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 10px 30px rgba(9, 36, 63, 0.1);
+  font-family: var(
+    --slds-g-font-family-base,
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif
+  );
+  font-size: 8.5px;
+  line-height: 1.35;
+  color: var(--tp-ink);
+  /* Decoration: nothing in here should invite a click. */
+  user-select: none;
+  pointer-events: none;
+}
+
+.tp-h1 {
+  display: block;
+  font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.tp-h2 {
+  display: block;
+  margin: 10px 0 6px;
+  font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tp-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 8.5px;
+  color: var(--tp-muted);
+}
+
+.tp-eyebrow {
+  display: block;
+  font-size: 8px;
+  color: var(--tp-muted);
+}
+
+/* ---- header chrome ------------------------------------------------------ */
+
+.tp-chrome {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  height: 32px;
+  padding: 0 9px;
+  border-bottom: 1px solid var(--tp-line);
+  background: #ffffff;
+}
+
+.tp-chrome__logo {
+  height: 13px;
+  width: auto;
+  display: block;
+}
+
+.tp-chrome__search {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  max-width: 210px;
+  height: 15px;
+  margin: 0 auto;
+  padding: 0 6px;
+  border: 1px solid var(--tp-line);
+  border-radius: 4px;
+  background: #ffffff;
+}
+
+.tp-chrome__placeholder {
+  font-size: 7.5px;
+  color: var(--tp-faint);
+}
+
+.tp-chrome__actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 5px;
+  border-radius: 7px;
+}
+
+.tp-chrome__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--tp-link);
+  color: #ffffff;
+  font-size: 6px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* ---- layout ------------------------------------------------------------- */
+
+.tp-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.tp-nav {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  /* Sized to the longest real label — "Investments & Agreements" — plus its
+     icon, gap and chevron. At 128px it truncated, and a clipped nav label
+     looks like a bug rather than a small-scale rendering of one. */
+  width: 154px;
+  border-right: 1px solid var(--tp-line);
+  background: var(--tp-rail);
+}
+
+.tp-nav__scroll {
+  flex: 1;
+  min-height: 0;
+  padding: 7px 5px;
+  overflow: hidden;
+}
+
+.tp-nav__group {
+  margin-bottom: 1px;
+}
+
+.tp-nav__row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3.5px 5px;
+  border-radius: 5px;
+  font-size: 8.5px;
+  font-weight: 500;
+  /* The step-to-step highlight move is the whole animation budget here. */
+  transition:
+    background 260ms ease,
+    box-shadow 260ms ease,
+    color 260ms ease;
+}
+
+.tp-nav__icon {
+  width: 10px;
+  height: 10px;
+  flex: none;
+  background-color: currentColor;
+  -webkit-mask-image: var(--tp-icon-url);
+  mask-image: var(--tp-icon-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.tp-nav__label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.tp-nav__chevron {
+  flex: none;
+  font-size: 8px;
+  color: var(--tp-faint);
+  line-height: 1;
+}
+
+.tp-nav__child {
+  padding: 2.5px 5px 2.5px 20px;
+  border-radius: 5px;
+  font-size: 8px;
+  /* The real rail renders children in the same ink as their parent, only
+     unweighted — not in the muted grey this used, which made every child look
+     disabled. */
+  color: var(--tp-ink);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transition:
+    background 260ms ease,
+    box-shadow 260ms ease,
+    color 260ms ease;
+}
+
+.tp-nav__footer {
+  flex: none;
+  display: flex;
+  justify-content: center;
+  padding: 7px 8px;
+  border-top: 1px solid var(--tp-line);
+}
+
+.tp-nav__builtby {
+  width: 74px;
+  height: auto;
+  display: block;
+}
+
+.tp-main {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.tp-pad {
+  padding: 9px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-height: 0;
+}
+
+/* ---- breadcrumb --------------------------------------------------------- */
+
+.tp-crumbs {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex: none;
+  font-size: 8px;
+  color: var(--tp-muted);
+}
+
+.tp-crumbs__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.tp-crumbs__caret {
+  color: var(--tp-faint);
+}
+
+.tp-crumb--last {
+  color: var(--tp-ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ---- page head ---------------------------------------------------------- */
+
+.tp-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  flex: none;
+}
+
+.tp-head__text {
+  min-width: 0;
+}
+
+.tp-head__actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+}
+
+.tp-head__actions--stack {
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.tp-head__row {
+  display: flex;
+  gap: 5px;
+}
+
+.tp-btn {
+  padding: 3.5px 7px;
+  border: 1px solid var(--tp-line);
+  border-radius: 5px;
+  background: #ffffff;
+  font-size: 7.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--tp-ink);
+}
+
+.tp-btn--brand {
+  border-color: var(--tp-accent);
+  background: var(--tp-accent);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.tp-btn--muted {
+  align-self: flex-start;
+  margin-top: 5px;
+  border-color: #b9b3ab;
+  background: #b9b3ab;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.tp-btn--sm {
+  padding: 3px 6px;
+}
+
+/* ---- announcement ------------------------------------------------------- */
+
+.tp-announce {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  flex: none;
+  padding: 6px 8px;
+  border: 1px solid var(--tp-line);
+  border-radius: 6px;
+}
+
+.tp-announce__icon {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-top: 1px;
+  border: 1.2px solid var(--tp-link);
+  border-radius: 2px;
+}
+
+.tp-announce__text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.tp-announce__title {
+  font-size: 8.5px;
+  font-weight: 700;
+  color: var(--tp-link);
+}
+
+.tp-announce__body {
+  font-size: 8px;
+  color: var(--tp-muted);
+}
+
+/* ---- metric tiles ------------------------------------------------------- */
+
+.tp-tiles {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  flex: none;
+  padding: 4px;
+  border-radius: 7px;
+}
+
+.tp-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 6px 7px;
+  border: 1px solid var(--tp-line);
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.tp-tile__label {
+  font-size: 7.5px;
+  color: var(--tp-muted);
+}
+
+.tp-tile__value {
+  font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.tp-tile__sub {
+  font-size: 7px;
+  color: var(--tp-muted);
+}
+
+.tp-tile__chev {
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  transform: translateY(-50%);
+  font-size: 8px;
+  color: var(--tp-faint);
+}
+
+/* ---- charts ------------------------------------------------------------- */
+
+.tp-charts {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+  flex: none;
+  padding: 4px;
+  border-radius: 7px;
+}
+
+.tp-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px 7px;
+  border: 1px solid var(--tp-line);
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.tp-chart__title {
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.tp-chart__sub {
+  font-size: 7px;
+  color: var(--tp-muted);
+}
+
+.tp-donut {
+  width: 34px;
+  height: 34px;
+  margin: 5px auto 4px;
+  border-radius: 50%;
+  border: 6px solid var(--tp-accent);
+}
+
+.tp-chart__legend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 7px;
+}
+
+.tp-chart__swatch {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--tp-accent);
+}
+
+.tp-chart__legend-label {
+  flex: 1;
+  color: var(--tp-muted);
+}
+
+.tp-chart__legend-value {
+  font-weight: 700;
+}
+
+.tp-barrow {
+  display: block;
+  margin-top: 4px;
+}
+
+.tp-barrow__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px;
+  font-size: 7px;
+}
+
+.tp-barrow__label {
+  color: var(--tp-muted);
+}
+
+.tp-barrow__value {
+  font-weight: 700;
+}
+
+.tp-bartrack {
+  display: block;
+  height: 4px;
+  margin-top: 2px;
+  border-radius: 999px;
+  background: var(--tp-hair);
+  overflow: hidden;
+}
+
+.tp-bar--blue,
+.tp-bar--green,
+.tp-bar--violet {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+
+.tp-bar--blue {
+  background: #1d4ed8;
+}
+
+.tp-bar--green {
+  background: #16a34a;
+}
+
+.tp-bar--violet {
+  background: #7c3aed;
+}
+
+/* ---- list toolbar ------------------------------------------------------- */
+
+.tp-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+}
+
+.tp-seg {
+  display: flex;
+  border: 1px solid var(--tp-line);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.tp-seg__btn {
+  padding: 3.5px 8px;
+  font-size: 7.5px;
+  font-weight: 500;
+  border-right: 1px solid var(--tp-line);
+  background: #ffffff;
+}
+
+.tp-seg__btn:last-child {
+  border-right: none;
+}
+
+.tp-seg__btn--on {
+  background: var(--tp-accent);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.tp-toolbar__spacer {
+  flex: 1;
+}
+
+.tp-toolbar__search {
+  width: 130px;
+  padding: 3.5px 7px;
+  border: 1px solid var(--tp-line);
+  border-radius: 5px;
+  font-size: 7.5px;
+  color: var(--tp-faint);
+}
+
+/* ---- tabs --------------------------------------------------------------- */
+
+.tp-tabs {
+  display: flex;
+  gap: 9px;
+  flex: none;
+  padding: 2px 4px 0;
+  border-bottom: 1px solid var(--tp-line);
+  border-radius: 5px 5px 0 0;
+  overflow: hidden;
+}
+
+.tp-tab {
+  padding-bottom: 3px;
+  font-size: 8px;
+  color: var(--tp-muted);
+  white-space: nowrap;
+}
+
+.tp-tab--on {
+  color: var(--tp-accent);
+  font-weight: 700;
+  box-shadow: inset 0 -2px 0 var(--tp-accent);
+}
+
+/* ---- tables ------------------------------------------------------------- */
+
+.tp-table {
+  border: 1px solid var(--tp-line);
+  border-radius: 6px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.tp-tr {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4.5px 7px;
+  border-top: 1px solid var(--tp-hair);
+}
+
+.tp-tr:first-child {
+  border-top: none;
+}
+
+.tp-tr--head {
+  background: #fafbfc;
+  border-bottom: 1px solid var(--tp-line);
+}
+
+.tp-th {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 7.5px;
+  font-weight: 700;
+  color: var(--tp-ink);
+}
+
+.tp-td {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 8px;
+}
+
+.tp-td--lead {
+  font-weight: 600;
+  color: var(--tp-link);
+}
+
+.tp-td--muted {
+  color: var(--tp-faint);
+}
+
+.tp-td--avatar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tp-td__link {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 600;
+  color: var(--tp-link);
+}
+
+.tp-rowavatar {
+  flex: none;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--tp-link);
+}
+
+/* ---- pills -------------------------------------------------------------- */
+
+.tp-pill {
+  display: inline-block;
+  padding: 1.5px 5px;
+  border-radius: 999px;
+  font-size: 7px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tp-pill--grey {
+  background: #eef1f4;
+  color: var(--tp-muted);
+}
+
+.tp-pill--blue {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.tp-pill--green {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.tp-pill--amber {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.tp-pill--indigo {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.tp-pill--teal {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.tp-pill--ontrack {
+  background: var(--tp-link);
+  color: #ffffff;
+  letter-spacing: 0.04em;
+}
+
+/* ---- record (case) screen ---------------------------------------------- */
+
+.tp-card {
+  flex: none;
+  padding: 8px 9px;
+  border: 1px solid var(--tp-line);
+  border-radius: 7px;
+  background: #ffffff;
+}
+
+.tp-facts {
+  display: flex;
+  gap: 10px;
+  margin-top: 7px;
+}
+
+.tp-fact {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+
+.tp-fact__label {
+  font-size: 7px;
+  color: var(--tp-muted);
+}
+
+.tp-fact__value {
+  font-size: 8px;
+  font-weight: 600;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.tp-fact__value--link {
+  color: var(--tp-link);
+}
+
+/* The real path is a row of chevron-shaped segments, not pills. */
+.tp-path {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  margin-top: 8px;
+  padding: 3px;
+  border-radius: 6px;
+}
+
+.tp-path__step {
+  flex: 1;
+  padding: 4px 8px 4px 12px;
+  font-size: 7px;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: var(--tp-hair);
+  color: var(--tp-muted);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 6px) 0,
+    100% 50%,
+    calc(100% - 6px) 100%,
+    0 100%,
+    6px 50%
+  );
+}
+
+.tp-path__step:first-child {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 6px) 0,
+    100% 50%,
+    calc(100% - 6px) 100%,
+    0 100%
+  );
+}
+
+.tp-path__step--current {
+  background: var(--tp-ink);
+  color: #ffffff;
+}
+
+.tp-cols {
+  display: flex;
+  gap: 7px;
+  min-height: 0;
+}
+
+.tp-cols__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.tp-cols__side {
+  flex: none;
+  width: 138px;
+}
+
+/* The blue left border is the real overview tile's signature. */
+.tp-overview {
+  padding: 7px 9px;
+  border: 1px solid var(--tp-line);
+  border-left: 3px solid var(--tp-link);
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.tp-overview__top {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.tp-overview__title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--tp-accent);
+}
+
+.tp-ratio {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tp-ratio__value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 3px solid var(--tp-link);
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.tp-ratio__label {
+  margin-top: 2px;
+  font-size: 5.5px;
+  letter-spacing: 0.04em;
+  color: var(--tp-muted);
+}
+
+.tp-assignee {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  background: #eef4fb;
+  font-size: 7.5px;
+  font-weight: 600;
+  color: var(--tp-accent);
+}
+
+.tp-progress {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.tp-progress__dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.tp-progress__dot--done {
+  background: #16a34a;
+}
+
+.tp-progress__dot--goal {
+  border: 2px solid var(--tp-link);
+}
+
+.tp-progress__line {
+  flex: 1;
+  height: 1.5px;
+  background: var(--tp-hair);
+}
+
+.tp-progress__labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2px;
+  font-size: 6.5px;
+  color: var(--tp-muted);
+}
+
+.tp-progress__label--goal {
+  color: var(--tp-link);
+  font-weight: 700;
+}
+
+.tp-tracks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 3px;
+  border-radius: 6px;
+}
+
+.tp-track {
+  border: 1px solid var(--tp-line);
+  border-radius: 6px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.tp-track__head {
+  display: block;
+  padding: 4px 7px;
+  border-bottom: 1px solid var(--tp-line);
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.tp-track__row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3.5px 7px;
+  border-top: 1px solid var(--tp-hair);
+  font-size: 7.5px;
+}
+
+.tp-track__row:first-of-type {
+  border-top: none;
+}
+
+.tp-track__row--head {
+  background: #fafbfc;
+  font-weight: 700;
+}
+
+.tp-track__subject {
+  flex: 2;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--tp-link);
+  font-weight: 600;
+}
+
+.tp-track__row--head .tp-track__subject {
+  color: var(--tp-ink);
+}
+
+.tp-track__status,
+.tp-track__owner {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--tp-muted);
+}
+
+.tp-track__status--wait {
+  color: #b45309;
+  font-weight: 600;
+}
+
+.tp-side__card {
+  padding: 7px 8px;
+  border: 1px solid var(--tp-line);
+  border-radius: 6px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+}
+
+.tp-side__eyebrow {
+  font-size: 6.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--tp-muted);
+}
+
+.tp-side__title {
+  margin: 2px 0 6px;
+  font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+  font-size: 9.5px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.tp-side__label {
+  margin-top: 4px;
+  font-size: 7.5px;
+  font-weight: 700;
+}
+
+.tp-side__value {
+  font-size: 7.5px;
+  color: var(--tp-muted);
+}
+
+/* ---- resource centre --------------------------------------------------- */
+
+.tp-hero {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 14px 16px 16px;
+  background: linear-gradient(120deg, #07243f 0%, #0f406f 100%);
+}
+
+.tp-hero__eyebrow {
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--tp-lit-ring);
+}
+
+.tp-hero__title {
+  font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+  font-size: 17px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.tp-hero__search {
+  margin-top: 6px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #ffffff;
+  font-size: 8px;
+  color: var(--tp-faint);
+}
+
+.tp-hero__link {
+  margin-top: 4px;
+  font-size: 7.5px;
+  font-weight: 600;
+  color: var(--tp-lit-ring);
+}
+
+.tp-featured {
+  display: flex;
+  flex-direction: column;
+  width: 172px;
+  padding: 8px 9px;
+  border: 1px solid var(--tp-line);
+  border-radius: 7px;
+  background: #ffffff;
+}
+
+.tp-featured__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tp-featured__play {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #e0f2fe;
+  border: 1.5px solid var(--tp-link);
+}
+
+.tp-featured__title {
+  margin-top: 6px;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.tp-featured__body {
+  margin: 1px 0 6px;
+  font-size: 7.5px;
+  color: var(--tp-muted);
+}
+
+.tp-featured .tp-btn {
+  align-self: flex-start;
+}
+
+.tp-cats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 4px;
+  border-radius: 7px;
+}
+
+.tp-cat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 9px 8px;
+  border: 1px solid var(--tp-line);
+  border-radius: 7px;
+  background: #ffffff;
+}
+
+.tp-cat__icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #e0f2fe;
+}
+
+.tp-cat__label {
+  font-size: 8px;
+  font-weight: 600;
+}
+
+.tp-cat__meta {
+  font-size: 7px;
+  color: var(--tp-muted);
+}
+
+/* ---- settings form ----------------------------------------------------- */
+
+.tp-form {
+  display: flex;
+  flex-direction: column;
+  padding: 5px;
+  border-radius: 7px;
+}
+
+.tp-form__title {
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.tp-form__body {
+  margin-bottom: 3px;
+  font-size: 7.5px;
+  color: var(--tp-muted);
+}
+
+.tp-form__row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 0;
+  border-top: 1px solid var(--tp-hair);
+}
+
+.tp-form__label {
+  flex: none;
+  width: 88px;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.tp-input {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 7px;
+  border: 1px solid var(--tp-line);
+  border-radius: 5px;
+  background: #ffffff;
+  font-size: 8px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* ---- the highlight -----------------------------------------------------
+   One rule for every region, and the sidebar rows get the same treatment, so
+   "the nav lights up too" is two elements carrying the lit class at once
+   rather than a second mechanism. */
+
+/*
+ * Ring only — no background.
+ *
+ * This used to also set `background: var(--tp-lit-bg)`, which quietly broke the
+ * one region that paints its own: the Resource Center hero is a dark navy
+ * gradient with white text, so the pale tint replaced the gradient and left the
+ * heading white-on-near-white. The ring alone is already the louder signal, and
+ * it works on every surface. The sidebar rows below keep their fill because
+ * that IS how the real rail marks its active item.
+ */
+.tp-lit {
+  box-shadow:
+    0 0 0 2px var(--tp-lit-ring),
+    0 0 0 6px rgba(20, 190, 240, 0.18);
+}
+
+.tp-nav__row--lit,
+.tp-nav__child--lit {
+  background: var(--tp-lit-bg);
+  color: var(--tp-lit-ink);
+  font-weight: 700;
+  box-shadow:
+    0 0 0 2px var(--tp-lit-ring),
+    0 0 0 5px rgba(20, 190, 240, 0.18);
+}
+
+/*
+ * The hero is the one lit region flush to the frame's edges, so an outset ring
+ * gets clipped on three sides by the preview's overflow:hidden. Drawn inside
+ * instead, where all four edges are visible.
+ */
+.tp-hero.tp-lit {
+  box-shadow:
+    inset 0 0 0 2px var(--tp-lit-ring),
+    inset 0 0 14px rgba(20, 190, 240, 0.35);
+}
+
+.tp-lit,
+.tp-nav__row--lit,
+.tp-nav__child--lit {
+  transition:
+    background 260ms ease,
+    box-shadow 260ms ease,
+    color 260ms ease;
+}
+
+/* ---- header glyphs, masked from the arcicon bundle --------------------- */
+
+.tp-glyph {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  background-color: currentColor;
+  -webkit-mask-image: var(--tp-icon-url);
+  mask-image: var(--tp-icon-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  color: #55636f;
+}
+
+.tp-glyph--dim {
+  width: 9px;
+  height: 9px;
+  color: var(--tp-faint);
+}
+
+.tp-glyph--gear {
+  color: var(--tp-accent);
+}
+
+/* ---- settings photo row ----------------------------------------------- */
+
+.tp-photo {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #94a3b8;
+}
+
+.tp-drop {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 6px 8px;
+  border: 1px dashed #b7d4e8;
+  border-radius: 5px;
+}
+
+.tp-drop__cta {
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--tp-accent);
+}
+
+.tp-drop__hint {
+  font-size: 7px;
+  color: var(--tp-muted);
+}
+
+/* Tighter heading for the dashboard's lower tables, which sit directly under
+   the chart row rather than starting a new block. */
+.tp-h2--tight {
+  margin: 4px 0 3px;
+  font-size: 11px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tp-nav__row,
+  .tp-nav__child,
+  .tp-lit,
+  .tp-nav__row--lit,
+  .tp-nav__child--lit {
+    transition: none;
+  }
+}

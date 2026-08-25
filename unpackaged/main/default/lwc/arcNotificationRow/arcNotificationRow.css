@@ -1,0 +1,98 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.arc-notification-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.arc-notification-row:focus-visible {
+  outline: 2px solid var(--div-color-focus, #1a76bb);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Figma "Divider": an 8px dot, not a bar — vertically centered against the
+   row regardless of whether the subtitle wraps to one or two lines. */
+.arc-notification-row__dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--div-color-border-1, #d1d5db);
+}
+
+.arc-notification-row__dot--unread {
+  background: var(--div-color-focus, #1a76bb);
+}
+
+.arc-notification-row__content {
+  flex: 1 1 0%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+
+.arc-notification-row__header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.arc-notification-row__title {
+  font-family: var(--div-font-family-base, "Inter", sans-serif);
+  font-size: 13px;
+  font-weight: var(--div-font-weight-regular, 400);
+  line-height: 18px;
+  color: var(--div-color-gray-600, #4b5563);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arc-notification-row__title--unread {
+  font-weight: var(--div-font-weight-semibold, 600);
+}
+
+.arc-notification-row__warning-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  display: block;
+  background-color: currentColor;
+  color: var(--div-color-warning-600, #f59e0b);
+  -webkit-mask-image: var(--icon-url);
+  mask-image: var(--icon-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.arc-notification-row__subtitle {
+  margin: 0;
+  font-family: var(--div-font-family-base, "Inter", sans-serif);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  color: var(--div-color-neutral-500, #838a97);
+}
+
+.arc-notification-row__time {
+  flex-shrink: 0;
+  font-family: var(--div-font-family-base, "Inter", sans-serif);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  color: var(--div-color-gray-700, #374151);
+  white-space: nowrap;
+}

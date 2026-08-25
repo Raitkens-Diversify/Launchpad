@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>false</isExposed>
+    <masterLabel>Arc Session</masterLabel>
+    <description>Anonymous per-tab correlation key (sessionStorage) for stitching help-center searches to result clicks. Not a user identifier.</description>
+</LightningComponentBundle>

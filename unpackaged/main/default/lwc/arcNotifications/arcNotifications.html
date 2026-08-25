@@ -1,0 +1,139 @@
+<template>
+  <div class="arc-notifications">
+    <div class="arc-notifications__page-header">
+      <div class="arc-notifications__heading">
+        <h1 class="arc-notifications__title">{pageTitle}</h1>
+        <p class="arc-notifications__stats">{statsLabel}</p>
+      </div>
+      <c-ds-tabs
+        tabs={tabs}
+        selected={activeTab}
+        label="Notification filters"
+        ontabchange={handleTabChange}
+      ></c-ds-tabs>
+    </div>
+
+    <div class="arc-notifications__content">
+      <div class="arc-notifications__card">
+        <div class="arc-notifications__list-header">
+          <p class="arc-notifications__summary">{summaryLabel}</p>
+          <button
+            type="button"
+            class="arc-notifications__mark-all"
+            onclick={handleMarkAllRead}
+          >
+            Mark All as Read
+          </button>
+        </div>
+
+        <template lwc:if={errorMessage}>
+          <p class="arc-notifications__error">{errorMessage}</p>
+        </template>
+
+        <template lwc:if={isLoading}>
+          <div class="arc-notifications__loading">
+            <c-arc-loading-spinner
+              alternative-text="Loading notifications"
+              size="medium"
+            ></c-arc-loading-spinner>
+          </div>
+        </template>
+        <template lwc:elseif={hasItems}>
+          <ul class="arc-notifications__rows">
+            <template for:each={pagedItems} for:item="item">
+              <li key={item.id} class="arc-notifications__row">
+                <c-arc-notification-row
+                  notification={item}
+                  onselect={handleRowSelect}
+                ></c-arc-notification-row>
+              </li>
+            </template>
+          </ul>
+          <div class="arc-notifications__pager">
+            <div class="arc-notifications__page-size">
+              <label
+                for="arc-notifications-page-size"
+                class="arc-notifications__page-size-label"
+              >
+                Items per page
+              </label>
+              <div class="arc-notifications__page-size-control">
+                <select
+                  id="arc-notifications-page-size"
+                  class="arc-notifications__page-size-select"
+                  onchange={handlePageSizeChange}
+                >
+                  <template for:each={pageSizeOptions} for:item="option">
+                    <option
+                      key={option.value}
+                      value={option.value}
+                      selected={option.isSelected}
+                    >
+                      {option.label}
+                    </option>
+                  </template>
+                </select>
+              </div>
+            </div>
+
+            <nav class="arc-notifications__page-nav" aria-label="Pagination">
+              <button
+                type="button"
+                class="arc-notifications__page-btn arc-notifications__page-btn--icon"
+                disabled={prevDisabled}
+                onclick={handlePrevious}
+                aria-label="Previous page"
+              >
+                <span
+                  class="arc-notifications__page-icon"
+                  style={caretLeftStyle}
+                  aria-hidden="true"
+                ></span>
+              </button>
+
+              <template for:each={pageItemsView} for:item="item">
+                <template lwc:if={item.isGap}>
+                  <span
+                    key={item.key}
+                    class="arc-notifications__page-gap"
+                    aria-hidden="true"
+                    >…</span
+                  >
+                </template>
+                <template lwc:else>
+                  <button
+                    key={item.key}
+                    type="button"
+                    class={item.cssClass}
+                    data-page={item.page}
+                    aria-current={item.ariaCurrent}
+                    onclick={handlePageClick}
+                  >
+                    {item.label}
+                  </button>
+                </template>
+              </template>
+
+              <button
+                type="button"
+                class="arc-notifications__page-btn arc-notifications__page-btn--icon"
+                disabled={nextDisabled}
+                onclick={handleNext}
+                aria-label="Next page"
+              >
+                <span
+                  class="arc-notifications__page-icon"
+                  style={caretRightStyle}
+                  aria-hidden="true"
+                ></span>
+              </button>
+            </nav>
+          </div>
+        </template>
+        <template lwc:else>
+          <p class="arc-notifications__empty">No notifications to show.</p>
+        </template>
+      </div>
+    </div>
+  </div>
+</template>

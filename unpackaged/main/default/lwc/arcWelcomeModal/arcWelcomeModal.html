@@ -1,0 +1,98 @@
+<template>
+  <!-- size="small" rather than "medium"/"large" because only the small
+       container honours --ds-modal-width; see modalStyle. -->
+  <c-ds-modal-v2
+    is-open={isOpen}
+    size="small"
+    hide-footer={isTour}
+    onclose={handleDismiss}
+    style={modalStyle}
+  >
+    <div slot="header" class="arc-welcome__logo">
+      <!-- Intrinsic size of the ArcLogoLite resource; CSS scales it by height
+           so the box is reserved before the image decodes. -->
+      <img src={logoUrl} width="512" height="128" alt="ARC" />
+    </div>
+
+    <!-- ---- stage one: the welcome message ---- -->
+    <template lwc:if={isWelcome}>
+      <h2 class="arc-welcome__title">Welcome to ARC</h2>
+      <p class="arc-welcome__body">
+        This is your new home for working with the home office. ARC brings
+        together everything you need to submit envelopes, manage cases and
+        tasks, and stay aligned on client onboarding &mdash; all in one
+        powerful, purpose-built platform.
+      </p>
+      <p class="arc-welcome__body arc-welcome__body--last">
+        Let&rsquo;s get you up to speed. A brief guided tour will walk you
+        through the essentials so you can start working smarter right away.
+      </p>
+
+      <button
+        slot="footer"
+        type="button"
+        class="arc-welcome__cta"
+        onclick={handleStart}
+      >
+        Let&rsquo;s Go
+      </button>
+    </template>
+
+    <!-- ---- stage two: the walkthrough ---- -->
+    <template lwc:else>
+      <div class="welcome-tour">
+        <c-arc-tour-preview
+          class="welcome-tour__preview"
+          screen={screen}
+          nav-id={navId}
+          region={region}
+        ></c-arc-tour-preview>
+
+        <div class="welcome-tour__copy">
+          <div class="welcome-tour__text">
+            <h2 class="welcome-tour__title">{stepTitle}</h2>
+            <p class="welcome-tour__body">{stepBody}</p>
+          </div>
+
+          <div class="welcome-tour__controls">
+            <button
+              type="button"
+              class="welcome-tour__skip"
+              onclick={handleSkip}
+            >
+              Skip tour
+            </button>
+
+            <div class="welcome-tour__progress">
+              <span class="welcome-tour__count">{progressLabel}</span>
+              <span class="welcome-tour__dots">
+                <template for:each={dots} for:item="dot">
+                  <span key={dot.key} class={dot.className}></span>
+                </template>
+              </span>
+            </div>
+
+            <div class="welcome-tour__actions">
+              <template lwc:if={showBack}>
+                <button
+                  type="button"
+                  class="welcome-tour__back"
+                  onclick={handleBack}
+                >
+                  Back
+                </button>
+              </template>
+              <button
+                type="button"
+                class="arc-welcome__cta"
+                onclick={handleNext}
+              >
+                {nextLabel}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+  </c-ds-modal-v2>
+</template>

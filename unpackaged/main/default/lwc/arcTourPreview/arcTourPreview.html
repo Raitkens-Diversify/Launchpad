@@ -1,0 +1,433 @@
+<template>
+  <!-- aria-hidden: this is decoration. The step's title and body in the tour
+       card carry the meaning, and reading a replica's sample rows out to a
+       screen reader would bury them. -->
+  <div class="tp" aria-hidden="true">
+    <!-- ============ header, as the real one is laid out ============ -->
+    <div class="tp-chrome">
+      <span class="tp-glyph tp-glyph--dim" style={collapseIconStyle}></span>
+      <img class="tp-chrome__logo" src={logoUrl} alt="" />
+      <span class="tp-chrome__search">
+        <span class="tp-glyph tp-glyph--dim" style={searchIconStyle}></span>
+        <span class="tp-chrome__placeholder">Search…</span>
+      </span>
+      <span class={headerActionsClass}>
+        <span class="tp-glyph" style={bellIconStyle}></span>
+        <span class="tp-glyph" style={helpIconStyle}></span>
+        <span class="tp-glyph tp-glyph--gear" style={gearIconStyle}></span>
+        <span class="tp-chrome__avatar">AM</span>
+      </span>
+    </div>
+
+    <div class="tp-body">
+      <!-- ============ sidebar, from the real STATIC_NAV_ITEMS ============ -->
+      <nav class="tp-nav">
+        <div class="tp-nav__scroll">
+          <template for:each={navItems} for:item="item">
+            <div key={item.id} class="tp-nav__group">
+              <div class={item.rowClass}>
+                <template lwc:if={item.hasIcon}>
+                  <span class="tp-nav__icon" style={item.iconStyle}></span>
+                </template>
+                <span class="tp-nav__label">{item.label}</span>
+                <template lwc:if={item.hasChevron}>
+                  <span class="tp-nav__chevron">{item.chevron}</span>
+                </template>
+              </div>
+              <template lwc:if={item.showChildren}>
+                <template for:each={item.children} for:item="child">
+                  <div key={child.id} class={child.rowClass}>{child.label}</div>
+                </template>
+              </template>
+            </div>
+          </template>
+        </div>
+        <div class="tp-nav__footer">
+          <img class="tp-nav__builtby" src={builtByUrl} alt="" />
+        </div>
+      </nav>
+
+      <!-- ============ content ============ -->
+      <div class="tp-main">
+        <!-- resources is full-bleed: it owns its own hero and has no crumb -->
+        <template lwc:if={isResources}>
+          <div class={heroClass}>
+            <span class="tp-hero__eyebrow">{config.eyebrow}</span>
+            <span class="tp-hero__title">{config.title}</span>
+            <span class="tp-hero__search">{config.searchPlaceholder}</span>
+            <span class="tp-hero__link">{config.helpLink}</span>
+          </div>
+          <div class="tp-pad">
+            <span class="tp-h2">{config.featuredLabel}</span>
+            <div class="tp-featured">
+              <div class="tp-featured__top">
+                <span class="tp-featured__play"></span>
+                <span class="tp-pill tp-pill--blue"
+                  >{config.featured.pill}</span
+                >
+              </div>
+              <span class="tp-featured__title">{config.featured.title}</span>
+              <span class="tp-featured__body">{config.featured.body}</span>
+              <span class="tp-btn tp-btn--brand">{config.featured.action}</span>
+            </div>
+            <span class="tp-h2">{config.categoryLabel}</span>
+            <div class={catsClass}>
+              <template for:each={config.categories} for:item="cat">
+                <div key={cat.key} class="tp-cat">
+                  <span class="tp-cat__icon"></span>
+                  <span class="tp-cat__label">{cat.label}</span>
+                  <span class="tp-cat__meta">{cat.meta}</span>
+                </div>
+              </template>
+            </div>
+          </div>
+        </template>
+
+        <template lwc:else>
+          <div class="tp-pad">
+            <!-- breadcrumb -->
+            <template lwc:if={hasCrumbs}>
+              <div class="tp-crumbs">
+                <template for:each={crumbs} for:item="crumb">
+                  <span key={crumb.key} class="tp-crumbs__item">
+                    <span class={crumb.className}>{crumb.label}</span>
+                    <template lwc:if={crumb.showCaret}>
+                      <span class="tp-crumbs__caret">›</span>
+                    </template>
+                  </span>
+                </template>
+              </div>
+            </template>
+
+            <!-- ---------- dashboard ---------- -->
+            <template lwc:if={isDashboard}>
+              <div class="tp-head">
+                <div class="tp-head__text">
+                  <span class="tp-h1">{config.greeting}</span>
+                  <span class="tp-sub">{config.date}</span>
+                </div>
+                <div class="tp-head__actions">
+                  <template for:each={config.actions} for:item="action">
+                    <span key={action} class="tp-btn">{action}</span>
+                  </template>
+                </div>
+              </div>
+
+              <div class="tp-announce">
+                <span class="tp-announce__icon"></span>
+                <span class="tp-announce__text">
+                  <span class="tp-announce__title"
+                    >{config.announcement.title}</span
+                  >
+                  <span class="tp-announce__body"
+                    >{config.announcement.body}</span
+                  >
+                </span>
+              </div>
+
+              <div class={tilesClass}>
+                <template for:each={config.tiles} for:item="tile">
+                  <div key={tile.key} class="tp-tile">
+                    <span class="tp-tile__label">{tile.label}</span>
+                    <span class="tp-tile__value">{tile.value}</span>
+                    <span class="tp-tile__sub">{tile.sub}</span>
+                    <span class="tp-tile__chev">›</span>
+                  </div>
+                </template>
+              </div>
+
+              <div class={chartsClass}>
+                <template for:each={config.donuts} for:item="donut">
+                  <div key={donut.key} class="tp-chart">
+                    <span class="tp-chart__title">{donut.title}</span>
+                    <span class="tp-chart__sub">{donut.sub}</span>
+                    <span class="tp-donut"></span>
+                    <span class="tp-chart__legend">
+                      <span class="tp-chart__swatch"></span>
+                      <span class="tp-chart__legend-label">{donut.legend}</span>
+                      <span class="tp-chart__legend-value">{donut.value}</span>
+                    </span>
+                  </div>
+                </template>
+                <template for:each={config.bars} for:item="group">
+                  <div key={group.key} class="tp-chart">
+                    <span class="tp-chart__title">{group.title}</span>
+                    <span class="tp-chart__sub">{group.sub}</span>
+                    <template for:each={group.rows} for:item="bar">
+                      <span key={bar.key} class="tp-barrow">
+                        <span class="tp-barrow__head">
+                          <span class="tp-barrow__label">{bar.label}</span>
+                          <span class="tp-barrow__value">{bar.value}</span>
+                        </span>
+                        <span class="tp-bartrack">
+                          <span class={bar.tone} style={bar.barStyle}></span>
+                        </span>
+                      </span>
+                    </template>
+                  </div>
+                </template>
+              </div>
+
+              <!-- The real dashboard continues into its Envelopes and Work
+                   tables; the Work one is what the tour's copy is about. -->
+              <span class="tp-h2 tp-h2--tight">{config.workTitle}</span>
+              <div class="tp-table">
+                <div class="tp-tr tp-tr--head">
+                  <template for:each={workColumns} for:item="col">
+                    <span key={col.key} class="tp-th">{col.label} ↓</span>
+                  </template>
+                </div>
+                <template for:each={workRows} for:item="row">
+                  <div key={row.key} class="tp-tr">
+                    <template for:each={row.cells} for:item="cell">
+                      <span key={cell.key} class={cell.cellClass}
+                        >{cell.value}</span
+                      >
+                    </template>
+                  </div>
+                </template>
+              </div>
+            </template>
+
+            <!-- ---------- record (a case) ---------- -->
+            <template lwc:elseif={isRecord}>
+              <div class="tp-card">
+                <div class="tp-head">
+                  <div class="tp-head__text">
+                    <span class="tp-eyebrow">{config.eyebrow}</span>
+                    <span class="tp-h1">{config.title}</span>
+                  </div>
+                  <div class="tp-head__actions tp-head__actions--stack">
+                    <span class="tp-pill tp-pill--amber"
+                      >{config.priorityPill}</span
+                    >
+                    <span class="tp-head__row">
+                      <template for:each={config.actions} for:item="action">
+                        <span key={action} class="tp-btn">{action}</span>
+                      </template>
+                    </span>
+                  </div>
+                </div>
+                <div class="tp-facts">
+                  <template for:each={facts} for:item="fact">
+                    <span key={fact.key} class="tp-fact">
+                      <span class="tp-fact__label">{fact.label}</span>
+                      <span class={fact.valueClass}>{fact.value}</span>
+                    </span>
+                  </template>
+                </div>
+                <div class={pathClass}>
+                  <template for:each={pathSteps} for:item="step">
+                    <span key={step.key} class={step.className}
+                      >{step.label}</span
+                    >
+                  </template>
+                </div>
+              </div>
+
+              <div class="tp-cols">
+                <div class="tp-cols__main">
+                  <div class="tp-overview">
+                    <div class="tp-overview__top">
+                      <span class="tp-pill tp-pill--ontrack"
+                        >{config.overview.badge}</span
+                      >
+                      <span class="tp-overview__title"
+                        >{config.overview.title}</span
+                      >
+                      <span class="tp-ratio">
+                        <span class="tp-ratio__value"
+                          >{config.overview.ratio}</span
+                        >
+                        <span class="tp-ratio__label"
+                          >{config.overview.ratioLabel}</span
+                        >
+                      </span>
+                    </div>
+                    <span class="tp-assignee">{config.overview.assignee}</span>
+                    <div class="tp-progress">
+                      <span
+                        class="tp-progress__dot tp-progress__dot--done"
+                      ></span>
+                      <span class="tp-progress__line"></span>
+                      <span
+                        class="tp-progress__dot tp-progress__dot--goal"
+                      ></span>
+                    </div>
+                    <div class="tp-progress__labels">
+                      <span class="tp-progress__label"
+                        >{config.overview.startLabel}</span
+                      >
+                      <span class="tp-progress__label tp-progress__label--goal"
+                        >{config.overview.endLabel}</span
+                      >
+                    </div>
+                  </div>
+
+                  <div class={tracksClass}>
+                    <div class="tp-track">
+                      <span class="tp-track__head">{config.pitStopTitle}</span>
+                      <template for:each={config.pitStops} for:item="row">
+                        <div key={row.key} class="tp-track__row">
+                          <span class="tp-track__subject">{row.subject}</span>
+                          <span class="tp-track__status tp-track__status--wait"
+                            >{row.status}</span
+                          >
+                          <span class="tp-track__owner">{row.owner}</span>
+                        </div>
+                      </template>
+                    </div>
+                    <div class="tp-track">
+                      <span class="tp-track__head"
+                        >{config.mainTrackTitle}</span
+                      >
+                      <div class="tp-track__row tp-track__row--head">
+                        <span class="tp-track__subject">Subject</span>
+                        <span class="tp-track__status">Status</span>
+                        <span class="tp-track__owner">Owner</span>
+                      </div>
+                      <template for:each={config.mainTrack} for:item="row">
+                        <div key={row.key} class="tp-track__row">
+                          <span class="tp-track__subject">{row.subject}</span>
+                          <span class="tp-track__status">{row.status}</span>
+                          <span class="tp-track__owner">{row.owner}</span>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="tp-cols__side">
+                  <div class={currentTaskClass}>
+                    <span class="tp-side__eyebrow"
+                      >{config.currentTask.eyebrow}</span
+                    >
+                    <span class="tp-side__title"
+                      >{config.currentTask.title}</span
+                    >
+                    <span class="tp-side__label"
+                      >{config.currentTask.assignedLabel}</span
+                    >
+                    <span class="tp-side__value"
+                      >{config.currentTask.assigned}</span
+                    >
+                    <span class="tp-side__label"
+                      >{config.currentTask.dueLabel}</span
+                    >
+                    <span class="tp-side__value">{config.currentTask.due}</span>
+                    <span class="tp-btn tp-btn--muted"
+                      >{config.currentTask.action}</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <!-- ---------- settings ---------- -->
+            <template lwc:elseif={isSettings}>
+              <div class="tp-head">
+                <div class="tp-head__text">
+                  <span class="tp-h1">{config.title}</span>
+                  <span class="tp-sub">{config.subtitle}</span>
+                </div>
+              </div>
+              <div class={tabsClass}>
+                <template for:each={tabs} for:item="tab">
+                  <span key={tab.key} class={tab.className}>{tab.label}</span>
+                </template>
+              </div>
+              <div class={formClass}>
+                <span class="tp-form__title">{config.sectionTitle}</span>
+                <span class="tp-form__body">{config.sectionBody}</span>
+                <template for:each={config.rows} for:item="row">
+                  <div key={row.key} class="tp-form__row">
+                    <span class="tp-form__label">{row.label}</span>
+                    <template lwc:if={row.photo}>
+                      <span class="tp-photo"></span>
+                      <span class="tp-drop">
+                        <span class="tp-drop__cta"
+                          >Choose a file or drag and drop it here</span
+                        >
+                        <span class="tp-drop__hint">{row.hint}</span>
+                      </span>
+                    </template>
+                    <template lwc:else>
+                      <span class="tp-input">{row.value}</span>
+                      <template lwc:if={row.second}>
+                        <span class="tp-input">{row.second}</span>
+                      </template>
+                    </template>
+                  </div>
+                </template>
+              </div>
+            </template>
+
+            <!-- ---------- list pages ---------- -->
+            <template lwc:else>
+              <div class="tp-head">
+                <div class="tp-head__text">
+                  <span class="tp-h1">{config.title}</span>
+                  <template lwc:if={config.subtitle}>
+                    <span class="tp-sub">{config.subtitle}</span>
+                  </template>
+                </div>
+                <template lwc:if={config.primaryAction}>
+                  <div class="tp-head__actions">
+                    <span class="tp-btn tp-btn--brand"
+                      >+ {config.primaryAction}</span
+                    >
+                  </div>
+                </template>
+              </div>
+
+              <template lwc:if={hasTabs}>
+                <div class={tabsClass}>
+                  <template for:each={tabs} for:item="tab">
+                    <span key={tab.key} class={tab.className}>{tab.label}</span>
+                  </template>
+                </div>
+              </template>
+
+              <!-- the toolbar every list page carries -->
+              <div class="tp-toolbar">
+                <span class="tp-seg">
+                  <span class="tp-seg__btn tp-seg__btn--on">Table</span>
+                  <span class="tp-seg__btn">Cards</span>
+                  <span class="tp-seg__btn">Chart</span>
+                </span>
+                <span class="tp-toolbar__spacer"></span>
+                <span class="tp-toolbar__search">Search…</span>
+                <span class="tp-btn tp-btn--sm">Group</span>
+                <span class="tp-btn tp-btn--sm">Filter</span>
+              </div>
+
+              <div class={listClass}>
+                <div class="tp-tr tp-tr--head">
+                  <template for:each={columns} for:item="col">
+                    <span key={col.key} class="tp-th">{col.label} ↓</span>
+                  </template>
+                </div>
+                <template for:each={rows} for:item="row">
+                  <div key={row.key} class="tp-tr">
+                    <template for:each={row.cells} for:item="cell">
+                      <span key={cell.key} class={cell.cellClass}>
+                        <template lwc:if={cell.isAvatar}>
+                          <span class="tp-rowavatar"></span>
+                          <span class="tp-td__link">{cell.value}</span>
+                        </template>
+                        <template lwc:elseif={cell.isPill}>
+                          <span class={cell.pillClass}>{cell.value}</span>
+                        </template>
+                        <template lwc:else>{cell.value}</template>
+                      </span>
+                    </template>
+                  </div>
+                </template>
+              </div>
+            </template>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+</template>

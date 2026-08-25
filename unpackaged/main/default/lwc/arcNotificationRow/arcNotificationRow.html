@@ -1,0 +1,25 @@
+<template>
+  <div
+    class="arc-notification-row"
+    role="button"
+    tabindex="0"
+    onclick={handleClick}
+    onkeydown={handleKeyDown}
+  >
+    <span class={dotClass} aria-hidden="true"></span>
+    <div class="arc-notification-row__content">
+      <div class="arc-notification-row__header">
+        <span class={titleClass}>{notification.title}</span>
+        <template lwc:if={showWarning}>
+          <span
+            class="arc-notification-row__warning-icon"
+            style={warningIconStyle}
+            aria-hidden="true"
+          ></span>
+        </template>
+      </div>
+      <p class="arc-notification-row__subtitle">{subtitle}</p>
+    </div>
+    <span class="arc-notification-row__time">{relativeTime}</span>
+  </div>
+</template>

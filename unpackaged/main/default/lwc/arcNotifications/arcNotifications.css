@@ -1,0 +1,226 @@
+:host {
+  display: block;
+}
+
+.arc-notifications {
+  display: block;
+  font-family: var(--div-font-family-base, "Inter", sans-serif);
+}
+
+/* Figma 781:25922 "Page Header" — pt-16 px-24 pb-0, 12px gap before tabs. */
+.arc-notifications__page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 24px 0;
+  background: var(--div-color-white, #ffffff);
+}
+
+.arc-notifications__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.arc-notifications__title {
+  margin: 0;
+  font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 32px;
+  color: var(--div-color-on-surface-2, #374151);
+}
+
+.arc-notifications__stats {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--div-color-gray-600, #4b5563);
+}
+
+/* Figma "Content" — 24px padding around the card. */
+.arc-notifications__content {
+  padding: 24px;
+}
+
+/* Figma 781:94365 "Notification List" — white card, 1px border, 8px radius. */
+.arc-notifications__card {
+  background: var(--div-color-white, #ffffff);
+  border: 1px solid var(--div-color-border-1, #d1d5db);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.arc-notifications__list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid var(--div-color-border-1, #d1d5db);
+}
+
+.arc-notifications__summary {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 19px;
+  color: var(--div-color-gray-600, #4b5563);
+}
+
+.arc-notifications__mark-all {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 19px;
+  color: var(--div-color-accent-2, #0b2f51);
+}
+
+.arc-notifications__error {
+  margin: 0;
+  padding: 12px 16px 0;
+  color: var(--div-color-danger, #b91c1c);
+  font-size: 13px;
+}
+
+.arc-notifications__loading {
+  position: relative;
+  min-height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.arc-notifications__empty {
+  margin: 0;
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--div-color-neutral-500, #838a97);
+  font-size: 14px;
+}
+
+/* Figma "Notification Row" — each row 16/12 padded, divided by a 1px rule. */
+.arc-notifications__rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.arc-notifications__row {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--div-color-border-1, #d1d5db);
+}
+
+.arc-notifications__row:last-child {
+  border-bottom: 0;
+}
+
+/* Figma 791:28985 "_TableCaption" — items-per-page left, numbered pager right. */
+.arc-notifications__pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+}
+
+.arc-notifications__page-size {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.arc-notifications__page-size-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--div-color-gray-700, #374151);
+}
+
+.arc-notifications__page-size-select {
+  height: 36px;
+  padding: 0 8px;
+  border: 1px solid var(--div-color-border-1, #d1d5db);
+  border-radius: 8px;
+  background: var(--div-color-white, #ffffff);
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--div-color-gray-700, #374151);
+}
+
+.arc-notifications__page-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.arc-notifications__page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
+  border: 1px solid var(--div-color-border-2, #b6bcc5);
+  border-radius: 8px;
+  background: var(--div-color-white, #ffffff);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--div-color-accent-2, #0b2f51);
+}
+
+.arc-notifications__page-btn--active {
+  background: var(--div-color-gray-100, #f3f4f6);
+  border-color: var(--div-color-border-1, #d1d5db);
+}
+
+.arc-notifications__page-btn--icon {
+  border-color: var(--div-color-border-1, #d1d5db);
+  color: var(--div-color-gray-600, #4b5563);
+}
+
+.arc-notifications__page-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.arc-notifications__page-gap {
+  color: var(--div-color-accent-2, #0b2f51);
+  font-size: 14px;
+  padding: 0 4px;
+}
+
+.arc-notifications__page-icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+  background-color: currentColor;
+  -webkit-mask-image: var(--icon-url);
+  mask-image: var(--icon-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+@media (max-width: 40rem) {
+  .arc-notifications__page-header {
+    padding: 16px 16px 0;
+  }
+
+  .arc-notifications__content {
+    padding: 16px;
+  }
+
+  .arc-notifications__pager {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+}

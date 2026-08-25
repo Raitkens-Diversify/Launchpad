@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>false</isExposed>
+    <masterLabel>Notification Row</masterLabel>
+    <description>Shared notification &quot;Line Item&quot; row (Figma 760:132514 / 781:25920), reused by the header bell dropdown and the full Notifications page.</description>
+</LightningComponentBundle>
