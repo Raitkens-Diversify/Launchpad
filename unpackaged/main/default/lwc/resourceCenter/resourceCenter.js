@@ -19,9 +19,21 @@ import trackDownload from '@salesforce/apex/ResourceCenterService.trackDownload'
  * throws in the core app — see nexsLanding.js).
  *
  * @api helpCenterBaseUrl — absolute base URL of the Help Center, for cross-links.
+ * @api hideBranding — hides the Diversify logo + "Resource Center" crumb in the
+ *   header (but keeps the header's search bar / Help Center link, when those
+ *   apply) for embeddings that already have their own site chrome/branding.
  */
 export default class ResourceCenter extends NavigationMixin(LightningElement) {
     @api helpCenterBaseUrl;
+
+    _hideBranding = false;
+    @api
+    get hideBranding() {
+        return this._hideBranding;
+    }
+    set hideBranding(value) {
+        this._hideBranding = value !== false && value !== 'false';
+    }
 
     logoUrl = diversifyLogo;
 
@@ -54,6 +66,15 @@ export default class ResourceCenter extends NavigationMixin(LightningElement) {
     /** Header search shows on every inner view; home keeps its hero search
         (mirrors nexsLanding, whose header search is browse-only). */
     get showHeaderSearch() { return this.view !== 'home'; }
+
+    get showBranding() { return !this._hideBranding; }
+
+    /** Collapses the header entirely rather than leaving an empty padded bar
+        when branding is hidden and neither the header search nor the Help
+        Center link apply (e.g. the Home view with no helpCenterBaseUrl). */
+    get showHeaderChrome() {
+        return this.showBranding || this.showHeaderSearch || Boolean(this.helpCenterBaseUrl);
+    }
 
     get isHome() { return this.view === 'home'; }
     get isCategory() { return this.view === 'category'; }

@@ -500,7 +500,7 @@
             <fieldInstance>
                 <fieldInstanceProperties>
                     <name>uiBehavior</name>
-                    <value>required</value>
+                    <value>none</value>
                 </fieldInstanceProperties>
                 <fieldItem>Record.Classification__c</fieldItem>
                 <identifier>RecordClassification_cField2</identifier>
@@ -622,7 +622,7 @@
             <fieldInstance>
                 <fieldInstanceProperties>
                     <name>uiBehavior</name>
-                    <value>required</value>
+                    <value>none</value>
                 </fieldInstanceProperties>
                 <fieldItem>Record.Classification__c</fieldItem>
                 <identifier>RecordClassification_cField3</identifier>

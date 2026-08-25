@@ -5,6 +5,7 @@ import { isFileType, TYPE_EXTERNAL_LINK } from 'c/rcConstants';
 import getResourcesForArticle from '@salesforce/apex/ResourceCenterService.getResourcesForArticle';
 import getResourceLinkBase from '@salesforce/apex/ResourceCenterService.getResourceLinkBase';
 import trackDownload from '@salesforce/apex/ResourceCenterService.trackDownload';
+import getResourceDownloadUrl from '@salesforce/apex/ResourceCenterService.getResourceDownloadUrl';
 
 /**
  * articleResources — "Downloads & Resources" card in the article page's right
@@ -84,7 +85,8 @@ export default class ArticleResources extends LightningElement {
                 href,
                 target,
                 download,
-                trackClick
+                trackClick,
+                contentDocumentId: isFile ? r.contentDocumentId : null
             };
         });
     }
@@ -98,10 +100,31 @@ export default class ArticleResources extends LightningElement {
         // download fallback needs to track here.
         const id = event.currentTarget.dataset.id;
         const track = event.currentTarget.dataset.track === 'true';
-        if (id && track) {
-            trackDownload({ resourceId: id }).catch(() => {
-                /* fire-and-forget */
-            });
+        if (!id || !track) {
+            return;
         }
+
+        trackDownload({ resourceId: id }).catch(() => {
+            /* fire-and-forget */
+        });
+
+        // The row's href is only ever the authenticated Shepherd URL baked in
+        // at wire time — resolve the real, guest-safe URL fresh on click.
+        const contentDocumentId = event.currentTarget.dataset.contentDocumentId;
+        const fallbackUrl = event.currentTarget.href;
+        if (!contentDocumentId) {
+            return;
+        }
+
+        event.preventDefault();
+        getResourceDownloadUrl({ contentDocumentId })
+            .then((url) => {
+                window.location.href = url || fallbackUrl;
+            })
+            .catch(() => {
+                if (fallbackUrl) {
+                    window.location.href = fallbackUrl;
+                }
+            });
     }
 }

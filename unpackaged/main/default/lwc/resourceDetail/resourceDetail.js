@@ -3,6 +3,7 @@ import { iconPath } from 'c/rcIcons';
 import getResourceBySlug from '@salesforce/apex/ResourceCenterService.getResourceBySlug';
 import trackDownload from '@salesforce/apex/ResourceCenterService.trackDownload';
 import getHelpCenterLinkBase from '@salesforce/apex/ResourceCenterService.getHelpCenterLinkBase';
+import getResourceDownloadUrl from '@salesforce/apex/ResourceCenterService.getResourceDownloadUrl';
 import { TYPE_VIDEO, TYPE_EXTERNAL_LINK } from 'c/rcConstants';
 
 /**
@@ -193,9 +194,30 @@ export default class ResourceDetail extends LightningElement {
             }));
         }
     }
-    handleDownload() {
-        if (this.detail) {
-            trackDownload({ resourceId: this.detail.id }).catch(() => {});
+    handleDownload(event) {
+        if (!this.detail) {
+            return;
         }
+        trackDownload({ resourceId: this.detail.id }).catch(() => {});
+
+        // The href baked into `detail.file.downloadUrl` is only ever the
+        // authenticated Shepherd URL (resolved during the cacheable wire) —
+        // resolve the real, guest-safe URL fresh at click time instead.
+        const fallbackUrl = this.detail.file?.downloadUrl;
+        const contentDocumentId = this.detail.file?.contentDocumentId;
+        if (!contentDocumentId) {
+            return;
+        }
+
+        event.preventDefault();
+        getResourceDownloadUrl({ contentDocumentId })
+            .then((url) => {
+                window.location.href = url || fallbackUrl;
+            })
+            .catch(() => {
+                if (fallbackUrl) {
+                    window.location.href = fallbackUrl;
+                }
+            });
     }
 }

@@ -12,10 +12,14 @@
         <targetConfig targets="lightningCommunity__Default">
             <property name="helpCenterBaseUrl" type="String" label="Help Center Base URL"
                       description="Absolute base URL of the Help Center site for cross-links (e.g. https://.../help)."/>
+            <property name="hideBranding" type="Boolean" label="Hide Diversify Branding"
+                      description="Hides the Diversify logo and 'Resource Center' crumb in the header for sites that already have their own header/branding."/>
         </targetConfig>
         <targetConfig targets="lightning__AppPage">
             <property name="helpCenterBaseUrl" type="String" label="Help Center Base URL"
                       description="Absolute base URL of the Help Center site for cross-links."/>
+            <property name="hideBranding" type="Boolean" label="Hide Diversify Branding"
+                      description="Hides the Diversify logo and 'Resource Center' crumb in the header for pages that already have their own header/branding."/>
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>

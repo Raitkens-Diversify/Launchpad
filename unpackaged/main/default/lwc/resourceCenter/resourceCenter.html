@@ -7,25 +7,29 @@
          onguideopen={handleGuideOpen}
          onresourcedownload={handleDownload}>
 
-        <header class="rc-chrome__header">
-            <img class="rc-chrome__logo" src={logoUrl} alt="Diversify" />
-            <span class="rc-chrome__divider" aria-hidden="true"></span>
-            <button type="button" class="rc-chrome__crumb" onclick={handleHome}>
-                Resource Center
-            </button>
-            <template if:true={showHeaderSearch}>
-                <div class="rc-chrome__search">
-                    <c-resource-search-bar placeholder="Search resources…"
-                                           onselect={handleHeaderSelect}
-                                           onsearch={handleHeaderSearch}></c-resource-search-bar>
-                </div>
-            </template>
-            <template if:true={helpCenterBaseUrl}>
-                <button type="button" class="rc-chrome__link" onclick={handleHelpCenter}>
-                    Help Center
-                </button>
-            </template>
-        </header>
+        <template if:true={showHeaderChrome}>
+            <header class="rc-chrome__header">
+                <template if:true={showBranding}>
+                    <img class="rc-chrome__logo" src={logoUrl} alt="Diversify" />
+                    <span class="rc-chrome__divider" aria-hidden="true"></span>
+                    <button type="button" class="rc-chrome__crumb" onclick={handleHome}>
+                        Resource Center
+                    </button>
+                </template>
+                <template if:true={showHeaderSearch}>
+                    <div class="rc-chrome__search">
+                        <c-resource-search-bar placeholder="Search resources…"
+                                               onselect={handleHeaderSelect}
+                                               onsearch={handleHeaderSearch}></c-resource-search-bar>
+                    </div>
+                </template>
+                <template if:true={helpCenterBaseUrl}>
+                    <button type="button" class="rc-chrome__link" onclick={handleHelpCenter}>
+                        Help Center
+                    </button>
+                </template>
+            </header>
+        </template>
 
         <main class="rc-main">
             <template if:true={isHome}>
