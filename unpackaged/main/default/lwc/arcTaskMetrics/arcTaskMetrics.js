@@ -5,17 +5,14 @@
 import { LightningElement, wire } from "lwc";
 import { loadStyle } from "lightning/platformResourceLoader";
 import diversifyStyles from "@salesforce/resourceUrl/diversifyStyles";
+import NEXS_ICONS from "@salesforce/resourceUrl/arcicon";
 import getTaskMetrics from "@salesforce/apex/ArcTaskMetricsController.getTaskMetrics";
 
+const INFO_ICON = "info.svg";
 const SCOPE_MY = "My";
 const SCOPE_TEAM = "Team";
 const BAR_TRANSITION =
   "width var(--arc-task-metrics-bar-duration, 500ms) var(--arc-task-metrics-bar-easing, cubic-bezier(0.4, 0, 0.2, 1))";
-
-const SCOPE_OPTIONS = [
-  { value: SCOPE_MY, label: "My" },
-  { value: SCOPE_TEAM, label: "My Team" },
-];
 
 const METRIC_DEFINITIONS = [
   {
@@ -23,33 +20,61 @@ const METRIC_DEFINITIONS = [
     label: "Main track",
     countField: "mainTrackCount",
     barClass:
-      "arc-task-metrics__bar-fill arc-task-metrics__bar-fill--main-track",
+      "arc-task-metrics__bar-fill arc-task-metrics__bar-fill--main-track"
   },
   {
     key: "hoPitStop",
     label: "HO pit stop",
     countField: "hoPitStopCount",
     barClass:
-      "arc-task-metrics__bar-fill arc-task-metrics__bar-fill--ho-pit-stop",
+      "arc-task-metrics__bar-fill arc-task-metrics__bar-fill--ho-pit-stop"
   },
   {
     key: "branchPitStop",
     label: "Branch pit stop",
     countField: "branchPitStopCount",
     barClass:
-      "arc-task-metrics__bar-fill arc-task-metrics__bar-fill--branch-pit-stop",
-  },
+      "arc-task-metrics__bar-fill arc-task-metrics__bar-fill--branch-pit-stop"
+  }
 ];
 
+const EMPTY_METRICS = {
+  mainTrackCount: 0,
+  hoPitStopCount: 0,
+  branchPitStopCount: 0
+};
+
+const buildMetricRows = (metrics) => {
+  const counts = METRIC_DEFINITIONS.map(
+    (definition) => metrics[definition.countField] || 0
+  );
+  const maxCount = Math.max(...counts, 1);
+
+  return METRIC_DEFINITIONS.map((definition) => {
+    const count = metrics[definition.countField] || 0;
+    const percent = Math.round((count / maxCount) * 100);
+
+    return {
+      ...definition,
+      count,
+      percent
+    };
+  });
+};
+
+/**
+ * My and My Team are shown side by side as two permanent panels rather than
+ * a single click-to-toggle view, so both @wire calls run concurrently.
+ */
 export default class ArcTaskMetrics extends LightningElement {
-  scope = SCOPE_MY;
-  metrics = {
-    mainTrackCount: 0,
-    hoPitStopCount: 0,
-    branchPitStopCount: 0,
-  };
-  errorMessage = "";
-  isInitialLoading = true;
+  myMetrics = { ...EMPTY_METRICS };
+  myErrorMessage = "";
+  isMyInitialLoading = true;
+
+  teamMetrics = { ...EMPTY_METRICS };
+  teamErrorMessage = "";
+  isTeamInitialLoading = true;
+
   _stylesLoaded = false;
   _shouldAnimateBars = false;
   _prefersReducedMotion = false;
@@ -81,54 +106,71 @@ export default class ArcTaskMetrics extends LightningElement {
     this.animateBarWidths();
   }
 
-  @wire(getTaskMetrics, { scope: "$scope" })
-  wiredTaskMetrics({ data, error }) {
+  @wire(getTaskMetrics, { scope: SCOPE_MY })
+  wiredMyTaskMetrics({ data, error }) {
     if (data) {
-      this.isInitialLoading = false;
-      this.metrics = {
+      this.isMyInitialLoading = false;
+      this.myMetrics = {
         mainTrackCount: data.mainTrackCount || 0,
         hoPitStopCount: data.hoPitStopCount || 0,
-        branchPitStopCount: data.branchPitStopCount || 0,
+        branchPitStopCount: data.branchPitStopCount || 0
       };
-      this.errorMessage = "";
+      this.myErrorMessage = "";
       this.queueBarGrowAnimation();
       return;
     }
 
     if (error) {
-      this.isInitialLoading = false;
-      this.metrics = {
-        mainTrackCount: 0,
-        hoPitStopCount: 0,
-        branchPitStopCount: 0,
-      };
-      this.errorMessage = this.reduceError(error);
+      this.isMyInitialLoading = false;
+      this.myMetrics = { ...EMPTY_METRICS };
+      this.myErrorMessage = this.reduceError(error);
       this.queueBarGrowAnimation();
       // eslint-disable-next-line no-console
-      console.error("[arcTaskMetrics] Failed to load task metrics", error);
+      console.error("[arcTaskMetrics] Failed to load My task metrics", error);
     }
   }
 
-  get scopeOptions() {
-    return SCOPE_OPTIONS;
+  @wire(getTaskMetrics, { scope: SCOPE_TEAM })
+  wiredTeamTaskMetrics({ data, error }) {
+    if (data) {
+      this.isTeamInitialLoading = false;
+      this.teamMetrics = {
+        mainTrackCount: data.mainTrackCount || 0,
+        hoPitStopCount: data.hoPitStopCount || 0,
+        branchPitStopCount: data.branchPitStopCount || 0
+      };
+      this.teamErrorMessage = "";
+      this.queueBarGrowAnimation();
+      return;
+    }
+
+    if (error) {
+      this.isTeamInitialLoading = false;
+      this.teamMetrics = { ...EMPTY_METRICS };
+      this.teamErrorMessage = this.reduceError(error);
+      this.queueBarGrowAnimation();
+      // eslint-disable-next-line no-console
+      console.error(
+        "[arcTaskMetrics] Failed to load My Team task metrics",
+        error
+      );
+    }
   }
 
-  get metricRows() {
-    const counts = METRIC_DEFINITIONS.map(
-      (definition) => this.metrics[definition.countField] || 0
-    );
-    const maxCount = Math.max(...counts, 1);
+  get isInitialLoading() {
+    return this.isMyInitialLoading && this.isTeamInitialLoading;
+  }
 
-    return METRIC_DEFINITIONS.map((definition) => {
-      const count = this.metrics[definition.countField] || 0;
-      const percent = Math.round((count / maxCount) * 100);
+  get infoIconStyle() {
+    return `--icon-url: url('${NEXS_ICONS}/${INFO_ICON}');`;
+  }
 
-      return {
-        ...definition,
-        count,
-        percent,
-      };
-    });
+  get myMetricRows() {
+    return buildMetricRows(this.myMetrics);
+  }
+
+  get teamMetricRows() {
+    return buildMetricRows(this.teamMetrics);
   }
 
   queueBarGrowAnimation() {
@@ -194,15 +236,6 @@ export default class ArcTaskMetrics extends LightningElement {
       const timeoutId = window.setTimeout(applyTargetWidth, delayMs);
       this._animationTimeoutIds.push(timeoutId);
     });
-  }
-
-  handleScopeChange(event) {
-    const nextScope = event.detail?.value;
-    if (!nextScope || nextScope === this.scope) {
-      return;
-    }
-
-    this.scope = nextScope;
   }
 
   reduceError(error) {

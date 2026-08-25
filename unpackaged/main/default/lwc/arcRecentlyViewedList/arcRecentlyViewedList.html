@@ -1,32 +1,58 @@
-<!-- Author: Hoang Long Vu To | Date: 2026-08-17 -->
+<!-- Author: Hoang Long Vu To | Date: 2026-08-11 -->
 <template>
-  <div
-    class="div-table-shell arc-recently-viewed"
+  <article
+    class="arc-recently-viewed"
     aria-labelledby="arc-recently-viewed-title"
   >
-    <template lwc:if={hasTitle}>
-      <h2 id="arc-recently-viewed-title" class="div-table-title">{title}</h2>
-    </template>
+    <div class="arc-recently-viewed__content">
+      <header class="arc-recently-viewed__header">
+        <div class="arc-recently-viewed__title-row">
+          <h2 id="arc-recently-viewed-title" class="arc-recently-viewed__title">
+            {title}
+          </h2>
+          <span
+            class="arc-recently-viewed__info-icon"
+            style={infoIconStyle}
+            aria-hidden="true"
+          ></span>
+        </div>
+        <button
+          type="button"
+          class="arc-recently-viewed__overflow-button"
+          aria-label="More actions"
+        >
+          <span
+            class="arc-recently-viewed__overflow-icon"
+            style={overflowIconStyle}
+            aria-hidden="true"
+          ></span>
+        </button>
+      </header>
 
-    <div class="div-table-card arc-recently-viewed__card">
-      <div class="arc-recently-viewed__body">
       <template lwc:if={errorMessage}>
-        <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+        <div
+          class="slds-notify slds-notify_alert slds-alert_error"
+          role="alert"
+        >
           {errorMessage}
         </div>
       </template>
 
       <template lwc:if={isInitialLoading}>
         <div class="arc-recently-viewed__loading">
-          <lightning-spinner
+          <c-arc-loading-spinner
             alternative-text="Loading recently viewed records"
             size="small"
-          ></lightning-spinner>
+          ></c-arc-loading-spinner>
         </div>
       </template>
 
       <template lwc:elseif={hasItems}>
-        <ul class="arc-recently-viewed__list" aria-label={title}>
+        <ul
+          class="arc-recently-viewed__list"
+          style={listStyle}
+          aria-label={title}
+        >
           <template for:each={listItems} for:item="item">
             <li key={item.id} class="arc-recently-viewed__item">
               <a
@@ -38,24 +64,25 @@
               >
                 <span class="arc-recently-viewed__icon-wrap" aria-hidden="true">
                   <span
-                    class="arc-recently-viewed__icon arc-recently-viewed__icon--asset"
+                    class="arc-recently-viewed__icon"
                     style={item.iconStyle}
                   ></span>
                 </span>
 
-                <span class="arc-recently-viewed__content">
+                <span class="arc-recently-viewed__content-text">
                   <span class="arc-recently-viewed__name">{item.name}</span>
                   <template lwc:if={item.hasMetadata}>
-                    <span class="arc-recently-viewed__metadata">{item.metadata}</span>
+                    <span class="arc-recently-viewed__metadata"
+                      >{item.metadata}</span
+                    >
                   </template>
                 </span>
 
-                <lightning-icon
-                  icon-name="utility:chevronright"
-                  size="x-small"
+                <span
                   class="arc-recently-viewed__chevron"
-                  alternative-text=""
-                ></lightning-icon>
+                  style={caretIconStyle}
+                  aria-hidden="true"
+                ></span>
               </a>
             </li>
           </template>
@@ -69,23 +96,26 @@
       </template>
     </div>
 
-    <footer lwc:if={showViewAllContacts} class="div-table-card__footer arc-recently-viewed__footer">
-      <div class="div-table-pager arc-recently-viewed__footer-pager">
-        <a
-          href={viewAllContactsHref}
-          class="div-table-pager__page-size-label arc-recently-viewed__view-all"
-          onclick={handleViewAllContactsClick}
-        >
-          View All Contacts
-          <lightning-icon
-            icon-name="utility:chevronright"
-            size="xx-small"
-            class="arc-recently-viewed__view-all-icon"
-            alternative-text=""
-          ></lightning-icon>
-        </a>
+    <template lwc:if={showFooter}>
+      <div class="arc-recently-viewed__footer-wrap">
+        <footer class="arc-recently-viewed__footer">
+          <span class="arc-recently-viewed__count">{footerLabel}</span>
+          <template lwc:if={showViewAll}>
+            <a
+              href={viewAllUrl}
+              class="arc-recently-viewed__view-all"
+              onclick={handleViewAllClick}
+            >
+              <span>View All</span>
+              <span
+                class="arc-recently-viewed__view-all-icon"
+                style={caretIconStyle}
+                aria-hidden="true"
+              ></span>
+            </a>
+          </template>
+        </footer>
       </div>
-    </footer>
-    </div>
-  </div>
+    </template>
+  </article>
 </template>

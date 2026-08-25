@@ -12,9 +12,18 @@ public with sharing class ArcRecentlyViewedListController {
 
   public static final String LIST_TYPE_CONTACT = 'Contact';
   public static final String LIST_TYPE_ISA = 'ISA';
-  public static final String ISA_OBJECT_API_NAME = 'FinServ__FinancialAccount__c';
+  /*
+   * "ISA" maps to the plain custom object Financial_Account__c — the object
+   * the site's own nav routes, CMS detail/list views, and
+   * ArcRecordDetailController actually use for viewing/browsing ISAs. The
+   * FSC managed-package object FinServ__FinancialAccount__c looked like the
+   * natural fit by name, but no page in this site ever renders or navigates
+   * to one, so RecentlyViewed/LastViewedDate never had anything to find for
+   * it — that was the actual reason this card stayed empty.
+   */
+  public static final String ISA_OBJECT_API_NAME = 'Financial_Account__c';
   private static final String RECENTLY_VIEWED_TYPE_ACCOUNT = 'Account';
-  private static final String RECENTLY_VIEWED_TYPE_ISA = 'FinServ__FinancialAccount__c';
+  private static final String RECENTLY_VIEWED_TYPE_ISA = 'Financial_Account__c';
 
   public class RecentlyViewedItemDTO {
     @AuraEnabled
@@ -104,7 +113,9 @@ public with sharing class ArcRecentlyViewedListController {
   }
 
   @TestVisible
-  private static List<RecentlyViewed> queryRecentlyViewedRows(String recentlyViewedType) {
+  private static List<RecentlyViewed> queryRecentlyViewedRows(
+    String recentlyViewedType
+  ) {
     if (String.isBlank(recentlyViewedType)) {
       return new List<RecentlyViewed>();
     }
@@ -174,7 +185,9 @@ public with sharing class ArcRecentlyViewedListController {
   }
 
   @TestVisible
-  private static List<SObject> enrichAccountRecordsByIds(List<Id> orderedAccountIds) {
+  private static List<SObject> enrichAccountRecordsByIds(
+    List<Id> orderedAccountIds
+  ) {
     List<SObject> orderedRecords = new List<SObject>();
 
     if (orderedAccountIds == null || orderedAccountIds.isEmpty()) {
@@ -233,15 +246,10 @@ public with sharing class ArcRecentlyViewedListController {
       financialAccountIds.add(recentlyViewedRow.Id);
     }
 
-    Map<Id, FinServ__FinancialAccount__c> financialAccountIdToRecord = new Map<Id, FinServ__FinancialAccount__c>(
+    Map<Id, Financial_Account__c> financialAccountIdToRecord = new Map<Id, Financial_Account__c>(
       [
-        SELECT
-          Id,
-          Name,
-          LastViewedDate,
-          FinServ__Household__c,
-          FinServ__Household__r.Name
-        FROM FinServ__FinancialAccount__c
+        SELECT Id, Name, LastViewedDate, Household__c, Household__r.Name
+        FROM Financial_Account__c
         WHERE Id IN :financialAccountIds
         WITH USER_MODE
       ]
@@ -259,7 +267,7 @@ public with sharing class ArcRecentlyViewedListController {
 
       seenFinancialAccountIds.add(recentlyViewedRow.Id);
 
-      FinServ__FinancialAccount__c financialAccount = financialAccountIdToRecord.get(
+      Financial_Account__c financialAccount = financialAccountIdToRecord.get(
         recentlyViewedRow.Id
       );
       if (financialAccount == null) {
@@ -283,7 +291,10 @@ public with sharing class ArcRecentlyViewedListController {
     }
 
     for (RecentlyViewed recentlyViewedRow : recentlyViewedRows) {
-      if (recentlyViewedRow?.Id == null || lastViewedDateById.containsKey(recentlyViewedRow.Id)) {
+      if (
+        recentlyViewedRow?.Id == null ||
+        lastViewedDateById.containsKey(recentlyViewedRow.Id)
+      ) {
         continue;
       }
 
@@ -311,14 +322,19 @@ public with sharing class ArcRecentlyViewedListController {
         continue;
       }
 
-      lastViewedDateById.put(record.Id, (Datetime) record.get('LastViewedDate'));
+      lastViewedDateById.put(
+        record.Id,
+        (Datetime) record.get('LastViewedDate')
+      );
     }
 
     return lastViewedDateById;
   }
 
   @TestVisible
-  private static List<SObject> queryRecordsByLastViewedDate(String objectApiName) {
+  private static List<SObject> queryRecordsByLastViewedDate(
+    String objectApiName
+  ) {
     if (String.isBlank(objectApiName)) {
       return new List<SObject>();
     }
@@ -342,13 +358,8 @@ public with sharing class ArcRecentlyViewedListController {
 
     if (objectApiName == ISA_OBJECT_API_NAME) {
       return [
-        SELECT
-          Id,
-          Name,
-          LastViewedDate,
-          FinServ__Household__c,
-          FinServ__Household__r.Name
-        FROM FinServ__FinancialAccount__c
+        SELECT Id, Name, LastViewedDate, Household__c, Household__r.Name
+        FROM Financial_Account__c
         WHERE LastViewedDate != NULL
         WITH USER_MODE
         ORDER BY LastViewedDate DESC
@@ -370,14 +381,14 @@ public with sharing class ArcRecentlyViewedListController {
     if (normalizedListType.equalsIgnoreCase(LIST_TYPE_CONTACT)) {
       ListTypeConfig config = new ListTypeConfig();
       config.objectApiName = 'Account';
-      config.title = 'Recently viewed Contacts';
+      config.title = 'Recently Viewed Contacts';
       return config;
     }
 
     if (normalizedListType.equalsIgnoreCase(LIST_TYPE_ISA)) {
       ListTypeConfig config = new ListTypeConfig();
       config.objectApiName = ISA_OBJECT_API_NAME;
-      config.title = 'Recently viewed Investments & Services';
+      config.title = 'Recently Viewed ISAs';
       return config;
     }
 
@@ -411,7 +422,9 @@ public with sharing class ArcRecentlyViewedListController {
     );
 
     if (!recentlyViewedRows.isEmpty()) {
-      queryResult.lastViewedDateById = buildLastViewedDateMap(recentlyViewedRows);
+      queryResult.lastViewedDateById = buildLastViewedDateMap(
+        recentlyViewedRows
+      );
 
       if (objectApiName == 'Account') {
         queryResult.records = enrichAccountRecordsFromRecentlyViewed(
@@ -549,7 +562,7 @@ public with sharing class ArcRecentlyViewedListController {
     }
 
     if (objectApiName == ISA_OBJECT_API_NAME) {
-      return ((FinServ__FinancialAccount__c) record).FinServ__Household__c;
+      return ((Financial_Account__c) record).Household__c;
     }
 
     return null;
@@ -563,10 +576,7 @@ public with sharing class ArcRecentlyViewedListController {
     return buildItemFromRecord(
       record,
       objectApiName,
-      queryHouseholdNamesByRecord(
-        new List<SObject>{ record },
-        objectApiName
-      ),
+      queryHouseholdNamesByRecord(new List<SObject>{ record }, objectApiName),
       buildLastViewedDateMapFromRecords(new List<SObject>{ record })
     );
   }
@@ -620,10 +630,7 @@ public with sharing class ArcRecentlyViewedListController {
     return resolveHouseholdMetadata(
       record,
       objectApiName,
-      queryHouseholdNamesByRecord(
-        new List<SObject>{ record },
-        objectApiName
-      )
+      queryHouseholdNamesByRecord(new List<SObject>{ record }, objectApiName)
     );
   }
 
@@ -651,16 +658,16 @@ public with sharing class ArcRecentlyViewedListController {
     }
 
     if (objectApiName == ISA_OBJECT_API_NAME) {
-      FinServ__FinancialAccount__c financialAccount = (FinServ__FinancialAccount__c) record;
+      Financial_Account__c financialAccount = (Financial_Account__c) record;
       String householdName = null;
-      if (record.getPopulatedFieldsAsMap().containsKey('FinServ__Household__r')) {
-        householdName = financialAccount.FinServ__Household__r?.Name;
+      if (record.getPopulatedFieldsAsMap().containsKey('Household__r')) {
+        householdName = financialAccount.Household__r?.Name;
       }
       if (!String.isBlank(householdName)) {
         return householdName;
       }
 
-      return householdIdToName.get(financialAccount.FinServ__Household__c);
+      return householdIdToName.get(financialAccount.Household__c);
     }
 
     return null;
@@ -702,7 +709,9 @@ public with sharing class ArcRecentlyViewedListController {
     Integer resolvedLimit = resolveDisplayLimit(displayLimit);
     List<RecentlyViewedItemDTO> truncatedItems = new List<RecentlyViewedItemDTO>();
 
-    for (Integer index = 0; index < items.size() && index < resolvedLimit; index++) {
+    for (
+      Integer index = 0; index < items.size() && index < resolvedLimit; index++
+    ) {
       truncatedItems.add(items[index]);
     }
 

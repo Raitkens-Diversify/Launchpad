@@ -1,10 +1,10 @@
 <template>
-  <div class="nav-toggle__wrap">
+  <span class={wrapperClass}>
     <button
       type="button"
       class="nav-toggle"
       aria-label={toggleLabel}
-      aria-describedby="nav-toggle-tooltip"
+      aria-describedby="arc-nav-toggle-tooltip"
       aria-pressed={collapsed}
       aria-disabled={isToggleDisabled}
       disabled={isToggleDisabled}
@@ -17,12 +17,11 @@
         aria-hidden="true"
       ></span>
     </button>
-    <span id="nav-toggle-tooltip" class="nav-toggle__tooltip" role="tooltip">
-      <span class="nav-toggle__tooltip-label">{tooltipLabel}</span>
-      <span class="nav-toggle__tooltip-shortcuts" aria-hidden="true">
-        <span class="nav-toggle__tooltip-keys">⌘.</span>
-        <span class="nav-toggle__tooltip-keys">⊞.</span>
-      </span>
-    </span>
-  </div>
+    <span id="arc-nav-toggle-tooltip" class="nav-toggle-tooltip" role="tooltip"
+      >{tooltipLabel}
+      <template lwc:if={showShortcutHint}>
+        <span class="nav-toggle-tooltip__shortcut">⌘.</span>
+      </template></span
+    >
+  </span>
 </template>

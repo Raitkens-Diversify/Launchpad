@@ -1,0 +1,26 @@
+<template>
+  <div class="flow-stylized-button">
+    <template lwc:if={isClickable}>
+      <button
+        type="button"
+        class={buttonClass}
+        title={ButtonText}
+        aria-label={ButtonText}
+        onclick={handleClick}
+      >
+        {ButtonText}
+      </button>
+    </template>
+    <template lwc:else>
+      <button
+        type="button"
+        class={buttonClass}
+        title={ButtonText}
+        aria-label={ButtonText}
+        disabled={isDisabled}
+      >
+        {ButtonText}
+      </button>
+    </template>
+  </div>
+</template>

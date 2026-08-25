@@ -1,0 +1,146 @@
+/* Author: Hoang Long Vu To | Date: 2026-08-11 */
+
+:host {
+  display: block;
+}
+
+.nexs-recently-viewed {
+  overflow: hidden;
+}
+
+.nexs-recently-viewed__header {
+  padding: 0.875rem 1rem;
+  background: var(--div-color-surface, #ffffff);
+}
+
+.nexs-recently-viewed__title {
+  margin: 0;
+  font-family: var(--div-font-family-base);
+  font-size: var(--slds-g-font-scale-1, 14px);
+  font-weight: var(--div-font-weight-bold, 700);
+  line-height: 19px;
+  letter-spacing: var(--div-font-letter-spacing-base, 0);
+  color: var(--div-color-on-surface-2, #374151);
+}
+
+.nexs-recently-viewed__loading,
+.nexs-recently-viewed__empty {
+  display: flex;
+  justify-content: center;
+  padding: var(--div-space-6, 1.5rem) var(--div-space-4, 1rem);
+  color: var(--div-color-text-muted, #6b7280);
+  font-size: var(--div-font-scale-base, 0.8125rem);
+}
+
+.nexs-recently-viewed__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nexs-recently-viewed__row {
+  display: flex;
+  align-items: center;
+  gap: var(--div-space-3, 0.75rem);
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.nexs-recently-viewed__row:hover,
+.nexs-recently-viewed__row:focus-visible {
+  background: var(--div-color-surface-subtle, #f9fafb);
+  outline: none;
+  text-decoration: none;
+}
+
+.nexs-recently-viewed__icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.nexs-recently-viewed__icon {
+  --slds-c-icon-color-foreground-default: var(--div-color-green-600, #16a34a);
+}
+
+.nexs-recently-viewed__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.nexs-recently-viewed__name {
+  font-family: var(--div-font-family-base);
+  font-size: var(--div-font-scale-base, 0.8125rem);
+  font-weight: var(--div-font-weight-semibold, 600);
+  line-height: 1.125rem;
+  color: var(--div-color-on-surface-2, #374151);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nexs-recently-viewed__metadata {
+  font-family: var(--div-font-family-base);
+  font-size: var(--div-font-scale-sm, 0.75rem);
+  font-weight: var(--div-font-weight-regular, 400);
+  line-height: 1.125rem;
+  color: var(--div-color-text-muted, #6b7280);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nexs-recently-viewed__chevron {
+  flex-shrink: 0;
+  --slds-c-icon-color-foreground-default: var(--div-color-text-muted, #9ca3af);
+}
+
+.nexs-recently-viewed__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--div-space-3, 0.75rem);
+  padding: 0.75rem 1rem;
+  background: var(--div-color-surface, #ffffff);
+}
+
+.nexs-recently-viewed__count {
+  font-family: var(--div-font-family-base);
+  font-size: var(--div-font-scale-sm, 0.75rem);
+  line-height: 1.125rem;
+  color: var(--div-color-text-muted, #6b7280);
+}
+
+.nexs-recently-viewed__view-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  font-family: var(--div-font-family-base);
+  font-size: var(--div-font-scale-sm, 0.75rem);
+  font-weight: var(--div-font-weight-semibold, 600);
+  line-height: 1.125rem;
+  color: var(--div-color-blue-600, #2563eb);
+  text-decoration: none;
+}
+
+.nexs-recently-viewed__view-all:hover,
+.nexs-recently-viewed__view-all:focus-visible {
+  outline: none;
+}
+
+.nexs-recently-viewed__view-all-icon {
+  --slds-c-icon-color-foreground-default: var(--div-color-blue-600, #2563eb);
+}

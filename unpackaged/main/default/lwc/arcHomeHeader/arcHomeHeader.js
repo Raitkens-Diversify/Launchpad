@@ -1,6 +1,14 @@
 /**
  * Author: Hoang Long Vu To
  * Date: 2026-08-12
+ *
+ * arcHomeHeader
+ *
+ * Dashboard welcome bar: greeting + today's date on the left, quick-action
+ * buttons on the right. Typography follows Figma Titles/font-scale-4 (serif
+ * title) and text-base (sans date).
+ *
+ * Greeting uses the running user's FirstName from @salesforce/user/Id context.
  */
 import { LightningElement, api, wire } from "lwc";
 import { NavigationMixin } from "lightning/navigation";
@@ -10,40 +18,26 @@ import { loadStyle } from "lightning/platformResourceLoader";
 import USER_ID from "@salesforce/user/Id";
 import USER_FIRST_NAME from "@salesforce/schema/User.FirstName";
 import diversifyStyles from "@salesforce/resourceUrl/diversifyStyles";
-import { isValidSalesforceRecordId } from "c/recordNavigationUtils";
 
 const ACTION_ENVELOPE_WIZARD = "envelope-wizard";
-const ACTION_LOG_A_CHECK = "log-a-check";
-const ACTION_ADVERTISING_REVIEW = "advertising-review";
-const ENVELOPE_WIZARD_PATH = `${(communityBasePath || "").replace(/\/$/, "")}/envelope`;
-const FLOW_ADVERTISING_REVIEW = "Advertising_Review";
-const FLOW_LOG_A_CHECK = "Log_a_Check";
-const FLOW_FINISHED_STATUSES = new Set(["FINISHED", "FINISHED_SCREEN"]);
+const ACTION_NEW_CASE = "new-case";
+const ACTION_CHECK_LOG = "check-log";
 
-const ACTION_HANDLERS = Object.freeze({
-  NAVIGATION: "navigation",
-  FLOW: "flow",
+const SITE_BASE = (communityBasePath || "").replace(/\/$/, "");
+const ENVELOPE_WIZARD_PATH = `${SITE_BASE}/envelope`;
+const CHECK_LOG_PATH = `${SITE_BASE}/check-log/Check_Log__c/Default`;
+
+/** Actions that only go somewhere, keyed by the action they answer to. */
+const NAVIGATION_PATHS = Object.freeze({
+  [ACTION_ENVELOPE_WIZARD]: ENVELOPE_WIZARD_PATH,
+  [ACTION_CHECK_LOG]: CHECK_LOG_PATH
 });
 
-const ACTION_CONFIG = Object.freeze({
-  [ACTION_ENVELOPE_WIZARD]: {
-    label: "Envelope Wizard",
-    handler: ACTION_HANDLERS.NAVIGATION,
-    url: ENVELOPE_WIZARD_PATH,
-  },
-  [ACTION_LOG_A_CHECK]: {
-    label: "Log a Check",
-    handler: ACTION_HANDLERS.FLOW,
-    flowName: FLOW_LOG_A_CHECK,
-    title: "Log a Check",
-  },
-  [ACTION_ADVERTISING_REVIEW]: {
-    label: "Advertising Review Request",
-    handler: ACTION_HANDLERS.FLOW,
-    flowName: FLOW_ADVERTISING_REVIEW,
-    title: "Advertising Review Request",
-  },
-});
+const DEFAULT_ACTIONS = Object.freeze([
+  { key: ACTION_ENVELOPE_WIZARD, label: "Envelope Wizard" },
+  { key: ACTION_NEW_CASE, label: "New Advertising Request" },
+  { key: ACTION_CHECK_LOG, label: "Check Log" }
+]);
 
 export default class ArcHomeHeader extends NavigationMixin(LightningElement) {
   /** Retained for Experience Builder page binding; not used for the greeting. */
@@ -67,11 +61,7 @@ export default class ArcHomeHeader extends NavigationMixin(LightningElement) {
       });
   }
 
-  get userRecordId() {
-    return isValidSalesforceRecordId(USER_ID) ? USER_ID : undefined;
-  }
-
-  @wire(getRecord, { recordId: "$userRecordId", fields: [USER_FIRST_NAME] })
+  @wire(getRecord, { recordId: USER_ID, fields: [USER_FIRST_NAME] })
   wiredUser({ data, error }) {
     if (data) {
       this.userFirstName = data.fields.FirstName.value || "";
@@ -94,19 +84,18 @@ export default class ArcHomeHeader extends NavigationMixin(LightningElement) {
       weekday: "short",
       month: "short",
       day: "numeric",
-      year: "numeric",
+      year: "numeric"
     }).format(new Date());
   }
 
   get actionButtons() {
-    return Object.entries(ACTION_CONFIG).map(([key, config]) => ({
-      key,
-      label: config.label,
-    }));
+    return DEFAULT_ACTIONS;
   }
 
+  showNewAdvertisingRequestModal = false;
+
   handleActionClick(event) {
-    this.executeAction(event.currentTarget.dataset.action);
+    this.runAction(event.currentTarget.dataset.action);
   }
 
   handleActionKeyDown(event) {
@@ -115,53 +104,54 @@ export default class ArcHomeHeader extends NavigationMixin(LightningElement) {
     }
 
     event.preventDefault();
-    this.executeAction(event.currentTarget.dataset.action);
+    this.runAction(event.currentTarget.dataset.action);
   }
 
-  executeAction(action) {
-    const config = ACTION_CONFIG[action];
-
-    if (!config) {
-      this.dispatchAction(action);
+  runAction(action) {
+    const path = NAVIGATION_PATHS[action];
+    if (path) {
+      this.navigateToPath(path);
       return;
     }
 
-    if (config.handler === ACTION_HANDLERS.NAVIGATION) {
-      this.navigateToUrl(config.url);
-      return;
-    }
-
-    if (config.handler === ACTION_HANDLERS.FLOW) {
-      this.openFlowModal(config);
+    if (action === ACTION_NEW_CASE) {
+      this.showNewAdvertisingRequestModal = true;
       return;
     }
 
     this.dispatchAction(action);
   }
 
-  openFlowModal({ flowName, title, subtitle, params }) {
-    this.refs.flowModal?.open({
-      flowName,
-      title,
-      subtitle,
-      params,
-    });
+  handleCloseNewAdvertisingRequestModal() {
+    this.showNewAdvertisingRequestModal = false;
   }
 
-  handleFlowStatusChange(event) {
-    const { status } = event.detail || {};
-
-    if (!FLOW_FINISHED_STATUSES.has(status)) {
-      return;
-    }
-
-    this.refs.flowModal?.close();
+  /**
+   * The old dialog collected a Case: account, subject, description, priority,
+   * status. What the business actually raises is an Advertising Item, and the
+   * fields here are the ones the Salesforce "New Advertising Item" page asks
+   * for, in its order. Items created here show up under Compliance >
+   * Advertising Reviews, which now lists Advertising Items rather than Cases.
+   */
+  get advertisingItemFields() {
+    return [
+      "Name",
+      "Advertising_Type__c",
+      "Intended_Audience__c",
+      "Financial_Advisor_Team__c",
+      "Date_of_Intended_First_Use__c",
+      "Submission_Notes__c"
+    ].join(",");
   }
 
-  navigateToUrl(url) {
+  handleAdvertisingItemCreated() {
+    this.showNewAdvertisingRequestModal = false;
+  }
+
+  navigateToPath(url) {
     this[NavigationMixin.Navigate]({
       type: "standard__webPage",
-      attributes: { url },
+      attributes: { url }
     });
   }
 
@@ -174,7 +164,7 @@ export default class ArcHomeHeader extends NavigationMixin(LightningElement) {
       new CustomEvent("actionclick", {
         detail: { action },
         bubbles: true,
-        composed: true,
+        composed: true
       })
     );
   }

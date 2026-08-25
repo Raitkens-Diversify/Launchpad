@@ -1,0 +1,10 @@
+/**
+ * The walkthrough renders through c/tourOverlay, which is fixed-position and
+ * carries all of its own styling, so this component contributes no visual
+ * surface of its own. The host must not occupy layout: it is mounted in the
+ * theme layout's footer region, and a host with a box would add stray space
+ * under every page whether or not the tour is running.
+ */
+:host {
+  display: contents;
+}

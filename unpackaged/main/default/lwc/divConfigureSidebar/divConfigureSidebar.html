@@ -1,0 +1,38 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-07-14 -->
+<template>
+  <template lwc:if={isPresent}>
+    <div class={drawerClass} role="dialog" aria-modal="true" aria-label={title}>
+      <div class="div-drawer__backdrop" role="presentation" aria-hidden="true"></div>
+      <aside class="div-drawer__panel">
+        <header class="div-drawer__header">
+          <h2 class="div-drawer__title">{title}</h2>
+          <button
+            type="button"
+            class="div-drawer__close"
+            aria-label="Close"
+            onclick={handleClose}
+          >
+            <lightning-icon icon-name="utility:close" size="x-small" aria-hidden="true"></lightning-icon>
+          </button>
+        </header>
+
+        <div class="div-drawer__body">
+          <slot></slot>
+        </div>
+
+        <footer class="div-drawer__footer">
+          <button type="button" class="div-toolbar__button" onclick={handleReset}>
+            {resetLabel}
+          </button>
+          <button
+            type="button"
+            class="div-toolbar__button div-toolbar__button--primary"
+            onclick={handleApply}
+          >
+            {applyLabel}
+          </button>
+        </footer>
+      </aside>
+    </div>
+  </template>
+</template>

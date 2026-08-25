@@ -6,7 +6,7 @@
 private class ArcTaskMetricsControllerTest {
   @TestSetup
   static void setupTeammate() {
-    createStandardUser('taskmetric');
+    ArcRelatedTableTestData.createStandardUser('taskmetric');
   }
 
   private static User getTeammateUser() {
@@ -59,29 +59,13 @@ private class ArcTaskMetricsControllerTest {
   @IsTest
   static void getTaskMetricsDualFilterReturnsAllCategoriesForBothScopes() {
     Id currentUserId = UserInfo.getUserId();
-    Financial_Advisor_Team__c team = createFinancialAdvisorTeam(
-      'Task Metrics Seed Team'
+    ArcRelatedTableTestData.TaskMetricsSeedContext context = ArcRelatedTableTestData.createTaskMetricsTeamContext(
+      currentUserId
     );
-    createTeamMembership(team.Id, currentUserId);
-
-    Case teamCase = new Case(
-      Subject = 'Task Metrics Seed Case',
-      Status = 'New',
-      Origin = 'Phone',
-      Financial_Advisor_Team__c = team.Id
-    );
-    insert teamCase;
-
-    Account teamAccount = new Account(
-      Name = 'Task Metrics Seed Household',
-      Financial_Advisor_Team__c = team.Id
-    );
-    insert teamAccount;
-
-    insertDualFilterTasksForAllMetricTypes(
+    ArcRelatedTableTestData.createDualFilterTasksForAllMetricTypes(
       currentUserId,
-      teamCase.Id,
-      teamAccount.Id
+      context.teamCase.Id,
+      context.teamAccount.Id
     );
 
     Test.startTest();
@@ -105,18 +89,9 @@ private class ArcTaskMetricsControllerTest {
   static void getTaskMetricsScopesExcludeSingleFilterTasks() {
     Id currentUserId = UserInfo.getUserId();
     User teammate = getTeammateUser();
-    Financial_Advisor_Team__c team = createFinancialAdvisorTeam(
-      'Task Metrics Seed Team'
+    ArcRelatedTableTestData.TaskMetricsSeedContext context = ArcRelatedTableTestData.createTaskMetricsTeamContext(
+      currentUserId
     );
-    createTeamMembership(team.Id, currentUserId);
-
-    Case teamCase = new Case(
-      Subject = 'Task Metrics Seed Case',
-      Status = 'New',
-      Origin = 'Phone',
-      Financial_Advisor_Team__c = team.Id
-    );
-    insert teamCase;
 
     insert new Task(
       Subject = 'My Only Task',
@@ -131,7 +106,7 @@ private class ArcTaskMetricsControllerTest {
       Status = 'Not Started',
       Priority = 'Normal',
       OwnerId = teammate.Id,
-      WhatId = teamCase.Id,
+      WhatId = context.teamCase.Id,
       Home_Office_Pit_Stop__c = true
     );
 
@@ -147,90 +122,6 @@ private class ArcTaskMetricsControllerTest {
     System.assertEquals(1, myResult.branchPitStopCount);
     System.assertEquals(0, myResult.hoPitStopCount);
     System.assertEquals(1, teamResult.hoPitStopCount);
-    System.assertEquals(1, teamResult.branchPitStopCount);
-  }
-
-  private static User createStandardUser(String aliasSeed) {
-    Profile standardProfile = [
-      SELECT Id
-      FROM Profile
-      WHERE Name = 'Standard User'
-      LIMIT 1
-    ];
-
-    String uniqueSuffix = String.valueOf(Math.abs(Crypto.getRandomInteger()));
-    User testUser = new User(
-      Alias = truncate(aliasSeed, 8),
-      Email = aliasSeed + uniqueSuffix + '@example.com',
-      EmailEncodingKey = 'UTF-8',
-      LastName = 'RelatedTable',
-      LanguageLocaleKey = 'en_US',
-      LocaleSidKey = 'en_US',
-      ProfileId = standardProfile.Id,
-      TimeZoneSidKey = 'America/Los_Angeles',
-      Username = aliasSeed + uniqueSuffix + '@relatedtable.example.com'
-    );
-    insert testUser;
-    return testUser;
-  }
-
-  private static Financial_Advisor_Team__c createFinancialAdvisorTeam(String name) {
-    Financial_Advisor_Team__c team = new Financial_Advisor_Team__c(
-      Name = name,
-      Related_Advisors__c = 'RT' + String.valueOf(Math.abs(Crypto.getRandomInteger()))
-    );
-    insert team;
-    return team;
-  }
-
-  private static void createTeamMembership(Id teamId, Id userId) {
-    insert new Financial_Advisor_Team_Member__c(
-      Financial_Advisor_Team__c = teamId,
-      User__c = userId,
-      Active__c = true
-    );
-  }
-
-  private static void insertDualFilterTasksForAllMetricTypes(
-    Id ownerId,
-    Id caseWhatId,
-    Id accountWhatId
-  ) {
-    insert new List<Task>{
-      buildTask('Case Main Track', ownerId, caseWhatId, false, false),
-      buildTask('Case HO Pit Stop', ownerId, caseWhatId, true, false),
-      buildTask('Case Branch Pit Stop', ownerId, caseWhatId, false, true),
-      buildTask('Account Main Track', ownerId, accountWhatId, false, false),
-      buildTask('Account HO Pit Stop', ownerId, accountWhatId, true, false),
-      buildTask('Account Branch Pit Stop', ownerId, accountWhatId, false, true)
-    };
-  }
-
-  private static Task buildTask(
-    String subject,
-    Id ownerId,
-    Id whatId,
-    Boolean isHoPitStop,
-    Boolean isBranchPitStop
-  ) {
-    return new Task(
-      Subject = subject,
-      Status = 'Not Started',
-      Priority = 'Normal',
-      OwnerId = ownerId,
-      WhatId = whatId,
-      Home_Office_Pit_Stop__c = isHoPitStop,
-      Branch_Pit_Stop__c = isBranchPitStop
-    );
-  }
-
-  private static String truncate(String value, Integer maxLength) {
-    if (value == null) {
-      return '';
-    }
-
-    return value.length() <= maxLength
-      ? value
-      : value.substring(0, maxLength);
+    System.assertEquals(0, teamResult.branchPitStopCount);
   }
 }

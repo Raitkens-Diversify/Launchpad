@@ -1,0 +1,91 @@
+.smallButton {
+  background-color: #5aaadc;
+  border: 1px solid #5aaadc;
+  border-radius: 0.25rem;
+  color: #fff;
+  cursor: pointer;
+  display: block;
+  font-size: 18px;
+  margin: 12px auto;
+  padding: 4px 0;
+  width: 20%;
+}
+
+.blankButton {
+  background-color: #fff;
+  border: 1px solid #fff;
+  border-radius: 0.25rem;
+  color: #fff;
+  cursor: default;
+  display: block;
+  font-size: 18px;
+  margin: 12px auto;
+  padding: 4px 0;
+  width: 20%;
+}
+
+.mediumButton {
+  background-color: #5aaadc;
+  border: 1px solid #5aaadc;
+  border-radius: 0.25rem;
+  color: #fff;
+  cursor: pointer;
+  display: block;
+  font-size: 18px;
+  margin: 12px auto;
+  padding: 4px 0;
+  width: 50%;
+}
+
+.largeButton {
+  background-color: #5aaadc;
+  border: 1px solid #5aaadc;
+  border-radius: 0.25rem;
+  color: #fff;
+  cursor: pointer;
+  display: block;
+  font-size: 18px;
+  margin: 12px auto;
+  padding: 4px 0;
+  width: 100%;
+}
+
+.largeButtonInactive {
+  background-color: #58595b;
+  border: 1px solid #58595b;
+  border-radius: 0.25rem;
+  color: #fff;
+  cursor: not-allowed;
+  display: block;
+  font-size: 18px;
+  margin: 12px auto;
+  padding: 4px 0;
+  width: 100%;
+}
+
+.linkButton {
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  display: block;
+  font-size: 12px;
+  margin: 0 auto;
+  padding: 16px 0;
+  text-decoration: underline;
+  width: 30%;
+}
+
+.smallButton:hover,
+.mediumButton:hover,
+.largeButton:hover {
+  background-color: #58595b;
+  border-color: #58595b;
+}
+
+.blankButton:hover {
+  background-color: #fff;
+  border-color: #fff;
+  color: #fff;
+  cursor: default;
+}

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Settings</masterLabel>
+    <description
+  >Settings / My Details for the running user (Figma 758:116625).</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property
+        name="title"
+        type="String"
+        label="Page Title"
+        default="Settings"
+        description="Serif page title shown above the tab strip."
+      />
+            <property
+        name="tagline"
+        type="String"
+        label="Page Tagline"
+        default="Additional info text goes here."
+        description="Supporting line under the page title. Leave blank to hide it."
+      />
+            <property
+        name="uploadHint"
+        type="String"
+        label="Photo Upload Hint"
+        default="SVG, PNG, JPG or GIF (max. 800×400px)"
+        description="Accepted-formats line inside the photo drop zone."
+      />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

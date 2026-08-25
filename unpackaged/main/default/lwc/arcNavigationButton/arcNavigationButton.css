@@ -1,12 +1,38 @@
-/* Hoang Long Vu To — Aug 13, 2026 */
+/* Hoang Long Vu To — Aug 12, 2026 */
 
 :host {
   display: inline-flex;
 }
 
-.nav-toggle__wrap {
+.nav-toggle-wrapper {
   position: relative;
   display: inline-flex;
+}
+
+/*
+ * Collapsed, this button sits at the head of the rail's column of nav icons, so
+ * its glyph has to share that column. It did not: the glyph landed seven pixels
+ * to the right, which reads as a kink at the top of the column.
+ *
+ *   rail glyph left   = 3px indicator reserve
+ *                     + centring a 20px glyph in what is left of the rail
+ *                     = 3 + (44 - 1 border - 3 indicator - 20) / 2  = 13px
+ *   toggle glyph left = 12px header inset + (36px button - 20px) / 2 = 20px
+ *
+ * --arc-sidebar-width is published by themeLayoutSidebar and inherits down
+ * through the header slot, so this tracks the rail rather than restating its
+ * width. The tooltip is inside this wrapper, so it travels with the button and
+ * keeps its offset.
+ *
+ * A relative offset, not a margin and not a translate. A margin would drag the
+ * logo beside it left by the same seven pixels, and only the glyph should
+ * move. translateX moved it correctly but created a stacking context, which
+ * trapped the tooltip's z-index inside this wrapper and let the logo — a later
+ * sibling — paint straight over it. `left` on an already-relative box shifts
+ * the paint without touching layout and without opening a stacking context.
+ */
+.nav-toggle-wrapper--rail-aligned {
+  left: calc(3px + (var(--arc-sidebar-width, 44px) - 24px) / 2 - 20px);
 }
 
 .nav-toggle {
@@ -19,19 +45,19 @@
   border: 0;
   border-radius: 8px;
   background: transparent;
-  color: #4b5563;
+  color: var(--div-color-gray-600, #4b5563);
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
 
 .nav-toggle:hover,
 .nav-toggle:focus-visible {
-  background: #f3f4f6;
+  background: var(--div-color-gray-100, #f3f4f6);
   outline: none;
 }
 
 .nav-toggle:focus-visible {
-  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #1a76bb;
+  box-shadow: var(--div-input-focus-ring, 0 0 0 2px #ffffff, 0 0 0 4px #1a76bb);
 }
 
 .nav-toggle:disabled {
@@ -59,70 +85,45 @@
   mask-position: center;
 }
 
-.nav-toggle__tooltip {
+.nav-toggle-tooltip {
   position: absolute;
-  left: calc(100% + 10px);
   top: 50%;
-  z-index: 100;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+  left: 100%;
+  z-index: 10;
+  margin-left: 8px;
   padding: 6px 10px;
-  border-radius: 8px;
-  background: #1a2b4a;
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1;
+  transform: translateY(-50%);
+  border-radius: 6px;
+  background: var(--div-color-gray-800, #1f2937);
+  color: var(--div-color-white, #ffffff);
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 19px;
   white-space: nowrap;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: translateY(-50%);
-  transition:
-    opacity 0.15s ease,
-    visibility 0.15s ease;
+  transition: opacity 0.15s ease;
 }
 
-.nav-toggle__tooltip::before {
+.nav-toggle-tooltip__shortcut {
+  color: var(--div-color-gray-400, #9ca3af);
+  margin-left: 4px;
+}
+
+.nav-toggle-tooltip::before {
   content: "";
   position: absolute;
-  left: -4px;
   top: 50%;
-  width: 8px;
-  height: 8px;
-  background: #1a2b4a;
-  transform: translateY(-50%) rotate(45deg);
+  right: 100%;
+  border: 5px solid transparent;
+  border-right-color: var(--div-color-gray-800, #1f2937);
+  transform: translateY(-50%);
 }
 
-.nav-toggle__tooltip-shortcuts {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.nav-toggle__tooltip-keys {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.nav-toggle__wrap:hover .nav-toggle__tooltip,
-.nav-toggle__wrap:focus-within .nav-toggle__tooltip {
+.nav-toggle:hover + .nav-toggle-tooltip,
+.nav-toggle:focus-visible + .nav-toggle-tooltip {
   opacity: 1;
   visibility: visible;
-}
-
-@media (hover: none) {
-  .nav-toggle__tooltip {
-    display: none;
-  }
 }

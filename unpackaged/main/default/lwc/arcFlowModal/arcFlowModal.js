@@ -3,10 +3,15 @@
  * Date: 2026-08-13
  */
 import { LightningElement, api } from 'lwc';
-import { loadStyle } from 'lightning/platformResourceLoader';
-import diversifyStyles from '@salesforce/resourceUrl/diversifyStyles';
 
-const FINISHED_STATUSES = new Set(['FINISHED', 'FINISHED_SCREEN', 'ERROR']);
+/*
+ * A flow that reaches its end is done with the dialog, and a flow that faults
+ * is not: the fault message is rendered by lightning-flow itself, so the
+ * interview has to stay mounted for anyone to read it. The two cases are
+ * therefore kept apart rather than lumped into one "finished" set.
+ */
+const COMPLETED_STATUSES = new Set(['FINISHED', 'FINISHED_SCREEN']);
+const ERROR_STATUSES = new Set(['ERROR']);
 
 const inferFlowVariableType = (value) => {
     if (typeof value === 'number') {
@@ -49,21 +54,12 @@ export default class ArcFlowModal extends LightningElement {
     @api params = [];
 
     _isOpen = false;
-    _stylesLoaded = false;
+    /** True once the flow faulted, which is the only state that needs a Close. */
     isFlowFinished = false;
+    /** True once the flow ran to the end; unmounts the interview, see showFlow. */
+    _completed = false;
     flowKey = 0;
     lastFlowStatus = null;
-
-    connectedCallback() {
-        if (this._stylesLoaded) {
-            return;
-        }
-
-        this._stylesLoaded = true;
-        loadStyle(this, diversifyStyles).catch(() => {
-            this._stylesLoaded = false;
-        });
-    }
 
     @api
     get isOpen() {
@@ -90,6 +86,7 @@ export default class ArcFlowModal extends LightningElement {
         }
 
         this.isFlowFinished = false;
+        this._completed = false;
         this.lastFlowStatus = null;
         this.flowKey += 1;
         this._isOpen = true;
@@ -108,8 +105,13 @@ export default class ArcFlowModal extends LightningElement {
         return normalizeFlowInputVariables(this.params);
     }
 
+    /*
+     * Unmounted the moment the flow completes. lightning-flow restarts its
+     * interview when one finishes, so leaving it mounted put a blank copy of
+     * the first screen back on the dialog underneath a Close button.
+     */
     get showFlow() {
-        return this._isOpen && Boolean(this.flowName);
+        return this._isOpen && Boolean(this.flowName) && !this._completed;
     }
 
     get dialogLabel() {
@@ -131,7 +133,24 @@ export default class ArcFlowModal extends LightningElement {
             })
         );
 
-        if (FINISHED_STATUSES.has(status)) {
+        if (COMPLETED_STATUSES.has(status)) {
+            this._completed = true;
+
+            // The parent refreshes off this; without it a task created here did
+            // not appear in the case's lists until the page was reloaded.
+            this.dispatchEvent(
+                new CustomEvent('flowfinished', {
+                    detail: { status, outputVariables },
+                    bubbles: true,
+                    composed: true
+                })
+            );
+
+            this._closeModal('finished');
+            return;
+        }
+
+        if (ERROR_STATUSES.has(status)) {
             this.isFlowFinished = true;
         }
     }
@@ -156,6 +175,7 @@ export default class ArcFlowModal extends LightningElement {
     _closeModal(reason = 'close') {
         this._isOpen = false;
         this.isFlowFinished = false;
+        this._completed = false;
         this.lastFlowStatus = null;
 
         this.dispatchEvent(

@@ -1,0 +1,30 @@
+<template>
+    <div>
+        <lightning-card class="slds-theme_shade slds-card_boundary" icon-name="utility:comments">
+            <span slot="title">
+                <b>
+                    <a class="slds-card__header-link">
+                        {sobjectLabelPlural} ({dataCount})
+                    </a>
+                </b>
+            </span>
+                <template if:true={showData}>
+                    <div>
+                        <lightning-datatable
+                            key-field="Id"
+                            data={displayedData}
+                            columns={columns}
+                            hide-checkbox-column>
+                        </lightning-datatable>
+                    </div>
+
+                    <!-- View All / View Less toggle -->
+                    <div class="linkText slds-p-horizontal slds-text-align_center"
+                        onclick={toggleViewAll}>
+                        {viewMinMax}
+                    </div>
+                </template>
+            
+        </lightning-card>
+    </div>
+</template>

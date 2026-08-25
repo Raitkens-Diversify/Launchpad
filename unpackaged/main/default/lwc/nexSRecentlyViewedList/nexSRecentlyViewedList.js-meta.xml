@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>NexS Recently Viewed List</masterLabel>
+    <description>Recently viewed contacts or ISAs with household metadata for Experience sites.</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property
+                name="listType"
+                type="String"
+                default="Contact"
+                label="List Type"
+                description="Contact (Account) or ISA (FinServ__FinancialAccount__c)"
+                datasource="Contact,ISA"
+            />
+            <property
+                name="displayLimit"
+                type="Integer"
+                default="5"
+                label="Display Limit"
+                description="Number of recently viewed records to show"
+            />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

@@ -11,26 +11,26 @@ import { resolveRecordIdFromPageReference } from "c/recordNavigationUtils";
 
 export const NAV_PATH_CHANGE_EVENT = "arc-nav-pathchange";
 export const NAV_TRAIL_CHANGE_EVENT = "arc-nav-trail-change";
-const NAV_TRAIL_STORAGE_KEY = "arc-nav-trail";
-export const ARC_NAV_HOME_ID = "arc-nav-home";
+export const NAV_TRAIL_STORAGE_KEY = "arc-nav-trail";
+export const UPGRADE_REQUESTED_EVENT = "arc-upgrade-requested";
 
 const HOME_LABEL = "Home";
 const ACCOUNT_LIST_PATH = "/account/Account/Default";
 const WORK_LIST_PATH = "/case/Case/Default";
+const TASK_LIST_PATH = "/task/Task/Default";
+const CHECK_LOG_LIST_PATH = "/check-log/Check_Log__c/Default";
 const ISA_LIST_PATH = "/financial-account/Financial_Account__c/Default";
-export const HELP_SITE_PATH = "/help";
+/* Its own page rather than a tab on Cases: the advertising reviews are Cases,
+   but nobody reaches them by browsing Cases — they come at it from Compliance. */
+const ADVERTISING_REVIEWS_PATH = "/advertising-reviews";
 export const MANUAL_CONTACTS_GROUP_ID = "arc-nav-contacts";
-export const MANUAL_WORK_GROUP_ID = "arc-nav-work";
-export const MANUAL_ISA_GROUP_ID = "arc-nav-isas";
-export const ARC_NAV_ALL_CONTACTS_ID = "arc-nav-all-contacts";
 
 const ROUTE_OBJECT_API_NAMES = Object.freeze({
   account: "Account",
   case: "Case",
-  envelope: "Envelope__c",
   task: "Task",
-  work: "Work__c",
-  "financial-account": "FinServ__FinancialAccount__c",
+  "check-log": "Check_Log__c",
+  "financial-account": "FinServ__FinancialAccount__c"
 });
 
 const ROUTE_STATE_IGNORED_KEYS = new Set([
@@ -40,26 +40,15 @@ const ROUTE_STATE_IGNORED_KEYS = new Set([
   "language",
   "recordId",
   "url",
-  "pathname",
+  "pathname"
 ]);
 
-const TAB_ID_PARAM_KEYS = ["c__tabId", "tabId"];
-const TAB_NAME_PARAM_KEYS = ["c_tabName", "tabName", "c__tabName"];
-const NAV_PARENT_PARAM_KEYS = ["c_navParent", "navParent"];
-const LEGACY_C_PARAM_PREFIX = "c__";
-const TAB_SELECTOR = '[role="tab"]';
-
-const buildTabNameTarget = (path, tabName, navParent) => {
-  const params = new URLSearchParams();
-
-  if (navParent) {
-    params.set("c_navParent", navParent);
-  }
-
-  params.set("c_tabName", tabName);
-  return `${path}?${params.toString()}`;
-};
-
+/*
+ * `hidden: true` keeps an entry defined but off the rail. Used for the Contacts
+ * children that have nowhere to go yet — they were rendering as dead links.
+ * Kept rather than deleted so restoring one is a single flag, and so the
+ * intended information architecture stays visible in this file.
+ */
 const MANUAL_CONTACTS_GROUP = {
   id: MANUAL_CONTACTS_GROUP_ID,
   label: "Contacts",
@@ -68,154 +57,214 @@ const MANUAL_CONTACTS_GROUP = {
   icon: "contact.svg",
   isCollapsible: true,
   subMenu: [
+    /*
+     * One entry per tab on the Account list page, in that page's own order —
+     * c__tabId is positional, so a mismatch does not fail, it quietly sends
+     * the wrong link to the wrong list. Keep this in step with the viewTabs
+     * attribute on the Account_List page in Experience Builder.
+     */
     {
-      id: ARC_NAV_ALL_CONTACTS_ID,
+      id: "arc-nav-all-contacts",
       label: "All Contacts",
       type: "InternalLink",
-      target: buildTabNameTarget(ACCOUNT_LIST_PATH, "All Contacts", "Contacts"),
-      objectApiName: "Account",
+      target: `${ACCOUNT_LIST_PATH}?c__tabId=tab1`,
+      objectApiName: "Account"
     },
     {
-      id: "arc-nav-households",
-      label: "Households",
+      id: "arc-nav-individuals",
+      label: "Individuals",
       type: "InternalLink",
-      target: buildTabNameTarget(ACCOUNT_LIST_PATH, "Households", "Contacts"),
-      objectApiName: "Account",
+      target: `${ACCOUNT_LIST_PATH}?c__tabId=tab2`,
+      objectApiName: "Account"
     },
     {
       id: "arc-nav-clients",
       label: "Clients",
       type: "InternalLink",
-      target: buildTabNameTarget(ACCOUNT_LIST_PATH, "Clients", "Contacts"),
-      objectApiName: "Account",
-    },
-  ],
-};
-
-const MANUAL_WORK_GROUP = {
-  id: MANUAL_WORK_GROUP_ID,
-  label: "Work",
-  type: "MenuLabel",
-  target: null,
-  icon: "work.svg",
-  isCollapsible: true,
-  objectApiName: "Case",
-  subMenu: [
-    {
-      id: "arc-nav-work",
-      label: "All Work",
-      type: "InternalLink",
-      target: buildTabNameTarget(WORK_LIST_PATH, "All Work", "Work"),
-      objectApiName: "Case",
+      target: `${ACCOUNT_LIST_PATH}?c__tabId=tab3`,
+      objectApiName: "Account"
     },
     {
-      id: "arc-nav-cases",
-      label: "Cases",
+      id: "arc-nav-households",
+      label: "Households",
       type: "InternalLink",
-      target: buildTabNameTarget(WORK_LIST_PATH, "Cases", "Work"),
-      objectApiName: "Case",
+      target: `${ACCOUNT_LIST_PATH}?c__tabId=tab4`,
+      objectApiName: "Account"
     },
     {
-      id: "arc-nav-tasks",
-      label: "Tasks",
+      id: "arc-nav-businesses",
+      label: "Businesses",
       type: "InternalLink",
-      target: buildTabNameTarget(WORK_LIST_PATH, "Tasks", "Work"),
-      objectApiName: "Task",
+      target: `${ACCOUNT_LIST_PATH}?c__tabId=tab5`,
+      objectApiName: "Account"
     },
     {
-      id: "arc-nav-advertising-request",
-      label: "Advertising Request",
+      id: "arc-nav-retirement-plans",
+      label: "Retirement Plans",
       type: "InternalLink",
-      target: buildTabNameTarget(
-        WORK_LIST_PATH,
-        "Advertising Request",
-        "Work"
-      ),
-      objectApiName: "Advertising_Item__c",
+      target: `${ACCOUNT_LIST_PATH}?c__tabId=tab6`,
+      objectApiName: "Account"
     },
     {
-      id: "arc-nav-check-log",
-      label: "Check Log",
+      id: "arc-nav-trusts-estates",
+      label: "Trusts & Estates",
       type: "InternalLink",
-      target: buildTabNameTarget(WORK_LIST_PATH, "Check Log", "Work"),
-      objectApiName: "Check_Log__c",
-    },
-  ],
-};
-
-const MANUAL_ISA_GROUP = {
-  id: MANUAL_ISA_GROUP_ID,
-  label: "Investments & Services",
-  type: "MenuLabel",
-  target: null,
-  icon: "isa.svg",
-  isCollapsible: true,
-  objectApiName: "FinServ__FinancialAccount__c",
-  subMenu: [
-    {
-      id: "arc-nav-isa-all",
-      label: "All",
-      type: "InternalLink",
-      target: buildTabNameTarget(
-        ISA_LIST_PATH,
-        "All",
-        "Investments & Services"
-      ),
-      objectApiName: "FinServ__FinancialAccount__c",
+      target: `${ACCOUNT_LIST_PATH}?c__tabId=tab7`,
+      objectApiName: "Account"
     },
     {
-      id: "arc-nav-producs",
-      label: "Products",
-      type: "InternalLink",
-      target: buildTabNameTarget(
-        ISA_LIST_PATH,
-        "Products",
-        "Investments & Services"
-      ),
-      objectApiName: "FinServ__FinancialAccount__c",
+      id: "arc-nav-related-parties",
+      label: "Related Parties",
+      type: "Placeholder",
+      target: null,
+      hidden: true
     },
-  ],
+    {
+      id: "arc-nav-prospects",
+      label: "Prospects",
+      type: "Placeholder",
+      target: null,
+      hidden: true
+    },
+    {
+      id: "arc-nav-leads",
+      label: "Leads",
+      type: "Placeholder",
+      target: null,
+      hidden: true
+    },
+    {
+      id: "arc-nav-cois",
+      label: "COIs",
+      type: "Placeholder",
+      target: null,
+      hidden: true
+    },
+    {
+      id: "arc-nav-vendors",
+      label: "Vendors",
+      type: "Placeholder",
+      target: null,
+      hidden: true
+    }
+  ]
 };
 
 export const STATIC_NAV_ITEMS = [
   {
-    id: ARC_NAV_HOME_ID,
+    id: "arc-nav-home",
     label: HOME_LABEL,
     type: "InternalLink",
     target: "/",
     icon: "home.svg",
-    subMenu: [],
+    subMenu: []
   },
   MANUAL_CONTACTS_GROUP,
-  MANUAL_WORK_GROUP,
-  MANUAL_ISA_GROUP,
   {
-    id: "arc-nav-intelligence",
-    label: "Intelligence",
+    id: "arc-nav-work",
+    label: "Work",
     type: "InternalLink",
-    target: "/intelligence",
-    icon: "intelligence.svg",
-    comingSoon: true,
-    subMenu: [],
+    target: WORK_LIST_PATH,
+    icon: "work.svg",
+    objectApiName: "Case",
+    isCollapsible: true,
+    subMenu: [
+      {
+        id: "arc-nav-work-cases",
+        label: "Cases",
+        type: "InternalLink",
+        target: WORK_LIST_PATH,
+        objectApiName: "Case"
+      },
+      {
+        id: "arc-nav-work-tasks",
+        label: "Tasks",
+        type: "InternalLink",
+        target: TASK_LIST_PATH,
+        objectApiName: "Task"
+      },
+      {
+        id: "arc-nav-work-check-log",
+        label: "Check Log",
+        type: "InternalLink",
+        target: CHECK_LOG_LIST_PATH,
+        objectApiName: "Check_Log__c"
+      },
+      {
+        id: "arc-nav-work-cadences",
+        label: "Cadences",
+        type: "Placeholder",
+        target: null,
+        // Nothing in the org backs this yet: Sales Engagement is off, so
+        // there is no ActionCadence, and no Cadence__c exists. Every
+        // "cadence" in Apex is the word meaning frequency
+        // (Review_Cadence__c, the digest scheduler's hourly/daily/weekly).
+        // Hidden rather than left as a dead link until it has a home.
+        hidden: true
+      }
+    ]
+  },
+  {
+    id: "arc-nav-isas",
+    label: "Investments & Agreements",
+    type: "InternalLink",
+    target: ISA_LIST_PATH,
+    icon: "isa.svg",
+    objectApiName: "FinServ__FinancialAccount__c",
+    isCollapsible: true,
+    subMenu: [
+      {
+        id: "arc-nav-isas-accounts",
+        label: "Accounts",
+        type: "InternalLink",
+        target: ISA_LIST_PATH,
+        objectApiName: "FinServ__FinancialAccount__c"
+      },
+      {
+        id: "arc-nav-isas-directly-held-investments",
+        label: "Directly Held Investments",
+        type: "Placeholder",
+        target: null
+      },
+      {
+        id: "arc-nav-isas-service-agreements",
+        label: "Service Agreements",
+        type: "Placeholder",
+        target: null
+      }
+    ]
   },
   {
     id: "arc-nav-compliance",
     label: "Compliance",
     type: "InternalLink",
-    target: "/compliance",
+    target: ADVERTISING_REVIEWS_PATH,
     icon: "compliance.svg",
-    comingSoon: true,
-    subMenu: [],
+    isCollapsible: true,
+    subMenu: [
+      {
+        id: "arc-nav-compliance-advertising-reviews",
+        label: "Advertising Reviews",
+        type: "InternalLink",
+        target: ADVERTISING_REVIEWS_PATH,
+        objectApiName: "Case"
+      }
+    ]
   },
   {
     id: "arc-nav-learning",
-    label: "Learning",
-    type: "ExternalLink",
-    target: HELP_SITE_PATH,
-    opensInNewTab: true,
-    icon: "learning.svg",
-    subMenu: [],
+    label: "Resource",
+    type: "InternalLink",
+    target: "/learning",
+    icon: "learning.svg"
   },
+  {
+    id: "arc-nav-notifications",
+    label: "Notifications",
+    type: "InternalLink",
+    target: "/notifications",
+    icon: "bell.svg"
+  }
 ];
 
 const flattenNavItems = (items = STATIC_NAV_ITEMS) => {
@@ -230,8 +279,19 @@ const flattenNavItems = (items = STATIC_NAV_ITEMS) => {
       flattened.push(item);
     }
 
+    /*
+     * Breadcrumbs need a 3rd, top-level "group" segment (e.g. "Work" above
+     * "Cases"), which the flat list otherwise loses once children are
+     * spread in alongside their parent. Only tagged when the parent is an
+     * actual navigable/labelled group — not for the synthetic
+     * MANUAL_CONTACTS_GROUP MenuLabel, which has no target of its own.
+     */
     (item.subMenu || []).forEach((child) => {
-      flattened.push(child);
+      flattened.push(
+        item.target
+          ? { ...child, groupLabel: item.label, groupPath: item.target }
+          : child
+      );
     });
   });
 
@@ -255,12 +315,12 @@ export function readNavTrail() {
     }
 
     return parsed;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
 
-function writeNavTrail(trail) {
+export function writeNavTrail(trail) {
   if (!trail?.label || !trail?.path) {
     return;
   }
@@ -270,6 +330,8 @@ function writeNavTrail(trail) {
     path: trail.path,
     objectApiName: trail.objectApiName || "",
     navItemId: trail.navItemId || "",
+    groupLabel: trail.groupLabel || "",
+    groupPath: trail.groupPath || ""
   };
 
   const currentTrail = readNavTrail();
@@ -279,30 +341,41 @@ function writeNavTrail(trail) {
     currentTrail.label === nextTrail.label &&
     currentTrail.path === nextTrail.path &&
     currentTrail.objectApiName === nextTrail.objectApiName &&
-    currentTrail.navItemId === nextTrail.navItemId
+    currentTrail.navItemId === nextTrail.navItemId &&
+    currentTrail.groupLabel === nextTrail.groupLabel &&
+    currentTrail.groupPath === nextTrail.groupPath
   ) {
     return;
   }
 
   try {
     sessionStorage.setItem(NAV_TRAIL_STORAGE_KEY, JSON.stringify(nextTrail));
-  } catch (error) {
+  } catch {
     // sessionStorage may be unavailable
   }
 
   window.dispatchEvent(
     new CustomEvent(NAV_TRAIL_CHANGE_EVENT, {
-      detail: { trail: nextTrail },
+      detail: { trail: nextTrail }
     })
   );
 }
 
-export function recordNavSelection({ id, label, path, objectApiName = "" }) {
+export function recordNavSelection({
+  id,
+  label,
+  path,
+  objectApiName = "",
+  groupLabel = "",
+  groupPath = ""
+}) {
   writeNavTrail({
     navItemId: id,
     label,
     path,
     objectApiName,
+    groupLabel,
+    groupPath
   });
 }
 
@@ -314,9 +387,10 @@ export function findNavTargetById(navItemId) {
   return NAV_TARGETS.find((item) => item.id === navItemId) || null;
 }
 
-function findActiveNavTarget(pathname, search, pageRef) {
+export function findActiveNavTarget(pathname, search, pageRef) {
   const currentPath = pathname || resolveCurrentPath(pageRef);
-  const currentSearch = search || serializeSearch(resolveCurrentQueryParams(pageRef));
+  const currentSearch =
+    search || serializeSearch(resolveCurrentQueryParams(pageRef));
 
   let bestMatch = null;
   let bestScore = -1;
@@ -326,7 +400,7 @@ function findActiveNavTarget(pathname, search, pageRef) {
       return;
     }
 
-    const score = scoreNavTarget(item, currentPath, pageRef);
+    const score = scoreNavTarget(item, currentPath, currentSearch, pageRef);
 
     if (score > bestScore) {
       bestScore = score;
@@ -349,7 +423,52 @@ export function syncNavTrailFromLocation(pathname, search, pageRef) {
     return activeTarget;
   }
 
-  return readNavTrail();
+  const recordId = resolveRecordIdFromPageReference(
+    pageRef,
+    inferObjectApiNameFromPath(pathname)
+  );
+  const routeObjectApiName = inferObjectApiNameFromPath(pathname);
+
+  if (!recordId || !routeObjectApiName) {
+    return readNavTrail();
+  }
+
+  const existingTrail = readNavTrail();
+
+  if (existingTrail?.objectApiName === routeObjectApiName) {
+    return existingTrail;
+  }
+
+  const fallbackTarget = findDefaultListTrail(routeObjectApiName);
+
+  if (fallbackTarget) {
+    writeNavTrail(fallbackTarget);
+    return fallbackTarget;
+  }
+
+  return existingTrail;
+}
+
+/**
+ * True when a route is neither a sidebar destination nor a record page, so no
+ * stored trail describes it.
+ *
+ * syncNavTrailFromLocation hands back the trail as it stands for these routes,
+ * which is right for keeping a selection across a record view but wrong for the
+ * breadcrumb: Settings sits behind the gear icon rather than in the sidebar, so
+ * opening it from a case left the crumb reading "Work > Cases" over a page that
+ * is under neither. Callers that describe the current location use this to show
+ * nothing instead of something stale.
+ */
+export function isOffNavRoute(pathname, search, pageRef) {
+  if (findActiveNavTarget(pathname, search, pageRef)) {
+    return false;
+  }
+
+  const objectApiName = inferObjectApiNameFromPath(pathname);
+  const recordId = resolveRecordIdFromPageReference(pageRef, objectApiName);
+
+  return !recordId || !objectApiName;
 }
 
 function toNavTrail(item) {
@@ -358,14 +477,48 @@ function toNavTrail(item) {
     label: item.label,
     path: item.target,
     objectApiName: item.objectApiName || "",
+    groupLabel: item.groupLabel || "",
+    groupPath: item.groupPath || ""
   };
 }
 
-function scoreNavTarget(item, currentPath, pageRef) {
+/**
+ * The nav entry that owns an object's list.
+ *
+ * A child entry wins over the group it hangs under. "Work" is a group whose
+ * first child is "Cases", and both carry objectApiName Case and the same
+ * target — so a plain first-match returned the group, and a case's trail read
+ * "Work" where it should read "Work › Cases". Preferring the child also keeps
+ * the group as its own crumb, because a child carries groupLabel and a group
+ * does not.
+ */
+export function findDefaultListTrail(objectApiName) {
+  const normalizedObjectApiName = (objectApiName || "").toLowerCase();
+  const matches = NAV_TARGETS.filter(
+    (item) =>
+      (item.objectApiName || "").toLowerCase() === normalizedObjectApiName
+  );
+
+  const match = matches.find((item) => item.groupLabel) || matches[0];
+
+  return match ? toNavTrail(match) : null;
+}
+
+function scoreNavTarget(item, currentPath, currentSearch, pageRef) {
   let score = normalizeMenuTarget(item.target).length;
 
   if (item.target?.includes("?")) {
     score += 100;
+  }
+
+  /*
+   * A child beats the group it sits under when both point at the same place.
+   * "Work" and its "Cases" child share /case/Case/Default and so score
+   * identically on length alone, and the group — listed first — won, which is
+   * why a case read "Work" rather than "Work › Cases".
+   */
+  if (item.groupLabel) {
+    score += 1;
   }
 
   if (isHomeItem(item)) {
@@ -409,78 +562,20 @@ export function resolveCurrentPath(pageRef) {
 export function resolveCurrentQueryParams(pageRef) {
   const params = new URLSearchParams(window.location.search || "");
   const state = pageRef?.state || {};
-  const urlHasTabName = TAB_NAME_PARAM_KEYS.some((key) => params.has(key));
-  const urlHasTabId =
-    TAB_ID_PARAM_KEYS.some((key) => params.has(key)) ||
-    urlHasNativeTabsParam(params);
 
   Object.entries(state).forEach(([key, value]) => {
-    if (!isRoutableQueryParam(key, value) || params.has(key)) {
+    if (!isRoutableQueryParam(key, value)) {
       return;
     }
 
-    if (urlHasTabName && isLegacyTabParamKey(key)) {
-      return;
-    }
-
-    if (urlHasTabId && isTabNameParamKey(key)) {
+    if (params.has(key)) {
       return;
     }
 
     params.set(key, String(value));
   });
 
-  if (TAB_NAME_PARAM_KEYS.some((key) => params.has(key))) {
-    removeLegacyTabParams(params);
-    return params;
-  }
-
-  if (
-    TAB_ID_PARAM_KEYS.some((key) => params.has(key)) ||
-    urlHasNativeTabsParam(params)
-  ) {
-    removeTabNameParams(params);
-  }
-
   return params;
-}
-
-function urlHasNativeTabsParam(params) {
-  return [...params.keys()].some((key) => key.startsWith("tabs-"));
-}
-
-function isLegacyTabParamKey(key) {
-  return (
-    key.startsWith(LEGACY_C_PARAM_PREFIX) ||
-    TAB_ID_PARAM_KEYS.includes(key) ||
-    key.startsWith("tabs-")
-  );
-}
-
-function isTabNameParamKey(key) {
-  return TAB_NAME_PARAM_KEYS.includes(key);
-}
-
-function removeLegacyTabParams(params) {
-  const keysToRemove = [];
-
-  params.forEach((_, key) => {
-    if (isLegacyTabParamKey(key)) {
-      keysToRemove.push(key);
-    }
-  });
-
-  keysToRemove.forEach((key) => {
-    params.delete(key);
-  });
-
-  params.delete("tabName");
-}
-
-function removeTabNameParams(params) {
-  TAB_NAME_PARAM_KEYS.forEach((key) => {
-    params.delete(key);
-  });
 }
 
 export function serializeSearch(params) {
@@ -518,47 +613,17 @@ function isItemActive(item, currentPath, currentSearch, pageRef) {
   }
 
   if (item.target?.includes("?")) {
-    return (
-      isUrlMatch(item.target, currentPath, pageRef) ||
-      isTrailItemActive(item, currentPath, pageRef)
-    );
+    return isUrlMatch(item.target, currentPath, pageRef);
   }
 
   if (item.type === "SalesforceObject") {
     return (
       isSalesforceObjectPageActive(item, pageRef) ||
-      isSalesforceObjectPathMatch(item.target, currentPath) ||
-      isTrailItemActive(item, currentPath, pageRef)
+      isSalesforceObjectPathMatch(item.target, currentPath)
     );
   }
 
-  return (
-    isPathMatch(item.target, currentPath) ||
-    isTrailItemActive(item, currentPath, pageRef)
-  );
-}
-
-function isTrailItemActive(item, currentPath, pageRef) {
-  const trail = readNavTrail();
-
-  if (!trail?.navItemId || trail.navItemId !== item.id) {
-    return false;
-  }
-
-  const routeObjectApiName = inferObjectApiNameFromPath(currentPath);
-  const itemObjectApiName = item.objectApiName || trail.objectApiName || "";
-
-  if (!routeObjectApiName || !itemObjectApiName) {
-    return false;
-  }
-
-  if (routeObjectApiName.toLowerCase() !== itemObjectApiName.toLowerCase()) {
-    return false;
-  }
-
-  const recordId = resolveRecordIdFromPageReference(pageRef, itemObjectApiName);
-
-  return Boolean(recordId);
+  return isPathMatch(item.target, currentPath);
 }
 
 function isUrlMatch(target, currentPath, pageRef) {
@@ -575,31 +640,8 @@ function isUrlMatch(target, currentPath, pageRef) {
 
   const targetParams = new URLSearchParams(targetQuery);
   const currentParams = resolveCurrentQueryParams(pageRef);
-  const targetNavParent = resolveTargetNavParent(targetParams);
-  const currentNavParent = resolveCurrentNavParent(currentParams, currentPath);
-
-  if (targetNavParent) {
-    if (
-      !currentNavParent ||
-      normalizeTabName(targetNavParent) !== normalizeTabName(currentNavParent)
-    ) {
-      return false;
-    }
-  }
-
-  const targetTabName = resolveTargetTabName(targetParams);
-  const currentTabName = resolveEffectiveTabName(currentParams);
-
-  if (targetTabName) {
-    if (!currentTabName) {
-      return false;
-    }
-
-    return normalizeTabName(targetTabName) === normalizeTabName(currentTabName);
-  }
-
   const targetTabId = resolveTargetTabId(targetParams);
-  const currentTabId = resolveEffectiveTabId(currentParams);
+  const currentTabId = resolveNavTabId(currentParams);
 
   if (targetTabId === "tab1" && !currentTabId) {
     return true;
@@ -610,14 +652,6 @@ function isUrlMatch(target, currentPath, pageRef) {
   }
 
   for (const [key, value] of targetParams.entries()) {
-    if (
-      NAV_PARENT_PARAM_KEYS.includes(key) ||
-      TAB_NAME_PARAM_KEYS.includes(key) ||
-      TAB_ID_PARAM_KEYS.includes(key)
-    ) {
-      continue;
-    }
-
     if (currentParams.get(key) !== value) {
       return false;
     }
@@ -630,15 +664,6 @@ function resolveTargetTabId(params) {
   return params.get("c__tabId") || params.get("tabId") || "";
 }
 
-function resolveTargetTabName(params) {
-  return decodeTabParam(
-    params.get("c_tabName") ||
-      params.get("tabName") ||
-      params.get("c__tabName") ||
-      ""
-  );
-}
-
 function resolveNavTabId(params) {
   for (const [key, value] of params.entries()) {
     if (key.startsWith("tabs-") && value) {
@@ -649,291 +674,10 @@ function resolveNavTabId(params) {
   return params.get("c__tabId") || params.get("tabId") || "";
 }
 
-function resolveNavTabName(params) {
-  return decodeTabParam(
-    params.get("c_tabName") ||
-      params.get("tabName") ||
-      params.get("c__tabName") ||
-      ""
-  );
-}
-
-function parseTargetParams(target) {
-  const queryIndex = target?.indexOf("?") ?? -1;
-
-  if (queryIndex < 0) {
-    return new URLSearchParams();
-  }
-
-  return new URLSearchParams(target.slice(queryIndex + 1));
-}
-
-export function resolveNavParent(params) {
-  return resolveTargetNavParent(params);
-}
-
-function resolveTargetNavParent(params) {
-  for (const key of NAV_PARENT_PARAM_KEYS) {
-    const value = params.get(key);
-
-    if (value) {
-      return decodeTabParam(value);
-    }
-  }
-
-  return "";
-}
-
-function resolveCurrentNavParent(params, currentPath) {
-  const fromParams = resolveNavParent(params);
-
-  if (fromParams) {
-    return fromParams;
-  }
-
-  return inferNavParentFromPath(currentPath);
-}
-
-function inferNavParentFromPath(pathname) {
-  if (isPathMatch(ACCOUNT_LIST_PATH, pathname)) {
-    return MANUAL_CONTACTS_GROUP.label;
-  }
-
-  if (isPathMatch(WORK_LIST_PATH, pathname)) {
-    return MANUAL_WORK_GROUP.label;
-  }
-
-  if (isPathMatch(ISA_LIST_PATH, pathname)) {
-    return MANUAL_ISA_GROUP.label;
-  }
-
-  return "";
-}
-
-export function resolveTabLabelFromElement(button) {
-  if (!button) {
-    return "";
-  }
-
-  const candidates = [
-    button.getAttribute("aria-label"),
-    button.getAttribute("label"),
-    button.getAttribute("title"),
-    button.querySelector("label")?.textContent,
-    button.textContent,
-  ];
-
-  for (const candidate of candidates) {
-    const normalized = normalizeTabName(candidate);
-
-    if (normalized) {
-      return String(candidate).trim();
-    }
-  }
-
-  return "";
-}
-
-function querySelectorAllDeep(selector, root = document) {
-  const matches = [];
-
-  function traverse(node) {
-    if (!node) {
-      return;
-    }
-
-    if (node.querySelectorAll) {
-      node.querySelectorAll(selector).forEach((element) => {
-        matches.push(element);
-      });
-    }
-
-    if (node.shadowRoot) {
-      traverse(node.shadowRoot);
-    }
-
-    const childNodes = node.children ? [...node.children] : [];
-
-    childNodes.forEach((child) => {
-      traverse(child);
-    });
-  }
-
-  traverse(root);
-  return matches;
-}
-
-export function resolveSelectedTabLabelFromDom() {
-  const tabs = querySelectorAllDeep(TAB_SELECTOR);
-  const selectedTab = tabs.find(
-    (tab) => tab.getAttribute("aria-selected") === "true"
-  );
-
-  if (!selectedTab) {
-    return "";
-  }
-
-  return resolveTabLabelFromElement(selectedTab);
-}
-
-export function findNavChildByParentAndLabel(navParentLabel, childLabel) {
-  if (!navParentLabel || !childLabel) {
-    return null;
-  }
-
-  const normalizedParent = normalizeTabName(navParentLabel);
-  const normalizedChild = normalizeTabName(childLabel);
-
-  for (const group of STATIC_NAV_ITEMS) {
-    if (!group.subMenu?.length) {
-      continue;
-    }
-
-    if (normalizeTabName(group.label) !== normalizedParent) {
-      continue;
-    }
-
-    const child = group.subMenu.find((item) => {
-      if (normalizeTabName(item.label) === normalizedChild) {
-        return true;
-      }
-
-      if (!item.target) {
-        return false;
-      }
-
-      const targetTabName = resolveTargetTabName(parseTargetParams(item.target));
-
-      return normalizeTabName(targetTabName) === normalizedChild;
-    });
-
-    if (child) {
-      return child;
-    }
-  }
-
-  return null;
-}
-
-export function resolveEffectiveTabName(params) {
-  const fromUrl = resolveNavTabName(params);
-
-  if (fromUrl) {
-    return fromUrl;
-  }
-
-  return resolveSelectedTabLabelFromDom();
-}
-
-export function resolveEffectiveTabId(params) {
-  const fromUrl = resolveNavTabId(params);
-
-  if (params.get("c__tabId") || params.get("tabId") || urlHasNativeTabsParam(params)) {
-    if (fromUrl) {
-      return fromUrl;
-    }
-  }
-
-  const navParent =
-    resolveNavParent(params) || inferNavParentFromPath(window.location.pathname);
-  const tabLabel = resolveSelectedTabLabelFromDom();
-
-  if (navParent && tabLabel) {
-    const child = findNavChildByParentAndLabel(navParent, tabLabel);
-
-    if (child?.target) {
-      return resolveTargetTabId(parseTargetParams(child.target));
-    }
-  }
-
-  return fromUrl;
-}
-
-export function syncNavParamsOnTabClick(tabLabel) {
-  if (!tabLabel || typeof window === "undefined") {
-    return;
-  }
-
-  const params = new URLSearchParams(window.location.search || "");
-  let navParent = resolveNavParent(params);
-
-  if (!navParent) {
-    navParent = inferNavParentFromPath(window.location.pathname);
-  }
-
-  if (!navParent) {
-    const trail = readNavTrail();
-
-    if (trail?.navItemId) {
-      const parentGroup = STATIC_NAV_ITEMS.find((item) =>
-        (item.subMenu || []).some((child) => child.id === trail.navItemId)
-      );
-
-      navParent = parentGroup?.label || "";
-    }
-  }
-
-  if (!navParent) {
-    notifyNavPathChange();
-    return;
-  }
-
-  params.set("c_navParent", navParent);
-
-  const child = findNavChildByParentAndLabel(navParent, tabLabel);
-
-  if (child?.target) {
-    const childParams = parseTargetParams(child.target);
-    const targetTabName = resolveTargetTabName(childParams);
-    const targetTabId = resolveTargetTabId(childParams);
-
-    if (targetTabName) {
-      params.set("c_tabName", targetTabName);
-    } else {
-      removeTabNameParams(params);
-    }
-
-    if (targetTabId) {
-      params.set("c__tabId", targetTabId);
-      params.delete("tabId");
-    }
-  } else {
-    params.set("c_tabName", tabLabel);
-  }
-
-  const nextSearch = params.toString();
-  const nextUrl = `${window.location.pathname}${
-    nextSearch ? `?${nextSearch}` : ""
-  }${window.location.hash || ""}`;
-  const currentUrl = `${window.location.pathname}${
-    window.location.search || ""
-  }${window.location.hash || ""}`;
-
-  if (nextUrl !== currentUrl) {
-    window.history.replaceState(window.history.state, {}, nextUrl);
-  }
-
-  notifyNavPathChange();
-}
-
-function decodeTabParam(value) {
-  if (!value) {
-    return "";
-  }
-
-  try {
-    return decodeURIComponent(value);
-  } catch (error) {
-    return value;
-  }
-}
-
-function normalizeTabName(value) {
-  return String(value).trim().toLowerCase().replace(/\s+/g, " ");
-}
-
 function resolveObjectApiNameFromPageRef(pageRef) {
-  return pageRef?.attributes?.objectApiName || pageRef?.state?.objectApiName || "";
+  return (
+    pageRef?.attributes?.objectApiName || pageRef?.state?.objectApiName || ""
+  );
 }
 
 function isSalesforceObjectPageActive(item, pageRef) {
@@ -955,7 +699,10 @@ function isSalesforceObjectPathMatch(objectApiName, currentPath) {
     return false;
   }
 
-  const escapedObjectApiName = objectApiName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const escapedObjectApiName = objectApiName.replace(
+    /[.*+?^${}()|[\]\\]/g,
+    "\\$&"
+  );
   const objectPathPattern = new RegExp(
     `/[^/]+/${escapedObjectApiName}(/|$)`,
     "i"
@@ -1000,7 +747,9 @@ function isPathMatch(target, currentPath) {
     return false;
   }
 
-  const normalizedTarget = normalizePathForComparison(normalizeMenuTarget(target));
+  const normalizedTarget = normalizePathForComparison(
+    normalizeMenuTarget(target)
+  );
 
   if (normalizedTarget === "/") {
     return isOnSiteHomepage(currentPath);
@@ -1010,7 +759,7 @@ function isPathMatch(target, currentPath) {
     normalizedTarget,
     normalizePathForComparison(normalizePath(target)),
     normalizePathForComparison(toSitePath(target)),
-    normalizePathForComparison(stripSiteBase(normalizePath(target))),
+    normalizePathForComparison(stripSiteBase(normalizePath(target)))
   ]);
 
   return pathCandidates(currentPath).some((candidate) => {
@@ -1145,21 +894,33 @@ function normalizePath(path) {
     if (path.startsWith("http")) {
       return new URL(path).pathname.replace(/\/$/, "") || "/";
     }
-  } catch (error) {
+  } catch {
     // fall through for relative paths
   }
 
   return path.replace(/\/$/, "") || "/";
 }
 
-export function notifyNavPathChange() {
-  window.dispatchEvent(new Event(NAV_PATH_CHANGE_EVENT));
-}
-
-/**
- * @deprecated Do not monkey-patch history in LWR — Browser Locker rejects it.
- * Navigation sync uses CurrentPageReference, popstate, and notifyNavPathChange().
- */
 export function patchHistoryForNavigation() {
-  // Intentionally no-op.
+  if (window.__arcNavHistoryPatched) {
+    return;
+  }
+
+  window.__arcNavHistoryPatched = true;
+
+  const notifyPathChange = () => {
+    window.dispatchEvent(new CustomEvent(NAV_PATH_CHANGE_EVENT));
+  };
+
+  const { pushState, replaceState } = window.history;
+  window.history.pushState = function pushStatePatched(...args) {
+    const result = pushState.apply(this, args);
+    notifyPathChange();
+    return result;
+  };
+  window.history.replaceState = function replaceStatePatched(...args) {
+    const result = replaceState.apply(this, args);
+    notifyPathChange();
+    return result;
+  };
 }

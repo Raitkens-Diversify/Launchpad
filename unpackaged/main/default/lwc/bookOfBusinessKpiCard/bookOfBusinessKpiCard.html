@@ -1,0 +1,14 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-06-22 -->
+<template>
+  <article class="div-kpi-card">
+    <div class="div-kpi-card__label">{label}</div>
+    <div class="div-kpi-card__value">{value}</div>
+    <div class="div-kpi-card__subtext">{subtext}</div>
+    <template lwc:if={hasTrend}>
+      <div class={trendClassName}>
+        <lightning-icon icon-name="utility:arrowup" size="xx-small" aria-hidden="true"></lightning-icon>
+        <span>{trendLabel}</span>
+      </div>
+    </template>
+  </article>
+</template>

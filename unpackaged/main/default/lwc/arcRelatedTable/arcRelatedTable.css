@@ -1,0 +1,17 @@
+/* Author: Hoang Long Vu To | Date: 2026-08-11 */
+
+:host {
+  display: block;
+}
+
+.arc-related-table__controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--div-space-2, 0.5rem);
+}
+
+.arc-related-table__empty {
+  color: var(--div-color-text-muted, #838a97);
+  padding: 2rem 0;
+  text-align: center;
+}

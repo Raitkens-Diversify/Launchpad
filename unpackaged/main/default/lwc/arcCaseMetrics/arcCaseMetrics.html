@@ -1,67 +1,134 @@
 <!-- Author: Hoang Long Vu To | Date: 2026-08-12 -->
 <template>
-  <article class="div-card arc-case-metrics" aria-labelledby="arc-case-metrics-title">
-    <header class="arc-case-metrics__header">
-      <div class="arc-case-metrics__header-copy">
-        <div class="arc-case-metrics__title-row">
-          <h2 id="arc-case-metrics-title" class="arc-case-metrics__title">Cases</h2>
-          <lightning-helptext
-            content="Open cases grouped by milestone status."
-          ></lightning-helptext>
-        </div>
-        <p class="arc-case-metrics__subtitle">By milestone</p>
-      </div>
-
-      <c-div-segmented-control
-        options={scopeOptions}
-        value={scope}
-        group-label="Case scope"
-        onchange={handleScopeChange}
-      ></c-div-segmented-control>
-    </header>
-
-    <template lwc:if={errorMessage}>
-      <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
-        {errorMessage}
-      </div>
-    </template>
-
+  <article
+    class="div-card arc-case-metrics"
+    aria-labelledby="arc-case-metrics-title"
+  >
     <template lwc:if={isInitialLoading}>
       <div class="arc-case-metrics__loading">
-        <lightning-spinner alternative-text="Loading case metrics" size="small"></lightning-spinner>
-      </div>
-    </template>
-
-    <template lwc:elseif={hasChartData}>
-      <div class="div-card__body div-card__body--chart arc-case-metrics__body">
-        <div class="arc-case-metrics__chart-wrap">
-          <canvas
-            data-id="case-metrics-chart"
-            aria-label="Cases by milestone donut chart"
-          ></canvas>
-        </div>
-
-        <ul class="div-chart-legend arc-case-metrics__legend" role="list">
-          <template for:each={segments} for:item="segment">
-            <li key={segment.key}>
-              <div class="arc-case-metrics__legend-item">
-                <span
-                  class="div-chart-legend__swatch"
-                  style={segment.swatchStyle}
-                  aria-hidden="true"
-                ></span>
-                <span class="div-chart-legend__label">{segment.label}</span>
-                <span class="arc-case-metrics__legend-count">{segment.countLabel}</span>
-              </div>
-            </li>
-          </template>
-        </ul>
+        <c-arc-loading-spinner
+          alternative-text="Loading case metrics"
+          size="small"
+        ></c-arc-loading-spinner>
       </div>
     </template>
 
     <template lwc:else>
-      <div class="div-card__body">
-        <p class="div-card__empty div-card__empty--center">No open cases for the selected scope.</p>
+      <div class="div-card__body div-card__body--chart arc-case-metrics__body">
+        <section class="arc-case-metrics__panel" aria-label="My cases">
+          <div class="arc-case-metrics__panel-header">
+            <div class="arc-case-metrics__title-row">
+              <h2
+                id="arc-case-metrics-title"
+                class="arc-case-metrics__panel-label"
+              >
+                My Cases
+              </h2>
+              <span
+                class="arc-case-metrics__info-icon"
+                style={infoIconStyle}
+                title="Open cases grouped by milestone status."
+                aria-hidden="true"
+              ></span>
+            </div>
+            <p class="arc-case-metrics__subtitle">By milestone</p>
+          </div>
+
+          <template lwc:if={myErrorMessage}>
+            <div
+              class="slds-notify slds-notify_alert slds-alert_error"
+              role="alert"
+            >
+              {myErrorMessage}
+            </div>
+          </template>
+          <template lwc:elseif={hasMyChartData}>
+            <div class="arc-case-metrics__panel-content">
+              <div class="arc-case-metrics__chart-wrap">
+                <canvas
+                  data-id="case-metrics-chart-my"
+                  aria-label="My cases by milestone donut chart"
+                ></canvas>
+              </div>
+              <ul class="div-chart-legend arc-case-metrics__legend" role="list">
+                <template for:each={mySegments} for:item="segment">
+                  <li key={segment.key}>
+                    <div class="arc-case-metrics__legend-item">
+                      <span
+                        class="div-chart-legend__swatch"
+                        style={segment.swatchStyle}
+                        aria-hidden="true"
+                      ></span>
+                      <span class="div-chart-legend__label"
+                        >{segment.label}</span
+                      >
+                      <span class="arc-case-metrics__legend-count"
+                        >{segment.countLabel}</span
+                      >
+                    </div>
+                  </li>
+                </template>
+              </ul>
+            </div>
+          </template>
+          <template lwc:else>
+            <p class="div-card__empty div-card__empty--center">
+              No open cases.
+            </p>
+          </template>
+        </section>
+
+        <div class="arc-case-metrics__divider" aria-hidden="true"></div>
+
+        <section class="arc-case-metrics__panel" aria-label="My Team cases">
+          <div class="arc-case-metrics__panel-header">
+            <p class="arc-case-metrics__panel-label">My Team Cases</p>
+            <p class="arc-case-metrics__subtitle">By milestone</p>
+          </div>
+
+          <template lwc:if={teamErrorMessage}>
+            <div
+              class="slds-notify slds-notify_alert slds-alert_error"
+              role="alert"
+            >
+              {teamErrorMessage}
+            </div>
+          </template>
+          <template lwc:elseif={hasTeamChartData}>
+            <div class="arc-case-metrics__panel-content">
+              <div class="arc-case-metrics__chart-wrap">
+                <canvas
+                  data-id="case-metrics-chart-team"
+                  aria-label="My Team cases by milestone donut chart"
+                ></canvas>
+              </div>
+              <ul class="div-chart-legend arc-case-metrics__legend" role="list">
+                <template for:each={teamSegments} for:item="segment">
+                  <li key={segment.key}>
+                    <div class="arc-case-metrics__legend-item">
+                      <span
+                        class="div-chart-legend__swatch"
+                        style={segment.swatchStyle}
+                        aria-hidden="true"
+                      ></span>
+                      <span class="div-chart-legend__label"
+                        >{segment.label}</span
+                      >
+                      <span class="arc-case-metrics__legend-count"
+                        >{segment.countLabel}</span
+                      >
+                    </div>
+                  </li>
+                </template>
+              </ul>
+            </div>
+          </template>
+          <template lwc:else>
+            <p class="div-card__empty div-card__empty--center">
+              No open cases.
+            </p>
+          </template>
+        </section>
       </div>
     </template>
   </article>

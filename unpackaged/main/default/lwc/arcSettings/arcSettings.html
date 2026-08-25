@@ -1,0 +1,369 @@
+<!-- Author: Claude (Figma 758:116625) -->
+<template>
+  <div class="settings">
+    <header class="settings__header">
+      <h1 class="settings__title">{title}</h1>
+      <p class="settings__tagline">{tagline}</p>
+      <c-ds-tabs
+        class="settings__tabs"
+        tabs={tabs}
+        selected={activeTab}
+        label="Settings sections"
+        ontabchange={handleTabChange}
+      >
+      </c-ds-tabs>
+    </header>
+
+    <template lwc:if={isMyDetails}>
+      <section class="settings__section">
+        <div class="settings__section-header">
+          <h2 class="settings__section-title">Personal info</h2>
+          <p class="settings__section-tagline">
+            Update your photo and personal details here.
+          </p>
+        </div>
+
+        <template lwc:if={errorMessage}>
+          <p class="settings__error" role="alert">{errorMessage}</p>
+        </template>
+
+        <div class="settings__form">
+          <div class="settings-row">
+            <div class="settings-row__label">
+              <span class="settings-row__label-text">Name</span>
+            </div>
+            <div class="settings-row__field settings-row__field--split">
+              <input
+                class="settings-input"
+                type="text"
+                aria-label="First name"
+                placeholder="First name"
+                data-field="FirstName"
+                value={draft.FirstName}
+                onchange={handleInput}
+              />
+              <input
+                class="settings-input"
+                type="text"
+                aria-label="Last name"
+                placeholder="Last name"
+                data-field="LastName"
+                value={draft.LastName}
+                onchange={handleInput}
+              />
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-row__label">
+              <span class="settings-row__label-text">Email address</span>
+            </div>
+            <div class="settings-row__field">
+              <div class="settings-input__wrap">
+                <span class="settings-input__glyph" aria-hidden="true"></span>
+                <input
+                  class="settings-input settings-input--with-glyph"
+                  type="email"
+                  aria-label="Email address"
+                  data-field="Email"
+                  value={draft.Email}
+                  onchange={handleInput}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-row settings-row--photo">
+            <div class="settings-row__label">
+              <span class="settings-row__label-text">Your photo</span>
+              <span class="settings-row__label-help">
+                This will be displayed on your profile.
+              </span>
+            </div>
+            <div class="settings-row__field settings-row__field--photo">
+              <span class="settings-avatar">
+                <template lwc:if={photoUrl}>
+                  <img src={photoUrl} alt="" />
+                </template>
+                <template lwc:else>{initials}</template>
+              </span>
+              <div
+                class={dropZoneClass}
+                ondragover={handleDragOver}
+                ondragleave={handleDragLeave}
+                ondrop={handleDrop}
+              >
+                <p class="settings-upload__label">
+                  Choose a file or drag and drop it here
+                </p>
+                <p class="settings-upload__hint">{uploadHint}</p>
+                <button
+                  type="button"
+                  class="settings-button"
+                  onclick={handleBrowseClick}
+                >
+                  Browse file
+                </button>
+                <input
+                  class="settings-upload__input"
+                  type="file"
+                  accept="image/svg+xml,image/png,image/jpeg,image/gif"
+                  tabindex="-1"
+                  aria-hidden="true"
+                  onchange={handleFileChange}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-row__label">
+              <span class="settings-row__label-text">Role</span>
+            </div>
+            <div class="settings-row__field">
+              <input
+                class="settings-input"
+                type="text"
+                aria-label="Role"
+                data-field="Title"
+                value={draft.Title}
+                onchange={handleInput}
+              />
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-row__label">
+              <span class="settings-row__label-text">Country</span>
+            </div>
+            <div class="settings-row__field">
+              <div class="settings-select__wrap">
+                <select
+                  class="settings-select"
+                  aria-label="Country"
+                  data-field="CountryCode"
+                  onchange={handleInput}
+                >
+                  <option value="">Select your country</option>
+                  <template for:each={countryOptions} for:item="option">
+                    <option
+                      key={option.value}
+                      value={option.value}
+                      selected={option.isSelected}
+                    >
+                      {option.label}
+                    </option>
+                  </template>
+                </select>
+                <span class="settings-select__caret" aria-hidden="true"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-row settings-row--bio">
+            <div class="settings-row__label">
+              <span class="settings-row__label-text">Bio</span>
+              <span class="settings-row__label-help">
+                Write a short introduction.
+              </span>
+            </div>
+            <div class="settings-row__field">
+              <textarea
+                class="settings-textarea"
+                aria-label="Bio"
+                maxlength={bioLimit}
+                placeholder="Write short intro about your self"
+                data-field="AboutMe"
+                onchange={handleInput}
+                oninput={handleBioInput}
+              >
+{draft.AboutMe}</textarea>
+              <p class="settings-textarea__count">{charactersLeftLabel}</p>
+            </div>
+          </div>
+        </div>
+
+        <footer class="settings__footer">
+          <button
+            type="button"
+            class="settings-button"
+            disabled={isSaving}
+            onclick={handleCancel}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="settings-button settings-button--brand"
+            disabled={isSaveDisabled}
+            onclick={handleSave}
+          >
+            Save
+          </button>
+        </footer>
+      </section>
+    </template>
+
+    <template lwc:elseif={isPassword}>
+      <section class="settings__section">
+        <div class="settings__section-header">
+          <h2 class="settings__section-title">Password</h2>
+          <p class="settings__section-tagline">
+            Change the password you use to sign in to ARC. You'll need your
+            current password to set a new one.
+          </p>
+        </div>
+
+        <c-arc-change-password></c-arc-change-password>
+      </section>
+    </template>
+
+    <template lwc:elseif={isTeam}>
+      <section class="settings__section">
+        <div class="settings__section-header">
+          <h2 class="settings__section-title">Team</h2>
+          <p class="settings__section-tagline">
+            The financial advisor team you belong to, who is on it, and what
+            each member is permitted to do.
+          </p>
+        </div>
+
+        <c-arc-team-settings></c-arc-team-settings>
+      </section>
+    </template>
+
+    <!--
+      Version. The wording follows the upgrade modal, which is the only other
+      place the editions are named: the current experience is the Lite one, and
+      Helios is the paid upgrade that adds branch-level CRM. No version number
+      or feature limit is stated here, because nothing in the app records one.
+    -->
+    <template lwc:elseif={isVersion}>
+      <section class="settings__section">
+        <div class="settings__section-header">
+          <h2 class="settings__section-title">Version</h2>
+          <p class="settings__section-tagline">
+            Which edition of ARC you are using, and what it covers.
+          </p>
+        </div>
+
+        <div class="settings__version">
+          <div class="settings__version-badge">
+            <span class="settings__version-name">ARC Lite</span>
+            <span class="settings__version-state">Current edition</span>
+          </div>
+
+          <h3 class="settings__version-heading">What is ARC Lite?</h3>
+          <p class="settings__version-copy">
+            ARC Lite is the branch-facing edition of ARC, designed to be your
+            doorway to the home office. Through the new Envelope Wizard
+            experience, you can create and submit envelopes that facilitate
+            building out contacts, cases, and tasks &mdash; everything needed to
+            successfully onboard new clients, process account changes, and
+            service existing relationships.
+          </p>
+          <p class="settings__version-copy">
+            Once submitted, ARC Lite lets you monitor the status of your work so
+            you can track where things stand and ensure the home office stays
+            aligned with your branch&rsquo;s efforts.
+          </p>
+
+          <h3 class="settings__version-heading">What about a full CRM?</h3>
+          <p class="settings__version-copy">
+            ARC Lite is intentionally focused on submitting information to the
+            home office and tracking its progress. It is not a full CRM
+            platform.
+          </p>
+          <p class="settings__version-copy">
+            For branches looking for a more comprehensive solution &mdash;
+            including contact and relationship management, pipeline and
+            opportunity tracking, activity and communication logging, reporting
+            and analytics, marketing and growth tools, workflow automation, and
+            AI-powered assistants &mdash; that&rsquo;s ARC Standard.
+          </p>
+
+          <h3 class="settings__version-heading">
+            When is ARC Standard coming?
+          </h3>
+          <p class="settings__version-copy">
+            ARC Standard is currently in development, with the initial release
+            targeted for summer 2027. We&rsquo;ll share more details as the
+            launch approaches.
+          </p>
+
+          <h3 class="settings__version-heading">Questions?</h3>
+          <p class="settings__version-copy settings__version-copy--muted">
+            Reach out to Advisor Solutions at the home
+            office:&nbsp;<a href="mailto:advisorsolutions@diversify.com"
+              >advisorsolutions@diversify.com</a
+            >
+          </p>
+        </div>
+      </section>
+    </template>
+
+    <template lwc:elseif={isNotifications}>
+      <section class="settings__section">
+        <div class="settings__section-header">
+          <h2 class="settings__section-title">Notifications</h2>
+          <p class="settings__section-tagline">
+            Stay informed with customizable notifications! Choose how to receive
+            updates, so you never miss important info.
+          </p>
+        </div>
+
+        <template lwc:if={notificationError}>
+          <p class="settings__error" role="alert">{notificationError}</p>
+        </template>
+
+        <div class="settings__form">
+          <template for:each={notificationGroups} for:item="group">
+            <div key={group.key} class="settings-group">
+              <div class="settings-group__label">
+                <span class="settings-row__label-text">{group.label}</span>
+                <span class="settings-row__label-help">{group.help}</span>
+              </div>
+              <div class="settings-group__rows">
+                <template for:each={group.rows} for:item="row">
+                  <div key={row.key} class="settings-notify">
+                    <span class="settings-notify__label">{row.label}</span>
+                    <div
+                      class="settings-segment"
+                      role="group"
+                      aria-label={row.label}
+                    >
+                      <template for:each={row.choices} for:item="choice">
+                        <button
+                          key={choice.value}
+                          type="button"
+                          class={choice.cssClass}
+                          aria-pressed={choice.isSelected}
+                          data-row={row.key}
+                          data-channel={choice.value}
+                          onclick={handleChannelClick}
+                        >
+                          {choice.label}
+                        </button>
+                      </template>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </template>
+        </div>
+      </section>
+    </template>
+
+    <template lwc:else>
+      <section class="settings__section">
+        <div class="settings__section-header">
+          <h2 class="settings__section-title">{activeTabLabel}</h2>
+          <p class="settings__section-tagline">
+            This section has not been built yet.
+          </p>
+        </div>
+      </section>
+    </template>
+  </div>
+</template>

@@ -6,17 +6,35 @@
   --arc-task-metrics-bar-easing: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.arc-task-metrics__header {
+/* Fixed 249px to match Cases (see arcCaseMetrics.css for why this is a
+   fixed height rather than ancestor flex-stretch). */
+.arc-task-metrics {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--div-space-3, 0.75rem);
-  padding: 0.875rem 1rem;
-  border-bottom: 1px solid var(--div-color-border, #e5e7eb);
-  background: var(--div-color-surface, #ffffff);
+  flex-direction: column;
+  height: 249px;
 }
 
-.arc-task-metrics__header-copy {
+@media (max-width: 40rem) {
+  .arc-task-metrics {
+    height: auto;
+  }
+
+  .arc-task-metrics__body {
+    flex-direction: column;
+  }
+
+  .arc-task-metrics__panel {
+    padding: 0;
+  }
+
+  .arc-task-metrics__divider {
+    width: auto;
+    height: 1px;
+    margin: var(--div-space-3, 0.75rem) 0;
+  }
+}
+
+.arc-task-metrics__panel-header {
   min-width: 0;
 }
 
@@ -26,14 +44,20 @@
   gap: var(--div-space-1, 0.25rem);
 }
 
-.arc-task-metrics__title {
-  margin: 0;
-  font-family: var(--div-font-family-base);
-  font-size: var(--div-font-scale-3, 1.5rem);
-  font-weight: var(--div-font-weight-semibold, 600);
-  line-height: var(--div-font-scale-3-line-height, 1.5rem);
-  letter-spacing: 0;
-  color: var(--div-color-on-surface-2, #374151);
+.arc-task-metrics__info-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  display: block;
+  background-color: var(--div-color-on-surface-1, #4b5563);
+  -webkit-mask-image: var(--icon-url);
+  mask-image: var(--icon-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
 }
 
 .arc-task-metrics__subtitle {
@@ -51,6 +75,60 @@
   padding: var(--div-space-6, 1.5rem);
 }
 
+/* My / My Team are two permanent side-by-side panels (not a click-to-toggle
+   view), split by a vertical divider with top/bottom breathing room so it
+   doesn't run the full height of the card. */
+.arc-task-metrics__body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  padding: var(--div-space-3, 0.75rem) var(--div-space-4, 1rem);
+}
+
+.arc-task-metrics__panel {
+  flex: 1 1 50%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--div-space-2, 0.5rem);
+  padding: 0 var(--div-space-3, 0.75rem);
+}
+
+.arc-task-metrics__panel-rows {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  justify-content: center;
+  gap: var(--div-space-2, 0.5rem);
+}
+
+.arc-task-metrics__panel:first-child {
+  padding-left: 0;
+}
+
+.arc-task-metrics__panel:last-child {
+  padding-right: 0;
+}
+
+/* The panel's own heading now carries the card title ("My Tasks"/"My Team
+   Tasks") — previously a single shared header sat above both panels. */
+.arc-task-metrics__panel-label {
+  margin: 0;
+  font-family: var(--div-font-family-base);
+  font-size: var(--div-font-scale-base, 0.9375rem);
+  font-weight: var(--div-font-weight-semibold, 600);
+  line-height: 1.25rem;
+  color: var(--div-color-on-surface-2, #374151);
+}
+
+.arc-task-metrics__divider {
+  flex: 0 0 auto;
+  width: 1px;
+  margin: var(--div-space-3, 0.75rem) 0;
+  background: var(--div-color-border-1, #d1d5db);
+}
+
 .arc-task-metrics__row-header {
   display: flex;
   align-items: center;
@@ -60,18 +138,18 @@
 
 .arc-task-metrics__row-label {
   font-family: var(--div-font-family-base);
-  font-size: var(--div-font-scale-base, 1rem);
-  font-weight: var(--div-font-weight-semibold, 600);
-  line-height: 1.125rem;
-  color: var(--div-color-on-surface-2, #374151);
+  font-size: 0.875rem;
+  font-weight: var(--div-font-weight-bold, 700);
+  line-height: 1.1875rem;
+  color: var(--div-color-on-surface-1, #4b5563);
 }
 
 .arc-task-metrics__row-count {
   font-family: var(--div-font-family-base);
-  font-size: var(--div-font-scale-base, 1rem);
-  font-weight: var(--div-font-weight-semibold, 600);
-  line-height: 1.125rem;
-  color: var(--div-color-on-surface-2, #374151);
+  font-size: 0.875rem;
+  font-weight: var(--div-font-weight-regular, 400);
+  line-height: 1.1875rem;
+  color: var(--div-color-on-surface-1, #4b5563);
   transition: opacity var(--arc-task-metrics-bar-duration, 500ms)
     var(--arc-task-metrics-bar-easing, cubic-bezier(0.4, 0, 0.2, 1));
 }

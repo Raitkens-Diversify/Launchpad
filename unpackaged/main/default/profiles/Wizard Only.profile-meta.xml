@@ -16003,6 +16003,9 @@
         <layout>AlternativePaymentMethod-Alternative Payment Method Layout</layout>
     </layoutAssignments>
     <layoutAssignments>
+        <layout>Announcement__c-Announcement Layout</layout>
+    </layoutAssignments>
+    <layoutAssignments>
         <layout>Article_Feedback__c-Article Feedback Layout</layout>
     </layoutAssignments>
     <layoutAssignments>

@@ -1,17 +1,47 @@
 /**
  * Author: Hoang Long Vu To
  * Date: 2026-08-12
+ *
+ * Figma "Record Summary - Detail Block" (903:26638). The card chrome itself
+ * lives on c-card; everything below is the block's own contents.
+ *
+ * The --rds-icon-* URLs are overwritten from JS with the arcicon static
+ * resource. The inline data URIs are the fallback for a failed resource load —
+ * a '#' inside url() would be read as a fragment, so fills are percent-encoded.
  */
 :host {
+  --rds-icon-lock: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="%23000"><path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM140,148a12,12,0,1,1-12-12A12,12,0,0,1,140,148Z"/></svg>');
+  --rds-icon-info: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="%23000"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-4,48a12,12,0,1,1-12,12A12,12,0,0,1,124,72Zm12,112a16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40a8,8,0,0,1,0,16Z"/></svg>');
+  --rds-icon-pencil: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="%23000"><path d="M230.14,70.54,185.46,25.85a20,20,0,0,0-28.29,0L33.86,149.17A19.85,19.85,0,0,0,28,163.31V208a20,20,0,0,0,20,20H92.69a19.86,19.86,0,0,0,14.14-5.86L230.14,98.82a20,20,0,0,0,0-28.28ZM91,204H52V165l84-84,39,39ZM192,103,153,64l18.34-18.34,39,39Z"/></svg>');
+
   display: block;
-  --slds-g-font-scale-2: 1rem;
-  --slds-g-color-on-surface-3: #09243f;
-  --div-record-field-height: 2.25rem;
+
+  /* Self-declared --slds-g-* set, same convention as arcSearchBar: LWR injects
+     real SLDS2 hooks under these names into each component scope, and those beat
+     values inherited from an ancestor's :host — so this block has to be repeated
+     here rather than inherited from arcRecordDetail. The org's injected set is
+     stock SLDS (rem against a 14px root, different neutral ramp), which rendered
+     the 16px row gap at 14px and the #4b5563 label at #747474. Values are the
+     Figma library's (903:26477), in px so the 14px root cannot rescale them. */
+  --slds-g-spacing-1: 4px;
+  --slds-g-spacing-2: 8px;
+  --slds-g-spacing-3: 12px;
+  --slds-g-spacing-4: 16px;
+  --slds-g-radius-border-2: 8px;
+  --slds-g-font-family-base:
+    "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --slds-g-color-surface-container-2: #f3f4f6;
+  --slds-g-color-on-surface-1: #4b5563;
+  --slds-g-color-on-surface-2: #374151;
+  --slds-g-color-border-1: #d1d5db;
+  --slds-g-color-border-inverse-1: #f3f4f6;
+  --slds-g-color-neutral-base-60: #838a97;
 }
 
 .record-section {
   display: flex;
   flex-direction: column;
+  gap: var(--slds-g-spacing-4, 16px);
   position: relative;
 }
 
@@ -26,73 +56,99 @@
   background: rgba(255, 255, 255, 0.72);
 }
 
+/* ---- Section header (903:42787) ---------------------------------------- */
 .record-section__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--slds-g-spacing-4, 16px);
-  padding-bottom: var(--slds-g-spacing-4, 16px);
+  gap: var(--slds-g-spacing-2, 8px);
+  min-height: 24px;
 }
 
-.record-section__title-group {
-  display: inline-flex;
+.record-section__heading {
+  display: flex;
   align-items: center;
-  gap: var(--div-space-2, 0.5rem);
+  gap: 4px;
   min-width: 0;
 }
 
 .record-section__title {
   margin: 0;
-  font-family: var(
-    --div-font-family-base,
-    var(--ds-font-body, "Inter", -apple-system, BlinkMacSystemFont, sans-serif)
-  );
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   font-style: normal;
-  font-weight: var(--div-font-weight-semibold, var(--slds-g-font-weight-6, 600));
-  font-size: var(--div-font-scale-lg, 1.125rem);
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 22px;
   letter-spacing: 0;
-  color: var(--div-color-text-primary, var(--slds-g-color-on-surface-3, #09243f));
+  color: #09243f;
 }
 
-.record-section__info-icon {
-  flex-shrink: 0;
-  --slds-c-icon-color-foreground-default: var(--arc-color-blue-600, var(--div-color-blue-600, #0369a1));
+.record-section__title-info {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  background-color: #4b5563;
+  -webkit-mask-image: var(--rds-icon-info);
+  mask-image: var(--rds-icon-info);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
 }
 
+/* "Button - Base" (904:28067): borderless, 36px tall, 14px semibold accent. */
 .record-section__edit {
   display: inline-flex;
   align-items: center;
-  gap: var(--div-space-2, 0.5rem);
+  justify-content: center;
+  gap: var(--slds-g-spacing-2, 8px);
   flex-shrink: 0;
+  height: 36px;
   padding: 0;
   border: none;
+  border-radius: var(--slds-g-radius-border-2, 8px);
   background: transparent;
   cursor: pointer;
-  font-family: var(--div-font-family-base, "Inter", -apple-system, BlinkMacSystemFont, sans-serif);
-  font-size: var(--slds-g-font-scale-2, 1rem);
-  font-weight: var(--div-font-weight-semibold, 600);
-  color: var(--slds-g-color-on-surface-3, #09243f);
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 19px;
+  color: #0b2f51;
 }
 
 .record-section__edit:hover,
 .record-section__edit:focus-visible {
-  color: var(--div-color-accent-2, #0e3c67);
+  color: var(--div-color-blue-900, #0f406f);
 }
 
 .record-section__edit:focus-visible {
-  outline: 2px solid var(--div-color-accent-2, #1a76bb);
+  outline: 2px solid var(--div-color-blue-700, #1a76bb);
   outline-offset: 2px;
-  border-radius: var(--slds-g-radius-border-1, 2px);
 }
 
 .record-section__edit-icon {
-  width: 1rem;
-  height: 1rem;
-  flex-shrink: 0;
-}
-
-.record-section__edit-icon path {
-  fill: currentColor;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  background-color: currentColor;
+  -webkit-mask-image: var(--rds-icon-pencil);
+  mask-image: var(--rds-icon-pencil);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
 }
 
 .record-section__actions {
@@ -102,58 +158,65 @@
   flex-shrink: 0;
 }
 
+/* ---- Record Summary List (903:26640) ----------------------------------- */
 .record-section__fields {
   display: flex;
   flex-direction: column;
-  gap: 0;
-  padding-top: var(--div-space-2, 0.5rem);
-  border-top: 1px solid var(--div-color-gray-100, #f3f4f6);
+  gap: var(--slds-g-spacing-4, 16px);
+  padding-top: var(--slds-g-spacing-4, 16px);
+  border-top: 1px solid var(--slds-g-color-border-inverse-1, #f3f4f6);
+}
+
+/* Edit mode rules off every row: 16px, a 1px rule, 16px (907:28922 measures the
+   list items at y=16/270/358 against dividers at 253/341/429). Read mode keeps
+   the plain 16px gap with no rules. */
+.record-section__fields--editing .field-row + .field-row {
+  padding-top: var(--slds-g-spacing-4, 16px);
+  border-top: 1px solid var(--slds-g-color-border-inverse-1, #f3f4f6);
 }
 
 .field-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  column-gap: var(--div-space-4, 1rem);
+  column-gap: var(--slds-g-spacing-2, 8px);
+  align-items: center;
+  min-height: 24px;
+}
+
+/* Label 19 + 12 + badge 24 = the 55px regulated row, control flush to the top. */
+.field-row--regulated {
   align-items: start;
-  padding: var(--div-space-2, 0.5rem) 0;
 }
 
 .field-row__label {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--div-space-1, 0.25rem);
+  gap: var(--slds-g-spacing-3, 12px);
 }
 
 .field-row__label-heading {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--div-space-1, 0.25rem);
   min-width: 0;
-}
-
-.field-row__lock-icon {
-  flex-shrink: 0;
-  width: 0.6875rem;
-  height: 0.75rem;
-  color: var(--slds-g-color-neutral-base-50, #838a97);
-}
-
-.field-row__lock-icon path {
-  fill: currentColor;
+  /* 19, not the inherited 21, so a regulated row lands on the frame's 55. */
+  line-height: 19px;
 }
 
 .field-row__label-text {
-  font-family: var(--div-font-family-base, var(--ds-font-body, "Inter", -apple-system, BlinkMacSystemFont, sans-serif));
-  font-size: var(--arc-record-detail-label-font-size, inherit);
-  font-weight: 300;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 19px;
   letter-spacing: 0;
-  color: var(--slds-g-color-on-surface-2, #374151);
+  color: var(--slds-g-color-on-surface-1, #4b5563);
 }
 
 .field-row__control {
   min-width: 0;
-  align-self: start;
+  align-self: center;
 }
 
 .field-row__control c-arc-record-detail-field {
@@ -165,24 +228,18 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  min-height: var(--div-record-field-height, 2.25rem);
-  font-family: var(--div-font-family-base, var(--ds-font-body, "Inter", -apple-system, BlinkMacSystemFont, sans-serif));
-  font-size: var(--arc-record-detail-value-font-size, inherit);
-  font-weight: var(--div-font-weight-semibold, 600);
+  min-height: 19px;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 19px;
   letter-spacing: 0;
-  color: var(--slds-g-color-on-surface-3, #09243f);
+  color: var(--slds-g-color-on-surface-2, #374151);
   text-align: right;
-}
-
-.field-row__link {
-  text-decoration: none;
-  color: var(--div-color-accent-2, #0e3c67);
-}
-
-.field-row__link:hover,
-.field-row__link:focus-visible {
-  text-decoration: underline;
-  outline: none;
 }
 
 @media (max-width: 640px) {
@@ -198,7 +255,7 @@
 
   .field-row {
     grid-template-columns: minmax(0, 1fr);
-    row-gap: var(--div-space-2, 0.5rem);
+    row-gap: var(--slds-g-spacing-1, 4px);
   }
 
   .field-row__control {
@@ -209,4 +266,166 @@
     justify-content: flex-start;
     text-align: left;
   }
+}
+
+/* ---- Home-office regulated fields (Figma 907:28922) ----------------------
+ * Alert: info-container-1 surface, info-base-90 border, on-info-1 text.
+ * Badge: same surface and text, no border, 12px/17px Medium.
+ */
+.record-section__alert {
+  display: flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-2, 8px);
+  padding: var(--slds-g-spacing-2, 8px) 12px;
+  border: 1px solid #bae6fd;
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  background: #e0f2fe;
+}
+
+.record-section__alert-icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  background-color: #0369a1;
+  -webkit-mask-image: var(--rds-icon-info);
+  mask-image: var(--rds-icon-info);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.record-section__alert-text {
+  flex: 1 1 auto;
+  margin: 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: #0369a1;
+}
+
+.record-section__alert-action {
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  line-height: 18px;
+  color: #0369a1;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.field-row__lock {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-left: 6px;
+  vertical-align: -2px;
+  background-color: #6b7280;
+  -webkit-mask-image: var(--rds-icon-lock);
+  mask-image: var(--rds-icon-lock);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.field-row__badge {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: var(--slds-g-spacing-1, 4px);
+  /* The 12px sits on .field-row__label's gap, so the badge adds no margin.
+     Height is fixed at 24 rather than padded to it — 17px of line box plus 4+4
+     would round the badge up to 25 and the row with it. */
+  height: 24px;
+  padding: 0 var(--slds-g-spacing-2, 8px);
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  background: #e0f2fe;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 17px;
+  color: #0369a1;
+  white-space: nowrap;
+}
+
+.field-row__badge-icon {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  background-color: #0369a1;
+  -webkit-mask-image: var(--rds-icon-info);
+  mask-image: var(--rds-icon-info);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* Locked control: a disabled input, matching the 36px live controls beside it. */
+.field-row__value--locked {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  min-height: 36px;
+  /* 8px, the inset arcRecordDetailField gives its controls, so a locked box and
+     a live input in the same section start their text on the same line. */
+  padding: 0 8px;
+  text-align: left;
+  border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  background: var(--slds-g-color-surface-container-2, #f3f4f6);
+  color: var(--slds-g-color-neutral-base-60, #838a97);
+}
+
+/*
+ * Read-mode grid (fieldLayout="grid").
+ *
+ * The default row puts the label hard left and the value hard right, which is
+ * what the contact page's frame draws. On a page of fifteen short values that
+ * leaves a wide empty gutter down the middle and makes the eye travel the full
+ * width of the card for every field. This lays the same fields out as a
+ * responsive grid with the label above its value, so a column of related
+ * values reads as a block. Columns are sized by the content, not counted, so
+ * the same rule covers a narrow card and a full-width one.
+ */
+.record-section__fields--grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  column-gap: var(--slds-g-spacing-6, 24px);
+  row-gap: var(--slds-g-spacing-5, 20px);
+}
+
+.record-section__fields--grid .field-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-height: 0;
+}
+
+.record-section__fields--grid .field-row__label {
+  gap: var(--slds-g-spacing-1, 4px);
+}
+
+.record-section__fields--grid .field-row__label-text {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--slds-g-color-on-surface-3, #6b7280);
+}
+
+.record-section__fields--grid .field-row__control,
+.record-section__fields--grid .field-row__value {
+  width: 100%;
+  justify-content: flex-start;
+  text-align: left;
+}
+
+/* Long values wrap inside their cell rather than widening the column. */
+.record-section__fields--grid .field-row__value {
+  display: block;
+  overflow-wrap: anywhere;
 }

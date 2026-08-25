@@ -1,106 +1,20 @@
-/* Hoang Long Vu To — Aug 17, 2026
+/* Hoang Long Vu To — Aug 12, 2026
    Local component stylesheet (shadow DOM). No scoped.css suffix needed. */
 
 :host {
   display: block;
   width: 100%;
   font: inherit;
-  --arc-nav-expanded-width: 280px;
-  --arc-nav-collapsed-width: 56px;
 }
 
 :host([data-collapsed="true"]) {
   width: 100%;
 }
 
-.nav-viewport {
-  display: grid;
-  grid-template: 1fr / 1fr;
-  width: 100%;
-  overflow: hidden;
-  position: relative;
-}
-
-.nav-panel {
-  grid-area: 1 / 1;
-  justify-self: start;
-  overflow: hidden;
-  transition: transform 0.22s ease;
-  will-change: transform;
-}
-
-.nav-panel--expanded {
-  width: var(--arc-nav-expanded-width, 280px);
-}
-
-.nav-panel--collapsed {
-  width: var(--arc-nav-collapsed-width, 56px);
-}
-
-.nav-panel[aria-hidden="true"] {
-  pointer-events: none;
-  visibility: hidden;
-}
-
-/* Resting — expanded */
-.nav-viewport--expanded .nav-panel--expanded {
-  transform: translateX(0);
-}
-
-.nav-viewport--expanded .nav-panel--collapsed {
-  transform: translateX(-100%);
-}
-
-/* Resting — collapsed */
-.nav-viewport--collapsed .nav-panel--expanded {
-  transform: translateX(-100%);
-}
-
-.nav-viewport--collapsed .nav-panel--collapsed {
-  transform: translateX(0);
-}
-
-/* Collapse phase 1: full nav slides out to the left */
-.nav-viewport--collapse-exit .nav-panel--expanded {
-  transform: translateX(-100%);
-}
-
-.nav-viewport--collapse-exit .nav-panel--collapsed {
-  transform: translateX(-100%);
-}
-
-/* Collapse phase 2: icon rail slides in from the left */
-.nav-viewport--collapse-enter .nav-panel--expanded {
-  transform: translateX(-100%);
-}
-
-.nav-viewport--collapse-enter .nav-panel--collapsed {
-  transform: translateX(0);
-}
-
-/* Expand phase 1: icon rail slides out to the left */
-.nav-viewport--expand-exit .nav-panel--expanded {
-  transform: translateX(-100%);
-}
-
-.nav-viewport--expand-exit .nav-panel--collapsed {
-  transform: translateX(-100%);
-}
-
-/* Expand phase 2: full nav slides in from the left */
-.nav-viewport--expand-enter .nav-panel--expanded {
-  transform: translateX(0);
-}
-
-.nav-viewport--expand-enter .nav-panel--collapsed {
-  transform: translateX(-100%);
-}
-
 .nav-sidebar {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 12px 0;
+  padding: 8px 0;
   font: inherit;
 }
 
@@ -109,10 +23,89 @@
   flex-direction: column;
 }
 
+/*
+ * Hangs the trailing divider — and so Apps with it — at the foot of the rail.
+ *
+ * The auto margin needs slack to consume, and the nav only ever grew to its
+ * own content height (385px inside a 972px rail). It cannot simply inherit the
+ * rail's height: the platform's region and component wrappers that sit between
+ * this component and .theme-layout__sidebar are plain blocks, so neither a
+ * percentage height nor a stretched flex child can be threaded down through
+ * them, and they are not ours to restyle.
+ *
+ * Deriving it in CSS does not work either — calc(100vh - header) overshot by
+ * exactly the 30px the site footer takes out of the shell.
+ *
+ * So themeLayoutSidebar measures the rail and publishes --arc-rail-height,
+ * which inherits down through the sidebar slot. That tracks the header, the
+ * footer and the viewport together, with no arithmetic here to fall out of
+ * step with the shell.
+ *
+ * min-height, not height: when the menu outgrows the rail — the expanded
+ * state does — it keeps growing, the sidebar scrolls as before, and the auto
+ * margin quietly has no slack to take.
+ *
+ * Desktop only. Below the layout's 768px breakpoint the shell stacks and the
+ * sidebar becomes an ordinary full-width block, where holding a rail's worth
+ * of height would push the page content off-screen.
+ */
+@media (min-width: 769px) {
+  .nav-sidebar {
+    min-height: var(--arc-rail-height, 0px);
+  }
+
+  .nav-entry--starts-footer {
+    margin-top: auto;
+  }
+}
+
+/*
+ * Sits at the very bottom of the rail, below every nav item, the same way
+ * nav-entry--starts-footer does — margin-top: auto only has slack to consume
+ * once the rail is at least as tall as its content, which is what the
+ * min-height rule above sets up.
+ *
+ * min-width: 0 overrides the flex item default of min-width: auto, which
+ * otherwise takes its minimum from the wordmark's own intrinsic width — a
+ * flex column can never shrink narrower than the widest thing a min-width:
+ * auto child is holding onto, so the whole rail refused to collapse below the
+ * wordmark's width, wordmark hidden or not.
+ */
+.nav-footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  padding: 16px 16px 16px;
+}
+
+.nav-footer__divider {
+  width: 100%;
+  border-top: 1px solid var(--div-color-sidebar-border, #d1d5db);
+  margin: 0 0 16px;
+}
+
+.nav-footer__logo {
+  max-width: 140px;
+  width: 100%;
+  height: auto;
+}
+
+/* The wordmark reads left-to-right; the collapsed rail is icon width only, so
+   it swaps for the circle mark alone rather than disappearing. */
+.nav-footer__logo--circle {
+  width: 28px;
+  height: 28px;
+}
+
+.nav-sidebar--collapsed .nav-footer {
+  padding: 16px 8px;
+}
+
 .nav-group {
   display: flex;
   flex-direction: column;
-  gap: 2px;
 }
 
 .nav-group__label {
@@ -122,7 +115,7 @@
   min-height: 40px;
   padding: 0 12px 0 16px;
   font: inherit;
-  color: #4b5563;
+  color: var(--div-color-gray-600, #4b5563);
 }
 
 .nav-group__leading {
@@ -135,33 +128,28 @@
 
 .nav-group__header {
   display: flex;
-  align-items: stretch;
+  align-items: center;
+  gap: 8px;
   width: 100%;
   min-height: 40px;
-}
-
-.nav-group__header .nav-item {
-  flex: 1;
-  min-width: 0;
-  padding-right: 4px;
-}
-
-.nav-group__chevron-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  min-width: 32px;
-  padding: 0 8px 0 4px;
+  padding: 0 12px 0 16px;
   border: 0;
+  border-left: 3px solid transparent;
   background: transparent;
+  font: inherit;
+  color: var(--div-color-gray-600, #4b5563);
+  text-align: left;
   cursor: pointer;
-  color: inherit;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
 }
 
-.nav-group__chevron-button:hover,
-.nav-group__chevron-button:focus-visible {
-  background: #e2f8ff;
+.nav-group__header:hover,
+.nav-group__header:focus-visible {
+  background: var(--div-color-sidebar-active-bg, #e2f8ff);
+  border-left-color: var(--div-color-sidebar-active-border, #0f406f);
+  color: var(--div-color-sidebar-active-text, #071c31);
   outline: none;
 }
 
@@ -170,9 +158,40 @@
   min-width: 0;
 }
 
+.nav-group__chevron-hitbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 8px;
+  margin: -8px;
+  border-radius: var(--div-radius-1, 4px);
+}
+
+.nav-group__chevron-hitbox:hover {
+  background: var(--div-color-gray-100, #f3f4f6);
+}
+
 .nav-group__chevron {
   flex-shrink: 0;
-  --slds-c-icon-color-foreground-default: #9ca3af;
+  --slds-c-icon-color-foreground-default: var(--div-color-gray-400, #9ca3af);
+}
+
+.nav-item__badge {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 4px 8px;
+  border-radius: var(--div-radius-2, 8px);
+  background: var(--div-color-warning-container, #fef3c7);
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--div-color-amber-700, #b45309);
+  white-space: nowrap;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .nav-item {
@@ -184,62 +203,40 @@
   border-radius: 0;
   border-left: 3px solid transparent;
   font: inherit;
-  color: #4b5563;
+  color: var(--div-color-gray-600, #4b5563);
   text-decoration: none;
   cursor: pointer;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .nav-item:hover {
-  background: #e2f8ff;
-  border-left-color: #0f406f;
-  color: #071c31;
+  background: var(--div-color-sidebar-hover-bg, #e2f8ff);
+  border-left-color: var(--div-color-sidebar-active-border, #0f406f);
+  color: var(--div-color-sidebar-active-text, #071c31);
   text-decoration: none;
 }
 
 .nav-item:focus-visible {
-  outline: 2px solid #1a76bb;
+  outline: 2px solid var(--div-color-focus, #1a76bb);
   outline-offset: -2px;
 }
 
 .nav-item--active {
-  background: #e2f8ff;
-  border-left-color: #0f406f;
+  background: var(--div-color-sidebar-active-bg, #e2f8ff);
+  border-left-color: var(--div-color-sidebar-active-border, #0f406f);
   font-weight: 600;
-  color: #071c31;
+  color: var(--div-color-sidebar-active-text, #071c31);
 }
 
 .nav-item--active:hover {
-  background: #e2f8ff;
-}
-
-.nav-item--coming-soon {
-  cursor: default;
-  min-width: 0;
-  padding-right: 8px;
-  pointer-events: none;
-}
-
-.nav-item--coming-soon:hover {
-  background: transparent;
-  border-left-color: transparent;
-  color: #4b5563;
-}
-
-.nav-item--coming-soon .nav-item__label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.nav-item__coming-pill {
-  flex-shrink: 0;
+  background: var(--div-color-sidebar-active-bg, #e2f8ff);
 }
 
 .nav-group__children {
   display: flex;
   flex-direction: column;
-  gap: 2px;
 }
 
 .nav-group__children--collapsed {
@@ -271,16 +268,103 @@
 }
 
 .nav-divider {
-  border-top: 1px solid #d1d5db;
+  border-top: 1px solid var(--div-color-sidebar-border, #d1d5db);
   margin: 8px 12px;
 }
 
+/* ---- Collapsed flyout ---------------------------------------------------
+ * Collapsed, a group is a bare icon and its children are unreachable. This
+ * shows them in a panel beside the icon, on hover and on keyboard focus.
+ *
+ * position: fixed because the rail clips horizontally — .theme-layout__sidebar
+ * carries overflow-x: hidden — so an absolutely positioned panel would be
+ * sheared off at the rail's edge. Fixed escapes the clip; handleFlyoutOpen
+ * supplies the coordinates, since fixed no longer follows the icon on its own.
+ *
+ * Hidden with visibility and opacity, never display: none, for two reasons:
+ * the panel has to be measurable while closed so its height can be kept clear
+ * of the bottom of the window, and it lets the fade run.
+ * ------------------------------------------------------------------------ */
+.nav-flyout-anchor {
+  display: block;
+}
+
+.nav-flyout {
+  position: fixed;
+  z-index: 20;
+  min-width: 208px;
+  padding: 8px;
+  border: 1px solid var(--div-color-sidebar-border, #d1d5db);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(3, 45, 96, 0.16);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  /* Closing is delayed by 150ms; opening is not. The panel sits outside the
+     rail, so a pointer heading for it can clip a neighbouring icon on the way
+     across — without the grace period the menu snaps shut mid-reach. */
+  transition:
+    opacity 0.12s ease 0.15s,
+    visibility 0s linear 0.27s;
+}
+
+/*
+ * The panel is a child of the anchor, so :hover holds while the pointer
+ * travels from the icon onto the menu — they sit edge to edge, with no gap to
+ * cross. :focus-within does the same for the keyboard: tabbing to the icon
+ * opens it and tabbing on walks the children.
+ */
+.nav-sidebar--collapsed .nav-flyout-anchor:hover .nav-flyout,
+.nav-sidebar--collapsed .nav-flyout-anchor:focus-within .nav-flyout {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    opacity 0.12s ease 0s,
+    visibility 0s linear 0s;
+}
+
+.nav-flyout__title {
+  margin: 0 0 4px;
+  padding: 4px 10px;
+  color: var(--div-color-gray-500, #6b7280);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 17px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.nav-flyout__link {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: var(--div-color-gray-600, #4b5563);
+  font-size: 14px;
+  line-height: 19px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.nav-flyout__link:hover,
+.nav-flyout__link:focus-visible {
+  background: var(--div-color-gray-100, #f3f4f6);
+  color: var(--div-color-sidebar-active-text, #071c31);
+}
+
+.nav-flyout__link--active {
+  background: var(--div-color-sidebar-active-bg, #e2f8ff);
+  color: var(--div-color-sidebar-active-text, #071c31);
+  font-weight: 600;
+}
+
 .nav-group__children .nav-item {
-  padding-left: 28px;
+  padding-left: 32px;
 }
 
 .nav-sidebar--collapsed {
-  align-items: center;
+  align-items: stretch;
   padding: 8px 0;
   gap: 4px;
 }
@@ -290,47 +374,50 @@
 }
 
 .nav-sidebar--collapsed .nav-item {
+  box-sizing: border-box;
   justify-content: center;
   gap: 0;
   width: 100%;
   min-height: 40px;
   padding: 0;
+  margin: 0;
   border-left-width: 3px;
 }
 
 .nav-sidebar--collapsed .nav-group__header {
+  box-sizing: border-box;
   justify-content: center;
+  gap: 0;
+  width: 100%;
   min-height: 40px;
+  padding: 0;
+  margin: 0;
 }
 
-.nav-sidebar--collapsed .nav-group__chevron-button,
+.nav-sidebar--collapsed .nav-group__chevron,
 .nav-sidebar--collapsed .nav-group__title,
 .nav-sidebar--collapsed .nav-group__children,
 .nav-sidebar--collapsed .nav-item__label,
-.nav-sidebar--collapsed .nav-item__label--hidden,
-.nav-sidebar--collapsed .nav-item__coming-pill {
+.nav-sidebar--collapsed .nav-item__label--hidden {
   display: none;
 }
 
 .nav-sidebar--collapsed .nav-divider {
+  height: 1px;
+  border-top: 0;
+  background: var(--div-color-sidebar-border, #d1d5db);
   margin: 8px 12px;
   align-self: stretch;
 }
 
 .nav-sidebar--collapsed .nav-item--active {
-  background: #e2f8ff;
-  border-left-color: #0f406f;
-  color: #071c31;
+  background: var(--div-color-sidebar-active-bg, #e2f8ff);
+  border-left-color: var(--div-color-sidebar-active-border, #0f406f);
+  color: var(--div-color-sidebar-active-text, #071c31);
 }
 
 .nav-sidebar--collapsed .nav-item:hover {
-  background: #e2f8ff;
-  border-left-color: #0f406f;
-  color: #071c31;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .nav-panel {
-    transition: none;
-  }
+  background: var(--div-color-sidebar-active-bg, #e2f8ff);
+  border-left-color: var(--div-color-sidebar-active-border, #0f406f);
+  color: var(--div-color-sidebar-active-text, #071c31);
 }

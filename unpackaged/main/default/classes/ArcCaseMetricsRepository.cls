@@ -20,7 +20,7 @@ public with sharing class ArcCaseMetricsRepository {
   }
 
   public ArcCaseMetricsModels.MetricsResult selectMetrics(
-    ARCConstants.RelatedTableScope scope
+    ArcRelatedTableScope.Value scope
   ) {
     ArcCaseMetricsModels.MetricsResult metrics = new ArcCaseMetricsModels.MetricsResult();
     List<Case> caseRecords = selectCases(scope);
@@ -61,35 +61,28 @@ public with sharing class ArcCaseMetricsRepository {
     return metrics;
   }
 
-  private List<Case> selectCases(ARCConstants.RelatedTableScope scope) {
+  private List<Case> selectCases(ArcRelatedTableScope.Value scope) {
     Id currentUserId = UserInfo.getUserId();
 
-    if (scope == ARCConstants.RelatedTableScope.MINE) {
-      return selectOwnedOpenCases(currentUserId);
+    if (scope == ArcRelatedTableScope.Value.MINE) {
+      return [
+        SELECT Id, MilestoneStatus
+        FROM Case
+        WHERE OwnerId = :currentUserId AND IsClosed = FALSE
+        WITH SECURITY_ENFORCED
+      ];
     }
 
     FinancialAdvisorTeamAccessService.TeamAccessContext teamAccess = teamAccessService.getCurrentUserTeamAccess();
-    Set<Id> teamIds = teamAccess.teamIds;
-
-    if (teamIds.isEmpty()) {
-      return selectOwnedOpenCases(currentUserId);
+    if (teamAccess.teamIds.isEmpty()) {
+      return new List<Case>();
     }
 
+    Set<Id> teamIds = teamAccess.teamIds;
     return [
       SELECT Id, MilestoneStatus
       FROM Case
-      WHERE
-        IsClosed = FALSE
-        AND (OwnerId = :currentUserId OR Financial_Advisor_Team__c IN :teamIds)
-      WITH SECURITY_ENFORCED
-    ];
-  }
-
-  private List<Case> selectOwnedOpenCases(Id ownerId) {
-    return [
-      SELECT Id, MilestoneStatus
-      FROM Case
-      WHERE OwnerId = :ownerId AND IsClosed = FALSE
+      WHERE Financial_Advisor_Team__c IN :teamIds AND IsClosed = FALSE
       WITH SECURITY_ENFORCED
     ];
   }

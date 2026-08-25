@@ -1,0 +1,69 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-06-22 -->
+<template>
+  <div class="div-table-card">
+    <div class="div-table-scroll">
+      <table class="div-table" aria-label="Related client accounts">
+      <thead>
+        <tr>
+          <template for:each={headerColumns} for:item="column">
+            <th
+              key={column.key}
+              scope="col"
+              class={column.headerClass}
+              aria-sort={column.ariaSort}
+            >
+              <button
+                type="button"
+                class="div-table__sort-button"
+                data-field={column.fieldName}
+                onclick={handleSort}
+              >
+                <span>{column.label}</span>
+                <lightning-icon
+                  icon-name={column.sortIcon}
+                  size="xx-small"
+                  class={column.sortIconClass}
+                  aria-hidden="true"
+                ></lightning-icon>
+              </button>
+            </th>
+          </template>
+        </tr>
+      </thead>
+      <tbody>
+        <template for:each={decoratedRows} for:item="entry">
+          <template lwc:if={entry.isGroup}>
+            <tr key={entry.key} class="div-table__group-header">
+              <td colspan={entry.colspan}>{entry.label}</td>
+            </tr>
+          </template>
+          <template lwc:else>
+            <tr key={entry.key}>
+              <template for:each={entry.cells} for:item="cell">
+                <td key={cell.key} data-label={cell.label} class={cell.cellClass}>
+                  <template lwc:if={cell.isNavigableLink}>
+                    <button
+                      type="button"
+                      class="div-table__link"
+                      data-account-id={cell.accountId}
+                      onclick={handleAccountNavigate}
+                    >
+                      {cell.value}
+                    </button>
+                  </template>
+                  <template lwc:elseif={cell.isStyledLink}>
+                    <span class="div-table__link">{cell.value}</span>
+                  </template>
+                  <template lwc:else>
+                    {cell.value}
+                  </template>
+                </td>
+              </template>
+            </tr>
+          </template>
+        </template>
+      </tbody>
+      </table>
+    </div>
+  </div>
+</template>

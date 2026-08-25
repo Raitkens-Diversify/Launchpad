@@ -1,0 +1,123 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-07-14 -->
+<template>
+  <div class="div-saved-views" role="dialog" aria-label="Saved views">
+    <div class="div-saved-views__actions">
+      <template lwc:if={showSaveChanges}>
+        <button
+          type="button"
+          class="div-toolbar__button div-toolbar__button--primary"
+          onclick={handleUpdateView}
+        >
+          Save changes
+        </button>
+      </template>
+      <button
+        type="button"
+        class={saveAsNewButtonClass}
+        onclick={handleOpenSavePrompt}
+      >
+        {saveNewViewLabel}
+      </button>
+    </div>
+
+    <template lwc:if={isSavePromptOpen}>
+      <section class="div-saved-views__prompt" role="dialog" aria-labelledby="saved-view-prompt-title">
+        <h3 id="saved-view-prompt-title" class="div-saved-views__prompt-title">{savePromptTitle}</h3>
+        <p class="div-saved-views__prompt-hint">{savePromptHint}</p>
+        <label class="div-saved-views__label" for="saved-view-name">View name</label>
+        <input
+          id="saved-view-name"
+          class="div-saved-views__input"
+          type="text"
+          value={draftViewName}
+          placeholder="My filtered view"
+          aria-invalid={hasNameError}
+          aria-describedby="saved-view-name-error"
+          oninput={handleDraftViewNameChange}
+          onkeydown={handlePromptKeyDown}
+        />
+        <template lwc:if={nameError}>
+          <p id="saved-view-name-error" class="div-saved-views__error" role="alert">{nameError}</p>
+        </template>
+        <div class="div-saved-views__prompt-actions">
+          <button type="button" class="div-toolbar__button" onclick={handleCancelSavePrompt}>
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="div-toolbar__button div-toolbar__button--primary"
+            onclick={handleConfirmSaveView}
+          >
+            Save
+          </button>
+        </div>
+      </section>
+    </template>
+
+    <template lwc:if={hasSavedViews}>
+      <ul class="div-saved-views__list" role="list">
+        <template for:each={decoratedViews} for:item="view">
+          <li key={view.key} class={view.itemClass}>
+            <div class="div-saved-views__item-main">
+              <template lwc:if={view.isEditing}>
+                <input
+                  class={view.renameInputClass}
+                  type="text"
+                  value={draftRenameName}
+                  data-view-id={view.id}
+                  aria-label={view.renameAriaLabel}
+                  aria-invalid={view.hasRenameError}
+                  aria-describedby={view.renameErrorId}
+                  oninput={handleRenameInput}
+                  onblur={handleRenameBlur}
+                  onkeydown={handleRenameKeyDown}
+                />
+                <template lwc:if={view.hasRenameError}>
+                  <p id={view.renameErrorId} class="div-saved-views__rename-error" role="alert">
+                    {renameError}
+                  </p>
+                </template>
+              </template>
+              <template lwc:else>
+                <button
+                  type="button"
+                  class={view.applyButtonClass}
+                  data-id={view.id}
+                  aria-current={view.ariaCurrent}
+                  onclick={handleApplyView}
+                >
+                  <template lwc:if={view.showUnsavedIndicator}>
+                    <span class="div-saved-views__unsaved-indicator" aria-label="Unsaved changes"></span>
+                  </template>
+                  <span>{view.name}</span>
+                </button>
+              </template>
+            </div>
+            <div class="div-saved-views__item-actions">
+              <template lwc:if={view.showRenameButton}>
+                <button
+                  type="button"
+                  class="div-saved-views__rename"
+                  data-id={view.id}
+                  aria-label={view.renameAriaLabel}
+                  onclick={handleStartRename}
+                >
+                  <lightning-icon icon-name="utility:edit" size="x-small" aria-hidden="true"></lightning-icon>
+                </button>
+              </template>
+              <button
+                type="button"
+                class="div-saved-views__delete"
+                data-id={view.id}
+                aria-label={view.deleteAriaLabel}
+                onclick={handleDeleteView}
+              >
+                <lightning-icon icon-name="utility:delete" size="x-small" aria-hidden="true"></lightning-icon>
+              </button>
+            </div>
+          </li>
+        </template>
+      </ul>
+    </template>
+  </div>
+</template>

@@ -9,7 +9,7 @@ public with sharing class ArcCaseMetricsController {
 
   @AuraEnabled(cacheable=true)
   public static ArcCaseMetricsModels.MetricsResult getCaseMetrics(String scope) {
-    ARCConstants.RelatedTableScope resolvedScope = ARCUtil.relatedTableScopeFromValue(
+    ArcRelatedTableScope.Value resolvedScope = ArcRelatedTableScope.fromValue(
       scope
     );
     return REPOSITORY.selectMetrics(resolvedScope);

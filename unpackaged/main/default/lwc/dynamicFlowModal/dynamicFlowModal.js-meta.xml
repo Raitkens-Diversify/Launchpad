@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle
+    xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>67.0</apiVersion>
+    <isExposed>true</isExposed>
+	<masterLabel>Dynamic Flow Modal</masterLabel>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+
+            <property
+                name="flowApiName"
+                type="String"
+                label="Flow API Name"
+                description="Enter the API name of the Screen Flow"
+                required="true"/>
+ 			<property
+                name="buttonLabel"
+                type="String"
+                label="Button Label"
+                description="Enter the Button Label"
+                required="true"/>
+            <property
+                name="recordId"
+                type="String"
+                label="Record Id"
+                description=""
+                />
+        </targetConfig>
+    </targetConfigs>
+
+</LightningComponentBundle>

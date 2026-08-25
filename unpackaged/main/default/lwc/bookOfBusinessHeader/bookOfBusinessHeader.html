@@ -1,0 +1,18 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-06-22 -->
+<template>
+  <header class="div-page-header">
+    <h1 class="div-page-header__title">{title}</h1>
+    <p class="div-page-header__subtitle">{subtitle}</p>
+    <div class="div-header-meta">
+      <span class="div-header-meta__item">
+        <lightning-icon icon-name="utility:user" size="xx-small" aria-hidden="true"></lightning-icon>
+        <span>{accountCount} client accounts</span>
+      </span>
+      <span class="div-header-meta__separator" aria-hidden="true">·</span>
+      <span class="div-header-meta__item">
+        <lightning-icon icon-name="utility:currency" size="xx-small" aria-hidden="true"></lightning-icon>
+        <span class="div-header-meta__value">{totalAumLabel} AUM</span>
+      </span>
+    </div>
+  </header>
+</template>

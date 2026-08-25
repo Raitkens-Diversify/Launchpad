@@ -1,85 +1,160 @@
-/* Author: Hoang Long Vu To | Date: 2026-08-17 */
+/* Author: Hoang Long Vu To | Date: 2026-08-11 */
 
 :host {
   display: block;
-  --arc-recently-viewed-item-height: 4.125rem;
-  --arc-recently-viewed-max-items: 10;
+  /* The card sits as a flex item in the layout column's own column-content
+     flex box, whose height comes from the tallest card in the row. height:100%
+     alone resolved to auto there — the column's height is stretched rather
+     than definite — so the shorter of two side-by-side cards stopped at its
+     content and left a gap under it. Growing as a flex item is what actually
+     fills the column. */
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
 }
 
 .arc-recently-viewed {
-  width: 100%;
-  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  overflow: hidden;
+  background: var(--div-color-white, #ffffff);
+  border: 1px solid var(--div-color-border-1, #d1d5db);
+  border-radius: 8px;
+}
+
+.arc-recently-viewed__content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+.arc-recently-viewed__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.arc-recently-viewed__title-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   min-width: 0;
 }
 
-.arc-recently-viewed .div-table-title {
-  margin: 0 0 0.75rem;
+.arc-recently-viewed__title {
+  margin: 0;
+  font-family: var(--div-font-family-base, "Inter", sans-serif);
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 19px;
+  color: var(--div-color-on-surface-1, #4b5563);
 }
 
-.arc-recently-viewed__card {
-  overflow: hidden;
+.arc-recently-viewed__info-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  display: block;
+  background-color: var(--div-color-on-surface-1, #4b5563);
+  -webkit-mask-image: var(--icon-url);
+  mask-image: var(--icon-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
 }
 
-.arc-recently-viewed__body {
-  flex: 0 0 auto;
-  height: calc(
-    var(--arc-recently-viewed-item-height) * var(--arc-recently-viewed-max-items)
-  );
-  max-height: calc(
-    var(--arc-recently-viewed-item-height) * var(--arc-recently-viewed-max-items)
-  );
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
+.arc-recently-viewed__overflow-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: var(--div-color-on-surface-1, #4b5563);
+}
+
+.arc-recently-viewed__overflow-icon {
+  width: 14px;
+  height: 14px;
+  display: block;
+  background-color: currentColor;
+  -webkit-mask-image: var(--icon-url);
+  mask-image: var(--icon-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
 }
 
 .arc-recently-viewed__loading,
 .arc-recently-viewed__empty {
   display: flex;
-  align-items: center;
   justify-content: center;
-  min-height: calc(
-    var(--arc-recently-viewed-item-height) * var(--arc-recently-viewed-max-items)
-  );
-  padding: var(--div-space-6, 1.5rem) var(--div-space-4, 1rem);
+  padding: 24px 0;
   color: var(--div-color-text-muted, #6b7280);
-  font-size: var(--div-font-scale-base, 1rem);
+  font-size: 13px;
 }
 
+/* min-height is set inline from displayLimit — see listStyle. Reserving the
+   space for a full card is what keeps two side-by-side cards the same height
+   whatever they each happen to hold, without depending on the page's layout
+   stretching them: the earlier CSS answer only worked once published, because
+   Experience Builder's preview wraps every component in a display:inline node
+   that a percentage height cannot resolve against. */
 .arc-recently-viewed__list {
+  /* content-box so the reserved min-height counts rows only. Under the
+     inherited border-box it also had to cover this rule's own padding and
+     border, which left a full card 17px taller than the reservation and put
+     the two cards back out of step by exactly that much. */
+  box-sizing: content-box;
   margin: 0;
-  padding: 0;
+  padding-top: 16px;
   list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-top: 1px solid var(--div-color-border-1, #d1d5db);
 }
 
+/* A uniform row, so the reserved height above is arithmetic rather than a
+   guess: a row with a subtitle and one without occupy the same space. */
 .arc-recently-viewed__item {
-  height: var(--arc-recently-viewed-item-height);
-  flex-shrink: 0;
+  /* Fixed, not a minimum: the reserved list height above is row-count
+     arithmetic, so a single row growing by one line puts the two cards out of
+     step again. Name and metadata are each clamped to one line, so 40px holds
+     both without clipping anything that was visible before. */
+  height: 40px;
+  overflow: hidden;
 }
 
 .arc-recently-viewed__row {
   display: flex;
-  align-items: center;
-  gap: var(--div-space-3, 0.75rem);
+  align-items: flex-start;
+  gap: 8px;
   width: 100%;
-  height: 100%;
-  min-height: var(--arc-recently-viewed-item-height);
-  box-sizing: border-box;
-  padding: 0.875rem 1rem;
   border: 0;
   background: transparent;
   text-align: left;
   text-decoration: none;
   color: inherit;
   cursor: pointer;
-  transition: background-color 120ms ease;
 }
 
 .arc-recently-viewed__row:hover,
 .arc-recently-viewed__row:focus-visible {
-  background: var(--div-color-surface-subtle, #f9fafb);
-  outline: none;
   text-decoration: none;
 }
 
@@ -88,17 +163,15 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 1.125rem;
-  height: 1.125rem;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
 }
 
 .arc-recently-viewed__icon {
   width: 100%;
   height: 100%;
   display: block;
-}
-
-.arc-recently-viewed__icon--asset {
   background-color: var(--icon-color, var(--div-color-success-dark, #16a34a));
   -webkit-mask-image: var(--icon-url);
   mask-image: var(--icon-url);
@@ -110,64 +183,101 @@
   mask-position: center;
 }
 
-.arc-recently-viewed__content {
+.arc-recently-viewed__content-text {
   display: flex;
   flex-direction: column;
-  gap: 0.125rem;
+  gap: 4px;
   min-width: 0;
   flex: 1;
 }
 
 .arc-recently-viewed__name {
-  font-family: var(--div-font-family-base);
-  font-size: var(--div-font-scale-base, 1rem);
-  font-weight: var(--div-font-weight-semibold, 600);
-  line-height: 1.125rem;
-  color: var(--div-color-on-surface-2, #374151);
+  font-family: var(--div-font-family-base, "Inter", sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--div-color-on-surface-1, #4b5563);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .arc-recently-viewed__metadata {
-  font-family: var(--div-font-family-base);
-  font-size: var(--div-font-scale-sm, 0.75rem);
-  font-weight: var(--div-font-weight-regular, 400);
-  line-height: 1.125rem;
-  color: var(--div-color-text-muted, #6b7280);
+  font-family: var(--div-font-family-base, "Inter", sans-serif);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  color: var(--div-color-on-surface-1, #4b5563);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .arc-recently-viewed__chevron {
+  width: 14px;
+  height: 14px;
   flex-shrink: 0;
-  --slds-c-icon-color-foreground-default: var(--div-color-text-muted, #9ca3af);
+  margin-top: 1px;
+  display: block;
+  background-color: var(--div-color-on-disabled-1, #838a97);
+  -webkit-mask-image: var(--icon-url);
+  mask-image: var(--icon-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.arc-recently-viewed__footer-wrap {
+  flex-shrink: 0;
+  padding: 0 16px;
 }
 
 .arc-recently-viewed__footer {
-  justify-content: stretch;
-  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--div-color-border-1, #d1d5db);
 }
 
-.arc-recently-viewed__footer-pager {
-  justify-content: flex-end;
+.arc-recently-viewed__count {
+  font-family: var(--div-font-family-base, "Inter", sans-serif);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--div-color-on-disabled-1, #838a97);
 }
 
 .arc-recently-viewed__view-all {
   display: inline-flex;
   align-items: center;
-  gap: 0.125rem;
-  color: var(--div-color-blue-600, #2563eb);
-  text-decoration: none;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  padding: 0;
   cursor: pointer;
-}
-
-.arc-recently-viewed__view-all:hover,
-.arc-recently-viewed__view-all:focus-visible {
-  outline: none;
+  font-family: var(--div-font-family-base, "Inter", sans-serif);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 19px;
+  color: var(--div-color-accent-2, #0b2f51);
 }
 
 .arc-recently-viewed__view-all-icon {
-  --slds-c-icon-color-foreground-default: var(--div-color-blue-600, #2563eb);
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  display: block;
+  background-color: currentColor;
+  -webkit-mask-image: var(--icon-url);
+  mask-image: var(--icon-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
 }

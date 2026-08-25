@@ -1,0 +1,179 @@
+:host {
+    display: block;
+
+    /* Self-declared --slds-g-* set (same values as arcLanding/arcArticleBrowser).
+       Declared locally, not inherited: LWR sites inject real SLDS2 styling hooks
+       under these names into each component scope, and those beat values inherited
+       from an ancestor's :host — keeping the two surfaces identical. */
+    --slds-g-spacing-1: 4px;
+    --slds-g-spacing-2: 0.5rem;
+    --slds-g-spacing-3: 0.75rem;
+    --slds-g-spacing-4: 1rem;
+    --slds-g-spacing-5: 24px;
+    --slds-g-radius-border-2: 0.5rem;
+    --slds-g-font-family-base: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    --slds-g-font-scale-1: 14px;
+    --slds-g-font-scale-2: 0.875rem;
+    --slds-g-font-scale-3: 1.25rem;
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-border-2: #b6bcc5;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-accent-3: #071c31;
+    --slds-g-color-on-accent-1: #ffffff;
+    --slds-g-color-accent-container-1: #0f406f;
+}
+
+/* Same card recipe as the list page's .arc__section so both pages share one
+   surface language: white on the gray page bg, border (no shadow), 10px radius. */
+.arc-article {
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+    padding: var(--ds-space-2xl, 32px);
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.arc-article__title {
+    margin: 0 0 var(--slds-g-spacing-3, 12px);
+    font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+    font-size: 1.75rem;
+    line-height: 1.25;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+/* Lede: bigger, quieter than the title, closed by a divider that separates the
+   header zone from the body. */
+.arc-article__summary {
+    margin: 0 0 var(--slds-g-spacing-5, 24px);
+    max-width: var(--arc-article-measure, 72ch);
+    padding-bottom: var(--slds-g-spacing-5, 24px);
+    border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    font-size: var(--slds-g-font-scale-3, 1.25rem);
+    line-height: 1.5;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* ---- "In this article" anchor nav ---- */
+.arc-article__toc {
+    margin: 0 0 var(--slds-g-spacing-5, 24px);
+    max-width: var(--arc-article-measure, 72ch);
+}
+
+.arc-article__toc-title {
+    display: block;
+    margin-bottom: var(--slds-g-spacing-2, 8px);
+    font-size: var(--slds-g-font-scale-2, 0.875rem);
+    font-weight: 700;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.arc-article__toc-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-1, 4px);
+}
+
+.arc-article__toc-link {
+    color: var(--ds-medium-blue, #1a76bb);
+    font-size: 0.9375rem;
+    text-decoration: none;
+}
+
+.arc-article__toc-link:hover {
+    text-decoration: underline;
+}
+
+.arc-article__toc-link--sub {
+    padding-left: var(--slds-g-spacing-4, 16px);
+}
+
+/* ---- Body (manual DOM; selectors below style the injected rich text) ---- */
+.arc-article__body {
+    max-width: var(--arc-article-measure, 72ch);
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+.arc-article__body h2 {
+    margin: var(--ds-space-2xl, 32px) 0 var(--slds-g-spacing-3, 12px);
+    font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    /* Clear the sticky brand header when the "In this article" nav jumps here. */
+    scroll-margin-top: 80px;
+}
+
+.arc-article__body h3 {
+    margin: var(--slds-g-spacing-5, 24px) 0 var(--slds-g-spacing-2, 8px);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    scroll-margin-top: 80px;
+}
+
+.arc-article__body h2:first-child,
+.arc-article__body h3:first-child {
+    margin-top: 0;
+}
+
+.arc-article__body p,
+.arc-article__body ul,
+.arc-article__body ol {
+    margin: 0 0 var(--slds-g-spacing-4, 16px);
+}
+
+.arc-article__body ul,
+.arc-article__body ol {
+    padding-left: var(--slds-g-spacing-5, 24px);
+}
+
+.arc-article__body a {
+    color: var(--ds-medium-blue, #1a76bb);
+}
+
+.arc-article__body img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--ds-radius-sm, 6px);
+}
+
+/* Interactive embed (e.g. Scribe): full card width, generous height. */
+.arc-article__embed {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: 800px;
+    min-height: 640px;
+    margin-top: var(--slds-g-spacing-5, 24px);
+    border: 0;
+    border-radius: var(--ds-radius-md, 8px);
+}
+
+.arc-article__status {
+    padding: var(--slds-g-spacing-5, 24px);
+    text-align: center;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.arc-article__error {
+    color: var(--ds-error-text, #a83232);
+}
+
+@media (max-width: 768px) {
+    .arc-article {
+        padding: var(--slds-g-spacing-5, 24px);
+    }
+}

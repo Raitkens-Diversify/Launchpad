@@ -1,0 +1,52 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-08-11 -->
+<template>
+  <div class="div-view arc-related-table">
+    <template lwc:if={errorMessage}>
+      <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+        {errorMessage}
+      </div>
+    </template>
+
+    <div class="arc-related-table__controls">
+      <div class="arc-related-table__header">
+        <h1 class="div-table-title">{title}</h1>
+      </div>
+
+      <c-div-list-toolbar
+        search-value={searchTerm}
+        search-placeholder="Search..."
+        scope-options={scopeOptions}
+        scope-value={scope}
+        scope-label="Record scope"
+        onsearch={handleSearchChange}
+        onscopechange={handleScopeChange}
+      ></c-div-list-toolbar>
+    </div>
+
+    <template lwc:if={isLoading}>
+      <c-arc-loading-spinner alternative-text="Loading records" size="small"></c-arc-loading-spinner>
+    </template>
+
+    <template lwc:elseif={hasRows}>
+      <c-styled-data-table
+        aria-label={title}
+        key-field="id"
+        columns={columns}
+        data={tableRows}
+        default-sort-field={defaultSortField}
+        default-sort-direction={defaultSortDirection}
+        enable-pagination
+        page-size={pageSize}
+        page-size-options={pageSizeOptions}
+        link-object-api-name-field="objectApiName"
+        link-query-param-object-api-names="Envelope__c"
+      ></c-styled-data-table>
+    </template>
+
+    <template lwc:else>
+      <div class="arc-related-table__empty" role="status">
+        No records found.
+      </div>
+    </template>
+  </div>
+</template>

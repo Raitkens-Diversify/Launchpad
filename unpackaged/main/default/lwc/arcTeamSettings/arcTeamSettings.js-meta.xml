@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Arc Team Settings</masterLabel>
+    <description>Financial advisor team roster with each member&#39;s role, the team-level view of who holds each permission, and the team&#39;s rep codes</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property name="teamId" type="String" label="Financial Advisor Team Id" description="Show one named team instead of the teams the signed-in user belongs to. Leave blank on the Settings page." />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

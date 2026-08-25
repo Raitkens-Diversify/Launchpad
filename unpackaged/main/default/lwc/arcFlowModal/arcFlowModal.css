@@ -1,25 +1,125 @@
-/**
+/*
  * Author: Hoang Long Vu To
  * Date: 2026-08-14
+ *
+ * The modal chrome is defined here rather than borrowed from the diversifyStyles
+ * static resource. That resource does not resolve on the ARC site — the site
+ * requests /ARC/sfsites/c/resource/diversifyStyles.css and gets a 404 served as
+ * text/html, which the browser then refuses as a stylesheet. The modal still
+ * looked right only because another component on the same page happened to load
+ * the same sheet through the working org-asset URL, and document-level styles
+ * leak into synthetic shadow DOM. On a page where this component is the only one
+ * asking, that accident does not happen and the dialog renders unstyled.
+ *
+ * Values are written as var(--lwc-token, literal) so the dialog tracks an SLDS
+ * theme where there is one and stays correct where there is not.
  */
 
 :host {
   display: contents;
 }
 
+/* The overlay scrolls, not the panel. A combobox inside a flow screen renders
+   its dropdown inline, so any scroll container between it and the viewport
+   clips the list — which is what hid half the Owner choices when the body
+   scrolled instead. */
+.arc-flow-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.arc-flow-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.45);
+}
+
+/* `flex: none` with an explicit min() width, rather than width:100% on a flex
+   item — a short flow screen let the item shrink to its content and the dialog
+   changed width from one screen to the next. `margin: auto` centres it while it
+   fits and lets the overlay scroll once it does not. */
+.arc-flow-modal__panel {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  width: min(100%, 36.75rem);
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+  border-radius: var(--lwc-borderRadiusMedium, 4px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+}
+
+.arc-flow-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--lwc-colorBorder, #c9c9c9);
+}
+
+.arc-flow-modal__intro {
+  min-width: 0;
+}
+
+.arc-flow-modal__title {
+  margin: 0;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 700;
+  color: var(--lwc-colorTextDefault, #181818);
+}
+
+.arc-flow-modal__subtitle {
+  margin: 2px 0 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--lwc-colorTextWeak, #444444);
+}
+
 .arc-flow-modal__close {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex: none;
   min-width: 1.75rem;
   min-height: 1.75rem;
   padding: 0;
+  border: 0;
+  border-radius: var(--lwc-borderRadiusMedium, 4px);
+  background: none;
+  cursor: pointer;
+}
+
+.arc-flow-modal__close:hover,
+.arc-flow-modal__close:focus-visible {
+  background: var(--lwc-colorBackgroundRowHover, #f3f3f3);
 }
 
 .arc-flow-modal__close lightning-icon {
-  --slds-c-icon-color-foreground-default: var(--div-color-text-muted, #706e6b);
+  --slds-c-icon-color-foreground-default: var(--lwc-colorTextWeak, #444444);
 }
 
-.arc-flow-modal__title {
-  font-size: var(--div-font-scale-lg, 1.125rem);
+/* The flow renders its own footer with its own navigation buttons, so the panel
+   does not add a second action row beneath it. Deliberately not a scroll
+   container — see the note on .arc-flow-modal. */
+.arc-flow-modal__body {
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+}
+
+/* Shown only once the flow has finished, where the flow itself no longer offers
+   a button to leave by. */
+.arc-flow-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 16px;
+  border-top: 1px solid var(--lwc-colorBorder, #c9c9c9);
 }

@@ -1,0 +1,50 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-08-11 -->
+<template>
+  <div class="div-filter div-filter--toolbar div-list-toolbar">
+    <template lwc:if={shouldShowSearch}>
+      <div class="div-filter__search div-filter__search--flat">
+        <lightning-icon
+          icon-name="utility:search"
+          size="x-small"
+          class="div-filter__search-icon"
+          aria-hidden="true"
+        ></lightning-icon>
+        <input
+          type="search"
+          class="div-filter__search-input"
+          placeholder={searchPlaceholder}
+          value={searchValue}
+          aria-label={searchPlaceholder}
+          oninput={handleSearchInput}
+        />
+      </div>
+    </template>
+
+    <div class="div-filter__actions div-list-toolbar__actions">
+      <template lwc:if={showFilterButton}>
+        <button
+          type="button"
+          class={filterButtonClass}
+          aria-pressed={filterActive}
+          onclick={handleFilterClick}
+        >
+          <lightning-icon
+            icon-name="utility:filterList"
+            size="xx-small"
+            aria-hidden="true"
+          ></lightning-icon>
+          <span>{filterLabel}</span>
+        </button>
+      </template>
+
+      <template lwc:if={showScopeControl}>
+        <c-div-segmented-control
+          options={scopeOptions}
+          value={scopeValue}
+          group-label={scopeLabel}
+          onchange={handleScopeChange}
+        ></c-div-segmented-control>
+      </template>
+    </div>
+  </div>
+</template>

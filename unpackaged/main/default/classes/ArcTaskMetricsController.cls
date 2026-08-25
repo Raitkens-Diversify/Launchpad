@@ -9,7 +9,7 @@ public with sharing class ArcTaskMetricsController {
 
   @AuraEnabled(cacheable=true)
   public static ArcTaskMetricsModels.MetricsResult getTaskMetrics(String scope) {
-    ARCConstants.RelatedTableScope resolvedScope = ARCUtil.relatedTableScopeFromValue(
+    ArcRelatedTableScope.Value resolvedScope = ArcRelatedTableScope.fromValue(
       scope
     );
     return REPOSITORY.selectMetrics(resolvedScope);

@@ -2,36 +2,37 @@
 <template>
   <template lwc:if={isOpen}>
     <section
-      class="div-modal"
+      class="arc-flow-modal"
       role="dialog"
       aria-modal="true"
       aria-label={dialogLabel}
     >
-      <div class="div-modal__backdrop" onclick={handleBackdropClick}></div>
+      <div class="arc-flow-modal__backdrop" onclick={handleBackdropClick}></div>
 
-      <div class="div-modal__panel div-modal__panel--wide">
-        <header class="div-modal__header">
-          <div class="div-modal__intro">
-            <h2 class="div-modal__title arc-flow-modal__title">{title}</h2>
+      <div class="arc-flow-modal__panel">
+        <header class="arc-flow-modal__header">
+          <div class="arc-flow-modal__intro">
+            <h2 class="arc-flow-modal__title">{title}</h2>
             <template lwc:if={hasSubtitle}>
-              <p class="div-modal__subtitle">{subtitle}</p>
+              <p class="arc-flow-modal__subtitle">{subtitle}</p>
             </template>
           </div>
           <button
             type="button"
-            class="div-modal__close arc-flow-modal__close"
-            aria-label="Close"
+            class="arc-flow-modal__close"
+            title="Cancel"
+            aria-label="Cancel"
             onclick={handleCancel}
           >
             <lightning-icon
               icon-name="utility:close"
               size="x-small"
-              alternative-text="Close"
+              alternative-text="Cancel"
             ></lightning-icon>
           </button>
         </header>
 
-        <div class="div-modal__body">
+        <div class="arc-flow-modal__body">
           <template lwc:if={showFlow}>
             <lightning-flow
               key={flowKey}
@@ -42,29 +43,21 @@
           </template>
         </div>
 
-        <footer class="div-modal__footer">
-          <span></span>
-          <div class="div-modal__footer-actions div-btn-group">
-            <template lwc:if={isFlowFinished}>
-              <button
-                type="button"
-                class="div-btn"
-                onclick={handleClose}
-              >
-                Close
-              </button>
-            </template>
-            <template lwc:else>
-              <button
-                type="button"
-                class="div-btn"
-                onclick={handleCancel}
-              >
-                Cancel
-              </button>
-            </template>
-          </div>
-        </footer>
+        <!--
+          Only rendered once the flow is done. While it is running the flow draws
+          its own footer holding its own navigation buttons, and adding a second
+          strip below it put two footers on the dialog with a lone Cancel
+          stranded in the lower one. Cancelling mid-flow is the header's X.
+        -->
+        <template lwc:if={isFlowFinished}>
+          <footer class="arc-flow-modal__footer">
+            <lightning-button
+              variant="brand"
+              label="Close"
+              onclick={handleClose}
+            ></lightning-button>
+          </footer>
+        </template>
       </div>
     </section>
   </template>

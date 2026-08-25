@@ -1,0 +1,204 @@
+<template>
+  <div class="team-settings">
+    <template lwc:if={isLoading}>
+      <div class="team-settings__loading">
+        <lightning-spinner
+          alternative-text="Loading team"
+          size="small"
+        ></lightning-spinner>
+      </div>
+    </template>
+
+    <template lwc:elseif={errorMessage}>
+      <p class="team-settings__error" role="alert">{errorMessage}</p>
+    </template>
+
+    <template lwc:elseif={showEmptyState}>
+      <p class="team-settings__empty">
+        You are not an active member of a financial advisor team.
+      </p>
+    </template>
+
+    <template lwc:else>
+      <!-- Only drawn when there is more than one team; with one, its name is
+           already the section heading below. -->
+      <template lwc:if={showTeamPicker}>
+        <div class="team-tabs" role="tablist" aria-label="Your teams">
+          <template for:each={teamTabs} for:item="tab">
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              class={tab.buttonClass}
+              data-id={tab.id}
+              onclick={handleTeamSelect}
+            >
+              {tab.name}
+            </button>
+          </template>
+        </div>
+      </template>
+
+      <!-- ── The team ────────────────────────────────────────────────────── -->
+      <section class="card">
+        <header class="card__header">
+          <div>
+            <h2 class="card__title">{activeTeam.name}</h2>
+            <p class="card__tagline">Financial advisor team</p>
+          </div>
+        </header>
+
+        <dl class="facts">
+          <template for:each={teamFacts} for:item="fact">
+            <div class="facts__item" key={fact.key}>
+              <dt class="facts__label">{fact.label}</dt>
+              <dd class="facts__value">{fact.value}</dd>
+            </div>
+          </template>
+        </dl>
+
+        <!-- What the signed-in member holds on this team. Rendered per team,
+             because the same person can hold a different role on each. -->
+        <template lwc:if={myAssignment}>
+          <div class="mine">
+            <p class="mine__label">Your role on {myAssignment.teamName}</p>
+            <p class="mine__role">
+              {myAssignment.role}
+              <template lwc:if={myAssignment.isPrimary}>
+                <span class="chip chip--primary">Primary</span>
+              </template>
+            </p>
+            <template lwc:if={myAssignment.hasPermissions}>
+              <div class="chips">
+                <template for:each={myAssignment.permissionChips} for:item="chip">
+                  <span class="chip" key={chip.key}>{chip.label}</span>
+                </template>
+              </div>
+            </template>
+            <template lwc:else>
+              <p class="mine__none">No permissions assigned to you on this team.</p>
+            </template>
+          </div>
+        </template>
+      </section>
+
+      <!-- ── Members ─────────────────────────────────────────────────────── -->
+      <section class="card">
+        <header class="card__header">
+          <div>
+            <h2 class="card__title">Members</h2>
+            <p class="card__tagline">
+              Name, role and the permissions each member holds
+            </p>
+          </div>
+          <span class="count">{memberCount}</span>
+        </header>
+
+        <div class={rosterClass}>
+          <table class="roster__table">
+            <thead>
+              <tr>
+                <th scope="col" class="roster__th">Name</th>
+                <th scope="col" class="roster__th">Role</th>
+                <th scope="col" class="roster__th">Permissions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template for:each={members} for:item="member">
+                <tr key={member.memberId} class={member.rowClass}>
+                  <td class="roster__td">
+                    <span class="roster__name">{member.name}</span>
+                    <template lwc:if={member.isPrimary}>
+                      <span class="chip chip--primary">Primary</span>
+                    </template>
+                    <template lwc:if={member.isSelf}>
+                      <span class="chip chip--you">You</span>
+                    </template>
+                  </td>
+                  <td class="roster__td roster__td--role">{member.roleLabel}</td>
+                  <td class="roster__td">
+                    <template lwc:if={member.hasPermissions}>
+                      <div class="chips">
+                        <template
+                          for:each={member.permissionChips}
+                          for:item="chip"
+                        >
+                          <span class="chip" key={chip.key}>{chip.label}</span>
+                        </template>
+                      </div>
+                    </template>
+                    <template lwc:else>
+                      <span class="roster__none">—</span>
+                    </template>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── Permissions, team level ─────────────────────────────────────── -->
+      <section class="card">
+        <header class="card__header">
+          <div>
+            <h2 class="card__title">Permissions</h2>
+            <p class="card__tagline">Who on this team is tied to each permission</p>
+          </div>
+        </header>
+
+        <ul class="permissions">
+          <template for:each={permissionRows} for:item="row">
+            <li class="permissions__row" key={row.field}>
+              <div class="permissions__name">
+                <span class="permissions__label">{row.label}</span>
+                <span class="permissions__count">{row.count}</span>
+              </div>
+              <p class={row.holderClass}>{row.holderText}</p>
+            </li>
+          </template>
+        </ul>
+      </section>
+
+      <!-- ── Rep codes ───────────────────────────────────────────────────────
+           Part of the team, not of a person: Rep_Code__c hangs off the team by
+           master-detail and carries no user field, so it belongs here rather
+           than as a column on the roster above. -->
+      <section class="card">
+        <header class="card__header">
+          <div>
+            <h2 class="card__title">Rep Codes</h2>
+            <p class="card__tagline">Held by the team, not by an individual member</p>
+          </div>
+          <span class="count">{repCodes.length}</span>
+        </header>
+
+        <template lwc:if={hasRepCodes}>
+          <table class="roster__table">
+            <thead>
+              <tr>
+                <th scope="col" class="roster__th">Rep Code</th>
+                <th scope="col" class="roster__th">Type</th>
+                <th scope="col" class="roster__th">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template for:each={repCodes} for:item="code">
+                <tr key={code.id} class="roster__row">
+                  <td class="roster__td">
+                    <span class="roster__name">{code.name}</span>
+                  </td>
+                  <td class="roster__td">{code.codeTypeLabel}</td>
+                  <td class="roster__td">{code.statusLabel}</td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </template>
+        <template lwc:else>
+          <p class="team-settings__empty">No rep codes on this team.</p>
+        </template>
+      </section>
+    </template>
+  </div>
+</template>

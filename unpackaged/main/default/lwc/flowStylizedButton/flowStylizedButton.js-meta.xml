@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Flow Stylized Button</masterLabel>
+    <description>LWC replacement for cmp_FlowStylizedButton in screen flows.</description>
+    <targets>
+        <target>lightning__FlowScreen</target>
+        <!-- Experience Cloud -->
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+        <target>lightning__RecordPage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__FlowScreen">
+            <property
+                name="Size"
+                type="String"
+                label="Button Size"
+                description="Small, Medium, or Large. Next buttons are Small; card buttons are Large."
+            />
+            <property
+                name="ButtonText"
+                type="String"
+                label="Text of the Button"
+                description="Label displayed on the button."
+            />
+            <property
+                name="ButtonType"
+                type="String"
+                label="Button Type"
+                description="Active Button, Pause Button, Link Button, Inactive Button, Selected Button, Blank Button, or Link."
+            />
+            <property
+                name="ValueClicked"
+                type="String"
+                label="Value Returned from the Button"
+                description="Flow variable that stores the clicked button value."
+                role="outputOnly"
+            />
+        </targetConfig>
+
+        <!-- Experience Cloud Configuration -->
+        <targetConfig targets="lightningCommunity__Default">
+
+            <property
+                name="Size"
+                type="String"
+                label="Button Size"
+                description="Small, Medium, or Large."
+            />
+
+            <property
+                name="ButtonText"
+                type="String"
+                label="Text of the Button"
+                description="Label displayed on the button."
+            />
+
+            <property
+                name="ButtonType"
+                type="String"
+                label="Button Type"
+                description="Active Button, Pause Button, Link Button, Inactive Button, Selected Button, Blank Button, or Link."
+            />
+
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

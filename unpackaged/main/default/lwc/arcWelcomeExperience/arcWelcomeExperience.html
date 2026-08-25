@@ -1,0 +1,22 @@
+<template>
+  <!-- Rendered unconditionally: dsModalV2 emits no DOM at all while closed, so
+       there is nothing to leave lying over the page, and keeping the instance
+       mounted is what lets it run its own open/close transition — moving focus
+       into the dialog and handing it back on dismiss. -->
+  <c-arc-welcome-modal
+    is-open={isOpen}
+    stage={stage}
+    step-title={stepTitle}
+    step-body={stepBody}
+    step-index={stepIndex}
+    step-count={stepCount}
+    screen={screen}
+    nav-id={navId}
+    region={region}
+    onstart={handleStart}
+    onnext={handleNext}
+    onback={handleBack}
+    onskip={handleSkip}
+    ondismiss={handleDismiss}
+  ></c-arc-welcome-modal>
+</template>

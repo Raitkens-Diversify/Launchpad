@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Arc Related Table</masterLabel>
+    <description>Sortable related list for Envelope and Work records on Experience sites.</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property
+                name="defaultObjectType"
+                type="String"
+                default="Envelope"
+                label="Default Object Type"
+                description="Envelope or Work"
+                datasource="Envelope,Work"
+            />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

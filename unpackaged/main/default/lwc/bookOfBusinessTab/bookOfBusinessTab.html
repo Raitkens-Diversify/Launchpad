@@ -1,0 +1,108 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-07-14 -->
+<template>
+  <div class="div-view">
+    <template lwc:if={errorMessage}>
+      <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">{errorMessage}</div>
+    </template>
+
+    <template lwc:if={preferenceErrorMessage}>
+      <div class="slds-notify slds-notify_alert slds-alert_warning" role="status">{preferenceErrorMessage}</div>
+    </template>
+
+    <template lwc:if={isLoading}>
+      <c-arc-loading-spinner alternative-text="Loading Book of Business" size="small"></c-arc-loading-spinner>
+    </template>
+
+    <template lwc:else>
+      <c-book-of-business-header
+        title={title}
+        subtitle={subtitle}
+        account-count={accountCount}
+        total-aum-label={totalAumLabel}
+      ></c-book-of-business-header>
+
+      <c-book-of-business-kpi-row kpis={kpis}></c-book-of-business-kpi-row>
+
+      <c-book-of-business-toolbar
+        view-mode={viewState.viewMode}
+        group-by={viewState.groupBy}
+        saved-views={savedViews}
+        saved-view-name={savedViewName}
+        active-view-id={activeViewId}
+        active-view-label={activeViewLabel}
+        has-unsaved-view-changes={hasUnsavedViewChanges}
+        ongroupbychange={handleGroupByChange}
+        onviewmodechange={handleViewModeChange}
+        onconfigureopen={handleConfigureOpen}
+        onsaveview={handleSaveView}
+        onupdateview={handleUpdateView}
+        onapplyview={handleApplyView}
+        ondeleteview={handleDeleteView}
+        onrenameview={handleRenameView}
+      ></c-book-of-business-toolbar>
+
+      <template lwc:if={isTableView}>
+        <div class="div-table-shell">
+          <c-book-of-business-table
+            table-rows={tableRows}
+            columns={viewState.columns}
+            sort-field={viewState.sortField}
+            sort-direction={viewState.sortDirection}
+            onsortchange={handleSortChange}
+          ></c-book-of-business-table>
+        </div>
+
+        <c-div-configure-sidebar
+          is-open={isConfigureOpen}
+          title="Configure"
+          apply-label="Apply"
+          reset-label="Reset"
+          onclose={handleConfigureClose}
+          onapply={handleConfigureApply}
+          onreset={handleConfigureReset}
+        >
+          <section class="div-drawer__section" aria-labelledby="configure-columns-heading">
+            <h3 id="configure-columns-heading" class="div-drawer__section-title">Columns</h3>
+            <c-ds-column-manager
+              key={configureDrawerKey}
+              embedded
+              columns={draftColumns}
+              default-columns={defaultColumns}
+              object-api-name="Account"
+              ondraftchange={handleDraftColumnsChange}
+            ></c-ds-column-manager>
+          </section>
+
+          <section class="div-drawer__section" aria-labelledby="configure-filters-heading">
+            <h3 id="configure-filters-heading" class="div-drawer__section-title">Filters</h3>
+            <template for:each={decoratedFilterFields} for:item="field">
+              <c-div-multi-select
+                key={field.key}
+                label={field.label}
+                options={field.options}
+                value={field.values}
+                placeholder="Search..."
+                data-field-key={field.fieldKey}
+                onchange={handleDraftFilterChange}
+              ></c-div-multi-select>
+            </template>
+          </section>
+        </c-div-configure-sidebar>
+      </template>
+
+      <template lwc:if={isChartView}>
+        <div class="div-chart-view div-chart-view--solo">
+          <c-book-of-business-chart
+            chart-data={chartData}
+            chart-type={viewState.chartType}
+            selected-segment-key={resolvedChartSegment}
+            onsegmentselect={handleSegmentSelect}
+            onexpandchange={handleChartExpandChange}
+            oncharttypechange={handleChartTypeChange}
+          ></c-book-of-business-chart>
+        </div>
+      </template>
+
+    </template>
+  </div>
+</template>

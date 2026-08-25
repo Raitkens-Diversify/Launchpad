@@ -1,0 +1,27 @@
+<template>
+  <div class="arc-home-metrics">
+    <template for:each={tiles} for:item="tile">
+      <article key={tile.key} class="arc-home-metrics__tile">
+        <div class="arc-home-metrics__data">
+          <p class="arc-home-metrics__label">{tile.label}</p>
+          <p class="arc-home-metrics__value">{tile.value}</p>
+          <p class="arc-home-metrics__subtext">{tile.subtext}</p>
+        </div>
+        <button
+          type="button"
+          class="arc-home-metrics__chevron"
+          data-key={tile.key}
+          data-object-api-name={tile.objectApiName}
+          onclick={handleTileClick}
+          aria-label={tile.label}
+        >
+          <span
+            class="arc-home-metrics__chevron-icon"
+            style={caretIconStyle}
+            aria-hidden="true"
+          ></span>
+        </button>
+      </article>
+    </template>
+  </div>
+</template>

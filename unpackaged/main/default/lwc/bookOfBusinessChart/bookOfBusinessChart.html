@@ -1,0 +1,86 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-06-22 -->
+<template>
+  <section class="div-chart-dashboard" aria-label="AUM by segment">
+    <article class={cardClass}>
+      <header class="div-card__header div-card__header--meta">
+        <h3 class="div-card__title">AUM by Segment</h3>
+        <div class="div-chart-dashboard__actions">
+          <button
+            type="button"
+            class="div-chart-dashboard__expand-button"
+            aria-label={expandButtonLabel}
+            aria-pressed={isExpanded}
+            title={expandButtonLabel}
+            onclick={handleExpandToggle}
+          >
+            <lightning-icon icon-name={expandIconName} size="xx-small" aria-hidden="true"></lightning-icon>
+          </button>
+          <div
+            class="div-toolbar__segmented div-chart-type-toggle"
+            role="group"
+            aria-label="Chart type"
+          >
+          <button
+            type="button"
+            class={barChartButtonClass}
+            data-chart-type="bar"
+            aria-pressed={isBarChart}
+            aria-label="Bar chart"
+            onclick={handleChartTypeChange}
+          >
+            <span class="div-chart-type-icon div-chart-type-icon--bar" aria-hidden="true"></span>
+            <span>Bar</span>
+          </button>
+          <button
+            type="button"
+            class={pieChartButtonClass}
+            data-chart-type="pie"
+            aria-pressed={isPieChart}
+            aria-label="Pie chart"
+            onclick={handleChartTypeChange}
+          >
+            <span class="div-chart-type-icon div-chart-type-icon--pie" aria-hidden="true"></span>
+            <span>Pie</span>
+          </button>
+          </div>
+        </div>
+      </header>
+
+      <template lwc:if={hasChartData}>
+        <div class="div-card__body div-card__body--chart">
+          <div class={canvasWrapClass}>
+            <canvas data-id="segment-chart" aria-label={chartAriaLabel}></canvas>
+          </div>
+
+          <ul class="div-chart-legend" role="list">
+            <template for:each={legendItems} for:item="item">
+              <li key={item.key}>
+                <button
+                  type="button"
+                  class={item.itemClass}
+                  data-key={item.key}
+                  aria-pressed={item.isSelected}
+                  onclick={handleLegendSelect}
+                  onkeydown={handleLegendKeyDown}
+                >
+                  <span class="div-chart-legend__swatch" style={item.swatchStyle} aria-hidden="true"></span>
+                  <span class="div-chart-legend__label">{item.label}</span>
+                  <span class="div-chart-legend__metrics">
+                    <span class="div-chart-legend__percent">{item.percentLabel}</span>
+                    <span class="div-chart-legend__value">{item.valueLabel}</span>
+                  </span>
+                </button>
+              </li>
+            </template>
+          </ul>
+        </div>
+      </template>
+
+      <template lwc:else>
+        <div class="div-card__body">
+          <p class="div-card__empty div-card__empty--center">No chart data available for the current filters.</p>
+        </div>
+      </template>
+    </article>
+  </section>
+</template>

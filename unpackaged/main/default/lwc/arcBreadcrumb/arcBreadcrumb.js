@@ -1,14 +1,14 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-08-13
+ * Date: 2026-08-12
  *
  * Shared Diversify breadcrumb trail for LWR Experience Cloud sites.
  * Visuals live in diversifyStyles.css under .arc-breadcrumb*.
  *
  * Nav trail mode (default on Experience sites):
- *   Record pages show the record Name by default. A parent list crumb appears only
- *   when the user selected a matching sidebar nav item (e.g. All Contacts, Work).
- *   Builder listLabel/listPath remain fallbacks for list pages only.
+ *   Reads the active sidebar selection from c/arcNavTrailState, which
+ *   arcNavigation updates on click and URL sync. Builder props remain as
+ *   fallbacks when no nav trail is stored yet.
  *
  * Programmatic mode:
  *   Pass @api items — [{ label, key?, muted?, current? }]
@@ -19,55 +19,56 @@ import { getRecord, getFieldValue } from "lightning/uiRecordApi";
 import { loadStyle } from "lightning/platformResourceLoader";
 import diversifyStyles from "@salesforce/resourceUrl/diversifyStyles";
 import {
-  isValidSalesforceRecordId,
   resolveRecordIdFromPageReference,
+  buildRecordNavigationReference
 } from "c/recordNavigationUtils";
 import {
   readNavTrail,
+  findDefaultListTrail,
   NAV_TRAIL_CHANGE_EVENT,
   NAV_PATH_CHANGE_EVENT,
   syncNavTrailFromLocation,
-  inferObjectApiNameFromPath,
+  isOffNavRoute,
   resolveCurrentPath,
   resolveCurrentQueryParams,
-  serializeSearch,
-  ARC_NAV_HOME_ID,
-  findNavTargetById,
+  serializeSearch
 } from "c/arcNavTrailState";
 
 const LIST_CRUMB_KEY = "list";
-const HOME_CRUMB_KEY = "home";
+const GROUP_CRUMB_KEY = "group";
 
-const CASE_OBJECT_API_NAME = "Case";
-const CASE_DISPLAY_FIELDS = [
-  "Case_Branch_Name_DisplayName__c",
-  "Subject",
-  "CaseNumber",
-];
-
-const TASK_OBJECT_API_NAME = "Task";
-const TASK_DISPLAY_FIELDS = ["Subject"];
-
-const normalizeFieldValue = (value) => {
-  if (value === null || value === undefined) {
-    return "";
-  }
-
-  return String(value).trim();
+/**
+ * Objects whose display name is not on a field called Name. In nav-trail mode
+ * nobody passes `nameField`, so it falls back to "Name" — which Task and Case
+ * do not have. The getRecord wire then returned nothing and the crumb printed
+ * the raw 18-character id ("Work > Tasks > 00TVF00000OKzG92AL").
+ */
+const RECORD_NAME_FIELDS = {
+  Task: "Subject",
+  Case: "Subject"
 };
 
-const resolveFirstFieldValue = (record, objectApiName, fieldApiNames) => {
-  for (const fieldApiName of fieldApiNames) {
-    const value = normalizeFieldValue(
-      getFieldValue(record, `${objectApiName}.${fieldApiName}`)
-    );
+const PARENT_CRUMB_KEY = "parent";
 
-    if (value) {
-      return value;
-    }
-  }
+/**
+ * Records whose trail should run through their parent rather than through the
+ * flat list they happen to live in. A task is always reached as part of
+ * something — open one from a case and "back" has to mean that case, not every
+ * task in the org.
+ */
+const PARENT_LOOKUP_FIELDS = {
+  Task: "WhatId"
+};
 
-  return "";
+/**
+ * WhatId is polymorphic, so the parent's object comes from its key prefix.
+ * Only the two this site can actually route back to are listed; a task hung
+ * off anything else keeps the plain list trail rather than offering a crumb
+ * that leads nowhere.
+ */
+const PARENT_OBJECT_BY_KEY_PREFIX = {
+  500: "Case",
+  "001": "Account"
 };
 
 let diversifyStylesLoadPromise;
@@ -124,6 +125,14 @@ export default class ArcBreadcrumb extends NavigationMixin(LightningElement) {
   _recordId;
   _navTrail = null;
 
+  /*
+   * Set on a route that no stored trail describes -- see isOffNavRoute. Held
+   * separately from _navTrail because the trail itself stays in session storage
+   * on purpose: leaving Settings for a nav destination should not have to
+   * rebuild it.
+   */
+  _offNavRoute = false;
+
   @wire(CurrentPageReference)
   wiredPageReference(pageRef) {
     this._pageRef = pageRef;
@@ -131,12 +140,15 @@ export default class ArcBreadcrumb extends NavigationMixin(LightningElement) {
     this.syncRecordIdFromContext();
   }
 
-  get wiredRecordId() {
-    return isValidSalesforceRecordId(this._recordId) ? this._recordId : undefined;
-  }
-
-  @wire(getRecord, { recordId: "$wiredRecordId", fields: "$recordFields" })
+  @wire(getRecord, {
+    recordId: "$_recordId",
+    fields: "$recordFields",
+    optionalFields: "$recordOptionalFields"
+  })
   wiredRecord;
+
+  @wire(getRecord, { recordId: "$parentRecordId", fields: "$parentNameFields" })
+  wiredParentRecord;
 
   connectedCallback() {
     ensureDiversifyStyles(this).catch(() => {
@@ -144,178 +156,226 @@ export default class ArcBreadcrumb extends NavigationMixin(LightningElement) {
     });
     this.refreshNavTrail();
     this.syncRecordIdFromContext();
+
+    /*
+     * The two events mean different things and must not be handled the same
+     * way.
+     *
+     * A trail change says someone has just decided what the trail is —
+     * arcNavigation records the clicked item before it navigates. Re-deriving
+     * the trail from the URL at that moment reads the page being left, and
+     * wrote it straight back over the selection: clicking Home recorded Home,
+     * this listener immediately restored Tasks, and the old breadcrumb stayed
+     * until a second click, by which time the URL had caught up. So a trail
+     * change is adopted as given.
+     *
+     * A path change says the location moved, which is exactly when the trail
+     * does need re-deriving.
+     */
     this._onNavTrailChange = () => {
+      this.adoptStoredNavTrail();
+    };
+    this._onNavPathChange = () => {
       this.refreshNavTrail();
     };
     window.addEventListener(NAV_TRAIL_CHANGE_EVENT, this._onNavTrailChange);
-    window.addEventListener(NAV_PATH_CHANGE_EVENT, this._onNavTrailChange);
+    window.addEventListener(NAV_PATH_CHANGE_EVENT, this._onNavPathChange);
   }
 
   disconnectedCallback() {
     window.removeEventListener(NAV_TRAIL_CHANGE_EVENT, this._onNavTrailChange);
-    window.removeEventListener(NAV_PATH_CHANGE_EVENT, this._onNavTrailChange);
+    window.removeEventListener(NAV_PATH_CHANGE_EVENT, this._onNavPathChange);
+  }
+
+  /** Takes the stored trail as it stands, without consulting the URL. */
+  adoptStoredNavTrail() {
+    this._navTrail = readNavTrail();
+    this._offNavRoute = false;
   }
 
   refreshNavTrail() {
     const pathname = resolveCurrentPath(this._pageRef);
     const search = serializeSearch(resolveCurrentQueryParams(this._pageRef));
-    const syncedTrail = syncNavTrailFromLocation(pathname, search, this._pageRef);
+    const syncedTrail = syncNavTrailFromLocation(
+      pathname,
+      search,
+      this._pageRef
+    );
 
+    this._offNavRoute = isOffNavRoute(pathname, search, this._pageRef);
     this._navTrail = syncedTrail || readNavTrail();
   }
 
-  get sessionNavTrail() {
-    return readNavTrail();
-  }
-
   get activeTrail() {
-    return this._navTrail || this.sessionNavTrail;
+    if (this._offNavRoute) {
+      return null;
+    }
+
+    return this._navTrail || readNavTrail();
   }
 
   get activeListLabel() {
-    return this.sessionNavTrail?.label || this.listLabel;
+    return this.activeTrail?.label || this.listLabel;
   }
 
   get activeListPath() {
-    return this.sessionNavTrail?.path || this.listPath;
+    return this.activeTrail?.path || this.listPath;
   }
 
   get activeObjectApiName() {
-    return this.sessionNavTrail?.objectApiName || this.objectApiName;
+    return this.activeTrail?.objectApiName || this.objectApiName;
   }
 
-  get inferredObjectApiNameFromPath() {
-    return inferObjectApiNameFromPath(resolveCurrentPath(this._pageRef));
+  get activeGroupLabel() {
+    return this.activeTrail?.groupLabel || "";
   }
 
-  get pageRefObjectApiName() {
-    return (
-      this._pageRef?.attributes?.objectApiName ||
-      this._pageRef?.state?.objectApiName ||
-      ""
+  get activeGroupPath() {
+    return this.activeTrail?.groupPath || "";
+  }
+
+  /** Skipped when the group *is* the list (e.g. "Work" list item itself). */
+  get hasDistinctGroup() {
+    return Boolean(
+      this.activeGroupLabel && this.activeGroupLabel !== this.activeListLabel
     );
   }
 
-  get recordObjectApiName() {
-    if (this.inferredObjectApiNameFromPath) {
-      return this.inferredObjectApiNameFromPath;
+  get groupCrumb() {
+    if (!this.hasDistinctGroup) {
+      return null;
     }
-
-    if (this.pageRefObjectApiName) {
-      return this.pageRefObjectApiName;
-    }
-
-    if (this.wiredRecord?.data?.apiName) {
-      return this.wiredRecord.data.apiName;
-    }
-
-    if (!this._recordId) {
-      return this.objectApiName;
-    }
-
-    return "";
-  }
-
-  get shouldShowHomeCrumb() {
-    return Boolean(this._recordId) && !this.shouldShowListCrumb;
-  }
-
-  get homeCrumb() {
-    const homeTarget = findNavTargetById(ARC_NAV_HOME_ID);
 
     return {
-      label: homeTarget?.label || "Home",
-      key: HOME_CRUMB_KEY,
-      muted: true,
+      label: this.activeGroupLabel,
+      key: this.activeGroupPath ? GROUP_CRUMB_KEY : undefined,
+      muted: true
     };
   }
 
-  get homePath() {
-    return findNavTargetById(ARC_NAV_HOME_ID)?.target || "/";
+  /**
+   * The group crumb for a trail that runs through a parent record.
+   *
+   * It has to come from the parent's own nav entry, not the record's. A task
+   * hung off an account goes back through All Contacts, which lives under
+   * Contacts — pairing it with the task's own group produced "Work › All
+   * Contacts", two halves of different trails. A group that repeats its list
+   * ("Work" above "Work") is dropped, the same rule hasDistinctGroup applies.
+   */
+  get parentGroupCrumb() {
+    const trail = this.parentListTrail;
+    if (!trail?.groupLabel || trail.groupLabel === trail.label) {
+      return null;
+    }
+
+    return {
+      label: trail.groupLabel,
+      key: trail.groupPath ? GROUP_CRUMB_KEY : undefined,
+      muted: true
+    };
   }
 
-  get shouldShowListCrumb() {
-    const trail = this.sessionNavTrail;
+  /** The group a click on the group crumb navigates to. */
+  get effectiveGroupPath() {
+    return this.parentDisplayName
+      ? this.parentListTrail?.groupPath || ""
+      : this.activeGroupPath;
+  }
 
-    if (!trail?.navItemId || !trail?.label || !trail?.path) {
-      return false;
+  /** An explicitly configured nameField still wins over the map. */
+  get resolvedNameField() {
+    const objectApiName = this.activeObjectApiName;
+    if (this.nameField && this.nameField !== "Name") {
+      return this.nameField;
     }
-
-    if (trail.navItemId === ARC_NAV_HOME_ID) {
-      return false;
-    }
-
-    if (!this._recordId) {
-      return true;
-    }
-
-    if (!trail.objectApiName || !this.recordObjectApiName) {
-      return false;
-    }
-
-    return (
-      trail.objectApiName.toLowerCase() === this.recordObjectApiName.toLowerCase()
-    );
+    return RECORD_NAME_FIELDS[objectApiName] || this.nameField;
   }
 
   get recordFields() {
-    if (!this.wiredRecordId || !this.recordObjectApiName) {
-      return undefined;
+    if (
+      !this._recordId ||
+      !this.activeObjectApiName ||
+      !this.resolvedNameField
+    ) {
+      return [];
     }
 
-    if (this.recordObjectApiName === CASE_OBJECT_API_NAME) {
-      return CASE_DISPLAY_FIELDS.map(
-        (fieldApiName) => `${CASE_OBJECT_API_NAME}.${fieldApiName}`
-      );
+    return [`${this.activeObjectApiName}.${this.resolvedNameField}`];
+  }
+
+  /* ---- Parent record (Task -> its Case) --------------------------------- */
+
+  get parentLookupField() {
+    return PARENT_LOOKUP_FIELDS[this.activeObjectApiName] || "";
+  }
+
+  get recordOptionalFields() {
+    const field = this.parentLookupField;
+    if (!field || !this._recordId || !this.activeObjectApiName) {
+      return [];
+    }
+    return [`${this.activeObjectApiName}.${field}`];
+  }
+
+  get parentRecordId() {
+    const fields = this.recordOptionalFields;
+    if (!fields.length || !this.wiredRecord?.data) {
+      return null;
     }
 
-    if (this.recordObjectApiName === TASK_OBJECT_API_NAME) {
-      return TASK_DISPLAY_FIELDS.map(
-        (fieldApiName) => `${TASK_OBJECT_API_NAME}.${fieldApiName}`
-      );
+    const value = getFieldValue(this.wiredRecord.data, fields[0]);
+    if (!value) {
+      return null;
     }
 
-    if (!this.nameField) {
-      return undefined;
-    }
+    return PARENT_OBJECT_BY_KEY_PREFIX[String(value).slice(0, 3)]
+      ? value
+      : null;
+  }
 
-    return [`${this.recordObjectApiName}.${this.nameField}`];
+  get parentObjectApiName() {
+    const recordId = this.parentRecordId;
+    return recordId
+      ? PARENT_OBJECT_BY_KEY_PREFIX[String(recordId).slice(0, 3)] || ""
+      : "";
+  }
+
+  get parentNameFields() {
+    const objectApiName = this.parentObjectApiName;
+    if (!objectApiName || !this.parentRecordId) {
+      return [];
+    }
+    return [`${objectApiName}.${RECORD_NAME_FIELDS[objectApiName] || "Name"}`];
+  }
+
+  get parentDisplayName() {
+    const fields = this.parentNameFields;
+    if (!fields.length || !this.wiredParentRecord?.data) {
+      return "";
+    }
+    return getFieldValue(this.wiredParentRecord.data, fields[0]) || "";
+  }
+
+  /** The parent's own list, so the first crumb matches the parent's home. */
+  get parentListTrail() {
+    return this.parentDisplayName
+      ? findDefaultListTrail(this.parentObjectApiName)
+      : null;
   }
 
   get recordDisplayName() {
-    if (!this.recordFields?.length || !this.wiredRecord?.data) {
+    if (!this.recordFields.length || !this.wiredRecord?.data) {
       return "";
-    }
-
-    if (this.recordObjectApiName === CASE_OBJECT_API_NAME) {
-      return resolveFirstFieldValue(
-        this.wiredRecord.data,
-        CASE_OBJECT_API_NAME,
-        CASE_DISPLAY_FIELDS
-      );
-    }
-
-    if (this.recordObjectApiName === TASK_OBJECT_API_NAME) {
-      return resolveFirstFieldValue(
-        this.wiredRecord.data,
-        TASK_OBJECT_API_NAME,
-        TASK_DISPLAY_FIELDS
-      );
     }
 
     return getFieldValue(this.wiredRecord.data, this.recordFields[0]) || "";
   }
 
   get usesDynamicTrail() {
-    if (Array.isArray(this.items) && this.items.length > 0) {
-      return false;
-    }
-
-    if (this._recordId) {
-      return Boolean(this.recordObjectApiName);
-    }
-
-    return Boolean(this.activeListLabel && this.activeObjectApiName);
+    return (
+      (!Array.isArray(this.items) || this.items.length === 0) &&
+      Boolean(this.activeListLabel && this.activeObjectApiName)
+    );
   }
 
   get resolvedItems() {
@@ -330,6 +390,10 @@ export default class ArcBreadcrumb extends NavigationMixin(LightningElement) {
     return this.buildStaticItems();
   }
 
+  get hasItems() {
+    return this.resolvedItems.length > 0;
+  }
+
   get itemView() {
     return this.resolvedItems.map((item, index) => {
       const isCurrent = Boolean(item.current);
@@ -342,7 +406,7 @@ export default class ArcBreadcrumb extends NavigationMixin(LightningElement) {
         isClickable,
         ariaCurrent: isCurrent ? "page" : undefined,
         textClass: buildTextClass({ muted: isMuted, current: isCurrent }),
-        linkClass: buildLinkClass({ muted: isMuted }),
+        linkClass: buildLinkClass({ muted: isMuted })
       };
     });
   }
@@ -350,7 +414,7 @@ export default class ArcBreadcrumb extends NavigationMixin(LightningElement) {
   syncRecordIdFromContext() {
     const resolved = resolveRecordIdFromPageReference(
       this._pageRef,
-      this.inferredObjectApiNameFromPath || this.pageRefObjectApiName || null
+      this.activeObjectApiName
     );
 
     this._recordId = resolved || null;
@@ -358,42 +422,55 @@ export default class ArcBreadcrumb extends NavigationMixin(LightningElement) {
 
   buildDynamicItems() {
     const listLabel = this.activeListLabel;
-    const showListCrumb = this.shouldShowListCrumb;
-    const homeCrumb = this.shouldShowHomeCrumb ? this.homeCrumb : null;
+    const groupCrumb = this.groupCrumb;
 
     if (!this._recordId) {
-      return [{ label: listLabel || this.activeObjectApiName, current: true }];
+      const crumbs = groupCrumb ? [groupCrumb] : [];
+      return [...crumbs, { label: listLabel, current: true }];
     }
 
     const recordName = this.recordDisplayName;
-    const isLoading =
-      this.wiredRecord?.loading && !recordName;
+    const listCrumb = { label: listLabel, key: LIST_CRUMB_KEY, muted: true };
+    const crumbs = groupCrumb ? [groupCrumb, listCrumb] : [listCrumb];
 
-    if (!showListCrumb) {
-      if (isLoading) {
-        return [
-          ...(homeCrumb ? [homeCrumb] : []),
-          { label: "Loading…", current: true },
-        ];
-      }
+    if (this.wiredRecord?.loading && !recordName) {
+      return [...crumbs, { label: "Loading…", current: true }];
+    }
 
+    // An unresolved name means the list crumb stands alone. A raw record id
+    // is not a breadcrumb — it tells the user nothing and reads as a bug.
+    if (!recordName) {
+      const emptyCrumbs = groupCrumb ? [groupCrumb] : [];
+      return [...emptyCrumbs, { label: listLabel, current: true }];
+    }
+
+    // A record with a parent leads back through it. Opening a task from a
+    // case and finding "back" points at every task in the org loses the one
+    // piece of context the user was working in.
+    const parentName = this.parentDisplayName;
+    if (parentName) {
+      // The parent's list, not the record's: a task under a case goes back to
+      // the case list, and a task under an account to All Contacts. The group
+      // comes from the same place for the same reason.
+      const parentListLabel = this.parentListTrail?.label || listLabel;
+      const parentGroup = this.parentGroupCrumb;
+      const parentCrumbs =
+        parentGroup && parentGroup.label !== parentListLabel
+          ? [parentGroup]
+          : [];
       return [
-        ...(homeCrumb ? [homeCrumb] : []),
-        { label: recordName || this._recordId, current: true },
+        ...parentCrumbs,
+        {
+          label: parentListLabel,
+          key: LIST_CRUMB_KEY,
+          muted: true
+        },
+        { label: parentName, key: PARENT_CRUMB_KEY, muted: true },
+        { label: recordName, current: true }
       ];
     }
 
-    if (isLoading) {
-      return [
-        { label: listLabel, key: LIST_CRUMB_KEY, muted: true },
-        { label: "Loading…", current: true },
-      ];
-    }
-
-    return [
-      { label: listLabel, key: LIST_CRUMB_KEY, muted: true },
-      { label: recordName || this._recordId, current: true },
-    ];
+    return [...crumbs, { label: recordName, current: true }];
   }
 
   buildStaticItems() {
@@ -403,7 +480,7 @@ export default class ArcBreadcrumb extends NavigationMixin(LightningElement) {
       crumbs.push({
         label: this.parentLabel,
         key: this.parentKey || undefined,
-        muted: true,
+        muted: true
       });
     }
 
@@ -421,20 +498,35 @@ export default class ArcBreadcrumb extends NavigationMixin(LightningElement) {
       return;
     }
 
-    if (key === HOME_CRUMB_KEY) {
-      this[NavigationMixin.Navigate]({
-        type: "standard__webPage",
-        attributes: { url: this.homePath },
-      });
+    if (key === PARENT_CRUMB_KEY) {
+      const reference = buildRecordNavigationReference(
+        this.parentRecordId,
+        this.parentObjectApiName
+      );
+      if (reference) {
+        this[NavigationMixin.Navigate](reference);
+      }
       return;
     }
 
-    const listPath = this.activeListPath;
+    // With a parent in the trail the first crumb is the parent's list, so it
+    // has to navigate there rather than to the record's own list.
+    const listPath = this.parentListTrail?.path || this.activeListPath;
 
     if (key === LIST_CRUMB_KEY && listPath) {
       this[NavigationMixin.Navigate]({
         type: "standard__webPage",
-        attributes: { url: listPath },
+        attributes: { url: listPath }
+      });
+      return;
+    }
+
+    const groupPath = this.effectiveGroupPath;
+
+    if (key === GROUP_CRUMB_KEY && groupPath) {
+      this[NavigationMixin.Navigate]({
+        type: "standard__webPage",
+        attributes: { url: groupPath }
       });
       return;
     }
@@ -443,7 +535,7 @@ export default class ArcBreadcrumb extends NavigationMixin(LightningElement) {
       new CustomEvent("crumbselect", {
         detail: { key },
         bubbles: true,
-        composed: true,
+        composed: true
       })
     );
   }

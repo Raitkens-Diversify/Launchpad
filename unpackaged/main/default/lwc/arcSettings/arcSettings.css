@@ -1,0 +1,712 @@
+/**
+ * Author: Claude
+ *
+ * Figma "Settings / My Details" (758:116625). The content column is 1160 wide:
+ * a 132px page header padded 16/24 over a 24px-padded section holding an
+ * 84px section header and a 354 / 734 form split by a 24px gutter.
+ *
+ * Column widths are held as a ratio, not pixels, so the form fills whatever
+ * width the shell gives it while keeping the proportion the frame draws.
+ */
+:host {
+  display: block;
+
+  /* Self-declared --slds-g-* set, the convention arcSearchBar.css documents:
+     LWR injects stock SLDS under these names into each component scope, and
+     that set is rem-based against a 14px root with a different neutral ramp.
+     Values below are the Figma library's, in px so the root cannot rescale. */
+  --slds-g-spacing-1: 4px;
+  --slds-g-spacing-2: 8px;
+  --slds-g-spacing-3: 12px;
+  --slds-g-spacing-4: 16px;
+  --slds-g-spacing-5: 24px;
+  --slds-g-radius-border-2: 8px;
+  --slds-g-color-surface-container-1: #ffffff;
+  --slds-g-color-surface-container-2: #f3f4f6;
+  --slds-g-color-on-surface-1: #4b5563;
+  --slds-g-color-on-surface-2: #374151;
+  --slds-g-color-accent-1: #0f406f;
+  --slds-g-color-accent-2: #0b2f51;
+  --slds-g-color-accent-3: #071c31;
+  --slds-g-color-on-accent-1: #ffffff;
+  --slds-g-color-accent-container-1: #0f406f;
+  --slds-g-color-border-1: #d1d5db;
+  --slds-g-color-border-2: #b6bcc5;
+
+  /* Untitled-UI-named tokens the frame carries alongside the SLDS set. */
+  --set-color-text-tertiary: #475467;
+  --set-color-border-secondary: #eaecf0;
+}
+
+.settings {
+  width: 100%;
+  background: var(--slds-g-color-surface-container-1, #ffffff);
+}
+
+/* ---- Page header (758:116627) ------------------------------------------ */
+.settings__header {
+  padding: var(--slds-g-spacing-4, 16px) var(--slds-g-spacing-5, 24px) 0;
+}
+
+/* The 32px title rides a 36px row (758:116627), which is what puts the
+   supporting line at 40 and the tab strip at 92. */
+.settings__title {
+  margin: 0;
+  padding: 2px 0;
+  font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 32px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+/* Title box 36 to supporting text at 40 (758:116627). */
+.settings__tagline {
+  margin: 4px 0 0;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* Content ends at 80, the 40px strip starts at 92 (758:116627). 9.5px of
+   padding either side of a 19px line box, over the 2px active underline. */
+.settings__tabs {
+  display: block;
+  margin-top: 12px;
+  --ds-tabs-padding-y: 9.5px;
+  --ds-tabs-font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --ds-tabs-font-size: 14px;
+  --ds-tabs-line-height: 19px;
+}
+
+/* ---- Section (758:116628) ----------------------------------------------- */
+.settings__section {
+  padding: var(--slds-g-spacing-5, 24px);
+}
+
+/* Content bottom 48 -> rule at 76 -> form at 100. */
+.settings__section-header {
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--set-color-border-secondary, #eaecf0);
+  margin-bottom: var(--slds-g-spacing-5, 24px);
+}
+
+.settings__section-title {
+  margin: 0;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 24px;
+  color: var(--slds-g-color-accent-3, #071c31);
+}
+
+.settings__section-tagline {
+  margin: 4px 0 0;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--set-color-text-tertiary, #475467);
+}
+
+.settings__error {
+  margin: 0 0 var(--slds-g-spacing-4, 16px);
+  padding: var(--slds-g-spacing-3, 12px) var(--slds-g-spacing-4, 16px);
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  background: #fef2f2;
+  color: #991b1b;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-size: 14px;
+  line-height: 19px;
+}
+
+/* ---- Form (758:116640) --------------------------------------------------
+ * Rows are ruled off from each other: 24, a 1px line, 24 — the frame's 16px
+ * gap either side of a 16-tall divider block whose line sits at its centre.
+ */
+.settings__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-5, 24px);
+}
+
+.settings-row {
+  display: grid;
+  grid-template-columns: minmax(0, 354fr) minmax(0, 734fr);
+  column-gap: var(--slds-g-spacing-5, 24px);
+  align-items: start;
+}
+
+.settings-row + .settings-row {
+  padding-top: var(--slds-g-spacing-5, 24px);
+  border-top: 1px solid var(--set-color-border-secondary, #eaecf0);
+}
+
+.settings-row__label {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  /* Label 19 against a 36 control, so it rides the control's centre line. */
+  padding-top: 8px;
+}
+
+.settings-row--photo .settings-row__label,
+.settings-row--bio .settings-row__label {
+  padding-top: 0;
+}
+
+.settings-row__label-text {
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 19px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.settings-row__label-help {
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 19px;
+  color: var(--set-color-text-tertiary, #475467);
+}
+
+.settings-row__field {
+  min-width: 0;
+}
+
+/* Two 355 inputs across the 734 field column (758:116644). */
+.settings-row__field--split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--slds-g-spacing-5, 24px);
+}
+
+.settings-row__field--photo {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+/* ---- Controls ------------------------------------------------------------
+ * The 36px control of the design system: 8px text inset on a 20px line box,
+ * 8px radius, on the #d1d5db border.
+ */
+.settings-input,
+.settings-select,
+.settings-textarea {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 2px 8px;
+  border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  background: var(--slds-g-color-surface-container-1, #ffffff);
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.settings-input,
+.settings-select {
+  height: 36px;
+}
+
+.settings-input:hover,
+.settings-select:hover,
+.settings-textarea:hover {
+  border-color: var(--slds-g-color-border-2, #b6bcc5);
+}
+
+.settings-input:focus,
+.settings-select:focus,
+.settings-textarea:focus {
+  outline: none;
+  border-color: var(--slds-g-color-accent-1, #0f406f);
+  box-shadow:
+    0 0 0 2px #ffffff,
+    0 0 0 4px #1a76bb;
+}
+
+.settings-input::placeholder,
+.settings-textarea::placeholder {
+  color: var(--slds-g-color-neutral-base-60, #838a97);
+}
+
+.settings-input__wrap,
+.settings-select__wrap {
+  position: relative;
+  display: block;
+}
+
+/* The mail glyph sits 8px in, so the text starts 8px past it. */
+.settings-input__glyph {
+  position: absolute;
+  top: 50%;
+  left: 8px;
+  width: 16px;
+  height: 16px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  background-color: var(--slds-g-color-on-surface-1, #4b5563);
+  -webkit-mask-image: var(--set-icon-envelope);
+  mask-image: var(--set-icon-envelope);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.settings-input--with-glyph {
+  padding-left: 32px;
+}
+
+.settings-select {
+  padding-right: 32px;
+}
+
+.settings-select__caret {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  width: 16px;
+  height: 16px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  background-color: var(--slds-g-color-on-surface-1, #4b5563);
+  -webkit-mask-image: var(--set-icon-caret);
+  mask-image: var(--set-icon-caret);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+/* Textarea 172 tall including the count line under it (758:116684). */
+.settings-textarea {
+  height: 148px;
+  padding: 8px;
+  resize: vertical;
+}
+
+.settings-textarea__count {
+  margin: 5px 0 0;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 19px;
+  color: var(--set-color-text-tertiary, #475467);
+}
+
+/* ---- Avatar and upload card (758:116658) -------------------------------- */
+.settings-avatar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: var(--slds-g-color-accent-2, #0b2f51);
+  color: #ffffff;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.settings-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.settings-upload {
+  flex: 1 1 auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  /* 15 not 16 down the sides the stroke runs: the frame's 121 counts its own
+     1px stroke inside, where the border here sits outside the padding box. */
+  padding: 15px var(--slds-g-spacing-4, 16px);
+  border: 1px dashed #a5bdd5;
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  background: var(--slds-g-color-surface-container-1, #ffffff);
+  text-align: center;
+}
+
+.settings-upload--dragging {
+  border-color: var(--slds-g-color-accent-1, #0f406f);
+  background: #f5f9fd;
+}
+
+.settings-upload__label {
+  margin: 0;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 22px;
+  color: var(--slds-g-color-accent-1, #0f406f);
+}
+
+/* Label box 22 to the hint at 26 (758:116662). */
+.settings-upload__hint {
+  margin: 4px 0 0;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 19px;
+  color: var(--set-color-text-tertiary, #475467);
+}
+
+/* Content block ends at 45, the button sits at 53. */
+.settings-upload .settings-button {
+  margin-top: 8px;
+}
+
+.settings-upload__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- Notifications (758:116742) -----------------------------------------
+ * Two groups ruled off from each other on the same 24 / 1px / 24 rhythm as the
+ * My Details rows. Inside a group: a 38px label block, 16 to the first row,
+ * then 36px rows 24 apart.
+ */
+.settings-group + .settings-group {
+  padding-top: var(--slds-g-spacing-5, 24px);
+  border-top: 1px solid var(--set-color-border-secondary, #eaecf0);
+}
+
+.settings-group__label {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--slds-g-spacing-4, 16px);
+}
+
+.settings-group__rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-5, 24px);
+}
+
+.settings-notify {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--slds-g-spacing-4, 16px);
+  min-height: 36px;
+}
+
+/* 13/18 Semibold — the frame's row labels sit on the base scale, not the 14. */
+.settings-notify__label {
+  min-width: 0;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+/* Button Group (758:116751): four 36px segments sharing single borders, so the
+   run reads as one control rather than four buttons in a row. */
+.settings-segment {
+  display: flex;
+  flex: none;
+  align-items: stretch;
+}
+
+.settings-segment__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  /* 16 a side puts the run on the frame's 50 / 69 / 76 / 68 (758:116751). */
+  padding: 0 var(--slds-g-spacing-4, 16px);
+  border: 1px solid var(--slds-g-color-border-2, #b6bcc5);
+  background: var(--slds-g-color-surface-container-1, #ffffff);
+  color: var(--slds-g-color-accent-2, #0b2f51);
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* The shared edge: every segment after the first sits on its neighbour's border. */
+.settings-segment__button + .settings-segment__button {
+  margin-left: -1px;
+}
+
+.settings-segment__button:first-child {
+  border-radius: var(--slds-g-radius-border-2, 8px) 0 0
+    var(--slds-g-radius-border-2, 8px);
+}
+
+.settings-segment__button:last-child {
+  border-radius: 0 var(--slds-g-radius-border-2, 8px)
+    var(--slds-g-radius-border-2, 8px) 0;
+}
+
+/* Lighter than the selected fill below, so hover never reads as chosen. */
+/* Excludes the selected segment, whose navy fill would otherwise be wiped back
+   to near-white the moment the pointer crossed it. */
+.settings-segment__button:hover:not(.settings-segment__button--active) {
+  background: #f9fafb;
+}
+
+/* The frame marks the chosen segment with a surface-container-2 fill and a
+   darker label (758:116751), but that grey proved too faint to pick out on
+   screen, so every segmented control in the app now uses the deep navy the
+   metric charts draw with. This is a deliberate departure from the frame, and
+   the one place it is worth calling out — revert to
+   var(--slds-g-color-surface-container-2, #f3f4f6) with
+   var(--slds-g-color-accent-3, #071c31) to go back to the Figma reading. */
+.settings-segment__button--active {
+  background: #032d60;
+  color: var(--slds-g-color-on-accent-1, #ffffff);
+}
+
+.settings-segment__button:focus-visible {
+  z-index: 2;
+  outline: 2px solid #1a76bb;
+  outline-offset: -2px;
+}
+
+/* ---- Buttons and footer (758:116685) ------------------------------------ */
+.settings-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 1px var(--slds-g-spacing-4, 16px);
+  border: 1px solid var(--slds-g-color-border-2, #b6bcc5);
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  background: var(--slds-g-color-surface-container-1, #ffffff);
+  color: var(--slds-g-color-accent-2, #0b2f51);
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 19px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.settings-button:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+.settings-button--brand {
+  border-color: var(--slds-g-color-accent-container-1, #0f406f);
+  background: var(--slds-g-color-accent-container-1, #0f406f);
+  color: var(--slds-g-color-on-accent-1, #ffffff);
+}
+
+.settings-button--brand:hover:not(:disabled) {
+  border-color: var(--slds-g-color-accent-2, #0b2f51);
+  background: var(--slds-g-color-accent-2, #0b2f51);
+}
+
+.settings-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.settings-button:focus-visible {
+  outline: 2px solid #1a76bb;
+  outline-offset: 2px;
+}
+
+/* Last row to the rule is 16, the rule to the buttons 20 (758:116685). */
+.settings__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--slds-g-spacing-2, 8px);
+  margin-top: var(--slds-g-spacing-4, 16px);
+  padding-top: 20px;
+  border-top: 1px solid var(--set-color-border-secondary, #eaecf0);
+}
+
+@media (max-width: 900px) {
+  .settings-row,
+  .settings-row__field--split {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--slds-g-spacing-3, 12px);
+  }
+
+  .settings-row__label {
+    padding-top: 0;
+  }
+
+  .settings-row__field--photo {
+    flex-wrap: wrap;
+  }
+}
+
+/* ── Version ────────────────────────────────────────────────────────────────
+   Same --set-* tokens with literal fallbacks the rest of this file uses, so the
+   panel is correct on the ARC site where the diversifyStyles resource does not
+   resolve. */
+
+.settings__version {
+  max-width: 640px;
+  margin-top: 20px;
+}
+
+/* The edition itself reads as a label rather than prose, so it is set apart
+   from the paragraphs explaining it. */
+.settings__version-badge {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--set-color-border-secondary, #eaecf0);
+}
+
+.settings__version-name {
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28px;
+  color: var(--div-color-sidebar-text, #09243f);
+}
+
+.settings__version-state {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #e6f6fd;
+  color: #0b5a75;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+/* Section headings inside the Version body. The page already has an h2 for the
+   tab, so these are h3s and sized below it, with the top margin doing the
+   separating rather than a rule -- four rules in a short body reads as a table. */
+.settings__version-heading {
+  margin: 24px 0 0;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 22px;
+  color: var(--div-color-sidebar-text, #09243f);
+}
+
+.settings__version-heading:first-of-type {
+  margin-top: 20px;
+}
+
+.settings__version-copy {
+  margin: 14px 0 0;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--set-color-text-tertiary, #475467);
+}
+
+.settings__version-copy--muted {
+  margin-top: 8px;
+}
+
+.settings__version-copy a {
+  color: var(--lwc-colorTextLink, #0176d3);
+}

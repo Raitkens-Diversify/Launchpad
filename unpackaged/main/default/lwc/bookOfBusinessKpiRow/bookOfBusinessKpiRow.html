@@ -1,0 +1,15 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-06-22 -->
+<template>
+  <section class="div-kpi-row" aria-label="Key metrics">
+    <template for:each={kpis} for:item="kpi">
+      <c-book-of-business-kpi-card
+        key={kpi.id}
+        label={kpi.label}
+        value={kpi.value}
+        subtext={kpi.subtext}
+        trend-label={kpi.trendLabel}
+        trend-direction={kpi.trendDirection}
+      ></c-book-of-business-kpi-card>
+    </template>
+  </section>
+</template>

@@ -1,0 +1,74 @@
+<template>
+  <template lwc:if={hasAnnouncements}>
+    <div class="arc-announcements">
+      <div class="arc-announcements__card">
+        <span
+          class="arc-announcements__icon"
+          style={megaphoneIconStyle}
+          aria-hidden="true"
+        ></span>
+        <div class="arc-announcements__body">
+          <p class="arc-announcements__title">{current.title}</p>
+          <p class="arc-announcements__text">{current.body}</p>
+        </div>
+        <div class="arc-announcements__actions">
+          <template lwc:if={hasLink}>
+            <button
+              type="button"
+              class="arc-announcements__visit-button"
+              onclick={handleVisitPage}
+            >
+              <span>Visit Page</span>
+              <span
+                class="arc-announcements__visit-icon"
+                style={externalLinkIconStyle}
+                aria-hidden="true"
+              ></span>
+            </button>
+          </template>
+          <button
+            type="button"
+            class="arc-announcements__overflow-button"
+            aria-label="More actions"
+          >
+            <span
+              class="arc-announcements__overflow-icon"
+              style={overflowIconStyle}
+              aria-hidden="true"
+            ></span>
+          </button>
+        </div>
+      </div>
+
+      <template lwc:if={showPagination}>
+        <div class="arc-announcements__pagination">
+          <button
+            type="button"
+            class="arc-announcements__page-button"
+            onclick={handlePrevious}
+            aria-label="Previous announcement"
+          >
+            <span
+              class="arc-announcements__page-icon"
+              style={caretLeftIconStyle}
+              aria-hidden="true"
+            ></span>
+          </button>
+          <p class="arc-announcements__page-label">{paginationLabel}</p>
+          <button
+            type="button"
+            class="arc-announcements__page-button"
+            onclick={handleNext}
+            aria-label="Next announcement"
+          >
+            <span
+              class="arc-announcements__page-icon"
+              style={caretRightIconStyle}
+              aria-hidden="true"
+            ></span>
+          </button>
+        </div>
+      </template>
+    </div>
+  </template>
+</template>

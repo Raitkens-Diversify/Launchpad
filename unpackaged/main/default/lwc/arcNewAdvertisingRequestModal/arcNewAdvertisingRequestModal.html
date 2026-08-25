@@ -1,0 +1,117 @@
+<template>
+  <c-ds-modal-v2
+    is-open={isOpen}
+    title="New Advertising Request"
+    subtitle="Create a new ad hoc case for a household."
+    size="small"
+    allow-overflow
+    onclose={handleClose}
+  >
+    <div class="arc-new-adv-request">
+      <div class="arc-new-adv-request__field arc-new-adv-request__field--account">
+        <label class="arc-new-adv-request__label" for="arc-new-adv-request-account">
+          Account Name<span class="arc-new-adv-request__required">*</span>
+        </label>
+        <div class="arc-new-adv-request__combobox">
+          <input
+            id="arc-new-adv-request-account"
+            class="arc-new-adv-request__input"
+            type="text"
+            placeholder="Search accounts…"
+            autocomplete="off"
+            value={accountDisplayValue}
+            onfocus={handleAccountFocus}
+            oninput={handleAccountInput}
+            onblur={handleAccountBlur}
+          />
+          <template lwc:if={isAccountMenuOpen}>
+            <template lwc:if={hasAccountOptions}>
+              <ul class="arc-new-adv-request__menu" role="listbox">
+                <template for:each={accountOptions} for:item="option">
+                  <li key={option.id}>
+                    <button
+                      type="button"
+                      class="arc-new-adv-request__option"
+                      data-id={option.id}
+                      data-name={option.name}
+                      onmousedown={handleAccountOptionMouseDown}
+                      onclick={handleAccountOptionClick}
+                    >
+                      {option.name}
+                    </button>
+                  </li>
+                </template>
+              </ul>
+            </template>
+            <template lwc:elseif={showAccountEmptyState}>
+              <div class="arc-new-adv-request__menu arc-new-adv-request__menu--empty">
+                No matching accounts
+              </div>
+            </template>
+          </template>
+        </div>
+      </div>
+
+      <lightning-input
+        label="Subject"
+        placeholder="Enter subject"
+        required
+        value={form.subject}
+        data-field="subject"
+        onchange={handleFieldChange}
+      ></lightning-input>
+
+      <lightning-textarea
+        label="Description"
+        placeholder="Enter description"
+        value={form.description}
+        data-field="description"
+        onchange={handleFieldChange}
+      ></lightning-textarea>
+
+      <lightning-combobox
+        label="Priority"
+        placeholder="Select priority"
+        required
+        options={priorityOptions}
+        value={form.priority}
+        data-field="priority"
+        onchange={handleFieldChange}
+      ></lightning-combobox>
+
+      <lightning-combobox
+        label="Status"
+        placeholder="Select status"
+        required
+        options={statusOptions}
+        value={form.status}
+        data-field="status"
+        onchange={handleFieldChange}
+      ></lightning-combobox>
+    </div>
+
+    <div slot="footer" class="arc-new-adv-request__footer">
+      <lightning-button
+        variant="secondary"
+        label="Cancel"
+        disabled={isSaving}
+        onclick={handleClose}
+      ></lightning-button>
+      <div class="arc-new-adv-request__save">
+        <lightning-button
+          variant="brand"
+          label="Save"
+          disabled={isSaveDisabled}
+          onclick={handleSave}
+        ></lightning-button>
+        <template lwc:if={isSaving}>
+          <lightning-spinner
+            size="small"
+            variant="brand"
+            alternative-text="Saving"
+          ></lightning-spinner>
+        </template>
+      </div>
+    </div>
+  </c-ds-modal-v2>
+</template>

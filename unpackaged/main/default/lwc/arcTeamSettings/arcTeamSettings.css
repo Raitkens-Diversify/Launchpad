@@ -1,0 +1,340 @@
+/**
+ * Team tab of the settings surface.
+ *
+ * Self-declares the same --slds-g-* set arcSettings.css does, for the reason
+ * arcSearchBar.css documents: LWR injects stock SLDS under these names into
+ * each component scope, and that set is rem-based against a different root with
+ * a different neutral ramp. Declaring them here in px keeps this tab identical
+ * to the rest of Settings instead of inheriting whichever set wins. Every use
+ * carries a literal fallback so the tab is still correct outside an LWR site.
+ *
+ * Deliberately not using the --div-* scale — see the note in arcSearchBar.css.
+ */
+:host {
+  display: block;
+
+  --slds-g-spacing-1: 4px;
+  --slds-g-spacing-2: 8px;
+  --slds-g-spacing-3: 12px;
+  --slds-g-spacing-4: 16px;
+  --slds-g-spacing-5: 24px;
+  --slds-g-radius-border-2: 8px;
+  --slds-g-color-surface-container-1: #ffffff;
+  --slds-g-color-surface-container-2: #f3f4f6;
+  --slds-g-color-on-surface-1: #4b5563;
+  --slds-g-color-on-surface-2: #374151;
+  --slds-g-color-accent-1: #0f406f;
+  --slds-g-color-accent-2: #0b2f51;
+  --slds-g-color-border-1: #d1d5db;
+  --slds-g-color-border-2: #b6bcc5;
+
+  --set-color-text-tertiary: #475467;
+  --set-color-border-secondary: #eaecf0;
+}
+
+.team-settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-5, 24px);
+  width: 100%;
+}
+
+.team-settings__loading {
+  display: flex;
+  justify-content: center;
+  padding: var(--slds-g-spacing-5, 24px) 0;
+}
+
+.team-settings__error,
+.team-settings__empty {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--set-color-text-tertiary, #475467);
+}
+
+.team-settings__error {
+  color: #b3261e;
+}
+
+/* ── Team picker ─────────────────────────────────────────────────────────── */
+
+.team-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--slds-g-spacing-2, 8px);
+}
+
+.team-tab {
+  appearance: none;
+  padding: var(--slds-g-spacing-1, 4px) var(--slds-g-spacing-3, 12px);
+  border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+  border-radius: 999px;
+  background: var(--slds-g-color-surface-container-1, #ffffff);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+  cursor: pointer;
+}
+
+.team-tab:hover {
+  background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+
+.team-tab--active {
+  background: var(--slds-g-color-accent-1, #0f406f);
+  border-color: var(--slds-g-color-accent-1, #0f406f);
+  color: #ffffff;
+}
+
+/* ── Cards ───────────────────────────────────────────────────────────────── */
+
+.card {
+  border: 1px solid var(--set-color-border-secondary, #eaecf0);
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  background: var(--slds-g-color-surface-container-1, #ffffff);
+  padding: var(--slds-g-spacing-5, 24px);
+}
+
+.card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--slds-g-spacing-4, 16px);
+  margin-bottom: var(--slds-g-spacing-4, 16px);
+}
+
+.card__title {
+  margin: 0;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.card__tagline {
+  margin: var(--slds-g-spacing-1, 4px) 0 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--set-color-text-tertiary, #475467);
+}
+
+.count {
+  flex: none;
+  padding: 2px var(--slds-g-spacing-2, 8px);
+  border-radius: 999px;
+  background: var(--slds-g-color-surface-container-2, #f3f4f6);
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--set-color-text-tertiary, #475467);
+}
+
+/* ── Team facts ──────────────────────────────────────────────────────────── */
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--slds-g-spacing-4, 16px);
+  margin: 0;
+}
+
+.facts__label {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--set-color-text-tertiary, #475467);
+}
+
+.facts__value {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+/* ── Your own assignment ─────────────────────────────────────────────────── */
+
+.mine {
+  margin-top: var(--slds-g-spacing-5, 24px);
+  padding: var(--slds-g-spacing-4, 16px);
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+
+.mine__label {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--set-color-text-tertiary, #475467);
+}
+
+.mine__role {
+  display: flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-2, 8px);
+  margin: var(--slds-g-spacing-1, 4px) 0 0;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.mine__none {
+  margin: var(--slds-g-spacing-2, 8px) 0 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--set-color-text-tertiary, #475467);
+}
+
+/* ── Chips ───────────────────────────────────────────────────────────────── */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--slds-g-spacing-1, 4px);
+}
+
+.chips:not(:first-child) {
+  margin-top: var(--slds-g-spacing-2, 8px);
+}
+
+.chip {
+  display: inline-block;
+  padding: 2px var(--slds-g-spacing-2, 8px);
+  border-radius: 999px;
+  background: #eef4ff;
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+  color: #0b5cab;
+}
+
+.chip--primary {
+  background: #ebf7e6;
+  color: #2e6b2e;
+}
+
+.chip--you {
+  background: var(--slds-g-color-accent-1, #0f406f);
+  color: #ffffff;
+}
+
+/* ── Tables ──────────────────────────────────────────────────────────────── */
+
+/* Past the threshold the roster scrolls in place rather than pushing the
+   Permissions and Rep Codes cards off the bottom of a long page. */
+.roster--scrolls {
+  max-height: 26rem;
+  overflow-y: auto;
+}
+
+.roster__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.roster__th {
+  padding: var(--slds-g-spacing-2, 8px) var(--slds-g-spacing-3, 12px);
+  border-bottom: 1px solid var(--set-color-border-secondary, #eaecf0);
+  background: var(--slds-g-color-surface-container-2, #f3f4f6);
+  text-align: left;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--set-color-text-tertiary, #475467);
+  position: sticky;
+  top: 0;
+}
+
+.roster__row {
+  border-bottom: 1px solid var(--set-color-border-secondary, #eaecf0);
+}
+
+.roster__row--self {
+  background: #f7fbff;
+}
+
+.roster__td {
+  padding: var(--slds-g-spacing-3, 12px);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+  vertical-align: top;
+}
+
+.roster__name {
+  margin-right: var(--slds-g-spacing-2, 8px);
+}
+
+.roster__td--role {
+  white-space: nowrap;
+}
+
+.roster__none {
+  color: var(--set-color-text-tertiary, #475467);
+}
+
+/* ── Team-level permissions ──────────────────────────────────────────────── */
+
+.permissions {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.permissions__row {
+  display: grid;
+  grid-template-columns: minmax(11rem, 14rem) 1fr;
+  gap: var(--slds-g-spacing-4, 16px);
+  align-items: baseline;
+  padding: var(--slds-g-spacing-3, 12px) 0;
+  border-bottom: 1px solid var(--set-color-border-secondary, #eaecf0);
+}
+
+.permissions__row:last-child {
+  border-bottom: 0;
+}
+
+.permissions__name {
+  display: flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-2, 8px);
+}
+
+.permissions__label {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.permissions__count {
+  padding: 0 var(--slds-g-spacing-2, 8px);
+  border-radius: 999px;
+  background: var(--slds-g-color-surface-container-2, #f3f4f6);
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--set-color-text-tertiary, #475467);
+}
+
+.permissions__holders {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.permissions__holders--empty {
+  color: var(--set-color-text-tertiary, #475467);
+  font-style: italic;
+}
+
+@media (max-width: 40rem) {
+  .permissions__row {
+    grid-template-columns: 1fr;
+    gap: var(--slds-g-spacing-1, 4px);
+  }
+}

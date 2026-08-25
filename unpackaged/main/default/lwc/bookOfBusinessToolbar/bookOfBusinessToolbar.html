@@ -1,0 +1,137 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-06-22 -->
+<template>
+  <div class="div-toolbar-stack">
+    <template lwc:if={hasOpenPopover}>
+      <div
+        class="div-toolbar__popover-backdrop"
+        role="presentation"
+        onclick={handleBackdropClick}
+      ></div>
+    </template>
+
+    <section class="div-toolbar" aria-label="Book of business controls">
+      <div class="div-toolbar__left">
+        <div class="div-toolbar__view-heading">
+          <template lwc:if={hasActiveViewLabel}>
+            <h2 class="div-branded-heading-large div-toolbar__view-heading-title">{activeViewLabel}</h2>
+          </template>
+        </div>
+
+        <div class="div-toolbar__segmented" role="group" aria-label="View mode">
+          <button
+            type="button"
+            class={tableSegmentClass}
+            data-mode="table"
+            aria-pressed={isTableView}
+            onclick={handleViewModeChange}
+          >
+            <lightning-icon icon-name="utility:table" size="xx-small" aria-hidden="true"></lightning-icon>
+            <span>Table</span>
+          </button>
+          <button
+            type="button"
+            class={chartSegmentClass}
+            data-mode="chart"
+            aria-pressed={isChartView}
+            onclick={handleViewModeChange}
+          >
+            <lightning-icon icon-name="utility:chart" size="xx-small" aria-hidden="true"></lightning-icon>
+            <span>Chart</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="div-toolbar__right">
+        <div class="div-toolbar__actions">
+          <div class="div-toolbar__saved-view-control">
+          <span class="div-toolbar__view-heading-label">Saved Views</span>
+          <div class="div-toolbar-popover div-toolbar__saved-view-trigger" data-popover-root="savedViews">
+            <button
+              type="button"
+              class="div-toolbar__button div-toolbar__saved-view-button"
+              data-popover="savedViews"
+              aria-expanded={showSavedViewsPopover}
+              aria-haspopup="dialog"
+              aria-label={savedViewsButtonAriaLabel}
+              onclick={handleTogglePopover}
+            >
+              <span class="div-toolbar__saved-view-button-label">
+                <template lwc:if={hasUnsavedViewChanges}>
+                  <span class="div-saved-views__unsaved-indicator" aria-hidden="true"></span>
+                </template>
+                <span>{savedViewsButtonLabel}</span>
+              </span>
+              <lightning-icon icon-name="utility:down" size="xx-small" aria-hidden="true"></lightning-icon>
+            </button>
+            <template lwc:if={showSavedViewsPopover}>
+              <div class="div-toolbar__popover div-toolbar__popover--saved-views" role="dialog" aria-label="Saved views menu">
+                <c-book-of-business-saved-views
+                  saved-views={savedViews}
+                  view-name={savedViewName}
+                  active-view-id={activeViewId}
+                  has-unsaved-changes={hasUnsavedViewChanges}
+                  onsaveview={handleSaveView}
+                  onupdateview={handleUpdateView}
+                  onapplyview={handleApplyView}
+                  ondeleteview={handleDeleteView}
+                  onrenameview={handleRenameView}
+                ></c-book-of-business-saved-views>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <div class="div-toolbar__group-by-control">
+          <span class="div-toolbar__view-heading-label">Group By</span>
+          <div class="div-toolbar-popover div-toolbar__group-by-trigger" data-popover-root="groupBy">
+            <button
+              type="button"
+              class="div-toolbar__button div-toolbar__group-by-button"
+              data-popover="groupBy"
+              aria-expanded={showGroupByPopover}
+              aria-haspopup="listbox"
+              aria-label={groupByButtonAriaLabel}
+              onclick={handleTogglePopover}
+            >
+              <span>{groupByButtonLabel}</span>
+              <lightning-icon icon-name="utility:down" size="xx-small" aria-hidden="true"></lightning-icon>
+            </button>
+            <template lwc:if={showGroupByPopover}>
+              <div
+                class="div-toolbar__popover div-toolbar__popover--group-by div-toolbar-popover__panel"
+                role="listbox"
+                aria-label="Group by options"
+              >
+                <template for:each={groupByOptions} for:item="option">
+                  <button
+                    key={option.key}
+                    type="button"
+                    class={option.buttonClass}
+                    data-value={option.value}
+                    role="option"
+                    aria-selected={option.isSelected}
+                    onclick={handleGroupBySelect}
+                  >
+                    {option.label}
+                  </button>
+                </template>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <template lwc:if={isTableView}>
+          <button
+            type="button"
+            class="div-toolbar__button div-toolbar__button--primary"
+            onclick={handleOpenConfigure}
+          >
+            <lightning-icon icon-name="utility:settings" size="xx-small" aria-hidden="true"></lightning-icon>
+            <span>Configure</span>
+          </button>
+        </template>
+        </div>
+      </div>
+    </section>
+  </div>
+</template>

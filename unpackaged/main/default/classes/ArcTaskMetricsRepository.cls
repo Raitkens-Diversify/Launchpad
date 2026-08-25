@@ -18,19 +18,51 @@ public with sharing class ArcTaskMetricsRepository {
   }
 
   public ArcTaskMetricsModels.MetricsResult selectMetrics(
-    ARCConstants.RelatedTableScope scope
+    ArcRelatedTableScope.Value scope
   ) {
     ArcTaskMetricsModels.MetricsResult metrics = new ArcTaskMetricsModels.MetricsResult();
     Id currentUserId = UserInfo.getUserId();
+    FinancialAdvisorTeamAccessService.TeamAccessContext teamAccess = teamAccessService.getCurrentUserTeamAccess();
 
     List<Task> taskRecords;
-    if (scope == ARCConstants.RelatedTableScope.MINE) {
-      taskRecords = selectOwnedOpenTasks(currentUserId);
+    if (scope == ArcRelatedTableScope.Value.MINE) {
+      taskRecords = [
+        SELECT Id, Branch_Pit_Stop__c, Home_Office_Pit_Stop__c
+        FROM Task
+        WHERE OwnerId = :currentUserId AND IsClosed = FALSE
+        WITH SECURITY_ENFORCED
+      ];
+    } else if (teamAccess.teamIds.isEmpty()) {
+      return metrics;
     } else {
-      taskRecords = selectTeamScopeTasks(
-        currentUserId,
-        teamAccessService.getCurrentUserTeamAccess()
-      );
+      Set<Id> relatedRecordIds = new Set<Id>();
+      for (Case caseRecord : [
+        SELECT Id
+        FROM Case
+        WHERE Financial_Advisor_Team__c IN :teamAccess.teamIds
+        WITH SECURITY_ENFORCED
+      ]) {
+        relatedRecordIds.add(caseRecord.Id);
+      }
+      for (Account accountRecord : [
+        SELECT Id
+        FROM Account
+        WHERE Financial_Advisor_Team__c IN :teamAccess.teamIds
+        WITH SECURITY_ENFORCED
+      ]) {
+        relatedRecordIds.add(accountRecord.Id);
+      }
+
+      if (relatedRecordIds.isEmpty()) {
+        return metrics;
+      }
+
+      taskRecords = [
+        SELECT Id, Branch_Pit_Stop__c, Home_Office_Pit_Stop__c
+        FROM Task
+        WHERE IsClosed = FALSE AND WhatId IN :relatedRecordIds
+        WITH SECURITY_ENFORCED
+      ];
     }
 
     for (Task taskRecord : taskRecords) {
@@ -51,69 +83,5 @@ public with sharing class ArcTaskMetricsRepository {
     }
 
     return metrics;
-  }
-
-  private List<Task> selectOwnedOpenTasks(Id ownerId) {
-    return [
-      SELECT Id, Branch_Pit_Stop__c, Home_Office_Pit_Stop__c
-      FROM Task
-      WHERE OwnerId = :ownerId AND IsClosed = FALSE
-      WITH SECURITY_ENFORCED
-    ];
-  }
-
-  private List<Task> selectTeamScopeTasks(
-    Id currentUserId,
-    FinancialAdvisorTeamAccessService.TeamAccessContext teamAccess
-  ) {
-    Map<Id, Task> tasksById = new Map<Id, Task>();
-
-    for (Task ownedTask : selectOwnedOpenTasks(currentUserId)) {
-      tasksById.put(ownedTask.Id, ownedTask);
-    }
-
-    if (teamAccess.teamIds.isEmpty()) {
-      return tasksById.values();
-    }
-
-    Set<Id> relatedRecordIds = selectTeamRelatedRecordIds(teamAccess.teamIds);
-    if (relatedRecordIds.isEmpty()) {
-      return tasksById.values();
-    }
-
-    for (Task teamTask : [
-      SELECT Id, Branch_Pit_Stop__c, Home_Office_Pit_Stop__c
-      FROM Task
-      WHERE IsClosed = FALSE AND WhatId IN :relatedRecordIds
-      WITH SECURITY_ENFORCED
-    ]) {
-      tasksById.put(teamTask.Id, teamTask);
-    }
-
-    return tasksById.values();
-  }
-
-  private Set<Id> selectTeamRelatedRecordIds(Set<Id> teamIds) {
-    Set<Id> relatedRecordIds = new Set<Id>();
-
-    for (Case caseRecord : [
-      SELECT Id
-      FROM Case
-      WHERE Financial_Advisor_Team__c IN :teamIds
-      WITH SECURITY_ENFORCED
-    ]) {
-      relatedRecordIds.add(caseRecord.Id);
-    }
-
-    for (Account accountRecord : [
-      SELECT Id
-      FROM Account
-      WHERE Financial_Advisor_Team__c IN :teamIds
-      WITH SECURITY_ENFORCED
-    ]) {
-      relatedRecordIds.add(accountRecord.Id);
-    }
-
-    return relatedRecordIds;
   }
 }

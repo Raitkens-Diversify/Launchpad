@@ -4,7 +4,6 @@
  */
 @IsTest
 private class ArcRecordDetailControllerTest {
-
   @IsTest
   static void loadReturnsSchemaAndValues() {
     Account member = new Account(
@@ -18,8 +17,11 @@ private class ArcRecordDetailControllerTest {
     insert member;
 
     Test.startTest();
-    ArcRecordDetailController.RecordDetailContext context =
-      ArcRecordDetailController.load(member.Id, null, false, null);
+    ArcRecordDetailController.RecordDetailContext context = ArcRecordDetailController.load(
+      member.Id,
+      null,
+      null
+    );
     Test.stopTest();
 
     System.assertNotEquals(null, context, 'Context should not be null');
@@ -30,10 +32,22 @@ private class ArcRecordDetailControllerTest {
       'Person account should resolve individual schema'
     );
     System.assertEquals(true, context.isPersonAccount);
-    System.assertNotEquals(null, context.sections, 'Sections should not be null');
+    System.assertNotEquals(
+      null,
+      context.sections,
+      'Sections should not be null'
+    );
     System.assertNotEquals(null, context.values, 'Values should not be null');
-    System.assertNotEquals(null, context.userContext, 'User context should not be null');
-    System.assertEquals(false, context.isSubmitted, 'Unsubmitted record should be editable');
+    System.assertNotEquals(
+      null,
+      context.userContext,
+      'User context should not be null'
+    );
+    System.assertEquals(
+      false,
+      context.isSubmitted,
+      'Unsubmitted record should be editable'
+    );
   }
 
   @IsTest
@@ -50,8 +64,11 @@ private class ArcRecordDetailControllerTest {
     insert business;
 
     Test.startTest();
-    ArcRecordDetailController.RecordDetailContext context =
-      ArcRecordDetailController.load(business.Id, null, false, null);
+    ArcRecordDetailController.RecordDetailContext context = ArcRecordDetailController.load(
+      business.Id,
+      null,
+      null
+    );
     Test.stopTest();
 
     System.assertEquals('Account', context.objectApiName);
@@ -61,30 +78,192 @@ private class ArcRecordDetailControllerTest {
 
   @IsTest
   static void resolveAccountSchemaTypeMapsKnownRecordTypes() {
-    System.assertEquals(
+    Assert.areEqual(
       'Client - Individual',
-      ArcRecordDetailController.resolveAccountSchemaType('PersonAccount')
+      ArcRecordDetailController.resolveAccountSchemaType('PersonAccount', true),
+      'A person account keeps the individual schema.'
     );
-    System.assertEquals(
+    Assert.areEqual(
       'Client - Business',
-      ArcRecordDetailController.resolveAccountSchemaType('Business')
+      ArcRecordDetailController.resolveAccountSchemaType(
+        'IndustriesBusiness',
+        false
+      ),
+      'Business record types keep the business schema.'
     );
-    System.assertEquals(
+    Assert.areEqual(
       'Client - Trust',
-      ArcRecordDetailController.resolveAccountSchemaType('Trust')
+      ArcRecordDetailController.resolveAccountSchemaType(
+        'IndustriesInstitution',
+        false
+      ),
+      'Institution record types keep the trust schema.'
     );
-    System.assertEquals(
+    Assert.areEqual(
       'Client - Retirement Plan',
-      ArcRecordDetailController.resolveAccountSchemaType('Retirement_Plan')
+      ArcRecordDetailController.resolveAccountSchemaType(
+        'Retirement_Plan',
+        false
+      ),
+      'Retirement plans keep their own schema.'
     );
+  }
+
+  /**
+   * Household has no schema of its own. It used to fall back to
+   * Client - Individual, which is built on person-account fields a business
+   * account cannot store, so every Household rendered a form it could not save.
+   */
+  @IsTest
+  static void resolveAccountSchemaTypeFallsBackByAccountKind() {
+    Assert.areEqual(
+      'Client - Business',
+      ArcRecordDetailController.resolveAccountSchemaType('Household', false),
+      'A Household is a business account and must not get the person schema.'
+    );
+    Assert.areEqual(
+      'Client - Business',
+      ArcRecordDetailController.resolveAccountSchemaType('Unknown_Type', false),
+      'An unmapped business record type falls back to the business schema.'
+    );
+    Assert.areEqual(
+      'Client - Individual',
+      ArcRecordDetailController.resolveAccountSchemaType('Unknown_Type', true),
+      'An unmapped person account still falls back to the individual schema.'
+    );
+    Assert.areEqual(
+      'Client - Business',
+      ArcRecordDetailController.resolveAccountSchemaType(null, false),
+      'A blank record type on a business account falls back to business.'
+    );
+  }
+
+  /**
+   * A section edit must never change the record's type. Saving used to route
+   * Accounts through the envelope wizard's member-save routine, which forces
+   * RecordTypeId from the schema type; on a Household that attempted a
+   * business-to-person conversion and Salesforce rejected the whole update.
+   */
+  @IsTest
+  static void saveLeavesTheAccountRecordTypeAlone() {
+    Id householdRecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
+      .get('Household')
+      .getRecordTypeId();
+
+    Account household = new Account(
+      Name = 'Schema Fallback Household',
+      RecordTypeId = householdRecordTypeId
+    );
+    insert household;
+
+    Test.startTest();
+    ArcRecordDetailController.save(
+      household.Id,
+      'Account',
+      null,
+      new Map<String, Object>{ 'BillingCity' => 'Denver' }
+    );
+    Test.stopTest();
+
+    Account reloaded = [
+      SELECT RecordTypeId, BillingCity
+      FROM Account
+      WHERE Id = :household.Id
+    ];
+    Assert.areEqual(
+      householdRecordTypeId,
+      reloaded.RecordTypeId,
+      'Editing a section must not convert the record to another type.'
+    );
+    Assert.areEqual(
+      'Denver',
+      reloaded.BillingCity,
+      'The edited field should still be written.'
+    );
+  }
+
+  /**
+   * "Edit Regulated Fields" used to only dispatch an event nothing listened
+   * for, so confirming the dialog did nothing. The envelope is raised against
+   * the member's household, and has to carry Status__c and Household__c or the
+   * wizard's own list filters it straight back out and opens on the list.
+   */
+  @IsTest
+  static void startRegulatedFieldsEnvelopeOpensAnEnvelopeOnTheHousehold() {
+    Account household = new Account(
+      Name = 'Regulated Fields Household',
+      RecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
+        .get('Household')
+        .getRecordTypeId()
+    );
+    insert household;
+
+    Account member = new Account(
+      FirstName = 'Regulated',
+      LastName = 'Member',
+      Household__c = household.Id,
+      RecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
+        .get('PersonAccount')
+        .getRecordTypeId()
+    );
+    insert member;
+
+    Test.startTest();
+    Id envelopeId = ArcRecordDetailController.startRegulatedFieldsEnvelope(
+      member.Id
+    );
+    Test.stopTest();
+
+    Assert.isNotNull(envelopeId, 'An envelope should have been created.');
+
+    Envelope__c envelope = [
+      SELECT Status__c, Household__c
+      FROM Envelope__c
+      WHERE Id = :envelopeId
+    ];
+    Assert.areEqual(
+      'New',
+      envelope.Status__c,
+      'An envelope the wizard cannot list is the same as no envelope.'
+    );
+    Assert.areEqual(
+      household.Id,
+      envelope.Household__c,
+      'A member edits its regulated fields through its household.'
+    );
+  }
+
+  /** Nothing else on the site declares regulated fields. */
+  @IsTest
+  static void startRegulatedFieldsEnvelopeRejectsNonAccounts() {
+    Task task = new Task(Subject = 'Not an account');
+    insert task;
 
     Boolean threw = false;
     try {
-      ArcRecordDetailController.resolveAccountSchemaType('Unknown_Type');
+      ArcRecordDetailController.startRegulatedFieldsEnvelope(task.Id);
     } catch (AuraHandledException e) {
       threw = true;
     }
-    System.assert(threw, 'Unknown account record types should not fall back to a default schema.');
+    Assert.isTrue(
+      threw,
+      'Only accounts can start a regulated-fields envelope.'
+    );
+  }
+
+  /** Task and Check Log resolve their one schema without a record-type branch. */
+  @IsTest
+  static void singleSchemaObjectsResolveTheirOwnSchemaType() {
+    Assert.areEqual(
+      'Task',
+      ArcRecordDetailController.SINGLE_SCHEMA_OBJECTS.get('Task'),
+      'Task detail is driven by the Task schema.'
+    );
+    Assert.areEqual(
+      'Check Log',
+      ArcRecordDetailController.SINGLE_SCHEMA_OBJECTS.get('Check_Log__c'),
+      'Check Log detail is driven by the Check Log schema.'
+    );
   }
 
   @IsTest
@@ -105,7 +284,6 @@ private class ArcRecordDetailControllerTest {
       ArcRecordDetailController.save(
         member.Id,
         null,
-        false,
         null,
         new Map<String, Object>{ 'FirstName' => 'Updated' }
       );
@@ -119,7 +297,7 @@ private class ArcRecordDetailControllerTest {
   static void loadRejectsNullRecordId() {
     Boolean threw = false;
     try {
-      ArcRecordDetailController.load(null, null, false, null);
+      ArcRecordDetailController.load(null, null, null);
     } catch (AuraHandledException e) {
       threw = true;
     }
@@ -132,8 +310,11 @@ private class ArcRecordDetailControllerTest {
     insert service;
 
     Test.startTest();
-    ArcRecordDetailController.RecordDetailContext context =
-      ArcRecordDetailController.load(service.Id, null, false, null);
+    ArcRecordDetailController.RecordDetailContext context = ArcRecordDetailController.load(
+      service.Id,
+      null,
+      null
+    );
     Test.stopTest();
 
     System.assertEquals('Service__c', context.objectApiName);
@@ -150,8 +331,11 @@ private class ArcRecordDetailControllerTest {
     );
     insert service;
 
-    ArcRecordDetailController.RecordDetailContext context =
-      ArcRecordDetailController.load(service.Id, null, false, null);
+    ArcRecordDetailController.RecordDetailContext context = ArcRecordDetailController.load(
+      service.Id,
+      null,
+      null
+    );
 
     System.assertEquals(true, context.isSubmitted);
   }
@@ -166,14 +350,16 @@ private class ArcRecordDetailControllerTest {
       ArcRecordDetailController.save(
         service.Id,
         null,
-        false,
         null,
         new Map<String, Object>{ 'Name' => 'After Save' }
       );
     } catch (AuraHandledException e) {
       threw = true;
     }
-    System.assert(threw, 'Service save should reject fields outside the schema');
+    System.assert(
+      threw,
+      'Service save should reject fields outside the schema'
+    );
   }
 
   @IsTest
@@ -184,8 +370,11 @@ private class ArcRecordDetailControllerTest {
     );
     insert fa;
 
-    ArcRecordDetailController.RecordDetailContext context =
-      ArcRecordDetailController.load(fa.Id, null, false, null);
+    ArcRecordDetailController.RecordDetailContext context = ArcRecordDetailController.load(
+      fa.Id,
+      null,
+      null
+    );
 
     System.assertEquals('Financial_Account__c', context.objectApiName);
     System.assertEquals('ISA - Fin Acct', context.schemaType);
@@ -199,8 +388,11 @@ private class ArcRecordDetailControllerTest {
     );
     insert fa;
 
-    ArcRecordDetailController.RecordDetailContext context =
-      ArcRecordDetailController.load(fa.Id, null, false, null);
+    ArcRecordDetailController.RecordDetailContext context = ArcRecordDetailController.load(
+      fa.Id,
+      null,
+      null
+    );
 
     System.assertEquals('ISA - DPI', context.schemaType);
   }
@@ -213,20 +405,28 @@ private class ArcRecordDetailControllerTest {
     );
     insert caseRecord;
 
-    ArcRecordDetailController.RecordDetailContext context =
-      ArcRecordDetailController.load(caseRecord.Id, null, false, null);
+    ArcRecordDetailController.RecordDetailContext context = ArcRecordDetailController.load(
+      caseRecord.Id,
+      null,
+      null
+    );
 
     System.assertEquals('Case', context.objectApiName);
-    System.assertEquals(ARCConstants.SCHEMA_STANDARD_CASE, context.schemaType);
+    System.assertEquals('Client - Individual', context.schemaType);
   }
 
   @IsTest
   static void saveGenericRecordUpdatesConfiguredField() {
-    Financial_Account__c fa = new Financial_Account__c(Name = 'Generic Save FA');
+    Financial_Account__c fa = new Financial_Account__c(
+      Name = 'Generic Save FA'
+    );
     insert fa;
 
-    ArcRecordDetailController.RecordDetailContext context =
-      ArcRecordDetailController.load(fa.Id, null, false, null);
+    ArcRecordDetailController.RecordDetailContext context = ArcRecordDetailController.load(
+      fa.Id,
+      null,
+      null
+    );
 
     String fieldPath = null;
     for (FieldDetailController.FormSection section : context.sections) {
@@ -247,7 +447,10 @@ private class ArcRecordDetailControllerTest {
     }
 
     if (fieldPath == null) {
-      System.assert(true, 'No writable schema fields configured for Financial_Account__c');
+      System.assert(
+        true,
+        'No writable schema fields configured for Financial_Account__c'
+      );
       return;
     }
 
@@ -255,13 +458,15 @@ private class ArcRecordDetailControllerTest {
     ArcRecordDetailController.save(
       fa.Id,
       null,
-      false,
       null,
       new Map<String, Object>{ fieldPath => 'Updated Value' }
     );
     Test.stopTest();
 
-    System.assert(true, 'Generic save path should complete for configured schema fields');
+    System.assert(
+      true,
+      'Generic save path should complete for configured schema fields'
+    );
   }
 
   @IsTest
@@ -282,7 +487,7 @@ private class ArcRecordDetailControllerTest {
     };
 
     Test.startTest();
-    ArcRecordDetailController.save(member.Id, null, false, null, fields);
+    ArcRecordDetailController.save(member.Id, null, null, fields);
     Test.stopTest();
 
     Account updated = [
@@ -290,7 +495,11 @@ private class ArcRecordDetailControllerTest {
       FROM Account
       WHERE Id = :member.Id
     ];
-    System.assertEquals('After', updated.FirstName, 'First name should be updated');
+    System.assertEquals(
+      'After',
+      updated.FirstName,
+      'First name should be updated'
+    );
   }
 
   @IsTest
@@ -308,7 +517,6 @@ private class ArcRecordDetailControllerTest {
     ArcRecordDetailController.save(
       member.Id,
       null,
-      false,
       null,
       new Map<String, Object>()
     );
@@ -334,7 +542,6 @@ private class ArcRecordDetailControllerTest {
     ArcRecordDetailController.save(
       business.Id,
       null,
-      false,
       null,
       new Map<String, Object>{
         'FirstName' => 'Ignored',
@@ -370,7 +577,6 @@ private class ArcRecordDetailControllerTest {
     ArcRecordDetailController.save(
       business.Id,
       null,
-      false,
       null,
       new Map<String, Object>{
         'PersonBirthdate' => Date.newInstance(1990, 1, 1),
@@ -403,7 +609,6 @@ private class ArcRecordDetailControllerTest {
     ArcRecordDetailController.save(
       member.Id,
       null,
-      false,
       null,
       new Map<String, Object>{
         'Name' => 'Should Not Apply',
@@ -437,7 +642,6 @@ private class ArcRecordDetailControllerTest {
       ArcRecordDetailController.save(
         member.Id,
         null,
-        false,
         null,
         new Map<String, Object>{ 'Not_In_Schema__c' => 'value' }
       );
@@ -460,8 +664,11 @@ private class ArcRecordDetailControllerTest {
     );
     insert trust;
 
-    ArcRecordDetailController.RecordDetailContext context =
-      ArcRecordDetailController.load(trust.Id, null, false, null);
+    ArcRecordDetailController.RecordDetailContext context = ArcRecordDetailController.load(
+      trust.Id,
+      null,
+      null
+    );
 
     System.assertEquals('Client - Trust', context.schemaType);
     System.assertEquals(false, context.isPersonAccount);
@@ -484,7 +691,6 @@ private class ArcRecordDetailControllerTest {
     ArcRecordDetailController.save(
       trust.Id,
       null,
-      false,
       null,
       new Map<String, Object>{ 'Name' => 'Trust After' }
     );
@@ -496,452 +702,5 @@ private class ArcRecordDetailControllerTest {
       WHERE Id = :trust.Id
     ];
     System.assertEquals('Trust After', updated.Name);
-  }
-
-  @IsTest
-  static void loadCaseAccountClosureUsesCaseTypeSchemaOnly() {
-    Id accountServicingRecordTypeId = Schema.SObjectType.Case
-      .getRecordTypeInfosByDeveloperName()
-      .get('Account_Servicing')
-      .getRecordTypeId();
-
-    Case caseRecord = new Case(
-      Subject = 'Account Closure Request',
-      Type = 'Account Closure',
-      RecordTypeId = accountServicingRecordTypeId
-    );
-    insert caseRecord;
-
-    Test.startTest();
-    ArcRecordDetailController.RecordDetailContext context =
-      ArcRecordDetailController.load(caseRecord.Id, null, false, null);
-    Test.stopTest();
-
-    System.assertEquals('Case', context.objectApiName);
-    System.assertEquals(
-      ARCConstants.SCHEMA_STANDARD_CASE,
-      context.schemaType,
-      'Case schema should always resolve to Standard Case metadata.'
-    );
-  }
-
-  @IsTest
-  static void loadCaseWithNullTypeUsesStandardCaseSchema() {
-    Id accountOpeningRecordTypeId = Schema.SObjectType.Case
-      .getRecordTypeInfosByDeveloperName()
-      .get('Account_Opening')
-      .getRecordTypeId();
-
-    Case caseRecord = new Case(
-      Subject = 'Unmapped Type Case',
-      Type = null,
-      RecordTypeId = accountOpeningRecordTypeId
-    );
-    insert caseRecord;
-
-    Test.startTest();
-    ArcRecordDetailController.RecordDetailContext context =
-      ArcRecordDetailController.load(caseRecord.Id, null, false, null);
-    Test.stopTest();
-
-    System.assertEquals(
-      ARCConstants.SCHEMA_STANDARD_CASE,
-      context.schemaType,
-      'Cases without Case.Type should still load Standard Case metadata.'
-    );
-  }
-
-  @IsTest
-  static void loadCaseWithExplicitStandardCaseSchemaType() {
-    Id accountOpeningRecordTypeId = Schema.SObjectType.Case
-      .getRecordTypeInfosByDeveloperName()
-      .get('Account_Opening')
-      .getRecordTypeId();
-
-    Case caseRecord = new Case(
-      Subject = 'Standard Case Request',
-      Type = 'Financial Planning',
-      RecordTypeId = accountOpeningRecordTypeId
-    );
-    insert caseRecord;
-
-    Test.startTest();
-    ArcRecordDetailController.RecordDetailContext context =
-      ArcRecordDetailController.load(caseRecord.Id, null, false, null);
-    Test.stopTest();
-
-    System.assertEquals('Case', context.objectApiName);
-    System.assertEquals('Standard Case', context.schemaType);
-    System.assertNotEquals(null, context.sections);
-  }
-
-  @IsTest
-  static void findCaseLookupFieldDiscoversServiceRelationship() {
-    Map<String, Schema.SObjectField> caseFieldMap =
-      Case.SObjectType.getDescribe().fields.getMap();
-
-    System.assertEquals(
-      ARCConstants.OBJECT_SERVICE,
-      RecordQueryUtil.findCaseLookupField(caseFieldMap, ARCConstants.OBJECT_SERVICE),
-      'Case.Service__c should resolve Service__c records dynamically'
-    );
-  }
-
-  @IsTest
-  static void loadCaseAlwaysUsesStandardCaseSchemaRegardlessOfType() {
-    Case accountClosureCase = new Case(
-      Subject = 'Account Closure Request',
-      Type = 'Account Closure'
-    );
-    insert accountClosureCase;
-
-    Case editIndividualCase = new Case(
-      Subject = 'Edit Individual Request',
-      Type = 'Edit Individual'
-    );
-    insert editIndividualCase;
-
-    Test.startTest();
-    ArcRecordDetailController.RecordDetailContext closureContext =
-      ArcRecordDetailController.load(accountClosureCase.Id, null, false, null);
-    ArcRecordDetailController.RecordDetailContext editContext =
-      ArcRecordDetailController.load(editIndividualCase.Id, null, false, null);
-    Test.stopTest();
-
-    System.assertEquals(
-      ARCConstants.SCHEMA_STANDARD_CASE,
-      closureContext.schemaType,
-      'Account Closure cases should load Standard Case metadata.'
-    );
-    System.assertEquals(
-      ARCConstants.SCHEMA_STANDARD_CASE,
-      editContext.schemaType,
-      'Edit Individual cases should load Standard Case metadata.'
-    );
-  }
-
-  @IsTest
-  static void loadCaseMergesRelatedServiceValues() {
-    Id accountOpeningRecordTypeId = Schema.SObjectType.Case
-      .getRecordTypeInfosByDeveloperName()
-      .get('Account_Opening')
-      .getRecordTypeId();
-
-    Service__c service = new Service__c(
-      Name = 'Standard Case Service',
-      Terms_of_Payment__c = 'Hourly Fee'
-    );
-    insert service;
-
-    Case caseRecord = new Case(
-      Subject = 'FP Case',
-      Type = 'Financial Planning',
-      Service__c = service.Id,
-      RecordTypeId = accountOpeningRecordTypeId
-    );
-    insert caseRecord;
-
-    Test.startTest();
-    ArcRecordDetailController.RecordDetailContext context =
-      ArcRecordDetailController.load(caseRecord.Id, null, false, null);
-    Test.stopTest();
-
-    System.assertEquals('Standard Case', context.schemaType);
-    System.assertEquals(
-      'Hourly Fee',
-      context.values.get('Terms_of_Payment__c'),
-      'Related Service field values should merge into the Case draft'
-    );
-  }
-
-  @IsTest
-  static void saveCaseUpdatesRelatedServiceField() {
-    Id accountOpeningRecordTypeId = Schema.SObjectType.Case
-      .getRecordTypeInfosByDeveloperName()
-      .get('Account_Opening')
-      .getRecordTypeId();
-
-    Service__c service = new Service__c(
-      Name = 'Save Service',
-      Terms_of_Payment__c = 'Hourly Fee'
-    );
-    insert service;
-
-    Case caseRecord = new Case(
-      Subject = 'FP Save Case',
-      Type = 'Financial Planning',
-      Service__c = service.Id,
-      RecordTypeId = accountOpeningRecordTypeId
-    );
-    insert caseRecord;
-
-    Test.startTest();
-    ArcRecordDetailController.save(
-      caseRecord.Id,
-      null,
-      false,
-      null,
-      new Map<String, Object>{ 'Terms_of_Payment__c' => 'Fixed Project Fee' }
-    );
-    Test.stopTest();
-
-    Service__c updated = [
-      SELECT Terms_of_Payment__c
-      FROM Service__c
-      WHERE Id = :service.Id
-    ];
-    System.assertEquals('Fixed Project Fee', updated.Terms_of_Payment__c);
-  }
-
-  @IsTest
-  static void saveCaseThrowsWhenRelatedRecordMissing() {
-    Id accountOpeningRecordTypeId = Schema.SObjectType.Case
-      .getRecordTypeInfosByDeveloperName()
-      .get('Account_Opening')
-      .getRecordTypeId();
-
-    Case caseRecord = new Case(
-      Subject = 'FP Missing Service',
-      Type = 'Financial Planning',
-      RecordTypeId = accountOpeningRecordTypeId
-    );
-    insert caseRecord;
-
-    Boolean threw = false;
-    try {
-      ArcRecordDetailController.save(
-        caseRecord.Id,
-        null,
-        false,
-        null,
-        new Map<String, Object>{ 'Terms_of_Payment__c' => 'Fixed Project Fee' }
-      );
-    } catch (AuraHandledException e) {
-      threw = true;
-    }
-    System.assert(threw, 'Save should fail when Case has no linked Service record');
-  }
-
-  @IsTest
-  static void loadRelatedRecordModeResolvesServiceFromCase() {
-    Id accountOpeningRecordTypeId = Schema.SObjectType.Case
-      .getRecordTypeInfosByDeveloperName()
-      .get('Account_Opening')
-      .getRecordTypeId();
-
-    Service__c service = new Service__c(
-      Name = 'Related Mode Service',
-      Terms_of_Payment__c = 'Hourly Fee'
-    );
-    insert service;
-
-    Case caseRecord = new Case(
-      Subject = 'Related Mode Case',
-      Type = 'Financial Planning',
-      Service__c = service.Id,
-      RecordTypeId = accountOpeningRecordTypeId
-    );
-    insert caseRecord;
-
-    Test.startTest();
-    ArcRecordDetailController.RecordDetailContext context =
-      ArcRecordDetailController.load(
-        caseRecord.Id,
-        null,
-        true,
-        'Service__c'
-      );
-    Test.stopTest();
-
-    System.assertEquals(false, context.hidden);
-    System.assertEquals(caseRecord.Id, context.pageRecordId);
-    System.assertEquals(service.Id, context.displayRecordId);
-    System.assertEquals('Service__c', context.objectApiName);
-    System.assertEquals(
-      ARCConstants.SCHEMA_ISA_SERVICE_AGREEMENT,
-      context.schemaType
-    );
-    System.assertEquals(
-      'Hourly Fee',
-      context.values.get('Terms_of_Payment__c'),
-      'Values should come from the related Service record'
-    );
-  }
-
-  @IsTest
-  static void loadRelatedRecordModeHidesWhenLookupEmpty() {
-    Id accountOpeningRecordTypeId = Schema.SObjectType.Case
-      .getRecordTypeInfosByDeveloperName()
-      .get('Account_Opening')
-      .getRecordTypeId();
-
-    Case caseRecord = new Case(
-      Subject = 'No Service Linked',
-      Type = 'Financial Planning',
-      RecordTypeId = accountOpeningRecordTypeId
-    );
-    insert caseRecord;
-
-    Test.startTest();
-    ArcRecordDetailController.RecordDetailContext context =
-      ArcRecordDetailController.load(
-        caseRecord.Id,
-        null,
-        true,
-        'Service__c'
-      );
-    Test.stopTest();
-
-    System.assertEquals(true, context.hidden);
-    System.assertEquals(caseRecord.Id, context.pageRecordId);
-    System.assertEquals(null, context.displayRecordId);
-    System.assertEquals(0, context.sections.size());
-  }
-
-  @IsTest
-  static void loadRelatedRecordModeRequiresLookupField() {
-    Case caseRecord = new Case(Subject = 'Missing Lookup Config');
-    insert caseRecord;
-
-    Boolean threw = false;
-    try {
-      ArcRecordDetailController.load(caseRecord.Id, null, true, null);
-    } catch (AuraHandledException e) {
-      threw = true;
-    }
-    System.assert(threw, 'Related mode without lookup field should throw');
-  }
-
-  @IsTest
-  static void loadRelatedRecordModeRejectsInvalidLookupField() {
-    Case caseRecord = new Case(Subject = 'Invalid Lookup Field');
-    insert caseRecord;
-
-    Boolean threw = false;
-    try {
-      ArcRecordDetailController.load(
-        caseRecord.Id,
-        null,
-        true,
-        'Not_A_Real_Field__c'
-      );
-    } catch (AuraHandledException e) {
-      threw = true;
-    }
-    System.assert(threw, 'Invalid lookup field API should throw');
-  }
-
-  @IsTest
-  static void collectWhereReferencedFieldApisIncludesBooleanGates() {
-    Map<String, Schema.SObjectField> caseFields =
-      Case.SObjectType.getDescribe().fields.getMap();
-
-    FieldDetailController.FieldMetadata amountField =
-      new FieldDetailController.FieldMetadata();
-    amountField.fieldPath = 'Amount__c';
-    amountField.shownWhereStatement = 'Source_of_Funds_Value__c = true';
-
-    FieldDetailController.FormSection section = new FieldDetailController.FormSection(
-      'Source of Funds'
-    );
-    section.fields.add(amountField);
-
-    Set<String> fieldApis = ArcRecordDetailController.collectWhereReferencedFieldApis(
-      new List<FieldDetailController.FormSection>{ section },
-      caseFields
-    );
-
-    System.assert(
-      fieldApis.contains('Source_of_Funds_Value__c'),
-      'Boolean gate fields referenced only in WHERE should be collected.'
-    );
-  }
-
-  @IsTest
-  static void loadStandardCaseIncludesBooleanWhereGateValues() {
-    List<Envelope_Field__mdt> amountRows = [
-      SELECT Field_API__c
-      FROM Envelope_Field__mdt
-      WHERE Type__c = 'Standard Case'
-      AND Object__c = 'Case'
-      AND Field_API__c = 'Amount__c'
-      LIMIT 1
-    ];
-    if (amountRows.isEmpty()) {
-      return;
-    }
-
-    List<Case> existingCases = [
-      SELECT Id
-      FROM Case
-      WHERE Source_of_Funds_Value__c = true
-      AND Amount__c != null
-      LIMIT 1
-    ];
-    if (existingCases.isEmpty()) {
-      return;
-    }
-
-    Test.startTest();
-    ArcRecordDetailController.RecordDetailContext context =
-      ArcRecordDetailController.load(existingCases[0].Id, null, false, null);
-    Test.stopTest();
-
-    System.assertEquals(
-      true,
-      context.values.get('Source_of_Funds_Value__c'),
-      'Boolean gate values must be present for client-side Shown WHERE evaluation.'
-    );
-    System.assertNotEquals(
-      null,
-      context.values.get('Amount__c'),
-      'Configured field values should still load.'
-    );
-  }
-
-  @IsTest
-  static void loadAccountClosureCaseSerializesDateValuesAsIsoStrings() {
-    Id accountServicingRecordTypeId = Schema.SObjectType.Case
-      .getRecordTypeInfosByDeveloperName()
-      .get('Account_Servicing')
-      .getRecordTypeId();
-
-    Case caseRecord = new Case(
-      Subject = 'Closure With End Date',
-      Type = 'Account Closure',
-      RecordTypeId = accountServicingRecordTypeId,
-      Account_Closure_Reason__c = 'Client Terminated Services',
-      Account_Closure_End_Date__c = Date.newInstance(2024, 7, 19)
-    );
-    insert caseRecord;
-
-    Test.startTest();
-    ArcRecordDetailController.RecordDetailContext context =
-      ArcRecordDetailController.load(caseRecord.Id, null, false, null);
-    Test.stopTest();
-
-    System.assertEquals(
-      '2024-07-19',
-      context.values.get('Account_Closure_End_Date__c'),
-      'Date fields should be serialized as YYYY-MM-DD strings for the LWC layer.'
-    );
-  }
-
-  @IsTest
-  static void formatFieldValueForWireSerializesDateAndDatetime() {
-    System.assertEquals(
-      '2024-07-19',
-      ArcRecordDetailController.formatFieldValueForWire(
-        Date.newInstance(2024, 7, 19),
-        Schema.DisplayType.DATE
-      )
-    );
-    System.assertEquals(
-      '2024-07-19T15:30:00Z',
-      ArcRecordDetailController.formatFieldValueForWire(
-        Datetime.newInstanceGmt(2024, 7, 19, 15, 30, 0),
-        Schema.DisplayType.DATETIME
-      )
-    );
   }
 }

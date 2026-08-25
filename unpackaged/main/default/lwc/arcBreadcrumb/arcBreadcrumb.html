@@ -1,28 +1,30 @@
 <!-- Author: Hoang Long Vu To -->
 <template>
+  <template lwc:if={hasItems}>
     <nav class="arc-breadcrumb" aria-label={ariaLabel}>
-        <ol class="arc-breadcrumb__list">
-            <template for:each={itemView} for:item="item">
-                <li
-                    key={item.renderKey}
-                    class="arc-breadcrumb__item"
-                    aria-current={item.ariaCurrent}
-                >
-                    <template lwc:if={item.isClickable}>
-                        <button
-                            type="button"
-                            class={item.linkClass}
-                            data-key={item.key}
-                            onclick={handleCrumbClick}
-                        >
-                            {item.label}
-                        </button>
-                    </template>
-                    <template lwc:else>
-                        <span class={item.textClass}>{item.label}</span>
-                    </template>
-                </li>
+      <ol class="arc-breadcrumb__list">
+        <template for:each={itemView} for:item="item">
+          <li
+            key={item.renderKey}
+            class="arc-breadcrumb__item"
+            aria-current={item.ariaCurrent}
+          >
+            <template lwc:if={item.isClickable}>
+              <button
+                type="button"
+                class={item.linkClass}
+                data-key={item.key}
+                onclick={handleCrumbClick}
+              >
+                {item.label}
+              </button>
             </template>
-        </ol>
+            <template lwc:else>
+              <span class={item.textClass}>{item.label}</span>
+            </template>
+          </li>
+        </template>
+      </ol>
     </nav>
+  </template>
 </template>

@@ -40,7 +40,8 @@
         name="listLabel"
         type="String"
         label="List Label"
-        description="Fallback list label on list pages when no sidebar nav trail is stored."
+        description="Fallback when no sidebar nav trail is stored yet."
+        default="All Contacts"
       />
             <property
         name="listPath"

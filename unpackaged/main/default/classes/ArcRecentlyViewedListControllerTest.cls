@@ -11,7 +11,7 @@ private class ArcRecentlyViewedListControllerTest {
       ArcRecentlyViewedListController.resolveRecentlyViewedType('Account')
     );
     System.assertEquals(
-      'FinServ__FinancialAccount__c',
+      'Financial_Account__c',
       ArcRecentlyViewedListController.resolveRecentlyViewedType(
         ArcRecentlyViewedListController.ISA_OBJECT_API_NAME
       )
@@ -51,8 +51,9 @@ private class ArcRecentlyViewedListControllerTest {
     System.assertEquals(
       0,
       ArcRecentlyViewedListController.deduplicateRecentlyViewedRows(
-        new List<RecentlyViewed>()
-      ).size()
+          new List<RecentlyViewed>()
+        )
+        .size()
     );
   }
 
@@ -66,16 +67,13 @@ private class ArcRecentlyViewedListControllerTest {
     );
 
     System.assertEquals('Account', contactConfig.objectApiName);
-    System.assertEquals(
-      'Recently viewed contacts',
-      contactConfig.title
-    );
+    System.assertEquals('Recently Viewed Contacts', contactConfig.title);
 
     System.assertEquals(
       ArcRecentlyViewedListController.ISA_OBJECT_API_NAME,
       isaConfig.objectApiName
     );
-    System.assertEquals('Recently viewed Investments & Services', isaConfig.title);
+    System.assertEquals('Recently Viewed ISAs', isaConfig.title);
   }
 
   @IsTest
@@ -92,9 +90,18 @@ private class ArcRecentlyViewedListControllerTest {
 
   @IsTest
   static void resolveDisplayLimit_defaultsToFiveWhenInvalid() {
-    System.assertEquals(5, ArcRecentlyViewedListController.resolveDisplayLimit(null));
-    System.assertEquals(5, ArcRecentlyViewedListController.resolveDisplayLimit(0));
-    System.assertEquals(3, ArcRecentlyViewedListController.resolveDisplayLimit(3));
+    System.assertEquals(
+      5,
+      ArcRecentlyViewedListController.resolveDisplayLimit(null)
+    );
+    System.assertEquals(
+      5,
+      ArcRecentlyViewedListController.resolveDisplayLimit(0)
+    );
+    System.assertEquals(
+      3,
+      ArcRecentlyViewedListController.resolveDisplayLimit(3)
+    );
   }
 
   @IsTest
@@ -106,8 +113,9 @@ private class ArcRecentlyViewedListControllerTest {
     System.assertEquals(
       0,
       ArcRecentlyViewedListController.deduplicateRecordsById(
-        new List<SObject>()
-      ).size()
+          new List<SObject>()
+        )
+        .size()
     );
   }
 
@@ -150,13 +158,12 @@ private class ArcRecentlyViewedListControllerTest {
   }
 
   @IsTest
-  static void buildItemFromRecord_includesHouseholdMetadataForFinServFinancialAccounts() {
-    Account household = createFinServHouseholdAccount('ISA Household');
-    FinServ__FinancialAccount__c financialAccount = createFinServFinancialAccount(
+  static void buildItemFromRecord_includesHouseholdMetadataForFinancialAccounts() {
+    Account household = createIsaHouseholdAccount('ISA Household');
+    Financial_Account__c financialAccount = createIsaFinancialAccount(
       'Harrison Dental 401(k) Plan',
       household.Id
     );
-    financialAccount.put('FinServ__Household__c', household.Id);
 
     ArcRecentlyViewedListController.RecentlyViewedItemDTO item = ArcRecentlyViewedListController.buildItemFromRecord(
       financialAccount,
@@ -191,13 +198,12 @@ private class ArcRecentlyViewedListControllerTest {
   }
 
   @IsTest
-  static void resolveHouseholdMetadata_returnsFinServHouseholdName() {
-    Account household = createFinServHouseholdAccount('Resolver Household');
-    FinServ__FinancialAccount__c financialAccount = createFinServFinancialAccount(
+  static void resolveHouseholdMetadata_returnsIsaHouseholdName() {
+    Account household = createIsaHouseholdAccount('Resolver Household');
+    Financial_Account__c financialAccount = createIsaFinancialAccount(
       'Resolver ISA',
       household.Id
     );
-    financialAccount.put('FinServ__Household__c', household.Id);
 
     System.assertEquals(
       household.Name,
@@ -231,12 +237,7 @@ private class ArcRecentlyViewedListControllerTest {
     };
 
     memberAccount = [
-      SELECT
-        Id,
-        Name,
-        LastViewedDate,
-        Household__c,
-        RecordType.DeveloperName
+      SELECT Id, Name, LastViewedDate, Household__c, RecordType.DeveloperName
       FROM Account
       WHERE Id = :memberAccount.Id
     ];
@@ -255,7 +256,9 @@ private class ArcRecentlyViewedListControllerTest {
   static void enrichFinServRecordsFromRecentlyViewed_returnsEmptyListForNullInput() {
     System.assertEquals(
       0,
-      ArcRecentlyViewedListController.enrichFinServRecordsFromRecentlyViewed(null)
+      ArcRecentlyViewedListController.enrichFinServRecordsFromRecentlyViewed(
+          null
+        )
         .size()
     );
   }
@@ -277,17 +280,21 @@ private class ArcRecentlyViewedListControllerTest {
     );
 
     System.assertEquals(1, lastViewedDateById.size());
-    System.assertEquals(memberAccount.LastViewedDate, lastViewedDateById.get(memberAccount.Id));
+    System.assertEquals(
+      memberAccount.LastViewedDate,
+      lastViewedDateById.get(memberAccount.Id)
+    );
   }
 
   @IsTest
-  static void queryRecentlyViewedRecords_returnsFinServFinancialAccountRows() {
-    Account household = createFinServHouseholdAccount('Query Household');
-    createFinServFinancialAccount('Query Test ISA', household.Id);
+  static void queryRecentlyViewedRecords_returnsFinancialAccountRows() {
+    Account household = createIsaHouseholdAccount('Query Household');
+    createIsaFinancialAccount('Query Test ISA', household.Id);
 
     List<SObject> records = ArcRecentlyViewedListController.queryRecentlyViewedRecords(
-      ArcRecentlyViewedListController.ISA_OBJECT_API_NAME
-    ).records;
+        ArcRecentlyViewedListController.ISA_OBJECT_API_NAME
+      )
+      .records;
 
     System.assertNotEquals(null, records);
   }
@@ -313,7 +320,7 @@ private class ArcRecentlyViewedListControllerTest {
     );
 
     System.assertEquals('Account', result.objectApiName);
-    System.assertEquals('Recently viewed contacts', result.title);
+    System.assertEquals('Recently Viewed Contacts', result.title);
     System.assertNotEquals(null, result.items);
     System.assert(result.totalCount >= 0);
     System.assert(result.items.size() <= 5);
@@ -330,13 +337,16 @@ private class ArcRecentlyViewedListControllerTest {
       ArcRecentlyViewedListController.ISA_OBJECT_API_NAME,
       result.objectApiName
     );
-    System.assertEquals('Recently viewed Investments & Services', result.title);
+    System.assertEquals('Recently Viewed ISAs', result.title);
     System.assertNotEquals(null, result.items);
     System.assert(result.totalCount >= 0);
     System.assert(result.items.size() <= 5);
   }
 
-  private static RecentlyViewed buildRecentlyViewedRow(Id recordId, Datetime lastViewedDate) {
+  private static RecentlyViewed buildRecentlyViewedRow(
+    Id recordId,
+    Datetime lastViewedDate
+  ) {
     RecentlyViewed recentlyViewedRow = new RecentlyViewed();
     recentlyViewedRow.put('Id', recordId);
     recentlyViewedRow.put('LastViewedDate', lastViewedDate);
@@ -345,7 +355,10 @@ private class ArcRecentlyViewedListControllerTest {
 
   @IsTest
   static void deduplicateRecentlyViewedRows_removesDuplicateRecordIds() {
-    Account account = FscDataTestDataFactory.createPersonAccount('Duplicate', 'Account');
+    Account account = FscDataTestDataFactory.createPersonAccount(
+      'Duplicate',
+      'Account'
+    );
     Datetime mostRecentView = Datetime.newInstance(2026, 8, 12, 16, 0, 0);
     Datetime olderView = Datetime.newInstance(2026, 8, 11, 16, 0, 0);
 
@@ -365,7 +378,10 @@ private class ArcRecentlyViewedListControllerTest {
 
   @IsTest
   static void deduplicateRecordsById_removesDuplicateRecords() {
-    Account account = FscDataTestDataFactory.createPersonAccount('Duplicate', 'Record');
+    Account account = FscDataTestDataFactory.createPersonAccount(
+      'Duplicate',
+      'Record'
+    );
     account = [
       SELECT Id, Name, LastViewedDate
       FROM Account
@@ -382,7 +398,10 @@ private class ArcRecentlyViewedListControllerTest {
 
   @IsTest
   static void deduplicateItemsById_removesDuplicateItems() {
-    Account account = FscDataTestDataFactory.createPersonAccount('Duplicate', 'Item');
+    Account account = FscDataTestDataFactory.createPersonAccount(
+      'Duplicate',
+      'Item'
+    );
     ArcRecentlyViewedListController.RecentlyViewedItemDTO firstItem = new ArcRecentlyViewedListController.RecentlyViewedItemDTO();
     firstItem.id = account.Id;
     firstItem.name = 'First';
@@ -411,7 +430,9 @@ private class ArcRecentlyViewedListControllerTest {
 
     Set<Id> seenItemIds = new Set<Id>();
 
-    for (ArcRecentlyViewedListController.RecentlyViewedItemDTO item : result.items) {
+    for (
+      ArcRecentlyViewedListController.RecentlyViewedItemDTO item : result.items
+    ) {
       System.assert(
         !seenItemIds.contains(item.id),
         'Duplicate recently viewed contact id returned: ' + item.id
@@ -429,7 +450,9 @@ private class ArcRecentlyViewedListControllerTest {
 
     Set<Id> seenItemIds = new Set<Id>();
 
-    for (ArcRecentlyViewedListController.RecentlyViewedItemDTO item : result.items) {
+    for (
+      ArcRecentlyViewedListController.RecentlyViewedItemDTO item : result.items
+    ) {
       System.assert(
         !seenItemIds.contains(item.id),
         'Duplicate recently viewed ISA id returned: ' + item.id
@@ -440,7 +463,10 @@ private class ArcRecentlyViewedListControllerTest {
 
   @IsTest
   static void enrichAccountRecordsFromRecentlyViewed_skipsDuplicateRecentlyViewedRows() {
-    Account account = FscDataTestDataFactory.createPersonAccount('Duplicate', 'Enrich');
+    Account account = FscDataTestDataFactory.createPersonAccount(
+      'Duplicate',
+      'Enrich'
+    );
     List<RecentlyViewed> recentlyViewedRows = new List<RecentlyViewed>{
       buildRecentlyViewedRow(account.Id, Datetime.now()),
       buildRecentlyViewedRow(account.Id, Datetime.now().addDays(-1))
@@ -454,50 +480,31 @@ private class ArcRecentlyViewedListControllerTest {
     System.assertEquals(account.Id, enrichedRecords[0].Id);
   }
 
-  private static Account createFinServHouseholdAccount(String name) {
+  private static Account createIsaHouseholdAccount(String name) {
     Id householdRecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByName()
       .get('Household')
       .getRecordTypeId();
-    Account household = new Account(Name = name, RecordTypeId = householdRecordTypeId);
+    Account household = new Account(
+      Name = name,
+      RecordTypeId = householdRecordTypeId
+    );
     insert household;
     return household;
   }
 
-  private static Id selectFinServHouseholdRecordTypeId() {
-    return Schema.SObjectType.Account.getRecordTypeInfosByName()
-      .get('Household')
-      .getRecordTypeId();
-  }
-
-  private static FinServ__FinancialAccount__c createFinServFinancialAccount(
+  private static Financial_Account__c createIsaFinancialAccount(
     String name,
     Id householdId
   ) {
-    Id personAccountRecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByName()
-      .get('Person Account')
-      .getRecordTypeId();
-    Account ownerAccount = new Account(
-      FirstName = 'FinServ',
-      LastName = 'Owner',
-      RecordTypeId = personAccountRecordTypeId
-    );
-    insert ownerAccount;
-
-    FinServ__FinancialAccount__c financialAccount = new FinServ__FinancialAccount__c(
+    Financial_Account__c financialAccount = new Financial_Account__c(
       Name = name,
-      FinServ__PrimaryOwner__c = ownerAccount.Id,
-      FinServ__Household__c = householdId
+      Household__c = householdId
     );
     insert financialAccount;
 
     return [
-      SELECT
-        Id,
-        Name,
-        LastViewedDate,
-        FinServ__Household__c,
-        FinServ__Household__r.Name
-      FROM FinServ__FinancialAccount__c
+      SELECT Id, Name, LastViewedDate, Household__c, Household__r.Name
+      FROM Financial_Account__c
       WHERE Id = :financialAccount.Id
     ];
   }

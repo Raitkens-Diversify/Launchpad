@@ -3,23 +3,21 @@
   <div class="record-section">
     <template lwc:if={isSaving}>
       <div class="record-section__saving" role="status" aria-live="polite">
-        <lightning-spinner alternative-text="Saving changes" size="small"></lightning-spinner>
+        <c-arc-loading-spinner
+          alternative-text="Saving changes"
+          size="small"
+        ></c-arc-loading-spinner>
       </div>
     </template>
     <template lwc:if={showHeader}>
       <header class="record-section__header">
-        <div class="record-section__title-group">
+        <div class="record-section__heading">
           <h3 class="record-section__title">{label}</h3>
-          <template lwc:if={showInfoIcon}>
-            <lightning-icon
-              class="record-section__info-icon"
-              icon-name="utility:info"
-              size="x-small"
-              alternative-text={infoAriaLabel}
-              title={infoAriaLabel}
-            >
-            </lightning-icon>
-          </template>
+          <span
+            class="record-section__title-info"
+            title={label}
+            aria-hidden="true"
+          ></span>
         </div>
         <template lwc:if={showEditButton}>
           <button
@@ -28,14 +26,7 @@
             aria-label={editAriaLabel}
             onclick={handleEditClick}
           >
-            <svg
-              class="record-section__edit-icon"
-              viewBox="0 0 19 19"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <path d={pencilIconPath}></path>
-            </svg>
+            <span class="record-section__edit-icon" aria-hidden="true"></span>
             <span class="record-section__edit-label">Edit</span>
           </button>
         </template>
@@ -59,43 +50,49 @@
         </template>
       </header>
     </template>
-    <div class="record-section__fields">
+    <template lwc:if={showRegulatedAlert}>
+      <div class="record-section__alert" role="status">
+        <span class="record-section__alert-icon" aria-hidden="true"></span>
+        <p class="record-section__alert-text">
+          Regulated fields cannot be edited. In order to make changes, you will
+          need to create an envelope, make edits and submit the envelope to home
+          office.
+        </p>
+        <button
+          type="button"
+          class="record-section__alert-action"
+          onclick={handleCreateEnvelope}
+        >
+          Create Envelope
+        </button>
+      </div>
+    </template>
+    <div class={fieldsClass}>
       <template for:each={fieldRows} for:item="field">
         <div key={field.key} class={field.rowClass}>
           <div class="field-row__label">
             <div class="field-row__label-heading">
               <span class="field-row__label-text">{field.displayLabel}</span>
-              <template lwc:if={showFieldLock}>
-                <svg
-                  class="field-row__lock-icon"
-                  viewBox="0 0 11 12"
-                  aria-hidden="true"
-                  focusable="false"
-                >
-                  <path d={lockIconPath}></path>
-                </svg>
+              <template lwc:if={field.isRegulated}>
+                <span
+                  class="field-row__lock"
+                  title="Controlled by the home office"
+                  aria-label="Controlled by the home office"
+                ></span>
               </template>
             </div>
+            <template lwc:if={field.showRegulatedBadge}>
+              <span class="field-row__badge">
+                <span class="field-row__badge-icon" aria-hidden="true"></span>
+                Regulated by Home Office
+              </span>
+            </template>
           </div>
           <div class="field-row__control">
-            <template lwc:if={isReadonly}>
-              <template lwc:if={field.isRecordLink}>
-                <a
-                  class="field-row__value field-row__link"
-                  href={field.recordUrl}
-                  data-record-id={field.linkRecordId}
-                  data-object-api-name={field.linkObjectApiName}
-                  aria-label={field.linkAriaLabel}
-                  onclick={handleRecordLinkClick}
-                >
-                  {field.displayValue}
-                </a>
-              </template>
-              <template lwc:else>
-                <span class="field-row__value">{field.displayValue}</span>
-              </template>
+            <template lwc:if={field.showValue}>
+              <span class={field.valueClass}>{field.displayValue}</span>
             </template>
-            <template lwc:else>
+            <template lwc:if={field.showControl}>
               <c-arc-record-detail-field
                 field={field}
                 data-field={field.apiName}

@@ -1,0 +1,91 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-08-11 -->
+<template>
+  <article
+    class="div-card nexs-recently-viewed"
+    aria-labelledby="nexs-recently-viewed-title"
+  >
+    <header class="nexs-recently-viewed__header">
+      <h2 id="nexs-recently-viewed-title" class="nexs-recently-viewed__title">
+        {title}
+      </h2>
+    </header>
+
+    <template lwc:if={errorMessage}>
+      <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+        {errorMessage}
+      </div>
+    </template>
+
+    <template lwc:if={isInitialLoading}>
+      <div class="nexs-recently-viewed__loading">
+        <c-arc-loading-spinner
+          alternative-text="Loading recently viewed records"
+          size="small"
+        ></c-arc-loading-spinner>
+      </div>
+    </template>
+
+    <template lwc:elseif={hasItems}>
+      <ul class="nexs-recently-viewed__list" aria-label={title}>
+        <template for:each={listItems} for:item="item">
+          <li key={item.id} class="nexs-recently-viewed__item">
+            <a
+              href={item.recordUrl}
+              class="nexs-recently-viewed__row"
+              data-record-id={item.id}
+              aria-label={item.ariaLabel}
+              onclick={handleRowClick}
+            >
+              <span class="nexs-recently-viewed__icon-wrap" aria-hidden="true">
+                <lightning-icon
+                  icon-name={item.iconName}
+                  size="x-small"
+                  class="nexs-recently-viewed__icon"
+                ></lightning-icon>
+              </span>
+
+              <span class="nexs-recently-viewed__content">
+                <span class="nexs-recently-viewed__name">{item.name}</span>
+                <template lwc:if={item.hasMetadata}>
+                  <span class="nexs-recently-viewed__metadata">{item.metadata}</span>
+                </template>
+              </span>
+
+              <lightning-icon
+                icon-name="utility:chevronright"
+                size="x-small"
+                class="nexs-recently-viewed__chevron"
+                alternative-text=""
+              ></lightning-icon>
+            </a>
+          </li>
+        </template>
+      </ul>
+    </template>
+
+    <template lwc:else>
+      <div class="nexs-recently-viewed__empty" role="status">
+        No recently viewed records.
+      </div>
+    </template>
+
+    <footer class="nexs-recently-viewed__footer">
+      <span class="nexs-recently-viewed__count">{footerLabel}</span>
+      <template lwc:if={showViewAll}>
+        <a
+          href="#"
+          class="nexs-recently-viewed__view-all"
+          onclick={handleViewAllClick}
+        >
+          View All
+          <lightning-icon
+            icon-name="utility:chevronright"
+            size="xx-small"
+            class="nexs-recently-viewed__view-all-icon"
+            alternative-text=""
+          ></lightning-icon>
+        </a>
+      </template>
+    </footer>
+  </article>
+</template>
