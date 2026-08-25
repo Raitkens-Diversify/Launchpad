@@ -60,6 +60,11 @@
         <default>false</default>
         <label>BD</label>
     </customValue>
+    <customValue>
+        <fullName>Diversify Asset Management</fullName>
+        <default>false</default>
+        <label>Diversify Asset Management</label>
+    </customValue>
     <masterLabel>Potential Services</masterLabel>
     <sorted>false</sorted>
 </GlobalValueSet>

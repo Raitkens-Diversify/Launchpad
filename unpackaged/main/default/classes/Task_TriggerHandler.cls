@@ -265,7 +265,7 @@ public class Task_TriggerHandler {
                    relatedCase.Owner_Group__c = null;
                    for(Task relatedTask : lstRelatedTask){
                        if(!String.isEmpty(relatedTask.Task_Template_Item__c) && !String.isEmpty(relatedTask.Task_Template__c) && 
-                          taskTempItemRecord.Order__c != null && relatedTask.Task_Template_Item__r.Order__c == taskTempItemRecord.Order__c + 1){
+                          newTask.Order__c != null && relatedTask.Order__c == newTask.Order__c + 1){
                               Date ActivityDate = System.Today();
                               
                               if(relatedTask.Task_Template__r.Due_Date__c == 'Immediate'){
@@ -273,10 +273,10 @@ public class Task_TriggerHandler {
                               } else if(relatedTask.Task_Template__r.Due_Date__c == 'Days from Case Creation' ||
                                         relatedTask.Task_Template__r.Due_Date__c == 'Days from Previous Task Completion'){
                                             relatedTask.ActivityDate = System.Today()+(Integer)relatedTask.Task_Template__r.Number_of_Days__c;
-                              } else if(relatedTask.Task_Template__r.Due_Date__c == 'After Referenced Field' && relatedTask.Task_Template__r.Referenced_Field__c == 'Review_Meeting_Scheduled_Date__c'){
+                                        } else if(relatedTask.Task_Template__r.Due_Date__c == 'After Referenced Field' && relatedTask.Task_Template__r.Referenced_Field__c == 'Review_Meeting_Scheduled_Date__c'){
                                             ActivityDate = relatedCase.Review_Meeting_Scheduled_Date__c + (Integer)relatedTask.Task_Template__r.Number_of_Days__c;
                                             relatedTask.ActivityDate = ActivityDate;
-                              } else if(relatedTask.Task_Template__r.Due_Date__c == 'Before Referenced Field' && relatedTask.Task_Template__r.Referenced_Field__c == 'Review_Meeting_Scheduled_Date__c'){
+                                        } else if(relatedTask.Task_Template__r.Due_Date__c == 'Before Referenced Field' && relatedTask.Task_Template__r.Referenced_Field__c == 'Review_Meeting_Scheduled_Date__c'){
                                             ActivityDate = relatedCase.Review_Meeting_Scheduled_Date__c - (Integer)relatedTask.Task_Template__r.Number_of_Days__c;
                                             relatedTask.ActivityDate = ActivityDate;
                                             //System.debug('relatedTask.ActivityDate: ' + relatedTask.ActivityDate);
@@ -345,8 +345,8 @@ public class Task_TriggerHandler {
 
                               updateTasksMap.put(relatedTask.Id,relatedTask);          
                           } else if(!String.isEmpty(relatedTask.Task_Template_Item__c) && !String.isEmpty(relatedTask.Task_Template__c) && 
-                                    taskTempItemRecord.Order__c != null && relatedTask.Task_Template_Item__r.Order__c == (taskTempItemRecord.Order__c + 2)){
 
+                                    newTask.Order__c != null && relatedTask.Order__c == (newTask.Order__c + 2)){
                                         relatedCase.Next_Task__c = relatedTask.Id;
                                     }
                        if(!relatedTask.isClosed){
@@ -518,6 +518,265 @@ public class Task_TriggerHandler {
             update finAcctsToUpdate;
         }
     }
+    
+    public static void handleTaskCompleteAndApproved(List<Task> newTasks, Map<Id, Task> oldTaskMap) {
+        Set<Id> taskIds = new Set<Id>();
+        
+        // Identify Tasks that changed to Approved/Completed
+        for (Task newTask : newTasks) {
+            
+            Task oldTask = oldTaskMap.get(newTask.Id);
+            
+            Boolean newStatusApprovedOrCompleted = newTask.Status == 'Approved' || newTask.Status == 'Completed';
+            Boolean oldStatusNotApprovedOrCompleted = oldTask.Status != 'Approved' && oldTask.Status != 'Completed';
+            
+            if (newStatusApprovedOrCompleted && oldStatusNotApprovedOrCompleted) {
+                taskIds.add(newTask.Id);
+            }
+        }
+        
+        if (taskIds.isEmpty()) {
+            return;
+        }
+        
+        // Re-query Tasks because Task_Template_Item__r
+        // is not populated in Trigger.new
+        List<Task> qualifyingTasks = [
+            SELECT Id,
+            WhatId,
+            Status,
+            Task_Template_Item__c,
+            Task_Template_Item__r.Home_Office_Approval_Milestone__c
+            FROM Task
+            WHERE Id IN :taskIds
+            AND Task_Template_Item__r.Home_Office_Approval_Milestone__c = true
+            AND WhatId != null
+        ];
+        
+        if (qualifyingTasks.isEmpty()) {
+            return;
+        }
+        
+        Set<Id> caseIds = new Set<Id>();
+        
+        for (Task taskRecord : qualifyingTasks) {
+            if (taskRecord.WhatId != null) {
+                caseIds.add(taskRecord.WhatId);
+            }
+        }
+        
+        if (caseIds.isEmpty()) {
+            return;
+        }
+        
+        // Query Envelope Content records where Case__c = Task.WhatId
+        List<Envelope_Content__c> caseEnvelopeContents = [
+            SELECT Id,
+            Case__c,
+            Envelope__c,
+            Account__c
+            FROM Envelope_Content__c
+            WHERE Case__c IN :caseIds
+        ];
+        
+        if (caseEnvelopeContents.isEmpty()) {
+            return;
+        }
+        
+        /*
+* Map Case Id -> Envelope Content records where Case__c is populated
+*/
+        Map<Id, List<Envelope_Content__c>> caseToEnvelopeContents =
+            new Map<Id, List<Envelope_Content__c>>();
+        
+        Set<Id> envelopeIds = new Set<Id>();
+        
+        for (Envelope_Content__c ec : caseEnvelopeContents) {
+            
+            if (ec.Envelope__c == null) {
+                continue;
+            }
+            
+            if (!caseToEnvelopeContents.containsKey(ec.Case__c)) {
+                caseToEnvelopeContents.put(
+                    ec.Case__c,
+                    new List<Envelope_Content__c>()
+                );
+            }
+            
+            caseToEnvelopeContents.get(ec.Case__c).add(ec);
+            
+            envelopeIds.add(ec.Envelope__c);
+        }
+        
+        if (envelopeIds.isEmpty()) {
+            return;
+        }
+        
+        // Query ALL Envelope_Content__c records belonging to the Envelope.
+        List<Envelope_Content__c> allEnvelopeContents = [
+            SELECT Id,
+            Case__c,
+            Envelope__c,
+            Account__c
+            FROM Envelope_Content__c
+            WHERE Envelope__c IN :envelopeIds
+        ];
+        
+        // Envelope -> all Envelope Content records
+        Map<Id, List<Envelope_Content__c>> envelopeToContents =
+            new Map<Id, List<Envelope_Content__c>>();
+        
+        for (Envelope_Content__c ec : allEnvelopeContents) {
+            
+            if (ec.Envelope__c == null) {
+                continue;
+            }
+            
+            if (!envelopeToContents.containsKey(ec.Envelope__c)) {
+                envelopeToContents.put(
+                    ec.Envelope__c,
+                    new List<Envelope_Content__c>()
+                );
+            }
+            
+            envelopeToContents.get(ec.Envelope__c).add(ec);
+        }
+        
+        // Accounts that need to be changed directly.
+        Set<Id> directAccountIds = new Set<Id>();
+        
+        // Cases where more than one Envelope_Content__c has Case__c populated.
+        Set<Id> multipleCaseEnvelopeCases = new Set<Id>();
+        
+        // Determine which path each Case should follow.
+        for (Id caseId : caseToEnvelopeContents.keySet()) {
+            
+            List<Envelope_Content__c> caseContents = caseToEnvelopeContents.get(caseId);
+            
+            if (caseContents.isEmpty()) {
+                continue;
+            }
+            
+            // First Envelope_Content__c gives us the Envelope__c.
+            Id envelopeId = caseContents[0].Envelope__c;
+            
+            if (envelopeId == null) {
+                continue;
+            }
+            
+            List<Envelope_Content__c> envelopeContents = envelopeToContents.get(envelopeId);
+            
+            if (envelopeContents == null) {
+                continue;
+            }
+            
+            // Count records where Case__c is populated.
+            Integer populatedCaseCount = 0;
+            
+            for (Envelope_Content__c ec : envelopeContents) {
+                if (ec.Case__c != null) {
+                    populatedCaseCount++;
+                }
+            }
+            
+            // CASE 1:
+            //Only one Envelope_Content__c has Case__c populated.
+            if (populatedCaseCount == 1) {
+                
+                for (Envelope_Content__c ec : envelopeContents) {
+                    
+                    if (ec.Account__c != null) {
+                        directAccountIds.add(ec.Account__c);
+                    }
+                }
+            }
+            
+            // More than one Envelope_Content__c has Case__c populated.
+            else if (populatedCaseCount > 1) {
+                
+                multipleCaseEnvelopeCases.add(caseId);
+            }
+        }
+        
+        //Query Cases for Wizard Financial Account.
+        Map<Id, Id> caseToFinancialAccountId = new Map<Id, Id>();
+        
+        if (!multipleCaseEnvelopeCases.isEmpty()) {
+            
+            for (Case caseRecord : [
+                SELECT Id,
+                Wizard_Financial_Account__c
+                FROM Case
+                WHERE Id IN :multipleCaseEnvelopeCases
+            ]) {
+                
+                if (caseRecord.Wizard_Financial_Account__c != null) {
+                    caseToFinancialAccountId.put(
+                        caseRecord.Id,
+                        caseRecord.Wizard_Financial_Account__c
+                    );
+                }
+            }
+        }
+        
+        if (!caseToFinancialAccountId.isEmpty()) {
+            
+            Set<Id> financialAccountIds = new Set<Id>(caseToFinancialAccountId.values());
+            
+            //Query Financial Account Roles.
+            for (Financial_Account_Role__c role : [
+                SELECT Id,
+                Financial_Account__c,
+                Account__c,
+                Role__c
+                FROM Financial_Account_Role__c
+                WHERE Financial_Account__c IN :financialAccountIds
+                AND Role__c IN (
+                    'Primary Owner',
+                    'Joint Owner',
+                    'Minor'
+                )
+                AND Account__c != null
+            ]) {
+                
+                directAccountIds.add(role.Account__c);
+            }
+        }
+        
+        if (directAccountIds.isEmpty()) {
+            return;
+        }
+        
+        //Query Accounts.
+        List<Account> accountsToUpdate = [
+            SELECT Id,
+            Type,
+            RecordTypeId,
+            RecordType.DeveloperName
+            FROM Account
+            WHERE Id IN :directAccountIds
+            AND RecordType.DeveloperName IN (
+                'PersonAccount',
+                'Business',
+                'Trust',
+                'Retirement_Plan'
+            )
+        ];
+        // Set Account Type = Client
+        
+        for (Account acc : accountsToUpdate) {
+            if (acc.Type != 'Client') {
+                acc.Type = 'Client';
+            }
+        }
+        
+        if (!accountsToUpdate.isEmpty()) {
+            update accountsToUpdate;
+        }
+    }
+    
+    
     
     @future
     public static void updateTasksForSystemAssignedField(Set<Id> ids){

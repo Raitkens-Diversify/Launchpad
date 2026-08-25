@@ -455,14 +455,15 @@ public class Case_TriggerHandler {
         }
     }
     
-    public  Map<Id,Case> setCaseTemplateForWizard(List<Case> newList){
+public  Map<Id,Case> setCaseTemplateForWizard(List<Case> newList){
         Set<String> setOfTypeToName = new Set<String>(); 
         Map<String, List<Case_Template__c>> mapOfNameTolstCaseTemp = new Map<String, List<Case_Template__c>>(); 
         Map<Id, Id> mapOfCaseIdToCaseTempId = new  Map<Id, Id>();
         List<Case_Template__c> lstCaseTemplate = new List<Case_Template__c>();
+        Map<String, List<Case_Template__c>> templatesByType = new Map<String, List<Case_Template__c>>();
         String caseTemplateType;
-
-       lstOfCaseTemplateField = new List<String>{'Type__c', 'Compliance_Needed__c', 'Check_in_Hand__c',
+        
+        lstOfCaseTemplateField = new List<String>{'Type__c', 'Compliance_Needed__c', 'Check_in_Hand__c',
             'Management_Style__c','Custodian__c'};
                 
                 caseTemplateFieldDefaultValue = 'EXCLUDED';
@@ -470,7 +471,7 @@ public class Case_TriggerHandler {
         mapCaseTempFldToCaseFld = new Map< String, String>{ 'Type__c' => 'Type','Compliance_Needed__c' => 'SOF_Compliance__c', 
             'Check_in_Hand__c' => 'Check_in_Hand__c', 'Management_Style__c' => 'Management_Style__c','Custodian__c' => 'Custodian__c'};
                 
-                Id newAccountRecordTypeId = Schema.SObjectType.Case.getRecordTypeInfosByName().get('Account Opening').getRecordTypeId();
+        Id newAccountRecordTypeId = Schema.SObjectType.Case.getRecordTypeInfosByName().get('Account Opening').getRecordTypeId();
         Id servicingRecordTypeId = Schema.SObjectType.Case.getRecordTypeInfosByName().get('Account Servicing').getRecordTypeId();
         Id approvalRecordTypeId = Schema.SObjectType.Case.getRecordTypeInfosByName().get('Account Servicing - Approval Required').getRecordTypeId();
         //Id approvalTaskRecordTypeId = Schema.sObjectType.Task.getRecordTypeInfosByName().get('Approval Task').getRecordTypeId();
@@ -482,59 +483,135 @@ setOfTypeToName.add('Account Opening');
 setOfTypeToName.add('Account Servicing');
 setOfTypeToName.add('Account Servicing - Approval Required');
 }*/
-      
+        
         //Get type of tmeplate by using current user 
-         User currentUser = [SELECT Id,Profile.UserLicense.Name FROM User WHERE Id =: UserInfo.getUserId()];
-        if(currentUser.Profile.UserLicense.Name == 'Customer Community Plus'){
+        User currentUser = [SELECT Id,Profile.UserLicense.Name FROM User WHERE Id =: UserInfo.getUserId()];
+        
+        if (currentUser.Profile.UserLicense.Name == 'Customer Community Plus') {
+            
             caseTemplateType = 'Fixed';
-        }else if(currentUser.Profile.UserLicense.Name == 'Salesforce Platform' || currentUser.Profile.UserLicense.Name == 'Salesforce'){
-            caseTemplateType = 'Full';
+            
+            lstCaseTemplate = [
+                SELECT Id,
+                Name,
+                Check_in_hand__c,
+                Compliance_Needed__c,
+                Management_Style__c,
+                Type__c,
+                Custodian__c,
+                Type_of_Template__c
+                FROM Case_Template__c
+                WHERE Type_of_Template__c = 'Fixed'
+            ];
+            
+        } else if (currentUser.Profile.UserLicense.Name == 'Salesforce Platform' ||currentUser.Profile.UserLicense.Name == 'Salesforce') {
+            caseTemplateType = 'PrePostFixed';
+            
+            lstCaseTemplate = [
+                SELECT Id,
+                Name,
+                Check_in_hand__c,
+                Compliance_Needed__c,
+                Management_Style__c,
+                Type__c,
+                Custodian__c,
+                Type_of_Template__c
+                FROM Case_Template__c
+                WHERE Type_of_Template__c IN ('Pre', 'Post', 'Fixed')
+            ];
         }
         
         
-        //Get All matching case template with name
-        lstCaseTemplate = [SELECT Id, Name, Check_in_hand__c, Compliance_Needed__c, Management_Style__c,Type__c, Custodian__c
-                           FROM Case_Template__c WHERE Type_of_Template__c =: caseTemplateType /*WHERE Name IN : setOfTypeToName*/];
-
-        /*for(Case_Template__c caseTemplate : lstCaseTemplate){
-if(!mapOfNameTolstCaseTemp.containsKey(caseTemplate.Name)){
-mapOfNameTolstCaseTemp.put(caseTemplate.Name, new List<Case_Template__c>());
-}
-mapOfNameTolstCaseTemp.get(caseTemplate.Name).add(caseTemplate);
-}*/
+        // Group templates by Type_of_Template__c
+        for (Case_Template__c template : lstCaseTemplate) {
+            if (!templatesByType.containsKey(template.Type_of_Template__c)) {
+                templatesByType.put(
+                    template.Type_of_Template__c,
+                    new List<Case_Template__c>()
+                );
+            }
+            templatesByType.get(template.Type_of_Template__c).add(template);
+        }
         
-        for(Case caseRecord : newList){
-            //System.debug('caseRecord: ' + caseRecord);
-            if(caseRecord.Donotcalc__c != true){
-                //String recordType;
-                /*if(caseRecord.RecordTypeId == newAccountRecordTypeId){
-recordType = 'Account Opening';
-}
-if(caseRecord.RecordTypeId == servicingRecordTypeId){
-recordType = 'Account Servicing';
-}
-if(caseRecord.RecordTypeId == approvalRecordTypeId){
-recordType = 'Account Servicing - Approval Required';
-}
-System.debug('recordType: ' + recordType);
-List<Case_Template__c> caseTemplateList = new List<Case_Template__c>();
-if(mapOfNameTolstCaseTemp.get(recordType)!= null){
-caseTemplateList = mapOfNameTolstCaseTemp.get(recordType);
-}
-System.debug('caseTemplateList: ' + caseTemplateList);*/
-                if(!lstCaseTemplate.isEmpty() && lstCaseTemplate.size() > 0){
-                    caseTemplateMatchFields ='';
-                    System.debug('lstCaseTemplate line 306');
-                    Id caseTempId = getCaseTempId(lstCaseTemplate,caseRecord, 0);
-                    if( !String.isEmpty(caseTempId)){
-                        caseRecord.Case_Template__c = caseTempId;   
-                        caseRecord.No_Template_Found__c = False;   
+        
+        // Match templates for each Case
+        for (Case caseRecord : newList) {
+            
+            if (caseRecord.Donotcalc__c != true) {
+                
+                caseTemplateMatchFields = '';
+                
+                // ---------------------------------
+                // Customer Community Plus
+                // Only Fixed template
+                // ---------------------------------
+                if (caseTemplateType == 'Fixed') {
+                    
+                    List<Case_Template__c> fixedTemplates = templatesByType.get('Fixed');
+                    
+                    if (fixedTemplates != null && !fixedTemplates.isEmpty()) {
+                        
+                        Id fixedTemplateId = getCaseTempId(fixedTemplates, caseRecord,0);
+                        
+                        if (!String.isEmpty(fixedTemplateId)) {
+                            caseRecord.Case_Template__c = fixedTemplateId;
+                            caseRecord.No_Template_Found__c = false;
+                        }
                     }
-                    //set Matching Fields
-                    caseRecord.No_Template_Found_Completed_Fields__c = caseTemplateMatchFields;
+                    
                 }
+                // ---------------------------------
+                // Salesforce / Salesforce Platform
+                // Pre + Post + Fixed
+                // ---------------------------------
+                else {
+                    // PRE
+                    List<Case_Template__c> preTemplates = templatesByType.get('Pre');
+                    
+                    if (preTemplates != null && !preTemplates.isEmpty()) {
+                        
+                        Id preTemplateId = getCaseTempId(preTemplates, caseRecord, 0);
+                        if (!String.isEmpty(preTemplateId)) {
+                            caseRecord.Pre_Case_Template__c = preTemplateId;
+                            caseRecord.No_Template_Found__c = false;
+                        }
+                    }
+                    
+                    // POST
+                    List<Case_Template__c> postTemplates = templatesByType.get('Post');
+                    
+                    if (postTemplates != null && !postTemplates.isEmpty()) {
+                        
+                        Id postTemplateId = getCaseTempId(postTemplates, caseRecord,0);
+                        
+                        if (!String.isEmpty(postTemplateId)) {
+                            caseRecord.Post_Case_Template__c = postTemplateId;
+                            caseRecord.No_Template_Found__c = false;
+                        }
+                    }
+                    
+                    // FIXED
+                    List<Case_Template__c> fixedTemplates = templatesByType.get('Fixed');
+                    
+                    if (fixedTemplates != null && !fixedTemplates.isEmpty()) {
+                        
+                        Id fixedTemplateId = getCaseTempId(fixedTemplates, caseRecord, 0);
+                        
+                        if (!String.isEmpty(fixedTemplateId)) {
+                            caseRecord.Case_Template__c = fixedTemplateId;
+                            caseRecord.No_Template_Found__c = false;
+                        }
+                    }
+                }
+                
+                // Set matching fields
+                caseRecord.No_Template_Found_Completed_Fields__c =
+                    caseTemplateMatchFields;
             }
         }
+        
+        
+        
         Map<Id,Case> caseMap = new Map<Id,Case>(); 
         for(Case caseRecord : newList){
             if(caseRecord.Id != null){
@@ -1463,19 +1540,18 @@ record.OwnerId = queuePRId;
     //FUTURE METHODS
     @future
     public static void setCurrentTask(set<Id> caseIds){
-        List<Task> lstTask = [SELECT Id,WhatId,Owner.Name,Task_Template_Item__r.Order__c FROM Task WHERE Task_Template_Item__r.Order__c IN(1,2) AND WhatId IN : caseIds];
+        List<Task> lstTask = [SELECT Id,WhatId,Owner.Name,Order__c FROM Task WHERE Order__c IN(1,2) AND WhatId IN : caseIds];
         
-        
-        Map<Id,Case> caseMap = new Map<Id,Case>();
+        Map<Id,Case> caseMap = new MAp<Id,Case>();
         for(Task tsk : lstTask){
             Case ca = new case(id = tsk.WhatId, Sub_Status__c ='New');
             if(caseMap.containsKey(tsk.WhatId)){
                 ca =  caseMap.get(tsk.WhatId);
             }
-            if(tsk.Task_Template_Item__r.Order__c == 1){
+            if(tsk.Order__c == 1){
                 ca.Current_Task_Id__c = tsk.Id;
                 ca.Owner_Group__c = tsk.Owner.Name;
-            }else if(tsk.Task_Template_Item__r.Order__c == 2){
+            }else if(tsk.Order__c == 2){
                 ca.Next_Task__c = tsk.Id;
             }
             caseMap.put(tsk.WhatId,ca);

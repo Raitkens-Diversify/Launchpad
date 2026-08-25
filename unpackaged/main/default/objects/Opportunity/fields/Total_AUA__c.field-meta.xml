@@ -3,9 +3,9 @@
     <fullName>Total_AUA__c</fullName>
     <description>Created by CCC(KM) for opportunity updates during the FSC to custom migration.</description>
     <label>Total AUA</label>
-    <precision>15</precision>
+    <precision>17</precision>
     <required>false</required>
-    <scale>0</scale>
+    <scale>2</scale>
     <trackFeedHistory>false</trackFeedHistory>
     <trackHistory>false</trackHistory>
     <trackTrending>false</trackTrending>

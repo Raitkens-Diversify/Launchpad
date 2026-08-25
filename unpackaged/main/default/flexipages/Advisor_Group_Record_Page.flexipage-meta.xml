@@ -857,6 +857,10 @@
                 <identifier>bpaf21</identifier>
             </fieldInstance>
         </itemInstances>
+        <name>Facet_bpa_col_2_1</name>
+        <type>Facet</type>
+    </flexiPageRegions>
+    <flexiPageRegions>
         <itemInstances>
             <fieldInstance>
                 <fieldInstanceProperties>
@@ -867,10 +871,6 @@
                 <identifier>bpaf22</identifier>
             </fieldInstance>
         </itemInstances>
-        <name>Facet_bpa_col_2_1</name>
-        <type>Facet</type>
-    </flexiPageRegions>
-    <flexiPageRegions>
         <itemInstances>
             <fieldInstance>
                 <fieldInstanceProperties>
@@ -1119,80 +1119,6 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.Total_AUA__c</fieldItem>
-                <identifier>bpaf38</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.BD_AUA__c</fieldItem>
-                <identifier>bpaf39</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Target_Transition_Fixed__c</fieldItem>
-                <identifier>bpaf40</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Target_Transition_Indexed__c</fieldItem>
-                <identifier>bpaf41</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Target_Transition_Variable__c</fieldItem>
-                <identifier>bpaf42</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <name>Facet_bpa_col_5_1</name>
-        <type>Facet</type>
-    </flexiPageRegions>
-    <flexiPageRegions>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Target_Transition_Insurance__c</fieldItem>
-                <identifier>bpaf43</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Revenue_T12__c</fieldItem>
-                <identifier>bpaf44</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
                 <fieldItem>Record.Fee_Revenue__c</fieldItem>
                 <identifier>bpaf45</identifier>
             </fieldInstance>
@@ -1203,8 +1129,8 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.BD_Revenue__c</fieldItem>
-                <identifier>bpaf46</identifier>
+                <fieldItem>Record.Revenue_T12__c</fieldItem>
+                <identifier>bpaf44</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -1225,6 +1151,80 @@
                 </fieldInstanceProperties>
                 <fieldItem>Record.T12_Other__c</fieldItem>
                 <identifier>bpaf48</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <name>Facet_bpa_col_5_1</name>
+        <type>Facet</type>
+    </flexiPageRegions>
+    <flexiPageRegions>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Total_AUA__c</fieldItem>
+                <identifier>bpaf38</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.BD_AUA__c</fieldItem>
+                <identifier>bpaf39</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.BD_Revenue__c</fieldItem>
+                <identifier>bpaf46</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Target_Transition_Insurance__c</fieldItem>
+                <identifier>bpaf43</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Target_Transition_Variable__c</fieldItem>
+                <identifier>bpaf42</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Target_Transition_Indexed__c</fieldItem>
+                <identifier>bpaf41</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Target_Transition_Fixed__c</fieldItem>
+                <identifier>bpaf40</identifier>
             </fieldInstance>
         </itemInstances>
         <name>Facet_bpa_col_5_2</name>
