@@ -12,10 +12,10 @@
     <columns>Type__c</columns>
     <columns>Enough_Cash__c</columns>
     <columns>Custodian__c</columns>
-    <columns>X3_Way_Call__c</columns>
-    <columns>Qualified__c</columns>
     <columns>Change_Withholdings__c</columns>
     <columns>Is_DAO_Eligible__c</columns>
+    <columns>CREATED_DATE</columns>
+    <columns>CREATEDBY_USER.ALIAS</columns>
     <filterScope>Everything</filterScope>
     <label>All</label>
 </ListView>

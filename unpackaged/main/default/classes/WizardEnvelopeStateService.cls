@@ -1518,6 +1518,46 @@ return result;
                 }
             }
         }
+        Set<Id> candidateAccountIds = new Set<Id>();
+        for (AccountContactRelation acr : relationships) {
+            if (acr.Contact != null && acr.Contact.AccountId != null) {
+                candidateAccountIds.add(acr.Contact.AccountId);
+            }
+        }
+        for (Account_Account_Relationship__c relation : accountRelationships) {
+            if (relation.Related_Account__c != null) {
+                candidateAccountIds.add(relation.Related_Account__c);
+            }
+        }
+        Set<Id> candidateFinAccountIds = new Set<Id>();
+        for (Financial_Account__c fa : finAccounts) {
+            candidateFinAccountIds.add(fa.Id);
+        }
+        Set<Id> candidateServiceIds = new Set<Id>();
+        for (Service__c svc : services) {
+            candidateServiceIds.add(svc.Id);
+        }
+        Set<Id> linkedToAnyEnvelopeIds = new Set<Id>();
+        if (!candidateAccountIds.isEmpty() || !candidateFinAccountIds.isEmpty() || !candidateServiceIds.isEmpty()) {
+            for (Envelope_Content__c ec : [
+                SELECT Account__c, Wizard_Financial_Account__c, Service__c
+                FROM Envelope_Content__c
+                WHERE Account__c IN :candidateAccountIds
+                OR Wizard_Financial_Account__c IN :candidateFinAccountIds
+                OR Service__c IN :candidateServiceIds
+            ]) {
+                if (ec.Account__c != null) {
+                    linkedToAnyEnvelopeIds.add(ec.Account__c);
+                }
+                if (ec.Wizard_Financial_Account__c != null) {
+                    linkedToAnyEnvelopeIds.add(ec.Wizard_Financial_Account__c);
+                }
+                if (ec.Service__c != null) {
+                    linkedToAnyEnvelopeIds.add(ec.Service__c);
+                }
+            }
+        }
+
         for (AccountContactRelation acr : relationships) {
             if (acr.Contact == null || acr.Contact.AccountId == null) {
                 continue; // Skip if no related person account
@@ -1525,7 +1565,7 @@ return result;
             if (memberAccountIds.contains(acr.Contact.AccountId)) {
                 continue;
             }
-            if (!belongsInEnvelope(acr.Contact.AccountId, acr.Contact.Account.Submitted__c, existingRecordIds)) {
+            if (!belongsInEnvelope(acr.Contact.AccountId, acr.Contact.Account.Submitted__c, existingRecordIds, linkedToAnyEnvelopeIds)) {
                 continue;
             }
             memberAccountIds.add(acr.Contact.AccountId);
@@ -1549,7 +1589,7 @@ return result;
             if (memberAccountIds.contains(relation.Related_Account__c)) {
                 continue;
             }
-            if (!belongsInEnvelope(relation.Related_Account__c, relation.Related_Account__r.Submitted__c, existingRecordIds)) {
+            if (!belongsInEnvelope(relation.Related_Account__c, relation.Related_Account__r.Submitted__c, existingRecordIds, linkedToAnyEnvelopeIds)) {
                 continue;
             }
             memberAccountIds.add(relation.Related_Account__c);
@@ -1611,7 +1651,7 @@ return result;
             }
         }
         for(Financial_Account__c finAccount : finAccounts){
-            if (!belongsInEnvelope(finAccount.Id, finAccount.Submitted__c, existingRecordIds)) {
+            if (!belongsInEnvelope(finAccount.Id, finAccount.Submitted__c, existingRecordIds, linkedToAnyEnvelopeIds)) {
                 continue;
             }
             AccountData account = createAccountData(finAccount);
@@ -1620,7 +1660,7 @@ return result;
 
         List<Service__c> scopedServices = new List<Service__c>();
         for(Service__c ser : services){
-            if (!belongsInEnvelope(ser.Id, ser.Submitted__c, existingRecordIds)) {
+            if (!belongsInEnvelope(ser.Id, ser.Submitted__c, existingRecordIds, linkedToAnyEnvelopeIds)) {
                 continue;
             }
             scopedServices.add(ser);
@@ -1681,17 +1721,10 @@ return result;
         return actionCases;
     }
 
-    // Whether a household record belongs on this envelope's outline. Two things put it there: the
-    // envelope already holds it, or it is submitted and so part of the household's settled state that
-    // every envelope shows.
-    //
-    // The queries above are deliberately household-wide, and this is what narrows them. Without it an
-    // unsubmitted record created in another envelope would appear here — and, worse, be linked to this
-    // envelope on sight, so opening envelope A would permanently graft envelope B's drafts into it.
-    // Records reach an envelope by being added to it (saveEntity, saveRelatedParties and the other
-    // create paths all link what they create), never by being read.
-    private static Boolean belongsInEnvelope(Id recordId, Boolean submitted, Set<Id> existingRecordIds) {
-        return existingRecordIds.contains(recordId) || submitted == true;
+    private static Boolean belongsInEnvelope(Id recordId, Boolean submitted, Set<Id> existingRecordIds, Set<Id> linkedToAnyEnvelopeIds) {
+        return existingRecordIds.contains(recordId)
+            || submitted == true
+            || (!linkedToAnyEnvelopeIds.contains(recordId) && submitted != true);
     }
     
     /**

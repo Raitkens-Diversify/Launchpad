@@ -2,6 +2,7 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Total_Assets__c</fullName>
     <formula>Fee_AUM__c + BD_AUA__c</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
     <label>Total Assets</label>
     <precision>18</precision>
     <required>false</required>

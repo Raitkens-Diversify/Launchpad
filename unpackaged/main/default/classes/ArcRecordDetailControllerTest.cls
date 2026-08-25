@@ -20,6 +20,8 @@ private class ArcRecordDetailControllerTest {
     ArcRecordDetailController.RecordDetailContext context = ArcRecordDetailController.load(
       member.Id,
       null,
+      null,
+      false,
       null
     );
     Test.stopTest();
@@ -67,6 +69,8 @@ private class ArcRecordDetailControllerTest {
     ArcRecordDetailController.RecordDetailContext context = ArcRecordDetailController.load(
       business.Id,
       null,
+      null,
+      false,
       null
     );
     Test.stopTest();
@@ -161,6 +165,8 @@ private class ArcRecordDetailControllerTest {
       household.Id,
       'Account',
       null,
+      false,
+      null,
       new Map<String, Object>{ 'BillingCity' => 'Denver' }
     );
     Test.stopTest();
@@ -251,7 +257,7 @@ private class ArcRecordDetailControllerTest {
     );
   }
 
-  /** Task and Check Log resolve their one schema without a record-type branch. */
+  /** Task, Check Log, Check Deposit and Advertising Item resolve their one schema without a record-type branch. */
   @IsTest
   static void singleSchemaObjectsResolveTheirOwnSchemaType() {
     Assert.areEqual(
@@ -263,6 +269,11 @@ private class ArcRecordDetailControllerTest {
       'Check Log',
       ArcRecordDetailController.SINGLE_SCHEMA_OBJECTS.get('Check_Log__c'),
       'Check Log detail is driven by the Check Log schema.'
+    );
+    Assert.areEqual(
+      'Standard Advertising Item',
+      ArcRecordDetailController.SINGLE_SCHEMA_OBJECTS.get('Advertising_Item__c'),
+      'The Case Detail page\'s Advertising Item section is driven by its own schema.'
     );
   }
 
@@ -285,6 +296,8 @@ private class ArcRecordDetailControllerTest {
         member.Id,
         null,
         null,
+        false,
+        null,
         new Map<String, Object>{ 'FirstName' => 'Updated' }
       );
     } catch (AuraHandledException e) {
@@ -297,7 +310,7 @@ private class ArcRecordDetailControllerTest {
   static void loadRejectsNullRecordId() {
     Boolean threw = false;
     try {
-      ArcRecordDetailController.load(null, null, null);
+      ArcRecordDetailController.load(null, null, null, false, null);
     } catch (AuraHandledException e) {
       threw = true;
     }
@@ -313,6 +326,8 @@ private class ArcRecordDetailControllerTest {
     ArcRecordDetailController.RecordDetailContext context = ArcRecordDetailController.load(
       service.Id,
       null,
+      null,
+      false,
       null
     );
     Test.stopTest();
@@ -334,6 +349,8 @@ private class ArcRecordDetailControllerTest {
     ArcRecordDetailController.RecordDetailContext context = ArcRecordDetailController.load(
       service.Id,
       null,
+      null,
+      false,
       null
     );
 
@@ -350,6 +367,8 @@ private class ArcRecordDetailControllerTest {
       ArcRecordDetailController.save(
         service.Id,
         null,
+        null,
+        false,
         null,
         new Map<String, Object>{ 'Name' => 'After Save' }
       );
@@ -373,6 +392,8 @@ private class ArcRecordDetailControllerTest {
     ArcRecordDetailController.RecordDetailContext context = ArcRecordDetailController.load(
       fa.Id,
       null,
+      null,
+      false,
       null
     );
 
@@ -391,6 +412,8 @@ private class ArcRecordDetailControllerTest {
     ArcRecordDetailController.RecordDetailContext context = ArcRecordDetailController.load(
       fa.Id,
       null,
+      null,
+      false,
       null
     );
 
@@ -408,6 +431,8 @@ private class ArcRecordDetailControllerTest {
     ArcRecordDetailController.RecordDetailContext context = ArcRecordDetailController.load(
       caseRecord.Id,
       null,
+      null,
+      false,
       null
     );
 
@@ -425,6 +450,8 @@ private class ArcRecordDetailControllerTest {
     ArcRecordDetailController.RecordDetailContext context = ArcRecordDetailController.load(
       fa.Id,
       null,
+      null,
+      false,
       null
     );
 
@@ -459,6 +486,8 @@ private class ArcRecordDetailControllerTest {
       fa.Id,
       null,
       null,
+      false,
+      null,
       new Map<String, Object>{ fieldPath => 'Updated Value' }
     );
     Test.stopTest();
@@ -487,7 +516,7 @@ private class ArcRecordDetailControllerTest {
     };
 
     Test.startTest();
-    ArcRecordDetailController.save(member.Id, null, null, fields);
+    ArcRecordDetailController.save(member.Id, null, null, false, null, fields);
     Test.stopTest();
 
     Account updated = [
@@ -518,6 +547,8 @@ private class ArcRecordDetailControllerTest {
       member.Id,
       null,
       null,
+      false,
+      null,
       new Map<String, Object>()
     );
     Test.stopTest();
@@ -542,6 +573,8 @@ private class ArcRecordDetailControllerTest {
     ArcRecordDetailController.save(
       business.Id,
       null,
+      null,
+      false,
       null,
       new Map<String, Object>{
         'FirstName' => 'Ignored',
@@ -578,6 +611,8 @@ private class ArcRecordDetailControllerTest {
       business.Id,
       null,
       null,
+      false,
+      null,
       new Map<String, Object>{
         'PersonBirthdate' => Date.newInstance(1990, 1, 1),
         'Name' => 'Birthdate Corp Updated'
@@ -609,6 +644,8 @@ private class ArcRecordDetailControllerTest {
     ArcRecordDetailController.save(
       member.Id,
       null,
+      null,
+      false,
       null,
       new Map<String, Object>{
         'Name' => 'Should Not Apply',
@@ -643,6 +680,8 @@ private class ArcRecordDetailControllerTest {
         member.Id,
         null,
         null,
+        false,
+        null,
         new Map<String, Object>{ 'Not_In_Schema__c' => 'value' }
       );
     } catch (AuraHandledException e) {
@@ -667,6 +706,8 @@ private class ArcRecordDetailControllerTest {
     ArcRecordDetailController.RecordDetailContext context = ArcRecordDetailController.load(
       trust.Id,
       null,
+      null,
+      false,
       null
     );
 
@@ -692,6 +733,8 @@ private class ArcRecordDetailControllerTest {
       trust.Id,
       null,
       null,
+      false,
+      null,
       new Map<String, Object>{ 'Name' => 'Trust After' }
     );
     Test.stopTest();
@@ -702,5 +745,260 @@ private class ArcRecordDetailControllerTest {
       WHERE Id = :trust.Id
     ];
     System.assertEquals('Trust After', updated.Name);
+  }
+
+  // ---- Restored from the pre-migration Launchpad version --------------------
+  // (related-record loading/saving, WHERE-gate value loading, wire formatting).
+  //
+  // NOT restored: the six original tests asserting Case always resolves
+  // ARCConstants.SCHEMA_STANDARD_CASE regardless of Type, and the two
+  // "Financial Planning" related-Service-merge tests. Those assert exactly the
+  // behavior this version deliberately replaced with Vestolio's case-type-aware
+  // schema mapping (CASE_TYPE_TO_SCHEMA_TYPE) and 'Financial Planning' is not a
+  // mapped case type here, so they would fail for reasons unrelated to a real
+  // regression. If Case-level related-record merging (Service__c fields folded
+  // into a Case's own form) is still needed under the new schema types, that
+  // needs its own test written against real Envelope_Field__mdt configuration.
+
+  @IsTest
+  static void findCaseLookupFieldDiscoversServiceRelationship() {
+    Map<String, Schema.SObjectField> caseFieldMap = Case.SObjectType.getDescribe()
+      .fields.getMap();
+
+    System.assertEquals(
+      'service__c',
+      RecordQueryUtil.findCaseLookupField(caseFieldMap, 'Service__c'),
+      'Case.Service__c should resolve Service__c records dynamically'
+    );
+  }
+
+  @IsTest
+  static void loadRelatedRecordModeResolvesServiceFromCase() {
+    Id accountOpeningRecordTypeId = Schema.SObjectType.Case
+      .getRecordTypeInfosByDeveloperName()
+      .get('Account_Opening')
+      .getRecordTypeId();
+
+    Service__c service = new Service__c(
+      Name = 'Related Mode Service',
+      Terms_of_Payment__c = 'Hourly Fee'
+    );
+    insert service;
+
+    Case caseRecord = new Case(
+      Subject = 'Related Mode Case',
+      Type = 'Financial Planning',
+      Service__c = service.Id,
+      RecordTypeId = accountOpeningRecordTypeId
+    );
+    insert caseRecord;
+
+    Test.startTest();
+    ArcRecordDetailController.RecordDetailContext context = ArcRecordDetailController.load(
+      caseRecord.Id,
+      null,
+      null,
+      true,
+      'Service__c'
+    );
+    Test.stopTest();
+
+    System.assertEquals(false, context.hidden);
+    System.assertEquals(caseRecord.Id, context.pageRecordId);
+    System.assertEquals(service.Id, context.displayRecordId);
+    System.assertEquals('Service__c', context.objectApiName);
+    System.assertEquals('ISA - Service Agreement', context.schemaType);
+    System.assertEquals(
+      'Hourly Fee',
+      context.values.get('Terms_of_Payment__c'),
+      'Values should come from the related Service record'
+    );
+  }
+
+  @IsTest
+  static void loadRelatedRecordModeHidesWhenLookupEmpty() {
+    Id accountOpeningRecordTypeId = Schema.SObjectType.Case
+      .getRecordTypeInfosByDeveloperName()
+      .get('Account_Opening')
+      .getRecordTypeId();
+
+    Case caseRecord = new Case(
+      Subject = 'No Service Linked',
+      Type = 'Financial Planning',
+      RecordTypeId = accountOpeningRecordTypeId
+    );
+    insert caseRecord;
+
+    Test.startTest();
+    ArcRecordDetailController.RecordDetailContext context = ArcRecordDetailController.load(
+      caseRecord.Id,
+      null,
+      null,
+      true,
+      'Service__c'
+    );
+    Test.stopTest();
+
+    System.assertEquals(true, context.hidden);
+    System.assertEquals(caseRecord.Id, context.pageRecordId);
+    System.assertEquals(null, context.displayRecordId);
+    System.assertEquals(0, context.sections.size());
+  }
+
+  @IsTest
+  static void loadRelatedRecordModeRequiresLookupField() {
+    Case caseRecord = new Case(Subject = 'Missing Lookup Config');
+    insert caseRecord;
+
+    Boolean threw = false;
+    try {
+      ArcRecordDetailController.load(caseRecord.Id, null, null, true, null);
+    } catch (AuraHandledException e) {
+      threw = true;
+    }
+    System.assert(threw, 'Related mode without lookup field should throw');
+  }
+
+  @IsTest
+  static void loadRelatedRecordModeRejectsInvalidLookupField() {
+    Case caseRecord = new Case(Subject = 'Invalid Lookup Field');
+    insert caseRecord;
+
+    Boolean threw = false;
+    try {
+      ArcRecordDetailController.load(
+        caseRecord.Id,
+        null,
+        null,
+        true,
+        'Not_A_Real_Field__c'
+      );
+    } catch (AuraHandledException e) {
+      threw = true;
+    }
+    System.assert(threw, 'Invalid lookup field API should throw');
+  }
+
+  @IsTest
+  static void collectWhereReferencedFieldApisIncludesBooleanGates() {
+    Map<String, Schema.SObjectField> caseFields = Case.SObjectType.getDescribe()
+      .fields.getMap();
+
+    FieldDetailController.FieldMetadata amountField = new FieldDetailController.FieldMetadata();
+    amountField.fieldPath = 'Amount__c';
+    amountField.shownWhereStatement = 'Source_of_Funds_Value__c = true';
+
+    FieldDetailController.FormSection section = new FieldDetailController.FormSection(
+      'Source of Funds'
+    );
+    section.fields.add(amountField);
+
+    Set<String> fieldApis = ArcRecordDetailController.collectWhereReferencedFieldApis(
+      new List<FieldDetailController.FormSection>{ section },
+      caseFields
+    );
+
+    System.assert(
+      fieldApis.contains('Source_of_Funds_Value__c'),
+      'Boolean gate fields referenced only in WHERE should be collected.'
+    );
+  }
+
+  @IsTest
+  static void loadStandardCaseIncludesBooleanWhereGateValues() {
+    List<Envelope_Field__mdt> amountRows = [
+      SELECT Field_API__c
+      FROM Envelope_Field__mdt
+      WHERE Object__c = 'Case'
+      AND Field_API__c = 'Amount__c'
+      LIMIT 1
+    ];
+    if (amountRows.isEmpty()) {
+      return;
+    }
+
+    List<Case> existingCases = [
+      SELECT Id
+      FROM Case
+      WHERE Source_of_Funds_Value__c = true
+      AND Amount__c != null
+      AND Type != null
+      LIMIT 1
+    ];
+    if (existingCases.isEmpty()) {
+      return;
+    }
+
+    Test.startTest();
+    ArcRecordDetailController.RecordDetailContext context = ArcRecordDetailController.load(
+      existingCases[0].Id,
+      null,
+      null,
+      false,
+      null
+    );
+    Test.stopTest();
+
+    System.assertEquals(
+      true,
+      context.values.get('Source_of_Funds_Value__c'),
+      'Boolean gate values must be present for client-side Shown WHERE evaluation.'
+    );
+    System.assertNotEquals(
+      null,
+      context.values.get('Amount__c'),
+      'Configured field values should still load.'
+    );
+  }
+
+  @IsTest
+  static void loadAccountClosureCaseSerializesDateValuesAsIsoStrings() {
+    Id accountServicingRecordTypeId = Schema.SObjectType.Case
+      .getRecordTypeInfosByDeveloperName()
+      .get('Account_Servicing')
+      .getRecordTypeId();
+
+    Case caseRecord = new Case(
+      Subject = 'Closure With End Date',
+      Type = 'Account Closure',
+      RecordTypeId = accountServicingRecordTypeId,
+      Account_Closure_Reason__c = 'Client Terminated Services',
+      Account_Closure_End_Date__c = Date.newInstance(2024, 7, 19)
+    );
+    insert caseRecord;
+
+    Test.startTest();
+    ArcRecordDetailController.RecordDetailContext context = ArcRecordDetailController.load(
+      caseRecord.Id,
+      null,
+      null,
+      false,
+      null
+    );
+    Test.stopTest();
+
+    System.assertEquals(
+      '2024-07-19',
+      context.values.get('Account_Closure_End_Date__c'),
+      'Date fields should be serialized as YYYY-MM-DD strings for the LWC layer.'
+    );
+  }
+
+  @IsTest
+  static void formatFieldValueForWireSerializesDateAndDatetime() {
+    System.assertEquals(
+      '2024-07-19',
+      ArcRecordDetailController.formatFieldValueForWire(
+        Date.newInstance(2024, 7, 19),
+        Schema.DisplayType.DATE
+      )
+    );
+    System.assertEquals(
+      '2024-07-19T15:30:00Z',
+      ArcRecordDetailController.formatFieldValueForWire(
+        Datetime.newInstanceGmt(2024, 7, 19, 15, 30, 0),
+        Schema.DisplayType.DATETIME
+      )
+    );
   }
 }

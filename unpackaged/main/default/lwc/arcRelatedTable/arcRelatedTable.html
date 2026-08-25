@@ -24,7 +24,10 @@
     </div>
 
     <template lwc:if={isLoading}>
-      <c-arc-loading-spinner alternative-text="Loading records" size="small"></c-arc-loading-spinner>
+      <c-arc-loading-spinner
+        alternative-text="Loading records"
+        size="small"
+      ></c-arc-loading-spinner>
     </template>
 
     <template lwc:elseif={hasRows}>

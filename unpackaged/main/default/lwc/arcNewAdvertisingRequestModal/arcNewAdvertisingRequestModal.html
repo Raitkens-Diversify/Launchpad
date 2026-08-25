@@ -8,8 +8,13 @@
     onclose={handleClose}
   >
     <div class="arc-new-adv-request">
-      <div class="arc-new-adv-request__field arc-new-adv-request__field--account">
-        <label class="arc-new-adv-request__label" for="arc-new-adv-request-account">
+      <div
+        class="arc-new-adv-request__field arc-new-adv-request__field--account"
+      >
+        <label
+          class="arc-new-adv-request__label"
+          for="arc-new-adv-request-account"
+        >
           Account Name<span class="arc-new-adv-request__required">*</span>
         </label>
         <div class="arc-new-adv-request__combobox">
@@ -44,7 +49,9 @@
               </ul>
             </template>
             <template lwc:elseif={showAccountEmptyState}>
-              <div class="arc-new-adv-request__menu arc-new-adv-request__menu--empty">
+              <div
+                class="arc-new-adv-request__menu arc-new-adv-request__menu--empty"
+              >
                 No matching accounts
               </div>
             </template>

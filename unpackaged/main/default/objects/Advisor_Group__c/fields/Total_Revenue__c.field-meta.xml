@@ -2,6 +2,7 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Total_Revenue__c</fullName>
     <formula>BD_Revenue__c +  Fee_Revenue__c</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
     <label>Total Revenue</label>
     <precision>18</precision>
     <required>false</required>

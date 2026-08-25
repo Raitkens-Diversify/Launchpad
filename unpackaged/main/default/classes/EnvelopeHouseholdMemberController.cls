@@ -428,35 +428,63 @@ public with sharing class EnvelopeHouseholdMemberController {
       }
     }
 
-    Set<Id> memberAccountIds = new Set<Id>();
-    for (AccountContactRelation relation : [
+    List<AccountContactRelation> personRelations = [
       SELECT Contact.AccountId, Contact.Account.Submitted__c, Contact.Account.RecordType.DeveloperName
       FROM AccountContactRelation
       WHERE AccountId = :householdId AND IsActive = TRUE
-    ]) {
-      if (relation.Contact == null || relation.Contact.AccountId == null) {
-        continue;
-      }
-      if (!HOUSEHOLD_ROSTER_RECORD_TYPES.contains(relation.Contact.Account.RecordType?.DeveloperName)) {
-        continue;
-      }
-      if (!belongsInEnvelope(relation.Contact.AccountId, relation.Contact.Account.Submitted__c, existingRecordIds)) {
-        continue;
-      }
-      memberAccountIds.add(relation.Contact.AccountId);
-    }
-    for (Account_Account_Relationship__c relation : [
+    ];
+    List<Account_Account_Relationship__c> accountRelations = [
       SELECT Related_Account__c, Related_Account__r.Submitted__c, Related_Account__r.RecordType.DeveloperName
       FROM Account_Account_Relationship__c
       WHERE
         Account__c = :householdId
         AND Active__c = TRUE
         AND Related_Account__c != NULL
-    ]) {
+    ];
+
+    Set<Id> candidateAccountIds = new Set<Id>();
+    for (AccountContactRelation relation : personRelations) {
+      if (relation.Contact != null && relation.Contact.AccountId != null) {
+        candidateAccountIds.add(relation.Contact.AccountId);
+      }
+    }
+    for (Account_Account_Relationship__c relation : accountRelations) {
+      if (relation.Related_Account__c != null) {
+        candidateAccountIds.add(relation.Related_Account__c);
+      }
+    }
+
+    Set<Id> linkedToAnyEnvelopeIds = new Set<Id>();
+    if (!candidateAccountIds.isEmpty()) {
+      for (Envelope_Content__c ec : [
+        SELECT Account__c
+        FROM Envelope_Content__c
+        WHERE Account__c IN :candidateAccountIds
+      ]) {
+        if (ec.Account__c != null) {
+          linkedToAnyEnvelopeIds.add(ec.Account__c);
+        }
+      }
+    }
+
+    Set<Id> memberAccountIds = new Set<Id>();
+    for (AccountContactRelation relation : personRelations) {
+      if (relation.Contact == null || relation.Contact.AccountId == null) {
+        continue;
+      }
+      if (!HOUSEHOLD_ROSTER_RECORD_TYPES.contains(relation.Contact.Account.RecordType?.DeveloperName)) {
+        continue;
+      }
+      if (!belongsInEnvelope(relation.Contact.AccountId, relation.Contact.Account.Submitted__c, existingRecordIds, linkedToAnyEnvelopeIds)) {
+        continue;
+      }
+      memberAccountIds.add(relation.Contact.AccountId);
+    }
+    for (Account_Account_Relationship__c relation : accountRelations) {
       if (!HOUSEHOLD_ROSTER_RECORD_TYPES.contains(relation.Related_Account__r.RecordType?.DeveloperName)) {
         continue;
       }
-      if (!belongsInEnvelope(relation.Related_Account__c, relation.Related_Account__r.Submitted__c, existingRecordIds)) {
+      if (!belongsInEnvelope(relation.Related_Account__c, relation.Related_Account__r.Submitted__c, existingRecordIds, linkedToAnyEnvelopeIds)) {
         continue;
       }
       memberAccountIds.add(relation.Related_Account__c);
@@ -465,12 +493,10 @@ public with sharing class EnvelopeHouseholdMemberController {
     return buildMemberViews(memberAccountIds);
   }
 
-  // A member belongs in this envelope's picker when it's either already finalized (Submitted__c)
-  // or explicitly linked to this envelope — never a still-in-progress draft from a different
-  // envelope. Mirrors WizardEnvelopeStateService's belongsInEnvelope guard for the outline rail,
-  // so the two lists never disagree about which drafts are visible here.
-  private static Boolean belongsInEnvelope(Id recordId, Boolean submitted, Set<Id> existingRecordIds) {
-    return existingRecordIds.contains(recordId) || submitted == true;
+  private static Boolean belongsInEnvelope(Id recordId, Boolean submitted, Set<Id> existingRecordIds, Set<Id> linkedToAnyEnvelopeIds) {
+    return existingRecordIds.contains(recordId)
+        || submitted == true
+        || (!linkedToAnyEnvelopeIds.contains(recordId) && submitted != true);
   }
 
   // Builds the display views for a set of member accounts: a consistent name + type label (the
