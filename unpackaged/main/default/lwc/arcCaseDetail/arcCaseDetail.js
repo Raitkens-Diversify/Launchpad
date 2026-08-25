@@ -6,9 +6,9 @@ import { refreshApex } from "@salesforce/apex";
 import { getPicklistValues } from "lightning/uiObjectInfoApi";
 import CASE_STATUS_FIELD from "@salesforce/schema/Case.Status";
 import {
-  resolveRecordIdFromPageReference,
-  buildRecordNavigationReference
+  resolveRecordIdFromPageReference
 } from "c/recordNavigationUtils";
+import { buildRecordNavigationReference } from "c/recordNavigationCommunityUtils";
 import getCaseDetail from "@salesforce/apex/ArcCaseDetailController.getCaseDetail";
 import getCaseTasks from "@salesforce/apex/ArcCaseDetailController.getCaseTasks";
 import getCaseFieldSections from "@salesforce/apex/ArcCaseDetailController.getCaseFieldSections";

@@ -167,6 +167,41 @@ private class FscRelAccountRepositoryTest {
   }
 
   @IsTest
+  static void selectClientAccountsByHouseholdId_excludesNullTypeHouseholdMembers() {
+    FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
+    Account untypedMember = FscDataTestDataFactory.createPersonAccount(
+      'Untyped',
+      'Member ' + System.currentTimeMillis()
+    );
+    untypedMember.Type = null;
+    update untypedMember;
+
+    FscDataTestDataFactory.createHouseholdMembershipRelations(
+      new List<Account>{ untypedMember },
+      scenario.rootAccount.Id
+    );
+
+    FscRelAccountRepository accountRepository = new FscRelAccountRepository();
+
+    Test.startTest();
+    List<Account> clientAccounts = accountRepository.selectClientAccountsByHouseholdId(
+      scenario.rootAccount.Id
+    );
+    Test.stopTest();
+
+    Set<Id> clientAccountIds = new Set<Id>();
+    for (Account account : clientAccounts) {
+      clientAccountIds.add(account.Id);
+    }
+
+    System.assertEquals(
+      false,
+      clientAccountIds.contains(untypedMember.Id),
+      'Household members without a client Type should not appear in the client roster.'
+    );
+  }
+
+  @IsTest
   static void selectLeadProspectAccountsByHouseholdId_usesHouseholdMembershipArr() {
     FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
     String leadProspectType = resolveLeadProspectType();

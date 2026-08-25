@@ -770,8 +770,7 @@ public with sharing class FscRelHouseholdService {
       if (
         relation.Related_Account__c == null ||
         relation.Related_Account__r == null ||
-        !FscRelAccountRepository.isPersonAccountRecord(relation.Related_Account__r) ||
-        FscRelClientAccountUtils.isLeadProspectAccount(relation.Related_Account__r)
+        !FscRelClientAccountUtils.isClientAccount(relation.Related_Account__r)
       ) {
         continue;
       }

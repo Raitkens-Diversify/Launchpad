@@ -43,7 +43,7 @@
                 "tabLayout" : "horizontal",
                 "tabPadding" : "12px",
                 "tabTextStyle" : "{\"textStyle\":\"paragraph1\",\"headingTag\":\"p\"}",
-                "tabsetConfig" : "{\"UUID\":\"6c1285e4-7849-4137-a268-1c5141db3ba7\",\"activeTab\":null,\"useOverflowMenu\":null,\"tabs\":[{\"UUID\":\"b671960b-c7cb-4fa9-8710-cff378bc7385\",\"tabName\":\"All Work\",\"tabKey\":\"tab1\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"fe24f6ae-5f44-4617-8776-3fb66cd7be97\",\"tabName\":\"Cases\",\"tabKey\":\"tab2\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"5dc33864-47cb-4dbf-b4f0-453084ff0bdf\",\"tabName\":\"Tasks\",\"tabKey\":\"tab3\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"161ef383-7bd5-4a52-bf17-f2def187af9d\",\"tabName\":\"Advertising Request\",\"tabKey\":\"af087\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"fced54d3-ecdd-417c-963a-0eb1f5d154b2\",\"tabName\":\"Check Log\",\"tabKey\":\"ff964\",\"locked\":false,\"allowGuestUser\":false}]}",
+                "tabsetConfig" : "{\"UUID\":\"6c1285e4-7849-4137-a268-1c5141db3ba7\",\"activeTab\":null,\"useOverflowMenu\":null,\"tabs\":[{\"UUID\":\"b671960b-c7cb-4fa9-8710-cff378bc7385\",\"tabName\":\"All Work\",\"tabKey\":\"tab1\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"fe24f6ae-5f44-4617-8776-3fb66cd7be97\",\"tabName\":\"Cases\",\"tabKey\":\"tab2\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"5dc33864-47cb-4dbf-b4f0-453084ff0bdf\",\"tabName\":\"Tasks\",\"tabKey\":\"tab3\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"fced54d3-ecdd-417c-963a-0eb1f5d154b2\",\"tabName\":\"Check Log\",\"tabKey\":\"ff964\",\"locked\":false,\"allowGuestUser\":false}]}",
                 "width" : "100%"
               },
               "children" : [ {
@@ -70,10 +70,11 @@
                     "defaultListViewApiName" : "All_Cases",
                     "dxpStyle" : { },
                     "objectApiName" : "Case",
-                    "tableId" : "work-cases",
-                    "title" : ""
+                    "pillFields" : "Status,Priority",
+                    "title" : "",
+                    "viewTabs" : "All_Cases=All Cases,Advertising_Requests=Advertising Request"
                   },
-                  "definition" : "c:arcListView",
+                  "definition" : "c:arcRecordListView",
                   "id" : "25eefd59-38d1-4184-9b23-7931a6d9b191",
                   "type" : "component"
                 } ],
@@ -87,10 +88,9 @@
                     "defaultListViewApiName" : "All",
                     "dxpStyle" : { },
                     "objectApiName" : "Task",
-                    "tableId" : "work-task",
                     "title" : ""
                   },
-                  "definition" : "c:arcListView",
+                  "definition" : "c:arcRecordListView",
                   "id" : "55f1757f-c2eb-495b-8c30-3b7ca9562f20",
                   "type" : "component"
                 } ],
@@ -101,30 +101,12 @@
               }, {
                 "children" : [ {
                   "attributes" : {
-                    "defaultListViewApiName" : "Advertising_Requests",
-                    "dxpStyle" : { },
-                    "objectApiName" : "Case",
-                    "tableId" : "work-advertising-request",
-                    "title" : ""
-                  },
-                  "definition" : "c:arcListView",
-                  "id" : "aa86c193-a3de-4473-8330-632ae2854b64",
-                  "type" : "component"
-                } ],
-                "id" : "161ef383-7bd5-4a52-bf17-f2def187af9d",
-                "name" : "af087",
-                "title" : "Advertising Request",
-                "type" : "region"
-              }, {
-                "children" : [ {
-                  "attributes" : {
                     "defaultListViewApiName" : "All",
                     "dxpStyle" : { },
                     "objectApiName" : "Check_Log__c",
-                    "tableId" : "work-check-log",
                     "title" : ""
                   },
-                  "definition" : "c:arcListView",
+                  "definition" : "c:arcRecordListView",
                   "id" : "5a745af0-7de3-47db-a1f2-25c738883709",
                   "type" : "component"
                 } ],

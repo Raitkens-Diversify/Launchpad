@@ -14,6 +14,7 @@ import {
   computeInitials,
   isClientAccount,
   isHouseholdMapClientAccount,
+  isHouseholdRecordType,
   isClientRoleValue,
   isLeadProspectAccount,
   isExcludedMemberRelationshipRecordType,
@@ -80,6 +81,8 @@ export const buildFullyLoadedMapTree = ({
   nestedAccountMemberCountByAccountId = {},
   nestedMemberRelationsByAccountId = {},
   nestedMemberRelationCountByAccountId = {},
+  nestedEntityRelationsByAccountId = {},
+  entityRelationCountByAccountId = {},
   memberRelationshipRecordTypes = [],
   loadedGroupIds = {}
 } = {}) => {
@@ -89,6 +92,8 @@ export const buildFullyLoadedMapTree = ({
     nestedAccountMemberCountByAccountId,
     nestedMemberRelationsByAccountId,
     nestedMemberRelationCountByAccountId,
+    nestedEntityRelationsByAccountId,
+    entityRelationCountByAccountId,
     memberRelationshipRecordTypes,
     loadedGroupIds: mergeLoadedGroupIds(loadedGroupIds)
   });
@@ -1733,12 +1738,196 @@ const buildClientMemberNode = (
     memberRelationshipRecordTypes
   );
 
+const collectEntityCentricRelatedAccounts = (
+  treeData = {},
+  additionalExcludeAccountIds = []
+) => {
+  const accountById = new Map();
+  const excludeAccountIds = new Set(
+    [treeData.rootAccountId, ...additionalExcludeAccountIds]
+      .map((accountId) => String(accountId || "").trim())
+      .filter(Boolean)
+  );
+
+  buildAccountViewModels([
+    ...(treeData.relatedAccounts || []),
+    ...(treeData.leadProspectAccounts || []),
+    ...(treeData.classifiedAccounts || []),
+    ...(treeData.clientAccounts || []),
+    ...(treeData.householdLinkedAccounts || [])
+  ]).forEach((account) => {
+    const accountId = String(account.accountId || "").trim();
+
+    if (!accountId || excludeAccountIds.has(accountId)) {
+      return;
+    }
+
+    accountById.set(accountId, account);
+  });
+
+  return [...accountById.values()].sort((leftAccount, rightAccount) =>
+    String(leftAccount.name || "").localeCompare(String(rightAccount.name || ""), undefined, {
+      sensitivity: "base"
+    })
+  );
+};
+
+export const collectEntityCentricRelatedAccountsFromTreeData = (
+  treeData = {},
+  additionalExcludeAccountIds = []
+) => collectEntityCentricRelatedAccounts(treeData, additionalExcludeAccountIds);
+
+export const isEntityCentricMapTreeData = (treeData = {}) => {
+  return Boolean(
+    treeData?.rootAccountId &&
+      !isHouseholdRecordType(treeData.recordTypeDeveloperName)
+  );
+};
+
+const buildEntityCentricRelatedAccountNode = (
+  account = {},
+  { parentAccountId = "" } = {}
+) => {
+  const presentation = resolveAccountPresentation(account);
+
+  return {
+    id: `account-${account.relationId || account.accountId}`,
+    label: account.name || "",
+    sub: presentation.sub,
+    iconName: presentation.iconName,
+    kind: presentation.kind,
+    nodeType: MAP_NODE_TYPE.ACCOUNT,
+    isAccountNode: true,
+    isEntityCentricRelatedAccount: true,
+    relationId: account.relationId || "",
+    accountId: account.accountId || "",
+    parentAccountId: parentAccountId || "",
+    isLazyExpandable: true,
+    showManageRelatedContacts: false,
+    showManageMemberRelationships: false,
+    memberRelationshipActions: [],
+    defaultOpen: false,
+    children: []
+  };
+};
+
+const enrichEntityCentricAccountNode = (
+  account = {},
+  parentAccountId = "",
+  nestedEntityRelationsByAccountId = {},
+  entityRelationCountByAccountId = {}
+) => {
+  const node = buildEntityCentricRelatedAccountNode(account, { parentAccountId });
+  const accountId = String(account.accountId || "").trim();
+
+  if (!accountId) {
+    return node;
+  }
+
+  const nestedAccounts = nestedEntityRelationsByAccountId[accountId];
+
+  if (Array.isArray(nestedAccounts)) {
+    const childNodes = nestedAccounts.map((relatedAccount) =>
+      enrichEntityCentricAccountNode(
+        relatedAccount,
+        accountId,
+        nestedEntityRelationsByAccountId,
+        entityRelationCountByAccountId
+      )
+    );
+
+    return {
+      ...node,
+      children: childNodes,
+      relatedAccountCount: childNodes.length,
+      entityRelationsLoaded: true,
+      entityRelationCountLoaded: true
+    };
+  }
+
+  const pendingCount = entityRelationCountByAccountId[accountId];
+
+  if (pendingCount != null) {
+    return {
+      ...node,
+      relatedAccountCount: pendingCount,
+      entityRelationsLoaded: false,
+      entityRelationCountLoaded: true
+    };
+  }
+
+  return node;
+};
+
+export const collectLazyExpandableEntityAccountNodes = (node, matches = []) => {
+  if (!node) {
+    return matches;
+  }
+
+  if (
+    node.nodeType === MAP_NODE_TYPE.ACCOUNT &&
+    node.isEntityCentricRelatedAccount &&
+    node.isLazyExpandable &&
+    node.accountId
+  ) {
+    matches.push({
+      accountId: node.accountId,
+      parentAccountId: node.parentAccountId || ""
+    });
+  }
+
+  (node.children || []).forEach((child) => {
+    collectLazyExpandableEntityAccountNodes(child, matches);
+  });
+
+  return matches;
+};
+
+export const buildEntityCentricMapTree = ({
+  treeData,
+  nestedEntityRelationsByAccountId = {},
+  entityRelationCountByAccountId = {}
+} = {}) => {
+  if (!treeData) {
+    return null;
+  }
+
+  const relatedAccountNodes = collectEntityCentricRelatedAccounts(treeData).map((account) =>
+    enrichEntityCentricAccountNode(
+      account,
+      treeData.rootAccountId || "",
+      nestedEntityRelationsByAccountId,
+      entityRelationCountByAccountId
+    )
+  );
+
+  const rootPresentation = resolveAccountPresentation({
+    recordTypeDeveloperName: treeData.recordTypeDeveloperName,
+    recordTypeLabel: treeData.recordTypeLabel
+  });
+
+  return {
+    id: `root-${treeData.rootAccountId || "entity"}`,
+    label: treeData.name || "Account",
+    sub: rootPresentation.sub,
+    iconName: rootPresentation.iconName,
+    kind: rootPresentation.kind,
+    nodeType: MAP_NODE_TYPE.ROOT,
+    isEntityCentricRoot: true,
+    accountId: treeData.rootAccountId || "",
+    defaultOpen: true,
+    children: relatedAccountNodes
+  };
+};
+
 export const buildMapTree = ({
   treeData,
   nestedMembersByAccountId = {},
   nestedAccountMemberCountByAccountId = {},
   nestedMemberRelationsByAccountId = {},
   nestedMemberRelationCountByAccountId = {},
+  nestedEntityRelationsByAccountId = {},
+  entityRelationCountByAccountId = {},
   memberRelationshipRecordTypes = [],
   loadedGroupIds = {},
   householdFamilyRecordCount = undefined,
@@ -1746,6 +1935,14 @@ export const buildMapTree = ({
 } = {}) => {
   if (!treeData) {
     return null;
+  }
+
+  if (!isHouseholdRecordType(treeData.recordTypeDeveloperName)) {
+    return buildEntityCentricMapTree({
+      treeData,
+      nestedEntityRelationsByAccountId,
+      entityRelationCountByAccountId
+    });
   }
 
   const relatedAccounts = buildAccountViewModels(
@@ -2248,6 +2445,68 @@ export const applyOpenState = (node, openState) => {
     return null;
   }
 
+  if (node.isEntityCentricRelatedAccount) {
+    const isRequestedOpen =
+      openState[node.id] === true ||
+      (openState[node.id] !== false && Boolean(node.defaultOpen));
+    const isLazyExpandable = Boolean(node.isLazyExpandable);
+    const entityRelationsLoaded = node.entityRelationsLoaded === true;
+    const entityRelationCountLoaded = node.entityRelationCountLoaded === true;
+    const hasNoEntityRelations =
+      entityRelationCountLoaded && (node.relatedAccountCount ?? 0) === 0;
+    const isLazyEntityPendingOpen =
+      isLazyExpandable &&
+      isRequestedOpen &&
+      !entityRelationsLoaded &&
+      !hasNoEntityRelations;
+    const isOpen = isLazyExpandable
+      ? isRequestedOpen &&
+        (entityRelationsLoaded || hasNoEntityRelations || isLazyEntityPendingOpen)
+      : isRequestedOpen;
+    const children = (node.children || []).map((child) =>
+      applyOpenState(child, openState)
+    );
+    const childCount = children.length;
+    const entityRelatedAccountCount = entityRelationsLoaded
+      ? (node.relatedAccountCount ?? childCount)
+      : entityRelationCountLoaded
+        ? (node.relatedAccountCount ?? 0)
+        : null;
+    const hasExpandableContent =
+      isLazyExpandable &&
+      (entityRelationsLoaded
+        ? childCount > 0
+        : entityRelationCountLoaded
+          ? (node.relatedAccountCount ?? 0) > 0
+          : true);
+    const badgeLabel =
+      entityRelatedAccountCount == null
+        ? isRequestedOpen
+          ? "‹"
+          : "›"
+        : `${entityRelatedAccountCount}${isOpen ? " ‹" : " ›"}`;
+
+    return {
+      ...node,
+      isOpen,
+      isRequestedOpen,
+      children,
+      childCount: entityRelatedAccountCount ?? 0,
+      hasExpandableContent,
+      showBadge:
+        hasExpandableContent &&
+        (entityRelatedAccountCount == null ||
+          (entityRelationCountLoaded && (node.relatedAccountCount ?? 0) > 0) ||
+          (entityRelationsLoaded && childCount > 0)),
+      badgeLabel,
+      chevronIcon: hasExpandableContent
+        ? isOpen
+          ? "utility:chevronleft"
+          : "utility:chevronright"
+        : undefined
+    };
+  }
+
   if (node.nodeType === MAP_NODE_TYPE.RELATIONSHIP_GROUP) {
     if (node.isClassificationGroupNode) {
       const isRequestedOpen =
@@ -2356,7 +2615,9 @@ export const applyOpenState = (node, openState) => {
     : memberRelationCountLoaded
       ? (node.relatedContactCount ?? 0)
       : null;
-  const displayCount = isRootNode
+  const displayCount = node.isEntityCentricRoot
+    ? childCount
+    : isRootNode
     ? sumRootChildRecordCounts(children)
     : isLazyGroup
     ? node.recordCount || 0

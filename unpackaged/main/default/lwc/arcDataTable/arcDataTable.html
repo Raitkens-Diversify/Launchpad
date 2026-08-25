@@ -1,0 +1,563 @@
+<!-- Author: Hoang Long Vu To | Date: 2026-08-11 -->
+<!-- Forked from Vestolio's styledDataTable for ARC's arcRecordListView. -->
+<template>
+  <div class="div-table-shell">
+    <template lwc:if={hasTitle}>
+      <h2 class="div-table-title">{title}</h2>
+    </template>
+    <div class={cardClass}>
+      <div class="div-table-scroll">
+        <table class={tableClass} aria-label={ariaLabel}>
+          <thead>
+            <tr>
+              <template for:each={headerColumns} for:item="column">
+                <th
+                  key={column.key}
+                  scope="col"
+                  aria-sort={column.ariaSort}
+                  class={column.headerClass}
+                  style={column.headerStyle}
+                  data-field={column.key}
+                  draggable={columnDraggable}
+                  ondragstart={handleColumnDragStart}
+                  ondragover={handleColumnDragOver}
+                  ondrop={handleColumnDrop}
+                  ondragend={handleColumnDragEnd}
+                >
+                  <template lwc:if={column.showDragHandle}>
+                    <span
+                      class="div-table__drag-handle"
+                      title="Drag to reorder column"
+                      aria-hidden="true"
+                    ></span>
+                  </template>
+                  <template lwc:if={column.sortable}>
+                    <button
+                      type="button"
+                      class="div-table__sort-button"
+                      data-field={column.key}
+                      aria-label={column.label}
+                      onclick={handleSort}
+                      onkeydown={handleSortKeyDown}
+                    >
+                      <span>{column.label}</span>
+                      <lightning-icon
+                        icon-name={column.sortIcon}
+                        size="xx-small"
+                        alternative-text="Sort direction"
+                        class={column.sortIconClass}
+                      ></lightning-icon>
+                    </button>
+                  </template>
+                  <template lwc:else>
+                    <span class="div-table__header-label">{column.label}</span>
+                  </template>
+                  <template lwc:if={column.showResizeGrip}>
+                    <span
+                      class="div-table__resize-grip"
+                      data-field={column.key}
+                      draggable="false"
+                      title="Drag to resize column, double-click to reset"
+                      onpointerdown={handleResizeStart}
+                      ondblclick={handleResizeReset}
+                    ></span>
+                  </template>
+                </th>
+              </template>
+              <template lwc:if={hasTrailingColumn}>
+                <th
+                  scope="col"
+                  class="div-table__header-actions arc-data-table__header--actions"
+                >
+                  <template lwc:if={showColumnSettings}>
+                    <button
+                      type="button"
+                      class="arc-data-table__column-settings"
+                      aria-label="Choose columns"
+                      title="Choose columns"
+                      onclick={handleColumnSettingsClick}
+                    >
+                      <template lwc:if={hasColumnSettingsMask}>
+                        <span
+                          class="arc-data-table__column-settings-glyph"
+                          aria-hidden="true"
+                        ></span>
+                      </template>
+                      <template lwc:else>
+                        <lightning-icon
+                          icon-name="utility:table_settings"
+                          size="xx-small"
+                          aria-hidden="true"
+                        ></lightning-icon>
+                      </template>
+                    </button>
+                  </template>
+                  <template lwc:else>
+                    <span class="slds-assistive-text">Actions</span>
+                  </template>
+                </th>
+              </template>
+            </tr>
+          </thead>
+          <tbody>
+            <template lwc:if={hasRows}>
+              <template for:each={tableBodyItems} for:item="item">
+                <template lwc:if={item.isGroupRow}>
+                  <tr key={item.key} class="arc-data-table__group-row">
+                    <th
+                      scope="colgroup"
+                      colspan={item.groupColspan}
+                      class="arc-data-table__group-cell"
+                    >
+                      {item.groupLabel}
+                    </th>
+                  </tr>
+                </template>
+                <template lwc:elseif={item.isDataRow}>
+                  <tr
+                    key={item.key}
+                    class={item.row.rowClass}
+                    data-id={item.row.key}
+                    onclick={handleRowNavigate}
+                  >
+                    <template for:each={item.row.cells} for:item="cell">
+                      <td
+                        key={cell.key}
+                        data-label={cell.label}
+                        class={cell.cellClass}
+                      >
+                        <template lwc:if={cell.isExpand}>
+                          <button
+                            type="button"
+                            class="arc-data-table__expand-button"
+                            data-id={item.row.key}
+                            aria-expanded={cell.isExpanded}
+                            aria-label={cell.expandAriaLabel}
+                            onclick={handleExpandChevronClick}
+                          >
+                            <lightning-icon
+                              icon-name={cell.expandIcon}
+                              size="xx-small"
+                              class="arc-data-table__expand-icon"
+                              alternative-text="Expand row"
+                            ></lightning-icon>
+                          </button>
+                        </template>
+                        <template lwc:elseif={cell.isLink}>
+                          <span class="arc-data-table__link-cell">
+                            <template lwc:if={cell.hasAvatar}>
+                              <span
+                                class="arc-data-table__avatar"
+                                aria-hidden="true"
+                              >
+                                <template lwc:if={cell.hasAvatarMask}>
+                                  <span
+                                    class="arc-data-table__avatar-glyph"
+                                  ></span>
+                                </template>
+                                <template lwc:else>
+                                  <lightning-icon
+                                    icon-name={cell.avatarIcon}
+                                    size="xx-small"
+                                  ></lightning-icon>
+                                </template>
+                              </span>
+                            </template>
+                            <template lwc:if={cell.showExpandChevron}>
+                              <button
+                                type="button"
+                                class="arc-data-table__expand-button"
+                                data-id={item.row.key}
+                                aria-expanded={cell.isExpanded}
+                                aria-label={cell.expandAriaLabel}
+                                onclick={handleExpandChevronClick}
+                              >
+                                <lightning-icon
+                                  icon-name={cell.expandIcon}
+                                  size="xx-small"
+                                  class="arc-data-table__expand-icon"
+                                  alternative-text="Expand row"
+                                ></lightning-icon>
+                              </button>
+                            </template>
+                            <a
+                              class="div-table__link"
+                              href={cell.recordUrl}
+                              data-record-id={cell.recordId}
+                              data-object-api-name={cell.objectApiName}
+                              aria-label={cell.linkAriaLabel}
+                              onclick={handleRecordLinkClick}
+                            >
+                              {cell.value}
+                            </a>
+                          </span>
+                        </template>
+                        <template lwc:elseif={cell.isPill}>
+                          <span class={cell.pillClass}>{cell.value}</span>
+                        </template>
+                        <template lwc:else> {cell.value} </template>
+                      </td>
+                    </template>
+                    <template lwc:if={hasTrailingColumn}>
+                      <td
+                        class="arc-data-table__cell--actions"
+                        onclick={handleActionCellClick}
+                      >
+                        <template lwc:if={hasRowActions}>
+                          <button
+                            type="button"
+                            class="arc-data-table__menu-trigger"
+                            data-id={item.row.key}
+                            data-kind="row"
+                            aria-haspopup="menu"
+                            onclick={handleRowMenuTrigger}
+                          >
+                            <lightning-icon
+                              icon-name="utility:threedots_vertical"
+                              size="xx-small"
+                              alternative-text="Show actions"
+                            ></lightning-icon>
+                          </button>
+                        </template>
+                      </td>
+                    </template>
+                  </tr>
+                </template>
+                <template lwc:elseif={item.isWorkDetailSection}>
+                  <tr
+                    key={item.key}
+                    class="arc-data-table__work-detail-section"
+                  >
+                    <td
+                      colspan={item.sectionColspan}
+                      class="arc-data-table__work-detail-section-cell"
+                    >
+                      <div class="arc-data-table__work-detail-panel">
+                        <table
+                          class="arc-data-table__work-detail-table"
+                          aria-label="Case tasks"
+                        >
+                          <thead>
+                            <tr>
+                              <th
+                                scope="col"
+                                class="arc-data-table__work-detail-col-tasks"
+                              >
+                                <button
+                                  type="button"
+                                  class="div-table__sort-button"
+                                  disabled
+                                  aria-label="Tasks"
+                                >
+                                  <span>Tasks</span>
+                                  <lightning-icon
+                                    icon-name="utility:arrowup"
+                                    size="xx-small"
+                                    alternative-text="Sort direction"
+                                    class="div-table__sort-icon"
+                                  ></lightning-icon>
+                                </button>
+                              </th>
+                              <th scope="col">Owner</th>
+                              <th scope="col">Status</th>
+                              <th scope="col">Due Date</th>
+                              <th scope="col">Completed Date</th>
+                              <template lwc:if={item.hasDetailRowActions}>
+                                <th
+                                  scope="col"
+                                  class="arc-data-table__work-detail-col-actions"
+                                >
+                                  <span class="slds-assistive-text"
+                                    >Actions</span
+                                  >
+                                </th>
+                              </template>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <template lwc:if={item.hasGroups}>
+                              <template
+                                for:each={item.groupViews}
+                                for:item="group"
+                              >
+                                <tr
+                                  key={group.key}
+                                  class="arc-data-table__work-detail-group-row"
+                                >
+                                  <td
+                                    colspan={group.detailColumnCount}
+                                    class="arc-data-table__work-detail-group-cell"
+                                  >
+                                    <button
+                                      type="button"
+                                      class="arc-data-table__work-detail-group"
+                                      data-row-key={group.rowKey}
+                                      data-group-key={group.groupKey}
+                                      aria-expanded={group.isExpanded}
+                                      onclick={handleDetailGroupToggle}
+                                      onkeydown={handleDetailGroupKeyDown}
+                                    >
+                                      <lightning-icon
+                                        icon-name={group.expandIcon}
+                                        size="xx-small"
+                                        class="arc-data-table__work-detail-group-icon"
+                                        alternative-text="Toggle task group"
+                                      ></lightning-icon>
+                                      <span>{group.label}</span>
+                                    </button>
+                                  </td>
+                                </tr>
+                                <template
+                                  for:each={group.tasks}
+                                  for:item="task"
+                                >
+                                  <tr
+                                    key={task.id}
+                                    class="arc-data-table__work-detail-task-row"
+                                    onclick={handleDetailInteraction}
+                                  >
+                                    <td
+                                      class="arc-data-table__work-detail-task-cell"
+                                    >
+                                      <span
+                                        class="arc-data-table__work-detail-task-name"
+                                      >
+                                        <template lwc:if={task.isStarred}>
+                                          <lightning-icon
+                                            icon-name="utility:favorite"
+                                            size="xx-small"
+                                            class="arc-data-table__work-detail-star"
+                                            alternative-text="Starred task"
+                                          ></lightning-icon>
+                                        </template>
+                                        <a
+                                          class="div-table__link"
+                                          href={task.recordUrl}
+                                          data-record-id={task.id}
+                                          aria-label={task.linkAriaLabel}
+                                          onclick={handleDetailTaskLinkClick}
+                                        >
+                                          {task.name}
+                                        </a>
+                                      </span>
+                                    </td>
+                                    <td>{task.ownerName}</td>
+                                    <td class="div-table__cell--pill">
+                                      <span class={task.statusPillClass}
+                                        >{task.status}</span
+                                      >
+                                    </td>
+                                    <td>{task.dueDate}</td>
+                                    <td>{task.completedDate}</td>
+                                    <template lwc:if={item.hasDetailRowActions}>
+                                      <td
+                                        class="arc-data-table__cell--actions"
+                                        onclick={handleDetailInteraction}
+                                      >
+                                        <button
+                                          type="button"
+                                          class="arc-data-table__menu-trigger"
+                                          data-id={task.id}
+                                          data-kind="detail"
+                                          aria-haspopup="menu"
+                                          onclick={handleDetailMenuTrigger}
+                                        >
+                                          <lightning-icon
+                                            icon-name="utility:threedots_vertical"
+                                            size="xx-small"
+                                            alternative-text="Show task actions"
+                                          ></lightning-icon>
+                                        </button>
+                                      </td>
+                                    </template>
+                                  </tr>
+                                </template>
+                              </template>
+                            </template>
+                            <template lwc:else>
+                              <tr
+                                class="arc-data-table__work-detail-empty-row"
+                              >
+                                <td colspan={item.detailColumnCount}>
+                                  No tasks found for this case.
+                                </td>
+                              </tr>
+                            </template>
+                          </tbody>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
+                <template lwc:elseif={item.isDetailWrapper}>
+                  <tr key={item.key} class="arc-data-table__expand-row">
+                    <td colspan={emptyColspan}>
+                      <slot name="rowdetail"></slot>
+                    </td>
+                  </tr>
+                </template>
+              </template>
+            </template>
+            <template lwc:elseif={showEmptyRow}>
+              <tr class="arc-data-table__empty-row">
+                <td
+                  colspan={emptyColspan}
+                  class="arc-data-table__empty-cell"
+                  role="status"
+                >
+                  {emptyMessage}
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+      <template lwc:if={showFooter}>
+        <footer class="div-table-card__footer">
+          <template lwc:if={showPager}>
+            <div class="div-table-pager">
+              <div class="div-table-pager__page-size">
+                <label
+                  class="div-table-pager__page-size-label"
+                  for="arc-data-table-page-size"
+                >
+                  Items per page
+                </label>
+                <div class="div-table-pager__page-size-control">
+                  <select
+                    id="arc-data-table-page-size"
+                    class="div-table-pager__page-size-select"
+                    value={pageSizeSelectValue}
+                    aria-label="Items per page"
+                    onchange={handlePageSizeChange}
+                  >
+                    <template for:each={pageSizeOptionViews} for:item="option">
+                      <option
+                        key={option.key}
+                        value={option.value}
+                        selected={option.isSelected}
+                      >
+                        {option.label}
+                      </option>
+                    </template>
+                  </select>
+                  <lightning-icon
+                    icon-name="utility:down"
+                    size="xx-small"
+                    class="div-table-pager__page-size-icon"
+                    aria-hidden="true"
+                  ></lightning-icon>
+                </div>
+              </div>
+
+              <nav class="div-table-pager__nav" aria-label="Pagination">
+                <button
+                  type="button"
+                  class="div-table-pager__btn div-table-pager__btn--icon"
+                  aria-label="Previous page"
+                  disabled={prevDisabled}
+                  onclick={handlePrevious}
+                >
+                  <lightning-icon
+                    icon-name="utility:chevronleft"
+                    size="xx-small"
+                    aria-hidden="true"
+                  ></lightning-icon>
+                </button>
+
+                <template for:each={pageItems} for:item="item">
+                  <template lwc:if={item.isGap}>
+                    <span
+                      key={item.key}
+                      class="div-table-pager__gap"
+                      aria-hidden="true"
+                      >…</span
+                    >
+                  </template>
+                  <template lwc:else>
+                    <button
+                      key={item.key}
+                      type="button"
+                      class={item.cssClass}
+                      data-page={item.page}
+                      aria-current={item.ariaCurrent}
+                      onclick={handlePageClick}
+                    >
+                      {item.label}
+                    </button>
+                  </template>
+                </template>
+
+                <button
+                  type="button"
+                  class="div-table-pager__btn div-table-pager__btn--icon"
+                  aria-label="Next page"
+                  disabled={nextDisabled}
+                  onclick={handleNext}
+                >
+                  <lightning-icon
+                    icon-name="utility:chevronright"
+                    size="xx-small"
+                    aria-hidden="true"
+                  ></lightning-icon>
+                </button>
+              </nav>
+            </div>
+          </template>
+          <template lwc:else>
+            <div class="div-table-pager div-table-pager--view-all">
+              <span class="div-table-pager__summary">{footerViewAllLabel}</span>
+              <button
+                type="button"
+                class="div-table-pager__view-all"
+                onclick={handleViewAllClick}
+              >
+                <span>View All</span>
+                <span
+                  class="div-table-pager__view-all-icon"
+                  style={viewAllIconStyle}
+                  aria-hidden="true"
+                ></span>
+              </button>
+            </div>
+          </template>
+        </footer>
+      </template>
+    </div>
+
+    <!-- Row-actions menu, rendered here rather than inside the row so it is not a
+         child of .div-table-scroll: that scroller has overflow-x, which clipped the
+         old lightning-button-menu dropdown. position: fixed plus coordinates worked
+         out in positionActionMenu() lets it sit over the page instead. Only ever one
+         is open, so a single instance is enough. -->
+    <template lwc:if={isActionMenuOpen}>
+      <div
+        class="arc-data-table__menu"
+        style={actionMenuStyle}
+        role="menu"
+        aria-label="Actions"
+        onkeydown={handleActionMenuKeyDown}
+      >
+        <template for:each={actionMenuItems} for:item="action">
+          <button
+            key={action.name}
+            type="button"
+            class="arc-data-table__menu-item"
+            role="menuitem"
+            data-value={action.name}
+            onclick={handleActionMenuSelect}
+          >
+            <template lwc:if={action.iconName}>
+              <lightning-icon
+                icon-name={action.iconName}
+                size="xx-small"
+                class="arc-data-table__menu-item-icon"
+              ></lightning-icon>
+            </template>
+            <span class="arc-data-table__menu-item-label">{action.label}</span>
+          </button>
+        </template>
+      </div>
+    </template>
+  </div>
+</template>

@@ -52,10 +52,10 @@
                     "defaultListViewApiName" : "All",
                     "dxpStyle" : { },
                     "objectApiName" : "Financial_Account__c",
-                    "tableId" : "isa-all",
+                    "pillFields" : "Account_Status__c",
                     "title" : ""
                   },
-                  "definition" : "c:arcListView",
+                  "definition" : "c:arcRecordListView",
                   "id" : "b513d9c6-424e-4b47-b8bb-a5728bb7cb16",
                   "type" : "component"
                 } ],
@@ -84,10 +84,9 @@
                     "defaultListViewApiName" : "All",
                     "dxpStyle" : { },
                     "objectApiName" : "Product__c",
-                    "tableId" : "isa-product",
                     "title" : ""
                   },
-                  "definition" : "c:arcListView",
+                  "definition" : "c:arcRecordListView",
                   "id" : "6b53f72f-031a-437b-9fd1-c353b6d3cc38",
                   "type" : "component"
                 } ],

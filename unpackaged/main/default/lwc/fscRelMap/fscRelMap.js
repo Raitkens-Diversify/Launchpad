@@ -43,6 +43,8 @@ import {
     collectLazyExpandableMemberAccountIds,
     collectLazyExpandableAccountIds,
     collectMemberRelationCountAccountIds,
+    collectEntityCentricRelatedAccountsFromTreeData,
+    collectLazyExpandableEntityAccountNodes,
     collectNodeIds,
     collectWireBusGroups,
     computeVisibleMapColumnCount,
@@ -50,6 +52,7 @@ import {
     createInitialOpenState,
     findMapNode,
     findMemberNodeByAccountId,
+    isEntityCentricMapTreeData,
     CLASSIFICATION_VALUES,
     GROUP_IDS,
     MANAGE_CLASSIFICATION_ACTION_PREFIX,
@@ -93,7 +96,9 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
     @track expandAllActive = false;
     nestedMembersByAccountId = {};
     nestedMemberRelationsByAccountId = {};
+    nestedEntityRelationsByAccountId = {};
     memberRelationCountByAccountId = {};
+    entityRelationCountByAccountId = {};
     accountMemberCountByAccountId = {};
     householdFamilyRecordCount = undefined;
     householdNetworkRecordCount = undefined;
@@ -102,6 +107,7 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
     @track mapBusyCount = 0;
     _pendingNestedAccountIds = new Set();
     _pendingNestedMemberRelationAccountIds = new Set();
+    _pendingEntityRelationAccountIds = new Set();
     _pendingMemberRelationCountIds = new Set();
     _pendingAccountMemberCountIds = new Set();
     _pendingHouseholdFamilyCount = false;
@@ -423,6 +429,10 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
         return this.treeData?.name || 'Household';
     }
 
+    get isEntityCentricMap() {
+        return isEntityCentricMapTreeData(this.treeData);
+    }
+
     get baseMapTree() {
         if (this.isUnlinkedPersonCentricMap) {
             return buildPersonCentricMapTree({
@@ -440,6 +450,8 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
             nestedAccountMemberCountByAccountId: this.accountMemberCountByAccountId,
             nestedMemberRelationsByAccountId: this.nestedMemberRelationsByAccountId,
             nestedMemberRelationCountByAccountId: this.memberRelationCountByAccountId,
+            nestedEntityRelationsByAccountId: this.nestedEntityRelationsByAccountId,
+            entityRelationCountByAccountId: this.entityRelationCountByAccountId,
             memberRelationshipRecordTypes: this.memberRelationshipRecordTypes,
             loadedGroupIds: this.loadedGroupIds,
             householdFamilyRecordCount: this.householdFamilyRecordCount,
@@ -537,7 +549,9 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
     clearNestedMapCaches() {
         this.nestedMembersByAccountId = {};
         this.nestedMemberRelationsByAccountId = {};
+        this.nestedEntityRelationsByAccountId = {};
         this.memberRelationCountByAccountId = {};
+        this.entityRelationCountByAccountId = {};
         this.accountMemberCountByAccountId = {};
         this.householdFamilyRecordCount = undefined;
         this.householdNetworkRecordCount = undefined;
@@ -715,7 +729,7 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
             this.memberRelationshipRecordTypes = Array.isArray(data) ? data : [];
 
             if (this.treeData && this._householdMapHydratedKey) {
-                void this.loadMemberRelationCountsForVisibleMembers();
+                void this.loadInitialMapCounts();
             }
 
             if (this.personTreeData && this._personMapHydratedKey) {
@@ -758,7 +772,7 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
                     })
                 );
                 this._householdMapHydratedKey = hydrationKey;
-                void this.loadMemberRelationCountsForVisibleMembers();
+                void this.loadInitialMapCounts();
             }
 
             return;
@@ -818,7 +832,7 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
                     })
                 );
                 this._householdMapHydratedKey = this.resolvedRootAccountIdForTree || '';
-                void this.loadMemberRelationCountsForVisibleMembers();
+                void this.loadInitialMapCounts();
             } else {
                 this.applyRefreshedHouseholdTreeData(data);
                 await this.reloadOpenLazyMapData();
@@ -883,6 +897,41 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
                 return;
             }
 
+            if (this.isEntityCentricMap) {
+                await this.loadEntityRelationCountsForEntityMap();
+
+                let pendingNodes = collectLazyExpandableEntityAccountNodes(baseTree).filter(
+                    ({ accountId }) =>
+                        this.entityRelationCountByAccountId[accountId] !== 0 &&
+                        !this.nestedEntityRelationsByAccountId[accountId]
+                );
+
+                while (pendingNodes.length > 0) {
+                    await Promise.all(
+                        pendingNodes.map(({ accountId, parentAccountId }) =>
+                            this.loadEntityRelationsForAccountId(accountId, parentAccountId)
+                        )
+                    );
+
+                    pendingNodes = collectLazyExpandableEntityAccountNodes(
+                        this.baseMapTree || baseTree
+                    ).filter(
+                        ({ accountId }) =>
+                            this.entityRelationCountByAccountId[accountId] !== 0 &&
+                            !this.nestedEntityRelationsByAccountId[accountId]
+                    );
+                }
+
+                const nextOpenState = {};
+                collectNodeIds(this.baseMapTree || baseTree).forEach((nodeId) => {
+                    nextOpenState[nodeId] = true;
+                });
+                this.openState = nextOpenState;
+                this.expandAllActive = true;
+                this.scheduleWireDraw();
+                return;
+            }
+
             if (!this.treeData) {
                 return;
             }
@@ -903,6 +952,8 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
                 nestedMembersByAccountId: this.nestedMembersByAccountId,
                 nestedMemberRelationsByAccountId: this.nestedMemberRelationsByAccountId,
                 nestedMemberRelationCountByAccountId: this.memberRelationCountByAccountId,
+                nestedEntityRelationsByAccountId: this.nestedEntityRelationsByAccountId,
+                entityRelationCountByAccountId: this.entityRelationCountByAccountId,
                 memberRelationshipRecordTypes: this.memberRelationshipRecordTypes,
                 loadedGroupIds: this.loadedGroupIds
             });
@@ -943,6 +994,8 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
                 nestedMembersByAccountId: this.nestedMembersByAccountId,
                 nestedMemberRelationsByAccountId: this.nestedMemberRelationsByAccountId,
                 nestedMemberRelationCountByAccountId: this.memberRelationCountByAccountId,
+                nestedEntityRelationsByAccountId: this.nestedEntityRelationsByAccountId,
+                entityRelationCountByAccountId: this.entityRelationCountByAccountId,
                 memberRelationshipRecordTypes: this.memberRelationshipRecordTypes,
                 loadedGroupIds: this.loadedGroupIds
             });
@@ -980,7 +1033,126 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
         this.scheduleWireDraw();
     }
 
+    async loadInitialMapCounts() {
+        if (this.isEntityCentricMap) {
+            await this.loadEntityRelationCountsForEntityMap();
+            return;
+        }
+
+        await this.loadMemberRelationCountsForVisibleMembers();
+    }
+
+    async loadEntityRelationCountsForEntityMap() {
+        if (!this.isEntityCentricMap || !this.treeData?.rootAccountId) {
+            return;
+        }
+
+        const rootAccountId = this.treeData.rootAccountId;
+        const directChildren = collectEntityCentricRelatedAccountsFromTreeData(this.treeData);
+        const pendingIds = directChildren
+            .map((account) => account.accountId)
+            .filter(
+                (accountId) =>
+                    accountId && this.entityRelationCountByAccountId[accountId] === undefined
+            );
+
+        if (pendingIds.length === 0) {
+            return;
+        }
+
+        await Promise.all(
+            pendingIds.map((accountId) =>
+                this.loadEntityRelationCountForAccountId(accountId, rootAccountId)
+            )
+        );
+    }
+
+    async loadEntityRelationCountForAccountId(accountId, parentAccountId = '') {
+        if (!accountId || this.entityRelationCountByAccountId[accountId] !== undefined) {
+            return;
+        }
+
+        try {
+            const data = await getRelationshipTree({ rootAccountId: accountId });
+            const relatedAccounts = collectEntityCentricRelatedAccountsFromTreeData(
+                data,
+                parentAccountId ? [parentAccountId] : []
+            );
+
+            this.entityRelationCountByAccountId = {
+                ...this.entityRelationCountByAccountId,
+                [accountId]: relatedAccounts.length
+            };
+        } catch (error) {
+            dispatchToast(this, {
+                title: 'Could not load relationship counts',
+                message: extractApexError(
+                    error,
+                    'Unexpected error loading entity relationship counts.'
+                ),
+                variant: 'error'
+            });
+        } finally {
+            this.scheduleWireDraw();
+        }
+    }
+
+    async loadEntityRelationsForAccountId(accountId, parentAccountId = '') {
+        if (!accountId) {
+            return;
+        }
+
+        if (this.nestedEntityRelationsByAccountId[accountId]) {
+            return;
+        }
+
+        if (this._pendingEntityRelationAccountIds.has(accountId)) {
+            return;
+        }
+
+        this._pendingEntityRelationAccountIds.add(accountId);
+
+        try {
+            const data = await getRelationshipTree({ rootAccountId: accountId });
+            const relatedAccounts = collectEntityCentricRelatedAccountsFromTreeData(
+                data,
+                parentAccountId ? [parentAccountId] : []
+            );
+
+            this.nestedEntityRelationsByAccountId = {
+                ...this.nestedEntityRelationsByAccountId,
+                [accountId]: relatedAccounts
+            };
+            this.entityRelationCountByAccountId = {
+                ...this.entityRelationCountByAccountId,
+                [accountId]: relatedAccounts.length
+            };
+
+            await Promise.all(
+                relatedAccounts.map((relatedAccount) =>
+                    this.loadEntityRelationCountForAccountId(
+                        relatedAccount.accountId,
+                        accountId
+                    )
+                )
+            );
+        } catch (error) {
+            dispatchToast(this, {
+                title: 'Could not load relationships',
+                message: extractApexError(error, 'Unexpected error loading account relationships.'),
+                variant: 'error'
+            });
+        } finally {
+            this._pendingEntityRelationAccountIds.delete(accountId);
+            this.scheduleWireDraw();
+        }
+    }
+
     async loadMemberRelationCountsForVisibleMembers() {
+        if (this.isEntityCentricMap) {
+            return;
+        }
+
         const baseTree = this.baseMapTree;
         if (!baseTree) {
             return;
@@ -1379,10 +1551,23 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
                 };
                 await this.loadMemberRelationCountsForVisibleMembers();
             } else if (
+                node?.isEntityCentricRelatedAccount &&
+                node?.isLazyExpandable &&
+                node?.accountId
+            ) {
+                const cachedCount = this.entityRelationCountByAccountId[node.accountId];
+                if (cachedCount === undefined || cachedCount !== 0) {
+                    await this.loadEntityRelationsForAccountId(
+                        node.accountId,
+                        node.parentAccountId || this.treeData?.rootAccountId || ''
+                    );
+                }
+            } else if (
                 node?.nodeType === MAP_NODE_TYPE.ACCOUNT &&
                 node?.showManageMemberRelationships &&
                 node?.isLazyExpandable &&
-                node?.accountId
+                node?.accountId &&
+                !node?.isEntityCentricRelatedAccount
             ) {
                 const cachedCount = this.memberRelationCountByAccountId[node.accountId];
                 if (cachedCount === undefined || cachedCount !== 0) {
@@ -1391,7 +1576,8 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
             } else if (
                 node?.nodeType === MAP_NODE_TYPE.ACCOUNT &&
                 node?.isLazyExpandable &&
-                node?.accountId
+                node?.accountId &&
+                !node?.isEntityCentricRelatedAccount
             ) {
                 await this.loadNestedMembersForAccountId(node.accountId);
             } else if (

@@ -245,7 +245,7 @@ export const isHouseholdMembershipPersonAccount = (account = {}) => {
 };
 
 export const isHouseholdMapClientAccount = (account = {}) => {
-  return isClientAccount(account) || isHouseholdMembershipPersonAccount(account);
+  return isClientAccount(account);
 };
 
 export const isLeadProspectAccount = (account = {}) => {

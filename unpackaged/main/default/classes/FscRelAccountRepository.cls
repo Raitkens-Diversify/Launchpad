@@ -385,13 +385,7 @@ public with sharing class FscRelAccountRepository {
     List<Account> clientAccounts = new List<Account>();
 
     for (Account account : selectMemberAccountsFromHouseholdMembership(householdId)) {
-      if (
-        FscRelClientAccountUtils.isClientAccount(account) ||
-        (
-          FscRelAccountRepository.isPersonAccountRecord(account) &&
-          !FscRelClientAccountUtils.isLeadProspectAccount(account)
-        )
-      ) {
+      if (FscRelClientAccountUtils.isClientAccount(account)) {
         clientAccounts.add(account);
       }
     }

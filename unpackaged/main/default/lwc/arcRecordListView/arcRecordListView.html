@@ -1,0 +1,631 @@
+<template lwc:render-mode="light">
+  <div class="arc-record-list-view">
+    <template lwc:if={hasOpenPopover}>
+      <div
+        class="arc-record-list-view__popover-backdrop"
+        role="presentation"
+        onclick={handleBackdropClick}
+      ></div>
+    </template>
+
+    <!-- Page Header (Figma 505:67786): title, tagline, primary action, saved-view tabs -->
+    <header class={pageHeaderClass}>
+      <div class="arc-record-list-view__page-header-row">
+        <h1 class="arc-record-list-view__title">{headingTitle}</h1>
+        <template lwc:if={hasNewRecordAction}>
+          <button
+            class="arc-record-list-view__button arc-record-list-view__button--brand"
+            type="button"
+            onclick={handleNewRecord}
+          >
+            <span
+              class="arc-record-list-view__icon arc-record-list-view__icon--plus"
+              aria-hidden="true"
+            ></span>
+            <span>{headingActionLabel}</span>
+          </button>
+        </template>
+      </div>
+
+      <template lwc:if={hasSubtitle}>
+        <p class="arc-record-list-view__tagline">{headingSubtitle}</p>
+      </template>
+
+      <template lwc:if={hasViewTabs}>
+        <div
+          class="arc-record-list-view__tabs"
+          role="tablist"
+          aria-label="Saved views"
+          onkeydown={handleTabKeyDown}
+        >
+          <template for:each={visibleTabs} for:item="tab">
+            <button
+              key={tab.value}
+              class={tab.className}
+              type="button"
+              role="tab"
+              aria-selected={tab.isActive}
+              tabindex={tab.tabIndex}
+              data-value={tab.value}
+              onclick={handleTabClick}
+            >
+              {tab.label}
+            </button>
+          </template>
+
+          <template lwc:if={hasOverflowTabs}>
+            <div class="arc-record-list-view__tab-more">
+              <button
+                class="arc-record-list-view__tab arc-record-list-view__tab--more"
+                type="button"
+                data-popover="moreTabs"
+                aria-haspopup="menu"
+                aria-expanded={showMoreTabsMenu}
+                aria-label="More saved views"
+                onclick={handleTogglePopover}
+              >
+                <span>More</span>
+                <span
+                  class="arc-record-list-view__icon arc-record-list-view__icon--caret"
+                  aria-hidden="true"
+                ></span>
+              </button>
+              <template lwc:if={showMoreTabsMenu}>
+                <div
+                  class="arc-record-list-view__menu arc-record-list-view__menu--tabs"
+                  role="menu"
+                  aria-label="More saved views"
+                >
+                  <template for:each={overflowTabs} for:item="tab">
+                    <button
+                      key={tab.value}
+                      class="arc-record-list-view__menu-item"
+                      type="button"
+                      role="menuitem"
+                      data-value={tab.value}
+                      onclick={handleTabClick}
+                    >
+                      {tab.label}
+                    </button>
+                  </template>
+                </div>
+              </template>
+            </div>
+          </template>
+
+          <span class="arc-record-list-view__tab-spacer" aria-hidden="true"></span>
+        </div>
+      </template>
+    </header>
+
+    <div class="arc-record-list-view__content">
+      <!-- Actions - Widget Customization (Figma 505:67788) -->
+      <div class="arc-record-list-view__actions">
+        <div
+          class="arc-record-list-view__segmented"
+          role="group"
+          aria-label="View mode"
+        >
+          <button
+            class={tableSegmentClass}
+            type="button"
+            data-mode="table"
+            aria-pressed={isTableView}
+            onclick={handleViewModeChange}
+          >
+            <span
+              class="arc-record-list-view__icon arc-record-list-view__icon--sm arc-record-list-view__icon--table"
+              aria-hidden="true"
+            ></span>
+            <span>Table</span>
+          </button>
+          <button
+            class={cardsSegmentClass}
+            type="button"
+            data-mode="cards"
+            aria-pressed={isCardsView}
+            onclick={handleViewModeChange}
+          >
+            <span
+              class="arc-record-list-view__icon arc-record-list-view__icon--sm arc-record-list-view__icon--cards"
+              aria-hidden="true"
+            ></span>
+            <span>Cards</span>
+          </button>
+          <button
+            class={chartSegmentClass}
+            type="button"
+            data-mode="chart"
+            aria-pressed={isChartView}
+            onclick={handleViewModeChange}
+          >
+            <span
+              class="arc-record-list-view__icon arc-record-list-view__icon--sm arc-record-list-view__icon--chart"
+              aria-hidden="true"
+            ></span>
+            <span>Chart</span>
+          </button>
+        </div>
+
+        <div class="arc-record-list-view__actions-right">
+          <label class="arc-record-list-view__search">
+            <span class="arc-record-list-view__sr-only">Search {headingTitle}</span>
+            <span
+              class="arc-record-list-view__icon arc-record-list-view__search-icon arc-record-list-view__icon--search"
+              aria-hidden="true"
+            ></span>
+            <input
+              class="arc-record-list-view__search-input"
+              type="search"
+              placeholder="Search…"
+              oninput={handleSearchInput}
+            />
+          </label>
+
+          <!-- Group / Dropdown (Figma 532:39348) -->
+          <div class="arc-record-list-view__popover-root">
+            <button
+              class={groupButtonClass}
+              type="button"
+              data-popover="group"
+              aria-haspopup="listbox"
+              aria-expanded={showGroupMenu}
+              onclick={handleTogglePopover}
+            >
+              <span
+                class="arc-record-list-view__icon arc-record-list-view__icon--group"
+                aria-hidden="true"
+              ></span>
+              <span>{groupButtonLabel}</span>
+            </button>
+            <template lwc:if={showGroupMenu}>
+              <div
+                class="arc-record-list-view__menu"
+                role="listbox"
+                aria-label="Group by field"
+              >
+                <div class="arc-record-list-view__menu-search">
+                  <span
+                    class="arc-record-list-view__icon arc-record-list-view__search-icon arc-record-list-view__icon--search"
+                    aria-hidden="true"
+                  ></span>
+                  <input
+                    class="arc-record-list-view__search-input"
+                    type="search"
+                    placeholder="Search…"
+                    aria-label="Search fields"
+                    value={fieldMenuSearch}
+                    oninput={handleFieldMenuSearch}
+                  />
+                </div>
+                <div class="arc-record-list-view__menu-list">
+                  <template lwc:if={hasFieldMenuOptions}>
+                    <template for:each={fieldMenuOptions} for:item="option">
+                      <button
+                        key={option.key}
+                        class="arc-record-list-view__menu-item"
+                        type="button"
+                        role="option"
+                        data-value={option.value}
+                        aria-selected={option.isSelected}
+                        onclick={handleGroupFieldSelect}
+                      >
+                        <span
+                          class={option.checkClass}
+                          aria-hidden="true"
+                        ></span>
+                        <span>{option.label}</span>
+                      </button>
+                    </template>
+                  </template>
+                  <template lwc:else>
+                    <p class="arc-record-list-view__menu-empty">No matching fields.</p>
+                  </template>
+                  <template lwc:if={groupFieldApiName}>
+                    <button
+                      class="arc-record-list-view__menu-item arc-record-list-view__menu-item--muted"
+                      type="button"
+                      onclick={handleClearGroup}
+                    >
+                      Clear grouping
+                    </button>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <!-- Filters / Dropdown (Figma 622:36631) -->
+          <div class="arc-record-list-view__popover-root">
+            <button
+              class="arc-record-list-view__button arc-record-list-view__button--neutral"
+              type="button"
+              data-popover="filter"
+              aria-haspopup="listbox"
+              aria-expanded={showFilterMenu}
+              onclick={handleTogglePopover}
+            >
+              <span
+                class="arc-record-list-view__icon arc-record-list-view__icon--filter"
+                aria-hidden="true"
+              ></span>
+              <span>Filter</span>
+            </button>
+            <template lwc:if={showFilterMenu}>
+              <div
+                class="arc-record-list-view__menu"
+                role="listbox"
+                aria-label="Add filter field"
+              >
+                <div class="arc-record-list-view__menu-search">
+                  <span
+                    class="arc-record-list-view__icon arc-record-list-view__search-icon arc-record-list-view__icon--search"
+                    aria-hidden="true"
+                  ></span>
+                  <input
+                    class="arc-record-list-view__search-input"
+                    type="search"
+                    placeholder="Search…"
+                    aria-label="Search fields"
+                    value={fieldMenuSearch}
+                    oninput={handleFieldMenuSearch}
+                  />
+                </div>
+                <div class="arc-record-list-view__menu-list">
+                  <template lwc:if={hasFieldMenuOptions}>
+                    <template for:each={fieldMenuOptions} for:item="option">
+                      <button
+                        key={option.key}
+                        class="arc-record-list-view__menu-item"
+                        type="button"
+                        role="option"
+                        data-value={option.value}
+                        aria-selected={option.isSelected}
+                        onclick={handleFilterFieldSelect}
+                      >
+                        <span
+                          class={option.checkClass}
+                          aria-hidden="true"
+                        ></span>
+                        <span>{option.label}</span>
+                      </button>
+                    </template>
+                  </template>
+                  <template lwc:else>
+                    <p class="arc-record-list-view__menu-empty">No matching fields.</p>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <!-- Save View: modal for a stock view, split menu for one of ours -->
+          <template lwc:if={hasUnsavedViewChanges}>
+            <div class="arc-record-list-view__popover-root">
+              <button
+                class="arc-record-list-view__button arc-record-list-view__button--outline"
+                type="button"
+                aria-haspopup="menu"
+                aria-expanded={showSaveViewMenu}
+                disabled={isSavingView}
+                onclick={handleSaveViewClick}
+              >
+                Save View
+              </button>
+              <template lwc:if={showSaveViewMenu}>
+                <div
+                  class="arc-record-list-view__menu arc-record-list-view__menu--save"
+                  role="menu"
+                  aria-label="Save view options"
+                >
+                  <button
+                    class="arc-record-list-view__menu-item"
+                    type="button"
+                    role="menuitem"
+                    onclick={handleOverwriteView}
+                  >
+                    <span
+                      class="arc-record-list-view__icon arc-record-list-view__icon--bookmark"
+                      aria-hidden="true"
+                    ></span>
+                    <span>Overwrite This View</span>
+                  </button>
+                  <button
+                    class="arc-record-list-view__menu-item"
+                    type="button"
+                    role="menuitem"
+                    onclick={openSaveViewModal}
+                  >
+                    <span
+                      class="arc-record-list-view__icon arc-record-list-view__icon--plus"
+                      aria-hidden="true"
+                    ></span>
+                    <span>Save as New View</span>
+                  </button>
+                </div>
+              </template>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- Filter chips + Clear Filters (Figma 532:42759) -->
+      <template lwc:if={hasActiveFilters}>
+        <div class="arc-record-list-view__chips">
+          <template for:each={filterChips} for:item="chip">
+            <div key={chip.key} class="arc-record-list-view__popover-root">
+              <button
+                class="arc-record-list-view__chip"
+                type="button"
+                data-key={chip.key}
+                aria-haspopup="dialog"
+                aria-expanded={chip.isOpen}
+                onclick={handleChipClick}
+              >
+                <span>{chip.chipLabel}</span>
+                <span
+                  class="arc-record-list-view__icon arc-record-list-view__icon--caret"
+                  aria-hidden="true"
+                ></span>
+              </button>
+              <template lwc:if={chip.isOpen}>
+                <div
+                  class="arc-record-list-view__menu arc-record-list-view__menu--chip"
+                  role="dialog"
+                  aria-label={chip.label}
+                >
+                  <p class="arc-record-list-view__chip-title">{chip.label}</p>
+                  <div class="arc-record-list-view__chip-row">
+                    <label class="arc-record-list-view__chip-control">
+                      <span class="arc-record-list-view__sr-only"> Operator </span>
+                      <select
+                        class="arc-record-list-view__select"
+                        data-key={chip.key}
+                        onchange={handleChipOperatorChange}
+                      >
+                        <template
+                          for:each={chip.operatorOptions}
+                          for:item="opt"
+                        >
+                          <option
+                            key={opt.value}
+                            value={opt.value}
+                            selected={opt.selected}
+                          >
+                            {opt.label}
+                          </option>
+                        </template>
+                      </select>
+                    </label>
+                    <label
+                      class="arc-record-list-view__chip-control arc-record-list-view__chip-control--value"
+                    >
+                      <span class="arc-record-list-view__sr-only"> Value </span>
+                      <input
+                        class="arc-record-list-view__input"
+                        type="text"
+                        placeholder="Type value…"
+                        data-key={chip.key}
+                        value={chip.operandValue}
+                        oninput={handleChipValueChange}
+                      />
+                      <template lwc:if={chip.hasValue}>
+                        <button
+                          class="arc-record-list-view__chip-clear"
+                          type="button"
+                          aria-label="Clear value"
+                          data-key={chip.key}
+                          onclick={handleChipValueClear}
+                        >
+                          <span
+                            class="arc-record-list-view__icon arc-record-list-view__icon--close"
+                            aria-hidden="true"
+                          ></span>
+                        </button>
+                      </template>
+                    </label>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </template>
+
+          <button
+            class="arc-record-list-view__link-button"
+            type="button"
+            onclick={handleClearFilters}
+          >
+            Clear Filters
+          </button>
+        </div>
+      </template>
+
+      <template lwc:if={hasError}>
+        <div class="arc-record-list-view__error" role="alert">{errorMessage}</div>
+      </template>
+
+      <template lwc:if={hasColumns}>
+        <template lwc:if={isLoading}>
+          <div class="arc-record-list-view__status">
+            <c-arc-loading-spinner
+              alternative-text="Loading"
+              size="medium"
+            ></c-arc-loading-spinner>
+          </div>
+        </template>
+        <template lwc:elseif={isTableView}>
+          <div class="arc-record-list-view__table-wrap">
+            <c-arc-data-table
+              aria-label={title}
+              key-field="id"
+              columns={tableColumns}
+              data={visibleRows}
+              group-field={groupFieldApiName}
+              density="comfortable"
+              max-page-buttons="5"
+              row-actions={rowActions}
+              onrowaction={handleRowAction}
+              enable-row-navigation
+              enable-column-resize
+              show-column-settings
+              column-settings-icon-url={columnSettingsIconUrl}
+              avatar-icon-url={avatarIconUrl}
+              placeholder="-"
+              empty-message={tableEmptyMessage}
+              enable-pagination={enableTablePagination}
+              page-size={pageSizeNumber}
+              page-size-options={tablePageSizeOptions}
+              default-link-object-api-name={objectApiName}
+              link-object-api-name-field="objectApiName"
+              link-query-param-object-api-names={linkQueryParamObjectApiNames}
+              oncolumnsettings={openColumnsMenu}
+            ></c-arc-data-table>
+
+            <!-- Table Columns / Dropdown (Figma 532:39223) -->
+            <template lwc:if={showColumnsMenu}>
+              <div
+                class="arc-record-list-view__columns-menu"
+                role="dialog"
+                aria-label="Table Columns"
+              >
+                <p class="arc-record-list-view__columns-title">Table Columns</p>
+                <div class="arc-record-list-view__columns-search-row">
+                  <label class="arc-record-list-view__menu-search">
+                    <span class="arc-record-list-view__sr-only">Search columns</span>
+                    <span
+                      class="arc-record-list-view__icon arc-record-list-view__icon--search arc-record-list-view__search-icon"
+                      aria-hidden="true"
+                    ></span>
+                    <input
+                      class="arc-record-list-view__search-input"
+                      type="search"
+                      placeholder="Search…"
+                      value={columnMenuSearch}
+                      oninput={handleColumnMenuSearch}
+                    />
+                  </label>
+                </div>
+
+                <template lwc:if={hasColumnMenuItems}>
+                  <template for:each={columnMenuItems} for:item="item">
+                    <button
+                      key={item.value}
+                      class="arc-record-list-view__columns-row"
+                      type="button"
+                      role="switch"
+                      aria-checked={item.checked}
+                      disabled={item.isLocked}
+                      data-field={item.value}
+                      onclick={handleColumnToggle}
+                    >
+                      <span class="arc-record-list-view__columns-label"
+                        >{item.label}</span
+                      >
+                      <span class={item.trackClass}>
+                        <span
+                          class="arc-record-list-view__toggle-glyph"
+                          aria-hidden="true"
+                        ></span>
+                        <span
+                          class="arc-record-list-view__toggle-thumb"
+                          aria-hidden="true"
+                        ></span>
+                      </span>
+                    </button>
+                  </template>
+                </template>
+                <template lwc:else>
+                  <p class="arc-record-list-view__menu-empty">No columns match.</p>
+                </template>
+              </div>
+            </template>
+          </div>
+        </template>
+        <template lwc:elseif={isCardsView}>
+          <div class="arc-record-list-view__cards">
+            <template for:each={cardRows} for:item="card">
+              <article key={card.key} class="arc-record-list-view__card">
+                <h3 class="arc-record-list-view__card-title">{card.title}</h3>
+                <dl class="arc-record-list-view__card-fields">
+                  <template for:each={card.fields} for:item="field">
+                    <div key={field.key} class="arc-record-list-view__card-field">
+                      <dt>{field.label}</dt>
+                      <dd>{field.value}</dd>
+                    </div>
+                  </template>
+                </dl>
+              </article>
+            </template>
+          </div>
+        </template>
+        <template lwc:else>
+          <div class="arc-record-list-view__status" role="status">
+            Chart view is not configured for {title}.
+          </div>
+        </template>
+      </template>
+    </div>
+  </div>
+
+  <!-- Modal / Save View (Figma 505:59111) -->
+  <template lwc:if={showSaveViewModal}>
+    <div class="arc-record-list-view__backdrop" onclick={closeSaveViewModal}></div>
+    <div
+      class="arc-record-list-view__modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Save View"
+    >
+      <div class="arc-record-list-view__modal-header">
+        <div>
+          <h2 class="arc-record-list-view__modal-title">Save View</h2>
+          <p class="arc-record-list-view__modal-help">
+            Enter name of the view that you wish to save.
+          </p>
+        </div>
+        <button
+          class="arc-record-list-view__modal-close"
+          type="button"
+          aria-label="Close"
+          onclick={closeSaveViewModal}
+        >
+          <span
+            class="arc-record-list-view__icon arc-record-list-view__icon--close"
+            aria-hidden="true"
+          ></span>
+        </button>
+      </div>
+
+      <div class="arc-record-list-view__modal-body">
+        <input
+          class="arc-record-list-view__input"
+          type="text"
+          aria-label="View name"
+          value={saveViewName}
+          oninput={handleSaveViewNameChange}
+        />
+        <template lwc:if={saveViewError}>
+          <div class="arc-record-list-view__error" role="alert">{saveViewError}</div>
+        </template>
+      </div>
+
+      <footer class="arc-record-list-view__modal-footer">
+        <button
+          class="arc-record-list-view__button arc-record-list-view__button--outline"
+          type="button"
+          onclick={closeSaveViewModal}
+        >
+          Cancel
+        </button>
+        <button
+          class="arc-record-list-view__button arc-record-list-view__button--brand"
+          type="button"
+          disabled={isSavingView}
+          onclick={handleSaveViewConfirm}
+        >
+          Save
+        </button>
+      </footer>
+    </div>
+  </template>
+</template>

@@ -1,0 +1,1316 @@
+/* Author: Hoang Long Vu To | Date: 2026-08-11
+   Self-contained diversify table styles — no diversifyStyles static resource.
+   Forked from Vestolio's styledDataTable for ARC's arcRecordListView. */
+
+:host {
+  display: block;
+
+  --div-font-family-base:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  --div-font-scale-base: 0.8125rem;
+  --div-font-scale-sm: 0.75rem;
+  --div-font-weight-regular: 400;
+  --div-font-weight-medium: 500;
+  --div-font-weight-semibold: 600;
+  --div-font-scale-3: 1.25rem;
+  --div-font-scale-3-line-height: 1.5rem;
+  --div-font-line-height-link: 1.125rem;
+  --div-font-letter-spacing-base: 0;
+  --div-color-on-surface-2: #374151;
+  --div-color-accent-2: #0250d9;
+  --div-color-surface: #ffffff;
+  --div-color-container-2: #f3f4f6;
+  --div-color-border: #dddbda;
+  --div-color-border-2: #b6bcc5;
+  --div-color-text-primary: #2b3544;
+  --div-color-text-muted: #706e6b;
+  --div-color-text-secondary: #444444;
+  --div-color-surface-subtle: #fafaf9;
+  --div-color-gray-50: #f9fafb;
+  --div-color-selected: #1a76bb;
+  --div-color-focus: #1a76bb;
+  --div-radius-border-2: 0.5rem;
+  --div-space-1: 0.25rem;
+  --div-border-card: 1px solid #dddbda;
+  --div-shadow-card: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Card shell */
+.div-table-shell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Titles/font-scale-3 — font/family/base, weight 600, on-surface/2 */
+.div-table-title {
+  margin: 0 0 0.75rem;
+  font-family: var(--div-font-family-base);
+  font-size: var(--div-font-scale-3, 1.25rem);
+  font-weight: var(--div-font-weight-semibold, 600);
+  line-height: var(--div-font-scale-3-line-height, 1.5rem);
+  letter-spacing: var(--div-font-letter-spacing-base, 0);
+  color: var(--div-color-on-surface-2, #374151);
+}
+
+.div-table-card {
+  background: var(--div-color-surface, #ffffff);
+  border: var(--div-border-card, 1px solid #dddbda);
+  border-radius: var(--div-radius-border-2, 0.5rem);
+  box-shadow: var(--div-shadow-card, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
+  overflow: hidden;
+}
+
+.div-table-scroll {
+  overflow-x: auto;
+  /* A containing block, so absolutely-positioned descendants are clipped here
+     rather than anchoring to the list view's relative wrap and escaping. The
+     assistive-text spans lightning-icon renders sit past the last column, and
+     escaping is what pushed the page sideways under the sidebar. Nothing inside
+     the scroller relies on breaking out — the only absolute box in this sheet is
+     the pager icon, which sits below the table. */
+  position: relative;
+}
+
+.arc-data-table__empty-row:hover {
+  background: transparent;
+}
+
+.arc-data-table__empty-cell {
+  padding: 2.5rem 0.75rem;
+  text-align: center;
+  color: var(--div-color-text-muted, #706e6b);
+  font-size: var(--div-font-scale-base, 0.8125rem);
+  line-height: 1.25rem;
+}
+
+/* Table */
+.div-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--div-font-family-base);
+  font-size: var(--div-font-scale-base, 0.8125rem);
+}
+
+.div-table thead th {
+  padding: 0.625rem 0.75rem;
+  border-bottom: 1px solid var(--div-color-border-2, #b6bcc5);
+  background: var(--div-color-container-2, #f3f4f6);
+  text-align: left;
+  font-family: var(--div-font-family-base);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.125rem;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #4b5563;
+  white-space: nowrap;
+}
+
+.div-table thead th[draggable="true"] {
+  cursor: grab;
+}
+
+.div-table thead th[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+/* Visible grip so a header's draggability isn't just an invisible cursor
+   change on hover — six dots via box-shadow, no external icon asset. Sits
+   a little clear of both the cell's own left padding and the label text,
+   so it doesn't read as glued to either. */
+.div-table__drag-handle {
+  display: inline-block;
+  flex: none;
+  vertical-align: middle;
+  width: 3px;
+  height: 3px;
+  margin: 0 0.75rem 0 0.125rem;
+  border-radius: 50%;
+  background: #9ca3af;
+  box-shadow:
+    0 -5px 0 #9ca3af,
+    0 5px 0 #9ca3af,
+    5px 0 0 #9ca3af,
+    5px -5px 0 #9ca3af,
+    5px 5px 0 #9ca3af;
+  opacity: 0.5;
+  cursor: grab;
+}
+
+.div-table thead th:hover .div-table__drag-handle {
+  opacity: 0.85;
+}
+
+.div-table thead th .div-table__sort-button {
+  color: #4b5563;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.125rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.div-table thead th lightning-icon.div-table__sort-icon {
+  --slds-c-icon-color-foreground-default: #4b5563;
+}
+
+.div-table thead th.div-table__cell--numeric {
+  text-align: right;
+}
+
+.div-table tbody td {
+  padding: 0.625rem 0.75rem;
+  border-bottom: 1px solid var(--div-color-border, #dddbda);
+  color: var(--div-color-text-primary, #2b3544);
+  font-size: var(--div-font-scale-base, 0.8125rem);
+  vertical-align: top;
+  line-height: 1.25;
+}
+
+/* ---- Comfortable density -------------------------------------------------
+ * Opt-in via density="comfortable". Metrics come straight from the Figma
+ * "⚡ Data Table" spec (532:35967): 36px header cells, 64px body cells, Inter,
+ * 8px horizontal padding, #d1d5db rules. Heights are set on the cells (where
+ * `height` acts as a minimum) so wrapped content can still grow the row.
+ *
+ * Type is the one departure: the frame specifies 13/18 but that read too small
+ * on screen, so the table runs at 14/19 via --adt-font-size/--adt-line-height
+ * below. Both are values from the design system's own scale.
+ *
+ * EVERY LENGTH HERE IS px, DELIBERATELY. The LWR root font-size is 14px, not
+ * 16px, so a rem literal renders at 87.5% of the number it appears to say:
+ * 4rem measured 56px where the frame asks for 64, 0.8125rem measured 11.4px
+ * where it asks for 13, and 0.5rem measured 7px where it asks for 8. The whole
+ * table was uniformly three-quarters of a step small. Do not reintroduce rem
+ * in this block, and do not route it through the --div-* scale — those tokens
+ * are rem too (see diversifyStyles.css), which is where the drift came from.
+ */
+.div-table--comfortable {
+  /* The frame types the table in Inter; --div-font-family-base is a system
+     stack, so it is overridden here rather than app-wide. */
+  --div-font-family-base:
+    "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* One step up from the frame's 13/18 (font-scale-base) to 14/19
+     (font-scale-1) — the next rung on the design system's own type scale, not
+     an arbitrary nudge — because 13px read too small on screen. Declared once
+     here so the whole sheet can be retuned from a single pair of values; the
+     64px row and 36px header still clear a 19px line comfortably. This is the
+     one place the table deliberately departs from the frame. */
+  --adt-font-size: 14px;
+  --adt-line-height: 19px;
+
+  font-family: var(--div-font-family-base);
+  font-size: var(--adt-font-size);
+}
+
+.div-table--comfortable thead th,
+.div-table--comfortable thead th .div-table__sort-button {
+  font-size: var(--adt-font-size);
+  font-weight: 600;
+  line-height: var(--adt-line-height);
+  color: #4b5563;
+}
+
+.div-table--comfortable thead th {
+  height: 36px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--div-color-border-1, #d1d5db);
+  background: #f3f4f6;
+}
+
+.div-table--comfortable tbody td {
+  height: 64px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--div-color-border-1, #d1d5db);
+  /* Weight is stated because the site's body copy inherits 300 down to here,
+     which rendered the cells lighter than the frame's Regular. */
+  font-size: var(--adt-font-size);
+  font-weight: 400;
+  line-height: var(--adt-line-height);
+  color: #5c5c5c;
+  vertical-align: middle;
+}
+
+/* Figma's cell link colour and size, distinct from the default table link. */
+.div-table--comfortable tbody td .arc-data-table__link-cell a,
+.div-table--comfortable tbody td .div-table__link {
+  font-size: var(--adt-font-size);
+  line-height: var(--adt-line-height);
+  color: var(--div-color-blue-800, #0250d9);
+}
+
+/*
+ * Figma's table sits flat on the page — a hairline border and 8px radius, with
+ * no elevation. The default card's shadow makes it read as a detached panel.
+ */
+.div-table--comfortable-card {
+  /* Redefined on the card, not just set as font-family on the footer: the pager
+     children each re-declare font-family: var(--div-font-family-base), so the
+     token has to change or they pull the system stack back in. */
+  --div-font-family-base:
+    "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  border-color: var(--div-color-border-1, #d1d5db);
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+/* Figma's cell content is a centred 8px-gap row, not top-aligned. */
+.div-table--comfortable .arc-data-table__link-cell {
+  align-items: center;
+  gap: 8px;
+}
+
+/*
+ * Money columns (Figma "⚡ Cell" 532:43034): 13px/18px weight 700, #5c5c5c,
+ * right-aligned. Plain number columns get the same emphasis.
+ */
+.div-table--comfortable .div-table__cell--currency,
+.div-table--comfortable thead th.div-table__cell--currency {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.div-table--comfortable tbody td.div-table__cell--strong {
+  font-weight: 700;
+  color: #5c5c5c;
+}
+
+/* The header arrow carries the same weight as its label, not a faded hint. */
+.div-table--comfortable thead th .div-table__sort-icon {
+  opacity: 1;
+}
+
+/* Row actions cell (Figma "⚡ Row actions menu cell"): 36px, centred kebab.
+   Its header (Figma Column 17) is the same 36px, not the default 48. The
+   padding is zeroed and the box border-boxed because a table cell's `width` is
+   a content-box minimum — with the block's 8px sides still applied the column
+   settled at 44px. */
+.div-table--comfortable tbody td.arc-data-table__cell--actions,
+.div-table--comfortable thead th.arc-data-table__header--actions {
+  box-sizing: border-box;
+  width: 36px;
+  /* min-width as well as width: this table overflows its container, so the auto
+     layout is already at min-content and treats `width` as a suggestion it can
+     undercut — the column sat at the kebab's own 28px without it. Padding is
+     zeroed because the block's 8px sides would otherwise push the column to 44. */
+  min-width: 36px;
+  padding: 0;
+  text-align: center;
+}
+
+/* Avatar: 24px circle, 12px glyph (Figma "⚡ Avatar"). */
+.div-table--comfortable .arc-data-table__avatar {
+  width: 24px;
+  height: 24px;
+  background: #066afe;
+}
+
+.div-table--comfortable .arc-data-table__avatar-glyph {
+  width: 12px;
+  height: 12px;
+}
+
+/* Badge (Figma "Badge" 532:36034): a 24px-tall box, so the height is stated
+   rather than accumulated out of padding + border, which overshot by 3px. */
+.div-table--comfortable .div-table-badge {
+  height: 24px;
+  gap: 4px;
+  padding: 0 8px;
+  border-radius: 8px;
+  /* Carried up a step alongside the cell text so the pills don't shrink away
+     against it; 17px still clears the 24px box, so the height is unaffected. */
+  font-size: 13px;
+  line-height: 17px;
+}
+
+.div-table--comfortable .div-table-badge--empty {
+  height: auto;
+  padding: 0;
+}
+
+/* Group band (Figma "…Group Added" 532:39399): a header-cell-sized row. */
+.div-table--comfortable
+  .arc-data-table__group-row
+  > .arc-data-table__group-cell {
+  height: 36px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--div-color-border-1, #d1d5db);
+  font-size: var(--adt-font-size);
+  line-height: var(--adt-line-height);
+}
+
+.div-table--comfortable .arc-data-table__column-settings-glyph {
+  display: block;
+  width: 0.875rem;
+  height: 0.875rem;
+  background-color: currentColor;
+  -webkit-mask-image: var(--adt-icon-columns);
+  mask-image: var(--adt-icon-columns);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.arc-data-table__avatar-glyph {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.div-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.div-table tbody tr:hover {
+  background: rgba(243, 243, 243, 0.35);
+}
+
+.div-table tbody tr.arc-data-table__work-detail-section:hover,
+.div-table tbody tr.arc-data-table__work-detail-group-row:hover,
+.div-table tbody tr.arc-data-table__work-detail-task-row:hover,
+.div-table tbody tr.arc-data-table__work-detail-empty-row:hover {
+  background: transparent;
+}
+
+.div-table__row--expanded:hover {
+  background: rgba(243, 243, 243, 0.5);
+}
+
+.div-table__row--clickable {
+  cursor: pointer;
+}
+
+/* Matches the sidebar nav's own hover highlight (--div-color-sidebar-hover-bg
+   in diversifyStyles.css) so row and nav hover read as the same affordance.
+   Needs to beat the plain `.div-table tbody tr:hover` gray on specificity. */
+.div-table tbody tr.div-table__row--clickable:hover {
+  background: var(--div-color-sidebar-hover-bg, #e2f8ff);
+}
+
+.div-table__row--clickable:focus-visible {
+  outline: 2px solid var(--div-color-selected, #1a76bb);
+  outline-offset: -2px;
+}
+
+.div-table__row--expanded {
+  background: rgba(243, 243, 243, 0.5);
+}
+
+.div-table__row--expanded td {
+  border-bottom: none;
+}
+
+.arc-data-table__link-cell {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.arc-data-table__link-cell .div-table__link {
+  min-width: 0;
+}
+
+/* Round avatar preceding the primary link (Figma "Save & Preview View" rows). */
+.arc-data-table__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background: var(--div-color-blue-700, #1a76bb);
+  color: #ffffff;
+  --slds-c-icon-color-foreground-default: #ffffff;
+  --slds-c-icon-color-foreground: #ffffff;
+}
+
+/* Phosphor glyph inside the avatar, masked so it takes the circle's colour. */
+.arc-data-table__avatar-glyph {
+  width: 0.75rem;
+  height: 0.75rem;
+  background-color: currentColor;
+  -webkit-mask-image: var(--adt-icon-avatar);
+  mask-image: var(--adt-icon-avatar);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+/* Full-width band naming the group a run of rows belongs to. */
+.arc-data-table__group-row > .arc-data-table__group-cell {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--div-color-border, #dddbda);
+  background: var(--div-color-container-2, #f3f4f6);
+  color: var(--div-color-text-primary, #2b3544);
+  text-align: left;
+  font-family: var(--div-font-family-base);
+  font-size: var(--div-font-scale-base, 0.8125rem);
+  font-weight: 600;
+  line-height: 1.125rem;
+}
+
+.arc-data-table__column-settings {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.125rem;
+  border: 0;
+  border-radius: 0.25rem;
+  background: transparent;
+  cursor: pointer;
+  --slds-c-icon-color-foreground-default: #4b5563;
+}
+
+.arc-data-table__column-settings:hover,
+.arc-data-table__column-settings:focus-visible {
+  background: var(--div-color-neutral-200, #e5e7eb);
+}
+
+.arc-data-table__cell--expand {
+  width: 2rem;
+  padding-right: 0.25rem;
+  color: #4b5563;
+}
+
+.arc-data-table__expand-icon {
+  --slds-c-icon-color-foreground-default: #4b5563;
+}
+
+.arc-data-table__expand-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.arc-data-table__expand-button:focus-visible {
+  outline: 2px solid var(--div-color-selected, #1a76bb);
+  outline-offset: 1px;
+}
+
+.arc-data-table__expand-row td {
+  padding: 0;
+  background: #ffffff;
+  border-bottom: 1px solid var(--div-color-border, #dddbda);
+}
+
+.arc-data-table__expand-row:hover {
+  background: transparent;
+}
+
+.arc-data-table__work-detail-section:hover {
+  background: transparent;
+}
+
+.arc-data-table__work-detail-section-cell {
+  padding: 0;
+  border-bottom: 1px solid var(--div-color-border, #dddbda);
+  background: #ffffff;
+}
+
+.arc-data-table__work-detail-panel {
+  background: #ffffff;
+}
+
+.arc-data-table__work-detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: var(--div-font-family-base);
+  font-size: var(--div-font-scale-base, 0.8125rem);
+}
+
+.arc-data-table__work-detail-table thead th {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--div-color-border-2, #b6bcc5);
+  background: #ffffff;
+  color: #4b5563;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.125rem;
+  white-space: nowrap;
+}
+
+.arc-data-table__work-detail-table tbody td {
+  padding: 0.625rem 0.75rem;
+  border-bottom: 1px solid var(--div-color-border, #dddbda);
+  color: #2b3544;
+  font-size: 0.8125rem;
+  vertical-align: middle;
+}
+
+.arc-data-table__work-detail-table
+  tbody
+  tr.arc-data-table__work-detail-task-row
+  td,
+.arc-data-table__work-detail-table
+  tbody
+  tr.arc-data-table__work-detail-empty-row
+  td {
+  background: #ffffff;
+}
+
+.arc-data-table__work-detail-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.arc-data-table__work-detail-col-tasks {
+  width: 28%;
+}
+
+.arc-data-table__work-detail-col-actions {
+  width: 3rem;
+}
+
+.arc-data-table__work-detail-group-cell {
+  padding: 0;
+  border-bottom: none;
+  background: #e5e7eb;
+}
+
+.arc-data-table__work-detail-table
+  tbody
+  td.arc-data-table__work-detail-group-cell {
+  padding: 0;
+  border-bottom: none;
+  background: #e5e7eb;
+}
+
+.arc-data-table__work-detail-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.375rem 0.75rem;
+  border: 0;
+  border-radius: 0;
+  background: #e5e7eb;
+  color: #4b5563;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.125rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.arc-data-table__work-detail-group-icon {
+  --slds-c-icon-color-foreground-default: #4b5563;
+  flex: 0 0 auto;
+}
+
+.arc-data-table__work-detail-task-row:hover td {
+  background: rgba(243, 243, 243, 0.35);
+}
+
+.arc-data-table__work-detail-table
+  tbody
+  tr.arc-data-table__work-detail-group-row:hover
+  td.arc-data-table__work-detail-group-cell {
+  background: #e5e7eb;
+}
+
+.arc-data-table__work-detail-task-cell {
+  padding-left: 1.75rem;
+}
+
+.arc-data-table__work-detail-task-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.arc-data-table__work-detail-star {
+  --slds-c-icon-color-foreground-default: #0250d9;
+  flex: 0 0 auto;
+}
+
+.arc-data-table__work-detail-empty-row td {
+  color: #6b7280;
+  font-size: 0.8125rem;
+}
+
+.arc-data-table__work-detail-group-row:hover
+  td.arc-data-table__work-detail-group-cell,
+.arc-data-table__work-detail-group:hover,
+.arc-data-table__work-detail-group:focus-visible {
+  background: #e5e7eb;
+}
+
+.arc-data-table__work-detail-table .arc-data-table__cell--actions {
+  width: 3rem;
+  padding-right: 0.5rem;
+}
+
+.arc-data-table__work-detail-table
+  tbody
+  tr.arc-data-table__work-detail-task-row
+  .arc-data-table__cell--actions {
+  background: #ffffff;
+}
+
+.div-table__cell--numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.div-table__cell--muted {
+  color: var(--div-color-text-muted, #706e6b);
+  white-space: nowrap;
+}
+
+.div-table__header-label {
+  display: inline-block;
+}
+
+.div-table__sort-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--div-space-1, 0.25rem);
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.div-table__sort-button:focus-visible {
+  outline: 2px solid var(--div-color-selected, #1a76bb);
+  outline-offset: 1px;
+}
+
+.div-table__sort-icon {
+  --slds-c-icon-color-foreground-default: #4b5563;
+  opacity: 0.55;
+}
+
+.div-table__sort-icon--active {
+  --slds-c-icon-color-foreground-default: #4b5563;
+  opacity: 1;
+}
+
+.div-table__link,
+.div-table tbody td a.div-table__link {
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-family: var(--div-font-family-base);
+  font-size: var(--div-font-scale-base, 0.8125rem);
+  font-weight: var(--div-font-weight-regular, 400);
+  line-height: var(--div-font-line-height-link, 1.125rem);
+  letter-spacing: var(--div-font-letter-spacing-base, 0);
+  color: var(--div-color-accent-2, #0250d9);
+  cursor: pointer;
+  text-align: left;
+  text-decoration: none;
+  display: inline;
+}
+
+.div-table tbody td.div-table__cell--link {
+  vertical-align: middle;
+}
+
+.div-table tbody td.div-table__cell--pill {
+  vertical-align: middle;
+}
+
+.div-work-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  white-space: nowrap;
+}
+
+/* ---- Badge (Figma "Badge" 532:36034) -------------------------------------
+ * 8px radius with a 1px border — not a fully-round pill — 4px/8px padding and
+ * 12px/17px Medium text. Each tone is a triple: surface, border, and text at
+ * the same hue, mirroring the design's palette-95 / palette-80 / base-40 steps.
+ * Separate from .div-work-pill so the Work list's status pills keep their look.
+ */
+.div-table-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--div-spacing-1, 0.25rem);
+  padding: var(--div-spacing-1, 0.25rem) var(--div-spacing-2, 0.5rem);
+  border: 1px solid transparent;
+  border-radius: var(--div-radius-border-2, 0.5rem);
+  font-size: var(--div-font-scale-neg-1, 0.75rem);
+  font-weight: 500;
+  line-height: 17px;
+  white-space: nowrap;
+}
+
+/* Tone 1 is the design's own sample: orange-95 / hot-orange-80 / warning-40 */
+.div-table-badge--tone-1 {
+  background: #fff1ea;
+  border-color: #feb9a5;
+  color: #b45309;
+}
+.div-table-badge--tone-2 {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+  color: #3730a3;
+}
+.div-table-badge--tone-3 {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #15803d;
+}
+.div-table-badge--tone-4 {
+  background: #f5f3ff;
+  border-color: #ddd6fe;
+  color: #6d28d9;
+}
+.div-table-badge--tone-5 {
+  background: #f0f9ff;
+  border-color: #bae6fd;
+  color: #0369a1;
+}
+.div-table-badge--tone-6 {
+  background: #fff1f2;
+  border-color: #fecdd3;
+  color: #be185d;
+}
+.div-table-badge--tone-7 {
+  background: #f0fdfa;
+  border-color: #99f6e4;
+  color: #0f766e;
+}
+.div-table-badge--tone-8 {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #475569;
+}
+
+/* No value: plain placeholder text rather than an empty badge. */
+.div-table-badge--empty {
+  padding: 0;
+  border-color: transparent;
+  background: none;
+  font-weight: 400;
+}
+
+.div-work-pill--on-track {
+  background: rgb(224, 242, 254);
+  color: rgb(3, 105, 161);
+}
+
+.div-work-pill--completed {
+  background: rgb(220, 252, 231);
+  color: rgb(21, 128, 61);
+}
+
+.div-work-pill--not-started {
+  background: rgb(229, 231, 235);
+  color: rgb(75, 85, 99);
+}
+
+.div-work-pill--ho-submission,
+.div-work-pill--branch-pit-stop,
+.div-work-pill--ho-pit-stop {
+  background: rgb(254, 243, 199);
+  color: rgb(180, 83, 9);
+}
+
+.div-table__link:hover,
+.div-table__link:focus-visible,
+.div-table tbody td a.div-table__link:hover,
+.div-table tbody td a.div-table__link:focus-visible {
+  color: var(--div-color-accent-2, #0250d9);
+  text-decoration: underline;
+}
+
+.div-table__link:visited,
+.div-table tbody td a.div-table__link:visited {
+  color: var(--div-color-accent-2, #0250d9);
+}
+
+.div-table__link:focus-visible,
+.div-table tbody td a.div-table__link:focus-visible {
+  outline: 2px solid var(--div-color-focus, #1a76bb);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Footer + pager */
+.div-table-card__footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: stretch;
+  padding: 0;
+  border-top: 1px solid var(--div-color-border-2, #b6bcc5);
+  background: var(--div-color-surface, #ffffff);
+  font-size: var(--div-font-scale-base, 0.8125rem);
+  color: #4b5563;
+}
+
+.div-table-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+}
+
+.div-table-pager__summary {
+  font-family: var(--div-font-family-base, "Inter", sans-serif);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--div-color-on-disabled-1, #838a97);
+}
+
+.div-table-pager__view-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--div-font-family-base, "Inter", sans-serif);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 19px;
+  color: var(--div-color-accent-2, #0b2f51);
+}
+
+.div-table-pager__view-all-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  display: block;
+  background-color: currentColor;
+  -webkit-mask-image: var(--icon-url);
+  mask-image: var(--icon-url);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.div-table-pager__page-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.div-table-pager__page-size-label {
+  color: #4b5563;
+  font-family: var(--div-font-family-base);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.125rem;
+  white-space: nowrap;
+}
+
+.div-table-pager__page-size-control {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.div-table-pager__page-size-select {
+  appearance: none;
+  border: 1px solid var(--div-color-border-2, #b6bcc5);
+  border-radius: var(--div-radius-border-2, 0.5rem);
+  background: var(--div-color-surface, #ffffff);
+  color: #4b5563;
+  cursor: pointer;
+  font-family: var(--div-font-family-base);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.125rem;
+  min-height: 2rem;
+  min-width: 4rem;
+  padding: 0.3125rem 1.75rem 0.3125rem 0.625rem;
+}
+
+.div-table-pager__page-size-select:focus-visible {
+  outline: 2px solid var(--div-color-focus, #1a76bb);
+  outline-offset: 1px;
+}
+
+.div-table-pager__page-size-icon {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  --slds-c-icon-color-foreground-default: #4b5563;
+  pointer-events: none;
+}
+
+.div-table-pager__nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.div-table-pager__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--div-color-border-2, #b6bcc5);
+  border-radius: var(--div-radius-border-2, 0.5rem);
+  background: var(--div-color-surface, #ffffff);
+  color: #4b5563;
+  cursor: pointer;
+  font-family: var(--div-font-family-base);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.125rem;
+  min-height: 2rem;
+  min-width: 2rem;
+  padding: 0 0.5rem;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.div-table-pager__btn lightning-icon {
+  --slds-c-icon-color-foreground-default: #4b5563;
+}
+
+.div-table-pager__btn--icon {
+  padding: 0;
+  width: 2rem;
+}
+
+.div-table-pager__btn:hover:not(:disabled):not(.div-table-pager__btn--current) {
+  background: var(--div-color-gray-50, #f9fafb);
+}
+
+.div-table-pager__btn:focus-visible {
+  outline: 2px solid var(--div-color-focus, #1a76bb);
+  outline-offset: 1px;
+}
+
+.div-table-pager__btn:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.div-table-pager__btn--current {
+  background: var(--div-color-container-2, #f3f4f6);
+  color: #4b5563;
+}
+
+.div-table-pager__gap {
+  color: #4b5563;
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  padding: 0 0.125rem;
+}
+
+/* ---- Comfortable pager (Figma "_TableCaption" 532:36556) ------------------
+ * A 68px band: 16px padding around a 36px control row. Page buttons are 36px
+ * squares with an 8px radius and 8px gaps, typed 14px/19px in accent-2, and
+ * the current page carries the #f3f4f6 fill. Scoped to the comfortable card so
+ * the work/related tables keep their existing 28px pager.
+ */
+.div-table--comfortable-card .div-table-card__footer {
+  border-top: 1px solid var(--div-color-border-1, #d1d5db);
+}
+
+.div-table--comfortable-card .div-table-pager {
+  gap: 16px;
+  padding: 16px;
+}
+
+.div-table--comfortable-card .div-table-pager__page-size {
+  gap: 8px;
+}
+
+.div-table--comfortable-card .div-table-pager__page-size-label {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 19px;
+  color: #374151;
+}
+
+.div-table--comfortable-card .div-table-pager__page-size-select {
+  min-width: 57px;
+  min-height: 36px;
+  padding: 0 28px 0 8px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 19px;
+}
+
+.div-table--comfortable-card .div-table-pager__nav {
+  gap: 8px;
+}
+
+.div-table--comfortable-card .div-table-pager__btn {
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0 8px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 19px;
+  color: var(--div-color-blue-950, #0b2f51);
+}
+
+.div-table--comfortable-card .div-table-pager__btn lightning-icon {
+  --slds-c-icon-color-foreground-default: var(--div-color-blue-950, #0b2f51);
+}
+
+.div-table--comfortable-card .div-table-pager__btn--icon {
+  width: 36px;
+  padding: 0;
+}
+
+.div-table--comfortable-card .div-table-pager__btn--current {
+  background: #f3f4f6;
+  color: var(--div-color-blue-950, #0b2f51);
+}
+
+.div-table--comfortable-card .div-table-pager__gap {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 19px;
+  color: var(--div-color-blue-950, #0b2f51);
+}
+
+/* Row actions column */
+.arc-data-table__header--actions {
+  width: 48px;
+}
+
+.arc-data-table__cell--actions {
+  width: 36px;
+  text-align: right;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.arc-data-table__cell--actions:hover {
+  background: var(--div-color-container-2, #f3f4f6);
+}
+
+/* ---- Column resizing ----------------------------------------------------- */
+
+/* Only in force once a drag has seeded every column: under the default auto
+   layout the browser treats a cell width as a suggestion and re-solves it from
+   the content, so a dragged width would spring back. min-width keeps a narrow
+   table filling its card while letting a widened one overflow into the
+   scroller instead of squeezing its neighbours. */
+.div-table--resized {
+  table-layout: fixed;
+  /* max-content, not auto: under a fixed layout `auto` resolves the table width
+     from the container and then re-solves every column to fit it, which quietly
+     cancelled the width the drag had just set. max-content sizes the table to
+     the sum of its columns instead, so a widened column overflows into the
+     scroller. min-width keeps a narrowed table filling its card — the trailing
+     actions column is the only one without a set width, so it is what absorbs
+     the slack rather than the columns the user has sized. */
+  width: max-content;
+  min-width: 100%;
+}
+
+/* Headers stay nowrap, so a narrowed one has to clip rather than push the
+   column back open — but clip the label, not the cell. `overflow: hidden` on the
+   th also clipped the resize grip, which deliberately straddles the column edge
+   at right: -3px: after the first drag every grab target shrank from 7px to 4px
+   and the hover line stopped sitting on the boundary it marks. Constraining the
+   label keeps the ellipsis and leaves the grip whole. */
+.div-table--resized thead th .div-table__header-label,
+.div-table--resized thead th .div-table__sort-button > span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.div-table--resized thead th .div-table__sort-button {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.div-table--resized tbody td {
+  overflow-wrap: anywhere;
+}
+
+/* The grip sits in the header's trailing padding rather than beside the label,
+   so it lands where the eye expects the column to end and needs no space of its
+   own. Invisible until the header is hovered — a permanent rule on every
+   boundary reads as table chrome. */
+.div-table thead th {
+  position: relative;
+}
+
+.div-table__resize-grip {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 7px;
+  height: 100%;
+  cursor: col-resize;
+  /* Above the sort button so the last few pixels resize rather than sort. */
+  z-index: 1;
+  touch-action: none;
+}
+
+.div-table__resize-grip::after {
+  content: "";
+  position: absolute;
+  top: 20%;
+  left: 3px;
+  width: 1px;
+  height: 60%;
+  background: var(--div-color-border-2, #b6bcc5);
+  opacity: 0;
+  transition: opacity 120ms ease-in-out;
+}
+
+.div-table thead th:hover .div-table__resize-grip::after,
+.div-table__resize-grip:hover::after {
+  opacity: 1;
+}
+
+/* ---- Pinned row-actions column -------------------------------------------- */
+
+/* The kebab is how a row is acted on, so it has to stay reachable on a table
+   wide enough to scroll — otherwise you scroll right to find it and lose sight
+   of which row you are on. Sticky rather than absolute so it keeps its place in
+   the table's own layout and the header cell stays aligned with the body cells
+   under it. Each needs its own background: a sticky cell is painted over the
+   scrolling ones, and a transparent one would let them show through. */
+.div-table thead th.arc-data-table__header--actions {
+  position: sticky;
+  right: 0;
+  z-index: 3;
+  background: var(--div-color-container-2, #f3f4f6);
+}
+
+.div-table tbody td.arc-data-table__cell--actions {
+  position: sticky;
+  right: 0;
+  z-index: 2;
+  background: var(--div-color-surface, #ffffff);
+}
+
+/* Row states have to reach the pinned cell too, or it stays white while the
+   rest of its row highlights. The cell has to repaint rather than inherit: it is
+   sticky, so it is painted over the scrolling cells and a transparent one would
+   let them show through.
+   Repainting means matching the row exactly, per row type — a single grey here
+   left the pinned cell a different colour from the row it belongs to, which read
+   as a separate box parked at the end of the row rather than as part of it.
+   Plain rows tint with a translucent grey; #fbfbfb is that colour flattened over
+   the white surface, which is what an opaque cell needs. */
+.div-table tbody tr:hover td.arc-data-table__cell--actions {
+  background: #fbfbfb;
+}
+
+.div-table tbody tr.div-table__row--clickable:hover
+  td.arc-data-table__cell--actions {
+  background: var(--div-color-sidebar-hover-bg, #e2f8ff);
+}
+
+/* No divider on the pinned column. It reads as a seam down the middle of the
+   table rather than as part of it, and the kebab is recognisable without one. */
+
+/* ---- Row-actions menu ----------------------------------------------------- */
+
+/* Bare kebab, matching the button-menu it replaced: no plate of its own. The
+   pinned actions cell already takes the row's hover tint, so a background here
+   reads as a second box sitting inside the highlighted cell rather than as an
+   affordance on the icon. Hover darkens the glyph instead; only keyboard focus
+   draws a ring. */
+.arc-data-table__menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  --sds-c-icon-color-foreground-default: var(--div-color-text-2, #54698d);
+}
+
+.arc-data-table__menu-trigger:hover,
+.arc-data-table__menu-trigger[aria-expanded="true"] {
+  --sds-c-icon-color-foreground-default: var(--div-color-text-1, #16325c);
+}
+
+.arc-data-table__menu-trigger:focus-visible {
+  outline: 2px solid var(--div-color-focus, #1b96ff);
+  outline-offset: 0;
+}
+
+/* Fixed, because the menu's own ancestor chain cannot be relied on: it renders
+   outside .div-table-scroll precisely so that scroller's overflow cannot clip it,
+   and fixed positioning keeps it clear of every other overflow between here and
+   the viewport. Coordinates come from positionActionMenu(). max-content is what
+   guarantees the longest label is never truncated — the whole point of replacing
+   lightning-button-menu. */
+.arc-data-table__menu {
+  position: fixed;
+  z-index: 9000;
+  min-width: max-content;
+  padding: var(--div-space-1, 0.25rem) 0;
+  border: 1px solid var(--div-color-border-2, #d8dde6);
+  border-radius: var(--div-radius-2, 0.25rem);
+  background: var(--div-color-surface, #ffffff);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+}
+
+.arc-data-table__menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--div-space-2, 0.5rem);
+  width: 100%;
+  padding: var(--div-space-2, 0.5rem) var(--div-space-3, 0.75rem);
+  border: 0;
+  background: transparent;
+  color: var(--div-color-text-1, #16325c);
+  font: inherit;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.arc-data-table__menu-item:hover,
+.arc-data-table__menu-item:focus-visible {
+  background: var(--div-color-container-2, #f3f4f6);
+  outline: none;
+}
+
+.arc-data-table__menu-item-icon {
+  flex: none;
+  --sds-c-icon-color-foreground-default: var(--div-color-text-2, #54698d);
+}
+
+.arc-data-table__menu-item-label {
+  flex: 1 1 auto;
+}
