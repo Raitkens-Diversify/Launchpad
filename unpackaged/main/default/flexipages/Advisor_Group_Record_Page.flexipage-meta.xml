@@ -730,6 +730,13 @@
                 </fieldInstanceProperties>
                 <fieldItem>Record.Primary_Branch_Opportunity__c</fieldItem>
                 <identifier>RecordPrimary_Branch_Opportunity_cField</identifier>
+                <visibilityRule>
+                    <criteria>
+                        <leftValue>{!$User.Profile.Name}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>System Administrator</rightValue>
+                    </criteria>
+                </visibilityRule>
             </fieldInstance>
         </itemInstances>
         <name>Facet_bpa_col_1_2</name>

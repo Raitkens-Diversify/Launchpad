@@ -15,6 +15,7 @@
             </value>
         </inputParameters>
         <nameSegment>c:cmp_NavigateToRecord</nameSegment>
+        <offset>0</offset>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </actionCalls>
     <apiVersion>62.0</apiVersion>
@@ -591,6 +592,18 @@
     </formulas>
     <interviewLabel>Branch New Opportunity {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Branch New Opportunity</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>FREE_FORM_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
     <processType>Flow</processType>
     <recordCreates>
         <name>Create_Branch_Opportunity</name>
@@ -748,6 +761,7 @@
         </connector>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.Name</objectFieldReference>
             <styleProperties>
@@ -761,6 +775,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.StageName</objectFieldReference>
             <styleProperties>
@@ -774,6 +789,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.CloseDate</objectFieldReference>
             <styleProperties>
@@ -787,6 +803,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.Advisor_Group__c</objectFieldReference>
             <styleProperties>
@@ -806,6 +823,7 @@
             </defaultValue>
             <fieldText>BD AUA</fieldText>
             <fieldType>InputField</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <scale>2</scale>
             <styleProperties>
@@ -825,6 +843,7 @@
             </defaultValue>
             <fieldText>T12 BD</fieldText>
             <fieldType>InputField</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <scale>2</scale>
             <styleProperties>
@@ -844,6 +863,7 @@
             </defaultValue>
             <fieldText>Fee-Based AUM</fieldText>
             <fieldType>InputField</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <scale>2</scale>
             <styleProperties>
@@ -863,6 +883,7 @@
             </defaultValue>
             <fieldText>T12 Fee-Based</fieldText>
             <fieldType>InputField</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <scale>2</scale>
             <styleProperties>
@@ -882,6 +903,7 @@
             </defaultValue>
             <fieldText>Forgivable Loan Amount</fieldText>
             <fieldType>InputField</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <scale>2</scale>
             <styleProperties>
@@ -901,6 +923,7 @@
             </defaultValue>
             <fieldText>Website</fieldText>
             <fieldType>InputField</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <styleProperties>
                 <verticalAlignment>
@@ -913,6 +936,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.Portfolio_Management__c</objectFieldReference>
             <styleProperties>
@@ -926,6 +950,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.Integrated_Ops__c</objectFieldReference>
             <styleProperties>
@@ -945,6 +970,7 @@
             </defaultValue>
             <fieldText>Integrated Ops Fee</fieldText>
             <fieldType>InputField</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <scale>2</scale>
             <styleProperties>
@@ -964,6 +990,7 @@
             </defaultValue>
             <fieldText>Fee-Based Payout %</fieldText>
             <fieldType>InputField</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <scale>2</scale>
             <styleProperties>
@@ -983,6 +1010,7 @@
             </defaultValue>
             <fieldText>BD-Based Payout %</fieldText>
             <fieldType>InputField</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <scale>2</scale>
             <styleProperties>
@@ -1002,6 +1030,7 @@
             </defaultValue>
             <fieldText>Platform Fee</fieldText>
             <fieldType>InputField</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <scale>2</scale>
             <styleProperties>
@@ -1015,6 +1044,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.Forgivable_Loan__c</objectFieldReference>
             <styleProperties>
@@ -1034,6 +1064,7 @@
             </defaultValue>
             <fieldText>Production Amount</fieldText>
             <fieldType>InputField</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <scale>2</scale>
             <styleProperties>
@@ -1047,6 +1078,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.Accelerator_Loan_Option__c</objectFieldReference>
             <styleProperties>
@@ -1066,6 +1098,7 @@
             </defaultValue>
             <fieldText>Accelerator Loan Amount</fieldText>
             <fieldType>InputField</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <scale>2</scale>
             <styleProperties>
@@ -1085,6 +1118,7 @@
             </defaultValue>
             <fieldText>T12 Total Revenue</fieldText>
             <fieldType>InputField</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <scale>2</scale>
             <styleProperties>
@@ -1098,6 +1132,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.Count_of_HH_s__c</objectFieldReference>
             <styleProperties>
@@ -1111,6 +1146,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.Count_of_Accounts__c</objectFieldReference>
             <styleProperties>
@@ -1130,6 +1166,7 @@
             </defaultValue>
             <fieldText>Total AUM</fieldText>
             <fieldType>InputField</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <scale>2</scale>
             <styleProperties>
@@ -1143,6 +1180,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.Specialties__c</objectFieldReference>
             <styleProperties>
@@ -1156,6 +1194,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.Affiliation_Type__c</objectFieldReference>
             <styleProperties>
@@ -1169,6 +1208,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.Cultural_Fit__c</objectFieldReference>
             <styleProperties>
@@ -1182,6 +1222,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.Current_Affiliation__c</objectFieldReference>
             <styleProperties>
@@ -1195,6 +1236,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.Current_Custodian__c</objectFieldReference>
             <styleProperties>
@@ -1208,19 +1250,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
-            <isRequired>false</isRequired>
-            <objectFieldReference>recordOpp.Disclosure_Details__c</objectFieldReference>
-            <styleProperties>
-                <verticalAlignment>
-                    <stringValue>top</stringValue>
-                </verticalAlignment>
-                <width>
-                    <stringValue>12</stringValue>
-                </width>
-            </styleProperties>
-        </fields>
-        <fields>
-            <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.Disclosures__c</objectFieldReference>
             <styleProperties>
@@ -1234,8 +1264,9 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
-            <objectFieldReference>recordOpp.External_Referrer__c</objectFieldReference>
+            <objectFieldReference>recordOpp.Disclosure_Details__c</objectFieldReference>
             <styleProperties>
                 <verticalAlignment>
                     <stringValue>top</stringValue>
@@ -1247,6 +1278,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.How_You_Manage_Assets__c</objectFieldReference>
             <styleProperties>
@@ -1266,6 +1298,7 @@
             </defaultValue>
             <fieldText>IAPD/BrokerCheck</fieldText>
             <fieldType>InputField</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <styleProperties>
                 <verticalAlignment>
@@ -1278,19 +1311,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
-            <isRequired>false</isRequired>
-            <objectFieldReference>recordOpp.Internal_Referrer_DRP__c</objectFieldReference>
-            <styleProperties>
-                <verticalAlignment>
-                    <stringValue>top</stringValue>
-                </verticalAlignment>
-                <width>
-                    <stringValue>12</stringValue>
-                </width>
-            </styleProperties>
-        </fields>
-        <fields>
-            <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.Main_Growth_Levers__c</objectFieldReference>
             <styleProperties>
@@ -1304,6 +1325,35 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
+            <isRequired>false</isRequired>
+            <objectFieldReference>recordOpp.Internal_Referrer_DRP__c</objectFieldReference>
+            <styleProperties>
+                <verticalAlignment>
+                    <stringValue>top</stringValue>
+                </verticalAlignment>
+                <width>
+                    <stringValue>12</stringValue>
+                </width>
+            </styleProperties>
+        </fields>
+        <fields>
+            <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
+            <isRequired>false</isRequired>
+            <objectFieldReference>recordOpp.External_Referrer__c</objectFieldReference>
+            <styleProperties>
+                <verticalAlignment>
+                    <stringValue>top</stringValue>
+                </verticalAlignment>
+                <width>
+                    <stringValue>12</stringValue>
+                </width>
+            </styleProperties>
+        </fields>
+        <fields>
+            <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.Notes__c</objectFieldReference>
             <styleProperties>
@@ -1317,6 +1367,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.Number_of_Advisors__c</objectFieldReference>
             <styleProperties>
@@ -1330,6 +1381,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.Number_of_Staff__c</objectFieldReference>
             <styleProperties>
@@ -1343,6 +1395,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.Office_Team_Structure__c</objectFieldReference>
             <styleProperties>
@@ -1356,6 +1409,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.Pain_Points__c</objectFieldReference>
             <styleProperties>
@@ -1369,6 +1423,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.Potential_Service__c</objectFieldReference>
             <styleProperties>
@@ -1382,6 +1437,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.Required_to_Make_a_Move__c</objectFieldReference>
             <styleProperties>
@@ -1401,6 +1457,7 @@
             </defaultValue>
             <fieldText>T12 Other</fieldText>
             <fieldType>InputField</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <scale>2</scale>
             <styleProperties>
@@ -1420,6 +1477,7 @@
             </defaultValue>
             <fieldText>T12 Planning</fieldText>
             <fieldType>InputField</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <scale>2</scale>
             <styleProperties>
@@ -1439,6 +1497,7 @@
             </defaultValue>
             <fieldText>Target % to Transition: Fixed</fieldText>
             <fieldType>InputField</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <scale>2</scale>
             <styleProperties>
@@ -1458,6 +1517,7 @@
             </defaultValue>
             <fieldText>Target % to Transition: Indexed</fieldText>
             <fieldType>InputField</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <scale>2</scale>
             <styleProperties>
@@ -1477,6 +1537,7 @@
             </defaultValue>
             <fieldText>Target % to Transition: Insurance</fieldText>
             <fieldType>InputField</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <scale>2</scale>
             <styleProperties>
@@ -1496,6 +1557,7 @@
             </defaultValue>
             <fieldText>Target % to Transition: Variable</fieldText>
             <fieldType>InputField</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <scale>2</scale>
             <styleProperties>
@@ -1515,6 +1577,7 @@
             </defaultValue>
             <fieldText>Total AUA</fieldText>
             <fieldType>InputField</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <scale>2</scale>
             <styleProperties>
@@ -1528,6 +1591,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.Affiliation__c</objectFieldReference>
             <styleProperties>
@@ -1541,6 +1605,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.LeadSource</objectFieldReference>
             <styleProperties>
@@ -1560,6 +1625,7 @@
             </defaultValue>
             <fieldText>Minimum Production</fieldText>
             <fieldType>InputField</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <scale>2</scale>
             <styleProperties>
@@ -1573,6 +1639,7 @@
         </fields>
         <fields>
             <fieldType>ObjectProvided</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>false</isRequired>
             <objectFieldReference>recordOpp.Tech_Stack__c</objectFieldReference>
             <styleProperties>
@@ -1584,6 +1651,7 @@
                 </width>
             </styleProperties>
         </fields>
+        <nextOrFinishButtonLabel>Save</nextOrFinishButtonLabel>
         <showFooter>true</showFooter>
         <showHeader>true</showHeader>
     </screens>
