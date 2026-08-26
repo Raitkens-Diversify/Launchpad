@@ -19,15 +19,15 @@
                 <template for:each={members} for:item="member" for:index="index">
                     <div key={member.id} class="create-member__row">
                         <lightning-input
-                            label="Member Nickname"
-                            placeholder="Enter member nickname"
+                            label="Client Nickname"
+                            placeholder="Enter Client Nickname"
                             value={member.nickname}
                             data-index={index}
                             onchange={handleNicknameChange}>
                         </lightning-input>
                         <c-envelope-searchable-combobox
-                            label="Member Type"
-                            placeholder="Select member type"
+                            label="Client Type"
+                            placeholder="Select Client Type"
                             options={memberTypeOptions}
                             value={member.type}
                             name={member.id}

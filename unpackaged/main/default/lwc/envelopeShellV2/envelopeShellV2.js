@@ -153,7 +153,9 @@ const NON_FIELD_FORM_KEYS = new Set([
   "EntityJurisdiction",
   "PrimaryTrustee",
   "TaxId",
-  "FormationDate"
+  "FormationDate",
+  "hasClientProfile",
+  "linkedToEnvelope"
 ]);
 
 // The object an account interview's product answer is stored on. It is a related record rather than a
@@ -411,7 +413,7 @@ function mapHouseholdResponse(data) {
         typeLabel: label,
         meta: buildMeta([label]),
         iconVariant: "member",
-        isNew: !m.submitted,
+        isNew: isEnvelopeMember && !m.submitted,
         removable: !m.submitted,
         hasClientProfile: m.hasClientProfile === true,
         actions: isEnvelopeMember
