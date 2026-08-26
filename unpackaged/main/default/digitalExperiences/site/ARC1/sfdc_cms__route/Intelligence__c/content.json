@@ -6,7 +6,7 @@
     "configurationTags" : [ ],
     "pageAccess" : "UseParent",
     "routeType" : "custom-intelligence",
-    "urlPrefix" : "intelligence"
+    "urlPrefix" : "intelligence-"
   },
   "urlName" : "intelligence"
 }

@@ -24,7 +24,13 @@ const MILESTONE_STAGES = [
 
 export default class CaseOverviewTile extends NavigationMixin(LightningElement) {
     _recordId;
-    mileStoneDetails;
+    /*
+     * Initialised rather than left undefined: the template iterates it, and on a
+     * case with no milestones processMilestones is never reached (the empty-state
+     * path is taken instead), which made LWC throw "Invalid template iteration
+     * for value `undefined`" on every render.
+     */
+    mileStoneDetails = [];
     channelName = '/event/Refresh_Detail__e';
     subscriptionRefresh = null;
     refreshHandlerID;
@@ -62,7 +68,7 @@ export default class CaseOverviewTile extends NavigationMixin(LightningElement) 
     membership;
     messageContext;
 
-    connectedCallback() {debugger
+    connectedCallback() {
         if (this.recordId) {
             this.loadSummary();
         }else{
@@ -166,16 +172,29 @@ export default class CaseOverviewTile extends NavigationMixin(LightningElement) 
             userId: this.userId
             })
             .then((result) => {
-                console.log('Hello from result :' , result);
-                console.log('Hello from this.data.wrappedMilestones :' , result.wrappedMilestones);
-
                 this.data = result;
-                this.membership = this.data.membership.replace(/\s*\|\s*<\/br>\s*\|\s*/g, ' </br> ');
-                this.ownerDetails = this.data.formattedOwnerDetail;
-                this.mileStoneDetails = this.processMilestones(this.data.wrappedMilestones);
+                /*
+                 * membership comes from Case_Branch_Name__c / Case_Home_Office_Name__c,
+                 * and nothing populates either field in this org — so it arrives null.
+                 * Calling .replace() on it threw, and because the catch below swallowed
+                 * the error and swapped in the empty state, the whole tile went wrong at
+                 * once: the badge fell through to "On Track" for a case that was actually
+                 * in an HO pit stop, and the owner line, the task ratio and the milestones
+                 * were all blank because the assignments after this one never ran.
+                 */
+                this.membership = (this.data.membership || '').replace(
+                    /\s*\|\s*<\/br>\s*\|\s*/g,
+                    ' </br> '
+                );
+                this.ownerDetails = this.data.formattedOwnerDetail || '';
+                this.mileStoneDetails = this.processMilestones(
+                    this.data.wrappedMilestones
+                );
             })
             .catch((error) => {
-                                this.loaded = true;
+                // Say so rather than showing a tile that looks like real data.
+                // eslint-disable-next-line no-console
+                console.error('[caseOverviewTile] Failed to load case summary', error);
                 this.data = this.emptyState();
                 this.data.statusMessage = 'Error loading data';
             })
@@ -419,6 +438,10 @@ export default class CaseOverviewTile extends NavigationMixin(LightningElement) 
         return detailsObject;
     }
 
+    /** No milestones means no track — an empty one draws a bare rule. */
+    get hasMilestones() {
+        return (this.mileStoneDetails || []).length > 0;
+    }
 
     get milestoneStages() {
         const currentIndex = this.currentStageIndex;

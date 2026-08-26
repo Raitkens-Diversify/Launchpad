@@ -103,3 +103,19 @@
 .rdf-lookup--readonly {
   pointer-events: none;
 }
+
+/*
+ * ARC-only override of diversifyStyles' .div-input--record-detail rule.
+ * The shared static resource's copy of this rule is missing its
+ * font-family declaration (Vestolio's comment: "907:28922 draws the
+ * control text in the same face as the labels beside it"), so these
+ * fields fall back to the generic --div-font-family-base system stack
+ * and visually mismatch their labels. .div-input--record-detail is used
+ * exclusively by this component anywhere in the repo, so adding the
+ * missing declaration here (this component's own Shadow DOM-scoped
+ * stylesheet) matches Vestolio without touching the shared file.
+ */
+.div-input--record-detail,
+.div-select.div-input--record-detail {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+}

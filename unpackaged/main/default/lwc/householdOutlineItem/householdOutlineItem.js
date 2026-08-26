@@ -86,7 +86,15 @@ export default class HouseholdOutlineItem extends LightningElement {
         return this.showNewBadge || this.showStatusDot || this.showStatusCheck;
     }
 
-    // More-actions menu select. Only "remove" today; mirrors envelopeActionCard's cardmenu.
+    get showAddClient() {
+        return this.item?.iconVariant === 'member' && !(this.item?.actions?.length);
+    }
+
+    get showMenu() {
+        return this.canRemove || this.showAddClient;
+    }
+
+    // More-actions menu select; mirrors envelopeActionCard's cardmenu.
     handleMenuSelect(event) {
         this.dispatchEvent(
             new CustomEvent('itemmenu', {

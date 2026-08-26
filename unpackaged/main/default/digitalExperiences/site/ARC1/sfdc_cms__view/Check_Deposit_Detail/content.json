@@ -22,7 +22,8 @@
           "children" : [ {
             "children" : [ {
               "attributes" : {
-                "dxpStyle" : { }
+                "dxpStyle" : { },
+                "fieldLayout" : "grid"
               },
               "definition" : "c:arcRecordDetail",
               "id" : "b5d3f81e-0c47-4a29-86f1-3947ec20d5ba",

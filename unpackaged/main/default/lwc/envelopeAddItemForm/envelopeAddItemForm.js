@@ -6,10 +6,10 @@ const CONFIG = {
     member: {
         icon: 'utility:adduser',
         iconClass: 'add-form__icon add-form__icon_member',
-        title: 'Add member',
+        title: 'Add Client',
         nicknameLabel: 'Member Nickname',
         nicknamePlaceholder: 'Enter member nickname',
-        typeLabel: 'Member Type',
+        typeLabel: 'Client Type',
         typePlaceholder: 'Select member type',
         submitLabel: 'Add Client',
         typeOptions: [
@@ -79,7 +79,7 @@ export default class EnvelopeAddItemForm extends LightningElement {
                     variant: this.variant,
                     nickname: this.nickname,
                     type: this.typeValue,
-                    typeLabel: selected ? selected.label : ''
+                    typeLabel: selected ? 'Client' : ''
                 }
             })
         );

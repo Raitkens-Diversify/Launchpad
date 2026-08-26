@@ -398,39 +398,42 @@ const MEMBER_SOURCES = [
 // ordering and balance are absent (see gaps in the migration notes).
 function mapHouseholdResponse(data) {
   const householdMembers = MEMBER_SOURCES.flatMap(({ list, type, typeLabel }) =>
-    (data?.[list] || []).map((m) => ({
-      id: m.id,
-      groupId: "householdMembers",
-      name:
-        m.Name ||
-        `${m.FirstName || ""} ${m.LastName || m.Lastname || ""}`.trim(),
-      type,
-      typeLabel,
-      meta: buildMeta([typeLabel]),
-      iconVariant: "member",
-      isNew: !m.submitted,
-      removable: !m.submitted,
-      hasClientProfile: m.hasClientProfile === true,
-      actions: [
-        {
-          id: `${m.id}-1`,
-          iconVariant: GROUPS.householdMembers.cardIconVariant,
-          title: GROUPS.householdMembers.actionTitle,
-          statusLabel: "In Progress",
-          // The wrapper is the draft, so a field whose api name Apex cannot express as an
-          // identifier is re-keyed here. Only set when the server actually sent a boolean, so a
-          // member type the affirmation does not apply to keeps a clean draft.
-          formData:
-            typeof m.noReportableBeneficialOwners === "boolean"
-              ? {
-                  ...m,
-                  No_Reportable_Beneficial_Owners__c:
-                    m.noReportableBeneficialOwners
-                }
-              : m
-        }
-      ]
-    }))
+    (data?.[list] || []).map((m) => {
+      const isEnvelopeMember = m.submitted === true || m.accountType === "Active Client" || m.linkedToEnvelope === true;
+      const label = isEnvelopeMember ? typeLabel : " ";
+      return {
+        id: m.id,
+        groupId: "householdMembers",
+        name:
+          m.Name ||
+          `${m.FirstName || ""} ${m.LastName || m.Lastname || ""}`.trim(),
+        type,
+        typeLabel: label,
+        meta: buildMeta([label]),
+        iconVariant: "member",
+        isNew: !m.submitted,
+        removable: !m.submitted,
+        hasClientProfile: m.hasClientProfile === true,
+        actions: isEnvelopeMember
+          ? [
+              {
+                id: `${m.id}-1`,
+                iconVariant: GROUPS.householdMembers.cardIconVariant,
+                title: GROUPS.householdMembers.actionTitle,
+                statusLabel: "In Progress",
+                formData:
+                  typeof m.noReportableBeneficialOwners === "boolean"
+                    ? {
+                        ...m,
+                        No_Reportable_Beneficial_Owners__c:
+                          m.noReportableBeneficialOwners
+                      }
+                    : m
+              }
+            ]
+          : []
+      };
+    })
   );
   // Accounts and DPIs share the Financial_Account__c list; the DPI flag decides the group.
   const allAccounts = (data?.accounts || []).map((a) => ({
@@ -2726,11 +2729,56 @@ export default class EnvelopeShellV2 extends LightningElement {
     }
   }
 
-  // Outline row overflow menu: open the shared removal dialog for the selected row.
+  // Outline row overflow menu: open the shared removal dialog or add an existing
+  // household member to the envelope as a client.
   handleItemMenu(event) {
     const { action, id, name, removeLabel } = event.detail || {};
     if (action === "remove") {
       this._openRemove("entity", id, name, removeLabel);
+    } else if (action === "addclient") {
+      this._addExistingMemberToEnvelope(id);
+    }
+  }
+
+  async _addExistingMemberToEnvelope(entityId) {
+    const entity = this._findEntity(entityId);
+    if (!entity) {
+      return;
+    }
+    const recordType = persistedMemberTypeFor(entity.type);
+    if (!recordType) {
+      return;
+    }
+    try {
+      await saveEntity({
+        acc: { Id: entity.id, RecordTypeId: recordType },
+        envelopeId: this.envelopeId
+      });
+      this._updateEntity(entityId, (e) => ({
+        ...e,
+        typeLabel: "Client",
+        meta: buildMeta(["Client"]),
+        actions: [
+          {
+            id: `${e.id}-1`,
+            iconVariant: GROUPS.householdMembers.cardIconVariant,
+            title: GROUPS.householdMembers.actionTitle,
+            statusLabel: "In Progress",
+            formData: e.actions?.[0]?.formData || {}
+          }
+        ]
+      }));
+      if (this.householdId) {
+        this._fetchHouseholdMembersAndAccounts();
+      }
+      this._refreshRequiredDocuments();
+    } catch (error) {
+      console.error("addclient failed", error);
+      this._showToast(
+        "Error",
+        error?.body?.message || "Unable to add client to envelope.",
+        "error"
+      );
     }
   }
 

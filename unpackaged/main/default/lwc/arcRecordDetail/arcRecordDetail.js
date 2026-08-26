@@ -92,6 +92,20 @@ export default class ArcRecordDetail extends LightningElement {
    * fifteen short fields. Edit mode is unaffected either way.
    */
   @api fieldLayout = 'rows';
+
+  /**
+   * Optional page-header chrome, additive only — every one of these is blank
+   * by default, so a placement that doesn't configure them (e.g. the
+   * Envelope_Field__mdt-driven Account_Detail header) renders exactly as
+   * before. Values are read from the record's already-loaded field data, not
+   * a second Apex round trip.
+   */
+  @api titleField = '';
+  @api badgeField = '';
+  @api tagFields = '';
+  @api sideCardLabel = '';
+  @api sideCardFields = '';
+
   _sectionFilter = '';
 
   @api
@@ -257,6 +271,70 @@ export default class ArcRecordDetail extends LightningElement {
 
   get hasTitle() {
     return Boolean(this.title?.trim());
+  }
+
+  /** The field's current draft value, or '' if unresolved/not loaded yet. */
+  resolveFieldValue(apiName) {
+    const name = (apiName || '').trim();
+    if (!name) {
+      return '';
+    }
+    const value = this.draft?.[name];
+    return value === null || value === undefined ? '' : String(value);
+  }
+
+  get resolvedTitle() {
+    const fromField = this.resolveFieldValue(this.titleField);
+    return fromField || this.title || '';
+  }
+
+  get hasResolvedTitle() {
+    return Boolean(this.resolvedTitle?.trim());
+  }
+
+  get badgeValue() {
+    return this.resolveFieldValue(this.badgeField);
+  }
+
+  get hasBadge() {
+    return Boolean(this.badgeField) && Boolean(this.badgeValue);
+  }
+
+  get tagValues() {
+    return (this.tagFields || '')
+      .split(',')
+      .map((apiName) => this.resolveFieldValue(apiName))
+      .filter(Boolean)
+      .map((value, index) => ({ key: `tag-${index}`, value }));
+  }
+
+  get hasTags() {
+    return this.tagValues.length > 0;
+  }
+
+  get hasHeaderRow() {
+    return this.hasResolvedTitle || this.hasBadge || this.hasTags;
+  }
+
+  /** Parses "Label:field,Label2:field2" into resolved {label, value} rows, skipping blanks. */
+  get sideCardItems() {
+    return (this.sideCardFields || '')
+      .split(',')
+      .map((entry) => entry.trim())
+      .filter(Boolean)
+      .map((entry, index) => {
+        const [label, apiName] = entry.split(':').map((part) => (part || '').trim());
+        return {
+          key: `side-${index}`,
+          label: label || apiName,
+          value: this.resolveFieldValue(apiName)
+        };
+      })
+      .filter((item) => item.value);
+  }
+
+  get hasSideCard() {
+    return Boolean(this.sideCardLabel) && this.sideCardItems.length > 0;
   }
 
   get hasFields() {

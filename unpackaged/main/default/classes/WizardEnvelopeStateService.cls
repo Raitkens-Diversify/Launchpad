@@ -1572,6 +1572,7 @@ return result;
 
             String recordTypeName = acr.Contact.Account.RecordType?.DeveloperName;
             MemberData member = createMemberData(acr);
+            member.linkedToEnvelope = existingRecordIds.contains(acr.Contact.AccountId);
             addMemberByRecordType(
                 member,
                 recordTypeName,
@@ -1597,6 +1598,7 @@ return result;
             Account relatedAccount = relation.Related_Account__r;
             String recordTypeName = relatedAccount.RecordType?.DeveloperName;
             MemberData member = createMemberDataFromAccount(relatedAccount);
+            member.linkedToEnvelope = existingRecordIds.contains(relation.Related_Account__c);
             addMemberByRecordType(
                 member,
                 recordTypeName,
@@ -1640,6 +1642,7 @@ return result;
                 
                 String recordTypeName = ec.Account__r.RecordType?.DeveloperName;
                 MemberData member = createMemberDataFromAccount(ec.Account__r);
+                member.linkedToEnvelope = true;
                 addMemberByRecordType(
                     member,
                     recordTypeName,
@@ -1997,6 +2000,7 @@ return result;
         // True when this person has their own Required_Documents__c client profile — a primary
         // Individual added to the envelope, not just a related party on another member.
         @AuraEnabled public Boolean hasClientProfile { get; set; }
+        @AuraEnabled public Boolean linkedToEnvelope { get; set; }
     }
     
     public class AccountData {

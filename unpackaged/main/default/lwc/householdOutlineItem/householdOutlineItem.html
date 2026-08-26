@@ -55,7 +55,7 @@
                         onclick={handleAdd}>
                     </lightning-button-icon>
                 </template>
-                <template lwc:if={canRemove}>
+                <template lwc:if={showMenu}>
                     <lightning-button-menu
                         variant="bare"
                         icon-name="utility:threedots_vertical"
@@ -63,12 +63,21 @@
                         alternative-text="More actions"
                         title="More actions"
                         onselect={handleMenuSelect}>
-                        <lightning-menu-item
-                            value="remove"
-                            label={removeMenuLabel}
-                            prefix-icon-name="utility:delete"
-                            class="env-menu-item_destructive">
-                        </lightning-menu-item>
+                        <template lwc:if={showAddClient}>
+                            <lightning-menu-item
+                                value="addclient"
+                                label="Add Client"
+                                prefix-icon-name="utility:adduser">
+                            </lightning-menu-item>
+                        </template>
+                        <template lwc:if={canRemove}>
+                            <lightning-menu-item
+                                value="remove"
+                                label={removeMenuLabel}
+                                prefix-icon-name="utility:delete"
+                                class="env-menu-item_destructive">
+                            </lightning-menu-item>
+                        </template>
                     </lightning-button-menu>
                 </template>
             </div>

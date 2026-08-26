@@ -27,28 +27,55 @@
             </template>
 
             <template lwc:else>
-                <template lwc:if={hasTitle}>
-                    <h2 class="record-detail__component-title">{title}</h2>
+                <template lwc:if={hasHeaderRow}>
+                    <div class="record-detail__header-row">
+                        <template lwc:if={hasResolvedTitle}>
+                            <h2 class="record-detail__component-title">{resolvedTitle}</h2>
+                        </template>
+                        <template lwc:if={hasBadge}>
+                            <span class="record-detail__badge">{badgeValue}</span>
+                        </template>
+                        <template lwc:if={hasTags}>
+                            <template for:each={tagValues} for:item="tag">
+                                <span key={tag.key} class="record-detail__tag">{tag.value}</span>
+                            </template>
+                        </template>
+                    </div>
                 </template>
-                <div class="record-detail__sections">
-                    <template for:each={sectionCards} for:item="section">
-                        <section key={section.key} class="record-detail__section">
-                            <c-card class="record-detail__card">
-                                <c-arc-record-detail-section
-                                    data-section-key={section.key}
-                                    section={section}
-                                    is-editing={section.isEditing}
-                                    is-saving={section.isSaving}
-                                    has-changes={section.hasChanges}
-                                    is-submitted={isSubmitted}
-                                    field-layout={fieldLayout}
-                                    onedit={handleSectionEdit}
-                                    onsave={handleSectionSave}
-                                    onsectioncancel={handleSectionCancel}
-                                    onvaluechange={handleFieldChange}>
-                                </c-arc-record-detail-section>
-                            </c-card>
-                        </section>
+                <div class="record-detail__body">
+                    <div class="record-detail__sections">
+                        <template for:each={sectionCards} for:item="section">
+                            <section key={section.key} class="record-detail__section">
+                                <c-card class="record-detail__card">
+                                    <c-arc-record-detail-section
+                                        data-section-key={section.key}
+                                        section={section}
+                                        is-editing={section.isEditing}
+                                        is-saving={section.isSaving}
+                                        has-changes={section.hasChanges}
+                                        is-submitted={isSubmitted}
+                                        field-layout={fieldLayout}
+                                        onedit={handleSectionEdit}
+                                        onsave={handleSectionSave}
+                                        onsectioncancel={handleSectionCancel}
+                                        onvaluechange={handleFieldChange}>
+                                    </c-arc-record-detail-section>
+                                </c-card>
+                            </section>
+                        </template>
+                    </div>
+                    <template lwc:if={hasSideCard}>
+                        <c-card class="record-detail__side-card">
+                            <h3 class="record-detail__side-card-label">{sideCardLabel}</h3>
+                            <dl class="record-detail__side-card-list">
+                                <template for:each={sideCardItems} for:item="item">
+                                    <div key={item.key} class="record-detail__side-card-row">
+                                        <dt class="record-detail__side-card-term">{item.label}</dt>
+                                        <dd class="record-detail__side-card-value">{item.value}</dd>
+                                    </div>
+                                </template>
+                            </dl>
+                        </c-card>
                     </template>
                 </div>
             </template>

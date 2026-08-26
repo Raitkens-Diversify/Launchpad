@@ -58,6 +58,11 @@
     <networkMemberGroups>
         <profile>Admin</profile>
         <profile>Nexs</profile>
+        <profile>Customer Community Plus User</profile>
+        <profile>Customer Community Plus Login User</profile>
+        <profile>Arc</profile>
+        <profile>Customer Community Login User</profile>
+        <profile>Customer Community User</profile>
     </networkMemberGroups>
     <networkPageOverrides>
         <changePasswordPageOverrideSetting>Standard</changePasswordPageOverrideSetting>

@@ -44,10 +44,107 @@
   color: var(--div-color-on-surface-2, #374151);
 }
 
+/* Optional page-header row: resolvedTitle + badge + tags. Blank/absent by
+   default, so a placement that never configures titleField/badgeField/
+   tagFields (e.g. Account_Detail's Envelope_Field__mdt-driven header) never
+   renders this block at all — see hasHeaderRow. */
+.record-detail__header-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--div-space-2, 0.5rem);
+  margin-bottom: var(--div-space-3, 0.75rem);
+}
+
+.record-detail__header-row .record-detail__component-title {
+  margin: 0;
+}
+
+.record-detail__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  background: var(--div-color-container-2, #f3f4f6);
+  color: var(--div-color-on-surface-2, #374151);
+  font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
+  font-weight: var(--div-font-weight-semibold, 600);
+}
+
+.record-detail__tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  border: 1px solid var(--div-color-border-1, #d1d5db);
+  color: var(--div-color-on-surface-1, #4b5563);
+  font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
+}
+
+/* Main sections + optional right-column side card. With no side card
+   configured (hasSideCard false, the common case) .record-detail__sections
+   is the row's only child and fills it exactly as a plain block would. */
+.record-detail__body {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--div-space-5, 1.5rem);
+}
+
 .record-detail__sections {
   display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
   flex-direction: column;
   gap: var(--div-space-4, 1rem);
+}
+
+.record-detail__side-card {
+  flex: 0 0 17.5rem;
+  width: 17.5rem;
+  --card-padding: var(--slds-g-spacing-5, 24px);
+}
+
+.record-detail__side-card-label {
+  margin: 0 0 var(--div-space-3, 0.75rem);
+  font-family: var(--div-font-family-base);
+  font-size: var(--slds-g-font-scale-1, 14px);
+  font-weight: var(--div-font-weight-semibold, 600);
+  color: var(--div-color-on-surface-2, #374151);
+}
+
+.record-detail__side-card-list {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--div-space-3, 0.75rem);
+}
+
+.record-detail__side-card-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.record-detail__side-card-term {
+  margin: 0;
+  font-size: var(--slds-g-font-scale-neg-1, 0.75rem);
+  color: var(--div-color-on-disabled-1, #838a97);
+}
+
+.record-detail__side-card-value {
+  margin: 0;
+  font-size: var(--slds-g-font-scale-1, 14px);
+  color: var(--div-color-on-surface-1, #4b5563);
+}
+
+@media (max-width: 40rem) {
+  .record-detail__body {
+    flex-direction: column;
+  }
+
+  .record-detail__side-card {
+    width: 100%;
+  }
 }
 
 .record-detail__section {

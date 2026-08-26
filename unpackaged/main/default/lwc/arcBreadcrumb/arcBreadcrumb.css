@@ -3,3 +3,66 @@
     display: flex;
     min-width: 0;
 }
+
+/*
+ * ARC-only override of diversifyStyles' .arc-breadcrumb__* rules. The shared
+ * static resource still ships an older version of these rules (a literal
+ * "&gt;" separator, the generic system font/color, and no visual distinction
+ * for the current crumb beyond an underline) — this component is the only
+ * consumer of these class names anywhere in the repo, so overriding them
+ * here (in this component's own Shadow DOM-scoped stylesheet) matches
+ * Vestolio's intended look without touching the shared diversifyStyles file.
+ */
+
+/* Phosphor CaretRight, 10px, painted as a mask (Figma 17924:32329). */
+.arc-breadcrumb__item + .arc-breadcrumb__item::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  background-color: var(--div-color-neutral-500, #838a97);
+  -webkit-mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="%23000"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/></svg>');
+  mask-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="%23000"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/></svg>');
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.arc-breadcrumb__text,
+.arc-breadcrumb__link {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 19px;
+  letter-spacing: 0;
+  color: var(--div-color-blue-950, #0b2f51);
+}
+
+.arc-breadcrumb__link {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: inherit;
+}
+
+.arc-breadcrumb__link:hover,
+.arc-breadcrumb__link:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.arc-breadcrumb__text_muted {
+  color: var(--div-color-blue-950, #0b2f51);
+}
+
+/* Current crumb: Body/font-scale-1/Underlined Medium on accent-3 (4300:13550). */
+.arc-breadcrumb__text_current {
+  font-weight: 500;
+  color: #071c31;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}

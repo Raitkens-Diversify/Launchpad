@@ -561,6 +561,42 @@
         <profile>Home Office</profile>
     </profileActionOverrides>
     <profileActionOverrides>
+        <actionName>View</actionName>
+        <content>Opportunity_Record_Page_Branch</content>
+        <formFactor>Small</formFactor>
+        <pageOrSobjectType>Opportunity</pageOrSobjectType>
+        <recordType>Opportunity.Branch</recordType>
+        <type>Flexipage</type>
+        <profile>Advisor</profile>
+    </profileActionOverrides>
+    <profileActionOverrides>
+        <actionName>View</actionName>
+        <content>Opportunity_Record_Page_Branch</content>
+        <formFactor>Large</formFactor>
+        <pageOrSobjectType>Opportunity</pageOrSobjectType>
+        <recordType>Opportunity.Branch</recordType>
+        <type>Flexipage</type>
+        <profile>Advisor</profile>
+    </profileActionOverrides>
+    <profileActionOverrides>
+        <actionName>View</actionName>
+        <content>Opportunity_Record_Page_Branch</content>
+        <formFactor>Small</formFactor>
+        <pageOrSobjectType>Opportunity</pageOrSobjectType>
+        <recordType>Opportunity.Branch</recordType>
+        <type>Flexipage</type>
+        <profile>Admin</profile>
+    </profileActionOverrides>
+    <profileActionOverrides>
+        <actionName>View</actionName>
+        <content>Opportunity_Record_Page_Branch</content>
+        <formFactor>Large</formFactor>
+        <pageOrSobjectType>Opportunity</pageOrSobjectType>
+        <recordType>Opportunity.Branch</recordType>
+        <type>Flexipage</type>
+        <profile>Admin</profile>
+    </profileActionOverrides>
+    <profileActionOverrides>
         <actionName>Tab</actionName>
         <content>HomePageCRM</content>
         <formFactor>Large</formFactor>
