@@ -2751,7 +2751,10 @@ export const collectWireBusGroups = (node, groups = []) => {
       dashedChildIds: []
     });
 
-    if (child.nodeType === MAP_NODE_TYPE.RELATIONSHIP_GROUP && !child.isClassificationGroupNode) {
+    if (
+      child.nodeType === MAP_NODE_TYPE.RELATIONSHIP_GROUP &&
+      !child.isClassificationGroupNode
+    ) {
       return;
     }
 

@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-06-17
+ * Date: 2026-08-26
  *
  * Unified notification delivery for immediate and digest channels.
  */
@@ -39,7 +39,7 @@ public without sharing class NotificationDeliveryService {
     try {
       deliverSafely(request);
     } catch (Exception error) {
-      if (NotificationGovernorLimitService.isLimitException(error)) {
+      if (isGovernorLimitFailure(error)) {
         NotificationGovernorLimitService.logLimitException(
           'NotificationDeliveryService.deliver',
           error
@@ -80,15 +80,20 @@ public without sharing class NotificationDeliveryService {
     NotificationDeliveryModels.DeliveryRequest request,
     List<Notification_Log__c> logs
   ) {
-    for (Notification_Log__c logRecord : logs) {
-      NotificationDeliveryModels.DeliveryRequest singleRequest = buildSingleLogRequest(
-        request,
-        logRecord
-      );
-      deliverSingleRequest(
-        singleRequest,
-        new List<Notification_Log__c>{ logRecord }
-      );
+    NotificationEmailDeliveryService.beginBatch();
+    try {
+      for (Notification_Log__c logRecord : logs) {
+        NotificationDeliveryModels.DeliveryRequest singleRequest = buildSingleLogRequest(
+          request,
+          logRecord
+        );
+        deliverSingleRequest(
+          singleRequest,
+          new List<Notification_Log__c>{ logRecord }
+        );
+      }
+    } finally {
+      NotificationEmailDeliveryService.endBatch();
     }
   }
 
@@ -142,7 +147,9 @@ public without sharing class NotificationDeliveryService {
       );
     }
 
-    NotificationLogDeliveryService.markSent(logs);
+    if (request.channel != NotificationConstants.CHANNEL_EMAIL) {
+      NotificationLogDeliveryService.markSent(logs);
+    }
   }
 
   public void handleFailure(
@@ -259,6 +266,10 @@ public without sharing class NotificationDeliveryService {
     NotificationDeliveryModels.DeliveryRequest request
   ) {
     if (skipRetryEnqueueForTest || request == null) {
+      return;
+    }
+
+    if (!NotificationGovernorLimitService.canEnqueueQueueableJob()) {
       return;
     }
 
@@ -631,14 +642,15 @@ public without sharing class NotificationDeliveryService {
 
   private static Boolean isGovernorLimitFailure(Exception error) {
     return NotificationGovernorLimitService.isLimitException(error) ||
-      (error != null &&
-      error instanceof NotificationDeliveryException &&
-      isGovernorLimitMessage(error.getMessage()));
+      (error != null && isGovernorLimitMessage(error.getMessage()));
   }
 
   private static Boolean isGovernorLimitMessage(String errorMessage) {
     return !String.isBlank(errorMessage) &&
       (errorMessage.contains('Insufficient SOQL budget') ||
+      NotificationGovernorLimitService.isEmailInvocationLimitMessage(
+        errorMessage
+      ) ||
       errorMessage == NotificationConstants.ERROR_GOVERNOR_LIMIT);
   }
 

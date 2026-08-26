@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-06-17
+ * Date: 2026-08-26
  */
 public without sharing class EmailChannelHandler implements INotificationChannelHandler {
   public NotificationDigestModels.DeliveryResult deliver(
@@ -11,7 +11,8 @@ public without sharing class EmailChannelHandler implements INotificationChannel
     NotificationEmailDeliveryService.sendNotification(
       context.request.recipientId,
       message.title,
-      message.body
+      message.body,
+      context.logs
     );
 
     return NotificationDigestResultFactory.succeeded();

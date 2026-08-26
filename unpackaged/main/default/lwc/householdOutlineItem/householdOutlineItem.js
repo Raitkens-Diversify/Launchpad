@@ -60,7 +60,7 @@ export default class HouseholdOutlineItem extends LightningElement {
     // Remove menu via `removable`; item types with no actions (e.g. DPIs, services) hide the "+"
     // entirely.
     get canAdd() {
-        return !this.item?.isNew && !!this.item?.canAddActions;
+        return !this.item?.isNew && !!this.item?.canAddActions && !this.item?.pendingElsewhere;
     }
 
     // The status indicator mirrors the content-area workspace: an entity surfaces its action
@@ -87,7 +87,7 @@ export default class HouseholdOutlineItem extends LightningElement {
     }
 
     get showAddClient() {
-        return this.item?.iconVariant === 'member' && !(this.item?.actions?.length);
+        return this.item?.iconVariant === 'member' && !(this.item?.actions?.length) && !this.item?.pendingElsewhere;
     }
 
     get showMenu() {

@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-07-27
+ * Date: 2026-08-26
  */
 @IsTest
 private class NotificationGovernorLimitServiceTest {
@@ -251,6 +251,59 @@ private class NotificationGovernorLimitServiceTest {
     System.assertEquals(
       0,
       NotificationGovernorLimitService.resolveRecipientChunkSize(null)
+    );
+  }
+
+  @IsTest
+  static void canInvokeSendEmailHonorsTestOverride() {
+    NotificationGovernorLimitService.resetTestState();
+    System.assertEquals(
+      true,
+      NotificationGovernorLimitService.canInvokeSendEmail()
+    );
+
+    NotificationGovernorLimitService.testForceInsufficientEmailBudget = true;
+
+    System.assertEquals(
+      false,
+      NotificationGovernorLimitService.canInvokeSendEmail()
+    );
+    System.assertEquals(
+      0,
+      NotificationGovernorLimitService.getRemainingEmailInvocationBudget()
+    );
+  }
+
+  @IsTest
+  static void remainingEmailInvocationBudgetHonorsOverride() {
+    NotificationGovernorLimitService.resetTestState();
+    NotificationGovernorLimitService.testRemainingEmailInvocationBudgetOverride = 3;
+
+    System.assertEquals(
+      3,
+      NotificationGovernorLimitService.getRemainingEmailInvocationBudget()
+    );
+  }
+
+  @IsTest
+  static void isEmailInvocationLimitMessageDetectsSalesforceLimitText() {
+    System.assertEquals(
+      true,
+      NotificationGovernorLimitService.isEmailInvocationLimitMessage(
+        'Too many Email Invocations: 11'
+      )
+    );
+    System.assertEquals(
+      true,
+      NotificationGovernorLimitService.isEmailInvocationLimitMessage(
+        NotificationConstants.ERROR_EMAIL_INVOCATION_LIMIT
+      )
+    );
+    System.assertEquals(
+      false,
+      NotificationGovernorLimitService.isEmailInvocationLimitMessage(
+        'Email delivery failed.'
+      )
     );
   }
 }

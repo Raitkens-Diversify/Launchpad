@@ -1538,9 +1538,11 @@ return result;
             candidateServiceIds.add(svc.Id);
         }
         Set<Id> linkedToAnyEnvelopeIds = new Set<Id>();
+        Map<Id, String> pendingEnvelopeNameByAccountId = new Map<Id, String>();
         if (!candidateAccountIds.isEmpty() || !candidateFinAccountIds.isEmpty() || !candidateServiceIds.isEmpty()) {
             for (Envelope_Content__c ec : [
-                SELECT Account__c, Wizard_Financial_Account__c, Service__c
+                SELECT Account__c, Wizard_Financial_Account__c, Service__c,
+                       Envelope__c, Envelope__r.Name
                 FROM Envelope_Content__c
                 WHERE Account__c IN :candidateAccountIds
                 OR Wizard_Financial_Account__c IN :candidateFinAccountIds
@@ -1548,6 +1550,9 @@ return result;
             ]) {
                 if (ec.Account__c != null) {
                     linkedToAnyEnvelopeIds.add(ec.Account__c);
+                    if (ec.Envelope__c != envelopeId && !pendingEnvelopeNameByAccountId.containsKey(ec.Account__c)) {
+                        pendingEnvelopeNameByAccountId.put(ec.Account__c, ec.Envelope__r.Name);
+                    }
                 }
                 if (ec.Wizard_Financial_Account__c != null) {
                     linkedToAnyEnvelopeIds.add(ec.Wizard_Financial_Account__c);
@@ -1560,12 +1565,9 @@ return result;
 
         for (AccountContactRelation acr : relationships) {
             if (acr.Contact == null || acr.Contact.AccountId == null) {
-                continue; // Skip if no related person account
-            }
-            if (memberAccountIds.contains(acr.Contact.AccountId)) {
                 continue;
             }
-            if (!belongsInEnvelope(acr.Contact.AccountId, acr.Contact.Account.Submitted__c, existingRecordIds, linkedToAnyEnvelopeIds)) {
+            if (memberAccountIds.contains(acr.Contact.AccountId)) {
                 continue;
             }
             memberAccountIds.add(acr.Contact.AccountId);
@@ -1573,6 +1575,7 @@ return result;
             String recordTypeName = acr.Contact.Account.RecordType?.DeveloperName;
             MemberData member = createMemberData(acr);
             member.linkedToEnvelope = existingRecordIds.contains(acr.Contact.AccountId);
+            member.pendingEnvelopeName = pendingEnvelopeNameByAccountId.get(acr.Contact.AccountId);
             addMemberByRecordType(
                 member,
                 recordTypeName,
@@ -1590,15 +1593,13 @@ return result;
             if (memberAccountIds.contains(relation.Related_Account__c)) {
                 continue;
             }
-            if (!belongsInEnvelope(relation.Related_Account__c, relation.Related_Account__r.Submitted__c, existingRecordIds, linkedToAnyEnvelopeIds)) {
-                continue;
-            }
             memberAccountIds.add(relation.Related_Account__c);
 
             Account relatedAccount = relation.Related_Account__r;
             String recordTypeName = relatedAccount.RecordType?.DeveloperName;
             MemberData member = createMemberDataFromAccount(relatedAccount);
             member.linkedToEnvelope = existingRecordIds.contains(relation.Related_Account__c);
+            member.pendingEnvelopeName = pendingEnvelopeNameByAccountId.get(relation.Related_Account__c);
             addMemberByRecordType(
                 member,
                 recordTypeName,
@@ -2001,6 +2002,7 @@ return result;
         // Individual added to the envelope, not just a related party on another member.
         @AuraEnabled public Boolean hasClientProfile { get; set; }
         @AuraEnabled public Boolean linkedToEnvelope { get; set; }
+        @AuraEnabled public String pendingEnvelopeName { get; set; }
     }
     
     public class AccountData {

@@ -38,7 +38,7 @@ export const MEMBER_RELATIONSHIP_GROUP_LABELS = Object.freeze({
   COI_Referral: "COI / Referral",
   Service_Provider: "Service Provider",
   Business: "Business",
-  Fiduciary_Legal: "Fiduciary / Regulatory",
+  Fiduciary_Legal: "Fiduciary / Regulatory Related Parties",
   Other: "Other"
 });
 

@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-07-27
+ * Date: 2026-08-26
  */
 @IsTest
 private class NotificationDeliveryDispatcherTest {
@@ -345,6 +345,77 @@ private class NotificationDeliveryDispatcherTest {
       NotificationDeliveryDispatcher.testEnqueuedJobCount,
       'Expected inline overflow delivery to avoid queueable enqueue when budget is exhausted.'
     );
+  }
+
+  @IsTest
+  static void enqueueRequests_batchesOverflowEmailsWithinInvocationLimit() {
+    NotificationDeliveryDispatcher.testEnqueuedJobCount = 0;
+    NotificationGovernorLimitService.resetTestState();
+    NotificationGovernorLimitService.testRemainingQueueableBudgetOverride = 0;
+    NotificationEmailDeliveryService.resetTestState();
+
+    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+    Notification_Rule__c rule = NotificationTestDataFactory.createUserPreference(
+      NotificationConstants.OBJECT_TYPE_CASE,
+      context.recipientUser.Id,
+      NotificationConstants.CHANNEL_EMAIL,
+      NotificationConstants.FREQUENCY_IMMEDIATE
+    );
+
+    Integer emailCount =
+      NotificationConstants.MAX_EMAIL_INVOCATIONS_PER_TRANSACTION + 1;
+    List<NotificationDeliveryModels.DeliveryRequest> requests = new List<NotificationDeliveryModels.DeliveryRequest>();
+    List<Id> logIds = new List<Id>();
+
+    for (Integer index = 0; index < emailCount; index++) {
+      Case caseRecord = new Case(
+        Subject = 'Overflow email ' + index,
+        AccountId = context.household.Id
+      );
+      NotificationTestDataFactory.insertRecord(caseRecord);
+
+      Notification_Log__c logRecord = new Notification_Log__c(
+        Recipient__c = context.recipientUser.Id,
+        Household__c = context.household.Id,
+        Source_Type__c = NotificationConstants.OBJECT_TYPE_CASE,
+        Source_Record_Id__c = String.valueOf(caseRecord.Id),
+        Channel__c = NotificationConstants.CHANNEL_EMAIL,
+        Status__c = NotificationConstants.STATUS_PENDING,
+        Frequency__c = NotificationConstants.FREQUENCY_IMMEDIATE,
+        Notification_Rule__c = rule.Id,
+        Title__c = 'Overflow ' + index,
+        Body__c = 'Body ' + index
+      );
+      NotificationTestDataFactory.insertRecord(logRecord);
+      logIds.add(logRecord.Id);
+      requests.add(NotificationDeliveryRequestBuilder.fromLogId(logRecord.Id));
+    }
+
+    Test.startTest();
+    NotificationDeliveryDispatcher.enqueueRequests(requests);
+    Test.stopTest();
+
+    System.assert(
+      NotificationEmailDeliveryService.testSendEmailInvocationCount <=
+        NotificationConstants.MAX_EMAIL_INVOCATIONS_PER_TRANSACTION,
+      'Overflow email delivery must batch sendEmail calls within the 10-invocation limit.'
+    );
+
+    List<Notification_Log__c> deliveredLogs = [
+      SELECT Status__c, Error_Message__c
+      FROM Notification_Log__c
+      WHERE Id IN :logIds
+    ];
+
+    for (Notification_Log__c logRecord : deliveredLogs) {
+      System.assertEquals(
+        false,
+        NotificationGovernorLimitService.isEmailInvocationLimitMessage(
+          logRecord.Error_Message__c
+        ),
+        'Overflow delivery must not fail logs with Too many Email Invocations.'
+      );
+    }
   }
 
   @IsTest

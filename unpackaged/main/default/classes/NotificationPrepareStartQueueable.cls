@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-08-17
+ * Date: 2026-08-26
  *
  * Runs notification prepare work in a fresh transaction when the caller
  * has insufficient remaining SOQL budget.
@@ -87,21 +87,33 @@ public without sharing class NotificationPrepareStartQueueable implements Queuea
   private void runPrepare() {
     NotificationCenterEventService service = new NotificationCenterEventService();
     List<NotificationCenterDeliveryItem> deliveryItems;
+    NotificationEmailDeliveryService.beginBatch();
 
-    if (prepareNotificationLog) {
-      deliveryItems = service.prepareNotificationLog(sourceId);
-    } else {
-      deliveryItems = service.prepareSourceRecord(
-        sourceType,
-        sourceId,
-        changeContextJson
-      );
-    }
+    try {
+      if (prepareNotificationLog) {
+        deliveryItems = service.prepareNotificationLog(sourceId);
+      } else {
+        deliveryItems = service.prepareSourceRecord(
+          sourceType,
+          sourceId,
+          changeContextJson
+        );
+      }
 
-    if (!(Test.isRunningTest() && testSkipDeliveryEnqueue)) {
-      NotificationDeliveryEnqueueService.enqueueImmediateDeliveryItems(
-        deliveryItems
-      );
+      if (!(Test.isRunningTest() && testSkipDeliveryEnqueue)) {
+        NotificationDeliveryEnqueueService.enqueueImmediateDeliveryItems(
+          deliveryItems
+        );
+      }
+    } finally {
+      try {
+        NotificationEmailDeliveryService.endBatch();
+      } catch (Exception flushError) {
+        NotificationGovernorLimitService.logLimitException(
+          'NotificationPrepareStartQueueable.flush',
+          flushError
+        );
+      }
     }
   }
 

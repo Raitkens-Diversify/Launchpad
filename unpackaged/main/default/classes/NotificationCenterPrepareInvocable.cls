@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-06-17
+ * Date: 2026-08-26
  *
  * Invocable preparation for Notification Center Event delivery.
  */
@@ -31,53 +31,65 @@ public without sharing class NotificationCenterPrepareInvocable {
   ) {
     List<PrepareOutput> outputs = new List<PrepareOutput>();
     NotificationCenterEventService service = new NotificationCenterEventService();
+    NotificationEmailDeliveryService.beginBatch();
 
-    for (EventInput input : inputs) {
-      PrepareOutput output = new PrepareOutput();
-      output.deliveryLogIds = new List<String>();
+    try {
+      for (EventInput input : inputs) {
+        PrepareOutput output = new PrepareOutput();
+        output.deliveryLogIds = new List<String>();
 
+        try {
+          if (NotificationGovernorLimitService.shouldDeferPrepareToAsync()) {
+            NotificationPrepareStartQueueable.enqueue(
+              input.sourceType,
+              input.sourceId,
+              input.changeContext,
+              input.sourceType ==
+                NotificationConstants.OBJECT_TYPE_NOTIFICATION_LOG
+            );
+            outputs.add(output);
+            continue;
+          }
+
+          List<NotificationCenterDeliveryItem> deliveryItems = new List<NotificationCenterDeliveryItem>();
+
+          if (
+            input.sourceType == NotificationConstants.OBJECT_TYPE_NOTIFICATION_LOG
+          ) {
+            deliveryItems = service.prepareNotificationLog(input.sourceId);
+          } else {
+            deliveryItems = service.prepareSourceRecord(
+              input.sourceType,
+              input.sourceId,
+              input.changeContext
+            );
+          }
+
+          for (NotificationCenterDeliveryItem deliveryItem : deliveryItems) {
+            output.deliveryLogIds.add(String.valueOf(deliveryItem.logId));
+          }
+
+          NotificationDeliveryEnqueueService.enqueueImmediateDeliveryItems(
+            deliveryItems
+          );
+        } catch (Exception error) {
+          NotificationGovernorLimitService.logLimitException(
+            'NotificationCenterPrepareInvocable.prepareDelivery',
+            error
+          );
+        }
+
+        outputs.add(output);
+      }
+    } finally {
       try {
-        if (NotificationGovernorLimitService.shouldDeferPrepareToAsync()) {
-          NotificationPrepareStartQueueable.enqueue(
-            input.sourceType,
-            input.sourceId,
-            input.changeContext,
-            input.sourceType ==
-              NotificationConstants.OBJECT_TYPE_NOTIFICATION_LOG
-          );
-          outputs.add(output);
-          continue;
-        }
-
-        List<NotificationCenterDeliveryItem> deliveryItems = new List<NotificationCenterDeliveryItem>();
-
-        if (
-          input.sourceType == NotificationConstants.OBJECT_TYPE_NOTIFICATION_LOG
-        ) {
-          deliveryItems = service.prepareNotificationLog(input.sourceId);
-        } else {
-          deliveryItems = service.prepareSourceRecord(
-            input.sourceType,
-            input.sourceId,
-            input.changeContext
-          );
-        }
-
-        for (NotificationCenterDeliveryItem deliveryItem : deliveryItems) {
-          output.deliveryLogIds.add(String.valueOf(deliveryItem.logId));
-        }
-
-        NotificationDeliveryEnqueueService.enqueueImmediateDeliveryItems(
-          deliveryItems
-        );
-      } catch (Exception error) {
+        NotificationEmailDeliveryService.endBatch();
+      } catch (Exception flushError) {
         NotificationGovernorLimitService.logLimitException(
-          'NotificationCenterPrepareInvocable.prepareDelivery',
-          error
+          'NotificationCenterPrepareInvocable.flush',
+          flushError
         );
       }
-
-      outputs.add(output);
     }
 
     return outputs;

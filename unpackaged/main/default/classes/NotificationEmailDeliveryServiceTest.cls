@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-07-24
+ * Date: 2026-08-26
  */
 @IsTest
 private class NotificationEmailDeliveryServiceTest {
@@ -129,6 +129,67 @@ private class NotificationEmailDeliveryServiceTest {
     System.assertEquals(
       false,
       NotificationEmailDeliveryService.containsHtmlMarkup('')
+    );
+  }
+
+  @IsTest
+  static void batchedSendsStayWithinEmailInvocationLimit() {
+    NotificationEmailDeliveryService.resetTestState();
+    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+    Integer emailCount =
+      NotificationConstants.MAX_EMAIL_INVOCATIONS_PER_TRANSACTION + 1;
+
+    Test.startTest();
+    NotificationEmailDeliveryService.beginBatch();
+    try {
+      for (Integer index = 0; index < emailCount; index++) {
+        NotificationEmailDeliveryService.sendNotification(
+          context.recipientUser.Id,
+          'Subject ' + index,
+          'Body ' + index
+        );
+      }
+    } finally {
+      NotificationEmailDeliveryService.endBatch();
+    }
+    Test.stopTest();
+
+    System.assertEquals(
+      2,
+      NotificationEmailDeliveryService.testSendEmailInvocationCount,
+      '11 emails should flush as two sendEmail invocations (10 + 1), not 11.'
+    );
+    System.assert(
+      Limits.getEmailInvocations() <=
+        NotificationConstants.MAX_EMAIL_INVOCATIONS_PER_TRANSACTION,
+      'Batched delivery must stay within the Salesforce email invocation limit.'
+    );
+  }
+
+  @IsTest
+  static void sendNotificationThrowsCatchableErrorWhenEmailBudgetIsExhausted() {
+    NotificationGovernorLimitService.resetTestState();
+    NotificationGovernorLimitService.testForceInsufficientEmailBudget = true;
+    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+
+    Boolean exceptionThrown = false;
+    String exceptionMessage = '';
+
+    try {
+      NotificationEmailDeliveryService.sendNotification(
+        context.recipientUser.Id,
+        'Subject',
+        'Body'
+      );
+    } catch (NotificationEmailDeliveryService.NotificationEmailDeliveryException ex) {
+      exceptionThrown = true;
+      exceptionMessage = ex.getMessage();
+    }
+
+    System.assertEquals(true, exceptionThrown);
+    System.assertEquals(
+      NotificationConstants.ERROR_EMAIL_INVOCATION_LIMIT,
+      exceptionMessage
     );
   }
 }

@@ -155,7 +155,8 @@ const NON_FIELD_FORM_KEYS = new Set([
   "TaxId",
   "FormationDate",
   "hasClientProfile",
-  "linkedToEnvelope"
+  "linkedToEnvelope",
+  "pendingEnvelopeName"
 ]);
 
 // The object an account interview's product answer is stored on. It is a related record rather than a
@@ -402,7 +403,12 @@ function mapHouseholdResponse(data) {
   const householdMembers = MEMBER_SOURCES.flatMap(({ list, type, typeLabel }) =>
     (data?.[list] || []).map((m) => {
       const isEnvelopeMember = m.submitted === true || m.accountType === "Active Client" || m.linkedToEnvelope === true;
-      const label = isEnvelopeMember ? typeLabel : " ";
+      const isPendingElsewhere = !isEnvelopeMember && !!m.pendingEnvelopeName;
+      const label = isEnvelopeMember
+        ? typeLabel
+        : isPendingElsewhere
+          ? "Pending in Envelope " + m.pendingEnvelopeName
+          : " ";
       return {
         id: m.id,
         groupId: "householdMembers",
@@ -414,7 +420,8 @@ function mapHouseholdResponse(data) {
         meta: buildMeta([label]),
         iconVariant: "member",
         isNew: isEnvelopeMember && !m.submitted,
-        removable: !m.submitted,
+        removable: isEnvelopeMember && !m.submitted,
+        pendingElsewhere: isPendingElsewhere,
         hasClientProfile: m.hasClientProfile === true,
         actions: isEnvelopeMember
           ? [
@@ -2034,7 +2041,8 @@ export default class EnvelopeShellV2 extends LightningElement {
               ? {
                   type: server.type,
                   typeLabel: server.typeLabel,
-                  hasClientProfile: server.hasClientProfile
+                  hasClientProfile: server.hasClientProfile,
+                  pendingElsewhere: server.pendingElsewhere
                 }
               : {})
           };

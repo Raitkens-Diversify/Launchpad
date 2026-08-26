@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-06-17
+ * Date: 2026-08-26
  */
 public with sharing class EmailDigestChannelHandler implements INotificationDigestChannelHandler {
   public NotificationDigestModels.DeliveryResult deliver(
@@ -9,9 +9,10 @@ public with sharing class EmailDigestChannelHandler implements INotificationDige
     NotificationDigestModels.ConsolidatedMessage message = context.message;
 
     NotificationEmailDeliveryService.sendNotification(
-      context.channelSettings,
+      context.request.recipientId,
       message.title,
-      message.body
+      message.body,
+      context.logs
     );
 
     return NotificationDigestResultFactory.succeeded();

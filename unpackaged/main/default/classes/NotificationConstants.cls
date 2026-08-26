@@ -58,6 +58,14 @@ public class NotificationConstants {
   public static final Integer SOQL_PREPARE_DEFER_MIN_BUDGET = 40;
   public static final Integer SOQL_QUERIES_PER_RECIPIENT_PREPARE_CHUNK = 2;
   public static final Integer SOQL_QUERIES_PER_IMMEDIATE_DELIVERY = 8;
+  /**
+   * Salesforce allows 10 Messaging.sendEmail invocations per transaction.
+   * Each invocation may include up to 10 SingleEmailMessage records.
+   * See https://help.salesforce.com/s/articleView?id=000385111&type=1
+   */
+  public static final Integer MAX_EMAIL_INVOCATIONS_PER_TRANSACTION = 10;
+  public static final Integer MAX_EMAILS_PER_SEND_EMAIL_INVOCATION = 10;
+  public static final Integer EMAIL_INVOCATION_SAFETY_BUFFER = 1;
   public static final Integer MAX_RECIPIENTS_PER_PREPARE_CHUNK = 50;
   public static final Integer MIN_RECIPIENTS_PER_PREPARE_CHUNK = 5;
   public static final Integer MAX_RECIPIENT_IDS_PER_SOQL_IN = 200;
@@ -66,6 +74,8 @@ public class NotificationConstants {
 
   public static final String ERROR_GOVERNOR_LIMIT =
     'Governor limit reached while preparing notification logs';
+  public static final String ERROR_EMAIL_INVOCATION_LIMIT =
+    'Insufficient email invocation budget for notification delivery';
 
   public static final String SUPPRESSION_USER_DIGEST_DISABLED =
     'User digest disabled for channel';

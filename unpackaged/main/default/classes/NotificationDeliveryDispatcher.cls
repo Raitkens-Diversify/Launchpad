@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-06-17
+ * Date: 2026-08-26
  *
  * Enqueues unified notification delivery jobs with governor-limit-safe chunking.
  */
@@ -174,12 +174,24 @@ public without sharing class NotificationDeliveryDispatcher {
     List<NotificationDeliveryModels.DeliveryRequest> requests
   ) {
     NotificationDeliveryService deliveryService = new NotificationDeliveryService();
+    NotificationEmailDeliveryService.beginBatch();
 
-    for (NotificationDeliveryModels.DeliveryRequest request : requests) {
+    try {
+      for (NotificationDeliveryModels.DeliveryRequest request : requests) {
+        try {
+          deliveryService.deliver(request);
+        } catch (Exception error) {
+          deliveryService.handleFailure(request, error);
+        }
+      }
+    } finally {
       try {
-        deliveryService.deliver(request);
-      } catch (Exception error) {
-        deliveryService.handleFailure(request, error);
+        NotificationEmailDeliveryService.endBatch();
+      } catch (Exception flushError) {
+        NotificationGovernorLimitService.logLimitException(
+          'NotificationDeliveryDispatcher.deliverOverflowInline.flush',
+          flushError
+        );
       }
     }
   }
@@ -190,27 +202,39 @@ public without sharing class NotificationDeliveryDispatcher {
   ) {
     NotificationDeliveryService deliveryService = new NotificationDeliveryService();
     Integer index = startIndex;
+    NotificationEmailDeliveryService.beginBatch();
 
-    while (index < requests.size()) {
+    try {
+      while (index < requests.size()) {
+        try {
+          deliveryService.deliver(requests[index]);
+        } catch (Exception error) {
+          deliveryService.handleFailure(requests[index], error);
+        }
+
+        index++;
+
+        if (index >= requests.size()) {
+          break;
+        }
+
+        if (Test.isRunningTest()) {
+          continue;
+        }
+
+        System.enqueueJob(new NotificationDeliveryChainQueueable(requests, index));
+        testEnqueuedJobCount++;
+        return;
+      }
+    } finally {
       try {
-        deliveryService.deliver(requests[index]);
-      } catch (Exception error) {
-        deliveryService.handleFailure(requests[index], error);
+        NotificationEmailDeliveryService.endBatch();
+      } catch (Exception flushError) {
+        NotificationGovernorLimitService.logLimitException(
+          'NotificationDeliveryDispatcher.chainDeliverInline.flush',
+          flushError
+        );
       }
-
-      index++;
-
-      if (index >= requests.size()) {
-        break;
-      }
-
-      if (Test.isRunningTest()) {
-        continue;
-      }
-
-      System.enqueueJob(new NotificationDeliveryChainQueueable(requests, index));
-      testEnqueuedJobCount++;
-      return;
     }
   }
 }

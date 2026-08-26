@@ -1,8 +1,10 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-06-17
+ * Date: 2026-08-26
  *
  * Sends notification emails for immediate and digest delivery.
+ * Batches Messaging.sendEmail so one transaction stays within the
+ * 10-invocation governor limit (see Salesforce article 000385111).
  */
 public without sharing class NotificationEmailDeliveryService {
   @TestVisible
@@ -12,46 +14,58 @@ public without sharing class NotificationEmailDeliveryService {
   private static Id cachedOrgWideEmailAddressId;
 
   @TestVisible
+  private static Integer batchDepth = 0;
+
+  @TestVisible
+  private static Integer testSendEmailInvocationCount = 0;
+
+  @TestVisible
   private static final Pattern HTML_MARKUP_PATTERN = Pattern.compile(
     '(?i)<(table|a\\s|div|p|br\\s*/?|html|body|thead|tbody|tr|td|th|span|ul|ol|li|h[1-6])\\b'
   );
+
+  private static List<PendingEmail> pendingEmails = new List<PendingEmail>();
+
+  public static void beginBatch() {
+    batchDepth++;
+  }
+
+  public static void endBatch() {
+    if (batchDepth > 0) {
+      batchDepth--;
+    }
+
+    if (batchDepth == 0) {
+      flush();
+    }
+  }
+
+  public static Boolean isBatchMode() {
+    return batchDepth > 0;
+  }
 
   public static void sendNotification(
     Id recipientId,
     String subject,
     String body
   ) {
+    sendNotification(recipientId, subject, body, null);
+  }
+
+  public static void sendNotification(
+    Id recipientId,
+    String subject,
+    String body,
+    List<Notification_Log__c> logs
+  ) {
     if (recipientId == null) {
       throw new NotificationEmailDeliveryException('Recipient Id is required.');
     }
 
-    String toAddress = resolveDeliveryAddress(recipientId);
+    pendingEmails.add(new PendingEmail(recipientId, subject, body, logs));
 
-    if (String.isBlank(toAddress)) {
-      throw new NotificationEmailDeliveryException(
-        'No email delivery address is configured for this user.'
-      );
-    }
-
-    Messaging.SingleEmailMessage email = buildEmailMessage(
-      toAddress,
-      subject,
-      body,
-      true
-    );
-
-    List<Messaging.SendEmailResult> results = Messaging.sendEmail(
-      new List<Messaging.SingleEmailMessage>{ email }
-    );
-
-    if (results.isEmpty() || !results[0].isSuccess()) {
-      String errorMessage = 'Email delivery failed.';
-
-      if (!results.isEmpty() && !results[0].getErrors().isEmpty()) {
-        errorMessage = results[0].getErrors()[0].getMessage();
-      }
-
-      throw new NotificationEmailDeliveryException(errorMessage);
+    if (batchDepth == 0) {
+      flush();
     }
   }
 
@@ -63,15 +77,187 @@ public without sharing class NotificationEmailDeliveryService {
     sendNotification(recipientId, subject, body);
   }
 
-  public static String resolveDeliveryAddress(Id recipientId) {
-    User userRecord = [
-      SELECT Email
-      FROM User
-      WHERE Id = :recipientId
-      LIMIT 1
-    ];
+  public static void flush() {
+    if (pendingEmails.isEmpty()) {
+      return;
+    }
 
-    return userRecord.Email;
+    List<PendingEmail> emailsToSend = pendingEmails;
+    pendingEmails = new List<PendingEmail>();
+
+    Map<Id, String> recipientIdToAddress = resolveDeliveryAddresses(
+      collectRecipientIds(emailsToSend)
+    );
+
+    List<Messaging.SingleEmailMessage> chunkMessages = new List<Messaging.SingleEmailMessage>();
+    List<PendingEmail> chunkEmails = new List<PendingEmail>();
+    List<Notification_Log__c> sentLogs = new List<Notification_Log__c>();
+    List<String> failureMessages = new List<String>();
+    Boolean hitInvocationLimit = false;
+
+    for (PendingEmail pendingEmail : emailsToSend) {
+      String toAddress = recipientIdToAddress.get(pendingEmail.recipientId);
+
+      if (String.isBlank(toAddress)) {
+        failureMessages.add(
+          'No email delivery address is configured for this user.'
+        );
+        continue;
+      }
+
+      chunkMessages.add(
+        buildEmailMessage(toAddress, pendingEmail.subject, pendingEmail.body, true)
+      );
+      chunkEmails.add(pendingEmail);
+
+      if (
+        chunkMessages.size() >=
+        NotificationConstants.MAX_EMAILS_PER_SEND_EMAIL_INVOCATION
+      ) {
+        SendChunkResult chunkResult = sendChunk(chunkMessages, chunkEmails);
+        sentLogs.addAll(chunkResult.sentLogs);
+        failureMessages.addAll(chunkResult.failureMessages);
+        hitInvocationLimit =
+          hitInvocationLimit || chunkResult.hitInvocationLimit;
+        chunkMessages = new List<Messaging.SingleEmailMessage>();
+        chunkEmails = new List<PendingEmail>();
+
+        if (chunkResult.hitInvocationLimit) {
+          break;
+        }
+      }
+    }
+
+    if (!chunkMessages.isEmpty() && !hitInvocationLimit) {
+      SendChunkResult chunkResult = sendChunk(chunkMessages, chunkEmails);
+      sentLogs.addAll(chunkResult.sentLogs);
+      failureMessages.addAll(chunkResult.failureMessages);
+      hitInvocationLimit = chunkResult.hitInvocationLimit;
+    }
+
+    if (!sentLogs.isEmpty()) {
+      NotificationLogDeliveryService.markSent(sentLogs);
+    }
+
+    if (hitInvocationLimit && sentLogs.isEmpty()) {
+      throw new NotificationEmailDeliveryException(
+        NotificationConstants.ERROR_EMAIL_INVOCATION_LIMIT
+      );
+    }
+
+    if (!failureMessages.isEmpty() && sentLogs.isEmpty()) {
+      throw new NotificationEmailDeliveryException(failureMessages[0]);
+    }
+  }
+
+  public static String resolveDeliveryAddress(Id recipientId) {
+    Map<Id, String> recipientIdToAddress = resolveDeliveryAddresses(
+      new Set<Id>{ recipientId }
+    );
+    return recipientIdToAddress.get(recipientId);
+  }
+
+  @TestVisible
+  public static void resetTestState() {
+    pendingEmails = new List<PendingEmail>();
+    batchDepth = 0;
+    testSendEmailInvocationCount = 0;
+  }
+
+  private static SendChunkResult sendChunk(
+    List<Messaging.SingleEmailMessage> messages,
+    List<PendingEmail> chunkEmails
+  ) {
+    SendChunkResult chunkResult = new SendChunkResult();
+
+    if (messages == null || messages.isEmpty()) {
+      return chunkResult;
+    }
+
+    if (!NotificationGovernorLimitService.canInvokeSendEmail()) {
+      chunkResult.hitInvocationLimit = true;
+      return chunkResult;
+    }
+
+    List<Messaging.SendEmailResult> results = Messaging.sendEmail(
+      messages,
+      false
+    );
+    testSendEmailInvocationCount++;
+
+    for (Integer index = 0; index < chunkEmails.size(); index++) {
+      PendingEmail pendingEmail = chunkEmails[index];
+      Boolean isSuccess =
+        results != null &&
+        index < results.size() &&
+        results[index].isSuccess();
+
+      if (isSuccess) {
+        chunkResult.sentLogs.addAll(safeLogs(pendingEmail));
+        continue;
+      }
+
+      String errorMessage = 'Email delivery failed.';
+
+      if (
+        results != null &&
+        index < results.size() &&
+        results[index].getErrors() != null &&
+        !results[index].getErrors().isEmpty()
+      ) {
+        errorMessage = results[index].getErrors()[0].getMessage();
+      }
+
+      chunkResult.failureMessages.add(errorMessage);
+    }
+
+    return chunkResult;
+  }
+
+  private static Map<Id, String> resolveDeliveryAddresses(Set<Id> recipientIds) {
+    Map<Id, String> recipientIdToAddress = new Map<Id, String>();
+
+    if (recipientIds == null || recipientIds.isEmpty()) {
+      return recipientIdToAddress;
+    }
+
+    for (User userRecord : [
+      SELECT Id, Email
+      FROM User
+      WHERE Id IN :recipientIds
+    ]) {
+      recipientIdToAddress.put(userRecord.Id, userRecord.Email);
+    }
+
+    return recipientIdToAddress;
+  }
+
+  private static Set<Id> collectRecipientIds(List<PendingEmail> emails) {
+    Set<Id> recipientIds = new Set<Id>();
+
+    for (PendingEmail pendingEmail : emails) {
+      if (pendingEmail.recipientId != null) {
+        recipientIds.add(pendingEmail.recipientId);
+      }
+    }
+
+    return recipientIds;
+  }
+
+  private static List<Notification_Log__c> safeLogs(PendingEmail pendingEmail) {
+    if (pendingEmail == null || pendingEmail.logs == null) {
+      return new List<Notification_Log__c>();
+    }
+
+    List<Notification_Log__c> logsWithIds = new List<Notification_Log__c>();
+
+    for (Notification_Log__c logRecord : pendingEmail.logs) {
+      if (logRecord != null && logRecord.Id != null) {
+        logsWithIds.add(logRecord);
+      }
+    }
+
+    return logsWithIds;
   }
 
   private static Messaging.SingleEmailMessage buildEmailMessage(
@@ -148,6 +334,31 @@ public without sharing class NotificationEmailDeliveryService {
     }
 
     return htmlBody.replaceAll('<[^>]+>', ' ').replaceAll('\\s+', ' ').trim();
+  }
+
+  private class PendingEmail {
+    public Id recipientId;
+    public String subject;
+    public String body;
+    public List<Notification_Log__c> logs;
+
+    public PendingEmail(
+      Id recipientId,
+      String subject,
+      String body,
+      List<Notification_Log__c> logs
+    ) {
+      this.recipientId = recipientId;
+      this.subject = subject;
+      this.body = body;
+      this.logs = logs;
+    }
+  }
+
+  private class SendChunkResult {
+    public List<Notification_Log__c> sentLogs = new List<Notification_Log__c>();
+    public List<String> failureMessages = new List<String>();
+    public Boolean hitInvocationLimit = false;
   }
 
   public class NotificationEmailDeliveryException extends Exception {

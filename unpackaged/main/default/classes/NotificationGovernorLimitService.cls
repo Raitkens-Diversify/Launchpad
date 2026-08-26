@@ -1,8 +1,8 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-07-27
+ * Date: 2026-08-26
  *
- * Governor-limit helpers for chunking notification preparation and DML.
+ * Governor-limit helpers for chunking notification preparation, DML, and email send.
  */
 public class NotificationGovernorLimitService {
   @TestVisible
@@ -15,10 +15,16 @@ public class NotificationGovernorLimitService {
   private static Boolean testForceInsufficientDeliveryBudget;
 
   @TestVisible
+  private static Boolean testForceInsufficientEmailBudget;
+
+  @TestVisible
   private static Boolean testForceDeferPrepareToAsync;
 
   @TestVisible
   private static Integer testRemainingQueueableBudgetOverride;
+
+  @TestVisible
+  private static Integer testRemainingEmailInvocationBudgetOverride;
 
   public static Boolean shouldDeferPrepareToAsync() {
     if (System.isQueueable() || System.isBatch()) {
@@ -90,6 +96,43 @@ public class NotificationGovernorLimitService {
 
     return getRemainingSoqlBudget() >=
       NotificationConstants.SOQL_QUERIES_PER_IMMEDIATE_DELIVERY;
+  }
+
+  public static Boolean canInvokeSendEmail() {
+    return getRemainingEmailInvocationBudget() > 0;
+  }
+
+  public static Integer getEmailInvocationLimit() {
+    return Limits.getLimitEmailInvocations();
+  }
+
+  public static Integer getRemainingEmailInvocationBudget() {
+    if (Test.isRunningTest() && testForceInsufficientEmailBudget == true) {
+      return 0;
+    }
+
+    if (
+      Test.isRunningTest() &&
+      testRemainingEmailInvocationBudgetOverride != null
+    ) {
+      return Math.max(0, testRemainingEmailInvocationBudgetOverride);
+    }
+
+    Integer remainingInvocations =
+      getEmailInvocationLimit() - Limits.getEmailInvocations();
+    return Math.max(
+      0,
+      remainingInvocations - NotificationConstants.EMAIL_INVOCATION_SAFETY_BUFFER
+    );
+  }
+
+  public static Boolean isEmailInvocationLimitMessage(String errorMessage) {
+    if (String.isBlank(errorMessage)) {
+      return false;
+    }
+
+    return errorMessage.contains('Too many Email Invocations') ||
+      errorMessage == NotificationConstants.ERROR_EMAIL_INVOCATION_LIMIT;
   }
 
   public static Integer getSoqlLimit() {
@@ -204,7 +247,11 @@ public class NotificationGovernorLimitService {
       ' | SOQL ' +
       Limits.getQueries() +
       '/' +
-      getSoqlLimit();
+      getSoqlLimit() +
+      ' | Email ' +
+      Limits.getEmailInvocations() +
+      '/' +
+      getEmailInvocationLimit();
 
     loggedLimitMessages.add(message);
     System.debug(LoggingLevel.ERROR, message);
@@ -214,8 +261,14 @@ public class NotificationGovernorLimitService {
   public static void resetTestState() {
     testRecipientChunkSizeOverride = null;
     testForceInsufficientDeliveryBudget = false;
+    testForceInsufficientEmailBudget = false;
     testForceDeferPrepareToAsync = false;
     testRemainingQueueableBudgetOverride = null;
+    testRemainingEmailInvocationBudgetOverride = null;
     loggedLimitMessages = new List<String>();
+
+    if (Test.isRunningTest()) {
+      NotificationEmailDeliveryService.resetTestState();
+    }
   }
 }
