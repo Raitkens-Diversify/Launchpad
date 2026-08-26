@@ -72,7 +72,7 @@
                     "objectApiName" : "Case",
                     "pillFields" : "Status,Priority",
                     "title" : "",
-                    "viewTabs" : "All_Cases=All Cases,Advertising_Requests=Advertising Request"
+                    "viewTabs" : "All_Cases=All Cases,MyOpenCases=My Open Cases,My_teams_open_cases=My Team's Open Cases"
                   },
                   "definition" : "c:arcRecordListView",
                   "id" : "25eefd59-38d1-4184-9b23-7931a6d9b191",

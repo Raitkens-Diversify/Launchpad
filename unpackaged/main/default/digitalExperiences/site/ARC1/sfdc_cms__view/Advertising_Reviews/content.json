@@ -27,7 +27,7 @@
                 "objectApiName" : "Advertising_Item__c",
                 "pillFields" : "Status__c",
                 "title" : "Advertising Reviews",
-                "viewTabs" : "My_Team_s_Advertising_Requests=My Team's Requests,All=All Items"
+                "viewTabs" : "[{\"view\": \"My_Team_s_Advertising_Requests\", \"label\": \"My Team's Requests\", \"title\": \"Advertising Reviews\", \"subtitle\": \"Advertising items submitted for compliance review\", \"action\": \"New Advertising Item\"}, {\"view\": \"All\", \"label\": \"All Items\", \"title\": \"Advertising Reviews\", \"subtitle\": \"Every advertising item\", \"action\": \"New Advertising Item\"}]"
               },
               "definition" : "c:arcRecordListView",
               "id" : "21dec2b8-e19d-491b-a829-18b2ac2147fa",

@@ -23,12 +23,9 @@
             "children" : [ {
               "attributes" : {
                 "dxpStyle" : { },
-                "enableEditing" : false,
-                "fieldSetApiName" : "ARC_Task",
-                "objectApiName" : "Task",
-                "sectionTitle" : "Task Detail"
+                "fieldLayout" : "grid"
               },
-              "definition" : "c:arcRecordDetailByFieldSet",
+              "definition" : "c:arcRecordDetail",
               "id" : "6f1dfcc1-8054-46ce-bd07-d3d2d6dbbef3",
               "type" : "component"
             } ],

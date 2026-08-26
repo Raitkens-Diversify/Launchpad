@@ -20,6 +20,20 @@
             "sectionVerticalAlign" : "flex-start"
           },
           "children" : [ {
+            "children" : [ {
+              "attributes" : {
+                "defaultColumns" : "",
+                "defaultListViewApiName" : "All",
+                "dxpStyle" : { },
+                "objectApiName" : "Task",
+                "pillFields" : "Status",
+                "title" : "Tasks",
+                "viewTabs" : "All=All Tasks,My_Open_Tasks=My Open Tasks,My_Team_s_Open_Tasks=My Team's Open Tasks"
+              },
+              "definition" : "c:arcRecordListView",
+              "id" : "a1c4f2d0-6b3e-4f1a-9c27-53b8e1d40f11",
+              "type" : "component"
+            } ],
             "id" : "7e926cd7-3e1d-4923-98c6-4cbf7a3f142b",
             "name" : "col1",
             "title" : "Column 1",

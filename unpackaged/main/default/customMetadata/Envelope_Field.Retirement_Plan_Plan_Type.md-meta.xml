@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-    <label>Retirement Plan - Plan Type</label>
+    <label>Retirement Plan - Plan Sub Type</label>
     <protected>false</protected>
     <values>
         <field>Account_Type__c</field>
@@ -16,7 +16,7 @@
     </values>
     <values>
         <field>Field_API__c</field>
-        <value xsi:type="xsd:string">Plan_Type__c</value>
+        <value xsi:type="xsd:string">Retirement_Plan_Sub_Type__c</value>
     </values>
     <values>
         <field>Field_Type_Override__c</field>

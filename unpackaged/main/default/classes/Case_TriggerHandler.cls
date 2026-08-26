@@ -1485,7 +1485,11 @@ record.OwnerId = queuePRId;
                            lstCaseTemptValue.add(caseTemplate);
                        } 
                    }
-                   if(caseTemplate.get(lstOfCaseTemplateField[indexNumber]) == String.valueOf(caseRecord.get(mapCaseTempFldToCaseFld.get(lstOfCaseTemplateField[indexNumber])))
+                   String caseFieldValue = String.valueOf(caseRecord.get(mapCaseTempFldToCaseFld.get(lstOfCaseTemplateField[indexNumber])));
+                   if(lstOfCaseTemplateField[indexNumber] == 'Live_SLOA_on_File__c'){
+                       caseFieldValue = caseFieldValue == 'true' ? 'false' : 'true';
+                   }
+                   if(caseTemplate.get(lstOfCaseTemplateField[indexNumber]) == caseFieldValue
                       || caseTemplate.get(lstOfCaseTemplateField[indexNumber]) == caseTemplateFieldDefaultValue
                       || lstOfCaseTemplateField[indexNumber] == 'Management_Style__c'){
                           if(lstOfCaseTemplateField[indexNumber] == 'Management_Style__c'){
@@ -1534,7 +1538,11 @@ record.OwnerId = queuePRId;
         for(Case_Template__c caseTemp : lstCaseTemplate){
             Integer count = 0;
             for(String caseTemFld : mapCaseTempFldToCaseFld.keySet()){
-                if(caseTemp.get(caseTemFld) == String.valueOf(caseRecord.get(mapCaseTempFldToCaseFld.get(caseTemFld)))){
+                String caseVal = String.valueOf(caseRecord.get(mapCaseTempFldToCaseFld.get(caseTemFld)));
+                if(caseTemFld == 'Live_SLOA_on_File__c'){
+                    caseVal = caseVal == 'true' ? 'false' : 'true';
+                }
+                if(caseTemp.get(caseTemFld) == caseVal){
                     count++;
                 }
             }

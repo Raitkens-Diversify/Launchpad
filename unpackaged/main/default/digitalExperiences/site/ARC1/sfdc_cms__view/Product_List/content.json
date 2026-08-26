@@ -20,6 +20,18 @@
             "sectionVerticalAlign" : "flex-start"
           },
           "children" : [ {
+            "children" : [ {
+              "attributes" : {
+                "defaultColumns" : "",
+                "defaultListViewApiName" : "All",
+                "dxpStyle" : { },
+                "objectApiName" : "Product__c",
+                "title" : "Products"
+              },
+              "definition" : "c:arcRecordListView",
+              "id" : "e2c8e5d4-1a2b-4c3d-9e5f-6a7b8c9d0e1f",
+              "type" : "component"
+            } ],
             "id" : "6153f2ea-e6f7-4821-8964-1e1af51bd4a5",
             "name" : "col1",
             "title" : "Column 1",
@@ -53,7 +65,7 @@
       "type" : "component"
     },
     "dataProviders" : [ ],
-    "themeLayoutType" : "Inner",
+    "themeLayoutType" : "OHzbXAVux6mZ7VVDb7Pb8F2YUFBAXR",
     "viewType" : "list-Product__c"
   },
   "urlName" : "product-list"

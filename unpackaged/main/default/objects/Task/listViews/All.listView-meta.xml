@@ -6,6 +6,7 @@
     <columns>WHAT_NAME</columns>
     <columns>DUE_DATE</columns>
     <columns>LAST_UPDATE</columns>
+    <columns>CREATED_DATE</columns>
     <columns>CORE.USERS.ALIAS</columns>
     <columns>Financial_Advisor_Team__c</columns>
     <columns>PRIORITY</columns>
@@ -13,15 +14,5 @@
     <columns>UPDATEDBY_USER.ALIAS</columns>
     <columns>CREATEDBY_USER.ALIAS</columns>
     <filterScope>Everything</filterScope>
-    <filters>
-        <field>CORE.USERS.FULL_NAME</field>
-        <operation>contains</operation>
-        <value>lexie</value>
-    </filters>
-    <filters>
-        <field>STATUS</field>
-        <operation>equals</operation>
-        <value>Open,Not Started,In Progress,NIGO,Canceled,Waiting on someone else</value>
-    </filters>
     <label>All</label>
 </ListView>

@@ -20,6 +20,19 @@
             "sectionVerticalAlign" : "flex-start"
           },
           "children" : [ {
+            "children" : [ {
+              "attributes" : {
+                "dxpStyle" : { },
+                "enablePagination" : true,
+                "enableSearch" : true,
+                "pageSize" : 25,
+                "searchPlaceholder" : "Search envelopes...",
+                "title" : "Envelopes"
+              },
+              "definition" : "c:envelopeTable",
+              "id" : "1f6a7b8c-d0e1-4234-9012-567890123abc",
+              "type" : "component"
+            } ],
             "id" : "706a3788-e2c6-4b16-ac45-2731eeea215e",
             "name" : "col1",
             "title" : "Column 1",

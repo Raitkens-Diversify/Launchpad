@@ -120,11 +120,14 @@ export const resolveCommunityBasePath = () => {
     );
   }
 
-  if (typeof window === "undefined") {
-    return "";
-  }
-
-  return stripExperienceRouteFromPath(window.location.pathname);
+  // No configured site path prefix (e.g. a root-mapped custom domain) means
+  // the base path is simply "". Deriving it from window.location.pathname
+  // instead is wrong here: on any page whose path isn't itself a record
+  // route (list pages, /notifications, etc.) there's nothing to strip, so
+  // the current page's own path gets treated as the base and every record
+  // link built from it nests under that page (e.g. "/notifications/task/{id}"
+  // instead of "/task/{id}").
+  return "";
 };
 
 export const buildExperienceRecordPath = (recordId, objectApiName, options = {}) => {

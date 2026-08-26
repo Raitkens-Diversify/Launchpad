@@ -1363,22 +1363,6 @@
     <picklistValues>
         <picklist>Disqualified_Reason__c</picklist>
         <values>
-            <fullName>Chose Another Firm</fullName>
-            <default>false</default>
-        </values>
-        <values>
-            <fullName>Compliance %2F Risk Concern</fullName>
-            <default>false</default>
-        </values>
-        <values>
-            <fullName>Cultural %2F Strategic Fit</fullName>
-            <default>false</default>
-        </values>
-        <values>
-            <fullName>Economics %2F Deal Terms</fullName>
-            <default>false</default>
-        </values>
-        <values>
             <fullName>Insufficient Assets</fullName>
             <default>false</default>
         </values>
@@ -1388,22 +1372,6 @@
         </values>
         <values>
             <fullName>Not the Right Time</fullName>
-            <default>false</default>
-        </values>
-        <values>
-            <fullName>Platform %2F Services Fit</fullName>
-            <default>false</default>
-        </values>
-        <values>
-            <fullName>Started Own RIA</fullName>
-            <default>false</default>
-        </values>
-        <values>
-            <fullName>Stayed with Current Firm</fullName>
-            <default>false</default>
-        </values>
-        <values>
-            <fullName>Timing %2F Not Ready</fullName>
             <default>false</default>
         </values>
         <values>
@@ -3770,22 +3738,6 @@
         </values>
         <values>
             <fullName>Financial Planning</fullName>
-            <default>false</default>
-        </values>
-        <values>
-            <fullName>RIA 1099</fullName>
-            <default>false</default>
-        </values>
-        <values>
-            <fullName>RIA 1099 %2B BD</fullName>
-            <default>false</default>
-        </values>
-        <values>
-            <fullName>RIA W2</fullName>
-            <default>false</default>
-        </values>
-        <values>
-            <fullName>RIA W2 %2B BD</fullName>
             <default>false</default>
         </values>
         <values>

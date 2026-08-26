@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>All_Retirement_Plans</fullName>
+    <columns>ACCOUNT.NAME</columns>
+    <columns>Entity_Type__c</columns>
+    <columns>ACCOUNT.ADDRESS1_STATE</columns>
+    <columns>ACCOUNT.TYPE</columns>
+    <columns>FinServ__TotalFinancialAccounts__c</columns>
+    <columns>Financial_Advisor_Team__c</columns>
+    <columns>ACCOUNT.CREATED_DATE</columns>
+    <columns>ACCOUNT.LAST_UPDATE</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>ACCOUNT.RECORDTYPE</field>
+        <operation>equals</operation>
+        <value>Account.Retirement_Plan</value>
+    </filters>
+    <label>All Retirement Plans</label>
+</ListView>
