@@ -1,0 +1,12 @@
+{
+  "type" : "sfdc_cms__route",
+  "title" : "Notifications",
+  "contentBody" : {
+    "activeViewId" : "Notifications",
+    "configurationTags" : [ ],
+    "pageAccess" : "UseParent",
+    "routeType" : "custom-notifications",
+    "urlPrefix" : "notifications"
+  },
+  "urlName" : "notifications"
+}

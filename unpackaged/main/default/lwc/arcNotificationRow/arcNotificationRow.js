@@ -2,7 +2,7 @@ import { LightningElement, api } from "lwc";
 import { NavigationMixin } from "lightning/navigation";
 import NEXS_ICONS from "@salesforce/resourceUrl/arcicon";
 import markAsRead from "@salesforce/apex/NotificationCenterController.markAsRead";
-import { buildRecordNavigationReference } from "c/recordNavigationUtils";
+import { buildRecordNavigationReference } from "c/recordNavigationCommunityUtils";
 
 const WARNING_ICON = "warning.svg";
 

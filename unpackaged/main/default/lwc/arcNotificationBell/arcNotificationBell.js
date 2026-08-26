@@ -25,8 +25,11 @@ import {
 import { reduceError } from "c/notificationCenterUtils";
 
 const BELL_ICON = "bell.svg";
+const VIEW_ALL_ICON = "caret-right.svg";
 const INBOX_FILTER_UNREAD = "UNREAD";
 const INBOX_PAGE_SIZE = 100;
+/** Route urlPrefix of the Notifications page (ARC1 sfdc_cms__route/Notifications__c). */
+const NOTIFICATIONS_PATH = "/notifications";
 
 const SOURCE_TYPE_TO_OBJECT = Object.freeze({
   Case: "Case",
@@ -123,7 +126,7 @@ const mapNotificationRow = (notification) => {
 };
 
 export default class ArcNotificationBell extends NavigationMixin(LightningElement) {
-  /** @deprecated View All link removed from the bell dropdown. */
+  /** @deprecated Bell always links to the ARC1 Notifications page. */
   @api viewAllPath;
 
   /** @deprecated Bell shows all unread notifications. */
@@ -204,6 +207,10 @@ export default class ArcNotificationBell extends NavigationMixin(LightningElemen
 
   get iconStyle() {
     return `--icon-url: url('${NEXS_ICONS}/${BELL_ICON}');`;
+  }
+
+  get viewAllIconStyle() {
+    return `--icon-url: url('${NEXS_ICONS}/${VIEW_ALL_ICON}');`;
   }
 
   get bellButtonClass() {
@@ -406,5 +413,15 @@ export default class ArcNotificationBell extends NavigationMixin(LightningElemen
     }
 
     this[NavigationMixin.Navigate](pageReference);
+  }
+
+  /** "View All" (Figma 760:132655) opens the full ARC1 Notifications page. */
+  handleViewAllClick(event) {
+    event.stopPropagation();
+    this.closePanel();
+    this[NavigationMixin.Navigate]({
+      type: "standard__webPage",
+      attributes: { url: NOTIFICATIONS_PATH }
+    });
   }
 }

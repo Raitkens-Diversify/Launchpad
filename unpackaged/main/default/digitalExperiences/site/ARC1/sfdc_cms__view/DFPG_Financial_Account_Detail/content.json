@@ -22,21 +22,6 @@
           "children" : [ {
             "children" : [ {
               "attributes" : {
-                "ariaLabel" : "Breadcrumb",
-                "currentLabel" : "",
-                "dxpStyle" : { },
-                "listLabel" : "",
-                "listPath" : "/account/Account/Default?c__tabId=tab1",
-                "nameField" : "Name",
-                "objectApiName" : "Account",
-                "parentKey" : "",
-                "parentLabel" : ""
-              },
-              "definition" : "c:arcBreadcrumb",
-              "id" : "114b51d7-ab53-44d9-8847-42af8ada4bb2",
-              "type" : "component"
-            }, {
-              "attributes" : {
                 "backgroundColor" : "",
                 "dxpStyle" : { },
                 "layout" : "{!Item._layout}",

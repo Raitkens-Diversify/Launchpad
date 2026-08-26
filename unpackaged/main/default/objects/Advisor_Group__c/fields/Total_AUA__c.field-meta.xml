@@ -2,9 +2,9 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Total_AUA__c</fullName>
     <label>Total AUA</label>
-    <precision>15</precision>
+    <precision>17</precision>
     <required>false</required>
-    <scale>0</scale>
+    <scale>2</scale>
     <trackHistory>false</trackHistory>
     <trackTrending>false</trackTrending>
     <type>Currency</type>

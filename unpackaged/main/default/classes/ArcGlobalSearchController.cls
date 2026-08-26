@@ -97,11 +97,15 @@ public with sharing class ArcGlobalSearchController {
       return result;
     }
 
-    // Compliance_Exception__c has Search disabled at the object level
-    // (enableSearch=false) — that's an object-wide setting we shouldn't
-    // flip just for this feature, so it's recalled via a plain SOQL LIKE
-    // query instead of SOSL. Everything else supports SOSL and shares one
-    // federated recall pass.
+    // Compliance_Exception__c and Financial_Account__c both have Search
+    // disabled at the object level (enableSearch=false) in this org — an
+    // object-wide setting we shouldn't flip just for this feature, so both
+    // are recalled via a plain SOQL LIKE query instead of SOSL. A SOSL
+    // FIND...RETURNING clause naming a non-searchable object throws
+    // "entity type X does not support search" and aborts the whole
+    // federated pass, which is why Financial_Account__c must be excluded
+    // from it entirely, not just guarded by object accessibility.
+    // Everything else supports SOSL and shares one federated recall pass.
     //
     // Leading + trailing wildcard so a term matches anywhere in the field
     // (contains), not just at the start of a word — e.g. "cme" still finds
@@ -116,12 +120,7 @@ public with sharing class ArcGlobalSearchController {
       '), ' +
       'Case(Id, CaseNumber, Subject, Status LIMIT ' +
       SOSL_LIMIT +
-      ')' +
-      (financialAccountsAccessible()
-        ? ', Financial_Account__c(Id, Name, Financial_Account_Type__c LIMIT ' +
-          SOSL_LIMIT +
-          ')'
-        : '');
+      ')';
 
     List<List<SObject>> searchResults;
     try {
@@ -149,7 +148,7 @@ public with sharing class ArcGlobalSearchController {
     if (financialAccountsAccessible()) {
       populateGroup(
         result.categories[2],
-        searchResults[2],
+        queryFinancialAccounts(cleanTerm),
         'Financial_Account__c',
         maxPerCategory
       );
@@ -233,6 +232,21 @@ public with sharing class ArcGlobalSearchController {
     return [
       SELECT Id, Name, Exception_Reason__c
       FROM Compliance_Exception__c
+      WHERE Name LIKE :likeTerm
+      LIMIT :SOSL_LIMIT
+    ];
+  }
+
+  /**
+   * Name-contains recall for Financial_Account__c, which doesn't support
+   * SOSL in this org (enableSearch=false on the object). Same pattern as
+   * queryComplianceExceptions.
+   */
+  private static List<SObject> queryFinancialAccounts(String cleanTerm) {
+    String likeTerm = '%' + cleanTerm + '%';
+    return [
+      SELECT Id, Name, Financial_Account_Type__c
+      FROM Financial_Account__c
       WHERE Name LIKE :likeTerm
       LIMIT :SOSL_LIMIT
     ];

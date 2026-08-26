@@ -95,6 +95,21 @@
               </template>
             </template>
           </div>
+
+          <div class="notification-bell__footer">
+            <button
+              type="button"
+              class="notification-bell__view-all"
+              onclick={handleViewAllClick}
+            >
+              View All
+              <span
+                class="notification-bell__view-all-icon"
+                style={viewAllIconStyle}
+                aria-hidden="true"
+              ></span>
+            </button>
+          </div>
         </section>
       </template>
     </div>

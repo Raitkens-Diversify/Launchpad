@@ -22,18 +22,6 @@
           "children" : [ {
             "children" : [ {
               "attributes" : {
-                "ariaLabel" : "Breadcrumb",
-                "dxpStyle" : { },
-                "listLabel" : "All Contacts",
-                "listPath" : "/account/Account/Default?c__tabId=tab1",
-                "nameField" : "Name",
-                "objectApiName" : "Account"
-              },
-              "definition" : "c:arcBreadcrumb",
-              "id" : "ab8eeca3-084c-4768-92f8-2c44c73f6dc6",
-              "type" : "component"
-            }, {
-              "attributes" : {
                 "dxpStyle" : { }
               },
               "definition" : "c:arcAccountHeader",
