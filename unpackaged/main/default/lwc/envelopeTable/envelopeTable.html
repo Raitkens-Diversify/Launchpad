@@ -81,16 +81,29 @@
                     </template>
                   </select>
                 </label>
-                <label class="envelope-table__filter-row">
-                  <span class="envelope-table__filter-label">Contains</span>
-                  <input
-                    class="envelope-table__filter-input"
-                    type="text"
-                    value={filterValue}
-                    placeholder="Type a value…"
-                    oninput={handleFilterValueChange}
-                  />
-                </label>
+                <template lwc:if={isDateFilterField}>
+                  <label class="envelope-table__filter-row">
+                    <span class="envelope-table__filter-label">On</span>
+                    <input
+                      class="envelope-table__filter-input"
+                      type="date"
+                      value={filterValue}
+                      onchange={handleFilterValueChange}
+                    />
+                  </label>
+                </template>
+                <template lwc:else>
+                  <label class="envelope-table__filter-row">
+                    <span class="envelope-table__filter-label">Contains</span>
+                    <input
+                      class="envelope-table__filter-input"
+                      type="text"
+                      value={filterValue}
+                      placeholder="Type a value…"
+                      oninput={handleFilterValueChange}
+                    />
+                  </label>
+                </template>
                 <div class="envelope-table__filter-actions">
                   <button
                     type="button"

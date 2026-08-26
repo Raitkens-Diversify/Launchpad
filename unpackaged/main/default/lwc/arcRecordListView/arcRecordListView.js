@@ -164,6 +164,76 @@ const toComparableNumber = (value) => {
   return Number.isFinite(numeric) ? numeric : null;
 };
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Date-only field values (e.g. Birthdate) are already a bare "YYYY-MM-DD". */
+const formatLocalDateKey = (rawValue) => {
+  if (!rawValue) {
+    return "";
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(rawValue)) {
+    return rawValue;
+  }
+  const date = new Date(rawValue);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const startOfLocalDay = (dateKey) => {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return new Date(year, month - 1, day).getTime();
+};
+
+/**
+ * Date-picker filtering compares whole calendar days (the picker has no time
+ * component), so every operator treats the picked day as a single unit —
+ * "Greater than" means strictly after that whole day, "Less or equal" means
+ * through the end of it, etc. — rather than a millisecond-precise cutoff.
+ */
+const dateRowMatchesFilter = (row, fieldApiName, operator, operandDateKey) => {
+  const rawValue = row[`${fieldApiName}__raw`];
+  const rowDayKey = row[`${fieldApiName}__dayKey`];
+
+  if (!rawValue || !rowDayKey || !/^\d{4}-\d{2}-\d{2}$/.test(operandDateKey)) {
+    return false;
+  }
+
+  const rowTime = new Date(rawValue).getTime();
+  const targetStart = startOfLocalDay(operandDateKey);
+  const targetNextStart = targetStart + DAY_MS;
+
+  switch (operator) {
+    case "Equals":
+      return rowDayKey === operandDateKey;
+    case "NotEqual":
+      return rowDayKey !== operandDateKey;
+    case "GreaterThan":
+      return rowTime >= targetNextStart;
+    case "GreaterOrEqual":
+      return rowTime >= targetStart;
+    case "LessThan":
+      return rowTime < targetStart;
+    case "LessOrEqual":
+      return rowTime < targetNextStart;
+    default:
+      return rowDayKey === operandDateKey;
+  }
+};
+
+const DATE_OPERATOR_KEYS = [
+  "Equals",
+  "NotEqual",
+  "GreaterThan",
+  "GreaterOrEqual",
+  "LessThan",
+  "LessOrEqual"
+];
+
 /**
  * LWR list-view experience: saved-view tabs, view-mode switch, search,
  * group-by, filter chips, and the save/overwrite view flow, backed by
@@ -735,6 +805,15 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
       return true;
     }
 
+    if (this.isDateFieldApiName(filter.fieldApiName)) {
+      return dateRowMatchesFilter(
+        row,
+        filter.fieldApiName,
+        filter.operator,
+        operand
+      );
+    }
+
     const rawValue = String(row[filter.fieldApiName] ?? "");
     const value = rawValue.toLowerCase();
     const target = operand.toLowerCase();
@@ -776,6 +855,7 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
         : filter.label,
       isOpen: this.openPopover === filter.key,
       hasValue: Boolean(filter.operandValue),
+      isDateField: this.isDateFieldApiName(filter.fieldApiName),
       operatorOptions: this.buildOperatorOptions(filter.fieldApiName).map(
         (opt) => ({ ...opt, selected: opt.value === filter.operator })
       )
@@ -797,10 +877,25 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   // ---- Group by ----------------------------------------------------------
 
   get groupButtonLabel() {
-    const meta = this.getColumnMeta(this.groupFieldApiName);
     return this.groupFieldApiName
-      ? `Group: ${meta?.label || this.groupFieldApiName}`
+      ? `Group: ${this.getDisplayedColumnLabel(this.groupFieldApiName)}`
       : "Group";
+  }
+
+  /**
+   * arcDataTable buckets rows by exact value equality; for a date/datetime
+   * group field that would put every row in its own group (down to the
+   * second), so grouping by a date field points at its precomputed
+   * calendar-day key instead of the raw field.
+   */
+  get effectiveGroupField() {
+    if (
+      this.groupFieldApiName &&
+      this.isDateFieldApiName(this.groupFieldApiName)
+    ) {
+      return `${this.groupFieldApiName}__dayKey`;
+    }
+    return this.groupFieldApiName;
   }
 
   get groupButtonClass() {
@@ -864,12 +959,38 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     return this.fieldMenuOptions.length > 0;
   }
 
+  /**
+   * Group/Filter options are scoped to the table's own currently-displayed
+   * columns (not the object's full field catalogue), so the menus can never
+   * offer a field the user can't see on screen, and a column added via
+   * defaultColumns or the Table Columns menu is picked up automatically. A
+   * column with no matching describe metadata defaults to usable. Labels
+   * come straight off the column def, the same source tableColumns reads,
+   * so a menu entry can never say something different than its header.
+   */
   get groupableObjectColumns() {
-    return (this.objectColumns || []).filter((col) => col.sortable !== false);
+    return this.visibleColumnDefs
+      .filter(
+        (col) => this.getColumnMeta(col.fieldApiName)?.sortable !== false
+      )
+      .map((col) => this.toFieldMenuColumn(col));
   }
 
   get filterableObjectColumns() {
-    return (this.objectColumns || []).filter((col) => col.filterable);
+    return this.visibleColumnDefs
+      .filter((col) => {
+        const meta = this.getColumnMeta(col.fieldApiName);
+        return meta ? Boolean(meta.filterable) : true;
+      })
+      .map((col) => this.toFieldMenuColumn(col));
+  }
+
+  toFieldMenuColumn(col) {
+    return {
+      fieldApiName: col.fieldApiName,
+      label: col.label,
+      dataType: this.getColumnMeta(col.fieldApiName)?.dataType
+    };
   }
 
   // ---- Saved-view dirty state -------------------------------------------
@@ -1157,6 +1278,15 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
       if (pillFieldNames.includes(fieldApiName)) {
         row[`${fieldApiName}PillClass`] = pillToneClass(value);
       }
+
+      // Date/DateTime fields also carry the raw timestamp and a local
+      // calendar-day key alongside the formatted display value, so filtering
+      // and grouping can compare real dates instead of a formatted string.
+      if (this.isDateFieldApiName(fieldApiName)) {
+        const rawValue = field?.value ?? null;
+        row[`${fieldApiName}__raw`] = rawValue;
+        row[`${fieldApiName}__dayKey`] = formatLocalDateKey(rawValue);
+      }
     });
 
     return row;
@@ -1174,6 +1304,10 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
       dataType.includes("percent") ||
       dataType === "number"
     );
+  }
+
+  isDateFieldApiName(fieldApiName) {
+    return this.resolveColumnType(fieldApiName) === "date";
   }
 
   /** Numerics stay raw so the table formats them; everything else uses displayValue. */
@@ -1233,13 +1367,25 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
 
   buildOperatorOptions(fieldApiName) {
     const meta = this.getColumnMeta(fieldApiName);
-    const operators = meta?.supportedFilterOperators?.length
-      ? meta.supportedFilterOperators
+    if (meta?.supportedFilterOperators?.length) {
+      return meta.supportedFilterOperators.map((operator) => ({
+        label: this.getOperatorLabel(operator),
+        value: operator
+      }));
+    }
+    const operatorKeys = this.isDateFieldApiName(fieldApiName)
+      ? DATE_OPERATOR_KEYS
       : Object.keys(OPERATOR_LABELS);
-    return operators.map((operator) => ({
+    return operatorKeys.map((operator) => ({
       label: this.getOperatorLabel(operator),
       value: operator
     }));
+  }
+
+  /** Label for a currently-displayed column, guaranteed to match its header. */
+  getDisplayedColumnLabel(fieldApiName) {
+    const col = this.columns.find((c) => c.fieldApiName === fieldApiName);
+    return col?.label || this.getColumnMeta(fieldApiName)?.label || fieldApiName;
   }
 
   buildFilterChip(fieldApiName, operator, operandValue = "") {
@@ -1254,7 +1400,7 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     return {
       key: `filter-${filterKeyCounter++}`,
       fieldApiName,
-      label: meta?.label || fieldApiName,
+      label: this.getDisplayedColumnLabel(fieldApiName),
       operator: resolvedOperator,
       operandValue
     };
@@ -1395,6 +1541,14 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   }
 
   handleChipValueChange(event) {
+    const key = event.currentTarget.dataset.key;
+    const operandValue = event.target.value;
+    this.activeFilters = this.activeFilters.map((filter) => {
+      return filter.key === key ? { ...filter, operandValue } : filter;
+    });
+  }
+
+  handleChipDateChange(event) {
     const key = event.currentTarget.dataset.key;
     const operandValue = event.target.value;
     this.activeFilters = this.activeFilters.map((filter) => {

@@ -60,6 +60,14 @@ const COLUMNS = [
     sortType: "date"
   },
   {
+    label: "Created Date",
+    fieldName: "createdDate",
+    type: "text",
+    sortable: true,
+    sortFieldName: "createdRaw",
+    sortType: "date"
+  },
+  {
     label: "Action Items",
     fieldName: "actionItems",
     type: "text",
@@ -358,6 +366,9 @@ export default class EnvelopeTable extends LightningElement {
               envelope.CreatedBy ? envelope.CreatedBy.Name : ""
             }`
           : "",
+        createdDate: envelope.CreatedDate
+          ? this.formatDateOnly(envelope.CreatedDate)
+          : "",
         createdRaw: envelope.CreatedDate || null,
         actionItems: hasCounts
           ? formatEnvelopeContentsLabel({
@@ -399,6 +410,19 @@ export default class EnvelopeTable extends LightningElement {
     return `${datePart} ${timePart}`;
   }
 
+  formatDateOnly(value) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return "";
+    }
+
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    });
+  }
+
   toLocalDateKey(value) {
     if (!value) {
       return "";
@@ -431,13 +455,19 @@ export default class EnvelopeTable extends LightningElement {
         !this.dateFilter ||
         this.toLocalDateKey(row.lastActivityRaw) === this.dateFilter;
       // Contains, case-insensitive — the same test the list views' chips use.
+      // A date-type field (Created Date, Created, Last Activity) compares
+      // whole calendar days against its raw value instead.
+      const dateRawField = this.filterFieldDateRawField;
       const filterTerm = this.filterValue.trim().toLowerCase();
-      const matchesFilter =
-        !this.filterField ||
-        !filterTerm ||
-        String(row[this.filterField] ?? "")
-          .toLowerCase()
-          .includes(filterTerm);
+      const matchesFilter = !this.filterField
+        ? true
+        : dateRawField
+        ? !this.filterValue ||
+          this.toLocalDateKey(row[dateRawField]) === this.filterValue
+        : !filterTerm ||
+          String(row[this.filterField] ?? "")
+            .toLowerCase()
+            .includes(filterTerm);
 
       return matchesSearch && matchesScope && matchesDate && matchesFilter;
     });
@@ -565,8 +595,24 @@ export default class EnvelopeTable extends LightningElement {
     return `${this.filterFieldLabel}: ${this.filterValue.trim()}`;
   }
 
+  /** The raw date field backing the selected filter field, when it's date-typed. */
+  get filterFieldDateRawField() {
+    const col = COLUMNS.find((c) => c.fieldName === this.filterField);
+    return col?.sortType === "date" ? col.sortFieldName : "";
+  }
+
+  get isDateFilterField() {
+    return Boolean(this.filterFieldDateRawField);
+  }
+
   handleFilterFieldChange(event) {
-    this.filterField = event.target.value;
+    const fieldName = event.target.value;
+    // Value from a text box and a date-picker aren't interchangeable, so
+    // switching field types clears whatever was already typed/picked.
+    if (fieldName !== this.filterField) {
+      this.filterValue = "";
+    }
+    this.filterField = fieldName;
   }
 
   handleFilterValueChange(event) {

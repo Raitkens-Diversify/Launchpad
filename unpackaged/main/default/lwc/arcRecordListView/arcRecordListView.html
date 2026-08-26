@@ -401,14 +401,25 @@
                       class="arc-record-list-view__chip-control arc-record-list-view__chip-control--value"
                     >
                       <span class="arc-record-list-view__sr-only"> Value </span>
-                      <input
-                        class="arc-record-list-view__input"
-                        type="text"
-                        placeholder="Type value…"
-                        data-key={chip.key}
-                        value={chip.operandValue}
-                        oninput={handleChipValueChange}
-                      />
+                      <template lwc:if={chip.isDateField}>
+                        <input
+                          class="arc-record-list-view__input"
+                          type="date"
+                          data-key={chip.key}
+                          value={chip.operandValue}
+                          onchange={handleChipDateChange}
+                        />
+                      </template>
+                      <template lwc:else>
+                        <input
+                          class="arc-record-list-view__input"
+                          type="text"
+                          placeholder="Type value…"
+                          data-key={chip.key}
+                          value={chip.operandValue}
+                          oninput={handleChipValueChange}
+                        />
+                      </template>
                       <template lwc:if={chip.hasValue}>
                         <button
                           class="arc-record-list-view__chip-clear"
@@ -460,7 +471,7 @@
               key-field="id"
               columns={tableColumns}
               data={visibleRows}
-              group-field={groupFieldApiName}
+              group-field={effectiveGroupField}
               density="comfortable"
               max-page-buttons="5"
               row-actions={rowActions}
