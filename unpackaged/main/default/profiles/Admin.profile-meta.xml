@@ -4928,6 +4928,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Opportunity.Estimated_Revenue__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Opportunity.Fee_Based_Models_Self_Managed__c</field>
         <readable>true</readable>
     </fieldPermissions>

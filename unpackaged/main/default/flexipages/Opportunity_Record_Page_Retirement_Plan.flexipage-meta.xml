@@ -270,6 +270,16 @@
                 <identifier>RecordProbabilityField</identifier>
             </fieldInstance>
         </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Estimated_Revenue__c</fieldItem>
+                <identifier>RecordEstimated_Revenue_cField</identifier>
+            </fieldInstance>
+        </itemInstances>
         <name>Facet-f80bf9d9-586f-438f-b42a-3ce6fea7b7f6</name>
         <type>Facet</type>
     </flexiPageRegions>

@@ -429,6 +429,10 @@
             <label>Estimated AUM</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NSu000005r0tR</field>
+            <label>Estimated Revenue</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00N8X00000GMiol</field>
             <label>External Referrer</label>
         </opportunityListFieldsLabelMappings>
@@ -943,6 +947,7 @@
             <field>00NSu000005q13R</field>
             <field>00NSu000005q13Q</field>
             <field>00NSu000005ek0I</field>
+            <field>00NSu000005r0tR</field>
             <field>00N8X00000GMiol</field>
             <field>00NSu000005ek0J</field>
             <field>00NTO00000Cu3E1</field>
@@ -1394,6 +1399,10 @@
             <label>Estimated AUM</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NSu000005r0tR</field>
+            <label>Estimated Revenue</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00N8X00000GMiol</field>
             <label>External Referrer</label>
         </opportunityListFieldsLabelMappings>
@@ -1908,6 +1917,7 @@
             <field>00NSu000005q13R</field>
             <field>00NSu000005q13Q</field>
             <field>00NSu000005ek0I</field>
+            <field>00NSu000005r0tR</field>
             <field>00N8X00000GMiol</field>
             <field>00NSu000005ek0J</field>
             <field>00NTO00000Cu3E1</field>
@@ -2363,6 +2373,10 @@
             <label>Estimated AUM</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NSu000005r0tR</field>
+            <label>Estimated Revenue</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00N8X00000GMiol</field>
             <label>External Referrer</label>
         </opportunityListFieldsLabelMappings>
@@ -2878,6 +2892,7 @@
             <field>00NSu000005q13R</field>
             <field>00NSu000005q13Q</field>
             <field>00NSu000005ek0I</field>
+            <field>00NSu000005r0tR</field>
             <field>00N8X00000GMiol</field>
             <field>00NSu000005ek0J</field>
             <field>00NTO00000Cu3E1</field>
@@ -3327,6 +3342,10 @@
         <opportunityListFieldsLabelMappings>
             <field>00NSu000005ek0I</field>
             <label>Estimated AUM</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NSu000005r0tR</field>
+            <label>Estimated Revenue</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00N8X00000GMiol</field>
@@ -3843,6 +3862,7 @@
             <field>00NSu000005q13R</field>
             <field>00NSu000005q13Q</field>
             <field>00NSu000005ek0I</field>
+            <field>00NSu000005r0tR</field>
             <field>00N8X00000GMiol</field>
             <field>00NSu000005ek0J</field>
             <field>00NTO00000Cu3E1</field>
@@ -4298,6 +4318,10 @@
             <label>Estimated AUM</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NSu000005r0tR</field>
+            <label>Estimated Revenue</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00N8X00000GMiol</field>
             <label>External Referrer</label>
         </opportunityListFieldsLabelMappings>
@@ -4813,6 +4837,7 @@
             <field>00NSu000005q13R</field>
             <field>00NSu000005q13Q</field>
             <field>00NSu000005ek0I</field>
+            <field>00NSu000005r0tR</field>
             <field>00N8X00000GMiol</field>
             <field>00NSu000005ek0J</field>
             <field>00NTO00000Cu3E1</field>
@@ -5262,6 +5287,10 @@
         <opportunityListFieldsLabelMappings>
             <field>00NSu000005ek0I</field>
             <label>Estimated AUM</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NSu000005r0tR</field>
+            <label>Estimated Revenue</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00N8X00000GMiol</field>
@@ -5778,6 +5807,7 @@
             <field>00NSu000005q13R</field>
             <field>00NSu000005q13Q</field>
             <field>00NSu000005ek0I</field>
+            <field>00NSu000005r0tR</field>
             <field>00N8X00000GMiol</field>
             <field>00NSu000005ek0J</field>
             <field>00NTO00000Cu3E1</field>
@@ -6233,6 +6263,10 @@
             <label>Estimated AUM</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NSu000005r0tR</field>
+            <label>Estimated Revenue</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00N8X00000GMiol</field>
             <label>External Referrer</label>
         </opportunityListFieldsLabelMappings>
@@ -6748,6 +6782,7 @@
             <field>00NSu000005q13R</field>
             <field>00NSu000005q13Q</field>
             <field>00NSu000005ek0I</field>
+            <field>00NSu000005r0tR</field>
             <field>00N8X00000GMiol</field>
             <field>00NSu000005ek0J</field>
             <field>00NTO00000Cu3E1</field>
@@ -7197,6 +7232,10 @@
         <opportunityListFieldsLabelMappings>
             <field>00NSu000005ek0I</field>
             <label>Estimated AUM</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NSu000005r0tR</field>
+            <label>Estimated Revenue</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00N8X00000GMiol</field>
@@ -7713,6 +7752,7 @@
             <field>00NSu000005q13R</field>
             <field>00NSu000005q13Q</field>
             <field>00NSu000005ek0I</field>
+            <field>00NSu000005r0tR</field>
             <field>00N8X00000GMiol</field>
             <field>00NSu000005ek0J</field>
             <field>00NTO00000Cu3E1</field>
@@ -8168,6 +8208,10 @@
             <label>Estimated AUM</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NSu000005r0tR</field>
+            <label>Estimated Revenue</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00N8X00000GMiol</field>
             <label>External Referrer</label>
         </opportunityListFieldsLabelMappings>
@@ -8683,6 +8727,7 @@
             <field>00NSu000005q13R</field>
             <field>00NSu000005q13Q</field>
             <field>00NSu000005ek0I</field>
+            <field>00NSu000005r0tR</field>
             <field>00N8X00000GMiol</field>
             <field>00NSu000005ek0J</field>
             <field>00NTO00000Cu3E1</field>
@@ -9132,6 +9177,10 @@
         <opportunityListFieldsLabelMappings>
             <field>00NSu000005ek0I</field>
             <label>Estimated AUM</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NSu000005r0tR</field>
+            <label>Estimated Revenue</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00N8X00000GMiol</field>
@@ -9648,6 +9697,7 @@
             <field>00NSu000005q13R</field>
             <field>00NSu000005q13Q</field>
             <field>00NSu000005ek0I</field>
+            <field>00NSu000005r0tR</field>
             <field>00N8X00000GMiol</field>
             <field>00NSu000005ek0J</field>
             <field>00NTO00000Cu3E1</field>
@@ -10103,6 +10153,10 @@
             <label>Estimated AUM</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NSu000005r0tR</field>
+            <label>Estimated Revenue</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00N8X00000GMiol</field>
             <label>External Referrer</label>
         </opportunityListFieldsLabelMappings>
@@ -10618,6 +10672,7 @@
             <field>00NSu000005q13R</field>
             <field>00NSu000005q13Q</field>
             <field>00NSu000005ek0I</field>
+            <field>00NSu000005r0tR</field>
             <field>00N8X00000GMiol</field>
             <field>00NSu000005ek0J</field>
             <field>00NTO00000Cu3E1</field>
@@ -11067,6 +11122,10 @@
         <opportunityListFieldsLabelMappings>
             <field>00NSu000005ek0I</field>
             <label>Estimated AUM</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NSu000005r0tR</field>
+            <label>Estimated Revenue</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00N8X00000GMiol</field>
@@ -11583,6 +11642,7 @@
             <field>00NSu000005q13R</field>
             <field>00NSu000005q13Q</field>
             <field>00NSu000005ek0I</field>
+            <field>00NSu000005r0tR</field>
             <field>00N8X00000GMiol</field>
             <field>00NSu000005ek0J</field>
             <field>00NTO00000Cu3E1</field>
