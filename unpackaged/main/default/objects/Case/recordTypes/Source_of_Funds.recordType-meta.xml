@@ -1106,10 +1106,6 @@
             <default>false</default>
         </values>
         <values>
-            <fullName>Sale of an Annuity %28Including 1035%29</fullName>
-            <default>false</default>
-        </values>
-        <values>
             <fullName>Sale of an Insurance Product %28Including 1035%29</fullName>
             <default>false</default>
         </values>

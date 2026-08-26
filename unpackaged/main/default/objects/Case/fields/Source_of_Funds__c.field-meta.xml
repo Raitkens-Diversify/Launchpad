@@ -47,11 +47,6 @@
                 <label>Retail Brokerage Account</label>
             </value>
             <value>
-                <fullName>Sale of an Annuity (Including 1035)</fullName>
-                <default>false</default>
-                <label>Sale of an Annuity (Including 1035)</label>
-            </value>
-            <value>
                 <fullName>Sale of a Mutual Fund</fullName>
                 <default>false</default>
                 <label>Sale of a Mutual Fund</label>
@@ -90,6 +85,12 @@
                 <fullName>Other</fullName>
                 <default>false</default>
                 <label>Other</label>
+            </value>
+            <value>
+                <fullName>Sale of an Annuity (Including 1035)</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Sale of an Annuity (Including 1035)</label>
             </value>
         </valueSetDefinition>
     </valueSet>

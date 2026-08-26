@@ -55,10 +55,6 @@
             <translation><!-- Sale of a Mutual Fund --></translation>
         </picklistValues>
         <picklistValues>
-            <masterLabel>Sale of an Annuity (Including 1035)</masterLabel>
-            <translation><!-- Sale of an Annuity (Including 1035) --></translation>
-        </picklistValues>
-        <picklistValues>
             <masterLabel>Sale of an Insurance Product (Including 1035)</masterLabel>
             <translation><!-- Sale of an Insurance Product (Including 1035) --></translation>
         </picklistValues>
