@@ -48,6 +48,12 @@
         description="Comma-separated field API names shown as colour-coded pills, e.g. BillingState. Each distinct value gets its own tone."
       />
             <property
+        name="defaultColumns"
+        type="String"
+        label="Default Columns"
+        description="Ordered, comma-separated field API names to show by default, e.g. Name,Check__r.Name,Amount__c. Can name fields the list view's own Setup config doesn't carry at all. Blank leaves the view's own columns/order alone."
+      />
+            <property
         name="defaultListViewApiName"
         type="String"
         label="Default List View API Name"

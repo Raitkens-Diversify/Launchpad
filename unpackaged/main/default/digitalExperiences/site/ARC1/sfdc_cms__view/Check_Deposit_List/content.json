@@ -27,10 +27,9 @@
                 "dxpStyle" : { },
                 "objectApiName" : "Check_Deposit__c",
                 "subtitle" : "Deposits recorded against a check",
-                "title" : "Check Deposits",
-                "viewTabs" : ""
+                "title" : "Check Deposits"
               },
-              "definition" : "c:nexSListView",
+              "definition" : "c:arcRecordListView",
               "id" : "d4e83b15-70c9-4a62-85f3-1907cb2e64d8",
               "type" : "component"
             } ],

@@ -18,6 +18,7 @@ import {
   createListInfo,
   updateListInfoByName
 } from "lightning/uiListsApi";
+import { getObjectInfo } from "lightning/uiObjectInfoApi";
 import diversifyStyles from "@salesforce/resourceUrl/diversifyStyles";
 import NEXS_ICONS from "@salesforce/resourceUrl/arcicon";
 import { CurrentPageReference, NavigationMixin } from "lightning/navigation";
@@ -195,6 +196,19 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
    * plain text, e.g. `BillingState`. Each distinct value gets its own tone.
    */
   @api pillFields = "";
+  /**
+   * Ordered, comma-separated field API names to show by default, e.g.
+   * `Name,Check__r.Name,Amount__c`. Can name fields the list view's own
+   * Setup config doesn't carry at all (their label is resolved from the
+   * object's own field describe) — not just reorder/hide what the view
+   * already returns. Blank leaves the view's own column set/order alone.
+   */
+  @api defaultColumns = "";
+
+  /** Every field the object describe knows about, keyed by API name. */
+  objectFieldInfo = null;
+  /** Which view `applyDefaultColumns` last hid columns for — see there. */
+  _defaultedListViewApiName;
 
   @track listViews = [];
   @track columns = [];
@@ -900,6 +914,24 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     }
   }
 
+  /*
+   * The field describe, purely for the labels of configured columns the list
+   * view does not carry. getListObjectInfo would seem to be the closer fit,
+   * but it only describes the columns its own list machinery offers and comes
+   * back empty for some objects; the object describe always has every field.
+   */
+  @wire(getObjectInfo, { objectApiName: "$objectApiName" })
+  wiredObjectInfo({ data }) {
+    this.objectFieldInfo = data?.fields || null;
+    // This wire and the list-info wire settle in either order, so rebuild once
+    // the labels land rather than dropping the extras when it arrives second.
+    if (this._listInfoWire?.data) {
+      this.columns = this.applyDefaultColumns(
+        this.baseDisplayColumns(this._listInfoWire.data)
+      );
+    }
+  }
+
   @wire(getListInfosByObjectName, {
     objectApiName: "$objectApiName",
     pageSize: 100,
@@ -943,11 +975,7 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     this._listInfoWire = result;
     const { data, error } = result;
     if (data) {
-      const displayColumns = data.displayColumns || [];
-      this.columns = displayColumns.map((col) => ({
-        fieldApiName: col.fieldApiName || col.fieldName || col.label,
-        label: col.label || col.fieldApiName
-      }));
+      this.columns = this.applyDefaultColumns(this.baseDisplayColumns(data));
       this.currentListViewLabel = data.label || this.selectedListViewApiName;
       this.filterLogicString = data.filterLogicString || "";
       this.adoptSavedFilters(data.filteredByInfo || []);
@@ -956,6 +984,113 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
       this.errorMessage = this.reduceError(error);
       this.columns = [];
     }
+  }
+
+  /** The list view's own column set, as `wiredListInfo` always rendered it. */
+  baseDisplayColumns(data) {
+    const displayColumns = data.displayColumns || [];
+    return displayColumns.map((col) => ({
+      fieldApiName: col.fieldApiName || col.fieldName || col.label,
+      label: col.label || col.fieldApiName
+    }));
+  }
+
+  /** Ordered default columns configured for this placement. */
+  get configuredDefaultColumns() {
+    return (this.defaultColumns || "")
+      .split(",")
+      .map((name) => name.trim())
+      .filter(Boolean);
+  }
+
+  /**
+   * Configured columns the list view itself does not return.
+   *
+   * `defaultColumns` reads as "the columns this page shows", but it could only
+   * ever reorder and hide what the list view already carried — naming a field
+   * the view omitted dropped it silently. The record payload is fetched with
+   * explicit optionalFields rather than the view's own column set, so the
+   * value is there for the asking; only the label has to come from somewhere,
+   * and the object field describe already has every field.
+   *
+   * A name that is neither in the view nor on the object (a typo, or a
+   * relationship path the object info does not describe) still drops out
+   * rather than rendering a column of blanks under a guessed heading.
+   */
+  buildExtraConfiguredColumns(existing) {
+    const known = new Set(existing.map((col) => col.fieldApiName));
+    return [...new Set(this.configuredDefaultColumns)]
+      .filter((name) => !known.has(name))
+      .map((name) => {
+        const label = this.resolveFieldLabel(name);
+        return label ? { fieldApiName: name, label } : null;
+      })
+      .filter(Boolean);
+  }
+
+  /**
+   * The column heading for a field API name. A dotted path is described by its
+   * last hop on the related object, which this component cannot see, so it
+   * falls back to the relationship's own label ("Financial Advisor Team" for
+   * Financial_Advisor_Team__r.Name) and finally to a humanized API name.
+   */
+  resolveFieldLabel(fieldApiName) {
+    const fields = this.objectFieldInfo;
+    if (!fields) {
+      return "";
+    }
+
+    if (fields[fieldApiName]) {
+      return fields[fieldApiName].label || fieldApiName;
+    }
+
+    const [relationship] = String(fieldApiName).split(".");
+    const owner = Object.values(fields).find(
+      (field) => field.relationshipName === relationship
+    );
+    if (owner) {
+      return owner.label || relationship;
+    }
+
+    return this.getColumnMeta(fieldApiName)?.label || "";
+  }
+
+  /**
+   * Puts the configured columns first, in the configured order, and switches
+   * the rest off. The unconfigured ones stay in `columns` so the Table
+   * Columns dropdown still offers them — hiding is a default, not a deletion.
+   *
+   * Guarded on the view actually changing: this wire re-emits from cache
+   * (e.g. a refreshApex), and re-seeding on every emit would undo a column
+   * the user had just switched back on via that dropdown.
+   */
+  applyDefaultColumns(listViewColumns) {
+    const columns = [
+      ...listViewColumns,
+      ...this.buildExtraConfiguredColumns(listViewColumns)
+    ];
+
+    const configured = this.configuredDefaultColumns;
+    if (!configured.length) {
+      return columns;
+    }
+
+    const byName = new Map(columns.map((col) => [col.fieldApiName, col]));
+    const ordered = configured.map((name) => byName.get(name)).filter(Boolean);
+
+    if (!ordered.length) {
+      return columns;
+    }
+
+    const chosen = new Set(ordered.map((col) => col.fieldApiName));
+    const rest = columns.filter((col) => !chosen.has(col.fieldApiName));
+
+    if (this._defaultedListViewApiName !== this.selectedListViewApiName) {
+      this._defaultedListViewApiName = this.selectedListViewApiName;
+      this.hiddenColumnFields = rest.map((col) => col.fieldApiName);
+    }
+
+    return [...ordered, ...rest];
   }
 
   @wire(getListRecordsByName, {
