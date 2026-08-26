@@ -908,8 +908,8 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
 
                 while (pendingNodes.length > 0) {
                     await Promise.all(
-                        pendingNodes.map(({ accountId, parentAccountId }) =>
-                            this.loadEntityRelationsForAccountId(accountId, parentAccountId)
+                        pendingNodes.map(({ accountId }) =>
+                            this.loadEntityRelationsForAccountId(accountId)
                         )
                     );
 
@@ -1062,22 +1062,20 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
 
         await Promise.all(
             pendingIds.map((accountId) =>
-                this.loadEntityRelationCountForAccountId(accountId, rootAccountId)
+                this.loadEntityRelationCountForAccountId(accountId)
             )
         );
     }
 
-    async loadEntityRelationCountForAccountId(accountId, parentAccountId = '') {
+    async loadEntityRelationCountForAccountId(accountId) {
         if (!accountId || this.entityRelationCountByAccountId[accountId] !== undefined) {
             return;
         }
 
         try {
             const data = await getRelationshipTree({ rootAccountId: accountId });
-            const relatedAccounts = collectEntityCentricRelatedAccountsFromTreeData(
-                data,
-                parentAccountId ? [parentAccountId] : []
-            );
+            const relatedAccounts =
+                collectEntityCentricRelatedAccountsFromTreeData(data);
 
             this.entityRelationCountByAccountId = {
                 ...this.entityRelationCountByAccountId,
@@ -1097,7 +1095,7 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
         }
     }
 
-    async loadEntityRelationsForAccountId(accountId, parentAccountId = '') {
+    async loadEntityRelationsForAccountId(accountId) {
         if (!accountId) {
             return;
         }
@@ -1114,10 +1112,8 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
 
         try {
             const data = await getRelationshipTree({ rootAccountId: accountId });
-            const relatedAccounts = collectEntityCentricRelatedAccountsFromTreeData(
-                data,
-                parentAccountId ? [parentAccountId] : []
-            );
+            const relatedAccounts =
+                collectEntityCentricRelatedAccountsFromTreeData(data);
 
             this.nestedEntityRelationsByAccountId = {
                 ...this.nestedEntityRelationsByAccountId,
@@ -1127,15 +1123,6 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
                 ...this.entityRelationCountByAccountId,
                 [accountId]: relatedAccounts.length
             };
-
-            await Promise.all(
-                relatedAccounts.map((relatedAccount) =>
-                    this.loadEntityRelationCountForAccountId(
-                        relatedAccount.accountId,
-                        accountId
-                    )
-                )
-            );
         } catch (error) {
             dispatchToast(this, {
                 title: 'Could not load relationships',
@@ -1557,10 +1544,7 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
             ) {
                 const cachedCount = this.entityRelationCountByAccountId[node.accountId];
                 if (cachedCount === undefined || cachedCount !== 0) {
-                    await this.loadEntityRelationsForAccountId(
-                        node.accountId,
-                        node.parentAccountId || this.treeData?.rootAccountId || ''
-                    );
+                    await this.loadEntityRelationsForAccountId(node.accountId);
                 }
             } else if (
                 node?.nodeType === MAP_NODE_TYPE.ACCOUNT &&

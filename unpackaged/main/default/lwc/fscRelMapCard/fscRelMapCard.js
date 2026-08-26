@@ -392,6 +392,10 @@ export default class FscRelMapCard extends LightningElement {
   }
 
   get showRecordTypeFooterPill() {
+    if (this.node?.isEntityCentricGroupedAccount) {
+      return false;
+    }
+
     return (
       this.showPlainSub &&
       (this.node?.nodeType === MAP_NODE_TYPE.ROOT ||
@@ -417,7 +421,8 @@ export default class FscRelMapCard extends LightningElement {
 
     if (
       this.showPlainSub &&
-      this.node?.nodeType === MAP_NODE_TYPE.RELATED_CONTACT
+      (this.node?.nodeType === MAP_NODE_TYPE.RELATED_CONTACT ||
+        this.node?.isEntityCentricGroupedAccount)
     ) {
       return [
         {

@@ -136,6 +136,50 @@
                                 </div>
                             </template>
 
+                            <template lwc:elseif={isEntityCentricMap}>
+                                <div class="map-node-row">
+                                    <div class="map-node-row__card" data-anchor-id={displayTree.id}>
+                                        <c-fsc-rel-map-card
+                                            node={displayTree}
+                                            active-preview-source-id={activePreviewSourceId}
+                                            oncardaction={handleCardAction}
+                                        ></c-fsc-rel-map-card>
+                                    </div>
+
+                                    <template lwc:if={displayTree.isOpen}>
+                                        <div class="map-node-row__children">
+                                            <template for:each={displayTree.children} for:item="relatedAccount">
+                                                <div
+                                                    key={relatedAccount.rowKey}
+                                                    class="map-node-row map-node-row_nested"
+                                                >
+                                                    <div
+                                                        class="map-node-row__card"
+                                                        data-anchor-id={relatedAccount.id}
+                                                    >
+                                                        <c-fsc-rel-map-card
+                                                            node={relatedAccount}
+                                                            active-preview-source-id={activePreviewSourceId}
+                                                            oncardaction={handleCardAction}
+                                                        ></c-fsc-rel-map-card>
+                                                    </div>
+
+                                                    <template lwc:if={relatedAccount.isOpen}>
+                                                        <div class="map-node-row__children">
+                                                            <c-fsc-rel-map-relationship-groups
+                                                                groups={relatedAccount.children}
+                                                                active-preview-source-id={activePreviewSourceId}
+                                                                oncardaction={handleCardAction}
+                                                            ></c-fsc-rel-map-relationship-groups>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+
                             <template lwc:else>
                             <div class="map-node-row">
                                 <div class="map-node-row__card" data-anchor-id={displayTree.id}>

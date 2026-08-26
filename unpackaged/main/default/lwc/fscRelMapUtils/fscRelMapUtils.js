@@ -1784,6 +1784,69 @@ export const isEntityCentricMapTreeData = (treeData = {}) => {
   );
 };
 
+const buildEntityCentricGroupedAccountNode = (account = {}) => {
+  const presentation = resolveAccountPresentation(account);
+
+  return {
+    id: `account-${account.relationId || account.accountId}`,
+    label: account.name || "",
+    sub: presentation.sub,
+    iconName: presentation.iconName,
+    kind: presentation.kind,
+    nodeType: MAP_NODE_TYPE.ACCOUNT,
+    isAccountNode: true,
+    isEntityCentricGroupedAccount: true,
+    relationId: account.relationId || "",
+    accountId: account.accountId || "",
+    isLazyExpandable: false,
+    defaultOpen: false,
+    children: []
+  };
+};
+
+const buildEntityCentricGroupedRelationNodes = (
+  relatedAccounts = [],
+  parentNodeId = "account"
+) => {
+  const accountsByRecordType = new Map();
+
+  (relatedAccounts || []).forEach((account) => {
+    const recordTypeDeveloperName = String(
+      account.recordTypeDeveloperName || ""
+    ).trim();
+    const recordTypeLabel = resolveAccountTypeDisplayLabel(
+      recordTypeDeveloperName,
+      account.recordTypeLabel
+    );
+    const groupKey = recordTypeDeveloperName || recordTypeLabel || "Other";
+
+    if (!accountsByRecordType.has(groupKey)) {
+      accountsByRecordType.set(groupKey, {
+        recordTypeDeveloperName: groupKey,
+        recordTypeLabel,
+        accounts: []
+      });
+    }
+
+    accountsByRecordType.get(groupKey).accounts.push(account);
+  });
+
+  return [...accountsByRecordType.values()]
+    .sort((leftGroup, rightGroup) =>
+      leftGroup.recordTypeLabel.localeCompare(rightGroup.recordTypeLabel, undefined, {
+        sensitivity: "base"
+      })
+    )
+    .map(({ recordTypeDeveloperName, recordTypeLabel, accounts }) =>
+      buildRelationshipGroupNode(
+        parentNodeId,
+        recordTypeDeveloperName,
+        String(recordTypeLabel || "Account").toUpperCase(),
+        accounts.map((account) => buildEntityCentricGroupedAccountNode(account))
+      )
+    );
+};
+
 const buildEntityCentricRelatedAccountNode = (
   account = {},
   { parentAccountId = "" } = {}
@@ -1827,19 +1890,15 @@ const enrichEntityCentricAccountNode = (
   const nestedAccounts = nestedEntityRelationsByAccountId[accountId];
 
   if (Array.isArray(nestedAccounts)) {
-    const childNodes = nestedAccounts.map((relatedAccount) =>
-      enrichEntityCentricAccountNode(
-        relatedAccount,
-        accountId,
-        nestedEntityRelationsByAccountId,
-        entityRelationCountByAccountId
-      )
+    const groupNodes = buildEntityCentricGroupedRelationNodes(
+      nestedAccounts,
+      node.id
     );
 
     return {
       ...node,
-      children: childNodes,
-      relatedAccountCount: childNodes.length,
+      children: groupNodes,
+      relatedAccountCount: nestedAccounts.length,
       entityRelationsLoaded: true,
       entityRelationCountLoaded: true
     };
@@ -2474,11 +2533,9 @@ export const applyOpenState = (node, openState) => {
         : null;
     const hasExpandableContent =
       isLazyExpandable &&
-      (entityRelationsLoaded
-        ? childCount > 0
-        : entityRelationCountLoaded
-          ? (node.relatedAccountCount ?? 0) > 0
-          : true);
+      (entityRelationCountLoaded || entityRelationsLoaded
+        ? (node.relatedAccountCount ?? 0) > 0
+        : true);
     const badgeLabel =
       entityRelatedAccountCount == null
         ? isRequestedOpen
