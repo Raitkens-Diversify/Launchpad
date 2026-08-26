@@ -20,10 +20,24 @@ export default class EnvelopeTopBarV2 extends LightningElement {
     /** Greys the Review button until the envelope is submittable. */
     @api reviewDisabled = false;
 
+    /** Hides the Diversify logo for hosts that already have their own header/branding. */
+    _hideBranding = false;
+    @api
+    get hideBranding() {
+        return this._hideBranding;
+    }
+    set hideBranding(value) {
+        this._hideBranding = value !== false && value !== 'false';
+    }
+
     logoUrl = logo;
 
     get isDefault() {
         return this.mode !== 'focused';
+    }
+
+    get showBranding() {
+        return !this._hideBranding;
     }
 
     get isFocused() {

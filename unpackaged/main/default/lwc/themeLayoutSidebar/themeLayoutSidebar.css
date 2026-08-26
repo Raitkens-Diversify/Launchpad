@@ -46,32 +46,58 @@
      frame correct on mobile browsers whose toolbars change the viewport. */
   max-height: 100dvh;
   overflow: hidden;
-  --arc-header-height: 60px;
+  --arc-header-height: 54px;
 }
 
 /* ── Top bar — FIXED. Never scrolls; divider along the bottom. ── */
 .theme-layout__header {
-  /* display: flex; */
+  display: flex;
   align-items: center;
   justify-content: space-between;
   flex: 0 0 auto;
   padding: 8px 12px;
   background: #ffffff;
   border-bottom: 1px solid #d1d5db;
-  z-index: 2;
+  /* position is required for the z-index to mean anything. Without it the
+     header was static, the z-index below was inert, and anything the header
+     opened downwards — the global search results — was painted over by the
+     main region purely because main comes later in the document. */
+  position: relative;
+  z-index: 3;
 }
 
 :host(.arc-runtime-shell) .theme-layout__header {
   height: var(--arc-header-height, 60px);
-  /* min-height: var(--arc-header-height, 60px);
-  max-height: var(--arc-header-height, 60px); */
-  padding: 0 12px;
+  min-height: var(--arc-header-height, 60px);
+  max-height: var(--arc-header-height, 60px);
+  padding: 1px 12px;
   box-sizing: border-box;
+  /* Deliberately not hidden. The three height declarations above already hold
+     the bar to its 54px, and the slotted rule below caps the content; clipping
+     as well meant the search results and the sidebar toggle's tooltip were
+     sheared off at the header's bottom edge, since both open downwards out of
+     it. */
+  overflow: visible;
 }
 
+/* flex-grow (not just width:100%) is required here — as a flex item under
+   .theme-layout__header's row layout, a plain width:100% slotted block can
+   resolve against the wrong containing block and shrink-wrap its own content
+   (observed: the header's dxp_layout:columns settling at ~738-870px instead
+   of filling the ~1896px row), squeezing the logo/search/icons into the left
+   half of the header instead of spanning it. flex-grow forces it to consume
+   all available row space regardless of that percentage-resolution quirk.
+   !important because the authenticated (non-Experience-Builder) runtime
+   loads an additional platform stylesheet — cross-origin, so its rules
+   aren't even inspectable from here — that sets flex-grow: 0 on this same
+   slotted node; confirmed live by forcing flex-grow: 1 !important via
+   devtools, which alone fixed the layout. Builder's own Preview mode
+   doesn't load that stylesheet, which is why this only reproduces for a
+   real logged-in visit. */
 :host(.arc-runtime-shell) .theme-layout__header ::slotted(*) {
   display: block;
-  width: 100%;
+  flex: 1 1 auto !important;
+  min-width: 0;
   max-height: 100%;
   box-sizing: border-box;
 }
@@ -92,8 +118,14 @@
   width: var(--arc-sidebar-width, 280px);
   background: #ffffff;
   border-right: 1px solid #d1d5db;
-  z-index: 1;
-  transition: width 0.44s ease, flex-basis 0.44s ease;
+  /* Positioned for the same reason as the header: static made the z-index
+     inert. It keeps the rail — and the flyout its collapsed groups open —
+     above the main region, while staying under the header. */
+  position: relative;
+  z-index: 2;
+  transition:
+    width 0.2s ease,
+    flex-basis 0.2s ease;
 }
 
 :host(.arc-runtime-shell) .theme-layout__sidebar {
@@ -103,22 +135,49 @@
   overscroll-behavior: contain; /* nav scroll doesn't chain to the main region */
 }
 
-/* Experience Builder edit canvas only — inset the sidebar slot so component
-   chrome (delete, drag) is not clipped. Never applied on preview or live. */
+/* Experience Builder edit canvas only. No horizontal padding here — the nav
+   fills the full rail width so highlight/hover backgrounds run edge-to-edge
+   in both open and collapsed states, matching runtime. */
 :host(.arc-design-mode:not(.arc-runtime-shell)) .theme-layout__sidebar {
-  padding: 8px 12px;
+  padding: 0;
   overflow: visible;
 }
 
 /* ── Main — the only region that scrolls with page content. ── */
 .theme-layout__main {
+  position: relative;
   flex: 1 1 auto;
   min-width: 0;
 }
 
+/* Sits above every screen's own content, inside the one region shared by
+   every routed page — added here instead of per-page so nothing has to
+   opt in. Collapses to nothing (c-arc-breadcrumb renders empty on Home)
+   rather than reserving dead space. */
+.theme-layout__breadcrumb {
+  padding: 12px 24px 0;
+}
+
+/* Covers the gap between a nav click and the routed-in page's first render —
+   an opaque veil (not just a centered spinner over a blank rect) so a
+   half-mounted page never peeks through mid-transition. */
+.theme-layout__route-transition {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: var(--div-color-white, #ffffff);
+}
+
+/* Down only. A wide table scrolls inside its own container (.div-table-scroll
+   on c-styled-data-table), so letting the region scroll sideways as well moved
+   the whole page under the rail — the page header, tabs and toolbar slid out
+   past the sidebar's edge while the rail stayed put. Anything wider than the
+   region is that component's own scroller to own, not the shell's to reveal. */
 :host(.arc-runtime-shell) .theme-layout__main {
   overflow-y: auto;
-  overflow-x: auto;
+  /* clip, not hidden: hidden still scrolls programmatically, so focusing a cell
+     off to the right would drag the whole page under the rail again. */
+  overflow-x: clip;
 }
 
 .theme-layout__footer:empty {

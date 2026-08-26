@@ -1,6 +1,6 @@
 {
   "type" : "sfdc_cms__view",
-  "title" : "Envelope",
+  "title" : "Settings",
   "contentBody" : {
     "component" : {
       "children" : [ {
@@ -15,30 +15,29 @@
             "layoutDirectionTablet" : "column",
             "maxContentWidth" : "",
             "sectionColumnGutterWidth" : "",
-            "sectionConfig" : "{\"UUID\":\"4dd0cac2-4dc4-4854-8f39-2bfe4a567aec\",\"columns\":[{\"UUID\":\"f46ee6dd-8065-4fa5-b316-f562059def4e\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":[]}]}",
+            "sectionConfig" : "{\"UUID\":\"69a7b5af-cf98-5b47-96a9-62078d168e2e\",\"columns\":[{\"UUID\":\"277cc6d5-38ea-551b-82ba-092eeeae0aa7\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":[]}]}",
             "sectionMinHeight" : "",
             "sectionVerticalAlign" : "flex-start"
           },
           "children" : [ {
             "children" : [ {
               "attributes" : {
-                "dxpStyle" : { },
-                "hideBranding" : true
+                "dxpStyle" : { }
               },
-              "definition" : "c:envelopeApp",
-              "id" : "e62e6e25-da8d-42ce-9fcb-162fa9e6de08",
+              "definition" : "c:arcSettings",
+              "id" : "113a545c-219d-5df9-908c-da816d9b661d",
               "type" : "component"
             } ],
-            "id" : "f46ee6dd-8065-4fa5-b316-f562059def4e",
+            "id" : "277cc6d5-38ea-551b-82ba-092eeeae0aa7",
             "name" : "col1",
             "title" : "Column 1",
             "type" : "region"
           } ],
           "definition" : "community_layout:section",
-          "id" : "4dd0cac2-4dc4-4854-8f39-2bfe4a567aec",
+          "id" : "69a7b5af-cf98-5b47-96a9-62078d168e2e",
           "type" : "component"
         } ],
-        "id" : "5ae522ee-4418-4327-a46f-b3f9e79809c8",
+        "id" : "6e185aad-416b-5d43-9a18-e6ec5775fc39",
         "name" : "content",
         "title" : "Content",
         "type" : "region"
@@ -48,25 +47,24 @@
             "customHeadTags" : "",
             "description" : "",
             "dxpStyle" : { },
-            "pageTitle" : "Envelope",
-            "recordId" : "{!recordId}"
+            "pageTitle" : "Settings"
           },
           "definition" : "community_builder:seoAssistant",
-          "id" : "9aff257f-5fb2-48e5-9c59-5e898c0ebbec",
+          "id" : "ab18df0e-5e88-5bbe-bc85-97c8a690a415",
           "type" : "component"
         } ],
-        "id" : "13f04729-0424-4f33-a2e1-51b30b971ce4",
+        "id" : "0085f580-4af7-5cdb-9026-54ac936a7961",
         "name" : "sfdcHiddenRegion",
         "title" : "sfdcHiddenRegion",
         "type" : "region"
       } ],
       "definition" : "community_layout:sldsFlexibleLayout",
-      "id" : "13402f6c-e94c-49a7-9d8c-96dd08e2a0b9",
+      "id" : "2de92285-ac0f-54a9-8f69-6c65de189a5e",
       "type" : "component"
     },
     "dataProviders" : [ ],
     "themeLayoutType" : "OHzbXAVux6mZ7VVDb7Pb8F2YUFBAXR",
-    "viewType" : "custom-envelope"
+    "viewType" : "custom-settings"
   },
-  "urlName" : "envelope"
+  "urlName" : "settings"
 }

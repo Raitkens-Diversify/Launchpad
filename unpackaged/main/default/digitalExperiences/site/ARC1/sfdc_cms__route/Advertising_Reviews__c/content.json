@@ -1,0 +1,12 @@
+{
+  "type" : "sfdc_cms__route",
+  "title" : "Advertising Reviews",
+  "contentBody" : {
+    "activeViewId" : "Advertising_Reviews",
+    "configurationTags" : [ ],
+    "pageAccess" : "UseParent",
+    "routeType" : "custom-advertising-reviews",
+    "urlPrefix" : "advertising-reviews"
+  },
+  "urlName" : "advertising-reviews"
+}

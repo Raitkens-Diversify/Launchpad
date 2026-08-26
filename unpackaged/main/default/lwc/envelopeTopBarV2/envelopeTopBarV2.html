@@ -3,7 +3,9 @@
         <!-- Default: Diversify logo + breadcrumb (list / workspace). -->
         <template lwc:if={isDefault}>
             <div class="topbar__left">
-                <img class="topbar__logo" src={logoUrl} alt="Diversify" />
+                <template if:true={showBranding}>
+                    <img class="topbar__logo" src={logoUrl} alt="Diversify" />
+                </template>
                 <!-- Breadcrumb: the base lightning-breadcrumb, themed via envelopeWizardStyles.css.
                      Hidden entirely (with its leading divider) when no crumbs are passed — e.g. the shell. -->
                 <template if:true={hasBreadcrumb}>

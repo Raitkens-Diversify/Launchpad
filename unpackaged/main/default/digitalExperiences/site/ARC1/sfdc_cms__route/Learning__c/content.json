@@ -1,0 +1,12 @@
+{
+  "type" : "sfdc_cms__route",
+  "title" : "Learning",
+  "contentBody" : {
+    "activeViewId" : "Learning",
+    "configurationTags" : [ ],
+    "pageAccess" : "UseParent",
+    "routeType" : "custom-learning",
+    "urlPrefix" : "learning"
+  },
+  "urlName" : "learning"
+}

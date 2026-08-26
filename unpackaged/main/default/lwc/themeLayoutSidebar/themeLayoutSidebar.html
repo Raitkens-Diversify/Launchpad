@@ -1,20 +1,45 @@
 <template>
-    <div class="theme-layout">
-        <!-- data-f6-region marks each area as an F6 keyboard-navigation landmark,
+  <div class="theme-layout">
+    <!-- data-f6-region marks each area as an F6 keyboard-navigation landmark,
              per the LWR custom-layout docs. -->
-        <header class="theme-layout__header" data-f6-region>
-            <slot name="header"></slot>
-        </header>
-        <div class="theme-layout__body">
-            <aside class="theme-layout__sidebar" data-f6-region>
-                <slot name="sidebar"></slot>
-            </aside>
-            <main class="theme-layout__main" data-f6-region>
-                <slot></slot>
-            </main>
-        </div>
-        <footer class="theme-layout__footer" data-f6-region>
-            <slot name="footer"></slot>
-        </footer>
+    <!--
+      Header, sidebar and breadcrumb are the signed-in app's chrome, so they are
+      left out on the login and system routes: every nav destination needs a
+      session, the breadcrumb would describe wherever the user last was, and the
+      sidebar renders as a bare vertical rule with nothing in it. See
+      syncChromeVisibility for why this is done by route here rather than by
+      removing the components from the layout.
+    -->
+    <template lwc:if={showChrome}>
+      <header class="theme-layout__header" data-f6-region>
+        <slot name="header"></slot>
+      </header>
+    </template>
+    <div class="theme-layout__body">
+      <template lwc:if={showChrome}>
+        <aside class="theme-layout__sidebar" data-f6-region>
+          <slot name="sidebar"></slot>
+        </aside>
+      </template>
+      <main class="theme-layout__main" data-f6-region>
+        <template lwc:if={showChrome}>
+          <div class="theme-layout__breadcrumb">
+            <c-arc-breadcrumb></c-arc-breadcrumb>
+          </div>
+        </template>
+        <template lwc:if={isRouteTransitioning}>
+          <div class="theme-layout__route-transition">
+            <c-arc-loading-spinner
+              alternative-text="Loading page"
+              size="large"
+            ></c-arc-loading-spinner>
+          </div>
+        </template>
+        <slot></slot>
+      </main>
     </div>
+    <footer class="theme-layout__footer" data-f6-region>
+      <slot name="footer"></slot>
+    </footer>
+  </div>
 </template>

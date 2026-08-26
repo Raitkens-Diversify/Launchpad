@@ -2,10 +2,10 @@
   <lightning-card icon-name="standard:event" title={pageTitle}>
     <template lwc:if={isLoading}>
       <div class="loading-state" role="status" aria-live="polite">
-        <lightning-spinner
+        <c-arc-loading-spinner
           alternative-text="Loading Significant Event"
           size="small"
-        ></lightning-spinner>
+        ></c-arc-loading-spinner>
       </div>
     </template>
 

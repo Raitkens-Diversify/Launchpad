@@ -1,8 +1,13 @@
 :host {
     display: block;
     background: var(--slds-g-color-surface-1, #ffffff);
-    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
-    border-radius: var(--div-control-radius, 0.5rem);
+    /* Consumer-overridable border colour hook. Needed because LWR injects the
+       org's stock --slds-g-color-border-1 (#c9c9c9) into this component's own
+       scope, where a consumer's :host override cannot reach it. */
+    border: 1px solid
+        var(--card-border-color, var(--slds-g-color-border-1, #d1d5db));
+    /* Consumer-overridable radius hook (real default; not a design token). */
+    border-radius: var(--card-radius, var(--slds-g-radius-border-3, 12px));
     /* Consumer-overridable padding hook (real default; not a design token). */
     padding: var(--card-padding, var(--slds-g-spacing-5, 24px));
 }
