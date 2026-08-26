@@ -632,19 +632,35 @@
     <picklistValues>
         <picklist>Potential_Service__c</picklist>
         <values>
-            <fullName>RIA 1099</fullName>
+            <fullName>BD</fullName>
             <default>false</default>
         </values>
         <values>
-            <fullName>RIA 1099 %2B BD</fullName>
+            <fullName>Broker Dealer</fullName>
             <default>false</default>
         </values>
         <values>
-            <fullName>RIA W2</fullName>
+            <fullName>Delaware Statutory Trust %28DST%29</fullName>
             <default>false</default>
         </values>
         <values>
-            <fullName>RIA W2 %2B BD</fullName>
+            <fullName>Family Office Service Agreement</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Fee Based Wealth Management</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Financial Planning</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Retirement Planning or ERISA</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Tax Services</fullName>
             <default>false</default>
         </values>
     </picklistValues>

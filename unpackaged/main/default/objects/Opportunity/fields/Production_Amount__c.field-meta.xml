@@ -2,9 +2,9 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Production_Amount__c</fullName>
     <label>Production Amount</label>
-    <precision>15</precision>
+    <precision>17</precision>
     <required>false</required>
-    <scale>0</scale>
+    <scale>2</scale>
     <trackFeedHistory>false</trackFeedHistory>
     <trackHistory>false</trackHistory>
     <trackTrending>false</trackTrending>
