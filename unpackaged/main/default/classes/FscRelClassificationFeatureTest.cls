@@ -252,6 +252,66 @@ private class FscRelClassificationFeatureTest {
   }
 
   @IsTest
+  static void getRelationshipTree_includesClassifiedClientAccounts() {
+    if (!FscDataTestDataFactory.hasClassificationField()) {
+      return;
+    }
+
+    FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
+    Account clientAccount = FscDataTestDataFactory.createPersonAccount(
+      'ClassifiedClient',
+      'COI Client ' + System.currentTimeMillis()
+    );
+    FscDataTestDataFactory.assignActiveClientAccountType(
+      new List<Account>{ clientAccount }
+    );
+    FscDataTestDataFactory.assignClassification(
+      clientAccount,
+      FscRelClassificationUtils.COI
+    );
+    FscDataTestDataFactory.createHouseholdMembershipRelations(
+      new List<Account>{ clientAccount },
+      scenario.rootAccount.Id
+    );
+
+    Test.startTest();
+    FscRelHouseholdModels.RelationshipTreeData treeData = FscRelTreeController.getRelationshipTree(
+      scenario.rootAccount.Id
+    );
+    Test.stopTest();
+
+    String accountId = String.valueOf(clientAccount.Id);
+    Boolean foundInClientAccounts = false;
+    Boolean foundInClassifiedAccounts = false;
+
+    for (FscRelHouseholdModels.TreeAccount account : treeData.clientAccounts) {
+      if (account.accountId == accountId) {
+        foundInClientAccounts = true;
+      }
+    }
+
+    for (FscRelHouseholdModels.TreeAccount account : treeData.classifiedAccounts) {
+      if (account.accountId == accountId) {
+        foundInClassifiedAccounts = true;
+        System.assert(
+          account.classifications.contains(FscRelClassificationUtils.COI)
+        );
+      }
+    }
+
+    System.assertEquals(
+      true,
+      foundInClientAccounts,
+      'Client accounts should still appear in the client roster.'
+    );
+    System.assertEquals(
+      true,
+      foundInClassifiedAccounts,
+      'Client accounts with classifications should still appear in classified accounts.'
+    );
+  }
+
+  @IsTest
   static void getRelationshipTree_includesDirectHouseholdAarClassifications() {
     if (!FscDataTestDataFactory.hasClassificationField()) {
       return;

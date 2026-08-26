@@ -508,7 +508,6 @@ const applyClassificationGroupAction = (node, classificationValue) => {
 
 const buildCoiClassificationGroupChildren = (
   classifiedAccounts = [],
-  clientAccountIds = new Set(),
   nestedMembersByAccountId = {},
   nestedAccountMemberCountByAccountId = {},
   nestedMemberRelationsByAccountId = {},
@@ -518,9 +517,7 @@ const buildCoiClassificationGroupChildren = (
   buildClassificationGroupChildren(
     GROUP_IDS.NETWORK,
     CLASSIFICATION_VALUES.COI,
-    filterAccountsByClassification(classifiedAccounts, CLASSIFICATION_VALUES.COI).filter(
-      (account) => !clientAccountIds.has(account.accountId)
-    ),
+    filterAccountsByClassification(classifiedAccounts, CLASSIFICATION_VALUES.COI),
     null,
     nestedMembersByAccountId,
     nestedAccountMemberCountByAccountId,
@@ -529,13 +526,9 @@ const buildCoiClassificationGroupChildren = (
     memberRelationshipRecordTypes
   );
 
-const countCoiGroupRecords = (
-  classifiedAccounts = [],
-  clientAccountIds = new Set()
-) =>
-  filterAccountsByClassification(classifiedAccounts, CLASSIFICATION_VALUES.COI).filter(
-    (account) => !clientAccountIds.has(account.accountId)
-  ).length;
+const countCoiGroupRecords = (classifiedAccounts = []) =>
+  filterAccountsByClassification(classifiedAccounts, CLASSIFICATION_VALUES.COI)
+    .length;
 
 const buildClientAccountIdSet = (
   clientPersonAccounts = [],
@@ -567,7 +560,6 @@ const buildHouseholdNetworkChildren = (
   );
   const coiGroupNodes = buildCoiClassificationGroupChildren(
     classifiedAccounts,
-    clientAccountIds,
     nestedMembersByAccountId,
     nestedAccountMemberCountByAccountId,
     nestedMemberRelationsByAccountId,
@@ -2174,7 +2166,7 @@ export const buildMapTree = ({
       groupNode.recordCount = networkCardsLoaded
         ? countNetworkGroupRecords(networkChildren)
         : (householdNetworkRecordCount ?? 0) +
-          countCoiGroupRecords(classifiedAccounts, clientAccountIds);
+          countCoiGroupRecords(classifiedAccounts);
 
       return applyNetworkGroupContactAction(
         groupNode,

@@ -876,12 +876,18 @@ public with sharing class FscRelHouseholdService {
   ) {
     Map<Id, FscRelHouseholdModels.TreeAccount> classifiedAccountById = new Map<Id, FscRelHouseholdModels.TreeAccount>();
     Map<Id, String> relationIdByAccountId = new Map<Id, String>();
-    Set<Id> clientAccountIds = new Set<Id>();
     Set<Id> candidateAccountIds = new Set<Id>();
 
     for (FscRelHouseholdModels.TreeAccount clientAccount : clientAccounts) {
-      if (String.isNotBlank(clientAccount.accountId)) {
-        clientAccountIds.add((Id) clientAccount.accountId);
+      if (String.isBlank(clientAccount.accountId)) {
+        continue;
+      }
+
+      Id accountId = (Id) clientAccount.accountId;
+      candidateAccountIds.add(accountId);
+
+      if (String.isNotBlank(clientAccount.relationId)) {
+        relationIdByAccountId.put(accountId, clientAccount.relationId);
       }
     }
 
@@ -891,11 +897,6 @@ public with sharing class FscRelHouseholdService {
       }
 
       Id accountId = (Id) relatedAccount.accountId;
-
-      if (clientAccountIds.contains(accountId)) {
-        continue;
-      }
-
       candidateAccountIds.add(accountId);
 
       if (String.isNotBlank(relatedAccount.relationId)) {
@@ -905,10 +906,6 @@ public with sharing class FscRelHouseholdService {
 
     if (householdId != null) {
       for (Account account : accountRepository.selectMemberAccountsByHouseholdId(householdId)) {
-        if (FscRelClientAccountUtils.isClientAccount(account)) {
-          continue;
-        }
-
         candidateAccountIds.add(account.Id);
       }
     }
@@ -926,10 +923,6 @@ public with sharing class FscRelHouseholdService {
         candidateAccountIds
       )
     ) {
-      if (clientAccountIds.contains(account.Id)) {
-        continue;
-      }
-
       if (!hasHouseholdScopedClassification(account)) {
         continue;
       }
