@@ -8,25 +8,17 @@ const OVERFLOW_ICON = "dots-three-vertical.svg";
 const CARET_LEFT_ICON = "caret-left.svg";
 const CARET_RIGHT_ICON = "caret-right.svg";
 
-// Shown until Announcement__c has real active records — keeps the banner
-// visible (per Figma) instead of the section silently disappearing.
-const PLACEHOLDER_ANNOUNCEMENTS = [
-  {
-    id: "placeholder",
-    title: "Announcement message title goes here",
-    body: "Additional information about announcement goes here",
-    linkUrl: null
-  }
-];
-
 /**
  * Home dashboard announcement banner (Figma node 760:131500): one
  * Announcement__c at a time, with prev/next pagination across every
- * active record.
+ * active record. Shows a "No new announcements" empty state when there
+ * are none, and greys out the prev/next arrows at either end of the list
+ * (both greyed when there's only one announcement).
  */
 export default class ArcAnnouncements extends LightningElement {
   announcements = [];
   activeIndex = 0;
+  isLoading = true;
 
   get megaphoneIconStyle() {
     return `--icon-url: url('${NEXS_ICONS}/${MEGAPHONE_ICON}');`;
@@ -50,13 +42,14 @@ export default class ArcAnnouncements extends LightningElement {
 
   @wire(getActiveAnnouncements)
   wiredAnnouncements({ data, error }) {
+    this.isLoading = false;
     if (data) {
-      this.announcements = data.length > 0 ? data : PLACEHOLDER_ANNOUNCEMENTS;
+      this.announcements = data;
       this.activeIndex = 0;
       return;
     }
     if (error) {
-      this.announcements = PLACEHOLDER_ANNOUNCEMENTS;
+      this.announcements = [];
       console.error("[arcAnnouncements] Failed to load announcements", error);
     }
   }
@@ -65,9 +58,11 @@ export default class ArcAnnouncements extends LightningElement {
     return this.announcements.length > 0;
   }
 
+  get showEmptyState() {
+    return !this.isLoading && !this.hasAnnouncements;
+  }
+
   get showPagination() {
-    // Always visible per Figma, even with a single (or placeholder)
-    // announcement — it reads as "1/1" rather than disappearing.
     return this.hasAnnouncements;
   }
 
@@ -83,15 +78,23 @@ export default class ArcAnnouncements extends LightningElement {
     return Boolean(this.current?.linkUrl);
   }
 
+  get isPreviousDisabled() {
+    return this.activeIndex === 0;
+  }
+
+  get isNextDisabled() {
+    return this.activeIndex >= this.announcements.length - 1;
+  }
+
   handlePrevious() {
-    if (this.activeIndex === 0) {
+    if (this.isPreviousDisabled) {
       return;
     }
     this.activeIndex -= 1;
   }
 
   handleNext() {
-    if (this.activeIndex >= this.announcements.length - 1) {
+    if (this.isNextDisabled) {
       return;
     }
     this.activeIndex += 1;

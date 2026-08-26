@@ -10,8 +10,8 @@ public class Task_TriggerHandlerTest {
         insert testFAT;
         
         List<Account> accList = new List<Account>();
-        accList.add(new Account(Name = 'Test Account', Financial_Advisor_Team__c = testFAT.Id));
-        accList.add(new Account(Name = 'Test Account 2'));
+        accList.add(new Account(Name = 'Test Account', Financial_Advisor_Team__c = testFAT.Id, Type ='Other' ));
+        accList.add(new Account(Name = 'Test Account 2', Type ='Other' ));
         insert accList;
         
         Contact con = new Contact(LastName = 'Test', Email = 'test.test@dfpg.com');

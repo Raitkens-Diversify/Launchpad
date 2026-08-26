@@ -3,12 +3,7 @@
   "title" : "Home",
   "contentBody" : {
     "component" : {
-      "children" : [ {
-        "attributes" : {
-          "size" : "small"
-        },
-        "id" : "670824c6-20c4-4db4-8f91-be3af65f482d"
-      } ]
+      "children" : [ ]
     }
   },
   "urlName" : "home"

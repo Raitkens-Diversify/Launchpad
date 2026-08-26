@@ -4,10 +4,10 @@ public class BatchUpdateAMLValidOnAccount_Test {
     @testSetup
     public static void setup(){
         List<Account> accts = new List<Account>();
-        accts.add(new Account(Name = 'Test Account 1', AML_Expiration_Date__c = Date.today().addDays(-1), AML_Valid__c = true));
-        accts.add(new Account(Name = 'Test Account 2', AML_Expiration_Date__c = Date.today().addDays(1), AML_Valid__c = true));
-        accts.add(new Account(Name = 'Test Account 3', AML_Expiration_Date__c = Date.today().addDays(-5), AML_Valid__c = false));
-        accts.add(new Account(Name = 'Test Account 4', AML_Expiration_Date__c = Date.today(), AML_Valid__c = true));      
+        accts.add(new Account(Name = 'Test Account 1', AML_Expiration_Date__c = Date.today().addDays(-1), AML_Valid__c = true, Type ='Other'));
+        accts.add(new Account(Name = 'Test Account 2', AML_Expiration_Date__c = Date.today().addDays(1), AML_Valid__c = true, Type ='Other'));
+        accts.add(new Account(Name = 'Test Account 3', AML_Expiration_Date__c = Date.today().addDays(-5), AML_Valid__c = false, Type ='Other'));
+        accts.add(new Account(Name = 'Test Account 4', AML_Expiration_Date__c = Date.today(), AML_Valid__c = true, Type ='Other'));      
         insert accts;
     }
     

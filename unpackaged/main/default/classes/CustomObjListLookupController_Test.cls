@@ -5,6 +5,8 @@ public class CustomObjListLookupController_Test {
     {
         Account testAccount = new Account();
         testAccount.Name = 'Test Account';
+        testAccount.Type ='Other';
+        testAccount.Classification__c = 'Vendor;';
 		insert testAccount;
     }
     

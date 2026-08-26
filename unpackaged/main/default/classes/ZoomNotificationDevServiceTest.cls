@@ -15,7 +15,7 @@ private class ZoomNotificationDevServiceTest {
     }
 
     public HttpResponse respond(HttpRequest request) {
-      if (request.getEndpoint() == TOKEN_ENDPOINT) {
+      if (request.getEndpoint() == TOKEN_ENDPOINT || request.getEndpoint()=='callout:Zoom_CCC/v2/app/notifications') {
         return buildTokenResponse();
       }
 
@@ -47,6 +47,20 @@ private class ZoomNotificationDevServiceTest {
     Test.startTest();
     ZoomNotificationDevService.TokenResponse tokenResponse = ZoomNotificationDevService.exchangeAuthorizationCode(
       'auth-code-123',
+      'client-secret'
+    );
+    Test.stopTest();
+
+    System.assertEquals('new-access-token', tokenResponse.access_token);
+    System.assertEquals('refresh-token', tokenResponse.refresh_token);
+  }
+      @IsTest
+  static void test_RefreshAccessToken() {
+    Test.setMock(HttpCalloutMock.class, new ZoomDevNotificationMock('success'));
+
+    Test.startTest();
+    ZoomNotificationDevService.TokenResponse tokenResponse = ZoomNotificationDevService.refreshAccessToken(
+      'refreshToken1234',
       'client-secret'
     );
     Test.stopTest();

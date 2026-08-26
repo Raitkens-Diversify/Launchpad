@@ -13,7 +13,7 @@ public class Case_TriggerHandler {
         setOriginalOwner(newList);
         setAccountForVAAP(newList);
         setCaseTemplateForWizard(newList);
-        setCaseTemplateForAdvisorRequest(newList);
+        //setCaseTemplateForAdvisorRequest(newList);
         populateBranchAndHomeNames(newList, null);
         populateTaskDetails(newList, null);
     }
@@ -464,12 +464,14 @@ public  Map<Id,Case> setCaseTemplateForWizard(List<Case> newList){
         String caseTemplateType;
         
         lstOfCaseTemplateField = new List<String>{'Type__c', 'Compliance_Needed__c', 'Check_in_Hand__c',
-            'Management_Style__c' /* ,'Custodian__c' */};
+            'Management_Style__c' ,'Custodian__c', 'Previous_Management_Style__c', 'Charity_Sponsor__c',
+            'Enough_Cash__c', 'Live_SLOA_on_File__c', 'Money_Movement_Direction__c' };
                 
                 caseTemplateFieldDefaultValue = 'EXCLUDED';
         
          mapCaseTempFldToCaseFld = new Map< String, String>{ 'Type__c' => 'Type','Compliance_Needed__c' => 'SOF_Compliance__c', 
-            'Check_in_Hand__c' => 'Check_in_Hand__c', 'Management_Style__c' => 'Management_Style__c','Custodian__c' => 'Custodian__c'}; 
+            'Check_in_Hand__c' => 'Check_in_Hand__c', 'Management_Style__c' => 'Management_Style__c','Custodian__c' => 'Custodian__c', 'Previous_Management_Style__c' => 'Previous_Management_Style__c',
+            'Charity_Sponsor__c' => 'Charity_Sponsor__c', 'Enough_Cash__c' => 'Enough_Cash__c', 'Live_SLOA_on_File__c' => 'No_SLOA_On_File__c', 'Money_Movement_Direction__c' => 'Money_Movement_Direction__c'}; 
                 
         Id newAccountRecordTypeId = Schema.SObjectType.Case.getRecordTypeInfosByName().get('Account Opening').getRecordTypeId();
         Id servicingRecordTypeId = Schema.SObjectType.Case.getRecordTypeInfosByName().get('Account Servicing').getRecordTypeId();
@@ -499,6 +501,11 @@ setOfTypeToName.add('Account Servicing - Approval Required');
                 Management_Style__c,
                 Type__c,
                 Custodian__c,
+                Previous_Management_Style__c,
+                Charity_Sponsor__c,
+                Enough_Cash__c,
+                Live_SLOA_on_file__c,
+                money_movement_direction__c,
                 Type_of_Template__c
                 FROM Case_Template__c
                 WHERE Type_of_Template__c = 'Fixed'
@@ -515,10 +522,16 @@ setOfTypeToName.add('Account Servicing - Approval Required');
                 Management_Style__c,
                 Type__c,
                 Custodian__c,
+                Previous_Management_Style__c,
+                Charity_Sponsor__c,
+                Enough_Cash__c,
+                Live_SLOA_on_file__c,
+                money_movement_direction__c,
                 Type_of_Template__c
                 FROM Case_Template__c
                 WHERE Type_of_Template__c IN ('Pre', 'Post', 'Fixed')
             ];
+            System.debug('templates: ' + lstCaseTemplate);
         }
         
         
@@ -621,7 +634,7 @@ setOfTypeToName.add('Account Servicing - Approval Required');
         return caseMap;
     }
     
-    public Map<Id,Case> setCaseTemplateForAdvisorRequest(List<Case> newList){
+    /*public Map<Id,Case> setCaseTemplateForAdvisorRequest(List<Case> newList){
         Set<String> setOfTypeToName = new Set<String>(); 
         Map<String, List<Case_Template__c>> mapOfNameTolstCaseTemp = new Map<String, List<Case_Template__c>>(); 
         Map<Id, Id> mapOfCaseIdToCaseTempId = new  Map<Id, Id>();
@@ -679,7 +692,7 @@ setOfTypeToName.add('Account Servicing - Approval Required');
             }
         }           
         return caseMap;
-    }
+    }*/
     
     public void createShareRecord(Map<Id, Case> newMap, Map<Id, Case> oldMap){
         Set<Id> fAccTeamIdSet = new Set<Id>();
@@ -1345,20 +1358,20 @@ record.OwnerId = queuePRId;
         Map<Id,Case> casesWizardToRecalc = new Map<Id,Case>();
         for(Case c : newMap.values()){
             if(c.Recalculate_Case_Template__c){
-                if(c.Origin == 'Wizard'){
+                //if(c.Origin == 'Wizard'){
                     casesWizardToRecalc.put(c.Id, c);
-                } else {
+                /*} else {
                     casesAdvisorToRecalc.put(c.Id, c);
-                }
+                }*/
                 
                 c.Recalculate_Case_Template__c = false;
                 c.DoNotCalc__c = false;
             }
         }
-        if(!casesAdvisorToRecalc.isEmpty()){
-            casesAdvisorToRecalc = setCaseTemplateForAdvisorRequest(casesAdvisorToRecalc.values());
+        /*if(!casesAdvisorToRecalc.isEmpty()){
+            //casesAdvisorToRecalc = setCaseTemplateForAdvisorRequest(casesAdvisorToRecalc.values());
             createAdvisorRequestTask(casesAdvisorToRecalc);
-        }
+        }*/
         if(!casesWizardToRecalc.isEmpty()){
             casesWizardToRecalc = setCaseTemplateForWizard(casesWizardToRecalc.values());
             createWizardTask(casesWizardToRecalc);
@@ -1476,29 +1489,25 @@ record.OwnerId = queuePRId;
                       || caseTemplate.get(lstOfCaseTemplateField[indexNumber]) == caseTemplateFieldDefaultValue
                       || lstOfCaseTemplateField[indexNumber] == 'Management_Style__c'){
                           if(lstOfCaseTemplateField[indexNumber] == 'Management_Style__c'){
-                              // Management_Style__c is a multi-select field (a Case or Template can carry more
-                              // than one value at once, e.g. 'DMS;AMS+'), which plain equality can't match — this
-                              // is why this one field is checked by substring instead of '=='. A brand-new
-                              // Account Opening Case has no Management_Style__c yet (nothing sets it before the
-                              // interview runs), so caseValue below is null on that very first insert; String's
-                              // .contains(null) throws, so both sides are checked for a value first. A Case with
-                              // no style yet simply matches no style-specific template here, same as any other
-                              // field would when its value doesn't match — it is not treated as a wildcard.
-                              String caseValue = String.valueOf(
-                                  caseRecord.get(mapCaseTempFldToCaseFld.get(lstOfCaseTemplateField[indexNumber])));
                               String templateValue = String.valueOf(caseTemplate.get('Management_Style__c'));
-                              if(caseValue != null && templateValue != null){
-                                  Set<String> templateValues = new Set<String>(templateValue.split(';'));
-                                  Set<String> caseValues = new Set<String>(caseValue.split(';'));
-                                  Boolean hasMatch = false;
-                                  for(String cv : caseValues){
-                                      if(templateValues.contains(cv)){
-                                          hasMatch = true;
-                                          break;
+                              if(templateValue == caseTemplateFieldDefaultValue){
+                                  lstCaseTemptValue.add(caseTemplate);
+                              } else {
+                                  String caseValue = String.valueOf(
+                                      caseRecord.get(mapCaseTempFldToCaseFld.get(lstOfCaseTemplateField[indexNumber])));
+                                  if(caseValue != null && templateValue != null){
+                                      Set<String> templateValues = new Set<String>(templateValue.split(';'));
+                                      Set<String> caseValues = new Set<String>(caseValue.split(';'));
+                                      Boolean hasMatch = false;
+                                      for(String cv : caseValues){
+                                          if(templateValues.contains(cv)){
+                                              hasMatch = true;
+                                              break;
+                                          }
                                       }
-                                  }
-                                  if(hasMatch){
-                                      lstCaseTemptValue.add(caseTemplate);
+                                      if(hasMatch){
+                                          lstCaseTemptValue.add(caseTemplate);
+                                      }
                                   }
                               }
                           } else {

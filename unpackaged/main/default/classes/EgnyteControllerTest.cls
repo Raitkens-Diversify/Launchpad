@@ -7,7 +7,7 @@ private class EgnyteControllerTest {
   private static final String RECORD_ID = '001TO000008Zp6JYAS';
   private static final String MAPPED_PATH = '/Shared/Salesforce.com/Account/AC';
   private static final String REDIRECT_URL =
-    'https://launchpad.egnyte.com/nav/one-time-session-token';
+    'https://falconpark.egnyte.com/nav/one-time-session-token';
   private static final String TEST_TOKEN = 'test-access-token';
 
   private class EgnyteSuccessMock implements HttpCalloutMock {
@@ -17,7 +17,7 @@ private class EgnyteControllerTest {
       if (request.getEndpoint().contains('/sfdc/foldermap/')) {
         System.assertEquals('GET', request.getMethod());
         System.assert(
-          request.getEndpoint().startsWith('https://launchpad.egnyte.com')
+          request.getEndpoint().startsWith('https://falconpark.egnyte.com')
         );
         System.assertEquals(
           'Bearer ' + TEST_TOKEN,
@@ -31,7 +31,7 @@ private class EgnyteControllerTest {
       if (request.getEndpoint().contains('/navigate')) {
         System.assertEquals('POST', request.getMethod());
         System.assert(
-          request.getEndpoint().startsWith('https://launchpad.egnyte.com')
+          request.getEndpoint().startsWith('https://falconpark.egnyte.com')
         );
         System.assertEquals(
           'Bearer ' + TEST_TOKEN,
@@ -101,7 +101,7 @@ private class EgnyteControllerTest {
     Test.stopTest();
 
     System.assertEquals(
-      'https://launchpad.egnyte.com/navigate/path/Shared/Salesforce.com',
+      'https://falconpark.egnyte.com/navigate/path/Shared/Salesforce.com',
       url
     );
   }
@@ -109,16 +109,16 @@ private class EgnyteControllerTest {
   @IsTest
   static void buildDirectEmbedUrl_buildsNavigatePathDeepLink() {
     System.assertEquals(
-      'https://launchpad.egnyte.com/navigate/path/Shared/Salesforce.com/Account/AC',
+      'https://falconpark.egnyte.com/navigate/path/Shared/Salesforce.com/Account/AC',
       EgnyteController.buildDirectEmbedUrl(
-        'https://launchpad.egnyte.com',
+        'https://falconpark.egnyte.com',
         '/Shared/Salesforce.com/Account/AC'
       )
     );
     System.assertEquals(
-      'https://launchpad.egnyte.com/navigate/path/Shared/Salesforce.com/Account/AC/ACME%20Company',
+      'https://falconpark.egnyte.com/navigate/path/Shared/Salesforce.com/Account/AC/ACME%20Company',
       EgnyteController.buildDirectEmbedUrl(
-        'https://launchpad.egnyte.com',
+        'https://falconpark.egnyte.com',
         '/Shared/Salesforce.com/Account/AC/ACME Company'
       )
     );
@@ -126,7 +126,7 @@ private class EgnyteControllerTest {
 
   @IsTest
   static void getEgnyteFolderUrl_buildsRecordSpecificPathWithoutApiCredentials() {
-    Account acct = new Account(Name = 'ACME Company');
+    Account acct = new Account(Name = 'ACME Company', Type ='Other', Classification__c = 'Vendor;');
     insert acct;
     EgnyteController.testAccessTokenOverride = null;
 
@@ -155,7 +155,7 @@ private class EgnyteControllerTest {
       false,
       EgnyteController.hasApiCredentials(
         EgnyteController.buildTestSettings(
-          'https://launchpad.egnyte.com',
+          'https://falconpark.egnyte.com',
           null,
           null,
           null
@@ -178,7 +178,7 @@ private class EgnyteControllerTest {
 
   @IsTest
   static void getEgnyteFolderUrl_throwsWhenMappingMissingEvenIfLocalRecordExists() {
-    Account acct = new Account(Name = 'ACME Company');
+    Account acct = new Account(Name = 'ACME Company', Type ='Other', Classification__c = 'Vendor;');
     insert acct;
     EgnyteController.testAccessTokenOverride = TEST_TOKEN;
     Test.setMock(HttpCalloutMock.class, new EgnyteFolderMapFailureMock());
@@ -289,12 +289,12 @@ private class EgnyteControllerTest {
   @IsTest
   static void buildBaseUrl_normalizesDomainValues() {
     System.assertEquals(
-      'https://launchpad.egnyte.com',
-      EgnyteController.buildBaseUrl('launchpad.egnyte.com')
+      'https://falconpark.egnyte.com',
+      EgnyteController.buildBaseUrl('falconpark.egnyte.com')
     );
     System.assertEquals(
-      'https://launchpad.egnyte.com',
-      EgnyteController.buildBaseUrl('https://launchpad.egnyte.com/')
+      'https://falconpark.egnyte.com',
+      EgnyteController.buildBaseUrl('https://falconpark.egnyte.com/')
     );
   }
 
@@ -305,7 +305,7 @@ private class EgnyteControllerTest {
     Test.startTest();
     String token = EgnyteController.refreshAccessToken(
       EgnyteController.buildTestSettings(
-        'https://launchpad.egnyte.com',
+        'https://falconpark.egnyte.com',
         'client-id',
         'client-secret',
         'refresh-token'
@@ -324,7 +324,7 @@ private class EgnyteControllerTest {
     try {
       EgnyteController.resolveAccessToken(
         EgnyteController.buildTestSettings(
-          'https://launchpad.egnyte.com',
+          'https://falconpark.egnyte.com',
           null,
           null,
           null
@@ -344,7 +344,7 @@ private class EgnyteControllerTest {
   @IsTest
   static void applyCredentialOverrides_appliesClientCredentialsAndDomain() {
     EgnyteController.Settings settings = EgnyteController.buildTestSettings(
-      'https://launchpad.egnyte.com',
+      'https://falconpark.egnyte.com',
       null,
       null,
       null
@@ -369,7 +369,7 @@ private class EgnyteControllerTest {
   @IsTest
   static void normalizeMappedFolderPath_supportsRelativeFoldermapPaths() {
     EgnyteController.Settings settings = EgnyteController.buildTestSettings(
-      'https://launchpad.egnyte.com',
+      'https://falconpark.egnyte.com',
       null,
       null,
       null

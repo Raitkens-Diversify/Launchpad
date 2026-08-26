@@ -16,7 +16,8 @@ private class AccountSlaTriggerHandlerTest {
     static void test_NoStandardEntitlementWhenNotSubmitted() {
         Account acc = new Account(
             Name = 'Not Submitted Entitlement Account',
-            Submitted__c = false
+            Submitted__c = false,
+            Type ='Other'
         );
 
         Test.startTest();
@@ -48,7 +49,8 @@ private class AccountSlaTriggerHandlerTest {
     static void test_CreateStandardEntitlementOnInsertWhenSubmitted() {
         Account acc = new Account(
             Name = 'Entitlement Insert Account',
-            Submitted__c = true
+            Submitted__c = true,
+             Type ='Other'
         );
 
         Test.startTest();
@@ -60,7 +62,7 @@ private class AccountSlaTriggerHandlerTest {
 
     @IsTest
     static void test_CreateStandardEntitlementWhenSubmittedFlipped() {
-        Account acc = new Account(Name = 'Entitlement Flip Account', Submitted__c = false);
+        Account acc = new Account(Name = 'Entitlement Flip Account', Submitted__c = false, Type ='Other');
         insert acc;
 
         Test.startTest();
@@ -73,7 +75,7 @@ private class AccountSlaTriggerHandlerTest {
 
     @IsTest
     static void test_DoesNotCreateDuplicateStandardEntitlement() {
-        Account acc = new Account(Name = 'Entitlement Duplicate Account', Submitted__c = false);
+        Account acc = new Account(Name = 'Entitlement Duplicate Account', Submitted__c = false, Type ='Other');
         insert acc;
 
         Test.startTest();

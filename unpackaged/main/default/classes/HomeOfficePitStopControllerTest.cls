@@ -2,7 +2,7 @@
 private class HomeOfficePitStopControllerTest {
     @IsTest
     static void testGetTasks_FiltersByRecordAndFlagAndOrdersByCreatedDateDesc() {
-        Account acc = new Account(Name = 'Test Account');
+        Account acc = new Account(Name = 'Test Account',Type ='Other');
         insert acc;
 
         Task_Template__c tt = new Task_Template__c();
@@ -61,7 +61,8 @@ private class HomeOfficePitStopControllerTest {
         );
         insert t3;
 
-        Account otherAcc = new Account(Name = 'Other');
+        Account otherAcc = new Account(Name = 'Other',Type ='Other', 
+           Classification__c = 'Vendor;');
         insert otherAcc;
 
         Task t4 = new Task(

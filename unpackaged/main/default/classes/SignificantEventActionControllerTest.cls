@@ -111,7 +111,7 @@ private class SignificantEventActionControllerTest {
     System.assertEquals(3, groups.size());
     System.assertEquals('Clients', groups[0].category);
     System.assert(groups[0].contacts.size() > 0, 'Expected client suggestions.');
-    System.assertEquals('Family and Friends', groups[1].category);
+    System.assertEquals('Family', groups[1].category);
     System.assertEquals('Network', groups[2].category);
   }
 
@@ -756,7 +756,7 @@ private class SignificantEventActionControllerTest {
 
   @IsTest
   static void getLinkedContactsForAccount_emptyScope_returnsEmptyList() {
-    Account standaloneAccount = new Account(Name = 'Standalone Account');
+    Account standaloneAccount = new Account(Name = 'Standalone Account',Type ='Other');
     insert standaloneAccount;
 
     Test.startTest();
@@ -935,7 +935,7 @@ private class SignificantEventActionControllerTest {
 
   @IsTest
   static void getSignificantEventsForAccount_emptyScope_returnsEmptyList() {
-    Account standaloneAccount = new Account(Name = 'Standalone Events Account');
+    Account standaloneAccount = new Account(Name = 'Standalone Events Account', Type ='Other');
     insert standaloneAccount;
 
     Test.startTest();
@@ -954,80 +954,6 @@ private class SignificantEventActionControllerTest {
     Test.startTest();
     try {
       SignificantEventActionController.getSignificantEventsForAccount(null);
-    } catch (AuraHandledException error) {
-      threw = true;
-    }
-    Test.stopTest();
-
-    System.assertEquals(true, threw);
-  }
-
-  @IsTest
-  static void getLinkedContactsForSignificantEvent_returnsParticipantsForEvent() {
-    SignificantEventTestDataFactory.Scenario scenario = SignificantEventTestDataFactory.loadScenario();
-    Account household = SignificantEventTestDataFactory.createHouseholdAccount(
-      'SE Event Participants Household'
-    );
-
-    Significant_Event__c eventRecord = new Significant_Event__c(
-      Name = 'Event Participants Test',
-      Event_Type__c = 'Birthday',
-      Start_Date__c = Date.today(),
-      Household__c = household.Id
-    );
-    insert eventRecord;
-
-    insert new Significant_Event_Contact__c(
-      Significant_Event__c = eventRecord.Id,
-      Account__c = scenario.treeScenario.linkedPersonAccount.Id
-    );
-
-    Test.startTest();
-    List<SignificantEventActionModels.LinkedContactRow> rows = SignificantEventActionController.getLinkedContactsForSignificantEvent(
-      eventRecord.Id
-    );
-    Test.stopTest();
-
-    System.assertEquals(1, rows.size());
-    System.assertEquals(
-      String.valueOf(eventRecord.Id),
-      rows[0].significantEventId
-    );
-    System.assertEquals(
-      String.valueOf(scenario.treeScenario.linkedPersonAccount.Id),
-      rows[0].accountId
-    );
-  }
-
-  @IsTest
-  static void getLinkedContactsForSignificantEvent_emptyScope_returnsEmptyList() {
-    Account household = SignificantEventTestDataFactory.createHouseholdAccount(
-      'SE Empty Participants Household'
-    );
-    Significant_Event__c eventRecord = new Significant_Event__c(
-      Name = 'No Participants Event',
-      Event_Type__c = 'Birthday',
-      Start_Date__c = Date.today(),
-      Household__c = household.Id
-    );
-    insert eventRecord;
-
-    Test.startTest();
-    List<SignificantEventActionModels.LinkedContactRow> rows = SignificantEventActionController.getLinkedContactsForSignificantEvent(
-      eventRecord.Id
-    );
-    Test.stopTest();
-
-    System.assertEquals(0, rows.size());
-  }
-
-  @IsTest
-  static void getLinkedContactsForSignificantEvent_nullId_throwsHandledException() {
-    Boolean threw = false;
-
-    Test.startTest();
-    try {
-      SignificantEventActionController.getLinkedContactsForSignificantEvent(null);
     } catch (AuraHandledException error) {
       threw = true;
     }

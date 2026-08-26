@@ -14,56 +14,57 @@ public class DocuSign_OppEnvelopesTest {
                                  TimeZoneSidKey='America/Chicago',
                                  EmailEncodingKey = 'UTF-8');
         insert testUser;
-        String householdRecTypeId = Schema.SObjectType.Account.getRecordTypeInfosByName().get('Household').getRecordTypeId();
-        String paRecTypeId = Schema.SObjectType.Account.getRecordTypeInfosByName().get('Person Account').getRecordTypeId();
-        List<Account> accList = new List<Account>();
-        accList.add(new Account(Name = 'Test Account', RecordTypeId = householdRecTypeId));
-        accList.add(new Account(FirstName = 'Test', LastName = 'Person Account 1', PersonEmail = 'test@test1.com', RecordTypeId = paRecTypeId));
-        accList.add(new Account(FirstName = 'Test', LastName = 'Person Account 2', PersonEmail = 'test@test2.com', RecordTypeId = paRecTypeId));
-        insert accList;
-        
-        List<Account> personAccounts =  [SELECT PersonContactId FROM Account WHERE LastName LIKE 'Person Account%'];
-        List<AccountContactRelation> acrs = new List<AccountContactRelation>();
-        acrs.add(new AccountContactRelation(ContactId = personAccounts[0].PersonContactId, AccountId = accList[0].Id, IsActive = true, Roles = 'Client', FinServ__Primary__c = true));
-        acrs.add(new AccountContactRelation(ContactId = personAccounts[1].PersonContactId, AccountId = accList[0].Id, IsActive = true, Roles = 'Client', FinServ__Primary__c = false));
-		insert acrs;
-        
-        Opportunity opp;
         System.runAs(testuser){
-            opp = new Opportunity(Name = 'Test Opportunity', AccountId = accList[0].Id, 
-                                              StageName = 'Qualification', CloseDate = Date.today());
-            insert opp;}
-        
-        List<dfsle__EnvelopeConfiguration__c> envelopConfig = new List<dfsle__EnvelopeConfiguration__c>();
-        envelopConfig.add(new dfsle__EnvelopeConfiguration__c(
-            Name = 'DocusignConfig',
-            dfsle__DocuSignId__c = String.valueOf(dfsle.UUID.randomUUID())
-        ));
-        insert envelopConfig;
-        
-        List<DocuSign_Document__c> docs = new List<DocuSign_Document__c>();
-        docs.add(new DocuSign_Document__c(
-            Opportunity__c=opp.Id,
-            Template_Type__c = envelopConfig[0].Id,
-            Send_to_Primary_Owner__c = true
-        ));
-        
-        
-        docs.add(new DocuSign_Document__c(
-            Opportunity__c=opp.Id,
-            Template_Type__c = envelopConfig[0].Id,
-            Send_to_Joint_Owner__c = true
-        ));
-        
-        docs.add(new DocuSign_Document__c(
-            Opportunity__c = opp.Id,
-            Template_Type__c = envelopConfig[0].Id,
-            Send_to_Primary_Owner__c = true,
-            Send_to_Joint_Owner__c = true
-        ));        
-        
-        insert docs;
-        
+            
+            String householdRecTypeId = Schema.SObjectType.Account.getRecordTypeInfosByName().get('Household').getRecordTypeId();
+            String paRecTypeId = Schema.SObjectType.Account.getRecordTypeInfosByName().get('Person Account').getRecordTypeId();
+            List<Account> accList = new List<Account>();
+            accList.add(new Account(Name = 'Test Account', RecordTypeId = householdRecTypeId, Type ='Other', Classification__c = 'Vendor;'));
+            accList.add(new Account(FirstName = 'Test', LastName = 'Person Account 1', PersonEmail = 'test@test1.com', RecordTypeId = paRecTypeId, Type ='Other', Classification__c = 'Vendor;'));
+            accList.add(new Account(FirstName = 'Test', LastName = 'Person Account 2', PersonEmail = 'test@test2.com', RecordTypeId = paRecTypeId, Type ='Other', Classification__c = 'Vendor;'));
+            insert accList;
+            
+            List<Account> personAccounts =  [SELECT PersonContactId FROM Account WHERE LastName LIKE 'Person Account%'];
+            List<AccountContactRelation> acrs = new List<AccountContactRelation>();
+            acrs.add(new AccountContactRelation(ContactId = personAccounts[0].PersonContactId, AccountId = accList[0].Id, IsActive = true, Roles = 'Client'));
+            acrs.add(new AccountContactRelation(ContactId = personAccounts[1].PersonContactId, AccountId = accList[0].Id, IsActive = true, Roles = 'Client'));
+            insert acrs;
+            
+            Opportunity opp;
+            opp = new Opportunity(Name = 'Test Opportunity', AccountId = accList[1].Id, 
+                                  StageName = 'Qualification', CloseDate = Date.today());
+            insert opp;
+            
+            List<dfsle__EnvelopeConfiguration__c> envelopConfig = new List<dfsle__EnvelopeConfiguration__c>();
+            envelopConfig.add(new dfsle__EnvelopeConfiguration__c(
+                Name = 'DocusignConfig',
+                dfsle__DocuSignId__c = String.valueOf(dfsle.UUID.randomUUID())
+            ));
+            insert envelopConfig;
+            
+            List<DocuSign_Document__c> docs = new List<DocuSign_Document__c>();
+            docs.add(new DocuSign_Document__c(
+                Opportunity__c=opp.Id,
+                Template_Type__c = envelopConfig[0].Id,
+                Send_to_Primary_Owner__c = true
+            ));
+            
+            
+            docs.add(new DocuSign_Document__c(
+                Opportunity__c=opp.Id,
+                Template_Type__c = envelopConfig[0].Id,
+                Send_to_Joint_Owner__c = true
+            ));
+            
+            docs.add(new DocuSign_Document__c(
+                Opportunity__c = opp.Id,
+                Template_Type__c = envelopConfig[0].Id,
+                Send_to_Primary_Owner__c = true,
+                Send_to_Joint_Owner__c = true
+            ));        
+            
+            insert docs;
+        }
     }
     
     @isTest
@@ -72,7 +73,11 @@ public class DocuSign_OppEnvelopesTest {
         // Mock the DocuSign eSignature API
         dfsle.TestUtils.setMock(new dfsle.ESignatureAPIMock());
         Test.startTest();
-        User testDSUser = dfsle.UserMock.createDocuSignAdministrator();
+        User testUser = [SELECT Id FROM User  WHERE Email='testinguser5309@testing.invalid'];
+        User testDSUser = new User();
+        System.runAs(testUser) {
+                 testDSUser = dfsle.UserMock.createDocuSignAdministrator();
+            }
         // Run the test as a DocuSign Sender. This is required by dfsle.EnvelopeService.sendEnvelope
         System.runAs(testDSUser) {
             DocuSign_OppEnvelopes.sendOppEnvelopes(opp.Id);

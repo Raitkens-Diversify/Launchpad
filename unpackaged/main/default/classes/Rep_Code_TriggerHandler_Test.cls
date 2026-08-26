@@ -1,104 +1,320 @@
 @isTest
 public class Rep_Code_TriggerHandler_Test {    
-    @testSetup
-    private static void setup(){
-        User usr = new User(
-            ProfileId = [SELECT Id FROM Profile WHERE Name='System Administrator'].Id,
-            FirstName = 'FirstName',
-            LastName = 'LastName',
-            Username = 'user@test.com' + System.currentTimeMillis(),
-            Email = 'test@none.com',
-            CompanyName = 'test',
-            Title = 'title',
-            Alias = 'alias',
-            TimeZoneSidKey = 'America/Los_Angeles',
-            EmailEncodingKey = 'UTF-8',
-            LanguageLocaleKey = 'en_US',
-            LocaleSidKey = 'en_US',
-            IsActive = true);
-        insert usr;
+    @TestSetup
+    static void setupTestData() {
         
-        List<Financial_Advisor_Team_Member__c> fatmList = new List<Financial_Advisor_Team_Member__c>();
-        Financial_Advisor_Team__c defaultTeam = new Financial_Advisor_Team__c(Name = 'Default Team');
+        Financial_Advisor_Team__c defaultTeam = new Financial_Advisor_Team__C ( Name = 'Default Team');
         insert defaultTeam;
         
-        Group grp = new Group(Name='Test Group');
-        insert grp;
         
-        System.runAs(usr){
-            Financial_Advisor_Team__c faTeam = new Financial_Advisor_Team__c();
-            faTeam.Name = 'Test Fin Advisor Team';
-            // faTeam.Public_Group_Id__c=grp.Id;
-            insert faTeam;
-            
-            Id accRecTypeId = Schema.SObjectType.Account.getRecordTypeInfosByName().get('Person Account').getRecordTypeId();
-            Id hhRecTypeId = Schema.SObjectType.Account.getRecordTypeInfosByName().get('Household').getRecordTypeId();
-            List<Account> accList = new List<Account>();
-            accList.add(new Account(FirstName = 'Primary', LastName = 'Owner', RecordTypeId = accRecTypeId, Financial_Advisor_Team__c = faTeam.Id));
-            accList.add(new Account(FirstName = 'Joint', LastName = 'Owner', RecordTypeId = accRecTypeId, Financial_Advisor_Team__c = faTeam.Id));
-            accList.add(new Account(Name = 'Test Household', RecordTypeId = hhRecTypeId, Financial_Advisor_Team__c = faTeam.Id));
-            insert accList;
-            
-            Account person1 = [SELECT Id, PersonContactId FROM Account WHERE Id =: accList[0].Id];
-            Account person2 = [SELECT Id, PersonContactId FROM Account WHERE Id =: accList[1].Id];
-            List<AccountContactRelation> acrList = new List<AccountContactRelation>();
-            acrList.add(new AccountContactRelation(AccountId = accList[2].Id, ContactId = person1.PersonContactId, FinServ__PrimaryGroup__c = true));
-            acrList.add(new AccountContactRelation(AccountId = accList[2].Id, ContactId = person2.PersonContactId, FinServ__PrimaryGroup__c = true));
-            insert acrList;
-            
-            DateTime now = DateTime.now();
-            Event evt = new Event(WhatId = accList[2].Id, Subject = 'Test Event', DurationInMinutes = 60, ActivityDateTime = now, Financial_Advisor_Team__c = faTeam.Id);
-            insert evt;
-            
-            
-            
-            Rep_Code__c repCode = new Rep_Code__c(Name = '123', Financial_Advisor_Team__c = faTeam.Id);
-            insert repCode;
-            
-            FinServ__FinancialAccount__c finAccount = new FinServ__FinancialAccount__c();
-            finAccount.Name = 'Test Fin Account';
-            finAccount.FinServ__PrimaryOwner__c = accList[0].Id;
-            finAccount.FinServ__JointOwner__c = accList[1].Id;
-            finAccount.Financial_Advisor_Team__c = faTeam.Id;
-            finAccount.Rep_Code_Lookup__c = repCode.Id;
-            finAccount.FinServ__Household__c = accList[2].Id;
-            insert finAccount;
-            System.debug('finAcct Inserted: ' + finAccount);
-            
-        }
+        // Get Account Record Types
+        Id householdRecordTypeId = Schema.SObjectType.Account
+            .getRecordTypeInfosByName()
+            .get('Household')
+            .getRecordTypeId();
         
-        Id fatId = [SELECT Id FROM Financial_Advisor_Team__c WHERE Name='Test Fin Advisor Team'][0].Id;
+        Id personAccountRecordTypeId = Schema.SObjectType.Account
+            .getRecordTypeInfosByName()
+            .get('Person Account')
+            .getRecordTypeId();
         
+        /*
+* Create Household Account
+*/
+        Account household = new Account(
+            Name = 'Test Household',
+            RecordTypeId = householdRecordTypeId,
+            Type ='Other',
+            Classification__c = 'Vendor;'
+            
+        );
+        insert household;
         
-        Financial_Advisor_Team_Member__c fatmember = new Financial_Advisor_Team_Member__c();
-        fatmember.Active__c = true;
-        fatmember.Financial_Advisor_Team__c = fatId;
-        fatmember.Role__c = 'Financial Advisor';
-        fatmember.User__c = usr.Id;
-        fatmList.add(fatmember);
-        Financial_Advisor_Team_Member__c fatmember1 = new Financial_Advisor_Team_Member__c();
-        fatmember1.Active__c = true;
-        fatmember1.Financial_Advisor_Team__c = fatId;
-        fatmember1.Role__c = 'Financial Advisor';
-        fatmember1.User__c = UserInfo.getUserId();
-        fatmList.add(fatmember1);
-        insert fatmList;
+        /*
+* Create Person Account
+*/
+        Account primaryOwner = new Account(
+            FirstName = 'Test',
+            LastName = 'Primary Owner',
+            PersonEmail = 'primaryowner@test.com',
+            RecordTypeId = personAccountRecordTypeId,
+            Type ='Other',
+            Classification__c = 'Vendor;'
+        );
+        insert primaryOwner;
+        
+        /*
+* Create Account Contact Relation.
+*
+* If your FSC org requires additional fields for ACR creation,
+* add them here.
+*/
+        primaryOwner = [
+            SELECT Id, PersonContactId
+            FROM Account
+            WHERE Id = :primaryOwner.Id
+            LIMIT 1
+        ];
+        
+        AccountContactRelation acr = new AccountContactRelation(
+            ContactId = primaryOwner.PersonContactId,
+            AccountId = household.Id,
+            IsActive = true
+        );
+        insert acr;
+        
+        /*
+* Create Financial Advisor Teams.
+*
+* Replace these records with the appropriate object if
+* Financial_Advisor_Team__c is a different object in your org.
+*/
+        Financial_Advisor_Team__c oldTeam = new Financial_Advisor_Team__c(
+            Name = 'Old Team'
+        );
+        
+        Financial_Advisor_Team__c newTeam = new Financial_Advisor_Team__c(
+            Name = 'New Team'
+        );
+        
+        insert new List<Financial_Advisor_Team__c>{
+            oldTeam,
+                newTeam
+                };
+                    
+                    /*
+* Create Rep Code.
+*/
+                    Rep_Code__c repCode = new Rep_Code__c(
+                        Name = 'TEST-REP-001',
+                        Financial_Advisor_Team__c = oldTeam.Id
+                    );
+        insert repCode;
+        
+        /*
+* Create Financial Account.
+*
+* Add any additional required fields from your org here.
+*/
+        FinServ__FinancialAccount__c financialAccount =
+            new FinServ__FinancialAccount__c(
+                Name = 'Test Financial Account',
+                Rep_Code_Lookup__c = repCode.Id,
+                Financial_Advisor_Team__c = oldTeam.Id,
+                FinServ__PrimaryOwner__c = primaryOwner.Id
+            );
+        
+        insert financialAccount;
+        
+        /*
+* Create Case related to Household.
+*/
+        Case householdCase = new Case(
+            AccountId = household.Id,
+            Status = 'New',
+            Subject = 'Household Test Case',
+            FinServ__Household__c = household.Id,
+            Financial_Advisor_Team__c = oldTeam.Id
+        );
+        insert householdCase;
+        
+        /*
+* Create Case related to Financial Account.
+*/
+        Case financialAccountCase = new Case(
+            AccountId = household.Id,
+            Status = 'New',
+            Subject = 'Financial Account Test Case',
+            FinServ__FinancialAccount__c = financialAccount.Id,
+            FinServ__Household__c = household.Id,
+            Financial_Advisor_Team__c = oldTeam.Id
+        );
+        insert financialAccountCase;
+        
+        /*
+* Create Task related to Household.
+*/
+        Task householdTask = new Task(
+            Subject = 'Household Task',
+            Status = 'Not Started',
+            WhatId = household.Id,
+            Financial_Advisor_Team__c = oldTeam.Id
+        );
+        insert householdTask;
+        
+        /*
+* Create Task related to Financial Account.
+*/
+        Task financialAccountTask = new Task(
+            Subject = 'Financial Account Task',
+            Status = 'Not Started',
+            WhatId = financialAccount.Id,
+            Financial_Advisor_Team__c = oldTeam.Id
+        );
+        insert financialAccountTask;
+        
+        /*
+* Create Event related to Household.
+*/
+        Event householdEvent = new Event(
+            Subject = 'Household Event',
+            StartDateTime = System.now().addHours(1),
+            EndDateTime = System.now().addHours(2),
+            WhatId = household.Id,
+            Financial_Advisor_Team__c = oldTeam.Id
+        );
+        insert householdEvent;
+        
+        /*
+* Create Event related to Financial Account.
+*/
+        Event financialAccountEvent = new Event(
+            Subject = 'Financial Account Event',
+            StartDateTime = System.now().addHours(1),
+            EndDateTime = System.now().addHours(2),
+            WhatId = financialAccount.Id,
+            Financial_Advisor_Team__c = oldTeam.Id
+        );
+        insert financialAccountEvent;
+    }
+    
+    
+    @IsTest
+    static void testFinancialAdvisorTeamChange() {
+        
+        Rep_Code__c repCode = [
+            SELECT Id,
+            Name,
+            Financial_Advisor_Team__c
+            FROM Rep_Code__c
+            WHERE Name = 'TEST-REP-001'
+            LIMIT 1
+        ];
+        
+        Financial_Advisor_Team__c newTeam = [
+            SELECT Id, Name
+            FROM Financial_Advisor_Team__c
+            WHERE Name = 'New Team'
+            LIMIT 1
+        ];
+        
+        // Change Financial Advisor Team
+        repCode.Financial_Advisor_Team__c = newTeam.Id;
+        
+        Test.startTest();
+        
+        update repCode;
+        
+        Test.stopTest();
+        
+        /*
+* Verify Financial Account
+*/
+        FinServ__FinancialAccount__c financialAccount = [
+            SELECT Id,
+            Financial_Advisor_Team__c,
+            Rep_Code_Lookup__c
+            FROM FinServ__FinancialAccount__c
+            WHERE Rep_Code_Lookup__c = :repCode.Id
+            LIMIT 1
+        ];
+        
+        System.assertEquals(
+            newTeam.Id,
+            financialAccount.Financial_Advisor_Team__c,
+            'Financial Account FAT should be updated.'
+        );
+        
+        /*
+* Verify Primary Owner
+*/
+        Account primaryOwner = [
+            SELECT Id,
+            Financial_Advisor_Team__c
+            FROM Account
+            WHERE LastName = 'Primary Owner'
+            LIMIT 1
+        ];
+        
+        System.assertEquals(
+            newTeam.Id,
+            primaryOwner.Financial_Advisor_Team__c,
+            'Primary Owner FAT should be updated.'
+        );
+        
+        /*
+* Verify Household-related Cases
+*/
+        List<Case> cases = [
+            SELECT Id,
+            Financial_Advisor_Team__c,
+            FinServ__Household__c,
+            FinServ__FinancialAccount__c
+            FROM Case
+        ];
+        
+        System.assertEquals(
+            2,
+            cases.size(),
+            'Expected two test Cases.'
+        );
+        
+   
+        /*
+* Verify Tasks
+*/
+        List<Task> tasks = [
+            SELECT Id,
+            Financial_Advisor_Team__c,
+            WhatId
+            FROM Task
+        ];
+        
+        System.assertEquals(
+            2,
+            tasks.size(),
+            'Expected two test Tasks.'
+        );
+        
         
     }
     
-    @isTest
-    private static void updateRepCodeTest(){
-        Id faTeamId = [SELECT Id FROM Financial_Advisor_Team__c WHERE Name = 'Test Fin Advisor Team'][0].Id;
-        Rep_Code__c repCode = [SELECT Id, Financial_Advisor_Team__c FROM Rep_Code__c LIMIT 1];
-        Financial_Advisor_Team__c defaultTeam = [SELECT Id FROM Financial_Advisor_Team__c WHERE Name = 'Default Team' LIMIT 1];
+    
+    @IsTest
+    static void testNoUpdateWhenFinancialAdvisorTeamDoesNotChange() {
+        
+        Rep_Code__c repCode = [
+            SELECT Id,
+            Financial_Advisor_Team__c
+            FROM Rep_Code__c
+            WHERE Name = 'TEST-REP-001'
+            LIMIT 1
+        ];
+        
+        Id oldTeamId = repCode.Financial_Advisor_Team__c;
+        
+        // Update some unrelated field if available.
+        // Here we simply assign the same FAT value.
+        repCode.Financial_Advisor_Team__c = oldTeamId;
+        
         Test.startTest();
-        repCode.Financial_Advisor_Team__c = defaultTeam.Id;
+        
         update repCode;
+        
         Test.stopTest();
-        //System.assertEquals(UserInfo.getUserId(), [SELECT Id, OwnerId FROM FinServ__FinancialAccount__c][0].OwnerId);
-        //System.assertEquals(UserInfo.getUserId(), [SELECT Id, OwnerId FROM Account][0].OwnerId);
-        //for coverage
-        //delete fatmember;
-        //undelete fatmember;
+        
+        FinServ__FinancialAccount__c financialAccount = [
+            SELECT Id,
+            Financial_Advisor_Team__c
+            FROM FinServ__FinancialAccount__c
+            WHERE Rep_Code_Lookup__c = :repCode.Id
+            LIMIT 1
+        ];
+        
+        System.assertEquals(
+            oldTeamId,
+            financialAccount.Financial_Advisor_Team__c,
+            'Financial Account FAT should remain unchanged.'
+        );
     }
 }

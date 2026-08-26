@@ -242,7 +242,7 @@ const GROUPS = {
   householdMembers: {
     iconVariant: "member",
     cardIconVariant: "member",
-    actionTitle: "Add Member",
+    actionTitle: "Add Client",
     removeLabel: "Remove household member",
     persist: (detail, envelopeId) => {
       const acc = buildMemberAccountPayload(detail);
@@ -380,13 +380,13 @@ const GROUPS = {
 // Member wrapper list → outline group type/label. Each `list` names a property of the household
 // wrapper, so the two have to stay in step.
 const MEMBER_SOURCES = [
-  { list: "clients", type: "client", typeLabel: "Individual" },
-  { list: "businesses", type: "business", typeLabel: "Business" },
-  { list: "trusts", type: "trust", typeLabel: "Trust" },
+  { list: "clients", type: "client", typeLabel: "Client" },
+  { list: "businesses", type: "business", typeLabel: "Client" },
+  { list: "trusts", type: "trust", typeLabel: "Client" },
   {
     list: "retirementPlans",
     type: "retirementPlan",
-    typeLabel: "Retirement Plan"
+    typeLabel: "Client"
   }
 ];
 

@@ -4,7 +4,7 @@ public class NewAllocationCreateMultiple_Test {
     @testSetup
     public static void setup(){
         // create person account
-        Account acc = new Account(FirstName = 'Test', LastName='Account');
+        Account acc = new Account(FirstName = 'Test', LastName='Account',Type ='Other' );
         insert acc;
         
         Contact con1 = [SELECT Id FROM Contact WHERE AccountId =: acc.Id];  

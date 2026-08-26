@@ -29,6 +29,20 @@
               "type" : "component"
             }, {
               "attributes" : {
+                "dxpStyle" : { }
+              },
+              "definition" : "c:arcAnnouncements",
+              "id" : "655dda3c-0eb0-494c-9d2d-8f0b9de9204d",
+              "type" : "component"
+            }, {
+              "attributes" : {
+                "dxpStyle" : { }
+              },
+              "definition" : "c:arcHomeMetrics",
+              "id" : "e9431a31-804c-4dde-9b84-cb955a321266",
+              "type" : "component"
+            }, {
+              "attributes" : {
                 "columnGutterWidth" : "",
                 "columnMinHeight" : "",
                 "columnVerticalAlign" : "flex-start",
@@ -76,9 +90,12 @@
                 "enableSearch" : true,
                 "hideNewEnvelopeButton" : true,
                 "hideRowActions" : false,
-                "pageSize" : 10,
+                "pageSize" : 5,
                 "searchPlaceholder" : "Search envelopes...",
-                "title" : "Envelopes"
+                "showFilterButton" : true,
+                "showViewAllFooter" : true,
+                "title" : "Envelopes",
+                "viewAllUrl" : "/envelope"
               },
               "definition" : "c:envelopeTable",
               "id" : "42f325ab-63b2-42e3-99bc-c9c76315c73c",
@@ -88,9 +105,12 @@
                 "dxpStyle" : { },
                 "enablePagination" : true,
                 "enableSearch" : true,
-                "pageSize" : 10,
+                "pageSize" : 5,
                 "searchPlaceholder" : "Search work...",
-                "title" : "Work"
+                "showFilterButton" : true,
+                "showViewAllFooter" : true,
+                "title" : "Work",
+                "viewAllUrl" : "/case/Case/Default"
               },
               "definition" : "c:workTable",
               "id" : "6f83cf8e-5194-46ce-abd0-4319f7c84ce0",
@@ -109,7 +129,7 @@
               "children" : [ {
                 "children" : [ {
                   "attributes" : {
-                    "displayLimit" : 5,
+                    "displayLimit" : 10,
                     "dxpStyle" : { },
                     "listType" : "Contact"
                   },
@@ -124,7 +144,7 @@
               }, {
                 "children" : [ {
                   "attributes" : {
-                    "displayLimit" : 5,
+                    "displayLimit" : 10,
                     "dxpStyle" : { },
                     "listType" : "ISA"
                   },

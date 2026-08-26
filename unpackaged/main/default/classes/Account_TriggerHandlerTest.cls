@@ -11,7 +11,7 @@ public class Account_TriggerHandlerTest {
         Financial_Advisor_Team__c team2 = new Financial_Advisor_Team__c(Name = 'Team 2'/*, Advisor_Group__c  = testGroup.Id*/);
         insert new List<Financial_Advisor_Team__c>{team1, team2};
     
-        Account acc = new Account(Name = 'Test Account', Financial_Advisor_Team__c = team1.Id);
+        Account acc = new Account(Name = 'Test Account', Financial_Advisor_Team__c = team1.Id, Type ='Other');
         Test.startTest();
         insert acc;    
         Test.stopTest();
@@ -28,7 +28,7 @@ public class Account_TriggerHandlerTest {
         Financial_Advisor_Team__c team2 = new Financial_Advisor_Team__c(Name = 'Team 2'/*, Advisor_Group__c  = testGroup.Id*/);
         insert new List<Financial_Advisor_Team__c>{team1, team2};
     
-        Account acc = new Account(Name = 'Test Account', Financial_Advisor_Team__c = team1.Id);
+        Account acc = new Account(Name = 'Test Account', Financial_Advisor_Team__c = team1.Id, Type ='Other');
         insert acc;
     
         Map<Id, Account> newMapInsert = new Map<Id, Account>{ acc.Id => acc };
@@ -50,11 +50,11 @@ public class Account_TriggerHandlerTest {
     @isTest
     private static void test_updateInvestmentObjectives(){
 
-        Account acct = new Account(Name='update Test', Investment_Objectives__c = 'Growth;Speculation;Balanced');
+        Account acct = new Account(Name='update Test', Investment_Objectives__c = 'Growth;Speculation;Balanced', Type ='Other');
         insert acct;
         Test.startTest();
         Account acc = new Account(Name='Test', Investment_Objectives__c = 'Growth;Speculation;Income',
-                                 Flow_Update__c = false);
+                                 Flow_Update__c = false, Type ='Other');
         insert acc;
         
         acct.Investment_Objectives__c = 'Growth;Speculation;Income';
@@ -87,7 +87,8 @@ public class Account_TriggerHandlerTest {
         Account acc = new Account(
             Name = 'Accreditation Test Account',
             Net_Worth_Excluding_Primary_Residence__c = 100000,
-            Approximate_Annual_Income_All_Sources__c = 50000
+            Approximate_Annual_Income_All_Sources__c = 50000,
+             Type ='Other'
         );
         insert acc;
 

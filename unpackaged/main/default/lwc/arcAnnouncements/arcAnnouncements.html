@@ -45,6 +45,7 @@
           <button
             type="button"
             class="arc-announcements__page-button"
+            disabled={isPreviousDisabled}
             onclick={handlePrevious}
             aria-label="Previous announcement"
           >
@@ -58,6 +59,7 @@
           <button
             type="button"
             class="arc-announcements__page-button"
+            disabled={isNextDisabled}
             onclick={handleNext}
             aria-label="Next announcement"
           >
@@ -69,6 +71,20 @@
           </button>
         </div>
       </template>
+    </div>
+  </template>
+  <template lwc:elseif={showEmptyState}>
+    <div class="arc-announcements">
+      <div class="arc-announcements__card arc-announcements__card--empty">
+        <span
+          class="arc-announcements__icon"
+          style={megaphoneIconStyle}
+          aria-hidden="true"
+        ></span>
+        <div class="arc-announcements__body">
+          <p class="arc-announcements__text">No new announcements</p>
+        </div>
+      </div>
     </div>
   </template>
 </template>

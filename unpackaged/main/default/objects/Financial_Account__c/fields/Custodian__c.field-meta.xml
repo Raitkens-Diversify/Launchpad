@@ -10,224 +10,19 @@
         <valueSetDefinition>
             <sorted>false</sorted>
             <value>
-                <fullName>401 GO</fullName>
-                <default>false</default>
-                <label>401 GO</label>
-            </value>
-            <value>
-                <fullName>AXA</fullName>
-                <default>false</default>
-                <label>AXA</label>
-            </value>
-            <value>
-                <fullName>Advisors Capital Management</fullName>
-                <default>false</default>
-                <label>Advisors Capital Management</label>
-            </value>
-            <value>
-                <fullName>Alerus</fullName>
-                <default>false</default>
-                <label>Alerus</label>
-            </value>
-            <value>
-                <fullName>American Funds</fullName>
-                <default>false</default>
-                <label>American Funds</label>
-            </value>
-            <value>
-                <fullName>American Funds (A shrs)</fullName>
-                <default>false</default>
-                <label>American Funds (A shrs)</label>
-            </value>
-            <value>
-                <fullName>American Funds (C Shares)</fullName>
-                <default>false</default>
-                <label>American Funds (C Shares)</label>
-            </value>
-            <value>
-                <fullName>American Funds Distributors</fullName>
-                <default>false</default>
-                <label>American Funds Distributors</label>
-            </value>
-            <value>
                 <fullName>American Funds F2</fullName>
                 <default>false</default>
                 <label>AMERICAN FUNDS F2</label>
             </value>
             <value>
-                <fullName>American Funds F2 Shares</fullName>
-                <default>false</default>
-                <label>American Funds F2 Shares</label>
-            </value>
-            <value>
-                <fullName>Ascensus</fullName>
-                <default>false</default>
-                <label>Ascensus</label>
-            </value>
-            <value>
-                <fullName>AssetMark</fullName>
-                <default>false</default>
-                <label>AssetMark</label>
-            </value>
-            <value>
-                <fullName>Brinker</fullName>
-                <default>false</default>
-                <label>Brinker</label>
-            </value>
-            <value>
-                <fullName>Brinker Capital Investments</fullName>
-                <default>false</default>
-                <label>Brinker Capital Investments</label>
-            </value>
-            <value>
-                <fullName>Brinker Financial Group</fullName>
-                <default>false</default>
-                <label>Brinker Financial Group</label>
-            </value>
-            <value>
-                <fullName>CB&amp;T</fullName>
-                <default>false</default>
-                <label>CB&amp;T</label>
-            </value>
-            <value>
-                <fullName>CNB</fullName>
-                <default>false</default>
-                <label>CNB</label>
-            </value>
-            <value>
-                <fullName>City Park</fullName>
-                <default>false</default>
-                <label>City Park</label>
-            </value>
-            <value>
-                <fullName>Community National Bank</fullName>
-                <default>false</default>
-                <label>Community National Bank</label>
-            </value>
-            <value>
-                <fullName>Direct</fullName>
+                <fullName>DIRECT</fullName>
                 <default>false</default>
                 <label>DIRECT</label>
             </value>
             <value>
-                <fullName>Direct (CNB)</fullName>
-                <default>false</default>
-                <label>Direct (CNB)</label>
-            </value>
-            <value>
-                <fullName>ETC</fullName>
-                <default>false</default>
-                <label>ETC</label>
-            </value>
-            <value>
-                <fullName>ETC Brokerage</fullName>
-                <default>false</default>
-                <label>ETC Brokerage</label>
-            </value>
-            <value>
-                <fullName>ETC Institutional</fullName>
-                <default>false</default>
-                <label>ETC Institutional</label>
-            </value>
-            <value>
-                <fullName>Equitable</fullName>
-                <default>false</default>
-                <label>Equitable</label>
-            </value>
-            <value>
-                <fullName>Equity Trust</fullName>
-                <default>false</default>
-                <label>Equity Trust</label>
-            </value>
-            <value>
-                <fullName>Equity Trust Company</fullName>
-                <default>false</default>
-                <label>Equity Trust Company</label>
-            </value>
-            <value>
-                <fullName>Fidelity</fullName>
+                <fullName>FIDELITY</fullName>
                 <default>false</default>
                 <label>FIDELITY</label>
-            </value>
-            <value>
-                <fullName>Fidelity Test</fullName>
-                <default>false</default>
-                <label>Fidelity Test</label>
-            </value>
-            <value>
-                <fullName>FortitudeRE</fullName>
-                <default>false</default>
-                <label>FortitudeRE</label>
-            </value>
-            <value>
-                <fullName>Franklin Templeton</fullName>
-                <default>false</default>
-                <label>Franklin Templeton</label>
-            </value>
-            <value>
-                <fullName>Fund Direct</fullName>
-                <default>false</default>
-                <label>Fund Direct</label>
-            </value>
-            <value>
-                <fullName>Haverford</fullName>
-                <default>false</default>
-                <label>HAVERFORD</label>
-            </value>
-            <value>
-                <fullName>Haverford Trust Company</fullName>
-                <default>false</default>
-                <label>Haverford Trust Company</label>
-            </value>
-            <value>
-                <fullName>Jackson</fullName>
-                <default>false</default>
-                <label>Jackson</label>
-            </value>
-            <value>
-                <fullName>Jackson National</fullName>
-                <default>false</default>
-                <label>Jackson National</label>
-            </value>
-            <value>
-                <fullName>Loring Ward</fullName>
-                <default>false</default>
-                <label>Loring Ward</label>
-            </value>
-            <value>
-                <fullName>MFS</fullName>
-                <default>false</default>
-                <label>MFS</label>
-            </value>
-            <value>
-                <fullName>Mainstay</fullName>
-                <default>false</default>
-                <label>Mainstay</label>
-            </value>
-            <value>
-                <fullName>Nationwide</fullName>
-                <default>false</default>
-                <label>Nationwide</label>
-            </value>
-            <value>
-                <fullName>Nationwide Annuities</fullName>
-                <default>false</default>
-                <label>Nationwide Annuities</label>
-            </value>
-            <value>
-                <fullName>Nationwide Monument Advisor</fullName>
-                <default>false</default>
-                <label>Nationwide Monument Advisor</label>
-            </value>
-            <value>
-                <fullName>Pacific Life</fullName>
-                <default>false</default>
-                <label>Pacific Life</label>
-            </value>
-            <value>
-                <fullName>Prudential</fullName>
-                <default>false</default>
-                <label>Prudential</label>
             </value>
             <value>
                 <fullName>RBC</fullName>
@@ -235,49 +30,9 @@
                 <label>RBC</label>
             </value>
             <value>
-                <fullName>RetireOne</fullName>
-                <default>false</default>
-                <label>RetireOne</label>
-            </value>
-            <value>
-                <fullName>Retirement Plan Consultants</fullName>
-                <default>false</default>
-                <label>Retirement Plan Consultants</label>
-            </value>
-            <value>
-                <fullName>Scholar&#39;s Choice</fullName>
-                <default>false</default>
-                <label>Scholar&#39;s Choice</label>
-            </value>
-            <value>
-                <fullName>Schwab</fullName>
+                <fullName>SCHWAB</fullName>
                 <default>false</default>
                 <label>SCHWAB</label>
-            </value>
-            <value>
-                <fullName>Schwab-DWM</fullName>
-                <default>false</default>
-                <label>Schwab-DWM</label>
-            </value>
-            <value>
-                <fullName>The Pacific Financial Group</fullName>
-                <default>false</default>
-                <label>The Pacific Financial Group</label>
-            </value>
-            <value>
-                <fullName>Transamerica</fullName>
-                <default>false</default>
-                <label>Transamerica</label>
-            </value>
-            <value>
-                <fullName>U.S Charitable Gift Trust</fullName>
-                <default>false</default>
-                <label>U.S Charitable Gift Trust</label>
-            </value>
-            <value>
-                <fullName>Voya</fullName>
-                <default>false</default>
-                <label>Voya</label>
             </value>
         </valueSetDefinition>
     </valueSet>

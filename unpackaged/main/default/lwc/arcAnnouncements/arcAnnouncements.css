@@ -18,6 +18,15 @@
   background: var(--div-color-white, #ffffff);
 }
 
+.arc-announcements__card--empty {
+  align-items: center;
+  border-color: var(--div-color-border-1, #d1d5db);
+}
+
+.arc-announcements__card--empty .arc-announcements__icon {
+  background-color: var(--div-color-neutral-500, #838a97);
+}
+
 .arc-announcements__icon {
   width: 16px;
   height: 16px;
@@ -148,8 +157,13 @@
   color: var(--div-color-accent-2, #0b2f51);
 }
 
-.arc-announcements__page-button:hover {
+.arc-announcements__page-button:not(:disabled):hover {
   background: var(--div-color-surface-2, #f3f4f6);
+}
+
+.arc-announcements__page-button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .arc-announcements__page-icon {

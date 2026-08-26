@@ -11,7 +11,7 @@ const CONFIG = {
         nicknamePlaceholder: 'Enter member nickname',
         typeLabel: 'Member Type',
         typePlaceholder: 'Select member type',
-        submitLabel: 'Add Member',
+        submitLabel: 'Add Client',
         typeOptions: [
             { label: 'Individual', value: 'client' },
             { label: 'Business', value: 'business' },

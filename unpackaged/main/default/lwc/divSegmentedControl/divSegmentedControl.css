@@ -3,3 +3,24 @@
 :host {
   display: inline-flex;
 }
+
+/*
+ * ARC-only override of diversifyStyles' .div-segmented__option--selected.
+ * The shared static resource still ships the original grey fill
+ * (--div-segmented-selected-bg: var(--div-color-container-2, #f3f4f6)),
+ * which reads as barely-there and leaves the selected option hard to pick
+ * out. Vestolio fixed this by repainting the selected segment with the deep
+ * navy the metric charts already use (#032d60), but that change lives only
+ * in Vestolio's copy of the shared stylesheet -- editing the shared
+ * diversifyStyles resource here would touch every consumer across the org,
+ * not just ARC. divSegmentedControl is used exclusively by ARC's own
+ * envelopeTable/workTable today, and this file is this component's own
+ * Shadow DOM-scoped stylesheet, so the override below only ever applies to
+ * elements this component itself renders -- it cannot leak into, or be
+ * affected by, any other component that happens to reuse the same shared
+ * class names.
+ */
+.div-segmented__option--selected {
+  background: #032d60;
+  color: var(--div-color-text-inverse, #ffffff);
+}

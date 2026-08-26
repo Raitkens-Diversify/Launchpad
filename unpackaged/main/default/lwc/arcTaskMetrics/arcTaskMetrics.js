@@ -44,6 +44,13 @@ const EMPTY_METRICS = {
   branchPitStopCount: 0
 };
 
+/**
+ * A category with any real records must still show a sliver of color — e.g.
+ * 1 of 460 rounds to 0% and the bar-fill-wrapper renders at zero width,
+ * making the count look uncategorized even though its label reads "1".
+ */
+const MIN_VISIBLE_PERCENT = 3;
+
 const buildMetricRows = (metrics) => {
   const counts = METRIC_DEFINITIONS.map(
     (definition) => metrics[definition.countField] || 0
@@ -52,7 +59,9 @@ const buildMetricRows = (metrics) => {
 
   return METRIC_DEFINITIONS.map((definition) => {
     const count = metrics[definition.countField] || 0;
-    const percent = Math.round((count / maxCount) * 100);
+    const rawPercent = Math.round((count / maxCount) * 100);
+    const percent =
+      count > 0 ? Math.max(rawPercent, MIN_VISIBLE_PERCENT) : 0;
 
     return {
       ...definition,

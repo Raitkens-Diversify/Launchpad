@@ -6,11 +6,11 @@ private class WizardEnvelopeStateServiceTest {
         Envelope__c envelope = new Envelope__c();
         envelope.name ='Test';
         insert envelope;
-        
-        // Create Household Members (replace with your object if needed)
+      
+        // Create Household Members
         List<Account> members = new List<Account>{
-            new Account(Name = 'Member 1'),
-                new Account(Name = 'Member 2')
+            new Account(Name = 'Member 1',Type ='Other',Classification__c = 'Vendor;'),
+                new Account(Name = 'Member 2',Type ='Other',Classification__c = 'Vendor;')
                 };
                     insert members;
         
@@ -35,7 +35,7 @@ private class WizardEnvelopeStateServiceTest {
         
         // Household
         Account household = new Account(
-            Name = 'Test Household'
+            Name = 'Test Household',Type ='Other',Classification__c = 'Vendor;'
         );
         insert household;
         
@@ -371,8 +371,8 @@ private class WizardEnvelopeStateServiceTest {
     static void testRemoveMember_KeptWhenAnotherEnvelopeStillHoldsIt() {
         Envelope__c envA = [SELECT Id FROM Envelope__c LIMIT 1];
         Envelope__c envB = makeSecondEnvelope();
-        Account trust = new Account(Name = 'Family Trust');
-        Account person = new Account(Name = 'Shared Person');
+        Account trust = new Account(Name = 'Family Trust',Type ='Other',Classification__c = 'Vendor;');
+        Account person = new Account(Name = 'Shared Person',Type ='Other',Classification__c = 'Vendor;');
         insert new List<Account>{ trust, person };
             insert new List<Envelope_Content__c>{
                 new Envelope_Content__c(Envelope__c = envA.Id, Account__c = person.Id),
@@ -418,7 +418,7 @@ private class WizardEnvelopeStateServiceTest {
         Account household = [
             SELECT Id FROM Account WHERE Name = 'Test Household' LIMIT 1
         ];
-        Account person = new Account(Name = 'Only Here');
+        Account person = new Account(Name = 'Only Here',Type ='Other',Classification__c = 'Vendor;');
         insert person;
         insert new Envelope_Content__c(
             Envelope__c = env.Id,
@@ -478,7 +478,7 @@ private class WizardEnvelopeStateServiceTest {
         Financial_Account__c account = [
             SELECT Id FROM Financial_Account__c LIMIT 1
         ];
-        Account person = new Account(Name = 'Account Owner');
+        Account person = new Account(Name = 'Account Owner',Type ='Other',Classification__c = 'Vendor;');
         insert person;
         insert new Envelope_Content__c(
             Envelope__c = env.Id,
@@ -511,8 +511,8 @@ private class WizardEnvelopeStateServiceTest {
     @IsTest
     static void testRemoveEntity_OwnChildrenDoNotKeepItAlive() {
         Envelope__c env = [SELECT Id FROM Envelope__c LIMIT 1];
-        Account trust = new Account(Name = 'Lone Trust');
-        Account party = new Account(Name = 'Its Trustee');
+        Account trust = new Account(Name = 'Lone Trust',Type ='Other',Classification__c = 'Vendor;');
+        Account party = new Account(Name = 'Its Trustee',Type ='Other',Classification__c = 'Vendor;');
         insert new List<Account>{ trust, party };
             insert new List<Envelope_Content__c>{
                 new Envelope_Content__c(Envelope__c = env.Id, Account__c = trust.Id),
@@ -551,8 +551,8 @@ private class WizardEnvelopeStateServiceTest {
     @IsTest
     static void testRemoveMember_StrandedPartyLeavesWithTheEntity() {
         Envelope__c env = [SELECT Id FROM Envelope__c LIMIT 1];
-        Account trust = new Account(Name = 'Solo Trust');
-        Account party = new Account(Name = 'Solo Trustee');
+        Account trust = new Account(Name = 'Solo Trust',Type ='Other',Classification__c = 'Vendor;');
+        Account party = new Account(Name = 'Solo Trustee',Type ='Other',Classification__c = 'Vendor;');
         insert new List<Account>{ trust, party };
             insert new List<Envelope_Content__c>{
                 new Envelope_Content__c(Envelope__c = env.Id, Account__c = trust.Id),
@@ -593,9 +593,9 @@ private class WizardEnvelopeStateServiceTest {
     @IsTest
     static void testRemoveMember_PartyKeptWhenAnotherEntityInEnvelopeUsesIt() {
         Envelope__c env = [SELECT Id FROM Envelope__c LIMIT 1];
-        Account trustA = new Account(Name = 'Trust One');
-        Account trustB = new Account(Name = 'Trust Two');
-        Account party = new Account(Name = 'Shared Trustee');
+        Account trustA = new Account(Name = 'Trust One',Type ='Other',Classification__c = 'Vendor;');
+        Account trustB = new Account(Name = 'Trust Two',Type ='Other',Classification__c = 'Vendor;');
+        Account party = new Account(Name = 'Shared Trustee',Type ='Other',Classification__c = 'Vendor;');
         insert new List<Account>{ trustA, trustB, party };
             insert new List<Envelope_Content__c>{
                 new Envelope_Content__c(Envelope__c = env.Id, Account__c = trustA.Id),
@@ -650,7 +650,7 @@ private class WizardEnvelopeStateServiceTest {
     @IsTest
     static void testRemoveMember_AlreadyDeletedRecordIsANoOp() {
         Envelope__c env = [SELECT Id FROM Envelope__c LIMIT 1];
-        Account person = new Account(Name = 'Already Gone');
+        Account person = new Account(Name = 'Already Gone',Type ='Other',Classification__c = 'Vendor;');
         insert person;
         Id personId = person.Id;
         insert new Envelope_Content__c(
@@ -679,8 +679,8 @@ private class WizardEnvelopeStateServiceTest {
     @IsTest
     static void testRemoveMember_TrustedContactLeavesWithTheClient() {
         Envelope__c env = [SELECT Id FROM Envelope__c LIMIT 1];
-        Account client = new Account(Name = 'Individual Client');
-        Account contact = new Account(Name = 'Their Trusted Contact');
+        Account client = new Account(Name = 'Individual Client',Type ='Other',Classification__c = 'Vendor;');
+        Account contact = new Account(Name = 'Their Trusted Contact',Type ='Other',Classification__c = 'Vendor;');
         insert new List<Account>{ client, contact };
             insert new List<Envelope_Content__c>{
                 new Envelope_Content__c(Envelope__c = env.Id, Account__c = client.Id),
@@ -718,8 +718,8 @@ private class WizardEnvelopeStateServiceTest {
         Financial_Account__c account = [
             SELECT Id FROM Financial_Account__c LIMIT 1
         ];
-        Account business = new Account(Name = 'Owning Business');
-        Account party = new Account(Name = 'Authorized Owner');
+        Account business = new Account(Name = 'Owning Business',Type ='Other',Classification__c = 'Vendor;');
+        Account party = new Account(Name = 'Authorized Owner',Type ='Other',Classification__c = 'Vendor;');
         insert new List<Account>{ business, party };
             insert new List<Envelope_Content__c>{
                 new Envelope_Content__c(Envelope__c = env.Id, Account__c = business.Id),
@@ -763,8 +763,8 @@ private class WizardEnvelopeStateServiceTest {
     static void testRemoveMember_StrandedPartyUnlinkedButKeptForAnotherEnvelope() {
         Envelope__c envA = [SELECT Id FROM Envelope__c LIMIT 1];
         Envelope__c envB = makeSecondEnvelope();
-        Account trust = new Account(Name = 'Trust Being Removed');
-        Account party = new Account(Name = 'Party Elsewhere Too');
+        Account trust = new Account(Name = 'Trust Being Removed',Type ='Other',Classification__c = 'Vendor;');
+        Account party = new Account(Name = 'Party Elsewhere Too',Type ='Other',Classification__c = 'Vendor;');
         insert new List<Account>{ trust, party };
             insert new List<Envelope_Content__c>{
                 new Envelope_Content__c(Envelope__c = envA.Id, Account__c = trust.Id),
@@ -806,9 +806,9 @@ private class WizardEnvelopeStateServiceTest {
     @IsTest
     static void testRemoveMember_StrandedPartyKeptWhenTheRelationshipMapOwnsIt() {
         Envelope__c env = [SELECT Id FROM Envelope__c LIMIT 1];
-        Account trust = new Account(Name = 'Trust With Mapped Party');
-        Account party = new Account(Name = 'Mapped Party');
-        Account mappedPeer = new Account(Name = 'Peer Outside The Envelope');
+        Account trust = new Account(Name = 'Trust With Mapped Party',Type ='Other',Classification__c = 'Vendor;');
+        Account party = new Account(Name = 'Mapped Party',Type ='Other',Classification__c = 'Vendor;');
+        Account mappedPeer = new Account(Name = 'Peer Outside The Envelope',Type ='Other',Classification__c = 'Vendor;');
         insert new List<Account>{ trust, party, mappedPeer };
             insert new List<Envelope_Content__c>{
                 new Envelope_Content__c(Envelope__c = env.Id, Account__c = trust.Id),
@@ -859,9 +859,9 @@ private class WizardEnvelopeStateServiceTest {
     static void testRemoveMember_LeavesRolesOnEntitiesOutsideThisEnvelope() {
         Envelope__c envA = [SELECT Id FROM Envelope__c LIMIT 1];
         Envelope__c envB = makeSecondEnvelope();
-        Account trustA = new Account(Name = 'Trust A');
-        Account trustB = new Account(Name = 'Trust B');
-        Account person = new Account(Name = 'Dual Role Person');
+        Account trustA = new Account(Name = 'Trust A',Type ='Other',Classification__c = 'Vendor;');
+        Account trustB = new Account(Name = 'Trust B',Type ='Other',Classification__c = 'Vendor;');
+        Account person = new Account(Name = 'Dual Role Person',Type ='Other',Classification__c = 'Vendor;');
         insert new List<Account>{ trustA, trustB, person };
             insert new List<Envelope_Content__c>{
                 new Envelope_Content__c(Envelope__c = envA.Id, Account__c = trustA.Id),
@@ -990,7 +990,7 @@ private class WizardEnvelopeStateServiceTest {
             FirstName = 'Aar',
             LastName = 'Client',
             RecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
-            .get('PersonAccount').getRecordTypeId()
+            .get('PersonAccount').getRecordTypeId(),Type ='Other',Classification__c = 'Vendor;'
         );
         insert person;
         insert new Account_Account_Relationship__c(
@@ -1869,7 +1869,9 @@ private class WizardEnvelopeStateServiceTest {
         // Create Account
         Account account = new Account(
             Name = 'Test Account',
-            Submitted__c = false
+            Submitted__c = false,
+            Type = 'Other',
+            Classification__c ='Vendor'
         );
         insert account;
         

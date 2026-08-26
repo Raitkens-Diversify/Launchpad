@@ -239,14 +239,14 @@
 
           <lightning-card title={allTasksLabel}>
             <template lwc:if={hasTasks}>
-              <c-styled-data-table
+              <c-arc-data-table
                 aria-label="Tasks for this case"
                 key-field="id"
                 columns={taskColumns}
                 data={tasks}
                 placeholder="-"
                 enable-row-navigation
-              ></c-styled-data-table>
+              ></c-arc-data-table>
             </template>
             <template lwc:else>
               <div class="slds-p-around_medium">No Tasks Found.</div>
@@ -255,27 +255,27 @@
 
           <template lwc:if={hasOpenHouseholdCases}>
             <lightning-card title={openHouseholdCasesLabel}>
-              <c-styled-data-table
+              <c-arc-data-table
                 aria-label="Open cases for this household"
                 key-field="id"
                 columns={relatedCaseColumns}
                 data={openHouseholdCases}
                 placeholder="-"
                 enable-row-navigation
-              ></c-styled-data-table>
+              ></c-arc-data-table>
             </lightning-card>
           </template>
 
           <template lwc:if={hasClosedHouseholdCases}>
             <lightning-card title={closedHouseholdCasesLabel}>
-              <c-styled-data-table
+              <c-arc-data-table
                 aria-label="Closed cases for this household"
                 key-field="id"
                 columns={relatedCaseColumns}
                 data={closedHouseholdCases}
                 placeholder="-"
                 enable-row-navigation
-              ></c-styled-data-table>
+              ></c-arc-data-table>
             </lightning-card>
           </template>
         </div>

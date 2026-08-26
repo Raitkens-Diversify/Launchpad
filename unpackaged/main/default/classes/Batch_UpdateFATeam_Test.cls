@@ -7,10 +7,10 @@ public class Batch_UpdateFATeam_Test {
         List<Financial_Advisor_Team__c> fatTeam=new List<Financial_Advisor_Team__c>();
         List<Rep_Code__c> repCodeList=new List<Rep_Code__c>();
         List<FinServ__FinancialAccount__c> finAccountList=new List<FinServ__FinancialAccount__c>();
-       Id recTypeId=Schema.SObjectType.Account.getRecordTypeInfosByName().get('Individual').getRecordTypeId();
+       	Id recTypeId=Schema.SObjectType.Account.getRecordTypeInfosByName().get('Individual').getRecordTypeId();
         
-        Account acc=new Account(Name='Primary Owner',RecordTypeId=recTypeId);
-        Account acct=new Account(Name='Joint Owner',RecordTypeId=recTypeId);
+        Account acc=new Account(Name='Primary Owner',RecordTypeId=recTypeId, Type = 'Other');
+        Account acct=new Account(Name='Joint Owner',RecordTypeId=recTypeId, Type = 'Other');
         accList.add(acc);
         accList.add(acct);
         insert accList;
@@ -20,7 +20,11 @@ public class Batch_UpdateFATeam_Test {
             fat.Orion_ID__c=i;
             fatTeam.add(fat);
         }
+         //Make a default team 
+                    Financial_Advisor_Team__c fat = new Financial_Advisor_Team__c(Name='Default Team');
+        fatTeam.add(fat);
         insert fatTeam;
+        
         for(Integer i=0;i<fatTeam.size();i++){
             Rep_Code__c repCode=new Rep_Code__c();
             repCode.Name='TestRepCode'+i;
@@ -40,6 +44,7 @@ public class Batch_UpdateFATeam_Test {
             finAcct.FinServ__JointOwner__c=acct.Id;
             finAccountList.add(finAcct);
         }
+       
         insert finAccountList;
     }
     @istest

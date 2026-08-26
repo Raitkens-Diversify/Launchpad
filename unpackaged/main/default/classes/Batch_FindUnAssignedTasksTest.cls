@@ -4,12 +4,9 @@ public class Batch_FindUnAssignedTasksTest {
     private static void setup(){
         
         List<Case_Template__c> caseTempList = new List<Case_Template__c>();
-        caseTempList.add(new Case_Template__c(Name = 'Problem' , Previous_Management_Style__c = 'EXCLUDED',
-                                              Management_Style__c = 'EXCLUDED',
-                                              Charity_Sponsor__c = 'EXCLUDED', Custodian__c = 'EXCLUDED',
-                                              Enough_Cash__c = 'EXCLUDED', Live_SLOA_on_File__c = 'EXCLUDED',
-                                              Money_Movement_Direction__c = 'EXCLUDED', Compliance_Needed__c = 'EXCLUDED',
-                                              Check_in_Hand__c = 'EXCLUDED'));
+        caseTempList.add(new Case_Template__c(Type__c = 'EXCLUDED',Compliance_Needed__c = 'EXCLUDED',
+                                              Check_in_Hand__c = 'EXCLUDED',Management_Style__c = 'EXCLUDED',
+                                              Custodian__c = 'EXCLUDED',Type_Of_Template__c ='Fixed'));
         
         Insert caseTempList;
         
@@ -28,7 +25,7 @@ public class Batch_FindUnAssignedTasksTest {
         Id accOpeningRecTypeId = Schema.sObjectType.Case.getRecordTypeInfosByName().get('Account Opening').getRecordTypeId(); 
         
         List<Case> caseList = new List<Case>();
-        caseList.add(new Case(Origin= 'Service Request',RecordTypeId = accOpeningRecTypeId, Status = 'New', Type = 'Problem', Signature_Type__c = 'DocuSign', 
+        caseList.add(new Case(RecordTypeId = accOpeningRecTypeId, Status = 'New', Type = 'Problem', Signature_Type__c = 'DocuSign', 
                               Management_Style__c = 'AMS', Charity_Sponsor__c = 'Schwab Charitable', Custodian__c = 'Fidelity', Primary_Owners_Match__c = TRUE,
                               Enough_Cash__c = TRUE, X3_Way_Call__c = TRUE, Qualified__c = FALSE, Change_Withholdings__c = FALSE, No_SLOA_on_File__c = FALSE,
                               Money_Movement_Direction__c = 'Out'));    

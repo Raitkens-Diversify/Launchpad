@@ -3,219 +3,23 @@
         <label><!-- Custodian --></label>
         <name>Custodian__c</name>
         <picklistValues>
-            <masterLabel>401 GO</masterLabel>
-            <translation><!-- 401 GO --></translation>
-        </picklistValues>
-        <picklistValues>
             <masterLabel>AMERICAN FUNDS F2</masterLabel>
             <translation><!-- AMERICAN FUNDS F2 --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>AXA</masterLabel>
-            <translation><!-- AXA --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Advisors Capital Management</masterLabel>
-            <translation><!-- Advisors Capital Management --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Alerus</masterLabel>
-            <translation><!-- Alerus --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>American Funds</masterLabel>
-            <translation><!-- American Funds --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>American Funds (A shrs)</masterLabel>
-            <translation><!-- American Funds (A shrs) --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>American Funds (C Shares)</masterLabel>
-            <translation><!-- American Funds (C Shares) --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>American Funds Distributors</masterLabel>
-            <translation><!-- American Funds Distributors --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>American Funds F2 Shares</masterLabel>
-            <translation><!-- American Funds F2 Shares --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Ascensus</masterLabel>
-            <translation><!-- Ascensus --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>AssetMark</masterLabel>
-            <translation><!-- AssetMark --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Brinker</masterLabel>
-            <translation><!-- Brinker --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Brinker Capital Investments</masterLabel>
-            <translation><!-- Brinker Capital Investments --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Brinker Financial Group</masterLabel>
-            <translation><!-- Brinker Financial Group --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>CB&amp;T</masterLabel>
-            <translation><!-- CB&amp;T --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>CNB</masterLabel>
-            <translation><!-- CNB --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>City Park</masterLabel>
-            <translation><!-- City Park --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Community National Bank</masterLabel>
-            <translation><!-- Community National Bank --></translation>
         </picklistValues>
         <picklistValues>
             <masterLabel>DIRECT</masterLabel>
             <translation><!-- DIRECT --></translation>
         </picklistValues>
         <picklistValues>
-            <masterLabel>Direct (CNB)</masterLabel>
-            <translation><!-- Direct (CNB) --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>ETC</masterLabel>
-            <translation><!-- ETC --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>ETC Brokerage</masterLabel>
-            <translation><!-- ETC Brokerage --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>ETC Institutional</masterLabel>
-            <translation><!-- ETC Institutional --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Equitable</masterLabel>
-            <translation><!-- Equitable --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Equity Trust</masterLabel>
-            <translation><!-- Equity Trust --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Equity Trust Company</masterLabel>
-            <translation><!-- Equity Trust Company --></translation>
-        </picklistValues>
-        <picklistValues>
             <masterLabel>FIDELITY</masterLabel>
             <translation><!-- FIDELITY --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Fidelity Test</masterLabel>
-            <translation><!-- Fidelity Test --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>FortitudeRE</masterLabel>
-            <translation><!-- FortitudeRE --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Franklin Templeton</masterLabel>
-            <translation><!-- Franklin Templeton --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Fund Direct</masterLabel>
-            <translation><!-- Fund Direct --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>HAVERFORD</masterLabel>
-            <translation><!-- HAVERFORD --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Haverford Trust Company</masterLabel>
-            <translation><!-- Haverford Trust Company --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Jackson</masterLabel>
-            <translation><!-- Jackson --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Jackson National</masterLabel>
-            <translation><!-- Jackson National --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Loring Ward</masterLabel>
-            <translation><!-- Loring Ward --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>MFS</masterLabel>
-            <translation><!-- MFS --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Mainstay</masterLabel>
-            <translation><!-- Mainstay --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Nationwide</masterLabel>
-            <translation><!-- Nationwide --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Nationwide Annuities</masterLabel>
-            <translation><!-- Nationwide Annuities --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Nationwide Monument Advisor</masterLabel>
-            <translation><!-- Nationwide Monument Advisor --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Pacific Life</masterLabel>
-            <translation><!-- Pacific Life --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Prudential</masterLabel>
-            <translation><!-- Prudential --></translation>
         </picklistValues>
         <picklistValues>
             <masterLabel>RBC</masterLabel>
             <translation><!-- RBC --></translation>
         </picklistValues>
         <picklistValues>
-            <masterLabel>RetireOne</masterLabel>
-            <translation><!-- RetireOne --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Retirement Plan Consultants</masterLabel>
-            <translation><!-- Retirement Plan Consultants --></translation>
-        </picklistValues>
-        <picklistValues>
             <masterLabel>SCHWAB</masterLabel>
             <translation><!-- SCHWAB --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Scholar&#39;s Choice</masterLabel>
-            <translation><!-- Scholar&apos;s Choice --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Schwab-DWM</masterLabel>
-            <translation><!-- Schwab-DWM --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>The Pacific Financial Group</masterLabel>
-            <translation><!-- The Pacific Financial Group --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Transamerica</masterLabel>
-            <translation><!-- Transamerica --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>U.S Charitable Gift Trust</masterLabel>
-            <translation><!-- U.S Charitable Gift Trust --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Voya</masterLabel>
-            <translation><!-- Voya --></translation>
         </picklistValues>
     </CustomFieldTranslation>

@@ -6,7 +6,7 @@
 private class ActivityTimelineControllerTest {
   @IsTest
   static void getTimelineDataReturnsHouseholdActivities() {
-    Account household = new Account(Name = 'Timeline Test Household');
+    Account household = new Account(Name = 'Timeline Test Household', Type ='Other' );
     insert household;
 
     Contact contactRecord = new Contact(
@@ -101,7 +101,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataMapsCallTaskToPhoneCallActivity() {
-    Account household = new Account(Name = 'Call Task Household');
+    Account household = new Account(Name = 'Call Task Household', Type ='Other' );
     insert household;
 
     Task callTask = new Task(
@@ -147,7 +147,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataIncludesEmailMessages() {
-    Account household = new Account(Name = 'Email Timeline Household');
+    Account household = new Account(Name = 'Email Timeline Household', Type ='Other' );
     insert household;
 
     User recipient = [
@@ -233,7 +233,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataUsesCorrectIconForNullEventType() {
-    Account household = new Account(Name = 'Null Event Type Household');
+    Account household = new Account(Name = 'Null Event Type Household', Type ='Other' );
     insert household;
 
     Event eventRecord = new Event(
@@ -273,7 +273,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataMapsEventTypeToMeeting() {
-    Account household = new Account(Name = 'Event Type Household');
+    Account household = new Account(Name = 'Event Type Household', Type ='Other' );
     insert household;
 
     Event eventRecord = new Event(
@@ -309,7 +309,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataIncludesEventInviteesAsRelatedParticipants() {
-    Account household = new Account(Name = 'Event Invite Household');
+    Account household = new Account(Name = 'Event Invite Household', Type ='Other' );
     insert household;
 
     Contact firstContact = new Contact(
@@ -523,7 +523,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataFromCaseRecordUsesAccountScope() {
-    Account household = new Account(Name = 'Timeline Case Scope Household');
+    Account household = new Account(Name = 'Timeline Case Scope Household', Type ='Other' );
     insert household;
 
     Case caseRecord = new Case(
@@ -567,7 +567,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataExposesAssociatedAccountOnCaseActivitiesWhenExternal() {
-    Account household = new Account(Name = 'External Case Account Household');
+    Account household = new Account(Name = 'External Case Account Household', Type ='Other' );
     insert household;
 
     Case caseRecord = new Case(
@@ -608,7 +608,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataFromContactRecordUsesAccountScope() {
-    Account household = new Account(Name = 'Timeline Contact Scope Household');
+    Account household = new Account(Name = 'Timeline Contact Scope Household', Type ='Other' );
     insert household;
 
     Contact contactRecord = new Contact(
@@ -646,7 +646,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataFromTaskRecordUsesRelatedAccountScope() {
-    Account household = new Account(Name = 'Timeline Task Scope Household');
+    Account household = new Account(Name = 'Timeline Task Scope Household', Type ='Other' );
     insert household;
 
     Task taskRecord = new Task(
@@ -678,7 +678,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataExposesLinkedCaseReferenceOnRelatedTask() {
-    Account household = new Account(Name = 'Timeline Linked Case Household');
+    Account household = new Account(Name = 'Timeline Linked Case Household', Type ='Other' );
     insert household;
 
     Case caseRecord = new Case(
@@ -740,7 +740,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataExposesLinkedAccountReferenceOnRelatedTask() {
-    Account household = new Account(Name = 'Timeline Linked Account Household');
+    Account household = new Account(Name = 'Timeline Linked Account Household', Type ='Other' );
     insert household;
 
     Task taskRecord = new Task(
@@ -787,7 +787,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataExposesAssociatedAccountOnTaskAndEvent() {
-    Account household = new Account(Name = 'Timeline Associated Account Household');
+    Account household = new Account(Name = 'Timeline Associated Account Household', Type ='Other' );
     insert household;
 
     Contact contactRecord = new Contact(
@@ -891,7 +891,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataIncludesWhoIdEventsForRelatedContacts() {
-    Account household = new Account(Name = 'WhoId Event Household');
+    Account household = new Account(Name = 'WhoId Event Household', Type ='Other' );
     insert household;
 
     Contact contactRecord = new Contact(
@@ -943,7 +943,7 @@ private class ActivityTimelineControllerTest {
 
     Account drpAccount = new Account(
       LastName = 'Branch Member DRP',
-      RecordTypeId = drpRecordTypes[0].Id
+      RecordTypeId = drpRecordTypes[0].Id, Type ='Other' 
     );
     insert drpAccount;
 
@@ -1008,7 +1008,7 @@ private class ActivityTimelineControllerTest {
 
     Account drpAccount = new Account(
       LastName = 'Timeline DRP',
-      RecordTypeId = drpRecordTypes[0].Id
+      RecordTypeId = drpRecordTypes[0].Id, Type ='Other' 
     );
     insert drpAccount;
 
@@ -1041,7 +1041,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataUsesCreatedDateForTasksWithoutDueDate() {
-    Account household = new Account(Name = 'Undated Task Household');
+    Account household = new Account(Name = 'Undated Task Household', Type ='Other' );
     insert household;
 
     Task undatedTask = new Task(
@@ -1116,7 +1116,8 @@ private class ActivityTimelineControllerTest {
     Account drpAccount = new Account(
       LastName = 'External Scope DRP',
       RecordTypeId = drpRecordTypes[0].Id,
-      Household__c = scenario.rootAccount.Id
+      Household__c = scenario.rootAccount.Id, Type ='Other' 
+        
     );
     insert drpAccount;
 
@@ -1190,7 +1191,7 @@ private class ActivityTimelineControllerTest {
     Account drpAccount = new Account(
       LastName = 'DRP External Scope',
       RecordTypeId = drpRecordTypes[0].Id,
-      Household__c = scenario.rootAccount.Id
+      Household__c = scenario.rootAccount.Id, Type ='Other' 
     );
     insert drpAccount;
 
@@ -1320,132 +1321,142 @@ private class ActivityTimelineControllerTest {
   }
 
   @IsTest
-  static void getTimelineData_householdAccount_includesMemberSignificantEvents() {
-    Account household = SignificantEventTestDataFactory.createHouseholdAccount(
-      'Timeline Significant Event Household'
+  static void getTimelineDataIncludesSignificantEvents() {
+    FscDataTestDataFactory.TreeScenario treeScenario = FscDataTestDataFactory.createTreeScenario(
+      new FscDataTestDataFactory.TreeScenarioOptions().withUniqueNames()
     );
 
-    Significant_Event__c eventRecord = new Significant_Event__c(
-      Name = 'Household Timeline Event',
-      Event_Type__c = 'Birthday',
-      Start_Date__c = Date.today(),
-      Description__c = 'Graduation celebration details',
-      Household__c = household.Id
+    SignificantEventTestDataFactory.SignificantEventOptions eventOptions = new SignificantEventTestDataFactory.SignificantEventOptions();
+    eventOptions.householdId = treeScenario.rootAccount.Id;
+    eventOptions.name = 'Timeline Significant Event';
+    eventOptions.eventType = SignificantEventTestDataFactory.OTHER_EVENT_TYPE;
+    eventOptions.otherEventType = SignificantEventTestDataFactory.DEFAULT_OTHER_EVENT_TYPE;
+    eventOptions.startDate = Date.today().addDays(-14);
+    eventOptions.endDate = Date.today().addDays(-10);
+    eventOptions.approximateDate = true;
+    eventOptions.description = 'Important family milestone';
+    Significant_Event__c eventRecord = SignificantEventTestDataFactory.createSignificantEvent(
+      eventOptions
     );
-    insert eventRecord;
 
-    insert new Significant_Event_Contact__c(
-      Significant_Event__c = eventRecord.Id,
-      Account__c = household.Id
+    SignificantEventTestDataFactory.createParticipant(
+      new SignificantEventTestDataFactory.ParticipantOptions()
+        .forEvent(eventRecord.Id)
+        .forAccount(treeScenario.linkedPersonAccount.Id)
+    );
+    SignificantEventTestDataFactory.createParticipant(
+      new SignificantEventTestDataFactory.ParticipantOptions()
+        .forEvent(eventRecord.Id)
+        .forAccount(treeScenario.unlinkedPersonAccount.Id)
     );
 
     Test.startTest();
     ActivityTimelineModels.ActivityTimelineData data = ActivityTimelineController.getTimelineData(
-      household.Id,
+      treeScenario.rootAccount.Id,
       false
     );
     Test.stopTest();
 
+    Integer significantEventCount = 0;
     ActivityTimelineModels.ActivityItem significantEventItem;
+
     for (ActivityTimelineModels.ActivityItem item : data.activities) {
-      if (item.activityType == 'Significant Event') {
-        significantEventItem = item;
-        break;
+      if (item.activityType != 'Significant Event') {
+        continue;
       }
+
+      significantEventCount++;
+      significantEventItem = item;
     }
 
-    System.assertNotEquals(
-      null,
-      significantEventItem,
-      'Household timeline should include member significant events.'
-    );
     System.assertEquals(
-      String.valueOf(eventRecord.Id),
-      significantEventItem.id,
+      1,
+      significantEventCount,
+      'Expected one timeline item per significant event.'
+    );
+    System.assertNotEquals(null, significantEventItem, 'Significant event should be returned.');
+    System.assertEquals(
+      eventRecord.Id,
+      Id.valueOf(significantEventItem.id),
       'Timeline item should reference the significant event record.'
     );
     System.assertEquals(
-      'Household Timeline Event',
+      'Timeline Significant Event',
       significantEventItem.title,
-      'Timeline item title should match the significant event name.'
+      'Timeline title should use the significant event name.'
     );
     System.assertEquals(
-      'Graduation celebration details',
+      SignificantEventTestDataFactory.DEFAULT_OTHER_EVENT_TYPE,
+      significantEventItem.status,
+      'Other event type should resolve to the custom label.'
+    );
+    System.assertEquals(
+      'Important family milestone',
       significantEventItem.description,
-      'Timeline item should include the significant event description.'
+      'Description should be exposed on the timeline item.'
+    );
+    System.assertEquals(true, significantEventItem.approximateDate, 'Approximate flag should pass through.');
+    System.assertEquals(
+      Datetime.newInstance(Date.today().addDays(-10), Time.newInstance(0, 0, 0, 0))
+        .format('yyyy-MM-dd'),
+      significantEventItem.endDateValue,
+      'End date should be formatted for the UI.'
     );
     System.assertEquals(
-      String.valueOf(household.Id),
-      significantEventItem.associatedAccountId,
-      'Household timeline should expose the current household account.'
+      'Interactions',
+      significantEventItem.category,
+      'Significant events should be categorized as Interactions.'
     );
     System.assertEquals(
-      household.Name,
-      significantEventItem.associatedAccountName,
-      'Household timeline should expose the current household name.'
-    );
-    System.assertEquals(
-      1,
+      2,
       significantEventItem.relatedParticipants.size(),
-      'Household timeline should expose linked contacts as related participants.'
+      'Associated contacts should be aggregated on one timeline item.'
     );
     System.assertEquals(
-      String.valueOf(household.Id),
-      significantEventItem.relatedParticipants[0].id,
-      'Linked household participant should appear in related participants.'
+      true,
+      significantEventItem.hasDueDate,
+      'Start date should schedule the item.'
     );
-    System.assertEquals(true, data.isHouseholdRecordContext);
   }
 
   @IsTest
-  static void getTimelineData_personAccount_includesSignificantEventHouseholdContext() {
-    SignificantEventTestDataFactory.Scenario scenario = SignificantEventTestDataFactory.createScenario(
-      new SignificantEventTestDataFactory.ScenarioOptions()
-        .withFinancialAdvisorTeam()
-        .withSignificantEvent()
-        .withParticipant()
+  static void getTimelineDataIncludesSignificantEventsWithoutStartDate() {
+    FscDataTestDataFactory.TreeScenario treeScenario = FscDataTestDataFactory.createTreeScenario(
+      new FscDataTestDataFactory.TreeScenarioOptions().withUniqueNames()
+    );
+
+    SignificantEventTestDataFactory.SignificantEventOptions eventOptions = new SignificantEventTestDataFactory.SignificantEventOptions();
+    eventOptions.householdId = treeScenario.rootAccount.Id;
+    eventOptions.name = 'Undated Significant Event';
+    eventOptions.startDate = null;
+    Significant_Event__c eventRecord = SignificantEventTestDataFactory.createSignificantEvent(
+      eventOptions
+    );
+
+    SignificantEventTestDataFactory.createParticipant(
+      new SignificantEventTestDataFactory.ParticipantOptions()
+        .forEvent(eventRecord.Id)
+        .forAccount(treeScenario.linkedPersonAccount.Id)
     );
 
     Test.startTest();
     ActivityTimelineModels.ActivityTimelineData data = ActivityTimelineController.getTimelineData(
-      scenario.treeScenario.linkedPersonAccount.Id,
+      treeScenario.rootAccount.Id,
       false
     );
     Test.stopTest();
 
-    ActivityTimelineModels.ActivityItem significantEventItem;
+    ActivityTimelineModels.ActivityItem undatedItem;
+
     for (ActivityTimelineModels.ActivityItem item : data.activities) {
-      if (item.activityType == 'Significant Event') {
-        significantEventItem = item;
+      if (item.id == String.valueOf(eventRecord.Id)) {
+        undatedItem = item;
         break;
       }
     }
 
-    System.assertNotEquals(
-      null,
-      significantEventItem,
-      'Person account timeline should include significant events.'
-    );
-    System.assertEquals(
-      String.valueOf(scenario.household.Id),
-      significantEventItem.associatedAccountId,
-      'Person account timeline should expose the event household.'
-    );
-    System.assertEquals(
-      scenario.household.Name,
-      significantEventItem.associatedAccountName,
-      'Person account timeline should expose the event household name.'
-    );
-    System.assertEquals(
-      1,
-      significantEventItem.relatedParticipants.size(),
-      'Person account timeline should expose only the current person account participant.'
-    );
-    System.assertEquals(
-      String.valueOf(scenario.treeScenario.linkedPersonAccount.Id),
-      significantEventItem.relatedParticipants[0].id,
-      'Person account timeline should expose the viewed person account as the participant.'
-    );
-    System.assertEquals(false, data.isHouseholdRecordContext);
+    System.assertNotEquals(null, undatedItem, 'Undated significant event should still be returned.');
+    System.assertEquals(false, undatedItem.hasDueDate, 'Missing start date should use upcoming grouping.');
+    System.assertEquals(0, undatedItem.activityDateTime, 'Missing start date should not assign a schedule.');
   }
 }

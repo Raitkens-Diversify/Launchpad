@@ -119,7 +119,7 @@
 
     <template lwc:else>
       <div class="work-table__table">
-        <c-styled-data-table
+        <c-arc-data-table
           aria-label={title}
           key-field="id"
           density="comfortable"
@@ -145,7 +145,7 @@
           page-size-options={pageSizeOptions}
           empty-message="No work records found."
           onrowclick={handleRowClick}
-        ></c-styled-data-table>
+        ></c-arc-data-table>
       </div>
     </template>
   </div>
