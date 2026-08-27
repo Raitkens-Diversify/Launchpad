@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Arc Advertising Item Detail</masterLabel>
+    <description
+  >Advertising Item detail page for Experience sites: highlights, Information/System Information, all Advertising_Type__c-conditional sections and their related lists, Files, and an Activity (Tasks/Events) rail.</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+</LightningComponentBundle>

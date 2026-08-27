@@ -1,0 +1,12 @@
+{
+  "type" : "sfdc_cms__route",
+  "title" : "Advertising Item List",
+  "contentBody" : {
+    "activeViewId" : "Advertising_Item_List",
+    "configurationTags" : [ ],
+    "pageAccess" : "UseParent",
+    "routeType" : "list-Advertising_Item__c",
+    "urlPrefix" : "advertising-item"
+  },
+  "urlName" : "advertising-item-list"
+}

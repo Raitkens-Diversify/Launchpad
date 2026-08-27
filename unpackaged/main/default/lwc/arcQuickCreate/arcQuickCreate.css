@@ -8,7 +8,10 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(3, 45, 96, 0.4);
+  /* Grey, matching --div-color-disabled-1 -- same fix applied to the Related
+     Products quick view, for one dialog-backdrop color across ARC rather
+     than the platform-default blue tint. */
+  background: rgba(107, 114, 128, 0.5);
 }
 
 .arc-quick-create {

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Arc Activity Panel</masterLabel>
+    <description>The Activity and Chatter panel from the right rail of the Lightning record page, redrawn for ARC: the New Event and Email composers, Timeline Settings, the Upcoming and Overdue timeline, and the record&#39;s Chatter feed with comments.</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property name="objectApiName" type="String" label="Object API Name" description="The object whose record page this sits on. Used to read the record id out of the route." default="Account" />
+            <property name="calendarUrl" type="String" label="View Calendar URL" description="Where the View Calendar action goes. ARC has no calendar of its own, so this opens in a new tab." default="/lightning/o/Event/home" />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

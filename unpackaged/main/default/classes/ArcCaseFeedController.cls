@@ -120,6 +120,47 @@ public with sharing class ArcCaseFeedController {
     String objectApiName,
     Integer pageSize
   ) {
+    return queryRecordHistory(recordId, objectApiName, 0, pageSize);
+  }
+
+  /**
+   * Same history as getRecordHistory, but offset/pageSize are caller-
+   * controlled instead of always starting at the top -- for a full paginated
+   * table (Advertising Item Detail's History section) rather than a fixed
+   * first-page rail card. A separate method rather than an optional param on
+   * getRecordHistory, same reason ArcRelatedListController.getRelatedRecordsPage
+   * is its own method: both are @AuraEnabled(cacheable=true), and Apex
+   * overloading on a name LWC imports by string risks the wrong overload.
+   *
+   * The offset is approximate, not exact: a reference-field change writes two
+   * raw history rows (an EntityId row and the Text row Lightning actually
+   * shows) that collapseHistory folds into one logical entry, so a flat SOQL
+   * OFFSET on the raw object can't be trusted to land on a collapsed-entry
+   * boundary. Doubling it keeps every page's raw window comfortably past the
+   * true boundary; the same over-fetch-then-truncate collapseHistory already
+   * does for page one covers the rest. A logical entry that happens to
+   * straddle exactly one page/fetch boundary could in principle be missed --
+   * accepted here, same as the single-page method's existing approximation.
+   */
+  @AuraEnabled(cacheable=true)
+  public static HistoryResult getRecordHistoryPage(
+    Id recordId,
+    String objectApiName,
+    Integer offsetValue,
+    Integer pageSize
+  ) {
+    Integer effectiveOffset = offsetValue == null
+      ? 0
+      : Math.max(offsetValue, 0);
+    return queryRecordHistory(recordId, objectApiName, effectiveOffset, pageSize);
+  }
+
+  private static HistoryResult queryRecordHistory(
+    Id recordId,
+    String objectApiName,
+    Integer offsetValue,
+    Integer pageSize
+  ) {
     HistoryResult result = new HistoryResult();
     result.entries = new List<HistoryEntry>();
     result.hasMore = false;
@@ -158,6 +199,7 @@ public with sharing class ArcCaseFeedController {
     // involved. Two per wanted entry covers the id/name pairing, plus one to
     // detect that more exist.
     Integer fetchLimit = (size * 2) + 1;
+    Integer rawOffset = (offsetValue == null ? 0 : offsetValue) * 2;
 
     String soql =
       'SELECT Id, CreatedDate, CreatedById, CreatedBy.Name, Field, DataType,' +
@@ -170,7 +212,9 @@ public with sharing class ArcCaseFeedController {
       ' WITH USER_MODE' +
       ' ORDER BY CreatedDate DESC' +
       ' LIMIT ' +
-      fetchLimit;
+      fetchLimit +
+      ' OFFSET ' +
+      rawOffset;
 
     List<SObject> rows;
 
@@ -182,7 +226,7 @@ public with sharing class ArcCaseFeedController {
       // breaking the page.
       System.debug(
         LoggingLevel.ERROR,
-        'ArcCaseFeedController.getRecordHistory failed for ' +
+        'ArcCaseFeedController.queryRecordHistory failed for ' +
           historyObject +
           ': ' +
           e

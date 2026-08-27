@@ -69,10 +69,22 @@
 
 .related-list__tr--link {
   cursor: pointer;
+  /* A click on the row shouldn't select its text -- without this, a fast
+     click could catch a word and paint it with the browser's native text-
+     selection highlight instead of just the row's own hover background. */
+  user-select: none;
 }
 
 .related-list__tr:hover {
   background: var(--div-color-neutral-50, #f9fafb);
+}
+
+/* Matches arc-data-table's own clickable-row hover (--div-color-sidebar-
+   hover-bg) so a related-list row and a data-table row read as the same
+   click affordance. Needs to beat the plain hover rule above on
+   specificity. */
+.related-list__tr--link:hover {
+  background: var(--div-color-sidebar-hover-bg, #e2f8ff);
 }
 
 .related-list__td {

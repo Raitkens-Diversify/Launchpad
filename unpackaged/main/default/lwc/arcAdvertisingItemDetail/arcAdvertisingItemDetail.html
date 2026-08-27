@@ -1,0 +1,554 @@
+<template>
+  <div class="arc-advertising-item-detail">
+    <template lwc:if={isLoading}>
+      <div class="arc-advertising-item-detail__loading">
+        <c-arc-loading-spinner
+          alternative-text="Loading advertising item"
+          size="medium"
+        ></c-arc-loading-spinner>
+      </div>
+    </template>
+
+    <template lwc:elseif={errorMessage}>
+      <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+        {errorMessage}
+      </div>
+    </template>
+
+    <template lwc:elseif={hasDetail}>
+      <!--
+        Structure follows AdvertisingItemRecordPage.flexipage: highlights
+        header, then a main/side split matching its own recordHomeTemplate
+        (Detail on the left/main, Activity in the right sidebar) -- the same
+        left-main/right-side direction Case Detail and Product Detail use.
+      -->
+      <header class="arc-advertising-item-detail__header">
+        <div class="arc-advertising-item-detail__header-top">
+          <div class="arc-advertising-item-detail__title-wrap">
+            <span class="arc-advertising-item-detail__eyebrow"
+              >Advertising Item</span
+            >
+            <h1 class="arc-advertising-item-detail__title">{itemName}</h1>
+          </div>
+          <div class="arc-advertising-item-detail__badges">
+            <template lwc:if={hasStatus}>
+              <span class="arc-advertising-item-detail__badge"
+                >{statusValue}</span
+              >
+            </template>
+          </div>
+        </div>
+
+        <dl class="arc-advertising-item-detail__key-facts">
+          <template lwc:if={hasReviewCase}>
+            <div class="arc-advertising-item-detail__key-fact">
+              <dt>Review Case</dt>
+              <dd>
+                <a href={reviewCaseUrl} onclick={handleReviewCaseClick}
+                  >{reviewCaseNumber}</a
+                >
+              </dd>
+            </div>
+          </template>
+          <template lwc:if={hasFinancialAdvisorTeam}>
+            <div class="arc-advertising-item-detail__key-fact">
+              <dt>Financial Advisor Team</dt>
+              <dd>{financialAdvisorTeamName}</dd>
+            </div>
+          </template>
+          <template lwc:if={hasAdvertisingType}>
+            <div class="arc-advertising-item-detail__key-fact">
+              <dt>Advertising Type</dt>
+              <dd>{advertisingTypeValue}</dd>
+            </div>
+          </template>
+          <template lwc:if={hasDateOfIntendedFirstUse}>
+            <div class="arc-advertising-item-detail__key-fact">
+              <dt>Date of Intended First Use</dt>
+              <dd>
+                <lightning-formatted-date-time
+                  value={dateOfIntendedFirstUseValue}
+                  year="numeric"
+                  month="short"
+                  day="numeric"
+                ></lightning-formatted-date-time>
+              </dd>
+            </div>
+          </template>
+        </dl>
+      </header>
+
+      <div class="arc-advertising-item-detail__body">
+        <div class="arc-advertising-item-detail__main">
+          <details class="detail-section" open>
+            <summary class="detail-section__summary">Information</summary>
+            <div class="detail-section__body">
+              <lightning-record-form
+                record-id={recordId}
+                object-api-name={objectApiName}
+                fields={informationFields}
+                columns="2"
+                mode="view"
+              ></lightning-record-form>
+            </div>
+          </details>
+
+          <!-- ===== Advertising_Type__c-conditional sections ===== -->
+
+          <template lwc:if={isBrochureType}>
+            <details class="detail-section" open>
+              <summary class="detail-section__summary"
+                >Brochure/Worksheet/Pamphlet</summary
+              >
+              <div class="detail-section__body">
+                <lightning-record-form
+                  record-id={recordId}
+                  object-api-name={objectApiName}
+                  fields={brochureFields}
+                  columns="2"
+                  mode="view"
+                ></lightning-record-form>
+                <template lwc:if={showThirdPartyField}>
+                  <div class="detail-section__extra-field">
+                    <span class="detail-section__extra-label"
+                      >3rd Party</span
+                    >
+                    <span>{thirdPartyValue}</span>
+                  </div>
+                </template>
+              </div>
+            </details>
+          </template>
+
+          <template lwc:if={isEventType}>
+            <details class="detail-section" open>
+              <summary class="detail-section__summary">Event</summary>
+              <div class="detail-section__body">
+                <lightning-record-form
+                  record-id={recordId}
+                  object-api-name={objectApiName}
+                  fields={eventFields}
+                  columns="2"
+                  mode="view"
+                ></lightning-record-form>
+                <template lwc:if={showRafflesExplanation}>
+                  <div class="detail-section__extra-field">
+                    <span class="detail-section__extra-label"
+                      >Raffles/Gifts Explanation</span
+                    >
+                    <span>{rafflesExplanationValue}</span>
+                  </div>
+                </template>
+              </div>
+            </details>
+            <c-arc-related-list
+              record-id={recordId}
+              card-label="Event Cost Line Items"
+              related-object-api-name="Event_Cost_Line_Item__c"
+              parent-field-api-name="Event__c"
+              columns="Name:Name,Name of Party:Name_of_Party__c,Amount:Amount__c"
+              collapsible
+            ></c-arc-related-list>
+            <c-arc-related-list
+              record-id={recordId}
+              card-label="Advertising Items Related to Event"
+              related-object-api-name="Advertising_Item__c"
+              parent-field-api-name="Event__c"
+              columns="Name:Name,Advertising Type:Advertising_Type__c,Date of Intended First Use:Date_of_Intended_First_Use__c,Intended Audience:Intended_Audience__c"
+              collapsible
+            ></c-arc-related-list>
+          </template>
+
+          <template lwc:if={isGroupEmailType}>
+            <details class="detail-section" open>
+              <summary class="detail-section__summary">Group Email</summary>
+              <div class="detail-section__body">
+                <lightning-record-form
+                  record-id={recordId}
+                  object-api-name={objectApiName}
+                  fields={groupEmailFields}
+                  columns="2"
+                  mode="view"
+                ></lightning-record-form>
+              </div>
+            </details>
+          </template>
+
+          <template lwc:if={isNewsletterType}>
+            <details class="detail-section" open>
+              <summary class="detail-section__summary"
+                >Newsletter/Circular</summary
+              >
+              <div class="detail-section__body">
+                <lightning-record-form
+                  record-id={recordId}
+                  object-api-name={objectApiName}
+                  fields={newsletterFields}
+                  columns="2"
+                  mode="view"
+                ></lightning-record-form>
+                <template lwc:if={showThirdPartyField}>
+                  <div class="detail-section__extra-field">
+                    <span class="detail-section__extra-label"
+                      >3rd Party</span
+                    >
+                    <span>{thirdPartyValue}</span>
+                  </div>
+                </template>
+              </div>
+            </details>
+          </template>
+
+          <template lwc:if={isPeriodicalType}>
+            <details class="detail-section" open>
+              <summary class="detail-section__summary"
+                >Periodical Print/Reprint</summary
+              >
+              <div class="detail-section__body">
+                <lightning-record-form
+                  record-id={recordId}
+                  object-api-name={objectApiName}
+                  fields={periodicalFields}
+                  columns="2"
+                  mode="view"
+                ></lightning-record-form>
+                <template lwc:if={showAdditionalCommentary}>
+                  <div class="detail-section__extra-field">
+                    <span class="detail-section__extra-label"
+                      >Providing Additional Commentary</span
+                    >
+                    <span>{additionalCommentaryValue}</span>
+                  </div>
+                </template>
+              </div>
+            </details>
+          </template>
+
+          <template lwc:if={isPresentationType}>
+            <details class="detail-section" open>
+              <summary class="detail-section__summary">Presentation</summary>
+              <div class="detail-section__body">
+                <lightning-record-form
+                  record-id={recordId}
+                  object-api-name={objectApiName}
+                  fields={presentationFields}
+                  columns="2"
+                  mode="view"
+                ></lightning-record-form>
+                <template lwc:if={showThirdPartyField}>
+                  <div class="detail-section__extra-field">
+                    <span class="detail-section__extra-label"
+                      >3rd Party</span
+                    >
+                    <span>{thirdPartyValue}</span>
+                  </div>
+                </template>
+              </div>
+            </details>
+          </template>
+
+          <template lwc:if={isPublicAppearanceType}>
+            <details class="detail-section" open>
+              <summary class="detail-section__summary"
+                >Public Appearance</summary
+              >
+              <div class="detail-section__body">
+                <lightning-record-form
+                  record-id={recordId}
+                  object-api-name={objectApiName}
+                  fields={publicAppearanceFields}
+                  columns="2"
+                  mode="view"
+                ></lightning-record-form>
+                <template lwc:if={showTalkingPoints}>
+                  <div class="detail-section__extra-field">
+                    <span class="detail-section__extra-label"
+                      >Detailed Talking Points</span
+                    >
+                    <span>{talkingPointsValue}</span>
+                  </div>
+                </template>
+              </div>
+            </details>
+            <c-arc-related-list
+              record-id={recordId}
+              card-label="Advertising Items Related to Public Appearance"
+              related-object-api-name="Advertising_Item__c"
+              parent-field-api-name="Public_Appearance__c"
+              columns="Name:Name,Advertising Type:Advertising_Type__c,Date of Intended First Use:Date_of_Intended_First_Use__c,Intended Audience:Intended_Audience__c"
+              collapsible
+            ></c-arc-related-list>
+          </template>
+
+          <template lwc:if={isRadioTvAdType}>
+            <details class="detail-section" open>
+              <summary class="detail-section__summary">Radio/TV Ad</summary>
+              <div class="detail-section__body">
+                <lightning-record-form
+                  record-id={recordId}
+                  object-api-name={objectApiName}
+                  fields={radioTvAdFields}
+                  columns="2"
+                  mode="view"
+                ></lightning-record-form>
+              </div>
+            </details>
+            <c-arc-related-list
+              record-id={recordId}
+              card-label="Radio/TV Ad Cost Line Items"
+              related-object-api-name="Radio_TV_Ad_Cost_Line_Item__c"
+              parent-field-api-name="Radio_TV_Ad__c"
+              columns="Name:Name,Name of Party:Name_of_Party__c,Amount:Amount__c"
+              collapsible
+            ></c-arc-related-list>
+            <c-arc-related-list
+              record-id={recordId}
+              card-label="Advertising Items Related to Radio/TV Ad"
+              related-object-api-name="Advertising_Item__c"
+              parent-field-api-name="Radio_TV_Ad__c"
+              columns="Name:Name,Advertising Type:Advertising_Type__c,Date of Intended First Use:Date_of_Intended_First_Use__c,Intended Audience:Intended_Audience__c"
+              collapsible
+            ></c-arc-related-list>
+          </template>
+
+          <template lwc:if={isSeminarType}>
+            <details class="detail-section" open>
+              <summary class="detail-section__summary"
+                >Seminar Handout</summary
+              >
+              <div class="detail-section__body">
+                <lightning-record-form
+                  record-id={recordId}
+                  object-api-name={objectApiName}
+                  fields={seminarFields}
+                  columns="2"
+                  mode="view"
+                ></lightning-record-form>
+              </div>
+            </details>
+          </template>
+
+          <template lwc:if={isSocialMediaContentType}>
+            <details class="detail-section" open>
+              <summary class="detail-section__summary"
+                >Social Media Content</summary
+              >
+              <div class="detail-section__body">
+                <lightning-record-form
+                  record-id={recordId}
+                  object-api-name={objectApiName}
+                  fields={socialMediaContentFields}
+                  columns="2"
+                  mode="view"
+                ></lightning-record-form>
+              </div>
+            </details>
+          </template>
+
+          <template lwc:if={isSocialMediaProfileType}>
+            <details class="detail-section" open>
+              <summary class="detail-section__summary"
+                >Social Media Profile</summary
+              >
+              <div class="detail-section__body">
+                <lightning-record-form
+                  record-id={recordId}
+                  object-api-name={objectApiName}
+                  fields={socialMediaProfileFields}
+                  columns="2"
+                  mode="view"
+                ></lightning-record-form>
+              </div>
+            </details>
+          </template>
+
+          <template lwc:if={isSponsorshipType}>
+            <details class="detail-section" open>
+              <summary class="detail-section__summary">Sponsorship</summary>
+              <div class="detail-section__body">
+                <lightning-record-form
+                  record-id={recordId}
+                  object-api-name={objectApiName}
+                  fields={sponsorshipFields}
+                  columns="2"
+                  mode="view"
+                ></lightning-record-form>
+              </div>
+            </details>
+            <c-arc-related-list
+              record-id={recordId}
+              card-label="Sponsorship Cost Line Items"
+              related-object-api-name="Sponsorship_Cost_Line_Item__c"
+              parent-field-api-name="Sponsorship__c"
+              columns="Name:Name,Name of Party:Name_of_Party__c,Amount:Amount__c"
+              collapsible
+            ></c-arc-related-list>
+          </template>
+
+          <template lwc:if={isVideoAudioType}>
+            <details class="detail-section" open>
+              <summary class="detail-section__summary">Video/Audio</summary>
+              <div class="detail-section__body">
+                <lightning-record-form
+                  record-id={recordId}
+                  object-api-name={objectApiName}
+                  fields={videoAudioFields}
+                  columns="2"
+                  mode="view"
+                ></lightning-record-form>
+                <template lwc:if={showRelatedPublicAppearance}>
+                  <div class="detail-section__extra-field">
+                    <span class="detail-section__extra-label"
+                      >Public Appearance</span
+                    >
+                    <a
+                      href="#"
+                      data-record-id={relatedPublicAppearanceId}
+                      onclick={handleRelatedItemClick}
+                      >{relatedPublicAppearanceName}</a
+                    >
+                  </div>
+                </template>
+                <template lwc:if={showRelatedSocialMediaProfile}>
+                  <div class="detail-section__extra-field">
+                    <span class="detail-section__extra-label"
+                      >Social Media Profile</span
+                    >
+                    <a
+                      href="#"
+                      data-record-id={relatedSocialMediaProfileId}
+                      onclick={handleRelatedItemClick}
+                      >{relatedSocialMediaProfileName}</a
+                    >
+                  </div>
+                </template>
+                <template lwc:if={showRelatedRadioTvAd}>
+                  <div class="detail-section__extra-field">
+                    <span class="detail-section__extra-label"
+                      >Radio/TV Ad</span
+                    >
+                    <a
+                      href="#"
+                      data-record-id={relatedRadioTvAdId}
+                      onclick={handleRelatedItemClick}
+                      >{relatedRadioTvAdName}</a
+                    >
+                  </div>
+                </template>
+              </div>
+            </details>
+          </template>
+
+          <template lwc:if={isWebsiteType}>
+            <details class="detail-section" open>
+              <summary class="detail-section__summary">Website</summary>
+              <div class="detail-section__body">
+                <lightning-record-form
+                  record-id={recordId}
+                  object-api-name={objectApiName}
+                  fields={websiteFields}
+                  columns="2"
+                  mode="view"
+                ></lightning-record-form>
+              </div>
+            </details>
+          </template>
+
+          <c-arc-related-list
+            record-id={recordId}
+            card-label="Files"
+            related-object-api-name="ContentDocumentLink"
+            parent-field-api-name="LinkedEntityId"
+            link-field-api-name="ContentDocumentId"
+            link-object-api-name="ContentDocument"
+            columns="File:ContentDocument.Title,Type:ContentDocument.FileExtension,Updated:ContentDocument.ContentModifiedDate"
+            collapsible
+          ></c-arc-related-list>
+
+          <details class="detail-section">
+            <summary class="detail-section__summary">System Information</summary>
+            <div class="detail-section__body">
+              <div class="detail-section__extra-field detail-section__extra-field--first">
+                <span class="detail-section__extra-label">Created By</span>
+                <span>{createdByName}</span>
+              </div>
+              <div class="detail-section__extra-field">
+                <span class="detail-section__extra-label"
+                  >Last Modified By</span
+                >
+                <span>{lastModifiedByName}</span>
+              </div>
+            </div>
+          </details>
+
+          <!-- Full-width, paginated -- the same c-arc-data-table Related
+               Products uses, fed by ArcCaseFeedController.getRecordHistoryPage.
+               No row links: the User column is the only plausible target and
+               ARC has no User detail route today. -->
+          <details class="detail-section">
+            <summary class="detail-section__summary">
+              Advertising Item History
+            </summary>
+            <div class="detail-section__body">
+              <template lwc:if={isHistoryLoading}>
+                <div class="arc-advertising-item-detail__panel-loading">
+                  <lightning-spinner
+                    alternative-text="Loading history"
+                    size="small"
+                  ></lightning-spinner>
+                </div>
+              </template>
+
+              <template lwc:elseif={historyError}>
+                <p class="arc-advertising-item-detail__panel-error" role="alert">
+                  {historyError}
+                </p>
+              </template>
+
+              <template lwc:else>
+                <c-arc-data-table
+                  aria-label="Advertising Item History"
+                  key-field="id"
+                  columns={historyColumns}
+                  data={historyRows}
+                  placeholder="-"
+                  has-more-rows={historyHasMore}
+                  is-loading-more={isLoadingMoreHistory}
+                  onloadmore={handleHistoryLoadMore}
+                ></c-arc-data-table>
+              </template>
+            </div>
+          </details>
+        </div>
+
+        <!--
+          Activity rail: the reference page uses Salesforce's native
+          runtime_sales_activities:activityPanel (Log a Call/Task/Event
+          composer + feed), which isn't an LWR-embeddable component -- this
+          is read-only Tasks and Events lists instead (no create actions,
+          per explicit confirmation), reusing c/arcRelatedList exactly as
+          every other rail card in ARC does.
+        -->
+        <div class="arc-advertising-item-detail__side">
+          <c-arc-related-list
+            record-id={recordId}
+            card-label="Open Tasks"
+            related-object-api-name="Task"
+            parent-field-api-name="WhatId"
+            columns="Subject:Subject,Status:Status,Due Date:ActivityDate"
+            collapsible
+          ></c-arc-related-list>
+
+          <c-arc-related-list
+            record-id={recordId}
+            card-label="Events"
+            related-object-api-name="Event"
+            parent-field-api-name="WhatId"
+            columns="Subject:Subject,Start:StartDateTime,End:EndDateTime"
+            collapsible
+          ></c-arc-related-list>
+        </div>
+      </div>
+    </template>
+  </div>
+</template>

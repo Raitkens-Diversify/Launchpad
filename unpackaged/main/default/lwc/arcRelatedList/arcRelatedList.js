@@ -16,7 +16,7 @@ import diversifyStyles from "@salesforce/resourceUrl/diversifyStyles";
 import {
   resolveRecordIdFromPageReference,
   buildRecordNavigationReference
-} from "c/recordNavigationUtils";
+} from "c/recordNavigationCommunityUtils";
 import getRelatedRecords from "@salesforce/apex/ArcRelatedListController.getRelatedRecords";
 
 /**

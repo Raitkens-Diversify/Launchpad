@@ -1,0 +1,550 @@
+/*
+ * Layout and neutral typography only. No brand colours are hard-coded — the ARC
+ * page this sits on supplies them, and duplicating them here would leave two
+ * places to change when the palette moves. The frame, the tokens and the shadow
+ * match c/arcCaseFeedTabs so the two panels read as siblings in the rail.
+ */
+
+.arc-activity {
+  display: block;
+  width: 100%;
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+  border: 1px solid var(--lwc-colorBorder, #c9c9c9);
+  border-radius: var(--lwc-borderRadiusMedium, 4px);
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+  /* NOT overflow: hidden — the composer dropdowns are positioned children and
+     would be clipped by it. */
+}
+
+.arc-activity__panel {
+  /* This sits in a ~340px rail, so horizontal padding is space the rows need
+     more than the margins do. */
+  padding: 0.75rem 0.75rem 1rem;
+}
+
+/* ---- status, loading, errors ---- */
+
+.arc-activity__status {
+  margin: 0.5rem 0.75rem 0;
+  padding: 0.375rem 0.5rem;
+  border-radius: var(--lwc-borderRadiusMedium, 4px);
+  background: #f3f2f2;
+  color: #3e3e3c;
+  font-size: 0.8125rem;
+}
+
+.arc-activity__status_error {
+  background: #fef1ee;
+  color: #c23934;
+}
+
+/*
+ * c/arcLoadingSpinner is absolutely positioned at 50%/50%, so it needs a
+ * positioned ancestor or it escapes to the page and centres itself mid-screen.
+ * The min-height stops that ancestor collapsing to nothing.
+ */
+.arc-activity__loading {
+  position: relative;
+  min-height: 4rem;
+}
+
+.arc-activity__error {
+  margin: 0;
+  color: #c23934;
+  font-size: 0.875rem;
+}
+
+/* ---- composer ---- */
+
+.arc-activity__composer {
+  display: flex;
+  gap: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+/* Positioned so the dropdown hangs off the group rather than the page. */
+.arc-activity__composer-group {
+  position: relative;
+  display: flex;
+}
+
+.arc-activity__composer-button,
+.arc-activity__composer-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+  border: 1px solid var(--lwc-colorBorder, #c9c9c9);
+  cursor: pointer;
+}
+
+.arc-activity__composer-button {
+  width: 3rem;
+  height: 2.5rem;
+  border-radius: var(--lwc-borderRadiusMedium, 4px) 0 0
+    var(--lwc-borderRadiusMedium, 4px);
+}
+
+.arc-activity__composer-toggle {
+  width: 2rem;
+  height: 2.5rem;
+  margin-left: -1px;
+  border-radius: 0 var(--lwc-borderRadiusMedium, 4px)
+    var(--lwc-borderRadiusMedium, 4px) 0;
+}
+
+.arc-activity__composer-button:hover,
+.arc-activity__composer-toggle:hover {
+  background: #f4f6f9;
+}
+
+.arc-activity__menu {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  z-index: 20;
+  min-width: 12rem;
+  margin: 0;
+  padding: 0.25rem 0;
+  list-style: none;
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+  border: 1px solid var(--lwc-colorBorder, #c9c9c9);
+  border-radius: var(--lwc-borderRadiusMedium, 4px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16);
+}
+
+.arc-activity__menu-item {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 0.8125rem;
+  color: #080707;
+  cursor: pointer;
+  /* max-content plus a floor, so the longest label sets the width instead of
+     being truncated by the narrow rail. */
+  white-space: nowrap;
+}
+
+.arc-activity__menu-item:hover {
+  background: #f4f6f9;
+}
+
+/* ---- filters and links ---- */
+
+.arc-activity__filters {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.arc-activity__filter-summary {
+  margin: 0;
+  color: #706e6b;
+  font-size: 0.75rem;
+  text-align: right;
+}
+
+.arc-activity__icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+  border: 1px solid var(--lwc-colorBorder, #c9c9c9);
+  border-radius: var(--lwc-borderRadiusMedium, 4px);
+  cursor: pointer;
+}
+
+.arc-activity__links {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.375rem;
+  padding: 0.25rem 0 0.5rem;
+}
+
+.arc-activity__link {
+  padding: 0;
+  background: none;
+  border: none;
+  color: #0176d3;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.arc-activity__link:hover {
+  text-decoration: underline;
+}
+
+.arc-activity__link-divider {
+  color: #706e6b;
+  font-size: 0.75rem;
+}
+
+/* ---- sections ---- */
+
+.arc-activity__section {
+  border-top: 1px solid #f3f2f2;
+}
+
+.arc-activity__section-heading {
+  margin: 0;
+}
+
+.arc-activity__section-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  width: 100%;
+  padding: 0.625rem 0;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.arc-activity__section-title {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #080707;
+}
+
+.arc-activity__rows {
+  margin: 0;
+  padding: 0 0 0.5rem;
+  list-style: none;
+}
+
+.arc-activity__row {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.625rem 0;
+  border-bottom: 1px solid #f3f2f2;
+}
+
+.arc-activity__row:last-child {
+  border-bottom: none;
+}
+
+/* An overdue activity is the one thing on this panel that needs to be spotted
+   without reading, so it gets a bar rather than only the word "Overdue". */
+.arc-activity__row_overdue {
+  border-left: 3px solid #ea001e;
+  padding-left: 0.5rem;
+}
+
+.arc-activity__row-icon {
+  flex: 0 0 auto;
+  padding-top: 0.125rem;
+}
+
+.arc-activity__row-main {
+  min-width: 0;
+}
+
+.arc-activity__row-title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #080707;
+  overflow-wrap: anywhere;
+}
+
+.arc-activity__row-when,
+.arc-activity__row-meta {
+  margin: 0.125rem 0 0;
+  font-size: 0.75rem;
+  color: #706e6b;
+}
+
+.arc-activity__row-description {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  color: #3e3e3c;
+  /* Two lines of a long description, then clipped — the rail cannot carry a
+     whole email body and the row is a summary, not the record. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ---- empty state ---- */
+
+.arc-activity__empty {
+  padding: 0.5rem 0 1rem;
+  text-align: center;
+}
+
+.arc-activity__empty-title {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #3e3e3c;
+}
+
+.arc-activity__empty-body {
+  margin: 0.25rem 0 0.75rem;
+  font-size: 0.8125rem;
+  color: #706e6b;
+}
+
+.arc-activity__empty-note {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem;
+  background: #f3f2f2;
+  border-radius: var(--lwc-borderRadiusMedium, 4px);
+  font-size: 0.75rem;
+  color: #3e3e3c;
+  text-align: left;
+}
+
+.arc-activity__more {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  color: #706e6b;
+}
+
+/* ---- buttons ---- */
+
+.arc-activity__brand-button,
+.arc-activity__neutral-button {
+  padding: 0.375rem 0.875rem;
+  border-radius: var(--lwc-borderRadiusMedium, 4px);
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.arc-activity__brand-button {
+  background: #0b5cab;
+  border: 1px solid #0b5cab;
+  color: #ffffff;
+}
+
+.arc-activity__brand-button:hover {
+  background: #094a8b;
+}
+
+.arc-activity__neutral-button {
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+  border: 1px solid var(--lwc-colorBorder, #c9c9c9);
+  color: #0176d3;
+}
+
+.arc-activity__brand-button[disabled],
+.arc-activity__neutral-button[disabled] {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ---- settings dialog ---- */
+
+.arc-activity__fieldset {
+  margin: 0 0 1rem;
+  padding: 0;
+  border: none;
+}
+
+.arc-activity__legend {
+  padding: 0 0 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.0625em;
+  text-transform: uppercase;
+  color: #706e6b;
+}
+
+.arc-activity__choice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.1875rem 0;
+  font-size: 0.8125rem;
+  color: #080707;
+  cursor: pointer;
+}
+
+.arc-activity__modal-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.arc-activity__modal-spacer {
+  flex: 1 1 auto;
+}
+
+.arc-activity__hint {
+  margin: 0.25rem 0 0.75rem;
+  font-size: 0.75rem;
+  color: #706e6b;
+}
+
+/* ---- chatter ---- */
+
+.arc-activity__publisher {
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f3f2f2;
+}
+
+.arc-activity__publisher-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.5rem;
+}
+
+.arc-activity__feed-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+}
+
+.arc-activity__feed-sort {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: #706e6b;
+}
+
+.arc-activity__select {
+  padding: 0.25rem;
+  border: 1px solid var(--lwc-colorBorder, #c9c9c9);
+  border-radius: var(--lwc-borderRadiusMedium, 4px);
+  font-size: 0.75rem;
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+}
+
+.arc-activity__posts {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.arc-activity__post {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f3f2f2;
+}
+
+.arc-activity__post:last-child {
+  border-bottom: none;
+}
+
+.arc-activity__post-actor {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #080707;
+}
+
+.arc-activity__post-when {
+  margin: 0.125rem 0 0;
+  font-size: 0.75rem;
+  color: #706e6b;
+}
+
+.arc-activity__post-header,
+.arc-activity__post-body {
+  margin: 0.375rem 0 0;
+  font-size: 0.8125rem;
+  color: #3e3e3c;
+  overflow-wrap: anywhere;
+}
+
+.arc-activity__changes {
+  margin: 0.375rem 0 0;
+}
+
+.arc-activity__change {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+}
+
+.arc-activity__change-label {
+  font-weight: 600;
+  color: #706e6b;
+}
+
+.arc-activity__change-value {
+  margin: 0;
+  color: #3e3e3c;
+}
+
+.arc-activity__change-old {
+  color: #706e6b;
+  text-decoration: line-through;
+}
+
+.arc-activity__change-arrow {
+  color: #706e6b;
+}
+
+.arc-activity__comments {
+  margin: 0.5rem 0 0;
+  padding: 0.5rem 0 0 0.75rem;
+  border-left: 2px solid #f3f2f2;
+  list-style: none;
+}
+
+.arc-activity__comment {
+  padding-bottom: 0.5rem;
+}
+
+.arc-activity__comment-actor {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #080707;
+}
+
+.arc-activity__comment-when {
+  margin-left: 0.375rem;
+  font-weight: 400;
+  color: #706e6b;
+}
+
+.arc-activity__comment-body {
+  margin: 0.125rem 0 0;
+  font-size: 0.75rem;
+  color: #3e3e3c;
+  overflow-wrap: anywhere;
+}
+
+.arc-activity__post-actions {
+  padding-top: 0.375rem;
+}
+
+.arc-activity__comment-form {
+  display: flex;
+  gap: 0.375rem;
+  padding-top: 0.375rem;
+}
+
+.arc-activity__comment-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0.3125rem 0.5rem;
+  border: 1px solid var(--lwc-colorBorder, #c9c9c9);
+  border-radius: var(--lwc-borderRadiusMedium, 4px);
+  font-size: 0.75rem;
+}
+
+.arc-activity__feed-end {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  color: #706e6b;
+  text-align: center;
+}

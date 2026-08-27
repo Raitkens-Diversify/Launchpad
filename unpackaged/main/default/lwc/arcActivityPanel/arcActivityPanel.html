@@ -1,0 +1,679 @@
+<template>
+  <div class="arc-activity">
+    <!-- c/dsTabs is ARC's own tab strip, used unmodified, so these tabs look
+         and behave like every other tab strip in the site. -->
+    <c-ds-tabs
+      tabs={tabs}
+      selected={activeTab}
+      label="Activity and Chatter"
+      ontabchange={handleTabChange}
+    ></c-ds-tabs>
+
+    <template lwc:if={statusMessage}>
+      <p class={statusClass} role="status">{statusMessage}</p>
+    </template>
+
+    <!-- ========================== ACTIVITY ========================== -->
+    <template lwc:if={showActivity}>
+      <div class="arc-activity__panel" role="tabpanel" aria-label="Activity">
+        <!-- Composer. Two groups, each a primary action and a dropdown of the
+             rest, exactly as the Lightning panel arranges them. -->
+        <div class="arc-activity__composer">
+          <div class="arc-activity__composer-group">
+            <button
+              type="button"
+              class="arc-activity__composer-button"
+              title="New Event"
+              onclick={handleNewEventClick}
+            >
+              <lightning-icon
+                icon-name="standard:event"
+                size="small"
+                alternative-text="New Event"
+              ></lightning-icon>
+            </button>
+            <button
+              type="button"
+              class="arc-activity__composer-toggle"
+              data-menu="event"
+              title="More New Event Actions"
+              aria-haspopup="true"
+              aria-expanded={eventMenuExpanded}
+              onclick={handleMenuToggle}
+            >
+              <lightning-icon
+                icon-name="utility:down"
+                size="xx-small"
+                alternative-text="More New Event Actions"
+              ></lightning-icon>
+            </button>
+
+            <template lwc:if={isEventMenuOpen}>
+              <ul class="arc-activity__menu" role="menu">
+                <template for:each={eventMenu} for:item="item">
+                  <li key={item.id} role="presentation">
+                    <button
+                      type="button"
+                      role="menuitem"
+                      class="arc-activity__menu-item"
+                      data-id={item.id}
+                      onclick={handleEventMenuSelect}
+                    >
+                      {item.label}
+                    </button>
+                  </li>
+                </template>
+              </ul>
+            </template>
+          </div>
+
+          <div class="arc-activity__composer-group">
+            <button
+              type="button"
+              class="arc-activity__composer-button"
+              title="Email"
+              onclick={handleEmailClick}
+            >
+              <lightning-icon
+                icon-name="standard:email"
+                size="small"
+                alternative-text="Email"
+              ></lightning-icon>
+            </button>
+            <button
+              type="button"
+              class="arc-activity__composer-toggle"
+              data-menu="email"
+              title="More Email Actions"
+              aria-haspopup="true"
+              aria-expanded={emailMenuExpanded}
+              onclick={handleMenuToggle}
+            >
+              <lightning-icon
+                icon-name="utility:down"
+                size="xx-small"
+                alternative-text="More Email Actions"
+              ></lightning-icon>
+            </button>
+
+            <template lwc:if={isEmailMenuOpen}>
+              <ul class="arc-activity__menu" role="menu">
+                <template for:each={emailMenu} for:item="item">
+                  <li key={item.id} role="presentation">
+                    <button
+                      type="button"
+                      role="menuitem"
+                      class="arc-activity__menu-item"
+                      data-id={item.id}
+                      onclick={handleEmailMenuSelect}
+                    >
+                      {item.label}
+                    </button>
+                  </li>
+                </template>
+              </ul>
+            </template>
+          </div>
+        </div>
+
+        <!-- Filter summary and the gear that opens the settings dialog. -->
+        <div class="arc-activity__filters">
+          <p class="arc-activity__filter-summary">Filters: {filterSummary}</p>
+          <button
+            type="button"
+            class="arc-activity__icon-button"
+            title="Timeline Settings"
+            onclick={handleOpenSettings}
+          >
+            <lightning-icon
+              icon-name="utility:settings"
+              size="x-small"
+              alternative-text="Timeline Settings"
+            ></lightning-icon>
+          </button>
+        </div>
+
+        <div class="arc-activity__links">
+          <button
+            type="button"
+            class="arc-activity__link"
+            onclick={handleRefresh}
+          >
+            Refresh
+          </button>
+          <span class="arc-activity__link-divider" aria-hidden="true">•</span>
+          <button
+            type="button"
+            class="arc-activity__link"
+            onclick={handleToggleExpandAll}
+          >
+            {expandAllLabel}
+          </button>
+          <span class="arc-activity__link-divider" aria-hidden="true">•</span>
+          <button
+            type="button"
+            class="arc-activity__link"
+            title="Show all activities in the task list"
+            onclick={handleViewAll}
+          >
+            View All
+          </button>
+        </div>
+
+        <template lwc:if={isTimelineLoading}>
+          <div class="arc-activity__loading">
+            <c-arc-loading-spinner
+              alternative-text="Loading activity"
+              size="small"
+            ></c-arc-loading-spinner>
+          </div>
+        </template>
+
+        <template lwc:if={activityError}>
+          <p class="arc-activity__error" role="alert">{activityError}</p>
+        </template>
+
+        <!-- Upcoming & Overdue, then one section per month of past activity. -->
+        <template for:each={timelineSections} for:item="section">
+          <section key={section.key} class="arc-activity__section">
+            <h3 class="arc-activity__section-heading">
+              <button
+                type="button"
+                class="arc-activity__section-toggle"
+                data-key={section.key}
+                aria-expanded={section.ariaExpanded}
+                onclick={handleToggleSection}
+              >
+                <lightning-icon
+                  icon-name={section.iconName}
+                  size="xx-small"
+                  alternative-text="Toggle section"
+                ></lightning-icon>
+                <span class="arc-activity__section-title">{section.title}</span>
+              </button>
+            </h3>
+
+            <template lwc:if={section.isOpen}>
+              <ul class="arc-activity__rows">
+                <template for:each={section.entries} for:item="entry">
+                  <li key={entry.id} class={entry.rowClass}>
+                    <div class="arc-activity__row-icon">
+                      <lightning-icon
+                        icon-name={entry.iconName}
+                        size="small"
+                        alternative-text={entry.typeLabel}
+                      ></lightning-icon>
+                    </div>
+                    <div class="arc-activity__row-main">
+                      <p class="arc-activity__row-title">{entry.title}</p>
+                      <p class="arc-activity__row-when">{entry.whenLabel}</p>
+                      <p class="arc-activity__row-meta">{entry.metaLabel}</p>
+                      <template lwc:if={entry.hasDescription}>
+                        <p class="arc-activity__row-description">
+                          {entry.description}
+                        </p>
+                      </template>
+                    </div>
+                  </li>
+                </template>
+              </ul>
+
+              <!-- The panel's own empty state, word for word, including the
+                   note about filters and the brand button that clears them. -->
+              <template lwc:if={section.showEmptyState}>
+                <div class="arc-activity__empty">
+                  <p class="arc-activity__empty-title">
+                    No activities to show.
+                  </p>
+                  <p class="arc-activity__empty-body">
+                    Get started by sending an email, scheduling a task, and
+                    more.
+                  </p>
+                  <div class="arc-activity__empty-note">
+                    <lightning-icon
+                      icon-name="utility:info"
+                      size="x-small"
+                      alternative-text="information"
+                    ></lightning-icon>
+                    <span
+                      >To change what's shown, try changing your filters.</span
+                    >
+                  </div>
+                  <button
+                    type="button"
+                    class="arc-activity__brand-button"
+                    onclick={handleShowAllActivities}
+                  >
+                    Show All Activities
+                  </button>
+                </div>
+              </template>
+            </template>
+          </section>
+        </template>
+
+        <template lwc:if={hasMorePast}>
+          <p class="arc-activity__more">
+            Older activities are not shown. Use View All to see them all.
+          </p>
+        </template>
+      </div>
+    </template>
+
+    <!-- =========================== CHATTER =========================== -->
+    <template lwc:if={showChatter}>
+      <div class="arc-activity__panel" role="tabpanel" aria-label="Chatter">
+        <!-- Publisher. -->
+        <div class="arc-activity__publisher">
+          <!-- oninput as well as onchange: a base textarea only fires change
+               on blur, and the Share button reads this value. -->
+          <lightning-textarea
+            label="Share an update"
+            variant="label-hidden"
+            placeholder="Share an update..."
+            value={postBody}
+            onchange={handlePostBodyChange}
+            oninput={handlePostBodyChange}
+          ></lightning-textarea>
+          <div class="arc-activity__publisher-actions">
+            <button
+              type="button"
+              class="arc-activity__brand-button"
+              disabled={isSaving}
+              onclick={handleShare}
+            >
+              Share
+            </button>
+          </div>
+        </div>
+
+        <div class="arc-activity__feed-bar">
+          <label class="arc-activity__feed-sort">
+            <span class="arc-activity__feed-sort-label">Sort by:</span>
+            <select
+              class="arc-activity__select"
+              onchange={handleFeedSortChange}
+            >
+              <template for:each={feedSortOptions} for:item="option">
+                <option
+                  key={option.value}
+                  value={option.value}
+                  selected={option.selected}
+                >
+                  {option.label}
+                </option>
+              </template>
+            </select>
+          </label>
+          <button
+            type="button"
+            class="arc-activity__link"
+            onclick={handleRefreshFeed}
+          >
+            Refresh this feed
+          </button>
+        </div>
+
+        <template lwc:if={isFeedLoading}>
+          <div class="arc-activity__loading">
+            <c-arc-loading-spinner
+              alternative-text="Loading feed"
+              size="small"
+            ></c-arc-loading-spinner>
+          </div>
+        </template>
+
+        <template lwc:if={feedError}>
+          <p class="arc-activity__error" role="alert">{feedError}</p>
+        </template>
+
+        <ul class="arc-activity__posts">
+          <template for:each={feedEntries} for:item="entry">
+            <li key={entry.id} class="arc-activity__post">
+              <p class="arc-activity__post-actor">{entry.actorName}</p>
+              <p class="arc-activity__post-when">{entry.whenLabel}</p>
+
+              <template lwc:if={entry.hasHeader}>
+                <p class="arc-activity__post-header">{entry.title}</p>
+              </template>
+
+              <template lwc:if={entry.hasBody}>
+                <p class="arc-activity__post-body">{entry.body}</p>
+              </template>
+
+              <template lwc:if={entry.hasChanges}>
+                <dl class="arc-activity__changes">
+                  <template for:each={entry.changes} for:item="change">
+                    <div key={change.key} class="arc-activity__change">
+                      <dt class="arc-activity__change-label">
+                        {change.label}:
+                      </dt>
+                      <dd class="arc-activity__change-value">
+                        <template lwc:if={change.showOldValue}>
+                          <span class="arc-activity__change-old"
+                            >{change.oldValue}</span
+                          >
+                          <span
+                            class="arc-activity__change-arrow"
+                            aria-label="changed to"
+                            >&rarr;</span
+                          >
+                        </template>
+                        {change.newValue}
+                      </dd>
+                    </div>
+                  </template>
+                </dl>
+              </template>
+
+              <template lwc:if={entry.hasComments}>
+                <ul class="arc-activity__comments">
+                  <template for:each={entry.comments} for:item="comment">
+                    <li key={comment.id} class="arc-activity__comment">
+                      <p class="arc-activity__comment-actor">
+                        {comment.actorName}
+                        <span class="arc-activity__comment-when"
+                          >{comment.whenLabel}</span
+                        >
+                      </p>
+                      <p class="arc-activity__comment-body">{comment.body}</p>
+                    </li>
+                  </template>
+                </ul>
+              </template>
+
+              <div class="arc-activity__post-actions">
+                <button
+                  type="button"
+                  class="arc-activity__link"
+                  data-id={entry.id}
+                  onclick={handleToggleComment}
+                >
+                  Comment
+                </button>
+              </div>
+
+              <template lwc:if={entry.isCommentOpen}>
+                <div class="arc-activity__comment-form">
+                  <input
+                    type="text"
+                    class="arc-activity__comment-input"
+                    placeholder="Write a comment..."
+                    aria-label="Write a comment"
+                    data-id={entry.id}
+                    value={entry.commentDraft}
+                    oninput={handleCommentDraft}
+                  />
+                  <button
+                    type="button"
+                    class="arc-activity__neutral-button"
+                    data-id={entry.id}
+                    disabled={isSaving}
+                    onclick={handleAddComment}
+                  >
+                    Comment
+                  </button>
+                </div>
+              </template>
+            </li>
+          </template>
+        </ul>
+
+        <template lwc:if={showFeedEmpty}>
+          <p class="arc-activity__empty-title">No posts on this record yet.</p>
+        </template>
+
+        <template lwc:if={showFeedEnd}>
+          <p class="arc-activity__feed-end">
+            End of Feed &nbsp;•&nbsp; {feedCountLabel}
+          </p>
+        </template>
+      </div>
+    </template>
+
+    <!-- ===================== TIMELINE SETTINGS ====================== -->
+    <c-ds-modal-v2
+      is-open={isSettingsOpen}
+      title="Timeline settings"
+      size="small"
+      onclose={handleCloseSettings}
+    >
+      <fieldset class="arc-activity__fieldset">
+        <legend class="arc-activity__legend">Date range</legend>
+        <template for:each={dateRangeOptions} for:item="option">
+          <label key={option.value} class="arc-activity__choice">
+            <input
+              type="radio"
+              name="arc-activity-range"
+              data-value={option.value}
+              checked={option.checked}
+              onchange={handleDraftDateRange}
+            />
+            <span>{option.label}</span>
+          </label>
+        </template>
+      </fieldset>
+
+      <fieldset class="arc-activity__fieldset">
+        <legend class="arc-activity__legend">Activities to show</legend>
+        <template for:each={scopeOptions} for:item="option">
+          <label key={option.value} class="arc-activity__choice">
+            <input
+              type="radio"
+              name="arc-activity-scope"
+              data-value={option.value}
+              checked={option.checked}
+              onchange={handleDraftScope}
+            />
+            <span>{option.label}</span>
+          </label>
+        </template>
+      </fieldset>
+
+      <fieldset class="arc-activity__fieldset">
+        <legend class="arc-activity__legend">Activity type</legend>
+        <label class="arc-activity__choice">
+          <input
+            type="checkbox"
+            checked={allTypesChecked}
+            onchange={handleDraftAllTypes}
+          />
+          <span>All types</span>
+        </label>
+        <template for:each={typeOptions} for:item="option">
+          <label key={option.value} class="arc-activity__choice">
+            <input
+              type="checkbox"
+              data-value={option.value}
+              checked={option.checked}
+              onchange={handleDraftType}
+            />
+            <span>{option.label}</span>
+          </label>
+        </template>
+      </fieldset>
+
+      <fieldset class="arc-activity__fieldset">
+        <legend class="arc-activity__legend">
+          Sort upcoming &amp; overdue activities
+        </legend>
+        <template for:each={sortOptions} for:item="option">
+          <label key={option.value} class="arc-activity__choice">
+            <input
+              type="radio"
+              name="arc-activity-sort"
+              data-value={option.value}
+              checked={option.checked}
+              onchange={handleDraftSort}
+            />
+            <span>{option.label}</span>
+          </label>
+        </template>
+      </fieldset>
+
+      <div slot="footer" class="arc-activity__modal-footer">
+        <button
+          type="button"
+          class="arc-activity__link"
+          onclick={handleRestoreDefaults}
+        >
+          Restore Defaults
+        </button>
+        <span class="arc-activity__modal-spacer"></span>
+        <button
+          type="button"
+          class="arc-activity__neutral-button"
+          onclick={handleCloseSettings}
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="arc-activity__neutral-button"
+          onclick={handleApplyAndSave}
+        >
+          Apply &amp; Save
+        </button>
+        <button
+          type="button"
+          class="arc-activity__brand-button"
+          onclick={handleApply}
+        >
+          Apply
+        </button>
+      </div>
+    </c-ds-modal-v2>
+
+    <!-- ========================= NEW EVENT ========================== -->
+    <c-ds-modal-v2
+      is-open={isEventFormOpen}
+      title="New Event"
+      size="small"
+      onclose={handleCloseEventForm}
+    >
+      <lightning-input
+        label="Subject"
+        required
+        data-field="eventSubject"
+        value={eventSubject}
+        onchange={handleEventField}
+      ></lightning-input>
+
+      <lightning-input
+        type="checkbox"
+        label="All-day event"
+        data-field="eventAllDay"
+        checked={eventAllDay}
+        onchange={handleEventField}
+      ></lightning-input>
+
+      <lightning-input
+        type="datetime"
+        label="Start"
+        required
+        data-field="eventStart"
+        value={eventStart}
+        onchange={handleEventField}
+      ></lightning-input>
+
+      <template lwc:if={eventAllDay}>
+        <p class="arc-activity__hint">
+          An all-day event runs for the whole of the start date, so it needs no
+          end time.
+        </p>
+      </template>
+      <template lwc:else>
+        <lightning-input
+          type="datetime"
+          label="End"
+          data-field="eventEnd"
+          value={eventEnd}
+          onchange={handleEventField}
+        ></lightning-input>
+      </template>
+
+      <lightning-input
+        label="Location"
+        data-field="eventLocation"
+        value={eventLocation}
+        onchange={handleEventField}
+      ></lightning-input>
+
+      <lightning-textarea
+        label="Description"
+        data-field="eventDescription"
+        value={eventDescription}
+        onchange={handleEventField}
+      ></lightning-textarea>
+
+      <div slot="footer" class="arc-activity__modal-footer">
+        <span class="arc-activity__modal-spacer"></span>
+        <button
+          type="button"
+          class="arc-activity__neutral-button"
+          onclick={handleCloseEventForm}
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="arc-activity__brand-button"
+          disabled={isSaving}
+          onclick={handleSaveEvent}
+        >
+          Save
+        </button>
+      </div>
+    </c-ds-modal-v2>
+
+    <!-- ========================== LOG EMAIL ========================= -->
+    <c-ds-modal-v2
+      is-open={isEmailFormOpen}
+      title="Log an Email"
+      subtitle="Records the email on this record's timeline. It does not send it."
+      size="small"
+      onclose={handleCloseEmailForm}
+    >
+      <lightning-input
+        label="To"
+        data-field="emailTo"
+        value={emailTo}
+        onchange={handleEmailField}
+      ></lightning-input>
+
+      <lightning-input
+        label="Subject"
+        required
+        data-field="emailSubject"
+        value={emailSubject}
+        onchange={handleEmailField}
+      ></lightning-input>
+
+      <lightning-textarea
+        label="Body"
+        data-field="emailBody"
+        value={emailBody}
+        onchange={handleEmailField}
+      ></lightning-textarea>
+
+      <div slot="footer" class="arc-activity__modal-footer">
+        <span class="arc-activity__modal-spacer"></span>
+        <button
+          type="button"
+          class="arc-activity__neutral-button"
+          onclick={handleCloseEmailForm}
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="arc-activity__brand-button"
+          disabled={isSaving}
+          onclick={handleLogEmail}
+        >
+          Log Email
+        </button>
+      </div>
+    </c-ds-modal-v2>
+  </div>
+</template>

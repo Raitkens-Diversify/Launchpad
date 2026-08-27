@@ -110,18 +110,6 @@ export default class ArcHeaderAvatar extends LightningElement {
   }
 
   /**
-   * The site's own /ChangePassword is the stock, unstyled Visualforce page
-   * Site.com auto-generates (Site.changePassword behind an <apex:page>). LWR
-   * has no route for it, so a link there landed on the site's Invalid Page.
-   * Settings' own Password tab now hosts the same functionality in-app;
-   * ?c__tab=password is the query-param convention arcSettings reads on load.
-   */
-  handleChangePassword() {
-    this.isMenuOpen = false;
-    window.location.assign(`${basePath}/settings?c__tab=password`);
-  }
-
-  /**
    * "Log out" used to end the session immediately on click — one accidental
    * click on the wrong menu item and the user was signed out with nothing to
    * undo. It now opens a confirm dialog instead; only handleConfirmLogout

@@ -1,0 +1,237 @@
+/*
+ * Same design tokens as arcCaseDetail.css/arcProductDetail.css (card border
+ * #c9c9c9 at 4px with a 0 2px 2px shadow, header surface #ffffff, body text
+ * #181818 at 13px/19.5, field labels #444444 at 12px/18, field values
+ * 14px/21). Kept as a separate stylesheet -- shadow DOM scopes each
+ * component's CSS independently -- but deliberately not reinvented.
+ */
+
+.arc-advertising-item-detail {
+  font-family: var(
+    --lwc-fontFamily,
+    -apple-system,
+    "system-ui",
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: 13px;
+  line-height: 19.5px;
+  color: var(--lwc-colorTextDefault, #181818);
+}
+
+.arc-advertising-item-detail__loading {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 0;
+  /* c-arc-loading-spinner centres on the nearest POSITIONED ancestor --
+     without this it escapes to .theme-layout__main and floats mid-page. */
+  position: relative;
+  min-height: 6rem;
+}
+
+/* ── Page header ────────────────────────────────────────────────────────── */
+
+.arc-advertising-item-detail__header {
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+  border: 1px solid var(--lwc-colorBorder, #c9c9c9);
+  border-radius: var(--lwc-borderRadiusMedium, 4px);
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+}
+
+.arc-advertising-item-detail__header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.arc-advertising-item-detail__title-wrap {
+  min-width: 0;
+}
+
+.arc-advertising-item-detail__eyebrow {
+  display: block;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--lwc-colorTextWeak, #444444);
+}
+
+.arc-advertising-item-detail__title {
+  margin: 0;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+  color: var(--lwc-colorTextDefault, #181818);
+}
+
+.arc-advertising-item-detail__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.arc-advertising-item-detail__badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+  background: #e5e5e5;
+  color: #181818;
+}
+
+.arc-advertising-item-detail__key-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 32px;
+  margin: 12px 0 0;
+}
+
+.arc-advertising-item-detail__key-fact {
+  min-width: 0;
+}
+
+.arc-advertising-item-detail__key-fact dt {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--lwc-colorTextWeak, #444444);
+}
+
+.arc-advertising-item-detail__key-fact dd {
+  margin: 0;
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--lwc-colorTextDefault, #181818);
+}
+
+/* ── Body layout ────────────────────────────────────────────────────────── */
+
+/* Same left-main/right-side direction as Case Detail/Product Detail: detail
+   sections lead in the wide column, Activity (Tasks/Events) trails in the
+   rail, matching AdvertisingItemRecordPage's own main/sidebar split. */
+.arc-advertising-item-detail__body {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.arc-advertising-item-detail__main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.arc-advertising-item-detail__side {
+  flex: 0 0 340px;
+  width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (max-width: 64rem) {
+  .arc-advertising-item-detail__body {
+    flex-direction: column;
+  }
+
+  .arc-advertising-item-detail__side {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+}
+
+/* ── Field sections ─────────────────────────────────────────────────────── */
+
+.detail-section {
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+  border: 1px solid var(--lwc-colorBorder, #c9c9c9);
+  border-radius: var(--lwc-borderRadiusMedium, 4px);
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+}
+
+.detail-section__summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 700;
+  color: var(--lwc-colorTextDefault, #181818);
+  cursor: pointer;
+  list-style: none;
+}
+
+.detail-section__summary::-webkit-details-marker {
+  display: none;
+}
+
+.detail-section__summary::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+}
+
+.detail-section[open] > .detail-section__summary::before {
+  transform: rotate(45deg);
+}
+
+.detail-section__body {
+  padding: 0 16px 16px;
+}
+
+/* Nested sub-conditional fields (e.g. x3rd_Party__c, Raffles_Gifts_
+   Explanation__c) rendered outside lightning-record-form, since that
+   component shows every field in its list unconditionally. Styled as a
+   plain label/value row to match the form's own field rows above it. */
+.detail-section__extra-field {
+  display: flex;
+  gap: 8px;
+  padding-top: 12px;
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.detail-section__extra-label {
+  flex-shrink: 0;
+  min-width: 160px;
+  font-size: 12px;
+  line-height: 21px;
+  color: var(--lwc-colorTextWeak, #444444);
+}
+
+/* System Information has no record-form above it to space away from --
+   the usual top padding would just be a gap under the section header. */
+.detail-section__extra-field--first {
+  padding-top: 0;
+}
+
+/* ── Advertising Item History (full-width paginated table) ───────────────── */
+
+.arc-advertising-item-detail__panel-loading {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 0;
+}
+
+.arc-advertising-item-detail__panel-error {
+  margin: 0;
+  font-size: 13px;
+  line-height: 19.5px;
+  color: var(--lwc-colorTextWeak, #444444);
+}
