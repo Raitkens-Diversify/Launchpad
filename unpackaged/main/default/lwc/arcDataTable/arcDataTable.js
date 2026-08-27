@@ -34,6 +34,39 @@ const CARET_RIGHT_ICON = "caret-right.svg";
 /** Narrow enough to tuck a column away, wide enough to keep its grip grabbable. */
 const MIN_COLUMN_WIDTH = 56;
 
+/**
+ * Coerces a public boolean property.
+ *
+ * A valueless attribute -- `enable-row-navigation` with nothing after it --
+ * arrives as the empty string and must read as TRUE. That is why these setters
+ * cannot simply call Boolean(value), and why the original
+ * `value !== false && value !== "false"` was written the way it was.
+ *
+ * But that expression returns TRUE for undefined, null and 0, so a caller
+ * passing an expression that has not resolved yet switches the property ON.
+ * That is not theoretical: arcRecordListView passes
+ * has-more-rows={hasMoreServerRows} and is-loading-more={isLoadingMoreRows},
+ * and _hasMoreServerRows is assigned straight from batch.hasMore -- undefined
+ * whenever the Apex response omits it -- so the getter yields undefined and the
+ * table reads it as true. A load-more spinner then shows with nothing able to
+ * clear it.
+ *
+ * Applied only to the properties whose backing field defaults to false.
+ * enablePagination defaults to TRUE and genuinely means "on unless explicitly
+ * turned off", so it keeps the original comparison.
+ */
+const toBooleanProperty = (value) => {
+  if (value === "") {
+    return true;
+  }
+
+  if (value === "false") {
+    return false;
+  }
+
+  return Boolean(value);
+};
+
 export default class ArcDataTable extends NavigationMixin(LightningElement) {
   @api keyField = "id";
   @api rowActions = [];
@@ -73,7 +106,7 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
     return this._showColumnSettings;
   }
   set showColumnSettings(value) {
-    this._showColumnSettings = value !== false && value !== "false";
+    this._showColumnSettings = toBooleanProperty(value);
   }
 
   // Lets the header's own columns be dragged into a new order — off by
@@ -87,7 +120,7 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
     return this._enableColumnReorder;
   }
   set enableColumnReorder(value) {
-    this._enableColumnReorder = value !== false && value !== "false";
+    this._enableColumnReorder = toBooleanProperty(value);
   }
 
   // HTML's `draggable` is a tri-state attribute ("true"/"false"/"auto"), not
@@ -114,7 +147,7 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
     return this._enableColumnResize;
   }
   set enableColumnResize(value) {
-    this._enableColumnResize = value !== false && value !== "false";
+    this._enableColumnResize = toBooleanProperty(value);
   }
 
   /**
@@ -185,7 +218,7 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
     return this._showFooterViewAll;
   }
   set showFooterViewAll(value) {
-    this._showFooterViewAll = value !== false && value !== "false";
+    this._showFooterViewAll = toBooleanProperty(value);
   }
 
   @api viewAllUrl = "";
@@ -207,7 +240,7 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
     return this._hasMoreRows;
   }
   set hasMoreRows(value) {
-    this._hasMoreRows = value !== false && value !== "false";
+    this._hasMoreRows = toBooleanProperty(value);
   }
 
   /**
@@ -223,7 +256,7 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
     return this._isLoadingMore;
   }
   set isLoadingMore(value) {
-    this._isLoadingMore = value !== false && value !== "false";
+    this._isLoadingMore = toBooleanProperty(value);
   }
 
   get viewAllIconStyle() {
@@ -257,7 +290,7 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
     return this._enableRowClick;
   }
   set enableRowClick(value) {
-    this._enableRowClick = value !== false && value !== "false";
+    this._enableRowClick = toBooleanProperty(value);
   }
 
   /**
@@ -274,7 +307,7 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
     return this._enableRowNavigation;
   }
   set enableRowNavigation(value) {
-    this._enableRowNavigation = value !== false && value !== "false";
+    this._enableRowNavigation = toBooleanProperty(value);
   }
 
   @api rowDetailType = "";

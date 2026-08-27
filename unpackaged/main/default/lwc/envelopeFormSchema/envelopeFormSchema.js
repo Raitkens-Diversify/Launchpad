@@ -484,7 +484,6 @@ const MDT_TYPE_TO_RECORD_TYPES = {
 // resolves to an empty metadata form, which is correct for the two DMS actions: their whole subject
 // is the Trade Instructions section, a custom section that renders independently of the schema.
 const ACCOUNT_TYPE_TO_MDT = {
-    thirdPartyMoneyMovement: 'Third Party Money Movement',
     accountClosure: 'Account Closure',
     updateDmsInstructions: 'Manage DMS Instructions',
     updateManagementStyle: 'Change Management Style',
@@ -694,7 +693,6 @@ function canPurchaseAlts(value) {
 // account's own fields (see `condition` below): Update Management Style shows only for RIA
 // accounts, Update DMS Instructions only for the DMS platforms. The rest are always offered.
 const ACCOUNT_ACTION_CATALOG = [
-    { id: 'thirdPartyMoneyMovement', label: 'Third Party Money Movement' },
     { id: 'accountClosure', label: 'Account Closure' },
     {
         id: 'updateManagementStyle',

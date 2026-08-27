@@ -7,10 +7,5 @@
     <columns>Primary_Owner__c</columns>
     <columns>CREATED_DATE</columns>
     <filterScope>Everything</filterScope>
-    <filters>
-        <field>DPI__c</field>
-        <operation>equals</operation>
-        <value>0</value>
-    </filters>
     <label>Accounts</label>
 </ListView>

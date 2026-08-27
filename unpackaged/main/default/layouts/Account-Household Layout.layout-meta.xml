@@ -324,16 +324,15 @@
         <relatedList>FinServ__FinancialAccount__c.FinServ__Household__c</relatedList>
     </relatedLists>
     <relatedLists>
-        <excludeButtons>MassChangeOwner</excludeButtons>
-        <excludeButtons>NewCase</excludeButtons>
-        <fields>CASES.CASE_NUMBER</fields>
-        <fields>NAME</fields>
-        <fields>FinServ__FinancialAccount__c</fields>
+        <fields>Case_Branch_Name_DisplayName__c</fields>
         <fields>CASES.SUBJECT</fields>
-        <fields>CASES.CREATED_DATE_DATE_ONLY</fields>
+        <fields>Wizard_Financial_Account__c</fields>
+        <fields>CASES.CREATED_DATE</fields>
         <fields>CASES.STATUS</fields>
         <fields>OWNER_NAME</fields>
-        <relatedList>RelatedCaseList</relatedList>
+        <relatedList>Case.Household__c</relatedList>
+        <sortField>CASES.CREATED_DATE</sortField>
+        <sortOrder>Desc</sortOrder>
     </relatedLists>
     <relatedLists>
         <fields>TASK.SUBJECT</fields>

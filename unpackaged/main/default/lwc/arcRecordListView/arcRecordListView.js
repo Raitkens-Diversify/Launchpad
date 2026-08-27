@@ -181,6 +181,22 @@ const resolveTabParam = (pageRef) => {
 const PILL_TONE_COUNT = 8;
 
 /**
+ * Known picklist values whose own Setup-defined Path/Kanban color is a real
+ * semantic red/yellow/green (Product__c.Performance_Status__c: Under
+ * Performing=#FF0000, Watch List=#FFFF66, Performing=#33CC00) -- mirrored
+ * here rather than read live, since uiObjectInfoApi's picklist describe
+ * doesn't surface a value's Setup color. Checked before the generic hash
+ * tone below so these values get their actual meaning instead of an
+ * arbitrary one of 8 tones; anything not listed here falls through
+ * unchanged.
+ */
+const SEMANTIC_PILL_TONES = {
+  "Under Performing": "red",
+  "Watch List": "yellow",
+  Performing: "green"
+};
+
+/**
  * Stable value → tone mapping for pill columns. The same value always lands on
  * the same colour (across rows, pages and reloads) because the tone is derived
  * from the text itself rather than from row order.
@@ -190,6 +206,11 @@ const pillToneClass = (value) => {
 
   if (!text) {
     return "div-table-badge div-table-badge--empty";
+  }
+
+  const semanticTone = SEMANTIC_PILL_TONES[text];
+  if (semanticTone) {
+    return `div-table-badge div-table-badge--tone-${semanticTone}`;
   }
 
   let hash = 0;

@@ -7,7 +7,8 @@
     <columns>Potential_Service__c</columns>
     <columns>Estimated_AUM__c</columns>
     <columns>Follow_Up_Date__c</columns>
-    <filterScope>Mine</filterScope>
+    <columns>Financial_Advisor_Team__c</columns>
+    <filterScope>Everything</filterScope>
     <filters>
         <field>ACCOUNT.TYPE</field>
         <operation>equals</operation>

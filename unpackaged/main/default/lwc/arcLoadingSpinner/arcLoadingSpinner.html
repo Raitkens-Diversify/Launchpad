@@ -1,6 +1,11 @@
 <template>
   <div class="arc-loading-spinner" role="status">
-    <img class={iconClass} src={iconUrl} alt="" />
+    <!-- title carries the same text as the assistive span. The span is
+         clipped for sighted users, so a spinner that will not clear gives no
+         clue which component owns it; every usage sets a different
+         alternative-text ("Loading page", "Loading more", "Loading case
+         overview"), so hovering one now names it. -->
+    <img class={iconClass} src={iconUrl} alt="" title={alternativeText} />
     <span class="arc-loading-spinner__assistive-text">{alternativeText}</span>
   </div>
 </template>

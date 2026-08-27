@@ -23,11 +23,12 @@
             "children" : [ {
               "attributes" : {
                 "defaultColumns" : "",
-                "defaultListViewApiName" : "All",
+                "defaultListViewApiName" : "Approved_Products",
                 "dxpStyle" : { },
                 "objectApiName" : "Product__c",
-                "serverSearchListViews" : "All",
-                "title" : "Products"
+                "pillFields" : "Status__c,Performance_Status__c",
+                "serverSearchListViews" : "Approved_Products",
+                "title" : "Approved Products"
               },
               "definition" : "c:arcRecordListView",
               "id" : "e2c8e5d4-1a2b-4c3d-9e5f-6a7b8c9d0e1f",

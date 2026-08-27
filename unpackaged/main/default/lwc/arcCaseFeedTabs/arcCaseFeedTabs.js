@@ -3,7 +3,7 @@ import { CurrentPageReference } from "lightning/navigation";
 import { getObjectInfo } from "lightning/uiObjectInfoApi";
 import { resolveRecordIdFromPageReference } from "c/recordNavigationUtils";
 import getRecordFeed from "@salesforce/apex/ArcCaseFeedController.getRecordFeed";
-import getRelatedRecordsBatch from "@salesforce/apex/ArcRelatedListController.getRelatedRecordsBatch";
+import getRecordHistory from "@salesforce/apex/ArcCaseFeedController.getRecordHistory";
 
 /**
  * arcCaseFeedTabs
@@ -14,17 +14,24 @@ import getRelatedRecordsBatch from "@salesforce/apex/ArcRelatedListController.ge
  * case page, so adding it changes nothing that is there today.
  *
  * NO FILES TAB. Lightning shows Feed / Related / Files; only the first two are
- * wanted here. ContentDocumentLink is deliberately absent from RELATED_CARDS
- * below — the row is not commented out, it is gone, so nobody has to guess
- * whether it was an oversight.
+ * wanted here, so there is no Files tab and nothing that would build one.
  *
- * APEX. Both tabs read through Apex that already existed:
- *   Related — ArcRelatedListController.getRelatedRecordsBatch, which is generic
- *             over object, parent lookup and columns, and runs all six cards in
- *             one transaction rather than one round trip per card.
- *   Feed    — ArcCaseFeedController.getRecordFeed, added alongside this
- *             component because nothing existed to read a feed. It is read-only
- *             and nothing else calls it.
+ * WHAT THE TABS CONTAIN was taken from the real page, not guessed: opening
+ * /lightning/r/Case/<id>/view and reading the rendered panels shows a Chatter
+ * feed under Feed, and under Related exactly one related list, Case History.
+ * The rail's other cards — Case Comments, Order Tickets and the rest — belong
+ * to Lightning's right COLUMN, which is a different thing, and arcCaseDetail
+ * renders those itself.
+ *
+ * APEX. Both tabs read ArcCaseFeedController, added alongside this component
+ * because nothing existed to read either a feed or history in a display-ready
+ * shape:
+ *   Feed    — getRecordFeed
+ *   Related — getRecordHistory
+ * Both are read-only and nothing else calls them. The generic
+ * ArcRelatedListController could query CaseHistory, but it returns raw SOQL,
+ * and raw history is not what the page shows — see the note on the history
+ * wire below.
  *
  * The feed is READ-ONLY. Posting or commenting is DML, which this deliberately
  * does not do.
@@ -34,91 +41,6 @@ import getRelatedRecordsBatch from "@salesforce/apex/ArcRelatedListController.ge
 const TAB_FEED = "feed";
 const TAB_RELATED = "related";
 
-/**
- * The related lists to show, in order.
- *
- * These are the same object/parent/column triples the case page already renders
- * through c/arcRelatedList, copied rather than invented so the tab shows what
- * the business already sees, with the proven relationship paths. `key` is what
- * getRelatedRecordsBatch matches results back by.
- */
-const RELATED_CARDS = [
-  {
-    key: "caseComments",
-    label: "Case Comments",
-    objectApiName: "CaseComment",
-    parentFieldApiName: "ParentId",
-    columns: [
-      { label: "Comment", field: "CommentBody" },
-      { label: "By", field: "CreatedBy.Name" },
-      { label: "Added", field: "CreatedDate" }
-    ]
-  },
-  {
-    key: "orderTickets",
-    label: "Order Tickets",
-    objectApiName: "Order_Ticket__c",
-    parentFieldApiName: "Case__c",
-    columns: [
-      { label: "Order Ticket", field: "Name" },
-      { label: "Financial Account", field: "Wizard_Financial_Account__r.Name" },
-      { label: "Created", field: "CreatedDate" }
-    ]
-  },
-  {
-    key: "relatedProducts",
-    label: "Related Products",
-    objectApiName: "Financial_Account_Related_Product__c",
-    parentFieldApiName: "Case__c",
-    columns: [
-      { label: "Product", field: "Name" },
-      { label: "Financial Account", field: "Wizard_Financial_Account__r.Name" },
-      { label: "Created", field: "CreatedDate" }
-    ]
-  },
-  {
-    key: "checkLogs",
-    label: "Check Logs",
-    objectApiName: "Check_Log__c",
-    parentFieldApiName: "Case__c",
-    columns: [
-      { label: "Check Log", field: "Name" },
-      { label: "Amount", field: "Amount__c" },
-      { label: "Status", field: "Status__c" }
-    ]
-  },
-  {
-    key: "tradeErrors",
-    label: "Trade Errors Log",
-    objectApiName: "Trade_Error_Log__c",
-    parentFieldApiName: "Case__c",
-    columns: [
-      { label: "Trade Error", field: "Name" },
-      { label: "Amount", field: "Total_Trade_Error_Amount__c" },
-      { label: "Status", field: "Status__c" }
-    ]
-  },
-  {
-    key: "services",
-    label: "Services",
-    objectApiName: "Service__c",
-    parentFieldApiName: "Case__c",
-    columns: [
-      { label: "Service", field: "Name" },
-      { label: "Type", field: "Type__c" },
-      { label: "Start Date", field: "Start_Date__c" }
-    ]
-  }
-];
-
-/** Request payload for getRelatedRecordsBatch, derived once. */
-const RELATED_REQUESTS = RELATED_CARDS.map((card) => ({
-  key: card.key,
-  objectApiName: card.objectApiName,
-  parentFieldApiName: card.parentFieldApiName,
-  fieldApiNames: card.columns.map((column) => column.field),
-  linkFieldApiName: ""
-}));
 
 /** FeedItem.Type values that describe a change to the record itself. */
 const TYPE_CREATED = "CreateRecordEvent";
@@ -137,10 +59,42 @@ export default class ArcCaseFeedTabs extends LightningElement {
 
   activeTab = TAB_FEED;
 
-  recordId;
+  /**
+   * Record to read. Passed by the parent as record-id, the way every other
+   * child in arcCaseDetail's rail gets it.
+   *
+   * WHY THIS EXISTS RATHER THAN JUST READING THE PAGE REFERENCE. An Apex @wire
+   * does not call the server while any reactive $parameter is `undefined`. When
+   * the id came only from CurrentPageReference and that did not resolve — which
+   * happens for a nested component in an LWR site — the feed wire never fired,
+   * so `feed` stayed undefined and the loading spinner ran forever. Taking the
+   * id from the parent, which already has it, removes that whole failure mode.
+   *
+   * The page reference is still used as a fallback so the component keeps
+   * working if it is ever dropped straight onto a record page.
+   */
+  @api
+  get recordId() {
+    return this._recordIdInput;
+  }
+
+  set recordId(value) {
+    this._recordIdInput = value || undefined;
+    this.syncActiveRecordId();
+  }
+
+  /**
+   * The id the wires actually read. A real field, not a getter, so the reactive
+   * $activeRecordId parameter is unambiguous.
+   */
+  activeRecordId;
+
+  _recordIdInput;
+  _pageRefRecordId;
+
   feed;
   feedError;
-  relatedData;
+  history;
   relatedError;
 
   /**
@@ -152,16 +106,27 @@ export default class ArcCaseFeedTabs extends LightningElement {
 
   @wire(CurrentPageReference)
   wiredPageReference(pageRef) {
-    this.recordId = resolveRecordIdFromPageReference(
-      pageRef,
-      this.objectApiName
-    );
+    this._pageRefRecordId =
+      resolveRecordIdFromPageReference(pageRef, this.objectApiName) || undefined;
+    this.syncActiveRecordId();
+  }
+
+  /** An explicit record-id wins; the page reference is the fallback. */
+  syncActiveRecordId() {
+    const next = this._recordIdInput || this._pageRefRecordId;
+
+    if (next !== this.activeRecordId) {
+      this.activeRecordId = next;
+    }
   }
 
   @wire(getObjectInfo, { objectApiName: "$objectApiName" })
   objectInfo;
 
-  @wire(getRecordFeed, { recordId: "$recordId", pageSize: "$feedPageSize" })
+  @wire(getRecordFeed, {
+    recordId: "$activeRecordId",
+    pageSize: "$feedPageSize"
+  })
   wiredFeed({ data, error }) {
     if (data) {
       this.feed = data;
@@ -175,26 +140,37 @@ export default class ArcCaseFeedTabs extends LightningElement {
     }
   }
 
-  @wire(getRelatedRecordsBatch, {
+  /**
+   * Case History, through ArcCaseFeedController rather than the generic
+   * related-list controller.
+   *
+   * The generic one can query CaseHistory, but it returns raw SOQL: "created"
+   * where the page shows "Created.", API names where the page shows labels, and
+   * a lookup change as the duplicated id/name row pair the platform writes
+   * rather than the single readable line the page shows. All three need describe
+   * access and dedupe, so they live in Apex.
+   */
+  @wire(getRecordHistory, {
     recordId: "$relatedRecordId",
-    requests: RELATED_REQUESTS
+    objectApiName: "$objectApiName",
+    pageSize: "$feedPageSize"
   })
-  wiredRelated({ data, error }) {
+  wiredHistory({ data, error }) {
     if (data) {
-      this.relatedData = data;
+      this.history = data;
       this.relatedError = undefined;
       return;
     }
 
     if (error) {
-      this.relatedData = undefined;
-      this.relatedError = "Unable to load the related lists for this record.";
+      this.history = undefined;
+      this.relatedError = "Unable to load the history for this record.";
     }
   }
 
   /** Undefined until the Related tab is opened, which keeps the wire idle. */
   get relatedRecordId() {
-    return this._relatedRequested ? this.recordId : undefined;
+    return this._relatedRequested ? this.activeRecordId : undefined;
   }
 
   // ---- tabs ---------------------------------------------------------------
@@ -283,8 +259,13 @@ export default class ArcCaseFeedTabs extends LightningElement {
     return Boolean(this.feed?.hasMore);
   }
 
+  /**
+   * Only true while a request can actually be in flight. Gated on having an id,
+   * because without one the Apex wire never calls the server and an ungated
+   * spinner would run forever — which is exactly what it did.
+   */
   get isFeedLoading() {
-    return !this.feed && !this.feedError;
+    return Boolean(this.activeRecordId) && !this.feed && !this.feedError;
   }
 
   /**
@@ -300,38 +281,53 @@ export default class ArcCaseFeedTabs extends LightningElement {
   // ---- related ------------------------------------------------------------
 
   /**
-   * Cards in configured order, each carrying its own rows. A card whose request
-   * failed validation server-side is simply absent from the response, which the
-   * batch method does on purpose so one bad card cannot blank the others — such
-   * a card renders as empty rather than disappearing.
+   * History entries as Lightning's history card lists them: Date, Field, User,
+   * Original Value, New Value.
+   *
+   * A blank value is kept rather than dropped. "Original Value:" with nothing
+   * after it is exactly what the page shows for a creation entry, and it is
+   * information -- the field went from nothing to something.
    */
-  get relatedCards() {
-    return RELATED_CARDS.map((card) => {
-      const result = this.relatedData?.[card.key];
-      const rows = (result?.rows || []).map((row) => ({
-        id: row.id,
-        cells: (row.cells || []).map((value, index) => ({
-          key: `${row.id}-${index}`,
-          value
-        }))
-      }));
-
-      return {
-        key: card.key,
-        label: card.label,
-        columns: card.columns.map((column) => ({
-          key: `${card.key}-${column.label}`,
-          label: column.label
-        })),
-        rows,
-        hasRows: rows.length > 0,
-        count: rows.length,
-        hasMore: Boolean(result?.hasMore)
-      };
-    });
+  get historyEntries() {
+    return (this.history?.entries || []).map((entry) => ({
+      id: entry.id,
+      createdDate: entry.createdDate,
+      actorName: entry.actorName || "Unknown user",
+      fieldLabel: entry.fieldLabel,
+      oldValue: entry.oldValue,
+      newValue: entry.newValue
+    }));
   }
 
+  get hasHistory() {
+    return this.historyEntries.length > 0;
+  }
+
+  get historyCount() {
+    return this.historyEntries.length;
+  }
+
+  get historyHasMore() {
+    return Boolean(this.history?.hasMore);
+  }
+
+  /** "Genuinely empty", as distinct from still loading or failed. */
+  get showHistoryEmpty() {
+    return (
+      this._relatedRequested &&
+      !this.isRelatedLoading &&
+      !this.relatedError &&
+      !this.hasHistory
+    );
+  }
+
+  /** Gated on the id for the same reason as isFeedLoading. */
   get isRelatedLoading() {
-    return this._relatedRequested && !this.relatedData && !this.relatedError;
+    return (
+      this._relatedRequested &&
+      Boolean(this.activeRecordId) &&
+      !this.history &&
+      !this.relatedError
+    );
   }
 }

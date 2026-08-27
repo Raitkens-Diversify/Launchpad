@@ -23,6 +23,14 @@ import { NAV_PATH_CHANGE_EVENT } from "c/arcNavTrailState";
  */
 const ROUTE_TRANSITION_SAFETY_MS = 4000;
 
+/**
+ * The part of the location that decides whether this is a new route. Pathname
+ * only: the query string carries tab, filter and list state that changes
+ * without the page changing.
+ */
+const currentRoutePath = () =>
+  typeof window === "undefined" ? "" : window.location.pathname || "";
+
 /*
  * Routes that are shown to someone who is not (yet) signed in, or who has hit
  * a system page. None of them should carry the app's chrome: a nav menu whose
@@ -158,6 +166,8 @@ export default class ThemeLayoutSidebar extends LightningElement {
   showChrome = !isChromelessRoute();
   _mainObserver;
   _routeTransitionSafetyTimer;
+  /** Pathname the overlay last transitioned to; see _onNavPathChange. */
+  _lastRoutePath;
 
   connectedCallback() {
     loadStyle(this, diversifyStyles).catch((error) => {
@@ -179,8 +189,34 @@ export default class ThemeLayoutSidebar extends LightningElement {
       this._onSidebarCollapseChange
     );
 
+    this._lastRoutePath = currentRoutePath();
     this._onNavPathChange = () => {
       this.syncChromeVisibility();
+
+      /*
+       * Only a real route change gets the overlay.
+       *
+       * NAV_PATH_CHANGE_EVENT is dispatched by patchHistoryForNavigation after
+       * EVERY history call, and plenty of those are not navigations: the tab
+       * handlers write the active tab into the query string, filters and list
+       * state do the same, and arcNavigation polls location every 250ms. Each
+       * one used to call beginRouteTransition, which re-arms the 4s safety
+       * timer -- so while those events arrive faster than 4s apart the timer can
+       * never fire, and the overlay re-appears as fast as it is cleared. On a
+       * page that writes query params regularly that reads as a loading spinner
+       * sitting permanently over content that has finished loading.
+       *
+       * Keyed on pathname alone, deliberately. A query-param update is not a
+       * route transition and should not blank the page behind a full-page
+       * spinner, which is the whole point of the guard.
+       */
+      const path = currentRoutePath();
+
+      if (path === this._lastRoutePath) {
+        return;
+      }
+
+      this._lastRoutePath = path;
       this.beginRouteTransition();
     };
     window.addEventListener("popstate", this._onNavPathChange);

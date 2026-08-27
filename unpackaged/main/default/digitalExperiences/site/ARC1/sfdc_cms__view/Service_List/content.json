@@ -1,6 +1,6 @@
 {
   "type" : "sfdc_cms__view",
-  "title" : "Case Detail",
+  "title" : "Service List",
   "contentBody" : {
     "component" : {
       "children" : [ {
@@ -15,57 +15,60 @@
             "layoutDirectionTablet" : "column",
             "maxContentWidth" : "",
             "sectionColumnGutterWidth" : "",
-            "sectionConfig" : "{\"UUID\":\"0c30885c-b673-44cc-a345-670e3ad0912f\",\"columns\":[{\"UUID\":\"728704ea-15bd-4786-a32c-22161bcc19ff\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":[]}]}",
+            "sectionConfig" : "{\"UUID\":\"7c47bae4-1114-4446-b013-24a31a67b27b\",\"columns\":[{\"UUID\":\"66dd31ab-b2f5-41f4-b265-96728c80cb86\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":[]}]}",
             "sectionMinHeight" : "",
             "sectionVerticalAlign" : "flex-start"
           },
           "children" : [ {
             "children" : [ {
               "attributes" : {
-                "dxpStyle" : { }
+                "defaultColumns" : "",
+                "defaultListViewApiName" : "All",
+                "dxpStyle" : { },
+                "objectApiName" : "Service__c",
+                "pillFields" : "Type__c",
+                "serverSearchListViews" : "All",
+                "title" : "Services"
               },
-              "definition" : "c:arcCaseDetail",
-              "id" : "8776a3ef-5d2f-49d5-9633-0680de4f4c14",
+              "definition" : "c:arcRecordListView",
+              "id" : "70b6f96d-e3dd-4749-86b4-244761956f52",
               "type" : "component"
             } ],
-            "id" : "728704ea-15bd-4786-a32c-22161bcc19ff",
+            "id" : "66dd31ab-b2f5-41f4-b265-96728c80cb86",
             "name" : "col1",
             "title" : "Column 1",
             "type" : "region"
           } ],
           "definition" : "community_layout:section",
-          "id" : "0c30885c-b673-44cc-a345-670e3ad0912f",
+          "id" : "7c47bae4-1114-4446-b013-24a31a67b27b",
           "type" : "component"
         } ],
-        "id" : "434f8d34-a374-41fe-972d-a9bc42a01fb0",
+        "id" : "4fac2c1a-461e-4720-a6a8-cd75fca308ef",
         "name" : "content",
         "title" : "Content",
         "type" : "region"
       }, {
         "children" : [ {
           "attributes" : {
-            "customHeadTags" : "",
-            "description" : "",
             "dxpStyle" : { },
-            "pageTitle" : "{!Record._Object}: {!Record._Title}",
             "recordId" : "{!recordId}"
           },
           "definition" : "community_builder:seoAssistant",
-          "id" : "c559e27b-698d-4e41-8a74-2062946a704c",
+          "id" : "34398968-e82f-4d28-935b-78abfe46bd70",
           "type" : "component"
         } ],
-        "id" : "bbe460eb-5615-417f-9642-54e628a90c5e",
+        "id" : "050f492a-59ab-4253-9cfb-f93914cc9811",
         "name" : "sfdcHiddenRegion",
         "title" : "sfdcHiddenRegion",
         "type" : "region"
       } ],
       "definition" : "community_layout:sldsFlexibleLayout",
-      "id" : "7d789946-1fe0-4d55-a3fc-26ebda94cbc9",
+      "id" : "dc8f6368-4b0e-4550-b51c-6ebaaf8ec52f",
       "type" : "component"
     },
     "dataProviders" : [ ],
     "themeLayoutType" : "OHzbXAVux6mZ7VVDb7Pb8F2YUFBAXR",
-    "viewType" : "detail-500"
+    "viewType" : "list-Service__c"
   },
-  "urlName" : "case-detail"
+  "urlName" : "service-list"
 }

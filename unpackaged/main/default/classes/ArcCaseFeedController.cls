@@ -28,6 +28,20 @@ public with sharing class ArcCaseFeedController {
    */
   private static final String FEED_EVENT_FIELD = 'feedEvent';
 
+  /**
+   * History's pseudo-field for "the record was created". Lightning renders it as
+   * "Created." rather than looking for a field of that name.
+   */
+  private static final String HISTORY_CREATED_FIELD = 'created';
+  private static final String HISTORY_CREATED_LABEL = 'Created.';
+
+  /**
+   * History DataType for the row that carries record IDs. A reference field
+   * writes TWO rows per change: this one, and a Text row carrying the readable
+   * names. Lightning shows the Text row.
+   */
+  private static final String DATA_TYPE_ENTITY_ID = 'EntityId';
+
   /** Describe results are per-transaction; caching keeps repeat lookups cheap. */
   private static Map<String, Map<String, Schema.SObjectField>> fieldsByObject = new Map<String, Map<String, Schema.SObjectField>>();
 
@@ -81,6 +95,211 @@ public with sharing class ArcCaseFeedController {
     }
 
     return result;
+  }
+
+  /**
+   * Field-change history for a record, shaped the way Lightning's history card
+   * renders it: date, field label, who, old value, new value.
+   *
+   * Why this exists when ArcRelatedListController could already query
+   * CaseHistory generically: that returns raw SOQL values, and raw history is
+   * not what the page shows. Field comes back as "created" where Lightning shows
+   * "Created.", a changed field comes back as its API name where Lightning shows
+   * its label, and a reference field arrives as a duplicated pair of rows where
+   * Lightning shows one. All three need describe access and dedupe logic, which
+   * belong here next to the feed code that already does the same job.
+   *
+   * @param recordId the record whose history to read
+   * @param objectApiName that record's object, used to find the history object
+   *        and to resolve field labels
+   * @param pageSize how many entries to return; defaults to 10, capped at 50
+   */
+  @AuraEnabled(cacheable=true)
+  public static HistoryResult getRecordHistory(
+    Id recordId,
+    String objectApiName,
+    Integer pageSize
+  ) {
+    HistoryResult result = new HistoryResult();
+    result.entries = new List<HistoryEntry>();
+    result.hasMore = false;
+
+    if (recordId == null || String.isBlank(objectApiName)) {
+      return result;
+    }
+
+    // Resolved through describe, never interpolated from the caller's string,
+    // so there is nothing to inject through. The record id is bound.
+    Schema.SObjectType parentType = Schema.getGlobalDescribe().get(objectApiName);
+
+    if (parentType == null) {
+      return result;
+    }
+
+    String parentName = parentType.getDescribe().getName();
+    String historyObject = historyObjectFor(parentName);
+    String parentField = historyParentFieldFor(parentName);
+
+    Schema.SObjectType historyType = Schema.getGlobalDescribe().get(historyObject);
+
+    if (historyType == null || !historyType.getDescribe().isAccessible()) {
+      // Field history tracking is off for this object, or the user cannot read
+      // it. An empty list is the honest answer; a thrown exception would put an
+      // error where the page simply has nothing to show.
+      return result;
+    }
+
+    Integer size = pageSize == null || pageSize <= 0
+      ? DEFAULT_PAGE_SIZE
+      : Math.min(pageSize, MAX_PAGE_SIZE);
+
+    // Deliberately generous: the raw rows get collapsed below, so asking for
+    // exactly one page would come back short whenever reference fields are
+    // involved. Two per wanted entry covers the id/name pairing, plus one to
+    // detect that more exist.
+    Integer fetchLimit = (size * 2) + 1;
+
+    String soql =
+      'SELECT Id, CreatedDate, CreatedById, CreatedBy.Name, Field, DataType,' +
+      ' OldValue, NewValue' +
+      ' FROM ' +
+      historyType.getDescribe().getName() +
+      ' WHERE ' +
+      parentField +
+      ' = :recordId' +
+      ' WITH USER_MODE' +
+      ' ORDER BY CreatedDate DESC' +
+      ' LIMIT ' +
+      fetchLimit;
+
+    List<SObject> rows;
+
+    try {
+      rows = Database.query(soql);
+    } catch (Exception e) {
+      // A missing DataType field on an older history object, or an
+      // inaccessible parent field, should leave the card empty rather than
+      // breaking the page.
+      System.debug(
+        LoggingLevel.ERROR,
+        'ArcCaseFeedController.getRecordHistory failed for ' +
+          historyObject +
+          ': ' +
+          e
+      );
+      return result;
+    }
+
+    List<HistoryEntry> collapsed = collapseHistory(rows, parentName);
+
+    result.hasMore = collapsed.size() > size;
+
+    Integer taken = 0;
+    for (HistoryEntry entry : collapsed) {
+      if (taken == size) {
+        break;
+      }
+      result.entries.add(entry);
+      taken++;
+    }
+
+    return result;
+  }
+
+  /**
+   * Collapses the duplicated rows a reference-field change produces.
+   *
+   * A lookup change writes an EntityId row carrying record ids and a Text row
+   * carrying their names, at the same instant and by the same user. Rendering
+   * both gives a doubled line, one of them showing raw 18-character ids.
+   *
+   * The key includes the user, not just time and field: the same field really
+   * can change twice in one second by different actors -- there is a case in
+   * this org where four rows share a timestamp, two logical changes each with
+   * its id/name pair -- and keying on time and field alone would silently throw
+   * one of them away.
+   */
+  @TestVisible
+  private static List<HistoryEntry> collapseHistory(
+    List<SObject> rows,
+    String parentName
+  ) {
+    Map<String, HistoryEntry> byChange = new Map<String, HistoryEntry>();
+
+    if (rows == null) {
+      return new List<HistoryEntry>();
+    }
+
+    for (SObject row : rows) {
+      String field = (String) row.get('Field');
+
+      if (String.isBlank(field)) {
+        continue;
+      }
+
+      Datetime created = (Datetime) row.get('CreatedDate');
+      Id actorId = (Id) row.get('CreatedById');
+      String dataType = (String) row.get('DataType');
+
+      String key =
+        String.valueOf(created) +
+        '|' +
+        field +
+        '|' +
+        String.valueOf(actorId);
+
+      Boolean isCreation = field == HISTORY_CREATED_FIELD;
+
+      HistoryEntry candidate = new HistoryEntry();
+      candidate.id = (Id) row.get('Id');
+      candidate.createdDate = created;
+      candidate.actorId = actorId;
+      candidate.actorName = actorNameOf(row);
+      candidate.isCreation = isCreation;
+      candidate.fieldLabel = isCreation
+        ? HISTORY_CREATED_LABEL
+        : resolveFieldLabel(parentName, field);
+      candidate.oldValue = stringify(row.get('OldValue'));
+      candidate.newValue = stringify(row.get('NewValue'));
+
+      HistoryEntry existing = byChange.get(key);
+
+      if (existing == null) {
+        byChange.put(key, candidate);
+        continue;
+      }
+
+      // Keep the readable row. Preferring "not EntityId" rather than "is Text"
+      // so a future DataType the platform adds is not thrown away in favour of
+      // a row of ids.
+      if (dataType != DATA_TYPE_ENTITY_ID) {
+        byChange.put(key, candidate);
+      }
+    }
+
+    return byChange.values();
+  }
+
+  /** CaseHistory for a standard object, Foo__History for a custom one. */
+  @TestVisible
+  private static String historyObjectFor(String objectApiName) {
+    return objectApiName.endsWith('__c')
+      ? objectApiName.removeEnd('__c') + '__History'
+      : objectApiName + 'History';
+  }
+
+  /**
+   * A custom object's history points at its parent through ParentId; a standard
+   * object's uses the object's own name, e.g. CaseHistory.CaseId.
+   */
+  @TestVisible
+  private static String historyParentFieldFor(String objectApiName) {
+    return objectApiName.endsWith('__c') ? 'ParentId' : objectApiName + 'Id';
+  }
+
+  private static String actorNameOf(SObject row) {
+    SObject actor = row.getSObject('CreatedBy');
+    return actor == null ? null : (String) actor.get('Name');
   }
 
   private static FeedEntry toEntry(FeedItem item) {
@@ -273,6 +492,42 @@ public with sharing class ArcCaseFeedController {
     /** Empty for a plain text post. */
     @AuraEnabled
     public List<FieldChange> changes;
+  }
+
+  public class HistoryResult {
+    @AuraEnabled
+    public List<HistoryEntry> entries;
+
+    @AuraEnabled
+    public Boolean hasMore;
+  }
+
+  public class HistoryEntry {
+    @AuraEnabled
+    public Id id;
+
+    @AuraEnabled
+    public Datetime createdDate;
+
+    @AuraEnabled
+    public Id actorId;
+
+    @AuraEnabled
+    public String actorName;
+
+    /** Field label, or "Created." for the record-created entry. */
+    @AuraEnabled
+    public String fieldLabel;
+
+    /** True for the record-created entry, which carries no values. */
+    @AuraEnabled
+    public Boolean isCreation;
+
+    @AuraEnabled
+    public String oldValue;
+
+    @AuraEnabled
+    public String newValue;
   }
 
   public class FieldChange {

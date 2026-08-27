@@ -198,4 +198,217 @@ private class ArcCaseFeedControllerTest {
       'A 15-character string with a space is not an id.'
     );
   }
+
+  // ---- getRecordHistory ---------------------------------------------------
+
+  /**
+   * History rows cannot be inserted -- the platform writes them -- and their
+   * fields are not writeable, so they are built through JSON.deserialize, which
+   * is the only way to get a read-only SObject with chosen values in a test.
+   */
+  private static SObject historyRow(
+    String id,
+    String field,
+    String dataType,
+    String actorId,
+    String actorName,
+    String oldValue,
+    String newValue,
+    String createdDate
+  ) {
+    // Not named `json`: a local of that name shadows the JSON class, and
+    // JSON.deserialize below then resolves against the String instead.
+    String payload =
+      '{"attributes":{"type":"CaseHistory"}' +
+      ',"Id":"' + id + '"' +
+      ',"Field":"' + field + '"' +
+      ',"DataType":"' + dataType + '"' +
+      ',"CreatedById":"' + actorId + '"' +
+      ',"CreatedDate":"' + createdDate + '"' +
+      ',"CreatedBy":{"attributes":{"type":"User"},"Name":"' + actorName + '"}' +
+      (oldValue == null ? '' : ',"OldValue":"' + oldValue + '"') +
+      (newValue == null ? '' : ',"NewValue":"' + newValue + '"') +
+      '}';
+    return (SObject) JSON.deserialize(payload, CaseHistory.class);
+  }
+
+  @IsTest
+  static void collapsesTheIdAndNameRowsOfOneLookupChange() {
+    Id actor = UserInfo.getUserId();
+    String when1 = '2025-04-23T21:38:36.000Z';
+
+    // What the platform actually writes for one lookup change: an EntityId row
+    // carrying record ids and a Text row carrying their names.
+    List<SObject> rows = new List<SObject>{
+      historyRow('0175Su000000001', 'FinServ__FinancialAccount__c', 'EntityId',
+        actor, 'Presten Fillmore',
+        'a08TO00000Z3vIMYAZ', 'a08TO00000hIIFZYA4', when1),
+      historyRow('0175Su000000002', 'FinServ__FinancialAccount__c', 'Text',
+        actor, 'Presten Fillmore',
+        'OLD ACCOUNT NAME', 'NEW ACCOUNT NAME', when1)
+    };
+
+    Test.startTest();
+    List<ArcCaseFeedController.HistoryEntry> entries = ArcCaseFeedController.collapseHistory(
+      rows,
+      'Case'
+    );
+    Test.stopTest();
+
+    Assert.areEqual(1, entries.size(), 'The pair is one logical change.');
+    Assert.areEqual(
+      'NEW ACCOUNT NAME',
+      entries[0].newValue,
+      'The readable row must win, not the row of ids.'
+    );
+    Assert.areEqual(
+      'OLD ACCOUNT NAME',
+      entries[0].oldValue,
+      'The readable row must win for the old value too.'
+    );
+  }
+
+  @IsTest
+  static void keepsTwoChangesToTheSameFieldInTheSameSecond() {
+    // Real data in this org has four rows sharing a timestamp: two logical
+    // changes by different actors, each with its own id/name pair. Keying on
+    // time and field alone would throw one away.
+    String when1 = '2025-04-23T21:38:36.000Z';
+    Id actorA = UserInfo.getUserId();
+    Id actorB = UserInfo.getOrganizationId(); // any second, different id
+
+    List<SObject> rows = new List<SObject>{
+      historyRow('0175Su000000001', 'Status', 'EntityId', actorA, 'User A',
+        'a', 'b', when1),
+      historyRow('0175Su000000002', 'Status', 'Text', actorA, 'User A',
+        'In Progress', 'Closed', when1),
+      historyRow('0175Su000000003', 'Status', 'EntityId', actorB, 'User B',
+        'c', 'd', when1),
+      historyRow('0175Su000000004', 'Status', 'Text', actorB, 'User B',
+        'Closed', 'Reopened', when1)
+    };
+
+    Test.startTest();
+    List<ArcCaseFeedController.HistoryEntry> entries = ArcCaseFeedController.collapseHistory(
+      rows,
+      'Case'
+    );
+    Test.stopTest();
+
+    Assert.areEqual(
+      2,
+      entries.size(),
+      'Two actors at the same instant are two changes, not one.'
+    );
+    for (ArcCaseFeedController.HistoryEntry entry : entries) {
+      Assert.areNotEqual(
+        'd',
+        entry.newValue,
+        'Neither entry should have kept the id-carrying row.'
+      );
+    }
+  }
+
+  @IsTest
+  static void labelsTheCreationEntryTheWayLightningDoes() {
+    List<SObject> rows = new List<SObject>{
+      historyRow('0175Su000000001', 'created', 'Text',
+        UserInfo.getUserId(), 'Manoj Kumar', null, null,
+        '2026-08-24T21:03:02.000Z')
+    };
+
+    Test.startTest();
+    List<ArcCaseFeedController.HistoryEntry> entries = ArcCaseFeedController.collapseHistory(
+      rows,
+      'Case'
+    );
+    Test.stopTest();
+
+    Assert.areEqual(1, entries.size());
+    Assert.areEqual(
+      'Created.',
+      entries[0].fieldLabel,
+      'The created pseudo-field renders as "Created.", not as a field label.'
+    );
+    Assert.isTrue(entries[0].isCreation, 'It should be flagged as a creation.');
+    Assert.isNull(entries[0].oldValue, 'A creation has no previous value.');
+  }
+
+  @IsTest
+  static void resolvesChangedFieldsToTheirLabel() {
+    List<SObject> rows = new List<SObject>{
+      historyRow('0175Su000000001', 'Status', 'Text',
+        UserInfo.getUserId(), 'Manoj Kumar', 'New', 'Closed',
+        '2026-08-24T21:03:02.000Z')
+    };
+
+    List<ArcCaseFeedController.HistoryEntry> entries = ArcCaseFeedController.collapseHistory(
+      rows,
+      'Case'
+    );
+
+    Assert.areEqual(
+      Case.Status.getDescribe().getLabel(),
+      entries[0].fieldLabel,
+      'A changed field shows its label, not its API name.'
+    );
+  }
+
+  @IsTest
+  static void historyObjectAndParentFieldPerObjectKind() {
+    Assert.areEqual('CaseHistory', ArcCaseFeedController.historyObjectFor('Case'));
+    Assert.areEqual('CaseId', ArcCaseFeedController.historyParentFieldFor('Case'));
+    Assert.areEqual(
+      'Check_Log__History',
+      ArcCaseFeedController.historyObjectFor('Check_Log__c'),
+      'A custom object tracks history in <name>__History.'
+    );
+    Assert.areEqual(
+      'ParentId',
+      ArcCaseFeedController.historyParentFieldFor('Check_Log__c'),
+      'A custom object history points at its parent through ParentId.'
+    );
+  }
+
+  @IsTest
+  static void historyIsEmptyForMissingArguments() {
+    Case record = makeCase();
+
+    Test.startTest();
+    Assert.areEqual(
+      0,
+      ArcCaseFeedController.getRecordHistory(null, 'Case', 10).entries.size(),
+      'No record id means no entries.'
+    );
+    Assert.areEqual(
+      0,
+      ArcCaseFeedController.getRecordHistory(record.Id, null, 10).entries.size(),
+      'No object name means no entries.'
+    );
+    Assert.areEqual(
+      0,
+      ArcCaseFeedController.getRecordHistory(record.Id, 'NotAnObject__x', 10)
+        .entries.size(),
+      'An unknown object should return empty, not throw.'
+    );
+    Test.stopTest();
+  }
+
+  @IsTest
+  static void collapseHistoryToleratesNullAndBlankRows() {
+    Assert.areEqual(
+      0,
+      ArcCaseFeedController.collapseHistory(null, 'Case').size(),
+      'Null rows should give an empty list.'
+    );
+    List<SObject> blank = new List<SObject>{
+      historyRow('0175Su000000001', '', 'Text', UserInfo.getUserId(), 'X',
+        null, null, '2026-08-24T21:03:02.000Z')
+    };
+    Assert.areEqual(
+      0,
+      ArcCaseFeedController.collapseHistory(blank, 'Case').size(),
+      'A row naming no field is skipped.'
+    );
+  }
 }

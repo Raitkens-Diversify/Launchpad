@@ -22,32 +22,9 @@
           "children" : [ {
             "children" : [ {
               "attributes" : {
-                "backgroundColor" : "",
-                "dxpStyle" : { },
-                "layout" : "{!Item._layout}",
-                "mainTitlePaddingHorizontal" : "none",
-                "mainTitlePaddingVertical" : "none",
-                "mainTitleText" : "Your text",
-                "mainTitleTextDisplayInfo" : "{}",
-                "metadata" : "{!Item._metadata._context}",
-                "recordIdFromDataProvider" : "{!Item.Id}",
-                "showTitle" : false
+                "dxpStyle" : { }
               },
-              "children" : [ {
-                "children" : [ {
-                  "attributes" : {
-                    "dxpStyle" : { }
-                  },
-                  "definition" : "dxp_page_layout:placeHolder",
-                  "id" : "a0ef6f17-a677-49ba-aa2c-9f5a4b850016",
-                  "type" : "component"
-                } ],
-                "id" : "05f6d194-ccd6-4696-a839-e4f148793990",
-                "name" : "placeholder",
-                "title" : "placeholder",
-                "type" : "region"
-              } ],
-              "definition" : "dxp_records:detailPanel",
+              "definition" : "c:arcProductDetail",
               "id" : "b0aae418-debf-4a31-8021-70d9f9920313",
               "type" : "component"
             } ],

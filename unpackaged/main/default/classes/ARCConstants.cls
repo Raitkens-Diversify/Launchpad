@@ -83,7 +83,6 @@ public class ARCConstants {
   };
 
   public static final Map<String, String> CASE_TYPE_TO_SCHEMA_TYPE = new Map<String, String>{
-    'Third Party Money Movement' => 'Third Party Money Movement',
     'Account Closure' => 'Account Closure',
     'Update DMS Instructions' => SCHEMA_MANAGE_DMS_INSTRUCTIONS,
     'Change Management Style' => 'Change Management Style',

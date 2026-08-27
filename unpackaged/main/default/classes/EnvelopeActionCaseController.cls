@@ -41,16 +41,6 @@ public with sharing class EnvelopeActionCaseController {
             'This Financial Account was recently serviced (Additional Funding).'
         ));
 
-        ActionCaseSpec thirdPartyMoney = new ActionCaseSpec(
-            'Third Party Money Movement',
-            'Third Party Money Movement',
-            'This Financial Account was recently serviced (Third Party Money Movement). Please review'
-                + ' the documentation attached to this Case. Further documentation can also be found'
-                + ' on the Household.'
-        );
-        thirdPartyMoney.needsPrincipalReview = true;
-        specs.put('Third Party Money Movement', thirdPartyMoney);
-
         // The closure reason and its dependent fields are interview answers, not create-time input,
         // so they reach the Case through the metadata-driven update. Any resulting change to the
         // owner's own Account record is the back end's to make.
@@ -614,84 +604,7 @@ public with sharing class EnvelopeActionCaseController {
         }
     }
     
-    @AuraEnabled
-    public static String createThirdPartyMoneyCase(String financialAccountId, Map<String, Object> formData, String envelopeId) {
-        try {
-            // Get Financial Account and related data
-            Financial_Account__c finAcc = [
-                SELECT Id, Name, Household__c, Primary_Owner__r.PersonContactId,
-                Financial_Advisor_Team__c
-                FROM Financial_Account__c 
-                WHERE Id = :financialAccountId 
-                LIMIT 1
-            ];
-            
-            // Get Wizard Flow Values for RecordTypeId
-            Wizard_Flow_Values__mdt wizardValues = [
-                SELECT Case_Account_Servicing_Record_Type__c 
-                FROM Wizard_Flow_Values__mdt 
-                LIMIT 1
-            ];
-            
-            // Create Case
-            Case newCase = new Case();
-            if(formData.get('Id') != null){
-                newCase.Id = (Id)formData.get('Id');
-            }
-            newCase.Wizard_Financial_Account__c = finAcc.Id;
-            newCase.Household__c = finAcc.Household__c;
-            newCase.AccountId = finAcc.Household__c;
-            newCase.ContactId = finAcc.Primary_Owner__r.PersonContactId;
-            newCase.Financial_Advisor_Team__c = finAcc.Financial_Advisor_Team__c;
-            newCase.Origin = 'Wizard';
-            newCase.RecordTypeId = wizardValues.Case_Account_Servicing_Record_Type__c;
-            newCase.Status = 'New';
-            newCase.Subject = 'Third Party Money Movement';
-            newCase.Type = 'Third Party Money Movement';
-            newCase.Description = 'This Financial Account was recently serviced (Third Party Money Movement). Please review the documentation attached to this Case. Further documentation can also be found on the Household.';
-            newCase.Needs_Principal_Review__c = true;
-            
-            insert newCase;
-            
-            // Create Envelope_Content__c record
-            if (String.isNotBlank(envelopeId) && formData.get('Id') == null) {
-                Envelope_Content__c envelopeContent = new Envelope_Content__c();
-                envelopeContent.Envelope__c = envelopeId;
-                envelopeContent.Case__c = newCase.Id;
-                insert envelopeContent;
-            }
-            
-            // Handle file uploads if present
-            if (formData.containsKey('uploadedFiles') && formData.get('uploadedFiles') != null) {
-                List<Object> files = (List<Object>) formData.get('uploadedFiles');
-                
-                if (!files.isEmpty()) {
-                    List<ContentDocumentLink> cdLinks = new List<ContentDocumentLink>();
-                    
-                    for (Object fileObj : files) {
-                        
-                        Map<Object, Object> file = (Map<Object, Object>) fileObj;
-                        
-                        String documentId = (String) file.get('documentId');
-                        
-                        ContentDocumentLink cdl = new ContentDocumentLink();
-                        cdl.ContentDocumentId = documentId;
-                        cdl.LinkedEntityId = newCase.Id;
-                        cdl.ShareType = 'V';
-                        
-                        cdLinks.add(cdl);
-                    }
-                    
-                    insert cdLinks;
-                }
-            }
-            
-            return newCase.Id;
-            
-        } catch (Exception e) {
-            throw new AuraHandledException('Error creating third party money movement case: ' + e.getMessage());
-        }
-    }
+
     @AuraEnabled
     public static void deleteAccountActionCase(String caseId){
         delete new case(Id = caseId);        

@@ -153,6 +153,21 @@ export default class EnvelopeFieldControl extends LightningElement {
         return this.field.type === 'PICKLIST';
     }
 
+    // A lookup rendered as a native type-ahead against its full target object. Sharing and FLS are
+    // enforced by Lightning Data Service in the running user's context, so only records the user may
+    // see are offered. Requires a known target object; a lookup that reaches here without a
+    // referenceTo (e.g. a polymorphic field whose target wasn't captured) still surfaces through the
+    // unsupported fallback rather than rendering a picker with no object to search. A lookup that had
+    // a scoped option source configured never reaches here — envelopeFormSchema.applyLookupOptions
+    // has already re-typed it to a curated PICKLIST.
+    get isReference() {
+        return this.field.type === 'REFERENCE' && !!this.field.referenceTo;
+    }
+
+    get referenceObjectApiName() {
+        return this.field?.referenceTo;
+    }
+
     // Render as a radio group when the design calls for it. An explicit `inputType` hint wins; without
     // one, fall back to the option-count heuristic (few options → radio for at-a-glance selection).
     get isRadioPicklist() {
@@ -209,8 +224,8 @@ export default class EnvelopeFieldControl extends LightningElement {
 
     // A field whose type matches no control above would otherwise render as nothing at all, hiding a
     // configured field with no clue why. Surface it instead: a disabled control that names the type.
-    // Lookups land here until an option source is supplied for them (see
-    // envelopeFormSchema.applyLookupOptions).
+    // A lookup lands here only when it has neither an option source (see
+    // envelopeFormSchema.applyLookupOptions) nor a resolvable target object for the native picker.
     get isUnsupported() {
         return (
             !!this.field &&
@@ -219,7 +234,8 @@ export default class EnvelopeFieldControl extends LightningElement {
             !this.isTextarea &&
             !this.isPicklist &&
             !this.isMultiPicklist &&
-            !this.isDualListbox
+            !this.isDualListbox &&
+            !this.isReference
         );
     }
 
@@ -416,7 +432,7 @@ export default class EnvelopeFieldControl extends LightningElement {
     // displayed value and the validity API.
     _renderedControl() {
         return this.template.querySelector(
-            'lightning-input, lightning-textarea, lightning-checkbox-group, lightning-dual-listbox, lightning-radio-group, c-envelope-searchable-combobox'
+            'lightning-input, lightning-textarea, lightning-checkbox-group, lightning-dual-listbox, lightning-radio-group, lightning-record-picker, c-envelope-searchable-combobox'
         );
     }
 
@@ -431,6 +447,12 @@ export default class EnvelopeFieldControl extends LightningElement {
         }
         if (target.type === 'checkbox') {
             return target.checked;
+        }
+        if (event.detail && event.detail.recordId !== undefined) {
+            // lightning-record-picker: the selected record id, or null once the user clears it.
+            // Normalize the cleared state to an empty string so it flows through the same clear
+            // path as every other single-value control.
+            return event.detail.recordId || '';
         }
         if (event.detail && event.detail.value !== undefined) {
             // lightning-radio-group / c-envelope-searchable-combobox re-target across their shadow

@@ -339,75 +339,70 @@
             preloaded-result={relatedProductsResult}
           ></c-arc-related-list>
 
-          <c-arc-related-list
-            record-id={detail.id}
-            card-label="Check Logs"
-            related-object-api-name="Check_Log__c"
-            parent-field-api-name="Case__c"
-            columns="Check Log:Name,Amount:Amount__c,Status:Status__c"
-            collapsible
-            use-preloaded-data
-            preloaded-result={checkLogsResult}
-          ></c-arc-related-list>
-
-          <c-arc-related-list
-            record-id={detail.id}
-            card-label="Trade Errors Log"
-            related-object-api-name="Trade_Error_Log__c"
-            parent-field-api-name="Case__c"
-            columns="Trade Error:Name,Amount:Total_Trade_Error_Amount__c,Status:Status__c"
-            collapsible
-            use-preloaded-data
-            preloaded-result={tradeErrorsResult}
-          ></c-arc-related-list>
-
-          <c-arc-related-list
-            record-id={detail.id}
-            card-label="Services"
-            related-object-api-name="Service__c"
-            parent-field-api-name="Case__c"
-            columns="Service:Name,Type:Type__c,Start Date:Start_Date__c"
-            collapsible
-            use-preloaded-data
-            preloaded-result={servicesResult}
-          ></c-arc-related-list>
-
-          <!--
-            The tabset that closes the layout's right rail. Feed is absent
-            rather than empty: the record feed there is an Aura component and
-            Aura has no runtime in an LWR site.
-          -->
-          <!--
-            The rail already lists this case's related records explicitly, so a
-            Related tab would only repeat them — and a table in a 340px rail wraps
-            every cell to three lines. Files is the one thing it adds.
-          -->
-          <div class="case-subtabs">
-            <div class="case-tabs" role="tablist">
-              <button
-                class={filesTabClass}
-                role="tab"
-                type="button"
-                data-tab="files"
-                aria-selected={isFilesTab}
-                onclick={handleTabSelect}
-              >
-                Files
-              </button>
-            </div>
-
+          <template lwc:if={showCheckLogs}>
             <c-arc-related-list
               record-id={detail.id}
-              card-label="Files"
-              related-object-api-name="ContentDocumentLink"
-              parent-field-api-name="LinkedEntityId"
-              columns="Title:ContentDocument.Title,Type:ContentDocument.FileType"
+              card-label="Check Logs"
+              related-object-api-name="Check_Log__c"
+              parent-field-api-name="Case__c"
+              columns="Check Log:Name,Amount:Amount__c,Status:Status__c"
               collapsible
-              disable-row-links
               use-preloaded-data
-              preloaded-result={filesResult}
+              preloaded-result={checkLogsResult}
             ></c-arc-related-list>
-          </div>
+          </template>
+
+          <template lwc:if={showTradeErrorsLog}>
+            <c-arc-related-list
+              record-id={detail.id}
+              card-label="Trade Errors Log"
+              related-object-api-name="Trade_Error_Log__c"
+              parent-field-api-name="Case__c"
+              columns="Trade Error:Name,Amount:Total_Trade_Error_Amount__c,Status:Status__c"
+              collapsible
+              use-preloaded-data
+              preloaded-result={tradeErrorsResult}
+            ></c-arc-related-list>
+          </template>
+
+          <template lwc:if={showServices}>
+            <c-arc-related-list
+              record-id={detail.id}
+              card-label="Services"
+              related-object-api-name="Service__c"
+              parent-field-api-name="Case__c"
+              columns="Service:Name,Type:Type__c,Start Date:Start_Date__c"
+              collapsible
+              use-preloaded-data
+              preloaded-result={servicesResult}
+            ></c-arc-related-list>
+          </template>
+
+          <!--
+            The rail's tab panel: Feed and Related, from c/arcCaseFeedTabs.
+
+            Replaces the Files-only tabset that used to close the rail. The
+            Files tab is gone on request (2026-08-27); nothing else consumed it.
+
+            The six related-list cards above are deliberately kept. They mirror
+            Lightning's right COLUMN, which is a different thing from its
+            Related TAB — that tab holds only Case History — so they are not a
+            duplicate of anything this panel shows.
+
+            Both objections the old tabset documented are now answered. It had
+            no Feed tab because the record feed was an Aura component and Aura
+            has no runtime in an LWR site; this feed is LWC over
+            ArcCaseFeedController, so it runs here. And it warned that a table
+            in a 340px rail wraps every cell to three lines; these tables scroll
+            horizontally inside their own container instead of wrapping.
+
+            The component resolves the record id from the page reference, the
+            same way this component does, so it needs no record-id attribute.
+          -->
+          <c-arc-case-feed-tabs
+            record-id={detail.id}
+            object-api-name="Case"
+          ></c-arc-case-feed-tabs>
         </div>
       </div>
       <c-arc-flow-modal

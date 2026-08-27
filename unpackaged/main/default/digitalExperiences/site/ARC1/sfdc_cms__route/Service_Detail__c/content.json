@@ -1,0 +1,12 @@
+{
+  "type" : "sfdc_cms__route",
+  "title" : "Service Detail",
+  "contentBody" : {
+    "activeViewId" : "Service_Detail",
+    "configurationTags" : [ ],
+    "pageAccess" : "UseParent",
+    "routeType" : "detail-Service__c",
+    "urlPrefix" : "service"
+  },
+  "urlName" : "service-detail"
+}

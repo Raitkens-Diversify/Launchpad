@@ -128,6 +128,19 @@
         </lightning-dual-listbox>
     </template>
 
+    <!-- Lookup (REFERENCE): native type-ahead against the full target object. Lightning Data Service
+         runs in the user's context, so sharing and FLS scope the results to records the user may see. -->
+    <template if:true={isReference}>
+        <lightning-record-picker
+            label={controlLabel}
+            variant={controlVariant}
+            placeholder="Search..."
+            object-api-name={referenceObjectApiName}
+            value={field.value}
+            onchange={handleChange}>
+        </lightning-record-picker>
+    </template>
+
     <!-- Fallback: a configured field whose type has no control. Rendered read-only so the gap is
          visible in the form rather than silently missing. -->
     <template if:true={isUnsupported}>

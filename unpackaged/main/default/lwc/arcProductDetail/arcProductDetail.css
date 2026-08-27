@@ -1,0 +1,284 @@
+/*
+ * Same design tokens as arcCaseDetail.css (read off the Lightning Case page's
+ * own computed values, not eyeballed): card border #c9c9c9 at 4px with a
+ * 0 2px 2px shadow, header surface #ffffff, body text #181818 at 13px/19.5,
+ * field labels #444444 at 12px/18, field values 14px/21. Kept as a separate
+ * stylesheet (shadow DOM scopes each component's CSS independently) rather
+ * than shared, but deliberately not reinvented.
+ */
+
+.arc-product-detail {
+  font-family: var(
+    --lwc-fontFamily,
+    -apple-system,
+    "system-ui",
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: 13px;
+  line-height: 19.5px;
+  color: var(--lwc-colorTextDefault, #181818);
+}
+
+.arc-product-detail__loading {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 0;
+}
+
+/* ── Page header ────────────────────────────────────────────────────────── */
+
+.arc-product-detail__header {
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+  border: 1px solid var(--lwc-colorBorder, #c9c9c9);
+  border-radius: var(--lwc-borderRadiusMedium, 4px);
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+}
+
+.arc-product-detail__header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.arc-product-detail__title-wrap {
+  min-width: 0;
+}
+
+.arc-product-detail__eyebrow {
+  display: block;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--lwc-colorTextWeak, #444444);
+}
+
+.arc-product-detail__title {
+  margin: 0;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+  color: var(--lwc-colorTextDefault, #181818);
+}
+
+.arc-product-detail__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.arc-product-detail__badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+  background: #e5e5e5;
+  color: #181818;
+}
+
+/* Same semantic red/yellow/green as arcRecordListView's SEMANTIC_PILL_TONES --
+   Performance_Status__c's own picklist already defines these colors in Setup. */
+.arc-product-detail__badge--red {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+.arc-product-detail__badge--yellow {
+  background: #fffbeb;
+  color: #92400e;
+}
+.arc-product-detail__badge--green {
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.arc-product-detail__key-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 32px;
+  margin: 12px 0 0;
+}
+
+.arc-product-detail__key-fact {
+  min-width: 0;
+}
+
+.arc-product-detail__key-fact dt {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--lwc-colorTextWeak, #444444);
+}
+
+.arc-product-detail__key-fact dd {
+  margin: 0;
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--lwc-colorTextDefault, #181818);
+}
+
+/* ── Body layout ────────────────────────────────────────────────────────── */
+
+.arc-product-detail__body {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* The tabbed panel leads on the left -- flipped from Case Detail's right
+   rail, per explicit request: Product has far less to say in a main field
+   column than a Case does, so History/Related Products lead instead of
+   trailing. */
+.arc-product-detail__side {
+  flex: 0 0 340px;
+  width: 340px;
+}
+
+.arc-product-detail__main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (max-width: 64rem) {
+  .arc-product-detail__body {
+    flex-direction: column;
+  }
+
+  .arc-product-detail__side {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+}
+
+/* ── Tabs card ──────────────────────────────────────────────────────────── */
+
+.arc-product-detail__tabs-card {
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+  border: 1px solid var(--lwc-colorBorder, #c9c9c9);
+  border-radius: var(--lwc-borderRadiusMedium, 4px);
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.arc-product-detail__panel {
+  padding: 12px 16px 16px;
+}
+
+.arc-product-detail__panel-loading {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 0;
+}
+
+.arc-product-detail__panel-error,
+.arc-product-detail__panel-empty {
+  margin: 0;
+  font-size: 13px;
+  line-height: 19.5px;
+  color: var(--lwc-colorTextWeak, #444444);
+}
+
+.arc-product-detail__panel-more {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--lwc-colorTextWeak, #444444);
+}
+
+/* ── History rows ───────────────────────────────────────────────────────── */
+
+/* Stacked label/value per entry, the way Lightning's own history card renders
+   it -- five columns side by side are unreadable in a ~340px rail. */
+.arc-product-detail__history-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.arc-product-detail__history-row {
+  padding: 10px 0;
+  border-top: 1px solid var(--lwc-colorBorder, #e5e5e5);
+}
+
+.arc-product-detail__history-row:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.arc-product-detail__history-fields {
+  margin: 0;
+}
+
+.arc-product-detail__history-field {
+  display: flex;
+  gap: 4px;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.arc-product-detail__history-field dt {
+  margin: 0;
+  flex-shrink: 0;
+  color: var(--lwc-colorTextWeak, #444444);
+}
+
+.arc-product-detail__history-field dd {
+  margin: 0;
+  color: var(--lwc-colorTextDefault, #181818);
+  word-break: break-word;
+}
+
+/* ── Field sections ─────────────────────────────────────────────────────── */
+
+.product-section {
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+  border: 1px solid var(--lwc-colorBorder, #c9c9c9);
+  border-radius: var(--lwc-borderRadiusMedium, 4px);
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+}
+
+.product-section__summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 700;
+  color: var(--lwc-colorTextDefault, #181818);
+  cursor: pointer;
+  list-style: none;
+}
+
+.product-section__summary::-webkit-details-marker {
+  display: none;
+}
+
+.product-section__summary::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+}
+
+.product-section[open] > .product-section__summary::before {
+  transform: rotate(45deg);
+}
+
+.product-section__body {
+  padding: 0 16px 16px;
+}

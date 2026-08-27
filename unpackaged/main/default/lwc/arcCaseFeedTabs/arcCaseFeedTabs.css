@@ -4,17 +4,25 @@
  * places to change when the palette moves.
  */
 
+/*
+ * Framed like the rail's other cards. The tokens and the shadow are copied from
+ * the .case-subtabs rule this component replaced, so it reads as part of the
+ * rail rather than as something bolted on.
+ */
 .arc-case-feed {
   display: block;
   width: 100%;
-  background: #ffffff;
-  border: 1px solid #dddbda;
-  border-radius: 0.5rem;
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+  border: 1px solid var(--lwc-colorBorder, #c9c9c9);
+  border-radius: var(--lwc-borderRadiusMedium, 4px);
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
 .arc-case-feed__panel {
-  padding: 1rem 1.25rem 1.25rem;
+  /* Tighter than a full-width panel would use: this sits in a ~340px rail, so
+     horizontal padding is space the tables need more than the margins do. */
+  padding: 0.75rem 0.75rem 1rem;
 }
 
 .arc-case-feed__loading {
@@ -145,26 +153,42 @@
   color: #706e6b;
 }
 
-.arc-case-feed__table-scroll {
-  overflow-x: auto;
+/* Stacked rows, matching Lightning's history card. No table: five columns in a
+   340px rail cannot be read side by side. */
+
+.arc-case-feed__rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.arc-case-feed__table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.875rem;
-}
-
-.arc-case-feed__table th,
-.arc-case-feed__table td {
-  text-align: left;
-  padding: 0.375rem 0.75rem 0.375rem 0;
+.arc-case-feed__row {
+  padding: 0.5rem 0;
   border-bottom: 1px solid #f3f2f2;
-  vertical-align: top;
 }
 
-.arc-case-feed__table th {
-  font-weight: 600;
+.arc-case-feed__row:last-child {
+  border-bottom: none;
+}
+
+.arc-case-feed__row-fields {
+  margin: 0;
+  font-size: 0.8125rem;
+}
+
+.arc-case-feed__row-field {
+  display: flex;
+  gap: 0.375rem;
+  padding: 0.0625rem 0;
+}
+
+.arc-case-feed__row-label {
   color: #706e6b;
-  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.arc-case-feed__row-value {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }

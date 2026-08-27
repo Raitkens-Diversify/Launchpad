@@ -110,49 +110,75 @@
           <p class="arc-case-feed__error" role="alert">{relatedError}</p>
         </template>
 
-        <template for:each={relatedCards} for:item="card">
-          <article key={card.key} class="arc-case-feed__card">
-            <header class="arc-case-feed__card-header">
-              <h3 class="arc-case-feed__card-title">{card.label}</h3>
-              <span class="arc-case-feed__card-count">({card.count})</span>
-            </header>
+        <article class="arc-case-feed__card">
+          <header class="arc-case-feed__card-header">
+            <h3 class="arc-case-feed__card-title">Case History</h3>
+            <span class="arc-case-feed__card-count">({historyCount})</span>
+          </header>
 
-            <template lwc:if={card.hasRows}>
-              <!-- Own scroll container: a wide related list scrolls itself
-                   rather than pushing the page into a horizontal scroll. -->
-              <div class="arc-case-feed__table-scroll">
-                <table class="arc-case-feed__table">
-                  <thead>
-                    <tr>
-                      <template for:each={card.columns} for:item="column">
-                        <th key={column.key} scope="col">{column.label}</th>
-                      </template>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <template for:each={card.rows} for:item="row">
-                      <tr key={row.id}>
-                        <template for:each={row.cells} for:item="cell">
-                          <td key={cell.key}>{cell.value}</td>
-                        </template>
-                      </tr>
-                    </template>
-                  </tbody>
-                </table>
-              </div>
-
-              <template lwc:if={card.hasMore}>
-                <p class="arc-case-feed__more">
-                  Showing the first {card.count}.
-                </p>
+          <template lwc:if={hasHistory}>
+            <!-- Stacked label/value per entry, the way Lightning's own history
+                 card renders it. Five columns side by side are unreadable in a
+                 ~340px rail. Blank values are shown, not skipped: a creation
+                 entry has no old or new value and the page still lists both
+                 labels. -->
+            <ul class="arc-case-feed__rows">
+              <template for:each={historyEntries} for:item="entry">
+                <li key={entry.id} class="arc-case-feed__row">
+                  <dl class="arc-case-feed__row-fields">
+                    <div class="arc-case-feed__row-field">
+                      <dt class="arc-case-feed__row-label">Date:</dt>
+                      <dd class="arc-case-feed__row-value">
+                        <lightning-formatted-date-time
+                          value={entry.createdDate}
+                          year="numeric"
+                          month="numeric"
+                          day="numeric"
+                          hour="2-digit"
+                          minute="2-digit"
+                        ></lightning-formatted-date-time>
+                      </dd>
+                    </div>
+                    <div class="arc-case-feed__row-field">
+                      <dt class="arc-case-feed__row-label">Field:</dt>
+                      <dd class="arc-case-feed__row-value">
+                        {entry.fieldLabel}
+                      </dd>
+                    </div>
+                    <div class="arc-case-feed__row-field">
+                      <dt class="arc-case-feed__row-label">User:</dt>
+                      <dd class="arc-case-feed__row-value">
+                        {entry.actorName}
+                      </dd>
+                    </div>
+                    <div class="arc-case-feed__row-field">
+                      <dt class="arc-case-feed__row-label">Original Value:</dt>
+                      <dd class="arc-case-feed__row-value">
+                        {entry.oldValue}
+                      </dd>
+                    </div>
+                    <div class="arc-case-feed__row-field">
+                      <dt class="arc-case-feed__row-label">New Value:</dt>
+                      <dd class="arc-case-feed__row-value">
+                        {entry.newValue}
+                      </dd>
+                    </div>
+                  </dl>
+                </li>
               </template>
-            </template>
+            </ul>
 
-            <template lwc:else>
-              <p class="arc-case-feed__empty">Nothing related yet.</p>
+            <template lwc:if={historyHasMore}>
+              <p class="arc-case-feed__more">
+                Showing the first {historyCount}.
+              </p>
             </template>
-          </article>
-        </template>
+          </template>
+
+          <template lwc:if={showHistoryEmpty}>
+            <p class="arc-case-feed__empty">No history on this record yet.</p>
+          </template>
+        </article>
       </div>
     </template>
   </div>

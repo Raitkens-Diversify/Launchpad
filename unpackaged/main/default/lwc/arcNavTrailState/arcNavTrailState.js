@@ -20,6 +20,8 @@ const WORK_LIST_PATH = "/case/Case/Default";
 const TASK_LIST_PATH = "/task/Task/Default";
 const CHECK_LOG_LIST_PATH = "/check-log/Check_Log__c/Default";
 const ISA_LIST_PATH = "/financial-account/Financial_Account__c/Default";
+const SERVICE_LIST_PATH = "/service/Service__c/Default";
+const APPROVED_PRODUCTS_LIST_PATH = "/product/Product__c/Default";
 /* Its own page rather than a tab on Cases: the advertising reviews are Cases,
    but nobody reaches them by browsing Cases — they come at it from Compliance. */
 const ADVERTISING_REVIEWS_PATH = "/advertising-reviews";
@@ -30,7 +32,9 @@ const ROUTE_OBJECT_API_NAMES = Object.freeze({
   case: "Case",
   task: "Task",
   "check-log": "Check_Log__c",
-  "financial-account": "FinServ__FinancialAccount__c"
+  "financial-account": "FinServ__FinancialAccount__c",
+  service: "Service__c",
+  product: "Product__c"
 });
 
 const ROUTE_STATE_IGNORED_KEYS = new Set([
@@ -214,38 +218,31 @@ export const STATIC_NAV_ITEMS = [
     isCollapsible: true,
     subMenu: [
       /*
-       * One entry per builder tab on DFPG_Financial_Account_List, in that
-       * page's own tab order -- c__tabId is the tab's own fixed tabKey (see
-       * that page's tabsetConfig), the same convention arcRecordListView's
-       * own deep-links use elsewhere on this nav. Keep this in step with
-       * that page's tab order/keys, same caution as the Contacts group.
+       * Each a standalone page/route now, not a shared tabset -- DFPG_
+       * Financial_Account_List, Service_List, and Product_List are each
+       * flat single-purpose pages (same "own page, not a builder tab"
+       * pattern as Task_List/Check_Log_List under Work). DPIs was removed
+       * entirely (nav + tab) rather than given its own page.
        */
       {
         id: "arc-nav-isas-accounts",
         label: "Accounts",
         type: "InternalLink",
-        target: `${ISA_LIST_PATH}?c__tabId=705bc`,
-        objectApiName: "FinServ__FinancialAccount__c"
-      },
-      {
-        id: "arc-nav-isas-dpis",
-        label: "DPIs",
-        type: "InternalLink",
-        target: `${ISA_LIST_PATH}?c__tabId=12a0e`,
+        target: ISA_LIST_PATH,
         objectApiName: "FinServ__FinancialAccount__c"
       },
       {
         id: "arc-nav-isas-services",
         label: "Services",
         type: "InternalLink",
-        target: `${ISA_LIST_PATH}?c__tabId=f5d45`,
+        target: SERVICE_LIST_PATH,
         objectApiName: "Service__c"
       },
       {
         id: "arc-nav-isas-approved-products",
         label: "Approved Products",
         type: "InternalLink",
-        target: `${ISA_LIST_PATH}?c__tabId=tab2`,
+        target: APPROVED_PRODUCTS_LIST_PATH,
         objectApiName: "Product__c"
       }
     ]

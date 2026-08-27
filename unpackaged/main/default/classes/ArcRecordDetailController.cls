@@ -472,7 +472,6 @@ public with sharing class ArcRecordDetailController {
   }
 
   private static final Map<String, String> CASE_TYPE_TO_SCHEMA_TYPE = new Map<String, String>{
-    'Third Party Money Movement' => 'Third Party Money Movement',
     'Account Closure' => 'Account Closure',
     'Update DMS Instructions' => 'Manage DMS Instructions',
     'Change Management Style' => 'Change Management Style',

@@ -11,60 +11,15 @@ import {
 import { buildRecordNavigationReference } from "c/recordNavigationCommunityUtils";
 import getCaseDetail from "@salesforce/apex/ArcCaseDetailController.getCaseDetail";
 import getCaseTasks from "@salesforce/apex/ArcCaseDetailController.getCaseTasks";
+import getRelatedRecordsBatch from "@salesforce/apex/ArcRelatedListController.getRelatedRecordsBatch";
 import getCaseFieldSections from "@salesforce/apex/ArcCaseDetailController.getCaseFieldSections";
 import getCaseInformationFieldNames from "@salesforce/apex/ArcCaseDetailController.getCaseInformationFieldNames";
 import getRelatedHouseholdCases from "@salesforce/apex/ArcCaseDetailController.getRelatedHouseholdCases";
-import getRelatedRecordsBatch from "@salesforce/apex/ArcRelatedListController.getRelatedRecordsBatch";
 
 // The right rail's 7 c-arc-related-list cards, batched into one Apex call
 // instead of each card independently fetching its own (7 round trips ->
 // 1). Field paths mirror each card's own `columns` attribute in the
 // template exactly -- keep the two in sync if a card's columns change.
-const RELATED_LIST_REQUESTS = [
-  {
-    key: "caseComments",
-    objectApiName: "CaseComment",
-    parentFieldApiName: "ParentId",
-    fieldApiNames: ["CommentBody", "CreatedBy.Name", "CreatedDate"]
-  },
-  {
-    key: "orderTickets",
-    objectApiName: "Order_Ticket__c",
-    parentFieldApiName: "Case__c",
-    fieldApiNames: ["Name", "Wizard_Financial_Account__r.Name", "CreatedDate"]
-  },
-  {
-    key: "relatedProducts",
-    objectApiName: "Financial_Account_Related_Product__c",
-    parentFieldApiName: "Case__c",
-    fieldApiNames: ["Name", "Wizard_Financial_Account__r.Name", "CreatedDate"]
-  },
-  {
-    key: "checkLogs",
-    objectApiName: "Check_Log__c",
-    parentFieldApiName: "Case__c",
-    fieldApiNames: ["Name", "Amount__c", "Status__c"]
-  },
-  {
-    key: "tradeErrors",
-    objectApiName: "Trade_Error_Log__c",
-    parentFieldApiName: "Case__c",
-    fieldApiNames: ["Name", "Total_Trade_Error_Amount__c", "Status__c"]
-  },
-  {
-    key: "services",
-    objectApiName: "Service__c",
-    parentFieldApiName: "Case__c",
-    fieldApiNames: ["Name", "Type__c", "Start_Date__c"]
-  },
-  {
-    key: "files",
-    objectApiName: "ContentDocumentLink",
-    parentFieldApiName: "LinkedEntityId",
-    fieldApiNames: ["ContentDocument.Title", "ContentDocument.FileType"]
-  }
-];
-
 const TASK_COLUMNS = [
   {
     label: "Subject",
@@ -117,7 +72,6 @@ const PRIORITY_CLASS_BY_VALUE = {
   low: "arc-case-detail__priority-pill--low"
 };
 
-const TAB_FILES = "files";
 
 /**
  * Statuses that mean the case is finished, so it takes no new pit-stop work.
@@ -177,6 +131,78 @@ const PIT_STOP_FLOWS = {
  */
 const SHOW_STATUS_PATH = false;
 
+/**
+ * The rail's related-list cards, fetched in one Apex call.
+ *
+ * Six, not seven: the Files card and its tabset were removed on request
+ * (2026-08-27), so ContentDocumentLink is no longer requested. These mirror
+ * Lightning's right COLUMN, which is not the same as its Related TAB — that
+ * tab holds only Case History, and c/arcCaseFeedTabs renders it.
+ */
+const RELATED_LIST_REQUESTS = [
+  {
+    key: "caseComments",
+    objectApiName: "CaseComment",
+    parentFieldApiName: "ParentId",
+    fieldApiNames: ["CommentBody", "CreatedBy.Name", "CreatedDate"]
+  },
+  {
+    key: "orderTickets",
+    objectApiName: "Order_Ticket__c",
+    parentFieldApiName: "Case__c",
+    fieldApiNames: ["Name", "Wizard_Financial_Account__r.Name", "CreatedDate"]
+  },
+  {
+    key: "relatedProducts",
+    objectApiName: "Financial_Account_Related_Product__c",
+    parentFieldApiName: "Case__c",
+    fieldApiNames: ["Name", "Wizard_Financial_Account__r.Name", "CreatedDate"]
+  },
+  {
+    key: "checkLogs",
+    objectApiName: "Check_Log__c",
+    parentFieldApiName: "Case__c",
+    fieldApiNames: ["Name", "Amount__c", "Status__c"]
+  },
+  {
+    key: "tradeErrors",
+    objectApiName: "Trade_Error_Log__c",
+    parentFieldApiName: "Case__c",
+    fieldApiNames: ["Name", "Total_Trade_Error_Amount__c", "Status__c"]
+  },
+  {
+    key: "services",
+    objectApiName: "Service__c",
+    parentFieldApiName: "Case__c",
+    fieldApiNames: ["Name", "Type__c", "Start_Date__c"]
+  },
+];
+
+/**
+ * Case Types that call for each conditional related-list card.
+ *
+ * Lifted from Case_Record_Page.flexipage's component visibility rules, which is
+ * where Lightning actually keeps them -- not in Apex:
+ *
+ *   Check_Logs__r        {!Record.Type} EQUAL Deposit Check
+ *   Trade_Errors_Log__r  {!Record.Type} EQUAL Trade Error
+ *   Services__r          {!Record.Type} EQUAL Financial Planning
+ *                     OR {!Record.Type} EQUAL Multi-Family Office
+ *
+ * Case Comments, Order Tickets and Related Products carry no Type rule on that
+ * page, so they stay on every case. (Order Tickets has two instances there,
+ * split on profile rather than on the record.)
+ *
+ * The three cards were showing on every case, each reading "(0)" -- six cards
+ * where the Lightning page shows three.
+ */
+const TYPE_CHECK_LOGS = "Deposit Check";
+const TYPE_TRADE_ERRORS = "Trade Error";
+const TYPES_SERVICES = new Set([
+  "Financial Planning",
+  "Multi-Family Office"
+]);
+
 export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
   taskColumns = TASK_COLUMNS;
   relatedCaseColumns = RELATED_CASE_COLUMNS;
@@ -190,7 +216,6 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
   householdCases = { openCases: [], closedCases: [] };
   errorMessage = "";
   isInitialLoading = true;
-  activeTab = TAB_FILES;
   _statusValues = [];
   _masterStatusValues = [];
   _pageRef;
@@ -310,7 +335,7 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
     }
   }
 
-  /** The right rail's 7 related-list cards, fetched in one Apex call. */
+  /** The rail's six related-list cards, fetched in one Apex call. */
   relatedListsByKey = {};
 
   @wire(getRelatedRecordsBatch, {
@@ -349,8 +374,23 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
     return this.relatedListsByKey.services;
   }
 
-  get filesResult() {
-    return this.relatedListsByKey.files;
+  /**
+   * Conditional related-list cards, gated on Case.Type the way the Lightning
+   * page gates them. Optional-chained so nothing shows before detail arrives —
+   * a card that flashes in and then vanishes is worse than one that appears a
+   * beat late.
+   */
+  get showCheckLogs() {
+    return this.detail?.type === TYPE_CHECK_LOGS;
+  }
+
+  get showTradeErrorsLog() {
+    return this.detail?.type === TYPE_TRADE_ERRORS;
+  }
+
+  get showServices() {
+    // Set.has(undefined) is false, so this needs no separate guard.
+    return TYPES_SERVICES.has(this.detail?.type);
   }
 
   get hasDetail() {
@@ -447,29 +487,6 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
     const next = [...values];
     next.splice(insertAt, 0, currentEntry);
     return next;
-  }
-
-  /* ---- Tabs ------------------------------------------------------------- */
-
-  get isFilesTab() {
-    return this.activeTab === TAB_FILES;
-  }
-
-  get filesTabClass() {
-    return this._tabClass(this.isFilesTab);
-  }
-
-  _tabClass(isActive) {
-    return isActive
-      ? "case-tabs__tab case-tabs__tab--active"
-      : "case-tabs__tab";
-  }
-
-  handleTabSelect(event) {
-    const tab = event.currentTarget?.dataset?.tab;
-    if (tab === TAB_FILES) {
-      this.activeTab = tab;
-    }
   }
 
   /* ---- Content ---------------------------------------------------------- */

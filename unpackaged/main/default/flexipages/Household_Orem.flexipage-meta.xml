@@ -150,7 +150,7 @@
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>relatedListLabel</name>
-                    <value>Financial Accounts</value>
+                    <value>Investments</value>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>showActionBar</name>
@@ -210,7 +210,7 @@
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>relatedListLabel</name>
-                    <value>Services</value>
+                    <value>Service Agreements</value>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>showActionBar</name>
@@ -1252,7 +1252,7 @@
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>relatedListApiName</name>
-                    <value>Cases</value>
+                    <value>Cases5__r</value>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>relatedListDisplayType</name>
@@ -1262,22 +1262,25 @@
                     <name>relatedListFieldAliases</name>
                     <valueList>
                         <valueListItems>
-                            <value>CASES.CASE_NUMBER</value>
+                            <value>Case_Branch_Name_DisplayName__c</value>
                         </valueListItems>
                         <valueListItems>
                             <value>CASES.SUBJECT</value>
                         </valueListItems>
                         <valueListItems>
+                            <value>CASES.CREATED_DATE</value>
+                        </valueListItems>
+                        <valueListItems>
                             <value>CASES.STATUS</value>
                         </valueListItems>
                         <valueListItems>
-                            <value>CORE.USERS.ALIAS</value>
+                            <value>OWNER_NAME</value>
                         </valueListItems>
                     </valueList>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>relatedListLabel</name>
-                    <value>Open Cases</value>
+                    <value>Open Cases for Household</value>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>showActionBar</name>
@@ -1323,7 +1326,7 @@
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>relatedListApiName</name>
-                    <value>Cases</value>
+                    <value>Cases5__r</value>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>relatedListDisplayType</name>
@@ -1333,22 +1336,25 @@
                     <name>relatedListFieldAliases</name>
                     <valueList>
                         <valueListItems>
-                            <value>CASES.CASE_NUMBER</value>
+                            <value>Case_Branch_Name_DisplayName__c</value>
                         </valueListItems>
                         <valueListItems>
                             <value>CASES.SUBJECT</value>
                         </valueListItems>
                         <valueListItems>
+                            <value>CASES.CLOSED_DATE</value>
+                        </valueListItems>
+                        <valueListItems>
                             <value>CASES.STATUS</value>
                         </valueListItems>
                         <valueListItems>
-                            <value>CORE.USERS.ALIAS</value>
+                            <value>OWNER_NAME</value>
                         </valueListItems>
                     </valueList>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>relatedListLabel</name>
-                    <value>Closed Cases</value>
+                    <value>Closed Cases for Household</value>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>showActionBar</name>
