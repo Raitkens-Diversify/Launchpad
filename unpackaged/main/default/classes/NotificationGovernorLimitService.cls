@@ -29,6 +29,8 @@ public class NotificationGovernorLimitService {
   @TestVisible
   private static Integer testRemainingSoqlBudgetOverride;
 
+  private static Boolean inFinalizerContext;
+
   public static Boolean shouldDeferPrepareToAsync() {
     if (System.isQueueable() || System.isBatch()) {
       return false;
@@ -71,12 +73,71 @@ public class NotificationGovernorLimitService {
     return Math.max(0, getQueueableLimit() - Limits.getQueueableJobs());
   }
 
+  public static void enterQueueableExecute() {
+    inFinalizerContext = false;
+  }
+
+  public static void enterFinalizerExecute() {
+    inFinalizerContext = true;
+  }
+
+  public static Boolean isInFinalizerContext() {
+    return inFinalizerContext == true;
+  }
+
+  public static Boolean requiresSingleEnqueueChain() {
+    return System.isBatch() || System.isQueueable() || isInFinalizerContext();
+  }
+
   public static Boolean canEnqueueQueueableJob() {
+    if (requiresSingleEnqueueChain() && Limits.getQueueableJobs() >= 1) {
+      return false;
+    }
+
     return getRemainingQueueableBudget() > 0;
   }
 
+  public static Boolean enqueueQueueable(Queueable job) {
+    if (job == null || !canEnqueueQueueableJob()) {
+      return false;
+    }
+
+    try {
+      System.enqueueJob(job);
+      return true;
+    } catch (Exception error) {
+      if (shouldSwallowEnqueueFailure(error)) {
+        logLimitException(
+          'NotificationGovernorLimitService.enqueueQueueable',
+          error
+        );
+        return false;
+      }
+
+      throw error;
+    }
+  }
+
+  public static Boolean isQueueableLimitMessage(String errorMessage) {
+    if (String.isBlank(errorMessage)) {
+      return false;
+    }
+
+    return errorMessage.contains('Too many queueable jobs') ||
+      errorMessage.contains('Maximum stack depth') ||
+      errorMessage == NotificationConstants.ERROR_QUEUEABLE_JOB_LIMIT;
+  }
+
+  private static Boolean shouldSwallowEnqueueFailure(Exception error) {
+    if (error == null) {
+      return false;
+    }
+
+    return isQueueableLimitMessage(error.getMessage()) || isLimitException(error);
+  }
+
   public static Integer resolveMaxDeliveryEnqueueJobs() {
-    if (System.isBatch() || System.isQueueable()) {
+    if (requiresSingleEnqueueChain()) {
       return 1;
     }
 
@@ -303,6 +364,7 @@ public class NotificationGovernorLimitService {
     testRemainingQueueableBudgetOverride = null;
     testRemainingEmailInvocationBudgetOverride = null;
     testRemainingSoqlBudgetOverride = null;
+    inFinalizerContext = false;
     loggedLimitMessages = new List<String>();
 
     if (Test.isRunningTest()) {

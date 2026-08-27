@@ -22,13 +22,15 @@
           "children" : [ {
             "children" : [ {
               "attributes" : {
+                "defaultChartFieldApiName" : "Status__c",
                 "defaultColumns" : "",
                 "defaultListViewApiName" : "Approved_Products",
                 "dxpStyle" : { },
                 "objectApiName" : "Product__c",
                 "pillFields" : "Status__c,Performance_Status__c",
-                "serverSearchListViews" : "Approved_Products",
-                "title" : "Approved Products"
+                "serverSearchListViews" : "Approved_Products,Approved_Products_Alternative_Investments",
+                "title" : "Approved Products",
+                "viewTabs" : "[{\"view\":\"Approved_Products\",\"label\":\"Approved Products\",\"chartField\":\"Status__c\"},{\"view\":\"Approved_Products_Alternative_Investments\",\"label\":\"Advisor View - Alternative Investments\",\"chartField\":\"Status__c\"}]"
               },
               "definition" : "c:arcRecordListView",
               "id" : "e2c8e5d4-1a2b-4c3d-9e5f-6a7b8c9d0e1f",

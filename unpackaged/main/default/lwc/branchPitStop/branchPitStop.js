@@ -25,6 +25,9 @@ export default class BranchPitStop extends NavigationMixin(LightningElement) {
 
     @track tasks = [];
 
+    /** Disables the refresh control while a load is in flight. */
+    isRefreshing = false;
+
     @wire(MessageContext)
     messageContext;
 
@@ -79,14 +82,39 @@ export default class BranchPitStop extends NavigationMixin(LightningElement) {
         return rows;
     }
 
+    /* Returns the promise so handleRefresh can tell when the load has
+       settled and re-enable its control. */
     _loadTasks() {
-        getTasks({ recordId: this.recordId })
+        return getTasks({ recordId: this.recordId })
             .then(result => {
                 this.tasks = result;
             })
             .catch(error => {
+                // Leave the rows that are already on screen: stale tasks are
+                // more use than an empty tile, and this fires on every platform
+                // event too, not just a button press.
                 console.error('BranchPitStop – error fetching tasks:', error);
             });
+    }
+
+    /**
+     * Re-reads this tile's tasks without reloading the page, for a task someone
+     * else has just added or completed.
+     *
+     * getTasks is not cacheable, so calling it again genuinely goes back to the
+     * server. refreshApex is neither needed nor possible here: the call is
+     * imperative, and refreshApex only works on a wired result.
+     */
+    handleRefresh() {
+        if (this.isRefreshing) {
+            return;
+        }
+
+        this.isRefreshing = true;
+
+        this._loadTasks().finally(() => {
+            this.isRefreshing = false;
+        });
     }
 
     _subscribeToEmpApi() {

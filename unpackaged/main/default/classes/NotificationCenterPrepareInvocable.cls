@@ -61,7 +61,11 @@ public without sharing class NotificationCenterPrepareInvocable {
       return outputs;
     }
 
-    NotificationPrepareStartQueueable.enqueueRequests(prepareRequests);
+    for (NotificationPrepareStartQueueable.PrepareRequest prepareRequest : prepareRequests) {
+      NotificationPrepareStartQueueable.enqueueRequests(
+        new List<NotificationPrepareStartQueueable.PrepareRequest>{ prepareRequest }
+      );
+    }
     return outputs;
   }
 }

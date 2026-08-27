@@ -1237,7 +1237,10 @@ private class WizardEnvelopeStateServiceTest {
     @IsTest
     static void saveProposedCaseCreatesReviewCase() {
         Account member = [SELECT Id FROM Account WHERE Name = 'Member 1' LIMIT 1];
-        
+        Account household = [SELECT Id FROM Account WHERE Name = 'Test Household' LIMIT 1];
+        Envelope__c env = new Envelope__c(Name = 'Proposed Env', Household__c = household.Id);
+        insert env;
+
         Test.startTest();
         WizardEnvelopeStateService.saveProposedCase(
             proposedCaseOriginals(),
@@ -1248,12 +1251,13 @@ private class WizardEnvelopeStateServiceTest {
                     'Investment_Objectives__c' => new List<Object>{ 'Growth', 'Speculation' },
                         'BillingStreet' => 'x'.repeat(300)
                         },
-            member.Id
+            member.Id,
+            env.Id
         );
         Test.stopTest();
-        
+
         Case created = [
-            SELECT Status, Origin, Subject, DoNotCalc__c, RecordType.DeveloperName,
+            SELECT Status, Origin, Subject, DoNotCalc__c, RecordType.DeveloperName, Household__c,
             Original_First_Name__c, Proposed_First_Name__c,
             Original_Last_Name__c, Proposed_Last_Name__c,
             Original_Physical_City__c, Proposed_Physical_City__c,
@@ -1268,6 +1272,8 @@ private class WizardEnvelopeStateServiceTest {
         System.assertEquals('Wizard', created.Origin);
         System.assertEquals('Person Account Requested Changes', created.Subject);
         System.assertEquals(true, created.DoNotCalc__c);
+        System.assertEquals(household.Id, created.Household__c,
+                            'The review case should carry the envelope household, not the member.');
         System.assertEquals('Janet', created.Original_First_Name__c);
         System.assertEquals('Janette', created.Proposed_First_Name__c);
         System.assertEquals('Prior', created.Original_Last_Name__c);
@@ -1290,14 +1296,16 @@ private class WizardEnvelopeStateServiceTest {
         WizardEnvelopeStateService.saveProposedCase(
             proposedCaseOriginals(),
             new Map<String, Object>{ 'FirstName' => 'Janette' },
-            member.Id
+            member.Id,
+            null
         );
         
         Test.startTest();
         WizardEnvelopeStateService.saveProposedCase(
             new Map<String, Object>{ 'FirstName' => 'Drifted Since' },
             new Map<String, Object>{ 'LastName' => 'Newer' },
-            member.Id
+            member.Id,
+            null
         );
         Test.stopTest();
         
@@ -1319,7 +1327,8 @@ private class WizardEnvelopeStateServiceTest {
         WizardEnvelopeStateService.saveProposedCase(
             proposedCaseOriginals(),
             new Map<String, Object>{ 'FirstName' => 'Janette' },
-            member.Id
+            member.Id,
+            null
         );
         Case existing = [SELECT Id FROM Case WHERE AccountId = :member.Id];
         existing.Status = [SELECT MasterLabel FROM CaseStatus WHERE IsClosed = true LIMIT 1].MasterLabel;
@@ -1329,7 +1338,8 @@ private class WizardEnvelopeStateServiceTest {
         WizardEnvelopeStateService.saveProposedCase(
             proposedCaseOriginals(),
             new Map<String, Object>{ 'FirstName' => 'Janot' },
-            member.Id
+            member.Id,
+            null
         );
         Test.stopTest();
         
@@ -1342,10 +1352,10 @@ private class WizardEnvelopeStateServiceTest {
         Account member = [SELECT Id FROM Account WHERE Name = 'Member 1' LIMIT 1];
         
         Test.startTest();
-        WizardEnvelopeStateService.saveProposedCase(proposedCaseOriginals(), new Map<String, Object>(), member.Id);
-        WizardEnvelopeStateService.saveProposedCase(proposedCaseOriginals(), null, member.Id);
+        WizardEnvelopeStateService.saveProposedCase(proposedCaseOriginals(), new Map<String, Object>(), member.Id, null);
+        WizardEnvelopeStateService.saveProposedCase(proposedCaseOriginals(), null, member.Id, null);
         WizardEnvelopeStateService.saveProposedCase(
-            proposedCaseOriginals(), new Map<String, Object>{ 'FirstName' => 'X' }, null);
+            proposedCaseOriginals(), new Map<String, Object>{ 'FirstName' => 'X' }, null, null);
         Test.stopTest();
         
         System.assertEquals(0, [SELECT COUNT() FROM Case WHERE AccountId = :member.Id],
@@ -1468,7 +1478,8 @@ private class WizardEnvelopeStateServiceTest {
             WizardEnvelopeStateService.saveProposedCase(
                 proposedCaseOriginals(),
                 new Map<String, Object>{ 'Tax_ID__c' => 'garbage' },
-                member.Id
+                member.Id,
+                null
             );
             System.assert(false, 'A malformed proposed Tax ID should block the change request.');
         } catch (AuraHandledException e) {
@@ -1502,7 +1513,8 @@ private class WizardEnvelopeStateServiceTest {
         WizardEnvelopeStateService.saveProposedCase(
             originals,
             new Map<String, Object>{ 'FirstName' => 'Janette' },
-            member.Id
+            member.Id,
+            null
         );
         Test.stopTest();
         
@@ -1682,7 +1694,8 @@ private class WizardEnvelopeStateServiceTest {
         WizardEnvelopeStateService.saveProposedCase(
             new Map<String, Object>{ 'FirstName' => 'Inline Original' },
             new Map<String, Object>{ 'FirstName' => 'Inline Proposed' },
-            member.Id
+            member.Id,
+            null
         );
         Test.stopTest();
 

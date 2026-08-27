@@ -15,18 +15,25 @@
  *     of scope for this round per explicit decision).
  *   - Related Products: the flexipage's own related list, Financial_Account_
  *     Related_Product__c filtered on Product__c -- "which financial accounts
- *     hold this product", not "similar products". Rendered with c/
- *     arcRelatedList, already generic and already used this way elsewhere
- *     (arcCaseDetail's own "Related Products" card, from Case's side of the
- *     same object).
+ *     hold this product", not "similar products" (Wizard_Financial_Account__c
+ *     is the lookup to our own Financial_Account__c; the field literally
+ *     named Financial_Account__c on that object points at the unrelated FSC
+ *     managed-package object instead). Rendered as a full-width, collapsible
+ *     c/arcDataTable -- the same table every other ARC list uses, per
+ *     explicit request, rather than c/arcRelatedList's plain table -- fed by
+ *     one batched fetch through ArcRelatedListController.getRelatedRecordsPage
+ *     (a generous single page, paginated from there client-side by
+ *     arcDataTable's own pager) instead of that component's fixed 10-row
+ *     card default: a product can be held across many financial accounts.
  *   - History: the flexipage's own History tab (relatedListApiName
- *     "Histories" = standard field-history tracking). Fetched through
- *     ArcCaseFeedController.getRecordHistory, which already takes an
- *     objectApiName parameter and resolves Product__c -> Product__History
- *     generically -- built for Case but never made Case-only. A new,
- *     Product-scoped tabs component (rather than reusing c/arcCaseFeedTabs
- *     directly) both to drop its Case-only Feed tab and its hardcoded "Case
- *     History" label, and to avoid touching a component under active,
+ *     "Histories" = standard field-history tracking), rendered as its own
+ *     card in the right rail rather than a tab, per explicit request.
+ *     Fetched through ArcCaseFeedController.getRecordHistory, which already
+ *     takes an objectApiName parameter and resolves Product__c ->
+ *     Product__History generically -- built for Case but never made
+ *     Case-only. Rendered with this component's own markup rather than
+ *     reusing c/arcCaseFeedTabs directly: that component hardcodes a
+ *     Case-only Feed tab and a "Case History" label, and is under active,
  *     unrelated concurrent development this same day.
  */
 import { LightningElement, wire } from "lwc";
@@ -34,8 +41,35 @@ import { CurrentPageReference } from "lightning/navigation";
 import { getRecord, getFieldValue } from "lightning/uiRecordApi";
 import { resolveRecordIdFromPageReference } from "c/recordNavigationUtils";
 import getRecordHistory from "@salesforce/apex/ArcCaseFeedController.getRecordHistory";
+import getRelatedRecordsPage from "@salesforce/apex/ArcRelatedListController.getRelatedRecordsPage";
 
 const OBJECT_API_NAME = "Product__c";
+
+const RELATED_PRODUCTS_OBJECT_API_NAME = "Financial_Account_Related_Product__c";
+/**
+ * Positional order matters -- ArcRelatedListController.getRelatedRecordsPage
+ * returns each row's values as a plain cells[] array in the same order these
+ * were requested, not keyed by name.
+ */
+const RELATED_PRODUCTS_FIELD_PATHS = [
+  "Wizard_Financial_Account__r.Name",
+  "Household__c",
+  "Primary_Owner__c",
+  "Amount__c",
+  "CreatedDate"
+];
+/** c/arcDataTable's own column shape -- see arcCaseDetail's TASK_COLUMNS for the same pattern. */
+const RELATED_PRODUCTS_COLUMNS = [
+  { label: "Financial Account", fieldName: "financialAccount", isLink: true },
+  { label: "Household", fieldName: "household" },
+  { label: "Owner", fieldName: "owner" },
+  { label: "Amount", fieldName: "amount", type: "currency" },
+  { label: "Created", fieldName: "created", type: "date" }
+];
+/** Fetched once, then paginated client-side by c/arcDataTable's own pager --
+ * MAX_PAGE_SIZE on the Apex side, generous enough that "load more" clicking
+ * isn't needed for the realistic range of accounts holding one product. */
+const RELATED_PRODUCTS_PAGE_SIZE = 100;
 
 const HEADER_FIELDS = [
   "Product__c.Name",
@@ -85,12 +119,7 @@ const PERFORMANCE_STATUS_TONES = {
   Performing: "green"
 };
 
-const TAB_HISTORY = "history";
-const TAB_RELATED_PRODUCTS = "relatedProducts";
-
 export default class ArcProductDetail extends LightningElement {
-  activeTab = TAB_HISTORY;
-
   recordId;
   errorMessage;
 
@@ -98,6 +127,11 @@ export default class ArcProductDetail extends LightningElement {
   historyError;
   _historyRequested = false;
   _record;
+
+  relatedProductsRows = [];
+  relatedProductsError;
+  _relatedProductsRequested = false;
+  _relatedProductsLoaded = false;
 
   @wire(CurrentPageReference)
   wiredPageReference(pageRef) {
@@ -132,6 +166,36 @@ export default class ArcProductDetail extends LightningElement {
     } else if (error) {
       this.history = undefined;
       this.historyError = "Unable to load the history for this record.";
+    }
+  }
+
+  @wire(getRelatedRecordsPage, {
+    recordId: "$recordId",
+    objectApiName: RELATED_PRODUCTS_OBJECT_API_NAME,
+    parentFieldApiName: "Product__c",
+    fieldApiNames: RELATED_PRODUCTS_FIELD_PATHS,
+    linkFieldApiName: null,
+    offsetValue: 0,
+    pageSize: RELATED_PRODUCTS_PAGE_SIZE
+  })
+  wiredRelatedProducts({ data, error }) {
+    this._relatedProductsRequested = true;
+    if (data) {
+      this._relatedProductsLoaded = true;
+      this.relatedProductsRows = (data.rows || []).map((row) => ({
+        id: row.id,
+        financialAccount: row.cells?.[0] ?? "",
+        household: row.cells?.[1] ?? "",
+        owner: row.cells?.[2] ?? "",
+        amount: row.cells?.[3] ?? "",
+        created: row.cells?.[4] ?? ""
+      }));
+      this.relatedProductsError = undefined;
+    } else if (error) {
+      this._relatedProductsLoaded = true;
+      this.relatedProductsRows = [];
+      this.relatedProductsError =
+        "Unable to load related products right now.";
     }
   }
 
@@ -220,26 +284,25 @@ export default class ArcProductDetail extends LightningElement {
     return OBJECT_API_NAME;
   }
 
-  // ---- Left-column tabs: History / Related Products ----------------------
+  // ---- Related Products (full-width table) --------------------------------
 
-  get tabs() {
-    return [
-      { value: TAB_HISTORY, label: "History" },
-      { value: TAB_RELATED_PRODUCTS, label: "Related Products" }
-    ];
+  get relatedProductsColumns() {
+    return RELATED_PRODUCTS_COLUMNS;
   }
 
-  handleTabChange(event) {
-    this.activeTab = event.detail.value;
+  get relatedProductsObjectApiName() {
+    return RELATED_PRODUCTS_OBJECT_API_NAME;
   }
 
-  get showHistory() {
-    return this.activeTab === TAB_HISTORY;
+  get isRelatedProductsLoading() {
+    return (
+      this._relatedProductsRequested &&
+      Boolean(this.recordId) &&
+      !this._relatedProductsLoaded
+    );
   }
 
-  get showRelatedProducts() {
-    return this.activeTab === TAB_RELATED_PRODUCTS;
-  }
+  // ---- History (right-side card) ------------------------------------------
 
   /**
    * Date, Field, User, Original Value, New Value -- the same shape and the

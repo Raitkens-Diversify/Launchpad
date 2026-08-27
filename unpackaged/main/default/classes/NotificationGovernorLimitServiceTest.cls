@@ -352,4 +352,83 @@ private class NotificationGovernorLimitServiceTest {
       )
     );
   }
+
+  @IsTest
+  static void isQueueableLimitMessageDetectsSalesforceLimitText() {
+    System.assertEquals(
+      true,
+      NotificationGovernorLimitService.isQueueableLimitMessage(
+        'Too many queueable jobs added to the queue: 2'
+      )
+    );
+    System.assertEquals(
+      true,
+      NotificationGovernorLimitService.isQueueableLimitMessage(
+        NotificationConstants.ERROR_QUEUEABLE_JOB_LIMIT
+      )
+    );
+    System.assertEquals(
+      true,
+      NotificationGovernorLimitService.isQueueableLimitMessage(
+        'Maximum stack depth has been reached'
+      )
+    );
+    System.assertEquals(
+      false,
+      NotificationGovernorLimitService.isQueueableLimitMessage(
+        'Email delivery failed.'
+      )
+    );
+  }
+
+  @IsTest
+  static void finalizerContextCapsEnqueueToOneJob() {
+    NotificationGovernorLimitService.resetTestState();
+
+    System.assertEquals(
+      false,
+      NotificationGovernorLimitService.requiresSingleEnqueueChain()
+    );
+
+    NotificationGovernorLimitService.enterFinalizerExecute();
+
+    System.assertEquals(
+      true,
+      NotificationGovernorLimitService.isInFinalizerContext()
+    );
+    System.assertEquals(
+      true,
+      NotificationGovernorLimitService.requiresSingleEnqueueChain()
+    );
+    System.assertEquals(
+      1,
+      NotificationGovernorLimitService.resolveMaxDeliveryEnqueueJobs()
+    );
+
+    NotificationGovernorLimitService.enterQueueableExecute();
+
+    System.assertEquals(
+      false,
+      NotificationGovernorLimitService.isInFinalizerContext()
+    );
+  }
+
+  @IsTest
+  static void enqueueQueueableReturnsFalseWhenBudgetIsExhausted() {
+    NotificationGovernorLimitService.resetTestState();
+    NotificationGovernorLimitService.testRemainingQueueableBudgetOverride = 0;
+
+    System.assertEquals(
+      false,
+      NotificationGovernorLimitService.canEnqueueQueueableJob()
+    );
+    System.assertEquals(
+      false,
+      NotificationGovernorLimitService.enqueueQueueable(
+        new NotificationDeliveryChainQueueable(
+          new List<NotificationDeliveryModels.DeliveryRequest>()
+        )
+      )
+    );
+  }
 }

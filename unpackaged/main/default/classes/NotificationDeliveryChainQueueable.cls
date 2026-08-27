@@ -25,6 +25,7 @@ public without sharing class NotificationDeliveryChainQueueable implements Queue
   }
 
   public void execute(QueueableContext context) {
+    NotificationGovernorLimitService.enterQueueableExecute();
     NotificationDeliveryDispatcher.chainRemainingJobs(
       pendingRequests,
       startIndex

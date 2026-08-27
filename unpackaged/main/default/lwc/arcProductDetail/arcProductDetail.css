@@ -27,6 +27,14 @@
   display: flex;
   justify-content: center;
   padding: 3rem 0;
+  /* c-arc-loading-spinner is position:absolute and centres on the nearest
+     POSITIONED ancestor. Without this it escapes past this container to
+     whatever ancestor happens to be positioned -- on the ARC shell that is
+     .theme-layout__main, so the spinner floated in the middle of the page
+     instead of sitting where it belongs. min-height gives it room, since an
+     absolutely positioned child contributes no height. */
+  position: relative;
+  min-height: 6rem;
 }
 
 /* ── Page header ────────────────────────────────────────────────────────── */
@@ -123,8 +131,17 @@
   color: var(--lwc-colorTextDefault, #181818);
 }
 
+/* ── Related Products (full width, above the two-column body) ─────────────── */
+
+.arc-product-detail__related-products {
+  margin-top: 12px;
+}
+
 /* ── Body layout ────────────────────────────────────────────────────────── */
 
+/* Same left-main/right-side direction as Case Detail's own rail -- History
+   is the page's only rail card now that Related Products moved to a
+   full-width table above. */
 .arc-product-detail__body {
   display: flex;
   align-items: flex-start;
@@ -132,10 +149,6 @@
   margin-top: 12px;
 }
 
-/* The tabbed panel leads on the left -- flipped from Case Detail's right
-   rail, per explicit request: Product has far less to say in a main field
-   column than a Case does, so History/Related Products lead instead of
-   trailing. */
 .arc-product-detail__side {
   flex: 0 0 340px;
   width: 340px;
@@ -160,18 +173,35 @@
   }
 }
 
-/* ── Tabs card ──────────────────────────────────────────────────────────── */
+/* ── History card ───────────────────────────────────────────────────────── */
 
-.arc-product-detail__tabs-card {
+.arc-product-detail__history-card {
   background: var(--lwc-colorBackgroundAlt, #ffffff);
   border: 1px solid var(--lwc-colorBorder, #c9c9c9);
   border-radius: var(--lwc-borderRadiusMedium, 4px);
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  padding: 12px 16px 16px;
 }
 
-.arc-product-detail__panel {
-  padding: 12px 16px 16px;
+.arc-product-detail__history-card-header {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0 0 8px;
+}
+
+.arc-product-detail__history-card-title {
+  margin: 0;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 700;
+  color: var(--lwc-colorTextDefault, #181818);
+}
+
+.arc-product-detail__history-card-count {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--lwc-colorTextWeak, #444444);
 }
 
 .arc-product-detail__panel-loading {

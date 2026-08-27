@@ -24,10 +24,15 @@
     </div>
 
     <template lwc:if={isLoading}>
-      <c-arc-loading-spinner
-        alternative-text="Loading records"
-        size="small"
-      ></c-arc-loading-spinner>
+      <!-- Wrapped, not bare: the spinner is position:absolute and would
+           otherwise centre on whatever ancestor happens to be positioned
+           rather than on this table. -->
+      <div class="arc-related-table__loading">
+        <c-arc-loading-spinner
+          alternative-text="Loading records"
+          size="small"
+        ></c-arc-loading-spinner>
+      </div>
     </template>
 
     <template lwc:elseif={hasRows}>

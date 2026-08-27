@@ -323,10 +323,11 @@ Wizard_View_Preference__c = viewMode
         }
         Financial_Account__c faRecord = accounts[0];
 
+        Id householdId = EnvelopeHouseholdResolver.resolveHouseholdId(envelopeId);
         caseRecord.Subject = 'New Financial Account';
         caseRecord.Origin = WIZARD_CASE_ORIGIN;
         caseRecord.Type = ACCOUNT_OPENING_CASE_TYPE;
-        caseRecord.Household__c = faRecord.Household__c;
+        caseRecord.Household__c = householdId != null ? householdId : faRecord.Household__c;
         caseRecord.Financial_Advisor_Team__c = faRecord.Financial_Advisor_Team__c;
         caseRecord.Wizard_Financial_Account__c = faRecord.Id;
         caseRecord.Submitted__c = false;
@@ -1081,7 +1082,8 @@ return result;
     public static void saveProposedCase(
         Map<String, Object> originalvalues,
         Map<String, Object> proposedValue,
-        Id accountId
+        Id accountId,
+        Id envelopeId
     ) {
         if (proposedValue == null || proposedValue.isEmpty() || accountId == null) {
             return;
@@ -1117,6 +1119,9 @@ return result;
             cse.Origin = 'Wizard';
             cse.Subject = 'Person Account Requested Changes';
             cse.DoNotCalc__c = true;
+            // The household is the envelope's, not the member's: a member Account has no household
+            // lookup of its own, matching the member action case in EnvelopeActionCaseController.
+            cse.Household__c = EnvelopeHouseholdResolver.resolveHouseholdId(envelopeId);
         } else {
             cse = cases[0];
         }

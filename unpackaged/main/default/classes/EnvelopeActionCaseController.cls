@@ -242,14 +242,7 @@ public with sharing class EnvelopeActionCaseController {
         }
         // The household is the envelope's, not the member's: a member Account has no household
         // lookup of its own, it is related to one through AccountContactRelation.
-        if (String.isNotBlank(envelopeId)) {
-            List<Envelope__c> envelopes = [
-                SELECT Household__c FROM Envelope__c WHERE Id = :envelopeId LIMIT 1
-            ];
-            if (!envelopes.isEmpty()) {
-                newCase.Household__c = envelopes[0].Household__c;
-            }
-        }
+        newCase.Household__c = EnvelopeHouseholdResolver.resolveHouseholdId(envelopeId);
         return newCase;
     }
 
@@ -330,7 +323,7 @@ public with sharing class EnvelopeActionCaseController {
     private static String createActionCase(String financialAccountId, String envelopeId, ActionCaseSpec spec) {
         Financial_Account__c finAcc = loadActionAccount(financialAccountId);
 
-        Case newCase = buildBaseActionCase(finAcc);
+        Case newCase = buildBaseActionCase(finAcc, envelopeId);
         newCase.Type = spec.caseType;
         newCase.Subject = spec.subjectNamesAccount
             ? spec.subject + ' for ' + finAcc.Name
@@ -362,11 +355,14 @@ public with sharing class EnvelopeActionCaseController {
         ];
     }
 
-    // The attribution every account-servicing case raised by the wizard shares.
-    private static Case buildBaseActionCase(Financial_Account__c finAcc) {
+    // The attribution every account-servicing case raised by the wizard shares. The household is the
+    // envelope's; the servicing account's own household is the fallback for the rare envelope with no
+    // resolvable household, so this never regresses to a null household.
+    private static Case buildBaseActionCase(Financial_Account__c finAcc, String envelopeId) {
+        Id householdId = EnvelopeHouseholdResolver.resolveHouseholdId(envelopeId);
         return new Case(
             Wizard_Financial_Account__c = finAcc.Id,
-            Household__c = finAcc.Household__c,
+            Household__c = householdId != null ? householdId : finAcc.Household__c,
             AccountId = finAcc.Household__c,
             ContactId = finAcc.Primary_Owner__r.PersonContactId,
             Financial_Advisor_Team__c = finAcc.Financial_Advisor_Team__c,
@@ -425,8 +421,9 @@ public with sharing class EnvelopeActionCaseController {
             if(formData.get('Id') != null){
                 newCase.Id = (Id)formData.get('Id');
             }
+            Id householdId = EnvelopeHouseholdResolver.resolveHouseholdId(envelopeId);
             newCase.Wizard_Financial_Account__c = finAcc.Id;
-            newCase.Household__c = finAcc.Household__c;
+            newCase.Household__c = householdId != null ? householdId : finAcc.Household__c;
             newCase.ContactId = finAcc.Primary_Owner__r.PersonContactId;
             newCase.Financial_Advisor_Team__c = finAcc.Financial_Advisor_Team__c;
             newCase.Origin = 'Wizard';
@@ -517,8 +514,9 @@ public with sharing class EnvelopeActionCaseController {
             if(formData.get('Id') != null){
                 newCase.Id = (Id)formData.get('Id');
             }
+            Id householdId = EnvelopeHouseholdResolver.resolveHouseholdId(envelopeId);
             newCase.Wizard_Financial_Account__c = finAcc.Id;
-            newCase.Household__c = finAcc.Household__c;
+            newCase.Household__c = householdId != null ? householdId : finAcc.Household__c;
             newCase.AccountId = finAcc.Household__c;
             newCase.ContactId = finAcc.Primary_Owner__r.PersonContactId;
             newCase.Financial_Advisor_Team__c = finAcc.Financial_Advisor_Team__c;

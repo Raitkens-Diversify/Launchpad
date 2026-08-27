@@ -3272,7 +3272,8 @@ export default class EnvelopeShellV2 extends LightningElement {
       saveProposedCase({
         originalvalues: formData,
         proposedValue: changedValues,
-        accountId: found.entity.id
+        accountId: found.entity.id,
+        envelopeId: this.envelopeId || null
       }).catch((error) =>
         console.error("[envelopeShellV2] saveProposedCase failed", error)
       );

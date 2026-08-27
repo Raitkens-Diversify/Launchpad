@@ -33,6 +33,13 @@
   display: flex;
   justify-content: center;
   padding: 3rem 0;
+  /* c-arc-loading-spinner is position:absolute and centres on the
+     nearest POSITIONED ancestor. Without this it escaped to
+     .theme-layout__main and floated in the middle of the page instead
+     of sitting in this container. min-height gives a medium (56px) spinner room, since
+     an absolutely positioned child contributes no height. */
+  position: relative;
+  min-height: 6rem;
 }
 
 /* ── Page header ────────────────────────────────────────────────────────── */

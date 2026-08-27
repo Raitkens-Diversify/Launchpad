@@ -255,6 +255,19 @@
 
           <template lwc:if={hasOpenHouseholdCases}>
             <lightning-card title={openHouseholdCasesLabel}>
+              <!-- lightning-card renders the actions slot in the header,
+                   top right. Refreshes just these two lists, not the page:
+                   a case someone else opens for this household shows up
+                   without losing scroll position or reloading anything else. -->
+              <lightning-button-icon
+                slot="actions"
+                icon-name="utility:refresh"
+                variant="border-filled"
+                alternative-text="Refresh open cases for household"
+                title="Refresh"
+                disabled={isRefreshingHouseholdCases}
+                onclick={handleRefreshHouseholdCases}
+              ></lightning-button-icon>
               <c-arc-data-table
                 aria-label="Open cases for this household"
                 key-field="id"
@@ -268,6 +281,19 @@
 
           <template lwc:if={hasClosedHouseholdCases}>
             <lightning-card title={closedHouseholdCasesLabel}>
+              <!-- lightning-card renders the actions slot in the header,
+                   top right. Refreshes just these two lists, not the page:
+                   a case someone else opens for this household shows up
+                   without losing scroll position or reloading anything else. -->
+              <lightning-button-icon
+                slot="actions"
+                icon-name="utility:refresh"
+                variant="border-filled"
+                alternative-text="Refresh closed cases for household"
+                title="Refresh"
+                disabled={isRefreshingHouseholdCases}
+                onclick={handleRefreshHouseholdCases}
+              ></lightning-button-icon>
               <c-arc-data-table
                 aria-label="Closed cases for this household"
                 key-field="id"

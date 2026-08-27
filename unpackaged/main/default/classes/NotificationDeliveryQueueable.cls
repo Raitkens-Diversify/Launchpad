@@ -24,11 +24,13 @@ public without sharing class NotificationDeliveryQueueable implements Queueable,
   }
 
   public void execute(QueueableContext context) {
+    NotificationGovernorLimitService.enterQueueableExecute();
     System.attachFinalizer(this);
     deliveryService.deliver(request);
   }
 
   public void execute(System.FinalizerContext context) {
+    NotificationGovernorLimitService.enterFinalizerExecute();
     if (context.getResult() != System.ParentJobResult.UNHANDLED_EXCEPTION) {
       return;
     }

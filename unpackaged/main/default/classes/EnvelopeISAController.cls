@@ -107,13 +107,16 @@ public with sharing class EnvelopeISAController {
                     insert finAccount;
                     
                     Id caseRecordType = Schema.SObjectType.Case.getRecordTypeInfosByName().get('Account Opening').getRecordTypeId();
-                    
+
+                    // Prefer the envelope's household; the junction household row (householdId) is the
+                    // fallback and, being this envelope's Household row, is what the resolver returns anyway.
+                    Id caseHouseholdId = EnvelopeHouseholdResolver.resolveHouseholdId(envelopeId);
                     caseRecord = new Case(
                         Subject = 'New Financial Account',
                         origin = 'Wizard',
                         Type = 'Account Opening',
                         Status = 'New',
-                        Household__C = householdId,
+                        Household__C = caseHouseholdId != null ? caseHouseholdId : householdId,
                         Financial_Advisor_Team__c = financialAdvisorTeamId,
                         Wizard_Financial_Account__c= finAccount.Id,
                         Submitted__c = false,

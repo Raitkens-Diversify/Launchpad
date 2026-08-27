@@ -221,6 +221,9 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
   _pageRef;
   _tasksResult;
   _detailResult;
+  _householdCasesResult;
+  /** Disables the refresh control and shows its spinning state while in flight. */
+  isRefreshingHouseholdCases = false;
 
   @wire(MessageContext)
   messageContext;
@@ -326,11 +329,18 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
     }
   }
 
+  /*
+   * The whole result is held, not just its data. This is the function form of
+   * @wire, so refreshApex has nothing to work with unless the wrapper object
+   * itself is kept -- the same reason _detailResult and _tasksResult are held.
+   */
   @wire(getRelatedHouseholdCases, { caseId: "$_recordId" })
-  wiredHouseholdCases({ data, error }) {
-    if (data) {
-      this.householdCases = data;
-    } else if (error) {
+  wiredHouseholdCases(result) {
+    this._householdCasesResult = result;
+
+    if (result.data) {
+      this.householdCases = result.data;
+    } else if (result.error) {
       this.householdCases = { openCases: [], closedCases: [] };
     }
   }
@@ -649,6 +659,41 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
         recordId: this.detail.id
       });
     }
+  }
+
+  /**
+   * Re-reads the household case lists without reloading the page.
+   *
+   * Both cards are fed by one getRelatedHouseholdCases wire, so a single
+   * refreshApex updates Open and Closed together -- which is right: a case
+   * being closed moves it between the two, and refreshing only one would leave
+   * the pair disagreeing.
+   *
+   * getRelatedHouseholdCases is cacheable, so without refreshApex the client
+   * would serve its cached copy and the button would appear to do nothing. This
+   * is the one call that actually goes back to the server.
+   */
+  handleRefreshHouseholdCases() {
+    if (!this._householdCasesResult || this.isRefreshingHouseholdCases) {
+      return;
+    }
+
+    this.isRefreshingHouseholdCases = true;
+
+    refreshApex(this._householdCasesResult)
+      .catch((error) => {
+        // Leave the existing rows on screen rather than blanking them: stale
+        // rows are more useful than none, and the counts in the card titles
+        // would otherwise disagree with what is listed.
+        // eslint-disable-next-line no-console
+        console.error(
+          "[arcCaseDetail] Failed to refresh household cases",
+          error
+        );
+      })
+      .finally(() => {
+        this.isRefreshingHouseholdCases = false;
+      });
   }
 
   handleAccountClick(event) {

@@ -64,6 +64,20 @@
             </tbody>
           </table>
         </div>
+
+        <template lwc:if={showLoadMore}>
+          <div class="related-list__load-more">
+            <button
+              type="button"
+              class="related-list__load-more-button"
+              disabled={isLoadingMore}
+              onclick={handleLoadMore}
+            >
+              <template lwc:if={isLoadingMore}>Loading…</template>
+              <template lwc:else>Load more</template>
+            </button>
+          </div>
+        </template>
       </template>
 
       <template lwc:else>

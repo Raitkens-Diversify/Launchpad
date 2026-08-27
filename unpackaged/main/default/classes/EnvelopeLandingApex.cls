@@ -964,7 +964,10 @@ public with sharing class EnvelopeLandingApex {
     ) {
         
         List<Case> casesToInsert = new List<Case>();
-        
+
+        // Every case raised under this envelope carries the envelope's household.
+        Id householdId = EnvelopeHouseholdResolver.resolveHouseholdId(envelopeId);
+
         // Create Cases for Financial Accounts
         for (Object obj : financialAccounts) {
             Financial_Account__c fa = (Financial_Account__c)obj;
@@ -972,6 +975,7 @@ public with sharing class EnvelopeLandingApex {
             c.Subject = 'Financial Account - ' + fa.Name;
             c.Status = 'New';
             c.Origin = 'Web';
+            c.Household__c = householdId;
             c.Wizard_Financial_Account__c = fa.Id;
             c.Incomplete_Record__c = true;
             c.Custodian__c = fa.Custodian__c;
@@ -988,6 +992,7 @@ public with sharing class EnvelopeLandingApex {
             Service__c ser = (Service__c)obj;
             Case c = new Case();
             c.Origin = 'Wizard';
+            c.Household__c = householdId;
             c.recordTypeId = [SELECT Id,Case_Account_Opening_Record_Type__c  FROM Wizard_Flow_Values__mdt].Case_Account_Opening_Record_Type__c;
             if(ser.type__c == 'Financial Planning'){
                 c.Type = 'Financial Planning';

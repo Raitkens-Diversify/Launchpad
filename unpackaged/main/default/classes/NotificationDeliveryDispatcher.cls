@@ -34,6 +34,16 @@ public without sharing class NotificationDeliveryDispatcher {
     enqueueRequests(requests);
   }
 
+  public static void enqueueAsSingleFollowUp(
+    List<NotificationDeliveryModels.DeliveryRequest> requests
+  ) {
+    if (requests == null || requests.isEmpty()) {
+      return;
+    }
+
+    enqueueViaChain(requests);
+  }
+
   public static void enqueueRequests(
     List<NotificationDeliveryModels.DeliveryRequest> requests
   ) {
@@ -51,11 +61,10 @@ public without sharing class NotificationDeliveryDispatcher {
 
     if (
       !overflowRequests.isEmpty() &&
-      NotificationGovernorLimitService.canEnqueueQueueableJob()
-    ) {
-      System.enqueueJob(
+      NotificationGovernorLimitService.enqueueQueueable(
         new NotificationDeliveryChainQueueable(overflowRequests, 0)
-      );
+      )
+    ) {
       testEnqueuedJobCount++;
     } else if (
       !overflowRequests.isEmpty() &&
@@ -81,9 +90,16 @@ public without sharing class NotificationDeliveryDispatcher {
 
     while (
       index < requests.size() &&
-      jobsEnqueuedThisTransaction < maxJobsPerTransaction
+      jobsEnqueuedThisTransaction < maxJobsPerTransaction &&
+      NotificationGovernorLimitService.canEnqueueQueueableJob()
     ) {
-      System.enqueueJob(new NotificationDeliveryQueueable(requests[index]));
+      if (
+        !NotificationGovernorLimitService.enqueueQueueable(
+          new NotificationDeliveryQueueable(requests[index])
+        )
+      ) {
+        break;
+      }
       jobsEnqueuedThisTransaction++;
       testEnqueuedJobCount++;
       index++;
@@ -138,11 +154,10 @@ public without sharing class NotificationDeliveryDispatcher {
 
       if (
         !overflowRequests.isEmpty() &&
-        NotificationGovernorLimitService.canEnqueueQueueableJob()
-      ) {
-        System.enqueueJob(
+        NotificationGovernorLimitService.enqueueQueueable(
           new NotificationDeliveryChainQueueable(overflowRequests, 0)
-        );
+        )
+      ) {
         testEnqueuedJobCount++;
       } else if (
         !overflowRequests.isEmpty() &&
@@ -155,7 +170,7 @@ public without sharing class NotificationDeliveryDispatcher {
 
   @TestVisible
   private static Boolean requiresSingleEnqueueChain() {
-    return System.isBatch() || System.isQueueable();
+    return NotificationGovernorLimitService.requiresSingleEnqueueChain();
   }
 
   @TestVisible
@@ -166,14 +181,21 @@ public without sharing class NotificationDeliveryDispatcher {
   private static void enqueueViaChain(
     List<NotificationDeliveryModels.DeliveryRequest> requests
   ) {
+    Queueable followUpJob;
     if (requests.size() == 1) {
-      System.enqueueJob(new NotificationDeliveryQueueable(requests[0]));
+      followUpJob = new NotificationDeliveryQueueable(requests[0]);
+    } else {
+      followUpJob = new NotificationDeliveryChainQueueable(requests, 0);
+    }
+
+    if (NotificationGovernorLimitService.enqueueQueueable(followUpJob)) {
       testEnqueuedJobCount++;
       return;
     }
 
-    System.enqueueJob(new NotificationDeliveryChainQueueable(requests, 0));
-    testEnqueuedJobCount++;
+    if (NotificationGovernorLimitService.canProcessImmediateDelivery()) {
+      deliverOverflowInline(requests);
+    }
   }
 
   private static void deliverOverflowInline(
@@ -236,9 +258,14 @@ public without sharing class NotificationDeliveryDispatcher {
           continue;
         }
 
-        System.enqueueJob(new NotificationDeliveryChainQueueable(requests, index));
-        testEnqueuedJobCount++;
-        return;
+        if (
+          NotificationGovernorLimitService.enqueueQueueable(
+            new NotificationDeliveryChainQueueable(requests, index)
+          )
+        ) {
+          testEnqueuedJobCount++;
+          return;
+        }
       }
     } finally {
       try {

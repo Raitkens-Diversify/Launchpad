@@ -38,6 +38,9 @@ public without sharing class NotificationPrepareStartQueueable implements Queuea
 
   private final List<PrepareRequest> prepareRequests;
   private final Integer startIndex;
+  private final List<NotificationCenterDeliveryItem> pendingDeliveryItems = new List<NotificationCenterDeliveryItem>();
+  private Integer remainingStartIndex;
+  private Boolean deliveryEnqueued = false;
 
   public NotificationPrepareStartQueueable(
     String sourceType,
@@ -133,29 +136,31 @@ public without sharing class NotificationPrepareStartQueueable implements Queuea
       return;
     }
 
-    if (!NotificationGovernorLimitService.canEnqueueQueueableJob()) {
+    if (!NotificationGovernorLimitService.enqueueQueueable(job)) {
       NotificationGovernorLimitService.logLimitException(
         'NotificationPrepareStartQueueable.enqueueRequests',
         new NotificationDeliveryService.NotificationDeliveryException(
-          NotificationConstants.ERROR_SOQL_QUERY_LIMIT
+          NotificationConstants.ERROR_QUEUEABLE_JOB_LIMIT
         )
       );
       return;
     }
 
-    System.enqueueJob(job);
     testEnqueuedJobCount++;
   }
 
   public void execute(QueueableContext context) {
+    NotificationGovernorLimitService.enterQueueableExecute();
     System.attachFinalizer(this);
     runPrepare();
+    enqueueFollowUpWork();
   }
 
   @TestVisible
   private void runPrepare() {
     NotificationCenterEventService service = new NotificationCenterEventService();
     NotificationEmailDeliveryService.beginBatch();
+    Boolean processOneSource = System.isQueueable();
 
     try {
       for (
@@ -163,15 +168,31 @@ public without sharing class NotificationPrepareStartQueueable implements Queuea
         index < prepareRequests.size();
         index++
       ) {
+        if (processOneSource && index > startIndex) {
+          remainingStartIndex = index;
+          break;
+        }
+
         if (
           index > startIndex &&
           !NotificationGovernorLimitService.canAffordPrepareSourceRecord()
         ) {
-          enqueueRequests(prepareRequests, index);
-          return;
+          remainingStartIndex = index;
+          if (!processOneSource) {
+            enqueueRequests(prepareRequests, index);
+          }
+          break;
         }
 
-        processPrepareRequest(service, prepareRequests[index]);
+        collectPrepareRequest(service, prepareRequests[index]);
+      }
+
+      pendingDeliveryItems.addAll(
+        NotificationRecipientPrepareDispatcher.consumeDeferredDeliveryItems()
+      );
+
+      if (!processOneSource) {
+        enqueuePendingDelivery();
       }
     } finally {
       try {
@@ -185,7 +206,7 @@ public without sharing class NotificationPrepareStartQueueable implements Queuea
     }
   }
 
-  private void processPrepareRequest(
+  private void collectPrepareRequest(
     NotificationCenterEventService service,
     PrepareRequest prepareRequest
   ) {
@@ -205,10 +226,8 @@ public without sharing class NotificationPrepareStartQueueable implements Queuea
         );
       }
 
-      if (!(Test.isRunningTest() && testSkipDeliveryEnqueue)) {
-        NotificationDeliveryEnqueueService.enqueueImmediateDeliveryItems(
-          deliveryItems
-        );
+      if (deliveryItems != null && !deliveryItems.isEmpty()) {
+        pendingDeliveryItems.addAll(deliveryItems);
       }
     } catch (Exception error) {
       NotificationGovernorLimitService.logLimitException(
@@ -218,8 +237,72 @@ public without sharing class NotificationPrepareStartQueueable implements Queuea
     }
   }
 
+  private void enqueueFollowUpWork() {
+    NotificationRecipientPrepareModels.ContinuationRequest continuation =
+      NotificationRecipientPrepareDispatcher.consumeDeferredContinuation();
+
+    if (
+      continuation != null &&
+      NotificationGovernorLimitService.enqueueQueueable(
+        new NotificationPrepareChainQueueable(continuation)
+      )
+    ) {
+      testEnqueuedJobCount++;
+      return;
+    }
+
+    if (
+      remainingStartIndex != null &&
+      remainingStartIndex < prepareRequests.size() &&
+      NotificationGovernorLimitService.enqueueQueueable(
+        new NotificationPrepareStartQueueable(
+          prepareRequests,
+          remainingStartIndex
+        )
+      )
+    ) {
+      testEnqueuedJobCount++;
+      return;
+    }
+
+    enqueuePendingDelivery();
+  }
+
+  private void enqueuePendingDelivery() {
+    if (Test.isRunningTest() && testSkipDeliveryEnqueue) {
+      deliveryEnqueued = true;
+      return;
+    }
+
+    if (pendingDeliveryItems.isEmpty() || deliveryEnqueued) {
+      return;
+    }
+
+    List<NotificationDeliveryModels.DeliveryRequest> requests = NotificationDeliveryRequestBuilder.fromDeliveryItems(
+      pendingDeliveryItems
+    );
+    if (requests == null || requests.isEmpty()) {
+      deliveryEnqueued = true;
+      return;
+    }
+
+    NotificationDeliveryDispatcher.enqueueAsSingleFollowUp(requests);
+    deliveryEnqueued = true;
+  }
+
   public void execute(System.FinalizerContext context) {
+    NotificationGovernorLimitService.enterFinalizerExecute();
     handleFinalizerFailure(context);
+    if (
+      context != null &&
+      context.getResult() == System.ParentJobResult.UNHANDLED_EXCEPTION
+    ) {
+      return;
+    }
+
+    if (!deliveryEnqueued) {
+      enqueuePendingDelivery();
+    }
   }
 
   @TestVisible

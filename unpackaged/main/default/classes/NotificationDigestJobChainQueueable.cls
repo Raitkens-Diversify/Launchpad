@@ -25,6 +25,7 @@ public with sharing class NotificationDigestJobChainQueueable implements Queueab
   }
 
   public void execute(QueueableContext context) {
+    NotificationGovernorLimitService.enterQueueableExecute();
     NotificationDigestJobDispatcher.chainRemainingJobs(pendingRequests, startIndex);
   }
 }

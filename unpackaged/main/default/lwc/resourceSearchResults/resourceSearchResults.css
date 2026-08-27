@@ -68,4 +68,12 @@
     padding: var(--ds-space-xl, 24px);
     text-align: center;
     color: var(--slds-g-color-on-surface-1, #4b5563);
+  /* c-arc-loading-spinner is position:absolute and centres on the nearest
+     POSITIONED ancestor. Without this it escapes past this container to
+     whatever ancestor happens to be positioned -- on the ARC shell that is
+     .theme-layout__main, so the spinner floated in the middle of the page
+     instead of sitting where it belongs. min-height gives it room, since an
+     absolutely positioned child contributes no height. */
+  position: relative;
+  min-height: 4rem;
 }

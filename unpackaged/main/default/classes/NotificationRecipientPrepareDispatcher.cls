@@ -14,6 +14,9 @@ public without sharing class NotificationRecipientPrepareDispatcher {
   @TestVisible
   private static Integer syncChunksProcessed = 0;
 
+  private static NotificationRecipientPrepareModels.ContinuationRequest deferredContinuation;
+  private static List<NotificationCenterDeliveryItem> deferredDeliveryItems = new List<NotificationCenterDeliveryItem>();
+
   public static List<NotificationCenterDeliveryItem> processRecipients(
     NotificationRecipientPrepareModels.SourcePrepareContext context
   ) {
@@ -169,46 +172,69 @@ public without sharing class NotificationRecipientPrepareDispatcher {
       return;
     }
 
-    if (!System.isQueueable() && !System.isBatch() && !Test.isRunningTest()) {
-      if (NotificationGovernorLimitService.canEnqueueQueueableJob()) {
-        System.enqueueJob(
-          new NotificationPrepareChainQueueable(continuationRequest)
-        );
-        testEnqueuedContinuationCount++;
-        return;
-      }
-
-      continuePreparation(continuationRequest);
-      testEnqueuedContinuationCount++;
-      return;
-    }
-
     if (System.isQueueable()) {
-      if (NotificationGovernorLimitService.canEnqueueQueueableJob()) {
-        System.enqueueJob(
-          new NotificationPrepareChainQueueable(continuationRequest)
-        );
-        testEnqueuedContinuationCount++;
-        return;
-      }
-
-      continuePreparation(continuationRequest);
+      deferredContinuation = continuationRequest;
       testEnqueuedContinuationCount++;
       return;
     }
 
-    if (Test.isRunningTest()) {
-      NotificationRecipientPrepareDispatcher.continuePreparation(
-        continuationRequest
+    if (
+      NotificationGovernorLimitService.isInFinalizerContext() ||
+      System.isBatch()
+    ) {
+      if (
+        NotificationGovernorLimitService.enqueueQueueable(
+          new NotificationPrepareChainQueueable(continuationRequest)
+        )
+      ) {
+        testEnqueuedContinuationCount++;
+        return;
+      }
+
+      NotificationGovernorLimitService.logLimitException(
+        'NotificationRecipientPrepareDispatcher.enqueueContinuation',
+        new NotificationDeliveryService.NotificationDeliveryException(
+          NotificationConstants.ERROR_QUEUEABLE_JOB_LIMIT
+        )
       );
-      testEnqueuedContinuationCount++;
+      return;
     }
+
+    if (
+      !Test.isRunningTest() &&
+      NotificationGovernorLimitService.enqueueQueueable(
+        new NotificationPrepareChainQueueable(continuationRequest)
+      )
+    ) {
+      testEnqueuedContinuationCount++;
+      return;
+    }
+
+    continuePreparation(continuationRequest);
+    testEnqueuedContinuationCount++;
+  }
+
+  public static NotificationRecipientPrepareModels.ContinuationRequest consumeDeferredContinuation() {
+    NotificationRecipientPrepareModels.ContinuationRequest continuationRequest = deferredContinuation;
+    deferredContinuation = null;
+    return continuationRequest;
+  }
+
+  public static List<NotificationCenterDeliveryItem> consumeDeferredDeliveryItems() {
+    List<NotificationCenterDeliveryItem> deliveryItems = deferredDeliveryItems;
+    deferredDeliveryItems = new List<NotificationCenterDeliveryItem>();
+    return deliveryItems;
   }
 
   private static void enqueueImmediateDelivery(
     List<NotificationCenterDeliveryItem> deliveryItems
   ) {
     if (deliveryItems == null || deliveryItems.isEmpty()) {
+      return;
+    }
+
+    if (System.isQueueable()) {
+      deferredDeliveryItems.addAll(deliveryItems);
       return;
     }
 
@@ -259,6 +285,8 @@ public without sharing class NotificationRecipientPrepareDispatcher {
     testEnqueuedContinuationCount = 0;
     testMaxSyncChunks = null;
     syncChunksProcessed = 0;
+    deferredContinuation = null;
+    deferredDeliveryItems = new List<NotificationCenterDeliveryItem>();
   }
 
   private static Boolean shouldStopSyncProcessing() {

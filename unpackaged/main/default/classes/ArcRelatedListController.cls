@@ -17,8 +17,8 @@ public with sharing class ArcRelatedListController {
   /** A card on a record page, not a list view. */
   private static final Integer ROW_LIMIT = 10;
 
-  /** One past the limit, so "10+" is known without a second COUNT() query. */
-  private static final Integer FETCH_LIMIT = 11;
+  /** Ceiling on getRelatedRecordsPage's caller-supplied pageSize. */
+  private static final Integer MAX_PAGE_SIZE = 100;
 
   /**
    * @param objectApiName child object, e.g. Check_Deposit__c
@@ -42,7 +42,52 @@ public with sharing class ArcRelatedListController {
       objectApiName,
       parentFieldApiName,
       fieldApiNames,
-      linkFieldApiName
+      linkFieldApiName,
+      0,
+      ROW_LIMIT
+    );
+  }
+
+  /**
+   * Same query as getRelatedRecords, but offset/pageSize are caller-controlled
+   * instead of the fixed ROW_LIMIT=10 card default -- for arcRelatedList's
+   * opt-in "Load more" mode (a table expected to hold more than a handful of
+   * rows) rather than a small fixed-size rail card.
+   *
+   * A separate method rather than optional parameters on getRelatedRecords:
+   * both are @AuraEnabled(cacheable=true), and Apex method overloading on a
+   * name LWC imports by string (`@salesforce/apex/Class.method`) risks
+   * resolving to the wrong overload -- a new name is unambiguous, and every
+   * existing card keeps calling the original method completely unchanged.
+   *
+   * @param offsetValue rows to skip; null or negative treated as 0
+   * @param pageSize rows per page; null keeps the ROW_LIMIT=10 default,
+   *        clamped to MAX_PAGE_SIZE
+   */
+  @AuraEnabled(cacheable=true)
+  public static RelatedRecords getRelatedRecordsPage(
+    Id recordId,
+    String objectApiName,
+    String parentFieldApiName,
+    List<String> fieldApiNames,
+    String linkFieldApiName,
+    Integer offsetValue,
+    Integer pageSize
+  ) {
+    Integer effectiveOffset = offsetValue == null
+      ? 0
+      : Math.max(offsetValue, 0);
+    Integer effectivePageSize = pageSize == null
+      ? ROW_LIMIT
+      : Math.min(Math.max(pageSize, 1), MAX_PAGE_SIZE);
+    return buildRelatedRecords(
+      recordId,
+      objectApiName,
+      parentFieldApiName,
+      fieldApiNames,
+      linkFieldApiName,
+      effectiveOffset,
+      effectivePageSize
     );
   }
 
@@ -78,7 +123,9 @@ public with sharing class ArcRelatedListController {
             request.objectApiName,
             request.parentFieldApiName,
             request.fieldApiNames,
-            request.linkFieldApiName
+            request.linkFieldApiName,
+            0,
+            ROW_LIMIT
           )
         );
       } catch (Exception e) {
@@ -100,7 +147,9 @@ public with sharing class ArcRelatedListController {
     String objectApiName,
     String parentFieldApiName,
     List<String> fieldApiNames,
-    String linkFieldApiName
+    String linkFieldApiName,
+    Integer offsetValue,
+    Integer pageSize
   ) {
     if (recordId == null) {
       throw new AuraHandledException('Record Id is required.');
@@ -148,6 +197,9 @@ public with sharing class ArcRelatedListController {
     // Every token below came from the describe map above, never from the
     // caller's string, so there is nothing here to inject through. The one
     // caller-supplied value is the record id, which is bound.
+    // One past pageSize, so "more past this page" is known without a second
+    // COUNT() query -- same trick the fixed-card path always used (there,
+    // pageSize is just always ROW_LIMIT=10).
     String soql =
       'SELECT Id, ' +
       String.join(selectList, ', ') +
@@ -161,7 +213,9 @@ public with sharing class ArcRelatedListController {
       resolveSortField(fieldMap) +
       ' DESC' +
       ' LIMIT ' +
-      FETCH_LIMIT;
+      (pageSize + 1) +
+      ' OFFSET ' +
+      offsetValue;
 
     RelatedRecords result = new RelatedRecords();
     result.rows = new List<RelatedRow>();
@@ -186,9 +240,9 @@ public with sharing class ArcRelatedListController {
       result.rows.add(row);
     }
 
-    result.hasMore = result.rows.size() > ROW_LIMIT;
+    result.hasMore = result.rows.size() > pageSize;
     if (result.hasMore) {
-      result.rows.remove(ROW_LIMIT);
+      result.rows.remove(pageSize);
     }
     return result;
   }

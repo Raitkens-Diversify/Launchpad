@@ -15,3 +15,14 @@
   padding: 2rem 0;
   text-align: center;
 }
+
+.arc-related-table__loading {
+  /* c-arc-loading-spinner is position:absolute and centres on the nearest
+     POSITIONED ancestor. Without this it escapes past this container to
+     whatever ancestor happens to be positioned -- on the ARC shell that is
+     .theme-layout__main, so the spinner floated in the middle of the page
+     instead of sitting where it belongs. min-height gives it room, since an
+     absolutely positioned child contributes no height. */
+  position: relative;
+  min-height: 4rem;
+}

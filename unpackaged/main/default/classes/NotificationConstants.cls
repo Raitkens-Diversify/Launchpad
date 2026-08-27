@@ -90,6 +90,8 @@ public class NotificationConstants {
     'Insufficient SOQL query budget for notification prepare';
   public static final String ERROR_EMAIL_INVOCATION_LIMIT =
     'Insufficient email invocation budget for notification delivery';
+  public static final String ERROR_QUEUEABLE_JOB_LIMIT =
+    'Insufficient queueable job budget for notification async work';
 
   public static final String SUPPRESSION_USER_DIGEST_DISABLED =
     'User digest disabled for channel';

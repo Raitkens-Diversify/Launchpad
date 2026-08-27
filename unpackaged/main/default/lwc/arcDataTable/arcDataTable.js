@@ -430,9 +430,19 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
   page = 1;
   @track _detailGroupExpansion = {};
 
+  // Whether the table's own scroll cues (see .div-table-scroll__fade) show at
+  // each edge -- recomputed on scroll, on window resize, and after every
+  // render (covers column/row changes that resize the table's content
+  // without necessarily resizing the viewport window itself).
+  _canScrollLeft = false;
+  _canScrollRight = false;
+  _handleWindowResize;
+
   connectedCallback() {
     this.initializeSortState();
     this.applyIconVariables();
+    this._handleWindowResize = () => this.updateScrollFadeState();
+    window.addEventListener("resize", this._handleWindowResize);
   }
 
   renderedCallback() {
@@ -451,6 +461,47 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
     } else if (this._actionMenuNeedsFocus) {
       this._actionMenuNeedsFocus = false;
       this.template.querySelector(".arc-data-table__menu-item")?.focus();
+    }
+
+    this.updateScrollFadeState();
+  }
+
+  get leftScrollFadeClass() {
+    return this._canScrollLeft
+      ? "div-table-scroll__fade div-table-scroll__fade--left div-table-scroll__fade--visible"
+      : "div-table-scroll__fade div-table-scroll__fade--left";
+  }
+
+  get rightScrollFadeClass() {
+    return this._canScrollRight
+      ? "div-table-scroll__fade div-table-scroll__fade--right div-table-scroll__fade--visible"
+      : "div-table-scroll__fade div-table-scroll__fade--right";
+  }
+
+  handleTableScroll() {
+    this.updateScrollFadeState();
+  }
+
+  /**
+   * A small epsilon rather than a strict >0/<max comparison -- sub-pixel
+   * scroll positions (fractional zoom levels, some browsers' rounding) would
+   * otherwise leave a fade very faintly stuck on at a true scroll extreme.
+   */
+  updateScrollFadeState() {
+    const scroller = this.template.querySelector(".div-table-scroll");
+    if (!scroller) {
+      return;
+    }
+
+    const canScrollLeft = scroller.scrollLeft > 2;
+    const canScrollRight =
+      scroller.scrollWidth - scroller.clientWidth - scroller.scrollLeft > 2;
+
+    if (canScrollLeft !== this._canScrollLeft) {
+      this._canScrollLeft = canScrollLeft;
+    }
+    if (canScrollRight !== this._canScrollRight) {
+      this._canScrollRight = canScrollRight;
     }
   }
 
@@ -1444,6 +1495,9 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
   disconnectedCallback() {
     this.removeResizeListeners();
     this.detachActionMenuDismissal();
+    if (this._handleWindowResize) {
+      window.removeEventListener("resize", this._handleWindowResize);
+    }
   }
 
   handleColumnDragStart(event) {

@@ -1,5 +1,16 @@
 <template>
     <lightning-card title="Branch Pit Stop Tasks">
+        <!-- lightning-card puts the actions slot in the header, top
+             right. Reloads only this tile. -->
+        <lightning-button-icon
+            slot="actions"
+            icon-name="utility:refresh"
+            variant="border-filled"
+            alternative-text="Refresh branch pit stop tasks"
+            title="Refresh"
+            disabled={isRefreshing}
+            onclick={handleRefresh}
+        ></lightning-button-icon>
         <template lwc:if={hasTasks}>
             <table class="slds-table slds-table_cell-buffer slds-table_bordered">
                 <thead>

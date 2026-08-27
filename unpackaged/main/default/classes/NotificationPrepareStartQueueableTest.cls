@@ -83,6 +83,68 @@ private class NotificationPrepareStartQueueableTest {
   }
 
   @IsTest
+  static void executeQueueable_staysWithinSingleChainedJobLimit() {
+    NotificationGovernorLimitService.resetTestState();
+    NotificationPrepareStartQueueable.resetTestState();
+    NotificationRecipientPrepareDispatcher.resetTestState();
+    NotificationRecipientPrepareDispatcher.testMaxSyncChunks = 1;
+    NotificationGovernorLimitService.testRecipientChunkSizeOverride = 1;
+    NotificationCustomNotificationService.testSkipSend = true;
+    NotificationDeliveryService.skipRetryEnqueueForTest = true;
+    NotificationTestDataFactory.clearTestOverrides();
+
+    NotificationTestDataFactory.NotificationTestContext context =
+      NotificationTestDataFactory.createHouseholdWithRecipient();
+    NotificationTestDataFactory.createGlobalPreference(
+      NotificationConstants.OBJECT_TYPE_TASK
+    );
+
+    User secondRecipient = NotificationTestDataFactory.createStandardUser(
+      'prepq2'
+    );
+    NotificationTaskRecipientService.testRecipientOverrides = new Map<Id, List<Id>>{
+      context.household.Id => new List<Id>{
+        context.recipientUser.Id,
+        secondRecipient.Id
+      }
+    };
+
+    Task taskRecord = new Task(
+      Subject = 'Single Chain Limit Task',
+      WhatId = context.household.Id
+    );
+    NotificationTestDataFactory.insertRecord(taskRecord);
+
+    try {
+      Test.startTest();
+      System.runAs(NotificationTestDataFactory.runningUser()) {
+        System.enqueueJob(
+          new NotificationPrepareStartQueueable(
+            NotificationConstants.OBJECT_TYPE_TASK,
+            String.valueOf(taskRecord.Id),
+            null
+          )
+        );
+      }
+      Test.stopTest();
+
+      List<Notification_Log__c> logs = [
+        SELECT Id
+        FROM Notification_Log__c
+        WHERE Source_Record_Id__c = :String.valueOf(taskRecord.Id)
+      ];
+
+      System.assert(
+        !logs.isEmpty(),
+        'Expected prepare queueable to create logs without exceeding the chained queueable limit.'
+      );
+    } finally {
+      NotificationTaskRecipientService.testRecipientOverrides = null;
+      NotificationDeliveryService.skipRetryEnqueueForTest = false;
+    }
+  }
+
+  @IsTest
   static void enqueueUsesAsyncPathWhenForced() {
     NotificationGovernorLimitService.resetTestState();
     NotificationPrepareStartQueueable.resetTestState();

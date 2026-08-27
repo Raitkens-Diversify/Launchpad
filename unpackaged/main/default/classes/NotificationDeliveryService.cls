@@ -652,6 +652,7 @@ public without sharing class NotificationDeliveryService {
       NotificationGovernorLimitService.isEmailInvocationLimitMessage(
         errorMessage
       ) ||
+      NotificationGovernorLimitService.isQueueableLimitMessage(errorMessage) ||
       errorMessage == NotificationConstants.ERROR_GOVERNOR_LIMIT);
   }
 

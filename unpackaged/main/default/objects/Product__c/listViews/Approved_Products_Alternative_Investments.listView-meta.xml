@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ListView xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Approved_Products</fullName>
+    <fullName>Approved_Products_Alternative_Investments</fullName>
     <columns>NAME</columns>
     <columns>Sponsor__c</columns>
     <columns>Asset_Class__c</columns>
@@ -14,5 +14,10 @@
     <columns>Current_Distribution__c</columns>
     <columns>Current_NAV__c</columns>
     <filterScope>Everything</filterScope>
-    <label>Approved Products</label>
+    <filters>
+        <field>Asset_Category__c</field>
+        <operation>equals</operation>
+        <value>Alternative Investment</value>
+    </filters>
+    <label>Advisor View - Alternative Investments</label>
 </ListView>

@@ -17,12 +17,12 @@
 
     <template lwc:elseif={hasDetail}>
       <!--
-        Structure follows ProductRecordPageAdvisors.flexipage: highlights in
-        the header, a two-column body -- the always-shown field sections as
-        the main column, a tabbed panel (History, Related Products) as a
-        narrower left rail. Flipped from Case Detail's own right-rail layout,
-        per explicit request: Product has far less to say in a main column
-        than a Case does, so the tabs lead instead of trailing.
+        Structure follows ProductRecordPageAdvisors.flexipage's own field
+        sections, rearranged per explicit request: Related Products leads as
+        a full-width collapsible table (not a rail tab), General/Sponsor
+        Information sit below it as the main column, and History closes the
+        page as its own card in a right rail -- the same right-rail pattern
+        Case Detail uses, just a single card instead of several.
       -->
       <header class="arc-product-detail__header">
         <div class="arc-product-detail__header-top">
@@ -77,107 +77,45 @@
         </dl>
       </header>
 
-      <div class="arc-product-detail__body">
-        <div class="arc-product-detail__side">
-          <div class="arc-product-detail__tabs-card">
-            <c-ds-tabs
-              tabs={tabs}
-              selected={activeTab}
-              label="Product record activity"
-              ontabchange={handleTabChange}
-            ></c-ds-tabs>
+      <!-- Full-width, collapsible table -- not a rail tab. The same
+           c-arc-data-table every other ARC table uses (its own numbered
+           pager, cell styling, scroll-edge cues), fed by one batched fetch
+           through ArcRelatedListController.getRelatedRecordsPage rather than
+           the fixed 10-row c/arcRelatedList card: a product can be held
+           across many financial accounts. -->
+      <details class="product-section arc-product-detail__related-products" open>
+        <summary class="product-section__summary">Related Products</summary>
+        <div class="product-section__body">
+          <template lwc:if={isRelatedProductsLoading}>
+            <div class="arc-product-detail__panel-loading">
+              <lightning-spinner
+                alternative-text="Loading related products"
+                size="small"
+              ></lightning-spinner>
+            </div>
+          </template>
 
-            <!-- ============================ HISTORY ============================ -->
-            <template lwc:if={showHistory}>
-              <div class="arc-product-detail__panel" role="tabpanel" aria-label="History">
-                <template lwc:if={isHistoryLoading}>
-                  <div class="arc-product-detail__panel-loading">
-                    <lightning-spinner
-                      alternative-text="Loading history"
-                      size="small"
-                    ></lightning-spinner>
-                  </div>
-                </template>
+          <template lwc:elseif={relatedProductsError}>
+            <p class="arc-product-detail__panel-error" role="alert">
+              {relatedProductsError}
+            </p>
+          </template>
 
-                <template lwc:if={historyError}>
-                  <p class="arc-product-detail__panel-error" role="alert">
-                    {historyError}
-                  </p>
-                </template>
-
-                <template lwc:if={hasHistory}>
-                  <ul class="arc-product-detail__history-rows">
-                    <template for:each={historyEntries} for:item="entry">
-                      <li key={entry.id} class="arc-product-detail__history-row">
-                        <dl class="arc-product-detail__history-fields">
-                          <div class="arc-product-detail__history-field">
-                            <dt>Date:</dt>
-                            <dd>
-                              <lightning-formatted-date-time
-                                value={entry.createdDate}
-                                year="numeric"
-                                month="numeric"
-                                day="numeric"
-                                hour="2-digit"
-                                minute="2-digit"
-                              ></lightning-formatted-date-time>
-                            </dd>
-                          </div>
-                          <div class="arc-product-detail__history-field">
-                            <dt>Field:</dt>
-                            <dd>{entry.fieldLabel}</dd>
-                          </div>
-                          <div class="arc-product-detail__history-field">
-                            <dt>User:</dt>
-                            <dd>{entry.actorName}</dd>
-                          </div>
-                          <div class="arc-product-detail__history-field">
-                            <dt>Original Value:</dt>
-                            <dd>{entry.oldValue}</dd>
-                          </div>
-                          <div class="arc-product-detail__history-field">
-                            <dt>New Value:</dt>
-                            <dd>{entry.newValue}</dd>
-                          </div>
-                        </dl>
-                      </li>
-                    </template>
-                  </ul>
-
-                  <template lwc:if={historyHasMore}>
-                    <p class="arc-product-detail__panel-more">
-                      Showing the first {historyCount}.
-                    </p>
-                  </template>
-                </template>
-
-                <template lwc:if={showHistoryEmpty}>
-                  <p class="arc-product-detail__panel-empty">
-                    No history on this record yet.
-                  </p>
-                </template>
-              </div>
-            </template>
-
-            <!-- ======================= RELATED PRODUCTS ======================= -->
-            <template lwc:if={showRelatedProducts}>
-              <div
-                class="arc-product-detail__panel"
-                role="tabpanel"
-                aria-label="Related Products"
-              >
-                <c-arc-related-list
-                  record-id={recordId}
-                  card-label="Related Products"
-                  related-object-api-name="Financial_Account_Related_Product__c"
-                  parent-field-api-name="Product__c"
-                  columns="Financial Account:Wizard_Financial_Account__r.Name,Household:Household__c,Owner:Primary_Owner__c,Amount:Amount__c,Created:CreatedDate"
-                ></c-arc-related-list>
-              </div>
-            </template>
-          </div>
+          <template lwc:else>
+            <c-arc-data-table
+              aria-label="Related Products"
+              key-field="id"
+              columns={relatedProductsColumns}
+              data={relatedProductsRows}
+              default-link-object-api-name={relatedProductsObjectApiName}
+              placeholder="-"
+              enable-row-navigation
+            ></c-arc-data-table>
+          </template>
         </div>
+      </details>
 
+      <div class="arc-product-detail__body">
         <div class="arc-product-detail__main">
           <details class="product-section" open>
             <summary class="product-section__summary">General Information</summary>
@@ -204,6 +142,84 @@
               ></lightning-record-form>
             </div>
           </details>
+        </div>
+
+        <div class="arc-product-detail__side">
+          <article class="arc-product-detail__history-card">
+            <header class="arc-product-detail__history-card-header">
+              <h2 class="arc-product-detail__history-card-title">History</h2>
+              <span class="arc-product-detail__history-card-count"
+                >({historyCount})</span
+              >
+            </header>
+
+            <template lwc:if={isHistoryLoading}>
+              <div class="arc-product-detail__panel-loading">
+                <lightning-spinner
+                  alternative-text="Loading history"
+                  size="small"
+                ></lightning-spinner>
+              </div>
+            </template>
+
+            <template lwc:if={historyError}>
+              <p class="arc-product-detail__panel-error" role="alert">
+                {historyError}
+              </p>
+            </template>
+
+            <template lwc:if={hasHistory}>
+              <ul class="arc-product-detail__history-rows">
+                <template for:each={historyEntries} for:item="entry">
+                  <li key={entry.id} class="arc-product-detail__history-row">
+                    <dl class="arc-product-detail__history-fields">
+                      <div class="arc-product-detail__history-field">
+                        <dt>Date:</dt>
+                        <dd>
+                          <lightning-formatted-date-time
+                            value={entry.createdDate}
+                            year="numeric"
+                            month="numeric"
+                            day="numeric"
+                            hour="2-digit"
+                            minute="2-digit"
+                          ></lightning-formatted-date-time>
+                        </dd>
+                      </div>
+                      <div class="arc-product-detail__history-field">
+                        <dt>Field:</dt>
+                        <dd>{entry.fieldLabel}</dd>
+                      </div>
+                      <div class="arc-product-detail__history-field">
+                        <dt>User:</dt>
+                        <dd>{entry.actorName}</dd>
+                      </div>
+                      <div class="arc-product-detail__history-field">
+                        <dt>Original Value:</dt>
+                        <dd>{entry.oldValue}</dd>
+                      </div>
+                      <div class="arc-product-detail__history-field">
+                        <dt>New Value:</dt>
+                        <dd>{entry.newValue}</dd>
+                      </div>
+                    </dl>
+                  </li>
+                </template>
+              </ul>
+
+              <template lwc:if={historyHasMore}>
+                <p class="arc-product-detail__panel-more">
+                  Showing the first {historyCount}.
+                </p>
+              </template>
+            </template>
+
+            <template lwc:if={showHistoryEmpty}>
+              <p class="arc-product-detail__panel-empty">
+                No history on this record yet.
+              </p>
+            </template>
+          </article>
         </div>
       </div>
     </template>

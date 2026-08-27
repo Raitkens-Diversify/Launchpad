@@ -98,7 +98,12 @@
   align-items: center;
   gap: var(--slds-g-spacing-2, 8px);
   height: 40px;
-  max-width: 240px;
+  /* Wide enough for a long saved-view label ("Advisor View - Alternative
+     Investments", 38 chars) to fit without the ellipsis truncation below
+     kicking in -- a tab genuinely too long to fit the strip still overflows
+     cleanly into the "More" menu via measureTabsIfNeeded's real pixel-width
+     measurement, so this only needs to be generous, not exact. */
+  max-width: 360px;
   padding: 0 var(--slds-g-spacing-3, 12px);
   border: 0;
   border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
@@ -147,7 +152,7 @@
 }
 
 .arc-record-list-view__tab-wrap .arc-record-list-view__tab {
-  max-width: 200px;
+  max-width: 320px;
   padding-right: var(--slds-g-spacing-2, 8px);
   border-bottom: 0;
 }

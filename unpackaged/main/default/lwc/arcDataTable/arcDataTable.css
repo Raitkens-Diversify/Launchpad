@@ -73,6 +73,53 @@
   position: relative;
 }
 
+/* Wraps .div-table-scroll (not a descendant of it) so the fade cues below can
+   sit outside the scrolling box and never themselves add to scrollWidth. */
+.div-table-scroll-region {
+  position: relative;
+}
+
+/* Scroll-edge cues: a soft fade over the outer ~28px of the table's visible
+   viewport, shown only while there is more to scroll to in that direction --
+   otherwise a wide table quietly truncates columns with no signal that
+   scrolling would reveal them. Toggled by updateScrollFadeState() off
+   scrollLeft/scrollWidth/clientWidth. z-index sits below the pinned
+   actions column (z-index 2/3, see ".arc-data-table__cell--actions" below)
+   so that column's own opaque background naturally clips the fade at its
+   edge instead of a shadow painting over its button. */
+.div-table-scroll__fade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 28px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 120ms ease-in-out;
+  z-index: 1;
+}
+
+.div-table-scroll__fade--visible {
+  opacity: 1;
+}
+
+.div-table-scroll__fade--left {
+  left: 0;
+  background: linear-gradient(
+    to right,
+    var(--div-color-surface, #ffffff),
+    transparent
+  );
+}
+
+.div-table-scroll__fade--right {
+  right: 0;
+  background: linear-gradient(
+    to left,
+    var(--div-color-surface, #ffffff),
+    transparent
+  );
+}
+
 .arc-data-table__empty-row:hover {
   background: transparent;
 }
@@ -828,6 +875,25 @@
   background: #f8fafc;
   border-color: #e2e8f0;
   color: #475569;
+}
+
+/* Semantic tones (red/yellow/green) -- for a value whose meaning is a real
+   status, not just one of 8 arbitrary hash colours. See
+   SEMANTIC_PILL_TONES in arcRecordListView.js. */
+.div-table-badge--tone-red {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+.div-table-badge--tone-yellow {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+.div-table-badge--tone-green {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #15803d;
 }
 
 /* No value: plain placeholder text rather than an empty badge. */
