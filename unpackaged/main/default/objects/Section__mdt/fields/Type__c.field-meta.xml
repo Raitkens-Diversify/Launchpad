@@ -15,6 +15,21 @@
                 <label>Individual Detail</label>
             </value>
             <value>
+                <fullName>Business Detail</fullName>
+                <default>false</default>
+                <label>Business Detail</label>
+            </value>
+            <value>
+                <fullName>Trust Detail</fullName>
+                <default>false</default>
+                <label>Trust Detail</label>
+            </value>
+            <value>
+                <fullName>Retirement Plan Detail</fullName>
+                <default>false</default>
+                <label>Retirement Plan Detail</label>
+            </value>
+            <value>
                 <fullName>Household Detail</fullName>
                 <default>false</default>
                 <label>Household Detail</label>

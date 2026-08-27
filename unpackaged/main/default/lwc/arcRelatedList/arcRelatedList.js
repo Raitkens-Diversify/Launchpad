@@ -209,6 +209,20 @@ export default class ArcRelatedList extends NavigationMixin(LightningElement) {
     }
   }
 
+  /**
+   * Re-runs the query outside the usual loadSignature-changed trigger -- for
+   * a caller that just created a child record (a logged call, an uploaded
+   * file) through its own UI and needs this card to pick it up without any
+   * of its own inputs actually changing.
+   */
+  @api
+  refresh() {
+    if (this.usePreloadedData) {
+      return Promise.resolve();
+    }
+    return this.loadRows();
+  }
+
   /** `Label:FieldPath` pairs; a bare entry uses the path as its own label. */
   get columnDefs() {
     return (this.columns || "")
@@ -353,8 +367,23 @@ export default class ArcRelatedList extends NavigationMixin(LightningElement) {
     if (this.disableRowLinks) {
       return;
     }
+
+    const linkId = event.currentTarget.dataset.link;
+
+    // A ContentDocument has no Experience Cloud detail page of its own --
+    // there is nothing for buildRecordNavigationReference to route to, so a
+    // Files list opens the file itself instead of navigating anywhere. Same
+    // download servlet already used elsewhere in this org (see
+    // envelopeManageDocuments._downloadFile) rather than a new mechanism.
+    if (this.linkObjectApiName === "ContentDocument") {
+      if (linkId && typeof window !== "undefined") {
+        window.location.href = `/sfc/servlet.shepherd/document/download/${linkId}`;
+      }
+      return;
+    }
+
     const reference = buildRecordNavigationReference(
-      event.currentTarget.dataset.link,
+      linkId,
       this.linkObjectApiName || this.relatedObjectApiName
     );
     if (reference) {

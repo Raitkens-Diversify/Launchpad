@@ -260,6 +260,19 @@ export default class ArcActivityPanel extends NavigationMixin(LightningElement) 
   isSettingsOpen = false;
   openMenu = null;
 
+  /**
+   * Free-text filter over the loaded timeline.
+   *
+   * CLIENT-SIDE ON PURPOSE. It filters what is already here -- every upcoming and
+   * overdue activity, plus the most recent page of past ones -- rather than
+   * issuing another query. A server-side search would need its own SOQL and would
+   * still be capped, and the Lightning panel this copies has no search at all, so
+   * there is no behaviour to match. Anything older than the loaded page is
+   * reached through View All, and the hint under the box says so when a search is
+   * running.
+   */
+  searchTerm = "";
+
   /** Section keys the user has collapsed. An array so the template re-renders. */
   collapsedKeys = [];
 
@@ -546,6 +559,55 @@ export default class ArcActivityPanel extends NavigationMixin(LightningElement) 
     ].join(" • ");
   }
 
+  get normalisedSearch() {
+    return (this.searchTerm || "").trim().toLowerCase();
+  }
+
+  get isSearching() {
+    return this.normalisedSearch.length > 0;
+  }
+
+  /**
+   * Matches the fields a person would actually search by: what it was called,
+   * what it said, who owns it, what it hangs off, and its type.
+   */
+  matchesSearch(entry) {
+    const term = this.normalisedSearch;
+    if (!term) {
+      return true;
+    }
+    return [
+      entry.title,
+      entry.description,
+      entry.ownerName,
+      entry.relatedName,
+      entry.typeLabel,
+      entry.status
+    ]
+      .filter(Boolean)
+      .some((value) => String(value).toLowerCase().includes(term));
+  }
+
+  get searchResultLabel() {
+    const count = this.matchCount;
+    return count === 1 ? "1 result" : `${count} results`;
+  }
+
+  get matchCount() {
+    return this.timelineSections.reduce(
+      (total, section) => total + section.entries.length,
+      0
+    );
+  }
+
+  handleSearchChange(event) {
+    this.searchTerm = event.target.value || "";
+  }
+
+  handleClearSearch() {
+    this.searchTerm = "";
+  }
+
   get isAnyCollapsed() {
     return this.collapsedKeys.length > 0;
   }
@@ -579,6 +641,8 @@ export default class ArcActivityPanel extends NavigationMixin(LightningElement) 
   handleShowAllActivities() {
     this.applyFilters(DEFAULTS, false);
     this.collapsedKeys = [];
+    // A search is a filter too, and this button's job is "stop hiding things".
+    this.searchTerm = "";
   }
 
   // ========================================================================
@@ -728,19 +792,18 @@ export default class ArcActivityPanel extends NavigationMixin(LightningElement) 
       return [];
     }
 
+    const upcoming = this.sortUpcomingEntries(
+      (data.upcoming || []).filter((entry) => this.matchesSearch(entry))
+    );
+
     const sections = [
-      this.buildSection(
-        UPCOMING_KEY,
-        UPCOMING_TITLE,
-        this.sortUpcomingEntries(data.upcoming || []),
-        true
-      )
+      this.buildSection(UPCOMING_KEY, UPCOMING_TITLE, upcoming, true)
     ];
 
     const groups = [];
     const byKey = {};
 
-    (data.past || []).forEach((entry) => {
+    (data.past || []).filter((entry) => this.matchesSearch(entry)).forEach((entry) => {
       const when = parseDateTime(entry.sortDate);
       const key = when
         ? `${when.getFullYear()}-${when.getMonth()}`
@@ -792,6 +855,7 @@ export default class ArcActivityPanel extends NavigationMixin(LightningElement) 
 
   buildSection(key, title, entries, showEmptyState) {
     const isOpen = !this.collapsedKeys.includes(key);
+    const isEmpty = showEmptyState && entries.length === 0;
 
     return {
       key,
@@ -801,7 +865,11 @@ export default class ArcActivityPanel extends NavigationMixin(LightningElement) 
       iconName: isOpen ? "utility:chevrondown" : "utility:chevronright",
       count: entries.length,
       entries: entries.map((entry) => this.decorate(entry)),
-      showEmptyState: showEmptyState && entries.length === 0
+      // Only one of these is ever true. A search that matched nothing is not
+      // the same as a record with nothing on it, and the two need different
+      // wording and a different button.
+      showEmptyState: isEmpty && !this.isSearching,
+      showSearchEmptyState: isEmpty && this.isSearching
     };
   }
 

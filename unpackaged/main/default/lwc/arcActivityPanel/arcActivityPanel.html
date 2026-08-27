@@ -116,6 +116,31 @@
           </div>
         </div>
 
+        <!-- Search. Not on the Lightning panel this copies — added because a
+             record with a long history is unusable without it. -->
+        <div class="arc-activity__search">
+          <lightning-input
+            type="search"
+            label="Search activity"
+            variant="label-hidden"
+            placeholder="Search activity..."
+            value={searchTerm}
+            onchange={handleSearchChange}
+          ></lightning-input>
+          <template lwc:if={isSearching}>
+            <p class="arc-activity__search-meta">
+              {searchResultLabel} in what is loaded &nbsp;·&nbsp;
+              <button
+                type="button"
+                class="arc-activity__link"
+                onclick={handleClearSearch}
+              >
+                Clear
+              </button>
+            </p>
+          </template>
+        </div>
+
         <!-- Filter summary and the gear that opens the settings dialog. -->
         <div class="arc-activity__filters">
           <p class="arc-activity__filter-summary">Filters: {filterSummary}</p>
@@ -218,8 +243,29 @@
                 </template>
               </ul>
 
-              <!-- The panel's own empty state, word for word, including the
-                   note about filters and the brand button that clears them. -->
+              <!-- Two empty states: the panel's own, word for word, and a
+                   search-specific one. Telling someone to "change your filters"
+                   when they have typed a search that matched nothing sends them
+                   to the wrong control. -->
+              <template lwc:if={section.showSearchEmptyState}>
+                <div class="arc-activity__empty">
+                  <p class="arc-activity__empty-title">
+                    No activities match your search.
+                  </p>
+                  <p class="arc-activity__empty-body">
+                    Only loaded activities are searched. Use View All for older
+                    history.
+                  </p>
+                  <button
+                    type="button"
+                    class="arc-activity__brand-button"
+                    onclick={handleClearSearch}
+                  >
+                    Clear search
+                  </button>
+                </div>
+              </template>
+
               <template lwc:if={section.showEmptyState}>
                 <div class="arc-activity__empty">
                   <p class="arc-activity__empty-title">

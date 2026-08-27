@@ -27,6 +27,10 @@
             <translation><!-- Beneficial Owner --></translation>
         </picklistValues>
         <picklistValues>
+            <masterLabel>Business Detail</masterLabel>
+            <translation><!-- Business Detail --></translation>
+        </picklistValues>
+        <picklistValues>
             <masterLabel>Business Related Party</masterLabel>
             <translation><!-- Business Related Party --></translation>
         </picklistValues>
@@ -111,6 +115,10 @@
             <translation><!-- Proposed Changes --></translation>
         </picklistValues>
         <picklistValues>
+            <masterLabel>Retirement Plan Detail</masterLabel>
+            <translation><!-- Retirement Plan Detail --></translation>
+        </picklistValues>
+        <picklistValues>
             <masterLabel>Retirement Plan Related Party</masterLabel>
             <translation><!-- Retirement Plan Related Party --></translation>
         </picklistValues>
@@ -133,6 +141,10 @@
         <picklistValues>
             <masterLabel>Third Party Money Movement</masterLabel>
             <translation><!-- Third Party Money Movement --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Trust Detail</masterLabel>
+            <translation><!-- Trust Detail --></translation>
         </picklistValues>
         <picklistValues>
             <masterLabel>Trust Related Party</masterLabel>

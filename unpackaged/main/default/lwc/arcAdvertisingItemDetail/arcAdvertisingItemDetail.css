@@ -139,6 +139,15 @@
   gap: 12px;
 }
 
+.arc-advertising-item-detail__activity-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.arc-advertising-item-detail__activity-actions lightning-button {
+  flex: 1 1 0;
+}
+
 @media (max-width: 64rem) {
   .arc-advertising-item-detail__body {
     flex-direction: column;
@@ -221,6 +230,24 @@
   padding-top: 0;
 }
 
+/* A section header that also carries an action button (Files' Upload
+   Files) -- the label and button share the row instead of the button
+   sitting inside the collapsible body. */
+.detail-section__summary--with-action {
+  justify-content: space-between;
+}
+
+.detail-section__action {
+  padding: 4px 10px;
+  border: 1px solid var(--lwc-colorBorder, #c9c9c9);
+  border-radius: var(--lwc-borderRadiusMedium, 4px);
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--lwc-colorTextDefault, #181818);
+  cursor: pointer;
+}
+
 /* ── Advertising Item History (full-width paginated table) ───────────────── */
 
 .arc-advertising-item-detail__panel-loading {
@@ -234,4 +261,121 @@
   font-size: 13px;
   line-height: 19.5px;
   color: var(--lwc-colorTextWeak, #444444);
+}
+
+/* ── Log a Call / Upload Files popups ─────────────────────────────────────
+   Same grey-backdrop, centered-panel convention as arcQuickCreate/
+   arcRelatedProductQuickView -- classes can't be shared across shadow DOM
+   boundaries, so the look is matched rather than the CSS reused. */
+
+.arc-advertising-item-detail__modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(107, 114, 128, 0.5);
+}
+
+.arc-advertising-item-detail__modal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow: hidden;
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+  border-radius: var(--lwc-borderRadiusMedium, 8px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+.arc-advertising-item-detail__modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--lwc-colorBorder, #c9c9c9);
+}
+
+.arc-advertising-item-detail__modal-title {
+  margin: 0;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 700;
+  color: var(--lwc-colorTextDefault, #181818);
+}
+
+.arc-advertising-item-detail__modal-close {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--lwc-colorTextWeak, #444444);
+}
+
+.arc-advertising-item-detail__modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.arc-advertising-item-detail__modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.arc-advertising-item-detail__modal-field-label {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--lwc-colorTextWeak, #444444);
+}
+
+/* Submitted with the form but never shown -- Status/ActivityDate, which the
+   native Log a Call action also sets behind the scenes rather than asking
+   for. */
+.arc-advertising-item-detail__modal-hidden-field {
+  display: none;
+}
+
+.arc-advertising-item-detail__modal-error {
+  margin: 0;
+  font-size: 13px;
+  color: #b91c1c;
+}
+
+.arc-advertising-item-detail__modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--lwc-colorBorder, #c9c9c9);
+}
+
+.arc-advertising-item-detail__modal-button {
+  padding: 8px 16px;
+  border: 1px solid var(--lwc-colorBorder, #c9c9c9);
+  border-radius: var(--lwc-borderRadiusMedium, 6px);
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--lwc-colorTextDefault, #181818);
+  cursor: pointer;
+}
+
+.arc-advertising-item-detail__modal-button--brand {
+  border-color: #0f406f;
+  background: #0f406f;
+  color: #ffffff;
+}
+
+.arc-advertising-item-detail__modal-button[disabled] {
+  opacity: 0.6;
+  cursor: default;
 }

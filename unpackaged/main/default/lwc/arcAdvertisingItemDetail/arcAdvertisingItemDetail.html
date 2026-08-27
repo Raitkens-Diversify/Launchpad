@@ -454,17 +454,6 @@
             </details>
           </template>
 
-          <c-arc-related-list
-            record-id={recordId}
-            card-label="Files"
-            related-object-api-name="ContentDocumentLink"
-            parent-field-api-name="LinkedEntityId"
-            link-field-api-name="ContentDocumentId"
-            link-object-api-name="ContentDocument"
-            columns="File:ContentDocument.Title,Type:ContentDocument.FileExtension,Updated:ContentDocument.ContentModifiedDate"
-            collapsible
-          ></c-arc-related-list>
-
           <details class="detail-section">
             <summary class="detail-section__summary">System Information</summary>
             <div class="detail-section__body">
@@ -512,6 +501,7 @@
                   columns={historyColumns}
                   data={historyRows}
                   placeholder="-"
+                  disable-links
                   has-more-rows={historyHasMore}
                   is-loading-more={isLoadingMoreHistory}
                   onloadmore={handleHistoryLoadMore}
@@ -519,35 +509,208 @@
               </template>
             </div>
           </details>
+
+          <!-- Files, moved to the bottom of the page per explicit request.
+               Upload Files opens a popup (lightning-file-upload) rather
+               than navigating away, matching the reference page's own
+               inline upload affordance on this card. -->
+          <details class="detail-section" open>
+            <summary class="detail-section__summary detail-section__summary--with-action">
+              <span>Files</span>
+              <button
+                class="detail-section__action"
+                type="button"
+                onclick={handleUploadFilesClick}
+              >
+                Upload Files
+              </button>
+            </summary>
+            <div class="detail-section__body">
+              <c-arc-related-list
+                lwc:ref="filesList"
+                record-id={recordId}
+                card-label="Files"
+                related-object-api-name="ContentDocumentLink"
+                parent-field-api-name="LinkedEntityId"
+                link-field-api-name="ContentDocumentId"
+                link-object-api-name="ContentDocument"
+                columns="File:ContentDocument.Title,Type:ContentDocument.FileExtension,Updated:ContentDocument.ContentModifiedDate"
+              ></c-arc-related-list>
+            </div>
+          </details>
         </div>
 
         <!--
-          Activity rail: the reference page uses Salesforce's native
-          runtime_sales_activities:activityPanel (Log a Call/Task/Event
-          composer + feed), which isn't an LWR-embeddable component -- this
-          is read-only Tasks and Events lists instead (no create actions,
-          per explicit confirmation), reusing c/arcRelatedList exactly as
-          every other rail card in ARC does.
+          Activity rail: the reference page's runtime_sales_activities:
+          activityPanel isn't LWR-embeddable, and the CRM's own richer
+          c/activityTimeline turned out to be more than was wanted (its
+          Work/Interactions menu offers New Task/New Meeting too) -- a
+          single Log a Call button opening a popup with the native panel's
+          own 4 fields (Subject, Notes, Name, Related To), plus a plain
+          list of what's been logged.
         -->
         <div class="arc-advertising-item-detail__side">
-          <c-arc-related-list
-            record-id={recordId}
-            card-label="Open Tasks"
-            related-object-api-name="Task"
-            parent-field-api-name="WhatId"
-            columns="Subject:Subject,Status:Status,Due Date:ActivityDate"
-            collapsible
-          ></c-arc-related-list>
+          <div class="arc-advertising-item-detail__activity-actions">
+            <lightning-button
+              label="Log a Call"
+              icon-name="utility:call"
+              variant="neutral"
+              onclick={handleLogACallClick}
+            ></lightning-button>
+          </div>
 
           <c-arc-related-list
+            lwc:ref="activityList"
             record-id={recordId}
-            card-label="Events"
-            related-object-api-name="Event"
+            card-label="Activity"
+            related-object-api-name="Task"
             parent-field-api-name="WhatId"
-            columns="Subject:Subject,Start:StartDateTime,End:EndDateTime"
+            columns="Subject:Subject,Status:Status,Date:ActivityDate"
             collapsible
           ></c-arc-related-list>
         </div>
+      </div>
+    </template>
+
+    <template lwc:if={isLogACallModalOpen}>
+      <div class="arc-advertising-item-detail__modal-backdrop">
+        <section
+          class="arc-advertising-item-detail__modal"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Log a Call"
+        >
+          <header class="arc-advertising-item-detail__modal-header">
+            <h2 class="arc-advertising-item-detail__modal-title">
+              Log a Call
+            </h2>
+            <button
+              class="arc-advertising-item-detail__modal-close"
+              type="button"
+              aria-label="Close"
+              onclick={handleLogACallModalClose}
+            >
+              &times;
+            </button>
+          </header>
+
+          <lightning-record-edit-form
+            object-api-name="Task"
+            onsubmit={handleLogACallSubmit}
+            onsuccess={handleLogACallSuccess}
+            onerror={handleLogACallError}
+          >
+            <div class="arc-advertising-item-detail__modal-body">
+              <template lwc:if={logACallHasError}>
+                <p class="arc-advertising-item-detail__modal-error" role="alert">
+                  {logACallErrorMessage}
+                </p>
+              </template>
+
+              <lightning-messages></lightning-messages>
+
+              <lightning-input-field
+                field-name="Subject"
+                value="Call"
+              ></lightning-input-field>
+
+              <div class="arc-advertising-item-detail__modal-field">
+                <span class="arc-advertising-item-detail__modal-field-label"
+                  >Notes</span
+                >
+                <lightning-input-field
+                  field-name="Description"
+                  variant="label-hidden"
+                ></lightning-input-field>
+              </div>
+
+              <lightning-input-field
+                field-name="WhoId"
+              ></lightning-input-field>
+
+              <lightning-input-field
+                field-name="WhatId"
+                value={recordId}
+              ></lightning-input-field>
+
+              <lightning-input-field
+                field-name="Status"
+                value="Completed"
+                class="arc-advertising-item-detail__modal-hidden-field"
+              ></lightning-input-field>
+
+              <lightning-input-field
+                field-name="ActivityDate"
+                value={todayDateValue}
+                class="arc-advertising-item-detail__modal-hidden-field"
+              ></lightning-input-field>
+            </div>
+
+            <footer class="arc-advertising-item-detail__modal-footer">
+              <button
+                class="arc-advertising-item-detail__modal-button"
+                type="button"
+                onclick={handleLogACallModalClose}
+                disabled={isSavingLogACall}
+              >
+                Cancel
+              </button>
+              <button
+                class="arc-advertising-item-detail__modal-button arc-advertising-item-detail__modal-button--brand"
+                type="button"
+                onclick={handleLogACallSaveClick}
+                disabled={isSavingLogACall}
+              >
+                Save
+              </button>
+            </footer>
+          </lightning-record-edit-form>
+        </section>
+      </div>
+    </template>
+
+    <template lwc:if={isUploadFilesModalOpen}>
+      <div class="arc-advertising-item-detail__modal-backdrop">
+        <section
+          class="arc-advertising-item-detail__modal"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Upload Files"
+        >
+          <header class="arc-advertising-item-detail__modal-header">
+            <h2 class="arc-advertising-item-detail__modal-title">
+              Upload Files
+            </h2>
+            <button
+              class="arc-advertising-item-detail__modal-close"
+              type="button"
+              aria-label="Close"
+              onclick={handleUploadFilesModalClose}
+            >
+              &times;
+            </button>
+          </header>
+
+          <div class="arc-advertising-item-detail__modal-body">
+            <lightning-file-upload
+              label="Upload Files"
+              name="advertisingItemFileUploader"
+              record-id={recordId}
+              onuploadfinished={handleFilesUploadFinished}
+              multiple
+            ></lightning-file-upload>
+          </div>
+
+          <footer class="arc-advertising-item-detail__modal-footer">
+            <button
+              class="arc-advertising-item-detail__modal-button"
+              type="button"
+              onclick={handleUploadFilesModalClose}
+            >
+              Done
+            </button>
+          </footer>
+        </section>
       </div>
     </template>
   </div>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>RET - ShippingAddress</label>
+    <protected>false</protected>
+    <values>
+        <field>Account_Type__c</field>
+        <value xsi:type="xsd:string">Person</value>
+    </values>
+    <values>
+        <field>Add_Record_Type__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Add_Record__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>Field_API__c</field>
+        <value xsi:type="xsd:string">ShippingAddress</value>
+    </values>
+    <values>
+        <field>Field_Type_Override__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Filter_Criteria__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Format__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Key_Decision__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>Label__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Max__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Min__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Object__c</field>
+        <value xsi:type="xsd:string">Account</value>
+    </values>
+    <values>
+        <field>Order__c</field>
+        <value xsi:type="xsd:double">11.0</value>
+    </values>
+    <values>
+        <field>Original_Account_Field__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Pattern_Error__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Pattern__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Required_WHERE_Statement__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Required__c</field>
+        <value xsi:type="xsd:boolean">false</value>
+    </values>
+    <values>
+        <field>Section_Name__c</field>
+        <value xsi:type="xsd:string">Address Information</value>
+    </values>
+    <values>
+        <field>Shown_WHERE_Statement__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Type_Override__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Type__c</field>
+        <value xsi:type="xsd:string">Retirement Plan Detail</value>
+    </values>
+</CustomMetadata>

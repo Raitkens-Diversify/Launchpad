@@ -310,6 +310,24 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
     this._enableRowNavigation = toBooleanProperty(value);
   }
 
+  /**
+   * Opts a table out of primaryColumnIndex's own default: when no column
+   * sets isLink/primary, it still falls back to column 0 so every existing
+   * table that never bothered to flag one keeps its first column looking
+   * and behaving like a link. A table with genuinely nothing to link to
+   * (Advertising Item History's Date/Field/User/Original/New Value) has no
+   * good column for that fallback to land on, so it opts out entirely
+   * instead of one column looking clickable toward an empty href.
+   */
+  _disableLinks = false;
+  @api
+  get disableLinks() {
+    return this._disableLinks;
+  }
+  set disableLinks(value) {
+    this._disableLinks = toBooleanProperty(value);
+  }
+
   @api rowDetailType = "";
   @api rowDetailGroupsField = "taskGroups";
   @api detailRowActions = [];
@@ -857,7 +875,10 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
     const flagged = this._columns.findIndex(
       (column) => column.primary === true || column.isLink === true
     );
-    return flagged === -1 ? 0 : flagged;
+    if (flagged !== -1) {
+      return flagged;
+    }
+    return this._disableLinks ? -1 : 0;
   }
 
   buildHeaderClass(column) {

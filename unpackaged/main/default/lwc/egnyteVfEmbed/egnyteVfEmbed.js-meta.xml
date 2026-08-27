@@ -19,6 +19,20 @@
                 label="Domain"
                 description="Published Experience site domain for the Egnyte Visualforce iframe."
             />
+            <property
+                name="cardTitle"
+                type="String"
+                default="Documents"
+                label="Card Title"
+                description="Heading above the Egnyte panel. Leave blank for no heading."
+            />
+            <property
+                name="frameHeight"
+                type="Integer"
+                default="440"
+                label="Panel Height (px)"
+                description="How tall the Egnyte panel is. The Egnyte canvas app inside is fixed at 600px and scrolls, so raise this once the file browser is what users see."
+            />
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>

@@ -19,6 +19,10 @@
             <translation><!-- Beneficial Owner --></translation>
         </picklistValues>
         <picklistValues>
+            <masterLabel>Business Detail</masterLabel>
+            <translation><!-- Business Detail --></translation>
+        </picklistValues>
+        <picklistValues>
             <masterLabel>Business Related Party</masterLabel>
             <translation><!-- Business Related Party --></translation>
         </picklistValues>
@@ -65,6 +69,14 @@
         <picklistValues>
             <masterLabel>Individual Detail</masterLabel>
             <translation><!-- Individual Detail --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Retirement Plan Detail</masterLabel>
+            <translation><!-- Retirement Plan Detail --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Trust Detail</masterLabel>
+            <translation><!-- Trust Detail --></translation>
         </picklistValues>
         <picklistValues>
             <masterLabel>Trust Related Party</masterLabel>

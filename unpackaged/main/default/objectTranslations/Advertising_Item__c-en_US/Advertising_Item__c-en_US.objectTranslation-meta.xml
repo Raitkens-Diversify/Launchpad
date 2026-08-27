@@ -8,61 +8,6 @@
         <plural>true</plural>
         <value>Advertising Items</value>
     </caseValues>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     <layouts>
         <layout>Advertising Item Layout</layout>
         <sections>
@@ -70,6 +15,14 @@
             <section>Custom Links</section>
         </sections>
     </layouts>
+    <quickActions>
+        <label><!-- Log a Call --></label>
+        <name>LogACallStandard</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- New Task --></label>
+        <name>NewStandardTask</name>
+    </quickActions>
     <quickActions>
         <label><!-- Update Advertising Item --></label>
         <name>Update_Advertising_item</name>
@@ -83,4 +36,59 @@
         <errorMessage><!-- The Status is set to Approved, therefore the Advertising Item cannot be updated. --></errorMessage>
         <name>Prevent_Modification_if_Record_Locked</name>
     </validationRules>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 </CustomObjectTranslation>

@@ -548,3 +548,15 @@
   color: #706e6b;
   text-align: center;
 }
+
+/* ---- search ---- */
+
+.arc-activity__search {
+  padding-bottom: 0.5rem;
+}
+
+.arc-activity__search-meta {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  color: #706e6b;
+}

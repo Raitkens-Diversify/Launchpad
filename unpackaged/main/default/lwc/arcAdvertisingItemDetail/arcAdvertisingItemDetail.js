@@ -26,14 +26,18 @@
  *     own Event__c/Public_Appearance__c/Radio_TV_Ad__c lookup points back
  *     at this one) -- confirmed via field metadata, not assumed from the
  *     related list's plain-English label.
- *   - Files: the reference page's AttachedContentDocuments related list.
- *   - Activity: the reference page uses runtime_sales_activities:
- *     activityPanel, Salesforce's native Log-a-Call/Task/Event composer +
- *     feed -- not an LWR-embeddable component, and not something to clone
- *     wholesale. Built as a read-only Tasks/Events rail instead (no New
- *     Task/New Event composer, per explicit confirmation -- just the
- *     lists), reusing c/arcRelatedList exactly as every other rail card in
- *     ARC does.
+ *   - Files: moved to the bottom of the page per explicit request, with its
+ *     own "Upload Files" action (lightning-file-upload in a popup) above
+ *     the list -- the reference page's Files card has the same action.
+ *   - Activity: c/activityTimeline (the CRM's own rich composer) turned out
+ *     to be the wrong fit once actually compared side-by-side against the
+ *     Cosmos reference in a browser -- its Work/Interactions split buttons
+ *     offer New Task/New Meeting/Log a Call, where the reference page (and
+ *     the explicit ask) only wants Log a Call, as a popup with the same 4
+ *     fields the native "Log a Call" panel shows (Subject, Notes, Name,
+ *     Related To -- Related To pre-filled with this record). Built as a
+ *     bespoke lightning-record-edit-form popup targeting Task instead, plus
+ *     a plain c/arcRelatedList card showing what's been logged.
  *   - History: the flexipage's own History related list (standard field
  *     history tracking), as a full-width paginated table matching Related
  *     Products' own c/arcDataTable treatment -- fetched through
@@ -56,9 +60,10 @@ const OBJECT_API_NAME = "Advertising_Item__c";
 
 /**
  * Date, Field, User, Original Value, New Value -- the exact column order
- * requested, matching Lightning's own History related list. No isLink: the
- * User column would be the only sensible target and ARC has no User detail
- * route today, so every row stays plain text.
+ * requested, matching Lightning's own History related list. Nothing here
+ * links anywhere (see disable-links on the c-arc-data-table in the
+ * template): a history entry has no detail page of its own, and ARC has no
+ * User detail route to send the User column to either.
  */
 const HISTORY_COLUMNS = [
   { label: "Date", fieldName: "createdDate", type: "date" },
@@ -585,5 +590,82 @@ export default class ArcAdvertisingItemDetail extends NavigationMixin(
     event.preventDefault();
     const recordId = event.currentTarget.dataset.recordId;
     this.navigateToRecord(recordId, OBJECT_API_NAME);
+  }
+
+  // ---- Log a Call (popup, matching the native panel's own 4 fields) ----
+
+  isLogACallModalOpen = false;
+  isSavingLogACall = false;
+  logACallErrorMessage = "";
+
+  get logACallHasError() {
+    return Boolean(this.logACallErrorMessage);
+  }
+
+  /**
+   * The native "Log a Call" action sets these behind the scenes rather than
+   * asking for them -- Status in particular is a required Task field, so
+   * without a value here the form would block on it despite it not being
+   * one of the 4 fields the reference panel actually shows.
+   */
+  get todayDateValue() {
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return `${now.getFullYear()}-${month}-${day}`;
+  }
+
+  handleLogACallClick() {
+    this.isLogACallModalOpen = true;
+  }
+
+  handleLogACallModalClose() {
+    this.isLogACallModalOpen = false;
+    this.isSavingLogACall = false;
+    this.logACallErrorMessage = "";
+  }
+
+  handleLogACallSubmit() {
+    this.isSavingLogACall = true;
+    this.logACallErrorMessage = "";
+  }
+
+  handleLogACallSuccess() {
+    this.handleLogACallModalClose();
+    this.refs.activityList?.refresh();
+  }
+
+  handleLogACallError(event) {
+    this.isSavingLogACall = false;
+    this.logACallErrorMessage =
+      event.detail?.detail || event.detail?.message || "Could not save.";
+  }
+
+  handleLogACallSaveClick() {
+    this.template.querySelector("lightning-record-edit-form")?.submit();
+  }
+
+  // ---- Upload Files (popup) ---------------------------------------------
+
+  isUploadFilesModalOpen = false;
+
+  /**
+   * The button sits inside the section's own <summary> -- without stopping
+   * propagation, a click bubbles up and also toggles the details element
+   * open/closed alongside opening the modal.
+   */
+  handleUploadFilesClick(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isUploadFilesModalOpen = true;
+  }
+
+  handleUploadFilesModalClose() {
+    this.isUploadFilesModalOpen = false;
+  }
+
+  handleFilesUploadFinished() {
+    this.handleUploadFilesModalClose();
+    this.refs.filesList?.refresh();
   }
 }
