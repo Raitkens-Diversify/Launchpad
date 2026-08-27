@@ -405,7 +405,15 @@
                   class="arc-data-table__empty-cell"
                   role="status"
                 >
-                  {emptyMessage}
+                  <template lwc:if={isLoadingMore}>
+                    <c-arc-loading-spinner
+                      alternative-text="Loading more"
+                      size="small"
+                    ></c-arc-loading-spinner>
+                  </template>
+                  <template lwc:else>
+                    {emptyMessage}
+                  </template>
                 </td>
               </tr>
             </template>

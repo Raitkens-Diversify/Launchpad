@@ -190,6 +190,42 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
 
   @api viewAllUrl = "";
 
+  /**
+   * Tells the pager there's more data on the server past whatever `data`
+   * currently holds -- a caller doing keyset-paginated server fetches (see
+   * arcRecordListView's runServerSearch) only ever hands over the rows
+   * it's fetched so far, never the true remote total, so pageCount can't
+   * know about the rest on its own. One extra page button appears at the
+   * end while this is true; clicking into it (past what local data
+   * supports) fires `loadmore` instead of silently rendering an empty
+   * page, so the caller gets a chance to fetch the next batch and append
+   * it before the click resolves.
+   */
+  _hasMoreRows = false;
+  @api
+  get hasMoreRows() {
+    return this._hasMoreRows;
+  }
+  set hasMoreRows(value) {
+    this._hasMoreRows = value !== false && value !== "false";
+  }
+
+  /**
+   * True while the caller's own loadmore fetch (triggered by this table)
+   * is in flight. The page the user clicked into has no rows yet -- see
+   * isDataAppendOnly -- so showEmptyRow would otherwise render
+   * emptyMessage ("No results found") for what is actually a normal,
+   * brief loading state, not an empty result.
+   */
+  _isLoadingMore = false;
+  @api
+  get isLoadingMore() {
+    return this._isLoadingMore;
+  }
+  set isLoadingMore(value) {
+    this._isLoadingMore = value !== false && value !== "false";
+  }
+
   get viewAllIconStyle() {
     return `--icon-url: url('${NEXS_ICONS}/${CARET_RIGHT_ICON}');`;
   }
@@ -317,14 +353,16 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
   }
   set data(value) {
     const nextData = Array.isArray(value) ? [...value] : [];
-    const dataCollectionChanged = this.hasDataCollectionChanged(
-      this._sourceData,
-      nextData
-    );
+    // A load-more append (see arcRecordListView's loadmore handling) hands
+    // back a longer array on the SAME page the user just clicked into --
+    // resetting to page 1 here would undo that click the instant its own
+    // fetch resolved. Only a genuine replacement (new search, new tab,
+    // fewer rows) should snap the pager back to page 1.
+    const isAppendOnly = this.isDataAppendOnly(this._sourceData, nextData);
 
     this._sourceData = nextData;
 
-    if (dataCollectionChanged) {
+    if (!isAppendOnly) {
       this.page = 1;
     }
 
@@ -476,30 +514,33 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
       : [...this._sourceData];
   }
 
-  hasDataCollectionChanged(previousData, nextData) {
+  /**
+   * True only when nextData is previousData with more rows appended after
+   * it, unchanged and in the same order -- everything else (a shorter
+   * list, a reordered or replaced one, the very first load) is a genuine
+   * dataset change the pager should reset for, not a fetch extending the
+   * page the user is already on.
+   */
+  isDataAppendOnly(previousData, nextData) {
     const previousRows = Array.isArray(previousData) ? previousData : [];
     const nextRows = Array.isArray(nextData) ? nextData : [];
 
-    if (previousRows.length !== nextRows.length) {
-      return true;
-    }
-
-    if (!previousRows.length) {
+    if (!previousRows.length || nextRows.length <= previousRows.length) {
       return false;
     }
 
     const keyField = this.keyField;
 
-    for (let index = 0; index < nextRows.length; index += 1) {
+    for (let index = 0; index < previousRows.length; index += 1) {
       const previousKey = `${previousRows[index]?.[keyField] ?? ""}`;
       const nextKey = `${nextRows[index]?.[keyField] ?? ""}`;
 
       if (previousKey !== nextKey) {
-        return true;
+        return false;
       }
     }
 
-    return false;
+    return true;
   }
 
   get hasRowActions() {
@@ -516,8 +557,20 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
     return this.sortedData.length;
   }
 
-  get pageCount() {
+  /** Full pages the data on hand actually supports -- see pageCount. */
+  get localPageCount() {
     return Math.max(1, Math.ceil(this.totalRows / this._pageSize));
+  }
+
+  /**
+   * One page longer than the data on hand while hasMoreRows is true, so a
+   * trailing page button always exists for the user to click into --
+   * clicking it is what asks the caller (see emitPageChange) to fetch the
+   * next batch, rather than the pager just running out of pages at
+   * whatever happened to be loaded first.
+   */
+  get pageCount() {
+    return this.localPageCount + (this._hasMoreRows ? 1 : 0);
   }
 
   get clampedPage() {
@@ -1462,6 +1515,12 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
     }
 
     this.page = page;
+    // Set first so paginatedData already targets the right slice the
+    // instant the caller's next batch lands -- no second click needed to
+    // "arrive" on the page that triggered the fetch.
+    if (page > this.localPageCount && this._hasMoreRows) {
+      this.dispatchEvent(new CustomEvent("loadmore", { bubbles: true, composed: true }));
+    }
   }
 
   findRow(rowId) {

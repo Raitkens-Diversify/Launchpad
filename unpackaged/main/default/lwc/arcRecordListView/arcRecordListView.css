@@ -313,9 +313,6 @@
 .arc-record-list-view__icon--table {
   --icon-url: var(--arc-icon-table);
 }
-.arc-record-list-view__icon--cards {
-  --icon-url: var(--arc-icon-cards);
-}
 .arc-record-list-view__icon--chart {
   --icon-url: var(--arc-icon-chart);
 }
@@ -658,50 +655,129 @@
   color: var(--slds-g-color-neutral-base-60, #838a97);
 }
 
-/* ---- Cards view -------------------------------------------------------- */
+/* ---- Chart view --------------------------------------------------------- */
 
-.arc-record-list-view__cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: var(--slds-g-spacing-4, 16px);
-}
-
-.arc-record-list-view__card {
-  padding: var(--slds-g-spacing-4, 16px);
+.arc-record-list-view__chart {
+  padding: var(--slds-g-spacing-5, 24px);
   border: 1px solid var(--slds-g-color-border-1, #d1d5db);
   border-radius: var(--slds-g-radius-border-2, 8px);
   background: var(--slds-g-color-surface-container-1, #ffffff);
 }
 
-.arc-record-list-view__card-title {
-  margin: 0 0 var(--slds-g-spacing-3, 12px);
-  font-size: var(--slds-g-font-scale-1, 14px);
-  font-weight: 600;
-  color: var(--slds-g-color-accent-1, #0f406f);
+.arc-record-list-view__chart-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--slds-g-spacing-4, 16px);
+  padding-bottom: var(--slds-g-spacing-4, 16px);
+  margin-bottom: var(--slds-g-spacing-4, 16px);
+  border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
 }
 
-.arc-record-list-view__card-fields {
+.arc-record-list-view__chart-title {
+  margin: 0;
+  font-family: var(--slds-g-font-family-serif);
+  font-size: var(--slds-g-font-scale-3, 20px);
+  font-weight: 700;
+  line-height: 26px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.arc-record-list-view__chart-summary {
+  margin: 4px 0 0;
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+  font-size: var(--slds-g-font-scale-1, 14px);
+  line-height: 19px;
+}
+
+.arc-record-list-view__chart-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-2, 8px);
+}
+
+.arc-record-list-view__chart-picker-label {
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.arc-record-list-view__chart-select {
+  height: 36px;
+  max-width: 260px;
+  padding: 0 var(--slds-g-spacing-2, 8px);
+  border: 1px solid var(--slds-g-color-border-2, #b6bcc5);
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  background: var(--slds-g-color-surface-container-1, #ffffff);
+  color: var(--slds-g-color-on-surface-2, #374151);
+  font-family: inherit;
+  font-size: var(--slds-g-font-scale-1, 14px);
+  cursor: pointer;
+}
+
+.arc-record-list-view__chart-bars {
   display: flex;
   flex-direction: column;
-  gap: var(--slds-g-spacing-2, 8px);
+  gap: var(--slds-g-spacing-3, 12px);
   margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.arc-record-list-view__card-field {
+/* Fixed label and value columns so the tracks share one baseline and the
+   bars stay comparable down the chart. */
+.arc-record-list-view__chart-row {
+  display: grid;
+  grid-template-columns: minmax(0, 200px) 1fr 72px;
+  align-items: center;
+  gap: var(--slds-g-spacing-3, 12px);
+}
+
+.arc-record-list-view__chart-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--slds-g-color-on-surface-2, #374151);
+  font-size: var(--slds-g-font-scale-1, 14px);
+  line-height: 19px;
+}
+
+.arc-record-list-view__chart-track {
+  display: block;
+  height: 24px;
+  border-radius: 4px;
+  background: #f3f4f6;
+}
+
+.arc-record-list-view__chart-bar {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  border-radius: 4px;
+  transition: width 0.25s ease;
+}
+
+.arc-record-list-view__chart-value {
   display: flex;
-  justify-content: space-between;
-  gap: var(--slds-g-spacing-2, 8px);
+  align-items: baseline;
+  gap: var(--slds-g-spacing-1, 4px);
+  justify-content: flex-end;
+  color: var(--slds-g-color-on-surface-2, #374151);
+  font-size: var(--slds-g-font-scale-1, 14px);
+  font-variant-numeric: tabular-nums;
+}
+
+.arc-record-list-view__chart-percent {
+  color: var(--slds-g-color-on-surface-1, #4b5563);
   font-size: var(--slds-g-font-scale-neg-1, 12px);
 }
 
-.arc-record-list-view__card-field dt {
-  color: var(--slds-g-color-on-surface-1, #4b5563);
-}
-
-.arc-record-list-view__card-field dd {
-  margin: 0;
-  text-align: right;
-  color: var(--slds-g-color-on-surface-2, #374151);
+@media (max-width: 719px) {
+  .arc-record-list-view__chart-row {
+    grid-template-columns: minmax(0, 120px) 1fr 60px;
+  }
 }
 
 /* ---- Modals ------------------------------------------------------------ */

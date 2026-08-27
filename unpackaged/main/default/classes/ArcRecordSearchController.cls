@@ -68,7 +68,17 @@ public with sharing class ArcRecordSearchController {
     public Boolean hasMore;
   }
 
-  @AuraEnabled(cacheable=true)
+  // Not cacheable: this session hit real, repeated confusion from a stale
+  // cached result surviving a fix that had already landed server-side --
+  // the exact params (object/fields/filters/searchTerm/afterId/pageSize)
+  // that returned an empty or wrong batch once keep being served back
+  // unchanged from cache even after the underlying bug is fixed, with no
+  // user-visible signal that what's on screen predates the fix. The
+  // load-more chain also means each afterId is its own cache entry, so a
+  // stale first page can silently pin an otherwise-fresh chain. A search
+  // that always hits the query is the one that can't lie about being
+  // out of date.
+  @AuraEnabled
   public static SearchResult searchRecords(
     String objectApiName,
     List<String> fieldApiNames,

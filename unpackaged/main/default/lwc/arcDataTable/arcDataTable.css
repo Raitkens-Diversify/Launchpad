@@ -78,7 +78,9 @@
 }
 
 .arc-data-table__empty-cell {
+  position: relative;
   padding: 2.5rem 0.75rem;
+  min-height: 6rem;
   text-align: center;
   color: var(--div-color-text-muted, #706e6b);
   font-size: var(--div-font-scale-base, 0.8125rem);

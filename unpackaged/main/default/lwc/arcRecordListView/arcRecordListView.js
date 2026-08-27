@@ -41,7 +41,6 @@ import {
  */
 const ICON_FILES = {
   table: "table",
-  cards: "cards-three",
   chart: "chart-pie",
   search: "magnifying-glass",
   group: "stack",
@@ -91,6 +90,33 @@ const SEARCH_DEBOUNCE_MS = 275;
  * "WHERE Id > last id" instead).
  */
 const SERVER_SEARCH_PAGE_SIZE = 100;
+/** Every field name a record-type-based filter can arrive as -- see buildFilterChip. */
+const RECORD_TYPE_FIELD_NAMES = new Set(["RecordTypeId", "RecordType.Name"]);
+/**
+ * A tab's own record-type label isn't always the word worth showing on its
+ * filter chip -- the "Trusts & Estates" tab's RecordType is literally
+ * named "Trusts & Estates" (its data has never actually split out a
+ * separate "Estate" sub-type; see the Entity_Type__c picklist, which only
+ * ever has Trust variants under this record type), so the chip reads
+ * "Type: Trust" rather than repeating the tab's own name back. Display
+ * only -- the real label is still what's sent to resolveRecordTypeIds.
+ */
+const RECORD_TYPE_FILTER_VALUE_ALIASES = {
+  "Trusts & Estates": "Trust"
+};
+/** Bars past this are dropped -- a chart of 200 one-record bars reads as noise. */
+const CHART_MAX_BARS = 12;
+/* Navy through to the lighter brand blues, so a long series stays legible. */
+const CHART_COLOURS = [
+  "#032d60",
+  "#0f406f",
+  "#0b5cab",
+  "#0176d3",
+  "#1b96ff",
+  "#57a3fd",
+  "#8ec2ff",
+  "#b8d9ff"
+];
 /**
  * Fallback tab count used only until the strip has measured itself once
  * (first paint, before renderedCallback runs). After that, visibility is
@@ -294,6 +320,14 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
    */
   @api defaultColumns = "";
   /**
+   * Field the Chart view counts by when neither the active tab's own
+   * chartField (viewTabs JSON) nor a live Group By choice picks one --
+   * see chartFieldApiName. Blank falls back to auto-picking the first
+   * column whose values actually vary (a column of unique names, e.g.
+   * Contact Name, makes a useless chart).
+   */
+  @api defaultChartFieldApiName = "";
+  /**
    * Opt-in pilot mode, scoped per list view rather than per placement: one
    * arcRecordListView instance handles every tab on its page (Account_List's
    * 7 tabs are one instance, not seven), so a plain on/off flag would turn
@@ -315,6 +349,16 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
 
   get enableServerSearch() {
     return this.serverSearchListViewNames.includes(this.selectedListViewApiName);
+  }
+
+  /** arcDataTable's pager cue that a load-more page button belongs at the end. */
+  get hasMoreServerRows() {
+    return this.enableServerSearch && this._hasMoreServerRows;
+  }
+
+  /** Swaps arcDataTable's empty-page message for a spinner while a load-more fetch is in flight. */
+  get isLoadingMoreRows() {
+    return this._isLoadingMoreRows;
   }
 
   get serverSearchListViewNames() {
@@ -342,6 +386,8 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   viewMode = "table";
   searchTerm = "";
   groupFieldApiName = "";
+  /** Column the chart counts by; blank falls back to chartFieldApiName. */
+  _chartField = "";
   openPopover = "";
   fieldMenuSearch = "";
   columnMenuSearch = "";
@@ -382,6 +428,12 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   _serverSearchGeneration = 0;
   _lastConfirmedSearchSignature = "";
   _serverSearchedListViewApiName = "";
+  /** Whether the last-loaded batch said more rows exist past it -- see handleLoadMoreRows. */
+  _hasMoreServerRows = false;
+  /** Id of the last loaded row -- afterId for the next batch's keyset fetch. */
+  _lastLoadedServerRowId = null;
+  /** Guards handleLoadMoreRows against a double-fire while its own fetch is in flight. */
+  _isLoadingMoreRows = false;
 
   connectedCallback() {
     this.applyIconVariables();
@@ -559,6 +611,19 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     return `${NEXS_ICONS}/${ICON_FILES.columns}.svg`;
   }
 
+  /**
+   * arcDataTable persists resized widths to localStorage under this key
+   * (already built in -- see arcDataTable.js -- just never connected here).
+   * Scoped per object+view the same way nexSListView's reference version
+   * is: different views on the same object routinely show different
+   * columns, so one shared key would apply a width meant for one column
+   * to whatever column happens to land in the same position on another
+   * view.
+   */
+  get columnWidthStorageKey() {
+    return `arcRecordListView.colWidths.${this.objectApiName}.${this.selectedListViewApiName}`;
+  }
+
   // ---- Header + tabs -----------------------------------------------------
 
   /** Without the tab strip the header owns its own bottom padding. */
@@ -662,7 +727,10 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
              shows by default -- see configuredColumnEntries. Only the JSON
              viewTabs form carries this; the comma-pair form has no room
              for a third value per entry. */
-          columns: entry.columns || ""
+          columns: entry.columns || "",
+          /* Field the Chart view defaults to counting by for this tab --
+             see chartFieldApiName. Same JSON-only limitation as columns. */
+          chartField: entry.chartField || ""
         };
       });
   }
@@ -785,20 +853,12 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     return this.viewMode === "table";
   }
 
-  get isCardsView() {
-    return this.viewMode === "cards";
-  }
-
   get isChartView() {
     return this.viewMode === "chart";
   }
 
   get tableSegmentClass() {
     return this.segmentClass("table");
-  }
-
-  get cardsSegmentClass() {
-    return this.segmentClass("cards");
   }
 
   get chartSegmentClass() {
@@ -1095,30 +1155,128 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   }
 
   get filterChips() {
-    return this.activeFilters.map((filter) => ({
-      ...filter,
-      chipLabel: filter.operandValue
-        ? `${filter.label}: ${filter.operandValue}`
-        : filter.label,
-      isOpen: this.openPopover === filter.key,
-      hasValue: Boolean(filter.operandValue),
-      isDateField: this.isDateFieldApiName(filter.fieldApiName),
-      operatorOptions: this.buildOperatorOptions(filter.fieldApiName).map(
-        (opt) => ({ ...opt, selected: opt.value === filter.operator })
+    return this.activeFilters.map((filter) => {
+      const displayValue =
+        RECORD_TYPE_FILTER_VALUE_ALIASES[filter.operandValue] ||
+        filter.operandValue;
+      return {
+        ...filter,
+        chipLabel: filter.operandValue
+          ? `${filter.label}: ${displayValue}`
+          : filter.label,
+        isOpen: this.openPopover === filter.key,
+        hasValue: Boolean(filter.operandValue),
+        isDateField: this.isDateFieldApiName(filter.fieldApiName),
+        operatorOptions: this.buildOperatorOptions(filter.fieldApiName).map(
+          (opt) => ({ ...opt, selected: opt.value === filter.operator })
+        )
+      };
+    });
+  }
+
+  // ---- Chart ---------------------------------------------------------------
+
+  /**
+   * This counts the visible rows by whichever column is chosen and draws
+   * them as bars. Deliberately CSS rather than a charting library: the data
+   * is a single series of counts, and a widths-and-labels bar chart carries
+   * no dependency, no canvas sizing to manage, and stays readable to a
+   * screen reader through the underlying list markup.
+   */
+  get chartFieldApiName() {
+    if (
+      this._chartField &&
+      this.visibleColumnDefs.some((c) => c.fieldApiName === this._chartField)
+    ) {
+      return this._chartField;
+    }
+    // Default to whatever is being grouped by, else this tab's own
+    // configured chart field, else the placement's configured default,
+    // else the first column that repeats values -- a column of unique
+    // names (Contact Name) makes a useless chart.
+    if (this.groupFieldApiName) {
+      return this.groupFieldApiName;
+    }
+    const tabField = this.activeConfiguredTab?.chartField;
+    if (
+      tabField &&
+      this.visibleColumnDefs.some((c) => c.fieldApiName === tabField)
+    ) {
+      return tabField;
+    }
+    if (
+      this.defaultChartFieldApiName &&
+      this.visibleColumnDefs.some(
+        (c) => c.fieldApiName === this.defaultChartFieldApiName
       )
+    ) {
+      return this.defaultChartFieldApiName;
+    }
+    const best = this.visibleColumnDefs.find((col) => {
+      const values = new Set(
+        this.visibleRows.map((r) => r[col.fieldApiName] || "")
+      );
+      return values.size > 1 && values.size < this.visibleRows.length;
+    });
+    return best?.fieldApiName || this.visibleColumnDefs[0]?.fieldApiName || "";
+  }
+
+  get chartFieldOptions() {
+    return this.visibleColumnDefs.map((col) => ({
+      label: this.getDisplayedColumnLabel(col.fieldApiName),
+      value: col.fieldApiName,
+      selected: col.fieldApiName === this.chartFieldApiName
     }));
   }
 
-  get cardRows() {
-    return this.visibleRows.map((row) => ({
-      key: row.id,
-      title: row[this.columns[0]?.fieldApiName] || "—",
-      fields: this.columns.slice(1).map((col) => ({
-        key: `${row.id}-${col.fieldApiName}`,
-        label: col.label,
-        value: row[col.fieldApiName] || "—"
-      }))
+  get chartFieldLabel() {
+    return this.getDisplayedColumnLabel(this.chartFieldApiName);
+  }
+
+  get chartBars() {
+    const field = this.chartFieldApiName;
+    if (!field) {
+      return [];
+    }
+
+    const counts = new Map();
+    this.visibleRows.forEach((row) => {
+      const raw = row[field];
+      const label =
+        raw === null || raw === undefined || raw === "" || raw === "-"
+          ? "(blank)"
+          : String(raw);
+      counts.set(label, (counts.get(label) || 0) + 1);
+    });
+
+    const entries = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+    const capped = entries.slice(0, CHART_MAX_BARS);
+    const max = capped.length ? capped[0][1] : 0;
+    const total = this.visibleRows.length || 1;
+
+    return capped.map(([label, count], index) => ({
+      key: label,
+      label,
+      count,
+      percent: `${Math.round((count / total) * 100)}%`,
+      // Widths are relative to the tallest bar so short series still fill
+      // the plot; the percentage beside it stays relative to total.
+      barStyle: `width: ${max ? Math.max(2, Math.round((count / max) * 100)) : 0}%; background: ${CHART_COLOURS[index % CHART_COLOURS.length]};`
     }));
+  }
+
+  get chartSummary() {
+    const shown = this.chartBars.length;
+    const rows = this.visibleRows.length;
+    return `${rows} record${rows === 1 ? "" : "s"} across ${shown} value${shown === 1 ? "" : "s"}`;
+  }
+
+  get hasChartData() {
+    return this.chartBars.length > 0;
+  }
+
+  handleChartFieldChange(event) {
+    this._chartField = event.target.value;
   }
 
   // ---- Group by ----------------------------------------------------------
@@ -1587,7 +1745,12 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
       this.buildFilterChip(
         filter.fieldApiName,
         filter.operator,
-        (filter.operandLabels || []).filter(Boolean).join("; ")
+        // Deduped: a record type whose label collides with another's (this
+        // org has two RecordTypes both literally named "Household") comes
+        // back from the UI API as that label twice in operandLabels --
+        // real for the underlying IN-clause value, but "Household;
+        // Household" as a chip's displayed text just looks broken.
+        [...new Set((filter.operandLabels || []).filter(Boolean))].join("; ")
       )
     );
     this._savedSignature = this.currentSignature;
@@ -1688,38 +1851,22 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     this._lastConfirmedSearchSignature = this.currentFilterSearchSignature;
     this.isLoading = true;
     this.errorMessage = undefined;
-
-    const filters = this.activeFilters
-      .filter((f) => f.fieldApiName && f.operandValue)
-      .map((f) => ({
-        fieldApiName: f.fieldApiName,
-        operator: f.operator,
-        operandValue: f.operandValue
-      }));
-    const searchTerm = this.searchTerm.trim();
-    const searchableFields = this.columns.map((col) => col.fieldApiName);
+    // A fresh search (new filters/search/tab) starts a new keyset chain --
+    // whatever was previously accumulated belonged to the old criteria and
+    // would otherwise sit underneath the new rows as stale leftovers the
+    // user could page back into.
+    this.tableRows = [];
+    this._hasMoreServerRows = false;
+    this._lastLoadedServerRowId = null;
 
     try {
-      const result = await searchRecords({
-        objectApiName: this.objectApiName,
-        fieldApiNames: this.searchFieldApiNames,
-        filters,
-        searchTerm,
-        searchableFields,
-        afterId: null,
-        pageSize: SERVER_SEARCH_PAGE_SIZE
-      });
-      if (generation !== this._serverSearchGeneration) {
+      const batch = await this.fetchServerSearchBatch(null);
+      if (generation !== this._serverSearchGeneration || !batch) {
         return;
       }
-      // Aligned by the field list the server actually selected, not the one
-      // requested -- a requested path can fail server-side validation and
-      // get dropped, which would silently shift every later cell by one if
-      // rows were mapped against the request instead.
-      const selectedFieldApiNames = result?.fieldApiNames || [];
-      this.tableRows = (result?.rows || []).map((row) =>
-        this.mapSearchRowToTableRow(row, selectedFieldApiNames)
-      );
+      this.tableRows = batch.rows;
+      this._hasMoreServerRows = batch.hasMore;
+      this._lastLoadedServerRowId = batch.lastRowId;
     } catch (error) {
       if (generation === this._serverSearchGeneration) {
         this.errorMessage = this.reduceError(error);
@@ -1730,6 +1877,98 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
         this.isLoading = false;
       }
     }
+  }
+
+  /**
+   * Fetches the next batch past whatever's already loaded (afterId = the
+   * last row's Id, keyset-paginated same as the Apex side already
+   * documents) and appends it, so pages the user already paged through
+   * stay put -- going back never re-fetches, only going past the end of
+   * what's loaded does.
+   *
+   * Triggered by arcDataTable's `loadmore` event: the user clicked into
+   * the trailing "there's more" page button pageCount grows an extra slot
+   * for whenever hasMoreRows is true (see arcDataTable.pageCount).
+   */
+  async handleLoadMoreRows() {
+    if (
+      !this.enableServerSearch ||
+      !this._hasMoreServerRows ||
+      this._isLoadingMoreRows
+    ) {
+      return;
+    }
+
+    const generation = this._serverSearchGeneration;
+    this._isLoadingMoreRows = true;
+
+    try {
+      const batch = await this.fetchServerSearchBatch(
+        this._lastLoadedServerRowId
+      );
+      // A fresh search (filters/search/tab changed) could have started
+      // and finished while this batch was in flight -- its rows belong to
+      // criteria that no longer apply, so they're dropped rather than
+      // appended on top of the new search's own results.
+      if (generation !== this._serverSearchGeneration || !batch) {
+        return;
+      }
+      this.tableRows = [...this.tableRows, ...batch.rows];
+      this._hasMoreServerRows = batch.hasMore;
+      this._lastLoadedServerRowId = batch.lastRowId;
+    } catch (error) {
+      if (generation === this._serverSearchGeneration) {
+        this.errorMessage = this.reduceError(error);
+      }
+    } finally {
+      if (generation === this._serverSearchGeneration) {
+        this._isLoadingMoreRows = false;
+      }
+    }
+  }
+
+  /** One searchRecords round trip, mapped to table rows -- shared by a fresh search and load-more. */
+  async fetchServerSearchBatch(afterId) {
+    const filters = this.activeFilters
+      .filter((f) => f.fieldApiName && f.operandValue)
+      .map((f) => ({
+        fieldApiName: f.fieldApiName,
+        operator: f.operator,
+        operandValue: f.operandValue
+      }));
+    const searchTerm = this.searchTerm.trim();
+    const searchableFields = this.columns.map((col) => col.fieldApiName);
+
+    const result = await searchRecords({
+      objectApiName: this.objectApiName,
+      fieldApiNames: this.searchFieldApiNames,
+      filters,
+      searchTerm,
+      searchableFields,
+      afterId,
+      pageSize: SERVER_SEARCH_PAGE_SIZE
+    });
+
+    // Aligned by the field list the server actually selected, not the one
+    // requested -- a requested path can fail server-side validation and
+    // get dropped, which would silently shift every later cell by one if
+    // rows were mapped against the request instead.
+    const selectedFieldApiNames = result?.fieldApiNames || [];
+    const rows = (result?.rows || []).map((row) =>
+      this.mapSearchRowToTableRow(row, selectedFieldApiNames)
+    );
+    // Apex's own contract only ever sets hasMore=true when it returned a
+    // full page (server-side "take" is exactly SERVER_SEARCH_PAGE_SIZE) --
+    // enforcing that same invariant here guarantees a short/final batch can
+    // never leave a trailing "load more" page button behind, regardless of
+    // what result.hasMore claims.
+    const hasMore =
+      Boolean(result?.hasMore) && rows.length >= SERVER_SEARCH_PAGE_SIZE;
+    return {
+      rows,
+      hasMore,
+      lastRowId: rows.length ? rows[rows.length - 1].id : afterId
+    };
   }
 
   /** Builds a table row from ArcRecordSearchController.SearchRow's flat cells. */
@@ -1862,7 +2101,13 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     return {
       key: `filter-${filterKeyCounter++}`,
       fieldApiName,
-      label: this.getDisplayedColumnLabel(fieldApiName),
+      // Every RecordType-based filter reads as "Type" regardless of the
+      // object's own label for the field ("Account Record Type") -- the
+      // record type itself is never a displayed column on these tabs, so
+      // there's no header for this to disagree with.
+      label: RECORD_TYPE_FIELD_NAMES.has(fieldApiName)
+        ? "Type"
+        : this.getDisplayedColumnLabel(fieldApiName),
       operator: resolvedOperator,
       operandValue
     };
@@ -2023,6 +2268,16 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     // eslint-disable-next-line @lwc/lwc/no-async-operation
     this._searchTimer = window.setTimeout(() => {
       this.searchTerm = value;
+      // Clearing the box back to empty (backspacing it out, or the native
+      // type="search" input's own X button) has only one sensible
+      // meaning -- show everything the current filters already allow --
+      // so unlike a term still being typed, it doesn't need to wait for
+      // Enter. Without this, tableRows stayed pinned to whatever the last
+      // *confirmed* (Enter-pressed) search had narrowed it to, since
+      // nothing else re-runs the search when the term goes back to "".
+      if (!value.trim() && this.enableServerSearch) {
+        this.runServerSearch();
+      }
     }, SEARCH_DEBOUNCE_MS);
   }
 
@@ -2079,11 +2334,18 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     this.groupFieldApiName =
       this.groupFieldApiName === fieldApiName ? "" : fieldApiName;
     this.openPopover = "";
+    // A menu pick is already a discrete "commit now" action, unlike free
+    // text (which needs Enter so it isn't re-searching on every
+    // keystroke) -- server-search mode re-runs immediately so grouping
+    // reflects the true dataset instead of whatever page happened to be
+    // loaded already, same as a filter or search-term confirm.
+    this.runServerSearch();
   }
 
   handleClearGroup() {
     this.groupFieldApiName = "";
     this.openPopover = "";
+    this.runServerSearch();
   }
 
   handleFilterFieldSelect(event) {

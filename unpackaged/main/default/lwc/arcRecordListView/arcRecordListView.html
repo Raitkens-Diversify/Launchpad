@@ -238,19 +238,6 @@
               <span>Table</span>
             </button>
             <button
-              class={cardsSegmentClass}
-              type="button"
-              data-mode="cards"
-              aria-pressed={isCardsView}
-              onclick={handleViewModeChange}
-            >
-              <span
-                class="arc-record-list-view__icon arc-record-list-view__icon--sm arc-record-list-view__icon--cards"
-                aria-hidden="true"
-              ></span>
-              <span>Cards</span>
-            </button>
-            <button
               class={chartSegmentClass}
               type="button"
               data-mode="chart"
@@ -606,6 +593,7 @@
               enable-row-navigation
               enable-column-resize
               enable-column-reorder
+              column-width-storage-key={columnWidthStorageKey}
               show-column-settings
               column-settings-icon-url={columnSettingsIconUrl}
               avatar-icon-url={avatarIconUrl}
@@ -614,11 +602,14 @@
               enable-pagination={enableTablePagination}
               page-size={pageSizeNumber}
               page-size-options={tablePageSizeOptions}
+              has-more-rows={hasMoreServerRows}
+              is-loading-more={isLoadingMoreRows}
               default-link-object-api-name={objectApiName}
               link-object-api-name-field="objectApiName"
               link-query-param-object-api-names={linkQueryParamObjectApiNames}
               oncolumnsettings={openColumnsMenu}
               oncolumnreorder={handleColumnReorder}
+              onloadmore={handleLoadMoreRows}
             ></c-arc-data-table>
 
             <!-- Table Columns / Dropdown (Figma 532:39223) -->
@@ -681,27 +672,65 @@
             </template>
           </div>
         </template>
-        <template lwc:elseif={isCardsView}>
-          <div class="arc-record-list-view__cards">
-            <template for:each={cardRows} for:item="card">
-              <article key={card.key} class="arc-record-list-view__card">
-                <h3 class="arc-record-list-view__card-title">{card.title}</h3>
-                <dl class="arc-record-list-view__card-fields">
-                  <template for:each={card.fields} for:item="field">
-                    <div key={field.key} class="arc-record-list-view__card-field">
-                      <dt>{field.label}</dt>
-                      <dd>{field.value}</dd>
-                    </div>
-                  </template>
-                </dl>
-              </article>
-            </template>
-          </div>
-        </template>
         <template lwc:else>
-          <div class="arc-record-list-view__status" role="status">
-            Chart view is not configured for {title}.
-          </div>
+          <section class="arc-record-list-view__chart">
+            <header class="arc-record-list-view__chart-head">
+              <div>
+                <h3 class="arc-record-list-view__chart-title">
+                  Records by {chartFieldLabel}
+                </h3>
+                <p class="arc-record-list-view__chart-summary">{chartSummary}</p>
+              </div>
+              <label class="arc-record-list-view__chart-picker">
+                <span class="arc-record-list-view__chart-picker-label"
+                  >Break down by</span
+                >
+                <select
+                  class="arc-record-list-view__chart-select"
+                  onchange={handleChartFieldChange}
+                >
+                  <template for:each={chartFieldOptions} for:item="option">
+                    <option
+                      key={option.value}
+                      value={option.value}
+                      selected={option.selected}
+                    >
+                      {option.label}
+                    </option>
+                  </template>
+                </select>
+              </label>
+            </header>
+
+            <template lwc:if={hasChartData}>
+              <ul class="arc-record-list-view__chart-bars">
+                <template for:each={chartBars} for:item="bar">
+                  <li key={bar.key} class="arc-record-list-view__chart-row">
+                    <span class="arc-record-list-view__chart-label" title={bar.label}
+                      >{bar.label}</span
+                    >
+                    <span class="arc-record-list-view__chart-track">
+                      <span
+                        class="arc-record-list-view__chart-bar"
+                        style={bar.barStyle}
+                      ></span>
+                    </span>
+                    <span class="arc-record-list-view__chart-value">
+                      <strong>{bar.count}</strong>
+                      <span class="arc-record-list-view__chart-percent"
+                        >{bar.percent}</span
+                      >
+                    </span>
+                  </li>
+                </template>
+              </ul>
+            </template>
+            <template lwc:else>
+              <div class="arc-record-list-view__status" role="status">
+                Nothing to chart — no records match the current filters.
+              </div>
+            </template>
+          </section>
         </template>
       </template>
     </div>
