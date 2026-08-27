@@ -16,15 +16,15 @@ private class FscRelAccountRelationShareServiceTest {
     System.runAs(advisor) {
       memberAccount = createPersonAccount('FscAarShare Member');
       relatedAccount = createPersonAccount('FscAarShare Related');
-    }
 
-    insert new AccountShare(
-      AccountId = relatedAccount.Id,
-      UserOrGroupId = unrelatedUser.Id,
-      AccountAccessLevel = 'Read',
-      OpportunityAccessLevel = 'None',
-      RowCause = Schema.AccountShare.RowCause.Manual
-    );
+      insert new AccountShare(
+        AccountId = relatedAccount.Id,
+        UserOrGroupId = unrelatedUser.Id,
+        AccountAccessLevel = 'Read',
+        OpportunityAccessLevel = 'None',
+        RowCause = Schema.AccountShare.RowCause.Manual
+      );
+    }
 
     System.runAs(advisor) {
       relation = new Account_Account_Relationship__c(
@@ -67,15 +67,15 @@ private class FscRelAccountRelationShareServiceTest {
     System.runAs(advisor) {
       memberAccount = createPersonAccount('FscAarTrigger Member');
       relatedAccount = createPersonAccount('FscAarTrigger Related');
-    }
 
-    insert new AccountShare(
-      AccountId = relatedAccount.Id,
-      UserOrGroupId = unrelatedUser.Id,
-      AccountAccessLevel = 'Read',
-      OpportunityAccessLevel = 'None',
-      RowCause = Schema.AccountShare.RowCause.Manual
-    );
+      insert new AccountShare(
+        AccountId = relatedAccount.Id,
+        UserOrGroupId = unrelatedUser.Id,
+        AccountAccessLevel = 'Read',
+        OpportunityAccessLevel = 'None',
+        RowCause = Schema.AccountShare.RowCause.Manual
+      );
+    }
 
     Account_Account_Relationship__c relation;
 

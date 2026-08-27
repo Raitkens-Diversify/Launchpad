@@ -2246,6 +2246,46 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     this._userReorderedListViewApiName = "";
     this.isLoading = true;
     this.selectedListViewApiName = listViewApiName;
+    this.syncTabUrlParam(listViewApiName);
+  }
+
+  /**
+   * Keeps ?c__tabId=tabN in the URL matching whatever tab is actually on
+   * screen. The sidebar nav (arcNavigation/arcNavTrailState) derives its
+   * active-item highlight purely from the current URL, and has no other way
+   * to observe an in-page tab switch — applyTabFromUrl above is the read
+   * side of this exact same c__tabId convention (nav click -> URL -> tab
+   * opens); this is the write side, so it also works in the other direction
+   * (tab click -> URL -> nav highlights). replaceState rather than
+   * pushState: a tab switch is view state, not a new history entry, so
+   * clicking through several tabs shouldn't take several presses of Back to
+   * undo. Only ever called from user-driven tab changes (selectTabView),
+   * never the initial default-tab load, so a plain page open doesn't
+   * acquire a tab param nobody asked for.
+   */
+  syncTabUrlParam(listViewApiName) {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const index = this.configuredTabs.findIndex(
+      (tab) => tab.value === listViewApiName
+    );
+
+    if (index === -1) {
+      return;
+    }
+
+    const tabParam = `tab${index + 1}`;
+    this._appliedTabParam = tabParam;
+
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("c__tabId") === tabParam) {
+      return;
+    }
+
+    url.searchParams.set("c__tabId", tabParam);
+    window.history.replaceState(window.history.state, "", url.toString());
   }
 
   handleTabKeyDown(event) {

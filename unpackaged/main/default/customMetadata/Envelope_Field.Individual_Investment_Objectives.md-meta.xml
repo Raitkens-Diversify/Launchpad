@@ -36,7 +36,7 @@
     </values>
     <values>
         <field>Label__c</field>
-        <value xsi:type="xsd:string">Investment Objectives - Select up to 3</value>
+        <value xsi:type="xsd:string">Investment Objectives - Select up to 3 in order of importance</value>
     </values>
     <values>
         <field>Max__c</field>

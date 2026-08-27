@@ -74,8 +74,6 @@ public class FscDataTestDataFactory {
     public Account secondPersonAccount;
     public Account vendorAccount;
     public Account unclassifiedAccount;
-    public AccountContactRelation primaryMembership;
-    public AccountContactRelation secondMembership;
     public Account_Account_Relationship__c primaryAccountRelationship;
 
     public TreeScenario reload() {
@@ -129,24 +127,6 @@ public class FscDataTestDataFactory {
       },
       scenario.rootAccount.Id
     );
-
-    scenario.primaryMembership = createMembership(
-      scenario.rootAccount,
-      scenario.linkedPersonAccount,
-      true,
-      true,
-      resolveDefaultRoleValue()
-    );
-
-    if (resolvedOptions.includeSecondHouseholdMember) {
-      scenario.secondMembership = createMembership(
-        scenario.rootAccount,
-        scenario.secondPersonAccount,
-        false,
-        false,
-        resolveDefaultRoleValue()
-      );
-    }
 
     if (resolvedOptions.includeBusinessRelationship) {
       scenario.primaryAccountRelationship = createAccountRelationship(
@@ -207,14 +187,6 @@ public class FscDataTestDataFactory {
     );
     scenario.secondPersonAccount = queryPersonAccountByLastName(SECOND_PERSON_LAST_NAME);
 
-    scenario.primaryMembership = queryPrimaryMembership(
-      scenario.rootAccount.Id,
-      scenario.linkedPersonAccount.PersonContactId
-    );
-    scenario.secondMembership = queryMembership(
-      scenario.rootAccount.Id,
-      scenario.secondPersonAccount.PersonContactId
-    );
     scenario.primaryAccountRelationship = queryPrimaryAccountRelationship(
       scenario.rootAccount.Id,
       scenario.relatedBusinessAccount.Id
@@ -253,7 +225,7 @@ public class FscDataTestDataFactory {
    * Use createHouseholdAccount for Account records that should be Household RT.
    */
   public static Account createRootAccount(String name) {
-    Account rootAccount = new Account(Name = name,Type ='Other');
+    Account rootAccount = new Account(Name = name);
     insert rootAccount;
     return rootAccount;
   }
@@ -296,9 +268,8 @@ public class FscDataTestDataFactory {
     Account personAccount = new Account(
       FirstName = firstName,
       LastName = lastName,
-      RecordTypeId = resolvePersonAccountRecordTypeId(),
-      Type ='Other'
-);
+      RecordTypeId = resolvePersonAccountRecordTypeId()
+    );
     insert personAccount;
 
     return queryAccountById(personAccount.Id);
@@ -493,10 +464,7 @@ public class FscDataTestDataFactory {
       return defaultRoleValue;
     }
 
-    defaultRoleValue = resolveFirstActivePicklistValue(
-      AccountContactRelation.Roles,
-      null
-    );
+    defaultRoleValue = 'Client';
     return defaultRoleValue;
   }
 
@@ -590,6 +558,76 @@ public class FscDataTestDataFactory {
         }
       }
     }
+
+    createHouseholdMembershipRelations(accounts, householdId);
+  }
+
+  public static void createHouseholdMembershipRelations(
+    List<Account> memberAccounts,
+    Id householdId
+  ) {
+    if (memberAccounts == null || memberAccounts.isEmpty() || householdId == null) {
+      return;
+    }
+
+    Id householdRecordTypeId = FscRelRecordTypeUtils.selectAccountRelationRecordTypeId(
+      FscRelRecordTypeUtils.HOUSEHOLD_AAR_RECORD_TYPE
+    );
+
+    if (householdRecordTypeId == null) {
+      return;
+    }
+
+    Set<Id> memberAccountIds = new Set<Id>();
+    for (Account memberAccount : memberAccounts) {
+      if (memberAccount?.Id != null) {
+        memberAccountIds.add(memberAccount.Id);
+      }
+    }
+
+    if (memberAccountIds.isEmpty()) {
+      return;
+    }
+
+    Set<String> existingMembershipKeys = new Set<String>();
+    for (Account_Account_Relationship__c existingRelation : [
+      SELECT Account__c, Related_Account__c
+      FROM Account_Account_Relationship__c
+      WHERE
+        Account__c = :householdId
+        AND Related_Account__c IN :memberAccountIds
+        AND RecordTypeId = :householdRecordTypeId
+    ]) {
+      existingMembershipKeys.add(
+        String.valueOf(existingRelation.Account__c) +
+          ':' +
+          String.valueOf(existingRelation.Related_Account__c)
+      );
+    }
+
+    List<Account_Account_Relationship__c> relationsToInsert = new List<Account_Account_Relationship__c>();
+    for (Id memberAccountId : memberAccountIds) {
+      String membershipKey =
+        String.valueOf(householdId) + ':' + String.valueOf(memberAccountId);
+
+      if (existingMembershipKeys.contains(membershipKey)) {
+        continue;
+      }
+
+      relationsToInsert.add(
+        new Account_Account_Relationship__c(
+          Account__c = householdId,
+          Related_Account__c = memberAccountId,
+          RecordTypeId = householdRecordTypeId,
+          Association_Type__c = resolveDefaultAssociationTypeValue(),
+          Active__c = true
+        )
+      );
+    }
+
+    if (!relationsToInsert.isEmpty()) {
+      insert relationsToInsert;
+    }
   }
 
   private static Boolean isHouseholdLookupFilterException(DmlException ex) {
@@ -661,34 +699,6 @@ public class FscDataTestDataFactory {
       ORDER BY CreatedDate DESC
       LIMIT 1
     ];
-  }
-
-  private static AccountContactRelation queryPrimaryMembership(
-    Id rootAccountId,
-    Id contactId
-  ) {
-    List<AccountContactRelation> memberships = [
-      SELECT Id, AccountId, ContactId, Roles
-      FROM AccountContactRelation
-      WHERE AccountId = :rootAccountId AND ContactId = :contactId
-      LIMIT 1
-    ];
-
-    return memberships.isEmpty() ? null : memberships[0];
-  }
-
-  private static AccountContactRelation queryMembership(
-    Id rootAccountId,
-    Id contactId
-  ) {
-    List<AccountContactRelation> memberships = [
-      SELECT Id, AccountId, ContactId, Roles
-      FROM AccountContactRelation
-      WHERE AccountId = :rootAccountId AND ContactId = :contactId
-      LIMIT 1
-    ];
-
-    return memberships.isEmpty() ? null : memberships[0];
   }
 
   private static Account_Account_Relationship__c queryPrimaryAccountRelationship(

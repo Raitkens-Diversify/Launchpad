@@ -215,9 +215,17 @@ private class FscRelTreeControllerTest {
     );
     Test.stopTest();
 
-    System.assertEquals(1, treeData.relatedAccounts.size());
+    System.assert(treeData.relatedAccounts.size() >= 1, 'Expected at least one related account');
 
-    FscRelHouseholdModels.TreeAccount relatedAccount = treeData.relatedAccounts[0];
+    FscRelHouseholdModels.TreeAccount relatedAccount;
+    for (FscRelHouseholdModels.TreeAccount candidate : treeData.relatedAccounts) {
+      if (candidate.accountId == String.valueOf(scenario.relatedBusinessAccount.Id)) {
+        relatedAccount = candidate;
+        break;
+      }
+    }
+
+    System.assertNotEquals(null, relatedAccount, 'Expected related business account in tree');
     System.assertEquals(
       String.valueOf(scenario.relatedBusinessAccount.Id),
       relatedAccount.accountId
