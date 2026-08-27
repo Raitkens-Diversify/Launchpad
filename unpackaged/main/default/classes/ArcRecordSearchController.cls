@@ -264,6 +264,35 @@ public with sharing class ArcRecordSearchController {
     Map<String, Object> binds
   ) {
     String op = String.isBlank(operatorKey) ? 'Contains' : operatorKey;
+
+    // A record-type filter adopted from a list view's own saved criteria
+    // (adoptSavedFilters on the client) arrives as the record type's NAME
+    // label (e.g. "Individual"), never its Id -- the UI API only ever
+    // hands back operandLabels (confirmed against its own docs: "the
+    // values (or label if one exists)"). Confirmed live against this org's
+    // own UI API (ui-api/list-ui) that the field name it actually reports
+    // for a list view's record-type filter is "RecordType.Name", not
+    // "RecordTypeId" -- the RecordTypeId spelling below is kept as a
+    // defensive alias in case some other list view surfaces it that way,
+    // but every filter observed live used RecordType.Name. A view whose
+    // own filter matches more than one record type (e.g. the Households
+    // tab, which matches both a FinServ and a plain "Household" record
+    // type) arrives as multiple labels joined with "; " by that same
+    // client code -- also confirmed live (operandLabels: ["Household",
+    // "Household"]). The output clause always targets the real
+    // RecordTypeId column (never the input fieldApiName) since resolving
+    // down to Ids either way -- comparing RecordType.Name to a List<Id>
+    // would be a type mismatch.
+    if (fieldApiName == 'RecordTypeId' || fieldApiName == 'RecordType.Name') {
+      List<Id> recordTypeIds = resolveRecordTypeIds(objectApiName, operandValue);
+      if (recordTypeIds.isEmpty()) {
+        return null;
+      }
+      Boolean isNegative = op == 'NotEqual' || op == 'Excludes' || op == 'NotIn';
+      binds.put(bindKey, recordTypeIds);
+      return 'RecordTypeId' + (isNegative ? ' NOT IN :' : ' IN :') + bindKey;
+    }
+
     Boolean isLikeOperator = op == 'StartsWith' || op == 'NotContain' ||
       (op != 'Equals' && op != 'NotEqual' && op != 'GreaterThan' &&
        op != 'GreaterOrEqual' && op != 'LessThan' && op != 'LessOrEqual');
@@ -288,24 +317,6 @@ public with sharing class ArcRecordSearchController {
     if (isLikeOperator) {
       binds.put(bindKey, '%' + escapeLike(operandValue) + '%');
       return fieldApiName + ' LIKE :' + bindKey;
-    }
-
-    // A RecordTypeId filter adopted from a list view's own saved criteria
-    // (adoptSavedFilters on the client) arrives as the record type's NAME
-    // label (e.g. "Individual"), not its Id -- the UI API only ever hands
-    // back operandLabels, never the raw Id -- and a view whose own filter
-    // matches more than one record type (an IN-style "equals" over a
-    // comma-separated value list, e.g. the Households tab) arrives as
-    // multiple labels joined with "; " by that same client code. Either
-    // shape resolves via schema (no extra query) and always compares with
-    // IN/NOT IN, which is valid for one value or several.
-    if ((op == 'Equals' || op == 'NotEqual') && fieldApiName == 'RecordTypeId') {
-      List<Id> recordTypeIds = resolveRecordTypeIds(objectApiName, operandValue);
-      if (recordTypeIds.isEmpty()) {
-        return null;
-      }
-      binds.put(bindKey, recordTypeIds);
-      return fieldApiName + (op == 'Equals' ? ' IN :' : ' NOT IN :') + bindKey;
     }
 
     Object coerced = coerceBindValue(objectApiName, fieldMap, fieldApiName, operandValue);
@@ -335,26 +346,47 @@ public with sharing class ArcRecordSearchController {
   /**
    * The RecordType Id(s) whose current Name matches operandValue -- a
    * single label, or several joined with "; " (see the RecordTypeId
-   * branch in buildFilterClause for why). A label that doesn't match any
-   * record type's current name is dropped rather than failing the whole
-   * filter; the caller treats an empty result as "nothing to filter on".
+   * branch in buildFilterClause for why). Queried live rather than via
+   * Schema.getRecordTypeInfosByName(): that method returns a Map keyed by
+   * Name, so two record types sharing an identical label (this org has
+   * exactly that -- a FinServ "Household" and a plain "Household") would
+   * silently collapse to whichever one the map happened to keep, and the
+   * caller could never recover both Ids for an OR-style label match. A
+   * plain SOQL WHERE Name IN (...) has no such collision. A label that
+   * doesn't match any record type's current name is dropped rather than
+   * failing the whole filter; the caller treats an empty result as
+   * "nothing to filter on".
    */
   private static List<Id> resolveRecordTypeIds(String objectApiName, String operandValue) {
     List<Id> ids = new List<Id>();
-    if (String.isBlank(operandValue)) {
+    if (String.isBlank(operandValue) || String.isBlank(objectApiName)) {
       return ids;
     }
-    Schema.SObjectType objectType = Schema.getGlobalDescribe().get(objectApiName);
-    if (objectType == null) {
-      return ids;
-    }
-    Map<String, Schema.RecordTypeInfo> byName = objectType.getDescribe()
-      .getRecordTypeInfosByName();
+
+    // The UI API hands back record-type labels HTML-entity-encoded when the
+    // label itself contains a reserved character -- confirmed live: a
+    // record type literally named "Trusts & Estates" comes back as
+    // "Trusts &amp; Estates" in operandLabels. Decoding here (rather than
+    // client-side) keeps every caller of this method working from the
+    // real Name value regardless of where operandValue originated.
+    Set<String> labels = new Set<String>();
     for (String label : operandValue.split(';')) {
-      Schema.RecordTypeInfo info = byName.get(label.trim());
-      if (info != null) {
-        ids.add(info.getRecordTypeId());
+      String trimmed = label.trim().unescapeHtml4();
+      if (String.isNotBlank(trimmed)) {
+        labels.add(trimmed);
       }
+    }
+    if (labels.isEmpty()) {
+      return ids;
+    }
+
+    for (RecordType recordType : [
+      SELECT Id
+      FROM RecordType
+      WHERE SObjectType = :objectApiName
+      AND Name IN :labels
+    ]) {
+      ids.add(recordType.Id);
     }
     return ids;
   }

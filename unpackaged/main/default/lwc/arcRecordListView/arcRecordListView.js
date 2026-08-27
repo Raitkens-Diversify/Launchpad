@@ -16,7 +16,8 @@ import {
   getListRecordsByName,
   getListObjectInfo,
   createListInfo,
-  updateListInfoByName
+  updateListInfoByName,
+  deleteListInfo
 } from "lightning/uiListsApi";
 import { getObjectInfo } from "lightning/uiObjectInfoApi";
 import searchRecords from "@salesforce/apex/ArcRecordSearchController.searchRecords";
@@ -90,8 +91,16 @@ const SEARCH_DEBOUNCE_MS = 275;
  * "WHERE Id > last id" instead).
  */
 const SERVER_SEARCH_PAGE_SIZE = 100;
-/** Saved views past this count collapse into the trailing "More" tab menu. */
+/**
+ * Fallback tab count used only until the strip has measured itself once
+ * (first paint, before renderedCallback runs). After that, visibility is
+ * decided by actual pixel width via measureTabsIfNeeded/TAB_FIT_RATIO --
+ * label lengths vary too much across objects for a fixed count to be right.
+ */
 const MAX_VISIBLE_TABS = 5;
+/** Tabs stay in the strip only while they leave this fraction free for
+ * "More" (and whatever trails it); past that point they overflow. */
+const TAB_FIT_RATIO = 0.7;
 
 const OPERATOR_LABELS = {
   Equals: "Equals",
@@ -340,6 +349,10 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   saveViewName = "";
   saveViewError;
   isSavingView = false;
+  showDeleteViewModal = false;
+  deleteViewTarget;
+  deleteViewError;
+  isDeletingView = false;
   filterLogicString = "";
   objectColumns = [];
   currentListViewLabel = "";
@@ -347,6 +360,13 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   _adoptedListViewApiName = "";
   /** Views saved from this component this session, so they tab up immediately. */
   _createdViewApiNames = new Set();
+  /** Overflow (configured) tabs a "More" click has brought into the strip for
+   * this session -- see promoteTab. */
+  _promotedTabValues = [];
+  /** Natural fit count from the last width measurement -- see
+   * measureTabsIfNeeded. Starts at the fixed fallback until first measured. */
+  _measuredVisibleCount = MAX_VISIBLE_TABS;
+  _tabMeasureSignature = "";
   _appliedTabParam = "";
   _pageRef;
   _searchTimer;
@@ -376,6 +396,93 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
 
   disconnectedCallback() {
     window.clearTimeout(this._searchTimer);
+    this._tabResizeObserver?.disconnect();
+  }
+
+  renderedCallback() {
+    this.observeTabStripResize();
+    this.measureTabsIfNeeded();
+  }
+
+  /**
+   * The strip's own clientWidth is stable regardless of how many tabs are
+   * currently rendered inside it -- it's a flex item stretched by its
+   * ancestor header (align-items: stretch, column direction), not sized by
+   * its children -- so a resize here always means the viewport/layout
+   * actually changed, never "we changed the tab count and now need to
+   * measure again" (that's covered by measureTabsIfNeeded's own signature
+   * check instead, since a resize here wouldn't fire for it).
+   */
+  observeTabStripResize() {
+    if (this._tabResizeObserver) {
+      return;
+    }
+    // Light DOM (lwc:render-mode="light") has no shadow root, so there's no
+    // this.template here -- query the host element directly instead.
+    const container = this.querySelector(".arc-record-list-view__tabs");
+    if (!container || typeof ResizeObserver === "undefined") {
+      return;
+    }
+    this._tabResizeObserver = new ResizeObserver(() => {
+      this._tabMeasureSignature = "";
+      this.measureTabsIfNeeded();
+    });
+    this._tabResizeObserver.observe(container);
+  }
+
+  /**
+   * Decides how many tabs fit before "More" by measuring real rendered
+   * widths off the hidden measuring layer (see the .arc-record-list-view__
+   * tab-measure template block) rather than guessing at label pixel widths
+   * -- label length varies too much across objects for a fixed tab count
+   * to make sense (see MAX_VISIBLE_TABS comment). Keeps ~30% of the strip
+   * free for "More" plus whatever trails it (TAB_FIT_RATIO).
+   */
+  measureTabsIfNeeded() {
+    const container = this.querySelector(".arc-record-list-view__tabs");
+    const measure = this.querySelector(".arc-record-list-view__tab-measure");
+    if (!container || !measure) {
+      return;
+    }
+
+    // Includes selectedListViewApiName because the active tab is the only
+    // one that can carry a delete-x (see buildTabs' showDelete), so which
+    // tab is active can itself change the widths being measured.
+    const signature = `${container.clientWidth}|${this.selectedListViewApiName}|${this.tabListViews
+      .map((tab) => tab.value)
+      .join(",")}`;
+    if (signature === this._tabMeasureSignature) {
+      return;
+    }
+    this._tabMeasureSignature = signature;
+
+    const items = Array.from(
+      measure.querySelectorAll("[data-measure-value]")
+    );
+    if (!items.length) {
+      return;
+    }
+    const moreButton = measure.querySelector("[data-measure-more]");
+    const moreWidth = moreButton ? moreButton.offsetWidth : 0;
+    const availableWidth = container.clientWidth * TAB_FIT_RATIO;
+
+    let used = 0;
+    let fitCount = 0;
+    for (let i = 0; i < items.length; i += 1) {
+      const width = items[i].offsetWidth;
+      const isLast = i === items.length - 1;
+      const reserve = isLast ? 0 : moreWidth;
+      if (fitCount > 0 && used + width + reserve > availableWidth) {
+        break;
+      }
+      used += width;
+      fitCount += 1;
+    }
+
+    const nextCount = Math.max(1, fitCount);
+    if (nextCount !== this._measuredVisibleCount) {
+      this._measuredVisibleCount = nextCount;
+    }
   }
 
   /**
@@ -579,24 +686,76 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     return this.tabListViews.length > 1;
   }
 
+  /**
+   * Every tab, in strip order, with isActive/showDelete/showUnpromote/
+   * className resolved. The measuring layer in the template renders this
+   * whole list (invisibly) so measureTabsIfNeeded can read real pixel
+   * widths -- including the delete-button width on whichever tab happens
+   * to be active -- before the visible/overflow split is decided.
+   */
+  get allBuiltTabs() {
+    return this.buildTabs(this.tabListViews);
+  }
+
+  /**
+   * Splits allBuiltTabs into what the strip shows up front versus what
+   * waits behind "More": the natural fit from the last width measurement
+   * (_measuredVisibleCount), plus any tab a "More" click has promoted out
+   * of it (see promoteTab). A promoted tab is appended after the natural
+   * ones rather than displacing one of them, so bringing a tab forward
+   * never costs the user a tab they could already see.
+   */
+  get orderedBuiltTabs() {
+    const all = this.allBuiltTabs;
+    const natural = all.slice(0, this._measuredVisibleCount);
+    const naturalValues = new Set(natural.map((tab) => tab.value));
+    const promotedExtra = this._promotedTabValues
+      .filter((value) => !naturalValues.has(value))
+      .map((value) => all.find((tab) => tab.value === value))
+      .filter(Boolean);
+
+    return {
+      visible: [...natural, ...promotedExtra],
+      overflow: all.filter(
+        (tab) =>
+          !naturalValues.has(tab.value) &&
+          !this._promotedTabValues.includes(tab.value)
+      )
+    };
+  }
+
   get visibleTabs() {
-    return this.buildTabs(this.tabListViews.slice(0, MAX_VISIBLE_TABS));
+    return this.orderedBuiltTabs.visible;
   }
 
   get overflowTabs() {
-    return this.buildTabs(this.tabListViews.slice(MAX_VISIBLE_TABS));
+    return this.orderedBuiltTabs.overflow;
   }
 
   get hasOverflowTabs() {
-    return this.tabListViews.length > MAX_VISIBLE_TABS;
+    return this.overflowTabs.length > 0;
   }
 
   buildTabs(listViews) {
+    const configuredValues = new Set(this.configuredTabs.map((tab) => tab.value));
     return listViews.map((lv) => {
       const isActive = lv.value === this.selectedListViewApiName;
       return {
         ...lv,
         isActive,
+        // Only the active view can be closed, and only when it isn't one of
+        // this placement's configured tabs, or the object's own default view
+        // -- those stay put no matter which one is on screen (Vestolio's
+        // tab-closability rule). The defaultListViewApiName check matters
+        // even when viewTabs is unset: with no configured tabs at all,
+        // configuredValues is empty and would otherwise protect nothing.
+        showDelete:
+          isActive &&
+          !configuredValues.has(lv.value) &&
+          lv.value !== this.defaultListViewApiName,
+        deleteAriaLabel: `Delete view ${lv.label}`,
+        showUnpromote: this._promotedTabValues.includes(lv.value),
+        unpromoteAriaLabel: `Remove ${lv.label} from the tab strip`,
         tabIndex: isActive ? 0 : -1,
         className: isActive
           ? "arc-record-list-view__tab arc-record-list-view__tab--active"
@@ -607,6 +766,10 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
 
   get showMoreTabsMenu() {
     return this.openPopover === "moreTabs";
+  }
+
+  get deleteViewTargetLabel() {
+    return this.deleteViewTarget?.label || "";
   }
 
   // ---- View mode ---------------------------------------------------------
@@ -1613,7 +1776,105 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     if (!listViewApiName || listViewApiName === this.selectedListViewApiName) {
       return;
     }
+    if (event.currentTarget.dataset.source === "overflow") {
+      this.promoteTab(listViewApiName);
+    }
     this.selectTabView(listViewApiName);
+  }
+
+  /**
+   * Brings a configured tab out of "More" and into the strip for the rest
+   * of the session. Saved/private views don't need this -- once active they
+   * already get their own delete-x (see buildTabs' showDelete), so stacking
+   * a second dismiss control on the same tab would just be confusing.
+   */
+  promoteTab(listViewApiName) {
+    const isConfiguredTab = this.configuredTabs.some(
+      (tab) => tab.value === listViewApiName
+    );
+    if (!isConfiguredTab || this._promotedTabValues.includes(listViewApiName)) {
+      return;
+    }
+    this._promotedTabValues = [...this._promotedTabValues, listViewApiName];
+  }
+
+  /**
+   * The "x" on a promoted tab. Only removes it from the strip -- it's one
+   * of this placement's configured views, so there's nothing to delete --
+   * and if it's the one on screen this falls back to the first configured
+   * tab rather than leaving the strip on a tab it no longer shows.
+   */
+  handleUnpromoteTabClick(event) {
+    event.stopPropagation();
+    const listViewApiName = event.currentTarget.dataset.value;
+    if (!listViewApiName) {
+      return;
+    }
+    this._promotedTabValues = this._promotedTabValues.filter(
+      (value) => value !== listViewApiName
+    );
+    if (this.selectedListViewApiName === listViewApiName) {
+      const fallback = this.configuredTabs[0]?.value || this.defaultListViewApiName;
+      this.selectTabView(fallback);
+    }
+  }
+
+  handleDeleteViewClick(event) {
+    event.stopPropagation();
+    const value = event.currentTarget.dataset.value;
+    const label = event.currentTarget.dataset.label;
+    if (!value) {
+      return;
+    }
+    this.deleteViewTarget = { value, label };
+    this.deleteViewError = undefined;
+    this.openPopover = "";
+    this.showDeleteViewModal = true;
+  }
+
+  closeDeleteViewModal() {
+    this.showDeleteViewModal = false;
+    this.deleteViewTarget = null;
+    this.deleteViewError = undefined;
+    this.isDeletingView = false;
+  }
+
+  async handleDeleteViewConfirm() {
+    const target = this.deleteViewTarget;
+    if (!target) {
+      return;
+    }
+    this.isDeletingView = true;
+    this.deleteViewError = undefined;
+
+    try {
+      await deleteListInfo({
+        objectApiName: this.objectApiName,
+        listViewApiName: target.value
+      });
+      this.listViews = this.listViews.filter((lv) => lv.value !== target.value);
+      this._createdViewApiNames.delete(target.value);
+      this._promotedTabValues = this._promotedTabValues.filter(
+        (value) => value !== target.value
+      );
+      refreshApex(this._listInfosWire).catch(() => {
+        /* Best-effort refresh -- local state above already reflects the delete. */
+      });
+
+      if (this.selectedListViewApiName === target.value) {
+        const fallback = this.configuredTabs[0]?.value || this.defaultListViewApiName;
+        this.selectTabView(fallback);
+      }
+
+      this.showDeleteViewModal = false;
+      this.deleteViewTarget = null;
+    } catch (error) {
+      this.deleteViewError = this.reduceError(error);
+      // eslint-disable-next-line no-console
+      console.error("[arcRecordListView] Failed to delete list view", error);
+    } finally {
+      this.isDeletingView = false;
+    }
   }
 
   selectTabView(listViewApiName) {
