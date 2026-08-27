@@ -15,5 +15,10 @@
     <columns>Financial_Advisor_Team__pc</columns>
     <columns>ACCOUNT.LAST_UPDATE</columns>
     <filterScope>Everything</filterScope>
+    <filters>
+        <field>ACCOUNT.TYPE</field>
+        <operation>equals</operation>
+        <value>Active Client</value>
+    </filters>
     <label>All Clients</label>
 </ListView>

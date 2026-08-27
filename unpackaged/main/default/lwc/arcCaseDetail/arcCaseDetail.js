@@ -14,6 +14,56 @@ import getCaseTasks from "@salesforce/apex/ArcCaseDetailController.getCaseTasks"
 import getCaseFieldSections from "@salesforce/apex/ArcCaseDetailController.getCaseFieldSections";
 import getCaseInformationFieldNames from "@salesforce/apex/ArcCaseDetailController.getCaseInformationFieldNames";
 import getRelatedHouseholdCases from "@salesforce/apex/ArcCaseDetailController.getRelatedHouseholdCases";
+import getRelatedRecordsBatch from "@salesforce/apex/ArcRelatedListController.getRelatedRecordsBatch";
+
+// The right rail's 7 c-arc-related-list cards, batched into one Apex call
+// instead of each card independently fetching its own (7 round trips ->
+// 1). Field paths mirror each card's own `columns` attribute in the
+// template exactly -- keep the two in sync if a card's columns change.
+const RELATED_LIST_REQUESTS = [
+  {
+    key: "caseComments",
+    objectApiName: "CaseComment",
+    parentFieldApiName: "ParentId",
+    fieldApiNames: ["CommentBody", "CreatedBy.Name", "CreatedDate"]
+  },
+  {
+    key: "orderTickets",
+    objectApiName: "Order_Ticket__c",
+    parentFieldApiName: "Case__c",
+    fieldApiNames: ["Name", "Wizard_Financial_Account__r.Name", "CreatedDate"]
+  },
+  {
+    key: "relatedProducts",
+    objectApiName: "Financial_Account_Related_Product__c",
+    parentFieldApiName: "Case__c",
+    fieldApiNames: ["Name", "Wizard_Financial_Account__r.Name", "CreatedDate"]
+  },
+  {
+    key: "checkLogs",
+    objectApiName: "Check_Log__c",
+    parentFieldApiName: "Case__c",
+    fieldApiNames: ["Name", "Amount__c", "Status__c"]
+  },
+  {
+    key: "tradeErrors",
+    objectApiName: "Trade_Error_Log__c",
+    parentFieldApiName: "Case__c",
+    fieldApiNames: ["Name", "Total_Trade_Error_Amount__c", "Status__c"]
+  },
+  {
+    key: "services",
+    objectApiName: "Service__c",
+    parentFieldApiName: "Case__c",
+    fieldApiNames: ["Name", "Type__c", "Start_Date__c"]
+  },
+  {
+    key: "files",
+    objectApiName: "ContentDocumentLink",
+    parentFieldApiName: "LinkedEntityId",
+    fieldApiNames: ["ContentDocument.Title", "ContentDocument.FileType"]
+  }
+];
 
 const TASK_COLUMNS = [
   {
@@ -241,6 +291,49 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
     } else if (error) {
       this.householdCases = { openCases: [], closedCases: [] };
     }
+  }
+
+  /** The right rail's 7 related-list cards, fetched in one Apex call. */
+  relatedListsByKey = {};
+
+  @wire(getRelatedRecordsBatch, {
+    recordId: "$_recordId",
+    requests: RELATED_LIST_REQUESTS
+  })
+  wiredRelatedListsBatch({ data, error }) {
+    if (data) {
+      this.relatedListsByKey = data;
+    } else if (error) {
+      this.relatedListsByKey = {};
+    }
+  }
+
+  get caseCommentsResult() {
+    return this.relatedListsByKey.caseComments;
+  }
+
+  get orderTicketsResult() {
+    return this.relatedListsByKey.orderTickets;
+  }
+
+  get relatedProductsResult() {
+    return this.relatedListsByKey.relatedProducts;
+  }
+
+  get checkLogsResult() {
+    return this.relatedListsByKey.checkLogs;
+  }
+
+  get tradeErrorsResult() {
+    return this.relatedListsByKey.tradeErrors;
+  }
+
+  get servicesResult() {
+    return this.relatedListsByKey.services;
+  }
+
+  get filesResult() {
+    return this.relatedListsByKey.files;
   }
 
   get hasDetail() {

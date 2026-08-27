@@ -37,6 +37,71 @@ public with sharing class ArcRelatedListController {
     List<String> fieldApiNames,
     String linkFieldApiName
   ) {
+    return buildRelatedRecords(
+      recordId,
+      objectApiName,
+      parentFieldApiName,
+      fieldApiNames,
+      linkFieldApiName
+    );
+  }
+
+  /**
+   * One record page (Case_Detail today) composes several of these cards at
+   * once, each independently calling getRelatedRecords -- fine for any one
+   * card, but N cards means N round trips before the page is done loading.
+   * This runs the same per-card query N times in a single Apex transaction
+   * instead, keyed by whatever key the caller chose per card so the client
+   * can match a result back to the card it belongs to. A request that fails
+   * validation is skipped rather than failing the whole batch, so one
+   * misconfigured card can't blank out the others.
+   */
+  @AuraEnabled(cacheable=true)
+  public static Map<String, RelatedRecords> getRelatedRecordsBatch(
+    Id recordId,
+    List<RelatedListRequest> requests
+  ) {
+    Map<String, RelatedRecords> results = new Map<String, RelatedRecords>();
+    if (requests == null) {
+      return results;
+    }
+
+    for (RelatedListRequest request : requests) {
+      if (request == null || String.isBlank(request.key)) {
+        continue;
+      }
+      try {
+        results.put(
+          request.key,
+          buildRelatedRecords(
+            recordId,
+            request.objectApiName,
+            request.parentFieldApiName,
+            request.fieldApiNames,
+            request.linkFieldApiName
+          )
+        );
+      } catch (Exception e) {
+        System.debug(
+          LoggingLevel.ERROR,
+          'ArcRelatedListController batch request failed for key ' +
+            request.key +
+            ': ' +
+            e
+        );
+      }
+    }
+
+    return results;
+  }
+
+  private static RelatedRecords buildRelatedRecords(
+    Id recordId,
+    String objectApiName,
+    String parentFieldApiName,
+    List<String> fieldApiNames,
+    String linkFieldApiName
+  ) {
     if (recordId == null) {
       throw new AuraHandledException('Record Id is required.');
     }
@@ -272,6 +337,25 @@ public with sharing class ArcRelatedListController {
   }
 
   // ---- Wrappers exposed to LWC ------------------------------------------
+
+  /** One card's worth of request params, for getRelatedRecordsBatch. */
+  public class RelatedListRequest {
+    /** Matches a result back to the card that asked for it. */
+    @AuraEnabled
+    public String key;
+
+    @AuraEnabled
+    public String objectApiName;
+
+    @AuraEnabled
+    public String parentFieldApiName;
+
+    @AuraEnabled
+    public List<String> fieldApiNames;
+
+    @AuraEnabled
+    public String linkFieldApiName;
+  }
 
   public class RelatedRecords {
     @AuraEnabled

@@ -44,6 +44,29 @@ export default class ArcRelatedList extends NavigationMixin(LightningElement) {
   @api disableRowLinks = false;
 
   /**
+   * When true, this card renders whatever `preloadedResult` is handed to it
+   * instead of calling getRelatedRecords itself. Set by a parent (e.g.
+   * arcCaseDetail) that batches several of these cards into one
+   * getRelatedRecordsBatch call rather than paying a separate round trip per
+   * card. Standalone usage (e.g. Check_Log_Detail's cards, placed directly
+   * from Experience Builder with no batching parent) leaves this false and
+   * self-fetches exactly as before.
+   */
+  @api usePreloadedData = false;
+
+  /** The result for this card's key out of a parent's batched fetch. */
+  @api
+  get preloadedResult() {
+    return this._preloadedResult;
+  }
+  set preloadedResult(value) {
+    this._preloadedResult = value;
+  }
+  _preloadedResult;
+  /** The preloadedResult value last applied to rows/types/etc — see renderedCallback. */
+  _appliedPreloadedResult;
+
+  /**
    * Show a caret that collapses the list, the way a related list collapses on a
    * Lightning record page. Off by default: the pages already using this
    * component do not expect a control in the header.
@@ -93,6 +116,18 @@ export default class ArcRelatedList extends NavigationMixin(LightningElement) {
   }
 
   renderedCallback() {
+    if (this.usePreloadedData) {
+      // @api properties are not guaranteed to land in a fixed order (same
+      // reason loadSignature exists below), so preloadedResult is only
+      // ever read here, after every initial property is settled -- never
+      // from inside its own setter.
+      if (this._preloadedResult !== this._appliedPreloadedResult) {
+        this._appliedPreloadedResult = this._preloadedResult;
+        this.applyResult(this._preloadedResult);
+        this.isLoading = false;
+      }
+      return;
+    }
     const signature = this.loadSignature;
     if (signature === this._loadedSignature) {
       return;
@@ -194,10 +229,7 @@ export default class ArcRelatedList extends NavigationMixin(LightningElement) {
         fieldApiNames: columns.map((column) => column.path),
         linkFieldApiName: this.linkFieldApiName || null
       });
-      this.rows = result?.rows || [];
-      this.types = result?.types || [];
-      this.currencyCode = result?.currencyCode || "USD";
-      this.hasMore = result?.hasMore === true;
+      this.applyResult(result);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("[arcRelatedList] Failed to load related records", error);
@@ -207,6 +239,14 @@ export default class ArcRelatedList extends NavigationMixin(LightningElement) {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  /** Shared by loadRows' own fetch and a parent's preloadedResult. */
+  applyResult(result) {
+    this.rows = result?.rows || [];
+    this.types = result?.types || [];
+    this.currencyCode = result?.currencyCode || "USD";
+    this.hasMore = result?.hasMore === true;
   }
 
   /**

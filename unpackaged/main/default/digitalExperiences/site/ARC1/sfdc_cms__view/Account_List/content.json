@@ -27,7 +27,7 @@
                 "objectApiName" : "Account",
                 "pillFields" : "BillingState",
                 "title" : "Contacts",
-                "viewTabs" : "AllAccounts=All Contacts,All_Individuals=Individuals,All_Clients=Clients,All_Households=Households,All_Businesses=Businesses,All_Retirement_Plans=Retirement Plans,All_Trusts_Estates=Trusts & Estates"
+                "viewTabs" : "AllAccounts=All Contacts,All_Individuals=Individuals,All_Clients=Clients,ARC_All_Households=Households,All_Businesses=Businesses,All_Retirement_Plans=Retirement Plans,All_Trusts_Estates=Trusts & Estates"
               },
               "definition" : "c:arcRecordListView",
               "id" : "396c880b-c2ba-4770-a873-a53ffeb4a513",

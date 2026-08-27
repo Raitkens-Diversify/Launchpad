@@ -9,7 +9,7 @@
 import { LightningElement, api, track } from "lwc";
 import { loadStyle } from "lightning/platformResourceLoader";
 import LightningToast from "lightning/toast";
-import getWizEnvelopes from "@salesforce/apex/EnvelopeLandingApex.getWizEnvelopes";
+import getEnvelopeListData from "@salesforce/apex/EnvelopeLandingApex.getEnvelopeListData";
 import getAllFormSchemas from "@salesforce/apex/FieldDetailController.getAllFormSchemas";
 import getRegistrationTypeAttributes from "@salesforce/apex/EnvelopeISAController.getRegistrationTypeAttributes";
 import getUserPreferences from "@salesforce/apex/WizardEnvelopeStateService.getUserPreferences";
@@ -195,10 +195,11 @@ export default class EnvelopeTable extends LightningElement {
 
   emptyEnvelopeIllustration = EMPTY_ENVELOPE;
 
+  // Always empty: the New Envelope dialog's household picker searches server-side
+  // (see envelopeCreateModalV2) rather than choosing from a preloaded list.
   @track households = [];
   @track financialAdvisorTeams = [];
   @track envelopes = [];
-  @track envelopeRecords = [];
   @track rows = [];
   @track isLoading = true;
 
@@ -291,15 +292,21 @@ export default class EnvelopeTable extends LightningElement {
     this.isLoading = true;
 
     return Promise.all([
-      getWizEnvelopes(),
+      getEnvelopeListData(),
       this._loadFormContext(),
       getMyTeamIds().catch(() => [])
     ])
       .then(([result, , teamIds]) => {
-        this.households = result.households || [];
-        this.financialAdvisorTeams = result.financialAdvisorTeams || [];
+        // getEnvelopeListData resolves household/team names server-side per row (via the
+        // Envelope_Content__c junction), so there's no household list to join client-side
+        // anymore -- households stays empty, and the New Envelope dialog's household picker
+        // falls back to its own server-side search (same as it already does on envelopeListV2).
+        this.households = [];
+        this.financialAdvisorTeams = (result.advisorTeamOptions || []).map((option) => ({
+          Id: option.value,
+          Name: option.label
+        }));
         this.envelopes = result.envelopes || [];
-        this.envelopeRecords = result.envelopeRecords || [];
         this._myTeamIds = new Set(teamIds || []);
         this._metricsById = {};
         (result.envelopeMetrics || []).forEach((metric) => {
@@ -317,22 +324,10 @@ export default class EnvelopeTable extends LightningElement {
       });
   }
 
+  // Each envelope arrives already resolved to its household name/id and advisor team
+  // name/id (getEnvelopeListData joins them server-side through the Envelope_Content__c
+  // junction), so there's no client-side household/team join to build here anymore.
   buildRows() {
-    const recordToAccount = {};
-    (this.envelopeRecords || []).forEach((record) => {
-      recordToAccount[record.Envelope__c] = record.Account__c;
-    });
-
-    const accountToTeamId = {};
-    (this.households || []).forEach((household) => {
-      accountToTeamId[household.Id] = household.Financial_Advisor_Team__c;
-    });
-
-    const teamName = {};
-    (this.financialAdvisorTeams || []).forEach((team) => {
-      teamName[team.Id] = team.Name;
-    });
-
     const hasSchema = Object.keys(this._schemaCache || {}).length > 0;
     const context = {
       schemaCache: this._schemaCache,
@@ -341,8 +336,7 @@ export default class EnvelopeTable extends LightningElement {
     };
 
     this.rows = (this.envelopes || []).map((envelope) => {
-      const teamId = accountToTeamId[recordToAccount[envelope.Id]];
-      const metrics = this._metricsById[envelope.Id];
+      const metrics = this._metricsById[envelope.id];
       const hasState = Boolean(metrics?.hasState);
       const hasCounts = Boolean(metrics?.hasCounts);
       const missing =
@@ -354,22 +348,21 @@ export default class EnvelopeTable extends LightningElement {
           : null;
 
       return {
-        id: envelope.Id,
-        ownerId: envelope.OwnerId || null,
-        name: envelope.Name || "",
-        household: envelope.Household_Name__c || "",
-        householdId: recordToAccount[envelope.Id] || null,
-        teamId: teamId || null,
-        advisorTeam: teamName[teamId] || "",
-        created: envelope.CreatedDate
-          ? `${this.formatDateTime(envelope.CreatedDate)} - ${
-              envelope.CreatedBy ? envelope.CreatedBy.Name : ""
+        id: envelope.id,
+        name: envelope.name || "",
+        household: envelope.householdName || "",
+        householdId: envelope.householdId || null,
+        teamId: envelope.advisorTeamId || null,
+        advisorTeam: envelope.advisorTeamName || "",
+        created: envelope.createdDate
+          ? `${this.formatDateTime(envelope.createdDate)} - ${
+              envelope.createdByName || ""
             }`
           : "",
-        createdDate: envelope.CreatedDate
-          ? this.formatDateOnly(envelope.CreatedDate)
+        createdDate: envelope.createdDate
+          ? this.formatDateOnly(envelope.createdDate)
           : "",
-        createdRaw: envelope.CreatedDate || null,
+        createdRaw: envelope.createdDate || null,
         actionItems: hasCounts
           ? formatEnvelopeContentsLabel({
               members: metrics.members,
@@ -380,12 +373,12 @@ export default class EnvelopeTable extends LightningElement {
           ? missingInputsCountLabel(missing.count, missing.hasPlus)
           : null,
         missingItemsCount: missing ? missing.count : null,
-        lastActivity: envelope.LastModifiedDate
-          ? `${this.formatDateTime(envelope.LastModifiedDate)} - ${
-              envelope.LastModifiedBy ? envelope.LastModifiedBy.Name : ""
+        lastActivity: envelope.lastModifiedDate
+          ? `${this.formatDateTime(envelope.lastModifiedDate)} - ${
+              envelope.lastModifiedByName || ""
             }`
           : "",
-        lastActivityRaw: envelope.LastModifiedDate || null
+        lastActivityRaw: envelope.lastModifiedDate || null
       };
     });
   }

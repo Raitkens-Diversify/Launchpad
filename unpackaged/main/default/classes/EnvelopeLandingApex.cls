@@ -207,6 +207,7 @@ public with sharing class EnvelopeLandingApex {
         @AuraEnabled public String householdName { get; set; }
         @AuraEnabled public Id householdId { get; set; }
         @AuraEnabled public String advisorTeamName { get; set; }
+        @AuraEnabled public Id advisorTeamId { get; set; }
         @AuraEnabled public Datetime createdDate { get; set; }
         @AuraEnabled public String createdByName { get; set; }
         @AuraEnabled public Datetime lastModifiedDate { get; set; }
@@ -232,6 +233,12 @@ public with sharing class EnvelopeLandingApex {
     // the rows cost nothing to hand through the component tree.
     private static final Integer HOUSEHOLD_SEARCH_LIMIT = 50;
     private static final Integer HOUSEHOLD_SEARCH_MIN_CHARS = 2;
+
+    // Defensive circuit breaker on the envelope list itself. Org-wide Envelope__c volume is 229
+    // rows today, nowhere near this, but the query has no LIMIT otherwise -- this caps future
+    // growth instead of letting the same "unbounded fetch" pattern getWizEnvelopes had reappear
+    // here one object later.
+    private static final Integer ENVELOPE_LIST_LIMIT = 2000;
 
     // The Financial Advisor Teams the running user is a member of.
     private static Set<Id> currentUserTeamIds() {
@@ -297,6 +304,7 @@ public with sharing class EnvelopeLandingApex {
             AND (Id IN :teamEnvelopeIds OR OwnerId = :UserInfo.getUserId())
             WITH SECURITY_ENFORCED
             ORDER BY LastModifiedDate DESC
+            LIMIT :ENVELOPE_LIST_LIMIT
         ];
         if (envelopes.isEmpty()) {
             return data;
@@ -336,6 +344,11 @@ public with sharing class EnvelopeLandingApex {
                 && householdRow.Account__r != null
                 && householdRow.Account__r.Financial_Advisor_Team__r != null
                 ? householdRow.Account__r.Financial_Advisor_Team__r.Name
+                : null;
+            row.advisorTeamId = householdRow != null
+                && householdRow.Account__r != null
+                && householdRow.Account__r.Financial_Advisor_Team__r != null
+                ? householdRow.Account__r.Financial_Advisor_Team__r.Id
                 : null;
             row.createdDate = env.CreatedDate;
             row.createdByName = env.CreatedBy != null ? env.CreatedBy.Name : null;

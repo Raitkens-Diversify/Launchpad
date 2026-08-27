@@ -313,6 +313,8 @@
             columns="Comment:CommentBody,By:CreatedBy.Name,Added:CreatedDate"
             disable-row-links
             collapsible
+            use-preloaded-data
+            preloaded-result={caseCommentsResult}
           ></c-arc-related-list>
 
           <c-arc-related-list
@@ -322,6 +324,8 @@
             parent-field-api-name="Case__c"
             columns="Order Ticket:Name,Financial Account:Wizard_Financial_Account__r.Name,Created:CreatedDate"
             collapsible
+            use-preloaded-data
+            preloaded-result={orderTicketsResult}
           ></c-arc-related-list>
 
           <c-arc-related-list
@@ -331,6 +335,8 @@
             parent-field-api-name="Case__c"
             columns="Product:Name,Financial Account:Wizard_Financial_Account__r.Name,Created:CreatedDate"
             collapsible
+            use-preloaded-data
+            preloaded-result={relatedProductsResult}
           ></c-arc-related-list>
 
           <c-arc-related-list
@@ -340,6 +346,8 @@
             parent-field-api-name="Case__c"
             columns="Check Log:Name,Amount:Amount__c,Status:Status__c"
             collapsible
+            use-preloaded-data
+            preloaded-result={checkLogsResult}
           ></c-arc-related-list>
 
           <c-arc-related-list
@@ -349,6 +357,8 @@
             parent-field-api-name="Case__c"
             columns="Trade Error:Name,Amount:Total_Trade_Error_Amount__c,Status:Status__c"
             collapsible
+            use-preloaded-data
+            preloaded-result={tradeErrorsResult}
           ></c-arc-related-list>
 
           <c-arc-related-list
@@ -358,6 +368,8 @@
             parent-field-api-name="Case__c"
             columns="Service:Name,Type:Type__c,Start Date:Start_Date__c"
             collapsible
+            use-preloaded-data
+            preloaded-result={servicesResult}
           ></c-arc-related-list>
 
           <!--
@@ -392,6 +404,8 @@
               columns="Title:ContentDocument.Title,Type:ContentDocument.FileType"
               collapsible
               disable-row-links
+              use-preloaded-data
+              preloaded-result={filesResult}
             ></c-arc-related-list>
           </div>
         </div>

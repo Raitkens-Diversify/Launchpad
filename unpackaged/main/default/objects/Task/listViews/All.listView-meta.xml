@@ -6,7 +6,6 @@
     <columns>WHAT_NAME</columns>
     <columns>DUE_DATE</columns>
     <columns>LAST_UPDATE</columns>
-    <columns>CREATED_DATE</columns>
     <columns>CORE.USERS.ALIAS</columns>
     <columns>Financial_Advisor_Team__c</columns>
     <columns>PRIORITY</columns>

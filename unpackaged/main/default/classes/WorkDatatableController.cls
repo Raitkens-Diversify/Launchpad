@@ -9,6 +9,13 @@ public with sharing class WorkDatatableController {
   private static final Integer ROW_LIMIT = 500;
   private static final Integer QUERY_CHUNK_SIZE = 200;
   private static final Integer SOQL_LIMIT_BUFFER = 1;
+  // Circuit breaker on the per-chunk task query, which otherwise has no LIMIT
+  // at all. Real data tops out around 19 tasks for the busiest case in the
+  // org (~3.25 average), so a 200-case chunk realistically returns well under
+  // 1,000 rows -- this caps it well above that so it never bites today, while
+  // still bounding how far a future spike in tasks-per-case can push a single
+  // query.
+  private static final Integer TASK_QUERY_LIMIT = 5000;
 
   private static final String PILL_BASE = 'div-work-pill';
   private static final String PILL_ON_TRACK = PILL_BASE + ' div-work-pill--on-track';
@@ -137,6 +144,7 @@ public with sharing class WorkDatatableController {
       FROM Task
       WHERE WhatId IN :caseIds
       WITH SECURITY_ENFORCED
+      LIMIT :TASK_QUERY_LIMIT
     ];
   }
 
