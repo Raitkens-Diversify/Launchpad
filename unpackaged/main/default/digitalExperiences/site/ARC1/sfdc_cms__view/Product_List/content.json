@@ -22,7 +22,6 @@
           "children" : [ {
             "children" : [ {
               "attributes" : {
-                "defaultChartFieldApiName" : "Status__c",
                 "defaultColumns" : "",
                 "defaultListViewApiName" : "Approved_Products",
                 "dxpStyle" : { },

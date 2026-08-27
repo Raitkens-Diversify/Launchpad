@@ -1,0 +1,49 @@
+<template>
+  <div class="arc-household-detail">
+    <template lwc:if={showTitle}>
+      <h2 class="arc-household-detail__title">{cardTitle}</h2>
+    </template>
+
+    <template lwc:if={isLoading}>
+      <div class="arc-household-detail__loading">
+        <c-arc-loading-spinner
+          alternative-text="Loading household details"
+          size="small"
+        ></c-arc-loading-spinner>
+      </div>
+    </template>
+
+    <template lwc:if={errorMessage}>
+      <p class="arc-household-detail__error" role="alert">{errorMessage}</p>
+    </template>
+
+    <template lwc:if={hasSections}>
+      <!-- One collapsible card per section, matching how the Lightning page
+           groups them. <details> rather than a scripted toggle: it is open by
+           default, keyboard accessible and needs no state to keep in sync. -->
+      <template for:each={sections} for:item="section">
+        <details key={section.key} class="arc-household-detail__section" open>
+          <summary class="arc-household-detail__summary">{section.name}</summary>
+          <div class="arc-household-detail__body">
+            <!-- Two columns on wide screens, one when narrow, the way the
+                 Lightning layout reflows. -->
+            <dl class="arc-household-detail__grid">
+              <template for:each={section.fields} for:item="field">
+                <div key={field.key} class="arc-household-detail__field">
+                  <dt class="arc-household-detail__label">{field.label}</dt>
+                  <dd class={field.valueClass}>{field.value}</dd>
+                </div>
+              </template>
+            </dl>
+          </div>
+        </details>
+      </template>
+    </template>
+
+    <template lwc:if={showEmpty}>
+      <p class="arc-household-detail__empty">
+        No details are configured for this record.
+      </p>
+    </template>
+  </div>
+</template>

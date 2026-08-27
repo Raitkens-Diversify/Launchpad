@@ -75,6 +75,10 @@
             <translation><!-- Grantor - Revocable Trust --></translation>
         </picklistValues>
         <picklistValues>
+            <masterLabel>Household Detail</masterLabel>
+            <translation><!-- Household Detail --></translation>
+        </picklistValues>
+        <picklistValues>
             <masterLabel>ISA - DPI</masterLabel>
             <translation><!-- ISA - DPI --></translation>
         </picklistValues>
@@ -85,6 +89,10 @@
         <picklistValues>
             <masterLabel>ISA - Service Agreement</masterLabel>
             <translation><!-- ISA - Service Agreement --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Individual Detail</masterLabel>
+            <translation><!-- Individual Detail --></translation>
         </picklistValues>
         <picklistValues>
             <masterLabel>Manage AMS+ Instructions</masterLabel>

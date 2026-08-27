@@ -1,0 +1,175 @@
+<template>
+  <template lwc:if={isOpen}>
+    <section
+      class="quick-view"
+      role="dialog"
+      aria-modal="true"
+      aria-label={headingLabel}
+      onkeydown={handleKeyDown}
+    >
+      <div class="quick-view__backdrop" onclick={handleClose}></div>
+      <div class="quick-view__panel">
+        <header class="quick-view__header">
+          <h2 class="quick-view__title">{headingLabel}</h2>
+          <div class="quick-view__header-actions">
+            <template lwc:if={showEditButton}>
+              <button
+                type="button"
+                class="quick-view__button"
+                onclick={handleEditClick}
+              >
+                Edit
+              </button>
+            </template>
+            <button
+              type="button"
+              class="quick-view__close"
+              aria-label="Close"
+              onclick={handleClose}
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        </header>
+
+        <div class="quick-view__body">
+          <template lwc:if={isLoading}>
+            <div class="quick-view__loading">
+              <lightning-spinner
+                alternative-text="Loading related product"
+                size="small"
+              ></lightning-spinner>
+            </div>
+          </template>
+
+          <template lwc:elseif={errorMessage}>
+            <p class="quick-view__error" role="alert">{errorMessage}</p>
+          </template>
+
+          <template lwc:elseif={hasDetail}>
+            <dl class="quick-view__fields">
+              <div class="quick-view__field">
+                <dt>Financial Account</dt>
+                <dd>
+                  <a
+                    href={financialAccountUrl}
+                    data-record-id={financialAccountId}
+                    data-object-api-name="Financial_Account__c"
+                    onclick={handleLookupClick}
+                    >{financialAccountName}</a
+                  >
+                </dd>
+              </div>
+
+              <template lwc:if={isEditing}>
+                <lightning-record-edit-form
+                  record-id={recordId}
+                  object-api-name={objectApiName}
+                  onsubmit={handleSubmit}
+                  onsuccess={handleSuccess}
+                  onerror={handleError}
+                >
+                  <div class="quick-view__field">
+                    <dt>Amount</dt>
+                    <dd>
+                      <lightning-input-field
+                        field-name="Amount__c"
+                        variant="label-hidden"
+                      ></lightning-input-field>
+                    </dd>
+                  </div>
+                  <div class="quick-view__field">
+                    <dt>Onbase Migration Id</dt>
+                    <dd>
+                      <lightning-input-field
+                        field-name="Onbase_Migration_Id__c"
+                        variant="label-hidden"
+                      ></lightning-input-field>
+                    </dd>
+                  </div>
+                </lightning-record-edit-form>
+              </template>
+              <template lwc:else>
+                <div class="quick-view__field">
+                  <dt>Amount</dt>
+                  <dd>
+                    <lightning-formatted-number
+                      value={amountValue}
+                      format-style="currency"
+                    ></lightning-formatted-number>
+                  </dd>
+                </div>
+                <div class="quick-view__field">
+                  <dt>Onbase Migration Id</dt>
+                  <dd>{onbaseMigrationIdValue}</dd>
+                </div>
+              </template>
+
+              <div class="quick-view__field">
+                <dt>Product</dt>
+                <dd>
+                  <a
+                    href={productUrl}
+                    data-record-id={productId}
+                    data-object-api-name="Product__c"
+                    onclick={handleLookupClick}
+                    >{productName}</a
+                  >
+                </dd>
+              </div>
+
+              <div class="quick-view__field">
+                <dt>Maestro Product Code</dt>
+                <dd>{maestroProductCode}</dd>
+              </div>
+
+              <div class="quick-view__field">
+                <dt>Case</dt>
+                <dd>
+                  <a
+                    href={caseUrl}
+                    data-record-id={caseId}
+                    data-object-api-name="Case"
+                    onclick={handleLookupClick}
+                    >{caseNumber}</a
+                  >
+                </dd>
+              </div>
+
+              <div class="quick-view__field">
+                <dt>Created By</dt>
+                <dd>{createdByName}</dd>
+              </div>
+
+              <div class="quick-view__field">
+                <dt>Last Modified By</dt>
+                <dd>{lastModifiedByName}</dd>
+              </div>
+            </dl>
+
+            <template lwc:if={isEditing}>
+              <div class="quick-view__form-actions">
+                <button
+                  type="button"
+                  class="quick-view__button"
+                  onclick={handleCancelEdit}
+                  disabled={isSaving}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  class="quick-view__button quick-view__button--primary"
+                  onclick={handleSave}
+                  disabled={isSaving}
+                >
+                  Save
+                </button>
+              </div>
+            </template>
+          </template>
+        </div>
+      </div>
+    </section>
+  </template>
+</template>

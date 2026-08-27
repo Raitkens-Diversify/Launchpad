@@ -1058,7 +1058,7 @@ taskRec.ActivityDate = ActivityDate;
             if(!String.isEmpty(caseRecord.Wizard_Financial_Account__c)){
                 setOfFinAccountId.add(caseRecord.Wizard_Financial_Account__c);
             }
-            if(!String.isEmpty(caseRecord.Case_Template__c) && caseRecord.Origin == 'Wizard'){
+            if(!String.isEmpty(caseRecord.Case_Template__c)){
                 mapOfCaseIdToCaseTempId.put(caseRecord.Id,caseRecord.Case_Template__c);
             }
             

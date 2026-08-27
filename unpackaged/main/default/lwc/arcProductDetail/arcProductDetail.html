@@ -110,6 +110,10 @@
               default-link-object-api-name={relatedProductsObjectApiName}
               placeholder="-"
               enable-row-navigation
+              has-more-rows={relatedProductsHasMore}
+              is-loading-more={isLoadingMoreRelatedProducts}
+              onrownavigate={handleRelatedProductRowNavigate}
+              onloadmore={handleRelatedProductsLoadMore}
             ></c-arc-data-table>
           </template>
         </div>
@@ -222,6 +226,10 @@
           </article>
         </div>
       </div>
+
+      <c-arc-related-product-quick-view
+        lwc:ref="relatedProductQuickView"
+      ></c-arc-related-product-quick-view>
     </template>
   </div>
 </template>

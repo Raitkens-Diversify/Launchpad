@@ -8,11 +8,6 @@
         <plural>true</plural>
         <value>Sections</value>
     </caseValues>
-    
-    
-    
-    
-    
     <layouts>
         <layout>Section Layout</layout>
         <sections>
@@ -20,5 +15,10 @@
             <section>Custom Links</section>
         </sections>
     </layouts>
+    
+    
+    
+    
+    
     <startsWith>Consonant</startsWith>
 </CustomObjectTranslation>

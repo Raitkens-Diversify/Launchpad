@@ -1677,6 +1677,10 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
       return;
     }
 
+    if (this.dispatchRowNavigateEvent(recordId, objectApiName)) {
+      return;
+    }
+
     const linkPathOptions = this.buildLinkPathOptions(objectApiName);
     const pageReference = buildRecordNavigationReference(
       recordId,
@@ -1689,6 +1693,24 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
     }
 
     this[NavigationMixin.Navigate](pageReference);
+  }
+
+  /**
+   * Cancelable escape hatch for a caller that wants to do something other
+   * than navigate on click -- Product Detail's Related Products table opens
+   * a quick-view popup instead. Fires on both click paths (the isLink cell's
+   * own anchor, and a whole-row click under enableRowNavigation) so a
+   * listener only has to handle one event regardless of where the click
+   * landed. Returns true if a listener called preventDefault(), meaning the
+   * caller should skip its own default navigation.
+   */
+  dispatchRowNavigateEvent(recordId, objectApiName) {
+    const navigateEvent = new CustomEvent("rownavigate", {
+      cancelable: true,
+      detail: { recordId, objectApiName }
+    });
+    this.dispatchEvent(navigateEvent);
+    return navigateEvent.defaultPrevented;
   }
 
   handleActionCellClick(event) {
@@ -1710,6 +1732,10 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
     );
 
     if (!row?.isNavigable) {
+      return;
+    }
+
+    if (this.dispatchRowNavigateEvent(row.key, row.navigationObjectApiName)) {
       return;
     }
 

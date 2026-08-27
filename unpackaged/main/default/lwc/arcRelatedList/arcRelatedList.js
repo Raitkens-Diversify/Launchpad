@@ -18,7 +18,6 @@ import {
   buildRecordNavigationReference
 } from "c/recordNavigationUtils";
 import getRelatedRecords from "@salesforce/apex/ArcRelatedListController.getRelatedRecords";
-import getRelatedRecordsPage from "@salesforce/apex/ArcRelatedListController.getRelatedRecordsPage";
 
 /**
  * Marks "no preloadedResult has been applied yet".
@@ -102,24 +101,11 @@ export default class ArcRelatedList extends NavigationMixin(LightningElement) {
    */
   @api collapsible = false;
 
-  /**
-   * Opt-in "Load more" mode: a table expected to hold more than a handful of
-   * rows (Product Detail's Related Products), not the fixed ROW_LIMIT=10 rail
-   * card every other consumer of this component uses. Off by default so
-   * nothing changes for them -- self-fetching still goes through the
-   * original getRelatedRecords, not the paginated one, when this is false.
-   */
-  @api enableLoadMore = false;
-  /** Rows per fetch when enableLoadMore is on. */
-  @api pageSize = 10;
-
   _collapsed = false;
 
   _recordId;
   _loadedSignature = "";
   _stylesLoaded = false;
-  _offset = 0;
-  isLoadingMore = false;
 
   rows = [];
   types = [];
@@ -262,26 +248,15 @@ export default class ArcRelatedList extends NavigationMixin(LightningElement) {
 
     this.isLoading = true;
     this.errorMessage = "";
-    this._offset = 0;
 
     try {
-      const result = this.enableLoadMore
-        ? await getRelatedRecordsPage({
-            recordId: this._recordId,
-            objectApiName: this.relatedObjectApiName,
-            parentFieldApiName: this.parentFieldApiName,
-            fieldApiNames: columns.map((column) => column.path),
-            linkFieldApiName: this.linkFieldApiName || null,
-            offsetValue: 0,
-            pageSize: this.pageSize
-          })
-        : await getRelatedRecords({
-            recordId: this._recordId,
-            objectApiName: this.relatedObjectApiName,
-            parentFieldApiName: this.parentFieldApiName,
-            fieldApiNames: columns.map((column) => column.path),
-            linkFieldApiName: this.linkFieldApiName || null
-          });
+      const result = await getRelatedRecords({
+        recordId: this._recordId,
+        objectApiName: this.relatedObjectApiName,
+        parentFieldApiName: this.parentFieldApiName,
+        fieldApiNames: columns.map((column) => column.path),
+        linkFieldApiName: this.linkFieldApiName || null
+      });
       this.applyResult(result);
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -292,47 +267,6 @@ export default class ArcRelatedList extends NavigationMixin(LightningElement) {
     } finally {
       this.isLoading = false;
     }
-  }
-
-  /**
-   * The "Load more" click: fetches the next page and appends it, rather than
-   * replacing what's already on screen -- rows the reader already scrolled
-   * past stay put.
-   */
-  async handleLoadMore() {
-    if (!this.enableLoadMore || this.isLoadingMore || !this.hasMore) {
-      return;
-    }
-
-    const columns = this.columnDefs;
-    const nextOffset = this._offset + this.pageSize;
-    this.isLoadingMore = true;
-
-    try {
-      const result = await getRelatedRecordsPage({
-        recordId: this._recordId,
-        objectApiName: this.relatedObjectApiName,
-        parentFieldApiName: this.parentFieldApiName,
-        fieldApiNames: columns.map((column) => column.path),
-        linkFieldApiName: this.linkFieldApiName || null,
-        offsetValue: nextOffset,
-        pageSize: this.pageSize
-      });
-      this._offset = nextOffset;
-      this.rows = [...this.rows, ...(result?.rows || [])];
-      this.hasMore = result?.hasMore === true;
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error("[arcRelatedList] Failed to load more records", error);
-      this.errorMessage =
-        error?.body?.message || "Unable to load more records right now.";
-    } finally {
-      this.isLoadingMore = false;
-    }
-  }
-
-  get showLoadMore() {
-    return this.enableLoadMore && this.hasMore;
   }
 
   /** Shared by loadRows' own fetch and a parent's preloadedResult. */

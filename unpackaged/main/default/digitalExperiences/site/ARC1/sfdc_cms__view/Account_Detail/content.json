@@ -50,11 +50,12 @@
                   "type" : "component"
                 }, {
                   "attributes" : {
+                    "cardTitle" : "",
                     "dxpStyle" : { },
-                    "useRelatedRecord" : false
+                    "objectApiName" : "Account"
                   },
-                  "definition" : "c:arcRecordDetail",
-                  "id" : "cd588101-ef62-4749-868a-953fbd630f1c",
+                  "definition" : "c:arcHouseholdDetail",
+                  "id" : "9c41e8b7-2d6a-4f35-8e12-7b60ad3f94c5",
                   "type" : "component"
                 }, {
                   "attributes" : {

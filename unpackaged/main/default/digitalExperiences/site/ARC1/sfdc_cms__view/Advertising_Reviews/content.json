@@ -28,7 +28,7 @@
                 "pillFields" : "Status__c",
                 "serverSearchListViews" : "My_Team_s_Advertising_Requests,All",
                 "title" : "Advertising Reviews",
-                "viewTabs" : "[{\"view\": \"My_Team_s_Advertising_Requests\", \"label\": \"My Team's Requests\", \"title\": \"Advertising Reviews\", \"subtitle\": \"Advertising items submitted for compliance review\", \"action\": \"New Advertising Item\"}, {\"view\": \"All\", \"label\": \"All Items\", \"title\": \"Advertising Reviews\", \"subtitle\": \"Every advertising item\", \"action\": \"New Advertising Item\"}]"
+                "viewTabs" : "[{\"view\": \"My_Team_s_Advertising_Requests\", \"label\": \"My Team's Requests\", \"title\": \"Advertising Reviews\", \"subtitle\": \"Advertising items submitted for compliance review\", \"action\": \"New Advertising Item\", \"createFields\": \"Name,Advertising_Type__c,Intended_Audience__c,Financial_Advisor_Team__c,Date_of_Intended_First_Use__c,Submission_Notes__c\"}, {\"view\": \"All\", \"label\": \"All Items\", \"title\": \"Advertising Reviews\", \"subtitle\": \"Every advertising item\", \"action\": \"New Advertising Item\", \"createFields\": \"Name,Advertising_Type__c,Intended_Audience__c,Financial_Advisor_Team__c,Date_of_Intended_First_Use__c,Submission_Notes__c\"}]"
               },
               "definition" : "c:arcRecordListView",
               "id" : "21dec2b8-e19d-491b-a829-18b2ac2147fa",

@@ -21,10 +21,21 @@
  *     managed-package object instead). Rendered as a full-width, collapsible
  *     c/arcDataTable -- the same table every other ARC list uses, per
  *     explicit request, rather than c/arcRelatedList's plain table -- fed by
- *     one batched fetch through ArcRelatedListController.getRelatedRecordsPage
- *     (a generous single page, paginated from there client-side by
- *     arcDataTable's own pager) instead of that component's fixed 10-row
- *     card default: a product can be held across many financial accounts.
+ *     ArcRelatedListController.getRelatedRecordsPage in PAGE_SIZE=100
+ *     batches instead of that component's fixed 10-row card default. The
+ *     first batch loads via @wire; paging past it fetches the next batch on
+ *     demand through arcDataTable's own hasMoreRows/loadmore mechanism (see
+ *     handleRelatedProductsLoadMore) -- real server pagination, not a single
+ *     capped fetch, since one product held across more than 100 financial
+ *     accounts is a real case (confirmed live: a 147-holding product loaded
+ *     only its first 100 before this).
+ *     Columns match the CRM reference's own Related Products related list
+ *     exactly (Related Product Name, Financial Account, Case). Clicking the
+ *     name opens c/arcRelatedProductQuickView, a popup showing/editing that
+ *     one record, instead of navigating to a full page -- arcDataTable's
+ *     cancelable rownavigate event (see handleRelatedProductRowNavigate) is
+ *     what makes that interception possible without arcDataTable itself
+ *     knowing anything about popups.
  *   - History: the flexipage's own History tab (relatedListApiName
  *     "Histories" = standard field-history tracking), rendered as its own
  *     card in the right rail rather than a tab, per explicit request.
@@ -49,27 +60,45 @@ const RELATED_PRODUCTS_OBJECT_API_NAME = "Financial_Account_Related_Product__c";
 /**
  * Positional order matters -- ArcRelatedListController.getRelatedRecordsPage
  * returns each row's values as a plain cells[] array in the same order these
- * were requested, not keyed by name.
+ * were requested, not keyed by name. Matches the reference CRM record page's
+ * own "Related Products" related list columns exactly (NAME,
+ * Financial_Account__c, Case__c) -- Financial_Account__c itself points at the
+ * wrong (unused FSC) object, so Wizard_Financial_Account__r.Name is used
+ * here instead, same substitution already established for this exact object
+ * in arcCaseDetail's own Related Products card.
  */
 const RELATED_PRODUCTS_FIELD_PATHS = [
+  "Name",
   "Wizard_Financial_Account__r.Name",
-  "Household__c",
-  "Primary_Owner__c",
-  "Amount__c",
-  "CreatedDate"
+  "Case__r.CaseNumber"
 ];
-/** c/arcDataTable's own column shape -- see arcCaseDetail's TASK_COLUMNS for the same pattern. */
+/**
+ * c/arcDataTable's own column shape -- see arcCaseDetail's TASK_COLUMNS for
+ * the same pattern. isLink on the first column opens
+ * c-arc-related-product-quick-view instead of navigating -- see
+ * handleRelatedProductRowNavigate, which intercepts arcDataTable's
+ * cancelable rownavigate event.
+ */
 const RELATED_PRODUCTS_COLUMNS = [
-  { label: "Financial Account", fieldName: "financialAccount", isLink: true },
-  { label: "Household", fieldName: "household" },
-  { label: "Owner", fieldName: "owner" },
-  { label: "Amount", fieldName: "amount", type: "currency" },
-  { label: "Created", fieldName: "created", type: "date" }
+  { label: "Related Product Name", fieldName: "name", isLink: true },
+  { label: "Financial Account", fieldName: "financialAccount" },
+  { label: "Case", fieldName: "caseNumber" }
 ];
-/** Fetched once, then paginated client-side by c/arcDataTable's own pager --
- * MAX_PAGE_SIZE on the Apex side, generous enough that "load more" clicking
- * isn't needed for the realistic range of accounts holding one product. */
+/** Rows per server fetch -- MAX_PAGE_SIZE on the Apex side. Additional
+ * batches are fetched on demand via arcDataTable's own loadmore event (see
+ * handleRelatedProductsLoadMore) once the reader pages past what's loaded,
+ * so a product held across more than one batch's worth of accounts is not
+ * silently truncated. */
 const RELATED_PRODUCTS_PAGE_SIZE = 100;
+
+/** Apex hands cells back as a positional array; this is the one place that order is named. */
+const mapRelatedProductRows = (rows) =>
+  (rows || []).map((row) => ({
+    id: row.id,
+    name: row.cells?.[0] ?? "",
+    financialAccount: row.cells?.[1] ?? "",
+    caseNumber: row.cells?.[2] ?? ""
+  }));
 
 const HEADER_FIELDS = [
   "Product__c.Name",
@@ -130,8 +159,12 @@ export default class ArcProductDetail extends LightningElement {
 
   relatedProductsRows = [];
   relatedProductsError;
+  relatedProductsHasMore = false;
+  isLoadingMoreRelatedProducts = false;
   _relatedProductsRequested = false;
   _relatedProductsLoaded = false;
+  /** Where the next loadmore fetch should pick up -- advances by RELATED_PRODUCTS_PAGE_SIZE each batch. */
+  _relatedProductsOffset = 0;
 
   @wire(CurrentPageReference)
   wiredPageReference(pageRef) {
@@ -182,18 +215,14 @@ export default class ArcProductDetail extends LightningElement {
     this._relatedProductsRequested = true;
     if (data) {
       this._relatedProductsLoaded = true;
-      this.relatedProductsRows = (data.rows || []).map((row) => ({
-        id: row.id,
-        financialAccount: row.cells?.[0] ?? "",
-        household: row.cells?.[1] ?? "",
-        owner: row.cells?.[2] ?? "",
-        amount: row.cells?.[3] ?? "",
-        created: row.cells?.[4] ?? ""
-      }));
+      this.relatedProductsRows = mapRelatedProductRows(data.rows);
+      this.relatedProductsHasMore = data.hasMore === true;
+      this._relatedProductsOffset = RELATED_PRODUCTS_PAGE_SIZE;
       this.relatedProductsError = undefined;
     } else if (error) {
       this._relatedProductsLoaded = true;
       this.relatedProductsRows = [];
+      this.relatedProductsHasMore = false;
       this.relatedProductsError =
         "Unable to load related products right now.";
     }
@@ -292,6 +321,58 @@ export default class ArcProductDetail extends LightningElement {
 
   get relatedProductsObjectApiName() {
     return RELATED_PRODUCTS_OBJECT_API_NAME;
+  }
+
+  /**
+   * arcDataTable's cancelable rownavigate event (fires instead of navigating
+   * when preventDefault() is called) -- opens the quick-view popup instead
+   * of a full page navigation, per explicit request.
+   */
+  handleRelatedProductRowNavigate(event) {
+    event.preventDefault();
+    const recordId = event.detail?.recordId;
+    if (!recordId) {
+      return;
+    }
+    this.refs.relatedProductQuickView?.open(recordId);
+  }
+
+  /**
+   * arcDataTable's own loadmore event -- fires when the reader pages past
+   * what's currently loaded while hasMoreRows is true (same mechanism
+   * arcRecordListView's own server search uses). Fetches the next
+   * RELATED_PRODUCTS_PAGE_SIZE batch and appends it, rather than replacing
+   * what's already on screen.
+   */
+  async handleRelatedProductsLoadMore() {
+    if (this.isLoadingMoreRelatedProducts || !this.relatedProductsHasMore) {
+      return;
+    }
+
+    this.isLoadingMoreRelatedProducts = true;
+
+    try {
+      const result = await getRelatedRecordsPage({
+        recordId: this.recordId,
+        objectApiName: RELATED_PRODUCTS_OBJECT_API_NAME,
+        parentFieldApiName: "Product__c",
+        fieldApiNames: RELATED_PRODUCTS_FIELD_PATHS,
+        linkFieldApiName: null,
+        offsetValue: this._relatedProductsOffset,
+        pageSize: RELATED_PRODUCTS_PAGE_SIZE
+      });
+      this.relatedProductsRows = [
+        ...this.relatedProductsRows,
+        ...mapRelatedProductRows(result?.rows)
+      ];
+      this._relatedProductsOffset += RELATED_PRODUCTS_PAGE_SIZE;
+      this.relatedProductsHasMore = result?.hasMore === true;
+    } catch (error) {
+      this.relatedProductsError =
+        error?.body?.message || "Unable to load more related products right now.";
+    } finally {
+      this.isLoadingMoreRelatedProducts = false;
+    }
   }
 
   get isRelatedProductsLoading() {

@@ -10,6 +10,16 @@
         <valueSetDefinition>
             <sorted>false</sorted>
             <value>
+                <fullName>Individual Detail</fullName>
+                <default>false</default>
+                <label>Individual Detail</label>
+            </value>
+            <value>
+                <fullName>Household Detail</fullName>
+                <default>false</default>
+                <label>Household Detail</label>
+            </value>
+            <value>
                 <fullName>Client - Individual</fullName>
                 <default>true</default>
                 <label>Client - Individual</label>

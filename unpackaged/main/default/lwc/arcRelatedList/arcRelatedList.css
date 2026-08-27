@@ -128,36 +128,6 @@
   min-height: 4rem;
 }
 
-/* "Load more" -- appears only in enableLoadMore mode, in place of a
-   page-number pager. */
-.related-list__load-more {
-  display: flex;
-  justify-content: center;
-  padding-top: var(--slds-g-spacing-3, 12px);
-}
-
-.related-list__load-more-button {
-  appearance: none;
-  background: var(--div-color-white, #ffffff);
-  border: 1px solid var(--div-color-neutral-200, #e5e7eb);
-  border-radius: var(--div-radius-full, 999px);
-  padding: var(--slds-g-spacing-1, 4px) var(--slds-g-spacing-4, 16px);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--div-color-blue-700, #1a76bb);
-  cursor: pointer;
-}
-
-.related-list__load-more-button:hover:not(:disabled),
-.related-list__load-more-button:focus:not(:disabled) {
-  background: var(--div-color-neutral-50, #f9fafb);
-}
-
-.related-list__load-more-button:disabled {
-  color: var(--div-color-neutral-500, #838a97);
-  cursor: default;
-}
-
 /* Collapse caret, only rendered when the consumer opts in. Drawn from borders so
    it needs no icon resource and rotates with the state. */
 
