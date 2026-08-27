@@ -14,8 +14,4 @@
             <masterLabel>Moderate</masterLabel>
             <translation><!-- Moderate --></translation>
         </picklistValues>
-        <picklistValues>
-            <masterLabel>No Experience</masterLabel>
-            <translation><!-- No Experience --></translation>
-        </picklistValues>
     </CustomFieldTranslation>

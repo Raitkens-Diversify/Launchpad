@@ -42,7 +42,7 @@
             <columnToColumn>false</columnToColumn>
             <isUnlocked>true</isUnlocked>
             <operator>equals</operator>
-            <value>PersonAccount.PersonAccount</value>
+            <value>Account.FinServ__IndustriesIndividual</value>
         </criteriaItems>
         <criteriaItems>
             <column>FinServ__FinancialAccount__c$Add_to_Maestro_Report_Date__c</column>

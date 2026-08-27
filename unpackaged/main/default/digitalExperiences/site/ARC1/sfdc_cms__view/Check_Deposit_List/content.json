@@ -26,6 +26,7 @@
                 "defaultListViewApiName" : "All",
                 "dxpStyle" : { },
                 "objectApiName" : "Check_Deposit__c",
+                "serverSearchListViews" : "All",
                 "subtitle" : "Deposits recorded against a check",
                 "title" : "Check Deposits"
               },

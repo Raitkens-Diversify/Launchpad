@@ -27,6 +27,7 @@
                 "dxpStyle" : { },
                 "objectApiName" : "Task",
                 "pillFields" : "Status",
+                "serverSearchListViews" : "All,My_Open_Tasks,My_Team_s_Open_Tasks",
                 "title" : "Tasks",
                 "viewTabs" : "All=All Tasks,My_Open_Tasks=My Open Tasks,My_Team_s_Open_Tasks=My Team's Open Tasks"
               },

@@ -26,6 +26,7 @@
                 "dxpStyle" : { },
                 "objectApiName" : "Advertising_Item__c",
                 "pillFields" : "Status__c",
+                "serverSearchListViews" : "My_Team_s_Advertising_Requests,All",
                 "title" : "Advertising Reviews",
                 "viewTabs" : "[{\"view\": \"My_Team_s_Advertising_Requests\", \"label\": \"My Team's Requests\", \"title\": \"Advertising Reviews\", \"subtitle\": \"Advertising items submitted for compliance review\", \"action\": \"New Advertising Item\"}, {\"view\": \"All\", \"label\": \"All Items\", \"title\": \"Advertising Reviews\", \"subtitle\": \"Every advertising item\", \"action\": \"New Advertising Item\"}]"
               },

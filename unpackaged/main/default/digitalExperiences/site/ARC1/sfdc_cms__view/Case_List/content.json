@@ -71,6 +71,7 @@
                     "dxpStyle" : { },
                     "objectApiName" : "Case",
                     "pillFields" : "Status,Priority",
+                    "serverSearchListViews" : "All_Cases,MyOpenCases,My_teams_open_cases",
                     "title" : "",
                     "viewTabs" : "All_Cases=All Cases,MyOpenCases=My Open Cases,My_teams_open_cases=My Team's Open Cases"
                   },
@@ -88,6 +89,7 @@
                     "defaultListViewApiName" : "All",
                     "dxpStyle" : { },
                     "objectApiName" : "Task",
+                    "serverSearchListViews" : "All",
                     "title" : ""
                   },
                   "definition" : "c:arcRecordListView",
@@ -104,6 +106,7 @@
                     "defaultListViewApiName" : "All",
                     "dxpStyle" : { },
                     "objectApiName" : "Check_Log__c",
+                    "serverSearchListViews" : "All",
                     "title" : ""
                   },
                   "definition" : "c:arcRecordListView",

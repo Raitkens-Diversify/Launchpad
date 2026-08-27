@@ -27,6 +27,7 @@
                 "dxpStyle" : { },
                 "objectApiName" : "Check_Log__c",
                 "pillFields" : "Status__c",
+                "serverSearchListViews" : "All,Sent_and_Received_Check_Logs,checking_in_ops",
                 "subtitle" : "Checks received, forwarded and delivered",
                 "title" : "Check Log",
                 "viewTabs" : "[{\"view\": \"All\", \"label\": \"All Check Logs\", \"title\": \"Check Log\", \"subtitle\": \"Checks received, forwarded and delivered\", \"action\": \"New Check Log\"}, {\"view\": \"Sent_and_Received_Check_Logs\", \"label\": \"Received and Sent\", \"title\": \"Check Log\", \"subtitle\": \"Checks received or already forwarded\", \"action\": \"New Check Log\"}, {\"view\": \"checking_in_ops\", \"label\": \"Checking in Ops\", \"title\": \"Check Log\", \"subtitle\": \"Checks operations still holds\", \"action\": \"New Check Log\"}]"

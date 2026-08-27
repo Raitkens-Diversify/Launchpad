@@ -160,8 +160,7 @@ export default class EnvelopeRelatedParties extends LightningElement {
     // The members the given subsection must not offer: the record itself, which cannot be its own
     // related party, the parties it already holds, so the list shows only what can still be added,
     // and — for a slot that must name a different entity than its siblings — whatever those siblings
-    // hold. exclusivePartyIds is empty for every slot carrying no exclusivity, so the account and
-    // member subsections still offer an entity a sibling slot already holds.
+    // hold. exclusivePartyIds is empty for every slot carrying no exclusivity.
     _excludedIdsFor(key) {
         return [
             ...(this.entityId ? [this.entityId] : []),

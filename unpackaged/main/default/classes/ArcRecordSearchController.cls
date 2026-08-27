@@ -13,6 +13,13 @@
  * own OFFSET clause is capped at 2000 regardless of who issues the query, so
  * it would only trade one 2000-row ceiling for another.
  *
+ * The free-text search term itself routes through ArcSoslSearchHelper for
+ * any object with Search enabled -- a maintained full-text index lookup
+ * (fast, effectively fuzzy, uniform across field types) instead of a SOQL
+ * LIKE scan -- falling back to LIKE only for objects Search is disabled on
+ * or a term too short for SOSL to run. See that class for why it's kept
+ * separate rather than folded in here.
+ *
  * Conventions, matching ArcRelatedListController: every object/field name is
  * validated against the describe before it's concatenated into SOQL (an
  * allowlist drawn from the schema itself); values are always bind variables,
@@ -88,6 +95,7 @@ public with sharing class ArcRecordSearchController {
 
     Map<String, Object> binds = new Map<String, Object>();
     String whereClause = buildWhereClause(
+      objectApiName,
       fieldMap,
       filters,
       searchTerm,
@@ -156,6 +164,7 @@ public with sharing class ArcRecordSearchController {
   }
 
   private static String buildWhereClause(
+    String objectApiName,
     Map<String, Schema.SObjectField> fieldMap,
     List<SearchFilter> filters,
     String searchTerm,
@@ -177,6 +186,7 @@ public with sharing class ArcRecordSearchController {
         }
         String bindKey = 'v' + bindIndex++;
         String clause = buildFilterClause(
+          objectApiName,
           fieldMap,
           filter.fieldApiName,
           filter.operator,
@@ -190,25 +200,45 @@ public with sharing class ArcRecordSearchController {
       }
     }
 
-    if (String.isNotBlank(searchTerm) && searchableFields != null) {
-      List<String> searchClauses = new List<String>();
-      String bindKey = 'searchTerm';
-      binds.put(bindKey, '%' + escapeLike(searchTerm.trim()) + '%');
-      for (String rawPath : searchableFields) {
-        if (String.isBlank(rawPath)) {
-          continue;
+    if (String.isNotBlank(searchTerm)) {
+      String trimmedTerm = searchTerm.trim();
+      Boolean useSosl = trimmedTerm.length() >= ArcSoslSearchHelper.MIN_TERM_LENGTH &&
+        ArcSoslSearchHelper.supportsSearch(objectApiName);
+
+      if (useSosl) {
+        // A maintained full-text index lookup: fast (not a column scan),
+        // effectively fuzzy (tokenized, matches anywhere, not typed), and
+        // works uniformly across every searchable field regardless of
+        // type -- none of the LIKE-branch's caveats below apply. An empty
+        // match list is authoritative (genuinely zero matches), not a
+        // signal to fall through to LIKE as well.
+        List<Id> soslIds = ArcSoslSearchHelper.findMatchingIds(objectApiName, trimmedTerm);
+        String bindKey = 'soslIds';
+        binds.put(bindKey, soslIds);
+        clauses.add('Id IN :' + bindKey);
+      } else if (searchableFields != null) {
+        // Fallback for objects with Search disabled, or a term too short
+        // for SOSL to run at all.
+        List<String> searchClauses = new List<String>();
+        String bindKey = 'searchTerm';
+        binds.put(bindKey, '%' + escapeLike(trimmedTerm) + '%');
+        for (String rawPath : searchableFields) {
+          if (String.isBlank(rawPath)) {
+            continue;
+          }
+          String path = rawPath.trim();
+          // SOQL's LIKE operator only works on string-shaped fields -- a
+          // displayed column can easily be a Date/Currency/etc, which
+          // would otherwise throw "like operator only valid on string
+          // field" and fail every search the moment such a column is on
+          // screen.
+          if (isReadablePath(fieldMap, path) && isLikeCompatibleType(fieldMap, path)) {
+            searchClauses.add(path + ' LIKE :' + bindKey);
+          }
         }
-        String path = rawPath.trim();
-        // SOQL's LIKE operator only works on string-shaped fields -- a
-        // displayed column can easily be a Date/Currency/etc, which would
-        // otherwise throw "like operator only valid on string field" and
-        // fail every search the moment such a column is on screen.
-        if (isReadablePath(fieldMap, path) && isLikeCompatibleType(fieldMap, path)) {
-          searchClauses.add(path + ' LIKE :' + bindKey);
+        if (!searchClauses.isEmpty()) {
+          clauses.add('(' + String.join(searchClauses, ' OR ') + ')');
         }
-      }
-      if (!searchClauses.isEmpty()) {
-        clauses.add('(' + String.join(searchClauses, ' OR ') + ')');
       }
     }
 
@@ -225,6 +255,7 @@ public with sharing class ArcRecordSearchController {
    * whole search.
    */
   private static String buildFilterClause(
+    String objectApiName,
     Map<String, Schema.SObjectField> fieldMap,
     String fieldApiName,
     String operatorKey,
@@ -259,7 +290,25 @@ public with sharing class ArcRecordSearchController {
       return fieldApiName + ' LIKE :' + bindKey;
     }
 
-    Object coerced = coerceBindValue(fieldMap, fieldApiName, operandValue);
+    // A RecordTypeId filter adopted from a list view's own saved criteria
+    // (adoptSavedFilters on the client) arrives as the record type's NAME
+    // label (e.g. "Individual"), not its Id -- the UI API only ever hands
+    // back operandLabels, never the raw Id -- and a view whose own filter
+    // matches more than one record type (an IN-style "equals" over a
+    // comma-separated value list, e.g. the Households tab) arrives as
+    // multiple labels joined with "; " by that same client code. Either
+    // shape resolves via schema (no extra query) and always compares with
+    // IN/NOT IN, which is valid for one value or several.
+    if ((op == 'Equals' || op == 'NotEqual') && fieldApiName == 'RecordTypeId') {
+      List<Id> recordTypeIds = resolveRecordTypeIds(objectApiName, operandValue);
+      if (recordTypeIds.isEmpty()) {
+        return null;
+      }
+      binds.put(bindKey, recordTypeIds);
+      return fieldApiName + (op == 'Equals' ? ' IN :' : ' NOT IN :') + bindKey;
+    }
+
+    Object coerced = coerceBindValue(objectApiName, fieldMap, fieldApiName, operandValue);
     if (coerced == null) {
       return null;
     }
@@ -283,8 +332,36 @@ public with sharing class ArcRecordSearchController {
     return fieldApiName + ' <= :' + bindKey;
   }
 
+  /**
+   * The RecordType Id(s) whose current Name matches operandValue -- a
+   * single label, or several joined with "; " (see the RecordTypeId
+   * branch in buildFilterClause for why). A label that doesn't match any
+   * record type's current name is dropped rather than failing the whole
+   * filter; the caller treats an empty result as "nothing to filter on".
+   */
+  private static List<Id> resolveRecordTypeIds(String objectApiName, String operandValue) {
+    List<Id> ids = new List<Id>();
+    if (String.isBlank(operandValue)) {
+      return ids;
+    }
+    Schema.SObjectType objectType = Schema.getGlobalDescribe().get(objectApiName);
+    if (objectType == null) {
+      return ids;
+    }
+    Map<String, Schema.RecordTypeInfo> byName = objectType.getDescribe()
+      .getRecordTypeInfosByName();
+    for (String label : operandValue.split(';')) {
+      Schema.RecordTypeInfo info = byName.get(label.trim());
+      if (info != null) {
+        ids.add(info.getRecordTypeId());
+      }
+    }
+    return ids;
+  }
+
   /** operandValue coerced to match the target field's own SOQL type. */
   private static Object coerceBindValue(
+    String objectApiName,
     Map<String, Schema.SObjectField> fieldMap,
     String fieldApiName,
     String operandValue
@@ -356,37 +433,48 @@ public with sharing class ArcRecordSearchController {
     Map<String, Schema.SObjectField> fieldMap,
     String path
   ) {
-    List<String> hops = path.split('\\.');
-    Map<String, Schema.SObjectField> current = fieldMap;
+    return isReadablePathFrom(fieldMap, path.split('\\.'), 0);
+  }
 
-    for (Integer index = 0; index < hops.size(); index++) {
-      String hop = hops[index];
-      Boolean isLast = index == hops.size() - 1;
+  /**
+   * A polymorphic lookup (Task/Event's OwnerId -> User or Group, WhoId ->
+   * Contact or Lead, WhatId -> a long list of object types) can resolve the
+   * rest of the path through ANY of its possible target types -- Owner.Alias
+   * exists on User but not Group, for instance. getReferenceTo()'s order
+   * isn't something to rely on, so every candidate is tried in turn rather
+   * than assuming the first one is the right one; a path is valid if any
+   * candidate resolves it.
+   */
+  private static Boolean isReadablePathFrom(
+    Map<String, Schema.SObjectField> fieldMap,
+    List<String> hops,
+    Integer index
+  ) {
+    String hop = hops[index];
+    Boolean isLast = index == hops.size() - 1;
 
-      if (isLast) {
-        Schema.SObjectField token = current.get(hop);
-        return token != null && token.getDescribe().isAccessible();
-      }
-
-      Schema.SObjectField token = current.get(hop.endsWith('__r')
-        ? hop.removeEnd('__r') + '__c'
-        : hop + 'Id');
-      if (token == null) {
-        return false;
-      }
-
-      Schema.DescribeFieldResult describe = token.getDescribe();
-      if (
-        !describe.isAccessible() ||
-        describe.getType() != Schema.DisplayType.REFERENCE ||
-        describe.getReferenceTo().isEmpty()
-      ) {
-        return false;
-      }
-
-      current = describe.getReferenceTo()[0].getDescribe().fields.getMap();
+    if (isLast) {
+      Schema.SObjectField token = fieldMap.get(hop);
+      return token != null && token.getDescribe().isAccessible();
     }
 
+    Schema.SObjectField token = fieldMap.get(hop.endsWith('__r')
+      ? hop.removeEnd('__r') + '__c'
+      : hop + 'Id');
+    if (token == null) {
+      return false;
+    }
+
+    Schema.DescribeFieldResult describe = token.getDescribe();
+    if (!describe.isAccessible() || describe.getType() != Schema.DisplayType.REFERENCE) {
+      return false;
+    }
+
+    for (Schema.SObjectType candidate : describe.getReferenceTo()) {
+      if (isReadablePathFrom(candidate.getDescribe().fields.getMap(), hops, index + 1)) {
+        return true;
+      }
+    }
     return false;
   }
 
@@ -394,26 +482,40 @@ public with sharing class ArcRecordSearchController {
     Map<String, Schema.SObjectField> fieldMap,
     String path
   ) {
-    List<String> hops = path.split('\\.');
-    Map<String, Schema.SObjectField> current = fieldMap;
+    Schema.DisplayType resolved = resolvePathTypeFrom(fieldMap, path.split('\\.'), 0);
+    return resolved == null ? Schema.DisplayType.STRING : resolved;
+  }
 
-    for (Integer index = 0; index < hops.size(); index++) {
-      String hop = hops[index];
-      if (index == hops.size() - 1) {
-        Schema.SObjectField token = current.get(hop);
-        return token == null ? Schema.DisplayType.STRING : token.getDescribe().getType();
-      }
-
-      Schema.SObjectField token = current.get(hop.endsWith('__r')
-        ? hop.removeEnd('__r') + '__c'
-        : hop + 'Id');
-      if (token == null) {
-        return Schema.DisplayType.STRING;
-      }
-      current = token.getDescribe().getReferenceTo()[0].getDescribe().fields.getMap();
+  /** Same polymorphic-aware walk as isReadablePathFrom; null means "not found". */
+  private static Schema.DisplayType resolvePathTypeFrom(
+    Map<String, Schema.SObjectField> fieldMap,
+    List<String> hops,
+    Integer index
+  ) {
+    String hop = hops[index];
+    if (index == hops.size() - 1) {
+      Schema.SObjectField token = fieldMap.get(hop);
+      return token == null ? null : token.getDescribe().getType();
     }
 
-    return Schema.DisplayType.STRING;
+    Schema.SObjectField token = fieldMap.get(hop.endsWith('__r')
+      ? hop.removeEnd('__r') + '__c'
+      : hop + 'Id');
+    if (token == null || token.getDescribe().getType() != Schema.DisplayType.REFERENCE) {
+      return null;
+    }
+
+    for (Schema.SObjectType candidate : token.getDescribe().getReferenceTo()) {
+      Schema.DisplayType resolved = resolvePathTypeFrom(
+        candidate.getDescribe().fields.getMap(),
+        hops,
+        index + 1
+      );
+      if (resolved != null) {
+        return resolved;
+      }
+    }
+    return null;
   }
 
   /**

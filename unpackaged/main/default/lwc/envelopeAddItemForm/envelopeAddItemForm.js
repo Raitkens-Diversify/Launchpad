@@ -58,8 +58,12 @@ export default class EnvelopeAddItemForm extends LightningElement {
         return CONFIG[this.variant] || CONFIG.member;
     }
 
+    get hasEligibleMembers() {
+        return this.eligibleMembers?.length > 0;
+    }
+
     get showModeButtons() {
-        return this.isSalesforceUser && this.variant === 'member' && !this._formMode;
+        return this.isSalesforceUser && this.variant === 'member' && this.hasEligibleMembers && !this._formMode;
     }
 
     get showSelectExisting() {
@@ -67,7 +71,7 @@ export default class EnvelopeAddItemForm extends LightningElement {
     }
 
     get showCreateNew() {
-        return (this.variant !== 'member' || !this.isSalesforceUser) || this._formMode === 'createNew';
+        return (this.variant !== 'member' || !this.isSalesforceUser || !this.hasEligibleMembers) || this._formMode === 'createNew';
     }
 
     get disableSubmit() {
@@ -118,11 +122,11 @@ export default class EnvelopeAddItemForm extends LightningElement {
     }
 
     get cancelOrBackLabel() {
-        return this.isSalesforceUser && this.variant === 'member' ? 'Back' : 'Cancel';
+        return this._formMode === 'createNew' && this.hasEligibleMembers ? 'Back' : 'Cancel';
     }
 
     handleCancelOrBack() {
-        if (this.isSalesforceUser && this.variant === 'member') {
+        if (this._formMode === 'createNew' && this.hasEligibleMembers) {
             this.handleBackToModes();
         } else {
             this.handleCancel();

@@ -49,10 +49,12 @@
               "children" : [ {
                 "children" : [ {
                   "attributes" : {
+                    "defaultColumns" : "Name,Account_Status__c,Account_Number__c,Primary_Owner__r.Name,CreatedDate",
                     "defaultListViewApiName" : "All",
                     "dxpStyle" : { },
                     "objectApiName" : "Financial_Account__c",
                     "pillFields" : "Account_Status__c",
+                    "serverSearchListViews" : "All",
                     "title" : ""
                   },
                   "definition" : "c:arcRecordListView",
@@ -84,6 +86,7 @@
                     "defaultListViewApiName" : "All",
                     "dxpStyle" : { },
                     "objectApiName" : "Product__c",
+                    "serverSearchListViews" : "All",
                     "title" : ""
                   },
                   "definition" : "c:arcRecordListView",

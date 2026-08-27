@@ -274,6 +274,8 @@ const BENEFICIARY_FA_ROLE = 'Beneficiary';
 // counterpart of `aarRole` on the member rules. It is held separately from the title because a slot
 // is titled for its registration ("Owner" on a business account) while the role vocabulary is fixed.
 // Every value here has to exist in the Role__c picklist, which is restricted.
+const ACCOUNT_OWNER_EXCLUSIVE = 'accountOwner';
+
 const ACCOUNT_RELATED_PARTY_RULES = {
     individual: [
         {
@@ -294,6 +296,7 @@ const ACCOUNT_RELATED_PARTY_RULES = {
             faRole: PRIMARY_OWNER_FA_ROLE,
             min: 1,
             max: 1,
+            exclusiveWith: ACCOUNT_OWNER_EXCLUSIVE,
             whereStatement: null
         },
         {
@@ -303,6 +306,7 @@ const ACCOUNT_RELATED_PARTY_RULES = {
             faRole: JOINT_OWNER_FA_ROLE,
             min: 1,
             max: 4,
+            exclusiveWith: ACCOUNT_OWNER_EXCLUSIVE,
             whereStatement: null
         }
     ],
@@ -383,8 +387,9 @@ const SERVICE_OWNER_EXCLUSIVE = 'serviceOwner';
 // two lookups are the whole store and no junction object stands behind them.
 //
 // `exclusiveWith` names slots that must not share an entity: the secondary owner cannot be the
-// primary. Only rules carrying the token cross-exclude, so the account rules — where one person
-// may legitimately hold both the Primary Owner and a Joint Owner slot — keep their behavior.
+// primary, and a joint account's joint owner cannot be the primary owner. Rules carrying the same
+// token cross-exclude; rules without it (the remaining account and member registrations) keep
+// their behavior.
 const SERVICE_PRIMARY_OWNER_FIELD = 'Primary_Owner__c';
 const SERVICE_SECONDARY_OWNER_FIELD = 'Secondary_Owner__c';
 
@@ -1780,8 +1785,8 @@ function resolveRelatedPartyRequirements(
             min: rule.min,
             max: rule.max,
             group: rule.group,
-            // Slots that must name distinct entities (a service agreement's two owners). Absent on
-            // the account and member rules, where one person may fill sibling slots.
+            // Slots that must name distinct entities (a joint account's owners, a service
+            // agreement's two owners). Absent on rules where one person may fill sibling slots.
             exclusiveWith: rule.exclusiveWith,
             // Carried through so a role that can be satisfied by affirmation still says so to the
             // section body and to waivedRelatedPartyKeys. This projection is deliberately explicit,

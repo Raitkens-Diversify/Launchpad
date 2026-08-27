@@ -3,7 +3,7 @@
     <fullName>PersonAccount</fullName>
     <active>true</active>
     <compactLayoutAssignment>Person_Account_Layout</compactLayoutAssignment>
-    <label>Person Account</label>
+    <label>Individual</label>
     <picklistValues>
         <picklist>ACR_Roles__pc</picklist>
         <values>

@@ -10,11 +10,6 @@
         <valueSetDefinition>
             <sorted>false</sorted>
             <value>
-                <fullName>No Experience</fullName>
-                <default>false</default>
-                <label>No Experience</label>
-            </value>
-            <value>
                 <fullName>Limited</fullName>
                 <default>false</default>
                 <label>Limited</label>

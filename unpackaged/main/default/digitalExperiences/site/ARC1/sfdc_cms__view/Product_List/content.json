@@ -26,6 +26,7 @@
                 "defaultListViewApiName" : "All",
                 "dxpStyle" : { },
                 "objectApiName" : "Product__c",
+                "serverSearchListViews" : "All",
                 "title" : "Products"
               },
               "definition" : "c:arcRecordListView",
