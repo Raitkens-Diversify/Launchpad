@@ -56,6 +56,13 @@
                 </template>
               </div>
             </template>
+            <template lwc:else>
+              <div class="nav-flyout nav-flyout--single" role="tooltip">
+                <p class="nav-flyout__title nav-flyout__title--only">
+                  {item.label}
+                </p>
+              </div>
+            </template>
           </div>
         </template>
         <template lwc:elseif={item.hasChildren}>

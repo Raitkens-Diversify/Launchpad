@@ -204,12 +204,15 @@ export default class ArcNavigation extends NavigationMixin(LightningElement) {
             ...mapped,
             showLabel: false,
             showChildren: false,
-            renderCollapsedLink: Boolean(collapsedLink),
+            // Every collapsed item anchors a hover card now (a single-line
+            // label for leaf items, the child list for groups) rather than
+            // relying on the native title tooltip, so this is unconditional.
+            renderCollapsedLink: true,
             collapsedHref: collapsedLink?.href ?? mapped.href,
             collapsedType: collapsedLink?.type ?? mapped.type,
             collapsedTarget: collapsedLink?.target ?? mapped.target,
             collapsedGroupId: collapsedLink?.groupId ?? null,
-            itemTitle: mapped.label,
+            itemTitle: null,
             labelClass: "nav-item__label nav-item__label--hidden",
             linkClass: linkClass(
               mapped.active || Boolean(collapsedLink?.active)

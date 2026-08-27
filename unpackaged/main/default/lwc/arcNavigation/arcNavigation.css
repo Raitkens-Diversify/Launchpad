@@ -336,6 +336,29 @@
   text-transform: uppercase;
 }
 
+/*
+ * Leaf items (no sub-menu, e.g. Resource/Notifications) get the same
+ * flyout card as a lightweight custom "hover card" standing in for the
+ * native title tooltip -- just the item's own label, read normally
+ * rather than styled as a section eyebrow.
+ */
+.nav-flyout--single {
+  min-width: 0;
+  padding: 6px 12px;
+  white-space: nowrap;
+}
+
+.nav-flyout__title--only {
+  margin: 0;
+  padding: 0;
+  color: var(--div-color-gray-600, #4b5563);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 19px;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
 .nav-flyout__link {
   display: block;
   padding: 8px 10px;
