@@ -1351,6 +1351,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>NotificationChangeSummaryBuilderTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>NotificationChannelPolicyTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -1444,6 +1448,10 @@
     </classAccesses>
     <classAccesses>
         <apexClass>NotificationDigestChannelRouter</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>NotificationDigestChannelRouterTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
@@ -1683,6 +1691,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>NotificationPreferenceControllerTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>NotificationPreferenceRepository</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -1732,6 +1744,10 @@
     </classAccesses>
     <classAccesses>
         <apexClass>NotificationRecipientPrepareModels</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>NotificationRecipientPrepareModelsTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
@@ -2391,7 +2407,15 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>ZoomChannelHandlerTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>ZoomContactNotification</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>ZoomContactNotificationTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>

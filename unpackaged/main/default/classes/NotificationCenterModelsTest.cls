@@ -17,6 +17,12 @@ private class NotificationCenterModelsTest {
     NotificationCenterModels.LogPageResult logPageResult = new NotificationCenterModels.LogPageResult();
     NotificationCenterModels.RuleInput ruleInput = new NotificationCenterModels.RuleInput();
     NotificationCenterModels.RuleItem ruleItem = new NotificationCenterModels.RuleItem();
+    NotificationCenterModels.FilterOption filterOption = new NotificationCenterModels.FilterOption();
+    NotificationCenterModels.FilterOption labeledFilterOption = new NotificationCenterModels.FilterOption(
+      'hh-1',
+      'Household One'
+    );
+    NotificationCenterModels.LogPresentationFields logPresentationFields = new NotificationCenterModels.LogPresentationFields();
 
     System.assertNotEquals(null, dashboardResult.channelDelivery);
     System.assertNotEquals(null, dashboardResult.recentEvents);
@@ -33,6 +39,10 @@ private class NotificationCenterModelsTest {
     System.assertEquals(false, ruleInput.isActive);
     System.assertNotEquals(null, ruleItem.channels);
     System.assertEquals(false, ruleItem.isActive);
+    System.assertEquals(null, filterOption.value);
+    System.assertEquals('hh-1', labeledFilterOption.value);
+    System.assertEquals('Household One', labeledFilterOption.label);
+    System.assertEquals(null, logPresentationFields.changeMadePlainText);
   }
 
   @IsTest

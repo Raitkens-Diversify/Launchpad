@@ -4,7 +4,7 @@
     <deleteConstraint>SetNull</deleteConstraint>
     <label>Household New Field</label>
     <referenceTo>Account</referenceTo>
-    <relationshipLabel>Cases (Household)</relationshipLabel>
+    <relationshipLabel>Cases (Household New Field)</relationshipLabel>
     <relationshipName>Cases5</relationshipName>
     <required>false</required>
     <trackFeedHistory>false</trackFeedHistory>

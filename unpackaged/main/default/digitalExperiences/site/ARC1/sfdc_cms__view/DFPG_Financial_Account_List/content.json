@@ -43,39 +43,61 @@
                 "tabLayout" : "horizontal",
                 "tabPadding" : "12px",
                 "tabTextStyle" : "{\"textStyle\":\"paragraph1\",\"headingTag\":\"p\"}",
-                "tabsetConfig" : "{\"UUID\":\"d1251730-c0f0-4d89-acee-8b8ae0907b47\",\"activeTab\":null,\"useOverflowMenu\":null,\"tabs\":[{\"UUID\":\"2597f776-3ccf-424c-8336-3f4df268a229\",\"tabName\":\"All Investments & Services\",\"tabKey\":\"tab1\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"cd2ebfb2-bf1f-4bb0-81f5-0d9d9663c18e\",\"tabName\":\"Accounts\",\"tabKey\":\"705bc\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"0e8252a9-dac9-48f8-980f-e0255111e786\",\"tabName\":\"DPIs\",\"tabKey\":\"12a0e\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"e3aeb3dc-ced5-4073-bec1-05a2b18275ba\",\"tabName\":\"Services\",\"tabKey\":\"f5d45\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"3835a881-037d-4cf3-863c-a443009e60ed\",\"tabName\":\"Approved Products\",\"tabKey\":\"tab2\",\"locked\":false,\"allowGuestUser\":false}]}",
+                "tabsetConfig" : "{\"UUID\":\"d1251730-c0f0-4d89-acee-8b8ae0907b47\",\"activeTab\":null,\"useOverflowMenu\":null,\"tabs\":[{\"UUID\":\"cd2ebfb2-bf1f-4bb0-81f5-0d9d9663c18e\",\"tabName\":\"Accounts\",\"tabKey\":\"705bc\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"0e8252a9-dac9-48f8-980f-e0255111e786\",\"tabName\":\"DPIs\",\"tabKey\":\"12a0e\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"e3aeb3dc-ced5-4073-bec1-05a2b18275ba\",\"tabName\":\"Services\",\"tabKey\":\"f5d45\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"3835a881-037d-4cf3-863c-a443009e60ed\",\"tabName\":\"Approved Products\",\"tabKey\":\"tab2\",\"locked\":false,\"allowGuestUser\":false}]}",
                 "width" : "100%"
               },
               "children" : [ {
                 "children" : [ {
                   "attributes" : {
                     "defaultColumns" : "Name,Account_Status__c,Account_Number__c,Primary_Owner__r.Name,CreatedDate",
-                    "defaultListViewApiName" : "All",
+                    "defaultListViewApiName" : "Accounts",
                     "dxpStyle" : { },
                     "objectApiName" : "Financial_Account__c",
                     "pillFields" : "Account_Status__c",
-                    "serverSearchListViews" : "All",
+                    "serverSearchListViews" : "Accounts",
                     "title" : ""
                   },
                   "definition" : "c:arcRecordListView",
                   "id" : "b513d9c6-424e-4b47-b8bb-a5728bb7cb16",
                   "type" : "component"
                 } ],
-                "id" : "2597f776-3ccf-424c-8336-3f4df268a229",
-                "name" : "tab1",
-                "title" : "All Investments & Services",
-                "type" : "region"
-              }, {
                 "id" : "cd2ebfb2-bf1f-4bb0-81f5-0d9d9663c18e",
                 "name" : "705bc",
                 "title" : "Accounts",
                 "type" : "region"
               }, {
+                "children" : [ {
+                  "attributes" : {
+                    "defaultColumns" : "Name,Account_Status__c,Account_Number__c,Primary_Owner__r.Name,CreatedDate",
+                    "defaultListViewApiName" : "DPIs",
+                    "dxpStyle" : { },
+                    "objectApiName" : "Financial_Account__c",
+                    "pillFields" : "Account_Status__c",
+                    "serverSearchListViews" : "DPIs",
+                    "title" : ""
+                  },
+                  "definition" : "c:arcRecordListView",
+                  "id" : "8c0b9a17-6d3e-4f2a-9b1c-2e4f5a6d7c8e",
+                  "type" : "component"
+                } ],
                 "id" : "0e8252a9-dac9-48f8-980f-e0255111e786",
                 "name" : "12a0e",
                 "title" : "DPIs",
                 "type" : "region"
               }, {
+                "children" : [ {
+                  "attributes" : {
+                    "defaultListViewApiName" : "All",
+                    "dxpStyle" : { },
+                    "objectApiName" : "Service__c",
+                    "pillFields" : "Type__c",
+                    "serverSearchListViews" : "All",
+                    "title" : ""
+                  },
+                  "definition" : "c:arcRecordListView",
+                  "id" : "3f5e7a1b-9c2d-4e6f-8a0b-1c3d5e7f9a2b",
+                  "type" : "component"
+                } ],
                 "id" : "e3aeb3dc-ced5-4073-bec1-05a2b18275ba",
                 "name" : "f5d45",
                 "title" : "Services",
@@ -86,6 +108,7 @@
                     "defaultListViewApiName" : "All",
                     "dxpStyle" : { },
                     "objectApiName" : "Product__c",
+                    "pillFields" : "Status__c",
                     "serverSearchListViews" : "All",
                     "title" : ""
                   },

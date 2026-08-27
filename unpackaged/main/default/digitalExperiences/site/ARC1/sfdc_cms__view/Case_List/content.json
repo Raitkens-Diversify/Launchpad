@@ -73,7 +73,7 @@
                     "pillFields" : "Status,Priority",
                     "serverSearchListViews" : "All_Cases,MyOpenCases,My_teams_open_cases",
                     "title" : "",
-                    "viewTabs" : "All_Cases=All Cases,MyOpenCases=My Open Cases,My_teams_open_cases=My Team's Open Cases"
+                    "viewTabs" : "[{\"view\":\"All_Cases\",\"label\":\"All Cases\",\"chartField\":\"Status\"},{\"view\":\"MyOpenCases\",\"label\":\"My Open Cases\",\"chartField\":\"Status\"},{\"view\":\"My_teams_open_cases\",\"label\":\"My Team's Open Cases\",\"chartField\":\"Status\"}]"
                   },
                   "definition" : "c:arcRecordListView",
                   "id" : "25eefd59-38d1-4184-9b23-7931a6d9b191",
@@ -89,8 +89,10 @@
                     "defaultListViewApiName" : "All",
                     "dxpStyle" : { },
                     "objectApiName" : "Task",
-                    "serverSearchListViews" : "All",
-                    "title" : ""
+                    "pillFields" : "Status",
+                    "serverSearchListViews" : "All,My_Open_Tasks,My_Team_s_Open_Tasks",
+                    "title" : "",
+                    "viewTabs" : "[{\"view\":\"All\",\"label\":\"All Tasks\"},{\"view\":\"My_Open_Tasks\",\"label\":\"My Open Tasks\"},{\"view\":\"My_Team_s_Open_Tasks\",\"label\":\"My Team's Open Tasks\"}]"
                   },
                   "definition" : "c:arcRecordListView",
                   "id" : "55f1757f-c2eb-495b-8c30-3b7ca9562f20",
@@ -106,8 +108,10 @@
                     "defaultListViewApiName" : "All",
                     "dxpStyle" : { },
                     "objectApiName" : "Check_Log__c",
-                    "serverSearchListViews" : "All",
-                    "title" : ""
+                    "pillFields" : "Status__c",
+                    "serverSearchListViews" : "All,Sent_and_Received_Check_Logs,checking_in_ops",
+                    "title" : "",
+                    "viewTabs" : "[{\"view\":\"All\",\"label\":\"All Check Logs\",\"subtitle\":\"Checks received, forwarded and delivered\",\"action\":\"New Check Log\",\"chartField\":\"Status__c\",\"createFields\":\"Client__c,Financial_Advisor_Team__c,Financial_Account__c,Status__c,Amount__c,Method_of_Forwarding__c,Received_Date__c,Sent_Date__c,Delivery_Date__c,Carrier__c,Tracking_Number__c,Custodian__c,Notes__c\"},{\"view\":\"Sent_and_Received_Check_Logs\",\"label\":\"Received and Sent\",\"subtitle\":\"Checks received or already forwarded\",\"action\":\"New Check Log\",\"chartField\":\"Status__c\",\"createFields\":\"Client__c,Financial_Advisor_Team__c,Financial_Account__c,Status__c,Amount__c,Method_of_Forwarding__c,Received_Date__c,Sent_Date__c,Delivery_Date__c,Carrier__c,Tracking_Number__c,Custodian__c,Notes__c\"},{\"view\":\"checking_in_ops\",\"label\":\"Checking in Ops\",\"subtitle\":\"Checks operations still holds\",\"action\":\"New Check Log\",\"chartField\":\"Status__c\",\"createFields\":\"Client__c,Financial_Advisor_Team__c,Financial_Account__c,Status__c,Amount__c,Method_of_Forwarding__c,Received_Date__c,Sent_Date__c,Delivery_Date__c,Carrier__c,Tracking_Number__c,Custodian__c,Notes__c\"}]"
                   },
                   "definition" : "c:arcRecordListView",
                   "id" : "5a745af0-7de3-47db-a1f2-25c738883709",

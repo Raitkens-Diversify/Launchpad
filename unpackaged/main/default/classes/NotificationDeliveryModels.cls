@@ -39,6 +39,7 @@ public with sharing class NotificationDeliveryModels {
     public DeliveryRequest request { get; set; }
     public List<Notification_Log__c> logs { get; set; }
     public NotificationDigestModels.ConsolidatedMessage message { get; set; }
+    public NotificationUserChannelService.ChannelSettings channelSettings { get; set; }
 
     public DeliveryContext() {
       this.request = new DeliveryRequest();

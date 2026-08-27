@@ -14,6 +14,7 @@ private class NotificationDeliveryModelsTest {
     System.assertEquals(false, deliveryRequest.deliverIndividually);
     System.assertNotEquals(null, deliveryContext.request);
     System.assertNotEquals(null, deliveryContext.logs);
+    System.assertEquals(null, deliveryContext.channelSettings);
   }
 
   @IsTest
@@ -25,8 +26,10 @@ private class NotificationDeliveryModelsTest {
     deliveryRequest.deliverIndividually = true;
 
     NotificationDeliveryModels.DeliveryRequest retryRequest = deliveryRequest.withAttemptNumber(2);
+    NotificationDeliveryModels.DeliveryRequest nullAttemptRequest = deliveryRequest.withAttemptNumber(null);
 
     System.assertEquals(2, retryRequest.attemptNumber);
+    System.assertEquals(0, nullAttemptRequest.attemptNumber);
     System.assertEquals(true, retryRequest.deliverIndividually);
     System.assertEquals(1, retryRequest.logIds.size());
   }

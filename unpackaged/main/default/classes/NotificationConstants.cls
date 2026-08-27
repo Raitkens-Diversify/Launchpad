@@ -33,6 +33,7 @@ public class NotificationConstants {
 
   public static final String CHANNEL_IN_APP = 'In_App';
   public static final String CHANNEL_EMAIL = 'Email';
+  public static final String CHANNEL_ZOOM = 'Zoom';
 
   /** Verified org-wide email address used as the sender for notification emails. */
   public static final String ORG_WIDE_NOTIFICATION_EMAIL =

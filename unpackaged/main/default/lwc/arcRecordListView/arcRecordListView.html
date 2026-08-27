@@ -852,4 +852,15 @@
       </footer>
     </div>
   </template>
+
+  <!-- Modal / curated "New" quick-create, only for a tab with createFields -->
+  <template lwc:if={showQuickCreateModal}>
+    <c-arc-quick-create
+      object-api-name={objectApiName}
+      heading-label={createHeadingLabel}
+      field-api-names={quickCreateFields}
+      oncreated={handleRecordCreated}
+      onclose={handleCreateModalClose}
+    ></c-arc-quick-create>
+  </template>
 </template>

@@ -16,6 +16,7 @@ private class NotificationDigestModelsTest {
     System.assertEquals(0, consolidatedMessage.itemCount);
     System.assertNotEquals(null, digestDeliveryContext.request);
     System.assertNotEquals(null, digestDeliveryContext.logs);
+    System.assertEquals(null, digestDeliveryContext.channelSettings);
     System.assertEquals(false, deliveryResult.success);
     System.assertEquals(false, deliveryResult.suppressed);
   }
@@ -30,8 +31,12 @@ private class NotificationDigestModelsTest {
     NotificationDigestModels.DigestDeliveryRequest retryRequest = digestDeliveryRequest.withAttemptNumber(
       3
     );
+    NotificationDigestModels.DigestDeliveryRequest nullAttemptRequest = digestDeliveryRequest.withAttemptNumber(
+      null
+    );
 
     System.assertEquals(3, retryRequest.attemptNumber);
+    System.assertEquals(0, nullAttemptRequest.attemptNumber);
     System.assertEquals(1, retryRequest.logIds.size());
   }
 }

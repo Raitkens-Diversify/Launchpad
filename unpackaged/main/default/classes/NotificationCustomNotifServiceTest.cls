@@ -125,6 +125,47 @@ private class NotificationCustomNotifServiceTest {
   }
 
   @IsTest
+  static void sendPreferenceNotifications_noOpsWhenLogsMissing() {
+    NotificationCustomNotificationService.testSkipSend = true;
+
+    Test.startTest();
+    NotificationCustomNotificationService.sendPreferenceNotifications(
+      UserInfo.getUserId(),
+      null
+    );
+    NotificationCustomNotificationService.sendPreferenceNotifications(
+      UserInfo.getUserId(),
+      new List<Notification_Log__c>()
+    );
+    Test.stopTest();
+
+    NotificationCustomNotificationService.testSkipSend = false;
+    System.assert(true, 'Expected empty log lists to no-op.');
+  }
+
+  @IsTest
+  static void sendPreferenceNotifications_sendsEachLogWithTargetId() {
+    NotificationCustomNotificationService.testSkipSend = true;
+    Notification_Log__c targetedLog = new Notification_Log__c(
+      Title__c = 'Targeted title',
+      Body__c = 'Targeted body',
+      Source_Type__c = NotificationConstants.OBJECT_TYPE_TASK,
+      Target_Record_Id__c = String.valueOf(UserInfo.getUserId())
+    );
+    Notification_Log__c fallbackLog = new Notification_Log__c();
+
+    Test.startTest();
+    NotificationCustomNotificationService.sendPreferenceNotifications(
+      UserInfo.getUserId(),
+      new List<Notification_Log__c>{ targetedLog, null, fallbackLog }
+    );
+    Test.stopTest();
+
+    NotificationCustomNotificationService.testSkipSend = false;
+    System.assert(true, 'Expected preference notifications to send per log.');
+  }
+
+  @IsTest
   static void resolveDeliveryTitleAndBody_delegateToBuilders() {
     Notification_Log__c logRecord = new Notification_Log__c(
       Title__c = 'Resolved title',

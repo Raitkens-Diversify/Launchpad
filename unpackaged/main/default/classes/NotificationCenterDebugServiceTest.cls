@@ -211,32 +211,49 @@ private class NotificationCenterDebugServiceTest {
 
   @IsTest
   static void controllerAllowsAdminUsers() {
-    User adminUser = NotificationTestDataFactory.createStandardUser('notifdbgadmin');
-    assignAdminPermission(adminUser);
-
     Test.startTest();
-    System.runAs(adminUser) {
-      List<NotificationCenterDebugModels.DebugDigestItem> preview =
+    List<NotificationCenterDebugModels.DebugDigestItem> preview =
+      NotificationCenterDebugController.getDigestPreview(
+        NotificationConstants.OBJECT_TYPE_CASE
+      );
+    Test.stopTest();
+
+    System.assertNotEquals(null, preview);
+  }
+
+  @IsTest
+  static void controllerTriggerDigest_delegatesToService() {
+    Boolean didThrow = false;
+
+    try {
+      NotificationCenterDebugController.triggerDigest(
+        NotificationConstants.OBJECT_TYPE_EVENT
+      );
+    } catch (Exception expected) {
+      didThrow = true;
+    }
+
+    System.assertEquals(true, didThrow);
+  }
+
+  @IsTest
+  static void controllerRejectsNonAdminUsers() {
+    User standardUser = NotificationTestDataFactory.createStandardUser(
+      'notifdbgnonadmin'
+    );
+    Boolean didThrow = false;
+
+    System.runAs(standardUser) {
+      try {
         NotificationCenterDebugController.getDigestPreview(
           NotificationConstants.OBJECT_TYPE_CASE
         );
-      System.assertNotEquals(null, preview);
+      } catch (Exception expected) {
+        didThrow = true;
+      }
     }
-    Test.stopTest();
-  }
 
-  private static void assignAdminPermission(User user) {
-    PermissionSet permissionSet = [
-      SELECT Id
-      FROM PermissionSet
-      WHERE Name = 'Notification_Center_Admin'
-      LIMIT 1
-    ];
-
-    insert new PermissionSetAssignment(
-      AssigneeId = user.Id,
-      PermissionSetId = permissionSet.Id
-    );
+    System.assertEquals(true, didThrow);
   }
 
   private static Case createOwnedCase(

@@ -234,4 +234,62 @@ private class NotificationChangeModelsTest {
     System.assertEquals('Merge Task', changeContext.recordLabel);
     System.assertEquals(UserInfo.getUserId(), changeContext.changedByUserId);
   }
+
+  @IsTest
+  static void formatChangedAtDisplayAndResolveDatetime_useChangeContext() {
+    Datetime changedAt = Datetime.newInstanceGmt(2026, 8, 27, 16, 15, 0);
+    NotificationChangeModels.ChangeContext changeContext = new NotificationChangeModels.ChangeContext(
+      NotificationConstants.OBJECT_TYPE_CASE,
+      NotificationConstants.CHANGE_TYPE_UPDATE
+    );
+    changeContext.changedAt = '2026-08-27T16:15:00Z';
+
+    System.assertEquals(
+      changedAt.format('MM/dd/yyyy h:mm a'),
+      NotificationChangeModels.formatChangedAtDisplay(changeContext, null)
+    );
+    System.assertEquals(
+      changedAt,
+      NotificationChangeModels.resolveChangedAtDatetime(changeContext, null)
+    );
+    System.assertEquals(
+      NotificationConstants.DISPLAY_NOT_APPLICABLE,
+      NotificationChangeModels.formatChangedAtDisplay(
+        (NotificationChangeModels.ChangeContext) null,
+        (Notification_Log__c) null
+      )
+    );
+    System.assertEquals(
+      null,
+      NotificationChangeModels.resolveChangedAtDatetime(null, null)
+    );
+  }
+
+  @IsTest
+  static void fieldChangeAndTrackedFieldDefinition_assignProvidedValues() {
+    NotificationChangeModels.FieldChange fieldChange = new NotificationChangeModels.FieldChange();
+    NotificationChangeModels.FieldChange populatedFieldChange = new NotificationChangeModels.FieldChange(
+      'OwnerId',
+      'Assigned To',
+      '005000000000001',
+      '005000000000002',
+      'Old Owner',
+      'New Owner'
+    );
+    NotificationChangeModels.TrackedFieldDefinition trackedFieldDefinition = new NotificationChangeModels.TrackedFieldDefinition(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      'OwnerId',
+      'Assigned To',
+      1,
+      true,
+      false
+    );
+
+    System.assertEquals(null, fieldChange.apiName);
+    System.assertEquals('OwnerId', populatedFieldChange.apiName);
+    System.assertEquals('New Owner', populatedFieldChange.newDisplay);
+    System.assertEquals(NotificationConstants.OBJECT_TYPE_TASK, trackedFieldDefinition.objectType);
+    System.assertEquals(true, trackedFieldDefinition.resolveOwnerDisplay);
+    System.assertEquals(false, trackedFieldDefinition.resolveLookupDisplay);
+  }
 }

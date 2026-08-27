@@ -5,7 +5,7 @@
     <fields>CaseNumber</fields>
     <fields>Priority</fields>
     <fields>Status</fields>
-    <fields>FinServ__Household__c</fields>
+    <fields>Household__c</fields>
     <fields>OwnerId</fields>
     <fields>Financial_Advisor_Team__c</fields>
     <label>CRM Compact Layout</label>

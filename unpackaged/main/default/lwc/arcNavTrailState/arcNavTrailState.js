@@ -213,24 +213,40 @@ export const STATIC_NAV_ITEMS = [
     objectApiName: "FinServ__FinancialAccount__c",
     isCollapsible: true,
     subMenu: [
+      /*
+       * One entry per builder tab on DFPG_Financial_Account_List, in that
+       * page's own tab order -- c__tabId is the tab's own fixed tabKey (see
+       * that page's tabsetConfig), the same convention arcRecordListView's
+       * own deep-links use elsewhere on this nav. Keep this in step with
+       * that page's tab order/keys, same caution as the Contacts group.
+       */
       {
         id: "arc-nav-isas-accounts",
         label: "Accounts",
         type: "InternalLink",
-        target: ISA_LIST_PATH,
+        target: `${ISA_LIST_PATH}?c__tabId=705bc`,
         objectApiName: "FinServ__FinancialAccount__c"
       },
       {
-        id: "arc-nav-isas-directly-held-investments",
-        label: "Directly Held Investments",
-        type: "Placeholder",
-        target: null
+        id: "arc-nav-isas-dpis",
+        label: "DPIs",
+        type: "InternalLink",
+        target: `${ISA_LIST_PATH}?c__tabId=12a0e`,
+        objectApiName: "FinServ__FinancialAccount__c"
       },
       {
-        id: "arc-nav-isas-service-agreements",
-        label: "Service Agreements",
-        type: "Placeholder",
-        target: null
+        id: "arc-nav-isas-services",
+        label: "Services",
+        type: "InternalLink",
+        target: `${ISA_LIST_PATH}?c__tabId=f5d45`,
+        objectApiName: "Service__c"
+      },
+      {
+        id: "arc-nav-isas-approved-products",
+        label: "Approved Products",
+        type: "InternalLink",
+        target: `${ISA_LIST_PATH}?c__tabId=tab2`,
+        objectApiName: "Product__c"
       }
     ]
   },

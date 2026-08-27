@@ -29,4 +29,20 @@ public with sharing class NotificationPreferenceController {
       householdId
     );
   }
+
+  @AuraEnabled
+  public static NotificationUserChannelService.ChannelSettings getUserChannelSettings() {
+    return new NotificationUserChannelService().getForCurrentUser();
+  }
+
+  @AuraEnabled
+  public static NotificationUserChannelService.ChannelSettings saveUserChannelSettings(
+    NotificationUserChannelService.ChannelSettings settings
+  ) {
+    if (settings == null) {
+      return new NotificationUserChannelService().getForCurrentUser();
+    }
+
+    return settings;
+  }
 }

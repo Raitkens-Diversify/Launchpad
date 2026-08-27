@@ -415,6 +415,7 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   deleteViewTarget;
   deleteViewError;
   isDeletingView = false;
+  showCreateModal = false;
   filterLogicString = "";
   objectColumns = [];
   currentListViewLabel = "";
@@ -671,6 +672,29 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   }
 
   /**
+   * Field API names the active tab wants on a curated "New" dialog, e.g.
+   * Check Log's "New Check Log" -- 13 specific fields rather than whatever
+   * the object's assigned page layout happens to carry. A tab with no
+   * createFields has none, and handleNewRecord falls through to the
+   * existing plain platform-navigation behavior unchanged.
+   */
+  get quickCreateFields() {
+    return this.activeConfiguredTab?.createFields || "";
+  }
+
+  get usesQuickCreate() {
+    return Boolean(this.quickCreateFields);
+  }
+
+  get showQuickCreateModal() {
+    return this.showCreateModal && this.usesQuickCreate;
+  }
+
+  get createHeadingLabel() {
+    return this.headingActionLabel || "New record";
+  }
+
+  /**
    * The strip shows this placement's own view plus views the user saved here —
    * not the org's whole list-view catalogue. The site's page tabs already
    * provide top-level navigation; duplicating it here fights the design.
@@ -744,7 +768,13 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
           columns: entry.columns || "",
           /* Field the Chart view defaults to counting by for this tab --
              see chartFieldApiName. Same JSON-only limitation as columns. */
-          chartField: entry.chartField || ""
+          chartField: entry.chartField || "",
+          /* Field API names a curated "New" dialog should offer for this
+             tab, e.g. "Client__c,Status__c,Amount__c" -- see
+             quickCreateFields/usesQuickCreate. A tab with no createFields
+             keeps today's plain platform-navigation "new record" behavior
+             unchanged. */
+          createFields: entry.createFields || ""
         };
       });
   }
@@ -2356,6 +2386,11 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
       })
     );
 
+    if (this.usesQuickCreate) {
+      this.showCreateModal = true;
+      return;
+    }
+
     this[NavigationMixin.Navigate]({
       type: "standard__objectPage",
       attributes: {
@@ -2363,6 +2398,28 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
         actionName: "new"
       }
     });
+  }
+
+  handleCreateModalClose() {
+    this.showCreateModal = false;
+  }
+
+  /** Lands the user on the record they just made, and refreshes the list. */
+  handleRecordCreated(event) {
+    this.showCreateModal = false;
+    this.runServerSearch();
+
+    const recordId = event.detail?.recordId;
+    if (!recordId) {
+      return;
+    }
+
+    const reference = buildRecordNavigationReference(recordId, this.objectApiName, {
+      useQueryParam: usesQueryParamRecordRoute(this.objectApiName)
+    });
+    if (reference) {
+      this[NavigationMixin.Navigate](reference);
+    }
   }
 
   // ---- Interaction: popovers --------------------------------------------

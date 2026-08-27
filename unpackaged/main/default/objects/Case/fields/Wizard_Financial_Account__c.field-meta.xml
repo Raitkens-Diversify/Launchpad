@@ -2,7 +2,7 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Wizard_Financial_Account__c</fullName>
     <deleteConstraint>SetNull</deleteConstraint>
-    <label>Financial Account</label>
+    <label>Financial Account wiz</label>
     <referenceTo>Financial_Account__c</referenceTo>
     <relationshipLabel>Cases</relationshipLabel>
     <relationshipName>Cases</relationshipName>

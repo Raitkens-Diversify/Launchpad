@@ -83,6 +83,30 @@ public with sharing class NotificationCustomNotificationService {
     notification.send(new Set<String>{ String.valueOf(recipientId) });
   }
 
+  public static void sendPreferenceNotifications(
+    Id recipientId,
+    List<Notification_Log__c> logs
+  ) {
+    if (logs == null || logs.isEmpty()) {
+      return;
+    }
+
+    for (Notification_Log__c logRecord : logs) {
+      Id targetId = null;
+
+      if (logRecord != null && !String.isBlank(logRecord.Target_Record_Id__c)) {
+        targetId = (Id) logRecord.Target_Record_Id__c;
+      }
+
+      sendNotification(
+        recipientId,
+        resolveDeliveryTitle(logRecord),
+        resolveDeliveryBody(logRecord),
+        targetId
+      );
+    }
+  }
+
   private static Id getNotificationTypeId(String developerName) {
     String normalizedDeveloperName = String.isBlank(developerName)
       ? NotificationConstants.CUSTOM_NOTIFICATION_PREFERENCE
