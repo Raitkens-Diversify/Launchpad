@@ -605,6 +605,7 @@
               onrowaction={handleRowAction}
               enable-row-navigation
               enable-column-resize
+              enable-column-reorder
               show-column-settings
               column-settings-icon-url={columnSettingsIconUrl}
               avatar-icon-url={avatarIconUrl}
@@ -617,6 +618,7 @@
               link-object-api-name-field="objectApiName"
               link-query-param-object-api-names={linkQueryParamObjectApiNames}
               oncolumnsettings={openColumnsMenu}
+              oncolumnreorder={handleColumnReorder}
             ></c-arc-data-table>
 
             <!-- Table Columns / Dropdown (Figma 532:39223) -->

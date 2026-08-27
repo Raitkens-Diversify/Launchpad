@@ -144,7 +144,16 @@ public with sharing class ArcRecordSearchController {
       row.id = (Id) record.get('Id');
       row.cells = new List<String>();
       for (String path : selected) {
-        row.cells.add(readPath(record, path));
+        // Never a raw null -- the Aura/LWR JSON encoder used for
+        // @salesforce/apex imports can silently drop null entries out of a
+        // List<String> rather than serializing them as null, which shifts
+        // every later cell in the row one column early on the client (a
+        // blank Role__pc, for instance, would make every cell after it
+        // read as the previous field's value). Confirmed live: a 5-cell
+        // response for an 8-field request, empty fields simply missing
+        // rather than present-and-blank.
+        String cellValue = readPath(record, path);
+        row.cells.add(cellValue == null ? '' : cellValue);
       }
       result.rows.add(row);
     }

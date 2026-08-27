@@ -328,6 +328,8 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   objectFieldInfo = null;
   /** Which view `applyDefaultColumns` last hid columns for — see there. */
   _defaultedListViewApiName;
+  /** View a drag-reorder has already decided the column order for — see applyDefaultColumns. */
+  _userReorderedListViewApiName = "";
 
   @track listViews = [];
   @track columns = [];
@@ -655,7 +657,12 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
           label: entry.label || known?.label || entry.view,
           heading: entry.title || "",
           tagline: entry.subtitle || "",
-          action: entry.action || ""
+          action: entry.action || "",
+          /* Ordered field API names (optionally "field=Label") this tab
+             shows by default -- see configuredColumnEntries. Only the JSON
+             viewTabs form carries this; the comma-pair form has no room
+             for a third value per entry. */
+          columns: entry.columns || ""
         };
       });
   }
@@ -1041,12 +1048,31 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     const numericValue = toComparableNumber(rawValue);
     const numericTarget = toComparableNumber(operand);
     const bothNumeric = numericValue !== null && numericTarget !== null;
+    // An adopted multi-value "equals" (e.g. a Households tab matching two
+    // differently-typed record types both labeled "Household") arrives as
+    // several labels joined with "; " (see adoptSavedFilters) -- a single
+    // row can only carry one of those labels, never the joined string, so
+    // Equals/NotEqual has to treat this as "matches any of them" the same
+    // way the server's own IN/NOT IN resolution does, not a literal
+    // string-equals against the whole joined value.
+    const targetList = target
+      .split(";")
+      .map((piece) => piece.trim())
+      .filter(Boolean);
 
     switch (filter.operator) {
       case "Equals":
-        return bothNumeric ? numericValue === numericTarget : value === target;
+        return bothNumeric
+          ? numericValue === numericTarget
+          : targetList.length > 1
+            ? targetList.includes(value)
+            : value === target;
       case "NotEqual":
-        return bothNumeric ? numericValue !== numericTarget : value !== target;
+        return bothNumeric
+          ? numericValue !== numericTarget
+          : targetList.length > 1
+            ? !targetList.includes(value)
+            : value !== target;
       case "NotContain":
         return !value.includes(target);
       case "StartsWith":
@@ -1348,12 +1374,33 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     }));
   }
 
-  /** Ordered default columns configured for this placement. */
-  get configuredDefaultColumns() {
-    return (this.defaultColumns || "")
+  /**
+   * Ordered {fieldApiName, label} pairs configured for the active tab, or
+   * the placement-wide defaultColumns when the tab carries none of its own
+   * -- each entry is "field" or "field=Label"; the label lets one tab call
+   * the same field "Client Name" where another calls it "Household Name"
+   * (or "Permanent State" vs plain "State" for BillingState), something no
+   * single object-level field label could do across every tab at once.
+   */
+  get configuredColumnEntries() {
+    const raw = this.activeConfiguredTab?.columns || this.defaultColumns || "";
+    return raw
       .split(",")
-      .map((name) => name.trim())
-      .filter(Boolean);
+      .map((entry) => entry.trim())
+      .filter(Boolean)
+      .map((entry) => {
+        const [name, ...labelParts] = entry.split("=");
+        return {
+          fieldApiName: name.trim(),
+          label: labelParts.join("=").trim()
+        };
+      })
+      .filter((entry) => entry.fieldApiName);
+  }
+
+  /** Ordered default columns configured for the active tab. */
+  get configuredDefaultColumns() {
+    return this.configuredColumnEntries.map((entry) => entry.fieldApiName);
   }
 
   /**
@@ -1409,8 +1456,9 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   }
 
   /**
-   * Puts the configured columns first, in the configured order, and switches
-   * the rest off. The unconfigured ones stay in `columns` so the Table
+   * Puts the configured columns first, in the configured order (applying
+   * this tab's own label override where one is given), and switches the
+   * rest off. The unconfigured ones stay in `columns` so the Table
    * Columns dropdown still offers them — hiding is a default, not a deletion.
    *
    * Guarded on the view actually changing: this wire re-emits from cache
@@ -1423,13 +1471,39 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
       ...this.buildExtraConfiguredColumns(listViewColumns)
     ];
 
-    const configured = this.configuredDefaultColumns;
-    if (!configured.length) {
+    // A drag-reordered column set for this same view takes precedence over
+    // the configured default order on any re-emit (e.g. the refreshApex a
+    // view save triggers) -- otherwise the reorder the user just made would
+    // silently snap back the moment the wire re-fires. Re-key against the
+    // fresh column metadata (labels, etc.) rather than reusing this.columns
+    // wholesale, so anything server-side about the columns still updates.
+    if (this._userReorderedListViewApiName === this.selectedListViewApiName) {
+      const byName = new Map(columns.map((col) => [col.fieldApiName, col]));
+      const known = new Set(this.columns.map((col) => col.fieldApiName));
+      const currentOrder = this.columns
+        .map((col) => byName.get(col.fieldApiName))
+        .filter(Boolean);
+      const newlyAppeared = columns.filter(
+        (col) => !known.has(col.fieldApiName)
+      );
+      return [...currentOrder, ...newlyAppeared];
+    }
+
+    const configuredEntries = this.configuredColumnEntries;
+    if (!configuredEntries.length) {
       return columns;
     }
 
     const byName = new Map(columns.map((col) => [col.fieldApiName, col]));
-    const ordered = configured.map((name) => byName.get(name)).filter(Boolean);
+    const ordered = configuredEntries
+      .map((entry) => {
+        const col = byName.get(entry.fieldApiName);
+        if (!col) {
+          return null;
+        }
+        return entry.label ? { ...col, label: entry.label } : col;
+      })
+      .filter(Boolean);
 
     if (!ordered.length) {
       return columns;
@@ -1444,6 +1518,31 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     }
 
     return [...ordered, ...rest];
+  }
+
+  /**
+   * A user drag-reorder always wins over the configured default order from
+   * then on for this view (see applyDefaultColumns) -- switching a column
+   * on/off from the Table Columns menu already stays put the same way via
+   * hiddenColumnFields; this is the reorder equivalent of that.
+   */
+  handleColumnReorder(event) {
+    const orderedVisibleNames = event.detail?.columns || [];
+    if (!orderedVisibleNames.length) {
+      return;
+    }
+
+    const byName = new Map(this.columns.map((col) => [col.fieldApiName, col]));
+    const reorderedVisible = orderedVisibleNames
+      .map((name) => byName.get(name))
+      .filter(Boolean);
+    const visibleSet = new Set(orderedVisibleNames);
+    const rest = this.columns.filter(
+      (col) => !visibleSet.has(col.fieldApiName)
+    );
+
+    this.columns = [...reorderedVisible, ...rest];
+    this._userReorderedListViewApiName = this.selectedListViewApiName;
   }
 
   @wire(getListRecordsByName, {
@@ -1881,8 +1980,11 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     this.openPopover = "";
     this.searchTerm = "";
     this.groupFieldApiName = "";
-    // Column choices are per view — the next view has its own field set.
+    // Column choices are per view — the next view has its own field set,
+    // including any reorder: a reorder made on one tab has no bearing on
+    // what order another tab's columns should start in.
     this.hiddenColumnFields = [];
+    this._userReorderedListViewApiName = "";
     this.isLoading = true;
     this.selectedListViewApiName = listViewApiName;
   }
@@ -1906,11 +2008,7 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
 
     if (next) {
       event.preventDefault();
-      this.openPopover = "";
-      this.searchTerm = "";
-      this.groupFieldApiName = "";
-      this.isLoading = true;
-      this.selectedListViewApiName = next.value;
+      this.selectTabView(next.value);
     }
   }
 
