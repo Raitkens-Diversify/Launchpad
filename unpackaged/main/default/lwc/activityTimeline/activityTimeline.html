@@ -1,5 +1,5 @@
 <!-- sldsValidatorIgnore -->
-<!-- Author: Hoang Long Vu To | Date: 2026-06-02 -->
+<!-- Author: Hoang Long Vu To | Date: 2026-08-27 -->
 <template>
   <lightning-card title="Activity Timeline">
     <div slot="actions" class="timeline-card-actions">
@@ -890,6 +890,8 @@
               <lightning-button
                 label={loadMoreLabel}
                 variant="neutral"
+                disabled={isLoadingMore}
+                aria-label={loadMoreLabel}
                 onclick={handleLoadMore}
               ></lightning-button>
             </div>

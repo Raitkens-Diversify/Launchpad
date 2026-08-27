@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-06-08
+ * Date: 2026-08-27
  *
  * DTOs for Activity Timeline reads.
  */
@@ -94,6 +94,10 @@ public with sharing class ActivityTimelineModels {
     public String contextBranchId;
     @AuraEnabled
     public String contextBranchName;
+    @AuraEnabled
+    public Boolean hasMoreActivities;
+    @AuraEnabled
+    public Integer nextPageNumber;
 
     public ActivityTimelineData() {
       this.activities = new List<ActivityItem>();
@@ -102,6 +106,8 @@ public with sharing class ActivityTimelineModels {
       this.isHomeOfficeUser = false;
       this.isHouseholdRecordContext = false;
       this.isDrpRecordContext = false;
+      this.hasMoreActivities = false;
+      this.nextPageNumber = 0;
     }
   }
 }

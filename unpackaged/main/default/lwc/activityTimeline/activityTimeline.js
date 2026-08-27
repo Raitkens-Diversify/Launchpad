@@ -1,4 +1,4 @@
-// Author: Hoang Long Vu To | Date: 2026-08-24
+// Author: Hoang Long Vu To | Date: 2026-08-27
 import { LightningElement, api, track, wire } from "lwc";
 import { NavigationMixin, CurrentPageReference } from "lightning/navigation";
 import { getRecord, getFieldValue } from "lightning/uiRecordApi";
@@ -10,6 +10,7 @@ import {
 import USER_NAME_FIELD from "@salesforce/schema/User.Name";
 import USER_ID from "@salesforce/user/Id";
 import getTimelineData from "@salesforce/apex/ActivityTimelineController.getTimelineData";
+import getTimelineDataPage from "@salesforce/apex/ActivityTimelineController.getTimelineDataPage";
 import {
   ACTIVITY_CATEGORIES,
   CATEGORY_CONFIG,
@@ -103,6 +104,9 @@ const FILTERABLE_TYPE_KEYS = Object.freeze([
   ...INTERACTIONS_TYPE_FILTERS.map((typeFilter) => typeFilter.value)
 ]);
 
+const MAX_AUTO_LOADED_ACTIVITIES = 250;
+const MAX_AUTO_ACTIVITY_PAGES = 6;
+
 const ACTIVITY_TYPE_FILTER_ALIASES = Object.freeze({
   Event: "Meeting"
 });
@@ -134,6 +138,40 @@ const buildActiveUserFilter = (excludedUserIds = []) => {
 };
 
 const cloneEmptyFilters = () => JSON.parse(JSON.stringify(EMPTY_FILTERS));
+
+const mergeActivitiesById = (existingActivities, incomingActivities) => {
+  const activityById = new Map();
+
+  (existingActivities || []).forEach((activity) => {
+    if (activity?.id) {
+      activityById.set(activity.id, activity);
+    }
+  });
+
+  (incomingActivities || []).forEach((activity) => {
+    if (activity?.id) {
+      activityById.set(activity.id, activity);
+    }
+  });
+
+  return [...activityById.values()];
+};
+
+const buildClientCategoryCounts = (activities) => {
+  const counts = {};
+
+  CATEGORY_ORDER_VALUES.forEach((category) => {
+    counts[category] = 0;
+  });
+
+  (activities || []).forEach((activity) => {
+    if (activity?.category && counts[activity.category] != null) {
+      counts[activity.category] += 1;
+    }
+  });
+
+  return counts;
+};
 
 const isCurrentYear = (activityDateTime) => {
   if (!activityDateTime) {
@@ -725,6 +763,8 @@ export default class ActivityTimeline extends NavigationMixin(
   @track collapsedGroupKeyList = [];
   @track expandedActivityIds = {};
   @track customerOnlyMode = false;
+  @track hasMoreActivities = false;
+  @track isLoadingMore = false;
 
   recordObjectApiName;
   showExternalToggle = false;
@@ -745,6 +785,8 @@ export default class ActivityTimeline extends NavigationMixin(
   refreshHandlerId;
   pendingActivityActionRefresh = false;
   activityActionRefreshTimeoutId;
+  nextActivityPage = 1;
+  activityLoadGeneration = 0;
 
   sortOptions = SORT_OPTIONS;
 
@@ -808,6 +850,7 @@ export default class ActivityTimeline extends NavigationMixin(
 
     this.isLoading = true;
     this.loadError = undefined;
+    this.resetActivityPaging();
 
     return refreshApex(this.wiredTimelineResult)
       .then(() => true)
@@ -815,6 +858,100 @@ export default class ActivityTimeline extends NavigationMixin(
         this.loadError = error;
         this.isLoading = false;
         return false;
+      });
+  }
+
+  resetActivityPaging() {
+    this.activityLoadGeneration += 1;
+    this.hasMoreActivities = false;
+    this.nextActivityPage = 1;
+    this.isLoadingMore = false;
+  }
+
+  prefetchActivityPages(generation) {
+    if (
+      !this.includeExternalActivitiesForQuery ||
+      !this.hasMoreActivities ||
+      this.allActivities.length >= MAX_AUTO_LOADED_ACTIVITIES
+    ) {
+      return;
+    }
+
+    let autoPagesLoaded = 0;
+
+    const loadNextPage = () => {
+      if (
+        generation !== this.activityLoadGeneration ||
+        !this.hasMoreActivities ||
+        !this.includeExternalActivitiesForQuery ||
+        this.allActivities.length >= MAX_AUTO_LOADED_ACTIVITIES ||
+        autoPagesLoaded >= MAX_AUTO_ACTIVITY_PAGES
+      ) {
+        return Promise.resolve();
+      }
+
+      return this.fetchNextActivityPage(generation).then((didLoad) => {
+        if (!didLoad) {
+          return undefined;
+        }
+
+        autoPagesLoaded += 1;
+        return loadNextPage();
+      });
+    };
+
+    Promise.resolve()
+      .then(loadNextPage)
+      .catch(() => undefined);
+  }
+
+  fetchNextActivityPage(generation) {
+    if (
+      this.isLoadingMore ||
+      !this.hasMoreActivities ||
+      !this.wiredContextRecordId
+    ) {
+      return Promise.resolve(false);
+    }
+
+    const requestedGeneration = generation;
+    this.isLoadingMore = true;
+
+    return getTimelineDataPage({
+      recordId: this.wiredContextRecordId,
+      includeExternalActivities: true,
+      pageNumber: this.nextActivityPage
+    })
+      .then((data) => {
+        if (requestedGeneration !== this.activityLoadGeneration) {
+          return false;
+        }
+
+        const incomingActivities = data?.activities || [];
+        this.allActivities = mergeActivitiesById(
+          this.allActivities,
+          incomingActivities
+        );
+        this.categoryCounts = buildClientCategoryCounts(this.allActivities);
+        this.hasMoreActivities = data?.hasMoreActivities === true;
+        this.nextActivityPage =
+          data?.nextPageNumber != null
+            ? data.nextPageNumber
+            : this.nextActivityPage + 1;
+        this.resetPagination();
+        return incomingActivities.length > 0;
+      })
+      .catch(() => {
+        if (requestedGeneration === this.activityLoadGeneration) {
+          this.hasMoreActivities = true;
+        }
+
+        return false;
+      })
+      .finally(() => {
+        if (requestedGeneration === this.activityLoadGeneration) {
+          this.isLoadingMore = false;
+        }
       });
   }
 
@@ -856,6 +993,7 @@ export default class ActivityTimeline extends NavigationMixin(
       this.contextBranchId = null;
       this.contextBranchName = null;
       this.paginationRecordId = null;
+      this.resetActivityPaging();
       return;
     }
 
@@ -863,6 +1001,7 @@ export default class ActivityTimeline extends NavigationMixin(
       this.customerOnlyMode = false;
       this.supportsExternalToggle = false;
       this.previousRecordId = this.recordId;
+      this.resetActivityPaging();
     }
 
     if (data) {
@@ -877,6 +1016,8 @@ export default class ActivityTimeline extends NavigationMixin(
       this.contextBranchName = data.contextBranchName || null;
       this.allActivities = data.activities || [];
       this.categoryCounts = data.categoryCounts || {};
+      this.hasMoreActivities = data.hasMoreActivities === true;
+      this.nextActivityPage = data.nextPageNumber || 1;
       this.isLoading = false;
       this.loadError = undefined;
 
@@ -886,6 +1027,7 @@ export default class ActivityTimeline extends NavigationMixin(
         this.paginationRecordId = this.recordId;
       }
 
+      this.prefetchActivityPages(this.activityLoadGeneration);
       return;
     }
 
@@ -895,6 +1037,7 @@ export default class ActivityTimeline extends NavigationMixin(
       this.allActivities = [];
       this.categoryCounts = {};
       this.showExternalToggle = this.supportsExternalToggle;
+      this.hasMoreActivities = false;
     }
   }
 
@@ -1202,10 +1345,14 @@ export default class ActivityTimeline extends NavigationMixin(
   }
 
   get hasMoreToLoad() {
-    return this.hiddenMonthKeys.length > 0;
+    return this.hiddenMonthKeys.length > 0 || this.hasMoreActivities;
   }
 
   get loadMoreLabel() {
+    if (this.isLoadingMore) {
+      return "Loading more";
+    }
+
     if (!this.hiddenMonthKeys.length) {
       return "Load More";
     }
@@ -1426,6 +1573,7 @@ export default class ActivityTimeline extends NavigationMixin(
   }
 
   handleExternalToggle(event) {
+    this.resetActivityPaging();
     this.customerOnlyMode = event.target.checked;
     this.isLoading = true;
     this.loadError = undefined;
@@ -1489,14 +1637,17 @@ export default class ActivityTimeline extends NavigationMixin(
   }
 
   handleLoadMore() {
-    if (!this.hiddenMonthKeys.length) {
+    if (this.hiddenMonthKeys.length) {
+      this.visibleMonthKeys = [
+        ...this.visibleMonthKeys,
+        this.hiddenMonthKeys[0]
+      ];
       return;
     }
 
-    this.visibleMonthKeys = [
-      ...this.visibleMonthKeys,
-      this.hiddenMonthKeys[0]
-    ];
+    if (this.hasMoreActivities) {
+      this.fetchNextActivityPage(this.activityLoadGeneration);
+    }
   }
 
   handleToggleDateGroup(event) {

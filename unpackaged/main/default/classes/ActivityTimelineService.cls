@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-06-08
+ * Date: 2026-08-27
  *
  * Queries and normalizes household activity records for the timeline UI.
  */
@@ -38,6 +38,18 @@ public with sharing class ActivityTimelineService {
 
   private static final Integer QUERY_CHUNK_SIZE = 200;
   private static final Integer SOQL_LIMIT_BUFFER = 20;
+  private static final Integer QUERY_ROW_SAFETY_BUFFER = 4000;
+  private static final Integer DEFAULT_ACTIVITY_QUERY_LIMIT = 400;
+  private static final Integer EMAIL_ACTIVITY_QUERY_LIMIT = 80;
+  private static final Integer EXTERNAL_ACCOUNT_PAGE_SIZE = 75;
+  private static final Integer ACCOUNT_SCOPE_QUERY_LIMIT = 10000;
+
+  @TestVisible
+  private static Integer externalAccountPageSizeOverride;
+  @TestVisible
+  private static Integer activityQueryLimitOverride;
+
+  private static QueryBudget queryBudget;
 
   private static Boolean canContinueSoqlWork(Integer reservedQueries) {
     Integer safeReservedQueries = reservedQueries == null ? 1 : reservedQueries;
@@ -47,62 +59,79 @@ public with sharing class ActivityTimelineService {
   public ActivityTimelineModels.ActivityTimelineData getTimelineData(
     Id recordId
   ) {
-    return getTimelineData(recordId, false);
+    return getTimelineData(recordId, false, 0);
   }
 
   public ActivityTimelineModels.ActivityTimelineData getTimelineData(
     Id recordId,
     Boolean includeExternalActivities
   ) {
+    return getTimelineData(recordId, includeExternalActivities, 0);
+  }
+
+  public ActivityTimelineModels.ActivityTimelineData getTimelineData(
+    Id recordId,
+    Boolean includeExternalActivities,
+    Integer pageNumber
+  ) {
     if (recordId == null) {
       throw new IllegalArgumentException('Record Id is required.');
     }
 
-    ActivityQueryScope queryScope = resolveActivityQueryScope(
-      recordId,
-      includeExternalActivities == true
-    );
-    if (queryScope.isEmpty()) {
-      return buildEmptyTimelineData(recordId);
+    Integer safePageNumber = pageNumber == null || pageNumber < 0 ? 0 : pageNumber;
+    queryBudget = new QueryBudget();
+
+    try {
+      return buildPagedTimelineData(
+        recordId,
+        includeExternalActivities == true,
+        safePageNumber
+      );
+    } finally {
+      queryBudget = null;
     }
+  }
 
-    Set<Id> caseIds = canContinueSoqlWork(SOQL_LIMIT_BUFFER)
-      ? resolveCaseIds(queryScope.relatedAccountIds)
-      : new Set<Id>();
-    queryScope.whatIds.addAll(caseIds);
-    Map<Id, String> caseNumberById = resolveCaseNumbers(caseIds);
-    Set<Id> contactIds = canContinueSoqlWork(SOQL_LIMIT_BUFFER)
-      ? resolveContactIds(
-          queryScope.householdIds,
-          queryScope.householdId,
-          queryScope.relatedAccountIds
-        )
-      : new Set<Id>();
-
+  private ActivityTimelineModels.ActivityTimelineData buildPagedTimelineData(
+    Id recordId,
+    Boolean includeExternalActivities,
+    Integer pageNumber
+  ) {
+    ActivityQueryScope coreScope = resolveActivityQueryScope(recordId, false);
     List<ActivityTimelineModels.ActivityItem> activities = new List<ActivityTimelineModels.ActivityItem>();
-    if (canContinueSoqlWork(SOQL_LIMIT_BUFFER)) {
-      activities.addAll(
-        buildCaseActivities(queryScope.relatedAccountIds, caseNumberById)
+
+    if (pageNumber == 0) {
+      activities.addAll(collectActivitiesForScope(coreScope, recordId, true));
+    }
+
+    Boolean hasMoreActivities = false;
+    Integer nextPageNumber = pageNumber;
+
+    if (includeExternalActivities) {
+      ActivityQueryScope fullScope = resolveActivityQueryScope(recordId, true);
+      ExternalPageSlice pageSlice = sliceExternalScope(
+        coreScope,
+        fullScope,
+        pageNumber
       );
+
+      if (!pageSlice.scope.isEmpty()) {
+        activities.addAll(
+          collectActivitiesForScope(pageSlice.scope, recordId, false)
+        );
+      }
+
+      hasMoreActivities = pageSlice.hasMore;
+      nextPageNumber = pageNumber + 1;
     }
-    if (canContinueSoqlWork(SOQL_LIMIT_BUFFER)) {
-      activities.addAll(
-        buildTaskActivities(queryScope.whatIds, contactIds, caseNumberById)
-      );
-    }
-    if (canContinueSoqlWork(SOQL_LIMIT_BUFFER)) {
-      activities.addAll(
-        buildEventActivities(queryScope.whatIds, contactIds, caseNumberById)
-      );
-    }
-    if (canContinueSoqlWork(SOQL_LIMIT_BUFFER)) {
-      activities.addAll(buildEngagementActivities(contactIds));
-    }
-    if (canContinueSoqlWork(SOQL_LIMIT_BUFFER)) {
-      activities.addAll(buildEmailActivities(queryScope.whatIds));
-    }
-    if (canContinueSoqlWork(SOQL_LIMIT_BUFFER)) {
-      activities.addAll(buildSignificantEventActivities(recordId));
+
+    if (
+      pageNumber == 0 &&
+      activities.isEmpty() &&
+      coreScope.isEmpty() &&
+      !includeExternalActivities
+    ) {
+      return buildEmptyTimelineData(recordId);
     }
 
     activities = deduplicateActivitiesById(activities);
@@ -111,8 +140,163 @@ public with sharing class ActivityTimelineService {
     ActivityTimelineModels.ActivityTimelineData data = new ActivityTimelineModels.ActivityTimelineData();
     data.activities = activities;
     data.categoryCounts = buildCategoryCounts(activities);
-    applyTimelineAccessFlags(data, recordId, includeExternalActivities == true);
+    data.hasMoreActivities = hasMoreActivities;
+    data.nextPageNumber = hasMoreActivities ? nextPageNumber : pageNumber;
+    applyTimelineAccessFlags(data, recordId, includeExternalActivities);
     return data;
+  }
+
+  private List<ActivityTimelineModels.ActivityItem> collectActivitiesForScope(
+    ActivityQueryScope queryScope,
+    Id recordId,
+    Boolean includeSignificantEvents
+  ) {
+    List<ActivityTimelineModels.ActivityItem> activities = new List<ActivityTimelineModels.ActivityItem>();
+    if (queryScope == null || queryScope.isEmpty()) {
+      return activities;
+    }
+
+    Set<Id> caseIds = budget().canRead(1)
+      ? resolveCaseIds(queryScope.relatedAccountIds)
+      : new Set<Id>();
+    queryScope.whatIds.addAll(caseIds);
+    Map<Id, String> caseNumberById = resolveCaseNumbers(caseIds);
+    Set<Id> contactIds = budget().canRead(1)
+      ? resolveContactIds(
+          queryScope.householdIds,
+          queryScope.householdId,
+          queryScope.relatedAccountIds
+        )
+      : new Set<Id>();
+
+    if (budget().canRead(1)) {
+      activities.addAll(
+        buildCaseActivities(queryScope.relatedAccountIds, caseNumberById)
+      );
+    }
+    if (budget().canRead(1)) {
+      activities.addAll(
+        buildTaskActivities(queryScope.whatIds, contactIds, caseNumberById)
+      );
+    }
+    if (budget().canRead(1)) {
+      activities.addAll(
+        buildEventActivities(queryScope.whatIds, contactIds, caseNumberById)
+      );
+    }
+    if (budget().canRead(1)) {
+      activities.addAll(buildEngagementActivities(contactIds));
+    }
+    if (budget().canRead(1)) {
+      activities.addAll(buildEmailActivities(queryScope.whatIds));
+    }
+    if (includeSignificantEvents && budget().canRead(1)) {
+      activities.addAll(buildSignificantEventActivities(recordId));
+    }
+
+    return activities;
+  }
+
+  private ExternalPageSlice sliceExternalScope(
+    ActivityQueryScope coreScope,
+    ActivityQueryScope fullScope,
+    Integer pageNumber
+  ) {
+    ExternalPageSlice slice = new ExternalPageSlice();
+    if (fullScope == null) {
+      return slice;
+    }
+
+    Set<Id> coreRelated = coreScope != null && coreScope.relatedAccountIds != null
+      ? new Set<Id>(coreScope.relatedAccountIds)
+      : new Set<Id>();
+    Set<Id> coreWhat = coreScope != null && coreScope.whatIds != null
+      ? new Set<Id>(coreScope.whatIds)
+      : new Set<Id>();
+
+    Set<Id> extraRelated = new Set<Id>();
+    if (fullScope.relatedAccountIds != null) {
+      extraRelated.addAll(fullScope.relatedAccountIds);
+    }
+    extraRelated.removeAll(coreRelated);
+
+    List<Id> pageableIds = new List<Id>(extraRelated);
+    pageableIds.sort();
+
+    Integer pageSize = getExternalAccountPageSize();
+    Integer startIndex = pageNumber * pageSize;
+
+    if (startIndex < pageableIds.size()) {
+      Integer endIndex = Math.min(startIndex + pageSize, pageableIds.size());
+      slice.hasMore = endIndex < pageableIds.size();
+
+      for (Integer index = startIndex; index < endIndex; index++) {
+        Id accountId = pageableIds[index];
+        slice.scope.relatedAccountIds.add(accountId);
+        slice.scope.whatIds.add(accountId);
+      }
+
+      if (fullScope.householdIds != null) {
+        for (Id householdId : fullScope.householdIds) {
+          if (slice.scope.relatedAccountIds.contains(householdId)) {
+            slice.scope.householdIds.add(householdId);
+            slice.scope.householdId = householdId;
+          }
+        }
+      }
+    }
+
+    if (pageNumber == 0) {
+      addStructuralWhatIds(slice.scope, fullScope, coreWhat, extraRelated);
+    }
+
+    return slice;
+  }
+
+  private static void addStructuralWhatIds(
+    ActivityQueryScope pageScope,
+    ActivityQueryScope fullScope,
+    Set<Id> coreWhat,
+    Set<Id> extraRelated
+  ) {
+    if (pageScope == null || fullScope == null || fullScope.whatIds == null) {
+      return;
+    }
+
+    for (Id whatId : fullScope.whatIds) {
+      if (coreWhat.contains(whatId) || extraRelated.contains(whatId)) {
+        continue;
+      }
+
+      pageScope.whatIds.add(whatId);
+    }
+  }
+
+  private static Integer getExternalAccountPageSize() {
+    if (
+      externalAccountPageSizeOverride != null &&
+      externalAccountPageSizeOverride > 0
+    ) {
+      return externalAccountPageSizeOverride;
+    }
+
+    return EXTERNAL_ACCOUNT_PAGE_SIZE;
+  }
+
+  private static Integer getActivityQueryLimit() {
+    if (activityQueryLimitOverride != null && activityQueryLimitOverride > 0) {
+      return activityQueryLimitOverride;
+    }
+
+    return DEFAULT_ACTIVITY_QUERY_LIMIT;
+  }
+
+  private static QueryBudget budget() {
+    if (queryBudget == null) {
+      queryBudget = new QueryBudget();
+    }
+
+    return queryBudget;
   }
 
   private ActivityTimelineModels.ActivityTimelineData buildEmptyTimelineData(
@@ -121,6 +305,8 @@ public with sharing class ActivityTimelineService {
     ActivityTimelineModels.ActivityTimelineData data = new ActivityTimelineModels.ActivityTimelineData();
     data.activities = new List<ActivityTimelineModels.ActivityItem>();
     data.categoryCounts = buildCategoryCounts(data.activities);
+    data.hasMoreActivities = false;
+    data.nextPageNumber = 0;
     applyTimelineAccessFlags(data, recordId, false);
     return data;
   }
@@ -389,6 +575,66 @@ public with sharing class ActivityTimelineService {
 
     private Boolean isEmpty() {
       return relatedAccountIds.isEmpty() && whatIds.isEmpty();
+    }
+  }
+
+  private class ExternalPageSlice {
+    ActivityQueryScope scope = new ActivityQueryScope();
+    Boolean hasMore = false;
+  }
+
+  private class QueryBudget {
+    Boolean truncated = false;
+
+    Integer remainingRows() {
+      return Limits.getLimitQueryRows() -
+        Limits.getQueryRows() -
+        QUERY_ROW_SAFETY_BUFFER;
+    }
+
+    Integer nextLimit(Integer preferred) {
+      Integer remaining = remainingRows();
+      if (remaining <= 0) {
+        truncated = true;
+        return 0;
+      }
+
+      Integer cap = preferred == null || preferred <= 0
+        ? DEFAULT_ACTIVITY_QUERY_LIMIT
+        : preferred;
+      Integer rowLimit = Math.min(cap, remaining);
+      if (rowLimit <= 0) {
+        truncated = true;
+        return 0;
+      }
+
+      return rowLimit;
+    }
+
+    Boolean canRead(Integer minimumRows) {
+      Integer requiredRows = minimumRows == null ? 1 : minimumRows;
+      if (!canContinueSoqlWork(1)) {
+        truncated = true;
+        return false;
+      }
+
+      if (remainingRows() < requiredRows) {
+        truncated = true;
+        return false;
+      }
+
+      return true;
+    }
+
+    void markTruncatedIfFull(Integer requestedLimit, Integer returnedSize) {
+      if (
+        requestedLimit != null &&
+        requestedLimit > 0 &&
+        returnedSize != null &&
+        returnedSize >= requestedLimit
+      ) {
+        truncated = true;
+      }
     }
   }
 
@@ -949,15 +1195,24 @@ public with sharing class ActivityTimelineService {
 
     if (!effectiveHouseholdIds.isEmpty()) {
       for (Set<Id> householdIdChunk : chunkIdSet(effectiveHouseholdIds)) {
-        if (!canContinueSoqlWork(1)) {
+        if (!budget().canRead(1)) {
           break;
         }
 
-        for (AccountContactRelation relation : [
+        Integer rowLimit = budget().nextLimit(ACCOUNT_SCOPE_QUERY_LIMIT);
+        if (rowLimit <= 0) {
+          break;
+        }
+
+        List<AccountContactRelation> relations = [
           SELECT ContactId
           FROM AccountContactRelation
           WHERE AccountId IN :householdIdChunk AND IsActive = TRUE
-        ]) {
+          LIMIT :rowLimit
+        ];
+        budget().markTruncatedIfFull(rowLimit, relations.size());
+
+        for (AccountContactRelation relation : relations) {
           contactIds.add(relation.ContactId);
         }
       }
@@ -968,7 +1223,7 @@ public with sharing class ActivityTimelineService {
     }
 
     for (Set<Id> accountIdChunk : chunkIdSet(relatedAccountIds)) {
-      if (!canContinueSoqlWork(2)) {
+      if (!budget().canRead(2)) {
         break;
       }
 
@@ -980,15 +1235,24 @@ public with sharing class ActivityTimelineService {
         contactIds.add(account.PersonContactId);
       }
 
-      if (!canContinueSoqlWork(1)) {
+      if (!budget().canRead(1)) {
         break;
       }
 
-      for (AccountContactRelation relation : [
+      Integer rowLimit = budget().nextLimit(ACCOUNT_SCOPE_QUERY_LIMIT);
+      if (rowLimit <= 0) {
+        break;
+      }
+
+      List<AccountContactRelation> relations = [
         SELECT ContactId
         FROM AccountContactRelation
         WHERE AccountId IN :accountIdChunk AND IsActive = TRUE
-      ]) {
+        LIMIT :rowLimit
+      ];
+      budget().markTruncatedIfFull(rowLimit, relations.size());
+
+      for (AccountContactRelation relation : relations) {
         contactIds.add(relation.ContactId);
       }
     }
@@ -1004,15 +1268,25 @@ public with sharing class ActivityTimelineService {
     }
 
     for (Set<Id> accountIdChunk : chunkIdSet(accountIds)) {
-      if (!canContinueSoqlWork(1)) {
+      if (!budget().canRead(1)) {
         break;
       }
 
-      for (Case caseRecord : [
+      Integer rowLimit = budget().nextLimit(getActivityQueryLimit());
+      if (rowLimit <= 0) {
+        break;
+      }
+
+      List<Case> caseRecords = [
         SELECT Id
         FROM Case
         WHERE AccountId IN :accountIdChunk
-      ]) {
+        ORDER BY CreatedDate DESC
+        LIMIT :rowLimit
+      ];
+      budget().markTruncatedIfFull(rowLimit, caseRecords.size());
+
+      for (Case caseRecord : caseRecords) {
         caseIds.add(caseRecord.Id);
       }
     }
@@ -1048,11 +1322,16 @@ public with sharing class ActivityTimelineService {
 
     List<Case> caseRecords = new List<Case>();
     for (Set<Id> accountIdChunk : chunkIdSet(accountIds)) {
-      if (!canContinueSoqlWork(1)) {
+      if (!budget().canRead(1)) {
         break;
       }
 
-      caseRecords.addAll([
+      Integer rowLimit = budget().nextLimit(getActivityQueryLimit());
+      if (rowLimit <= 0) {
+        break;
+      }
+
+      List<Case> chunkRecords = [
         SELECT
           Id,
           Subject,
@@ -1066,7 +1345,11 @@ public with sharing class ActivityTimelineService {
           AccountId
         FROM Case
         WHERE AccountId IN :accountIdChunk
-      ]);
+        ORDER BY CreatedDate DESC
+        LIMIT :rowLimit
+      ];
+      budget().markTruncatedIfFull(rowLimit, chunkRecords.size());
+      caseRecords.addAll(chunkRecords);
     }
 
     Set<Id> associatedAccountIds = new Set<Id>();
@@ -1247,83 +1530,73 @@ public with sharing class ActivityTimelineService {
   }
 
   private static List<Task> queryTasksByRelation(Set<Id> whatIds, Set<Id> whoIds) {
-    Boolean hasWhatIds = whatIds != null && !whatIds.isEmpty();
-    Boolean hasWhoIds = whoIds != null && !whoIds.isEmpty();
-
-    if (!hasWhatIds && !hasWhoIds) {
-      return new List<Task>();
-    }
-
-    if (!hasWhatIds || whatIds.size() <= QUERY_CHUNK_SIZE) {
-      return queryTasksByRelationChunk(whatIds, whoIds);
-    }
-
     Map<Id, Task> taskById = new Map<Id, Task>();
-    for (Set<Id> whatIdChunk : chunkIdSet(whatIds)) {
-      if (!canContinueSoqlWork(1)) {
-        break;
-      }
 
-      for (Task taskRecord : queryTasksByRelationChunk(whatIdChunk, whoIds)) {
-        taskById.put(taskRecord.Id, taskRecord);
+    if (whatIds != null) {
+      for (Set<Id> whatIdChunk : chunkIdSet(whatIds)) {
+        for (Task taskRecord : queryTasksByWhatIds(whatIdChunk)) {
+          taskById.put(taskRecord.Id, taskRecord);
+        }
+      }
+    }
+
+    if (whoIds != null) {
+      for (Set<Id> whoIdChunk : chunkIdSet(whoIds)) {
+        for (Task taskRecord : queryTasksByWhoIds(whoIdChunk)) {
+          taskById.put(taskRecord.Id, taskRecord);
+        }
       }
     }
 
     return taskById.values();
   }
 
-  private static List<Task> queryTasksByRelationChunk(
-    Set<Id> whatIds,
-    Set<Id> whoIds
-  ) {
-    Boolean hasWhatIds = whatIds != null && !whatIds.isEmpty();
-    Boolean hasWhoIds = whoIds != null && !whoIds.isEmpty();
-
-    if (hasWhatIds && hasWhoIds) {
-      return [
-        SELECT
-          Id,
-          Subject,
-          Status,
-          Description,
-          ActivityDate,
-          CreatedDate,
-          Priority,
-          TaskSubtype,
-          OwnerId,
-          Owner.Name,
-          WhoId,
-          Who.Name,
-          WhatId,
-          AccountId
-        FROM Task
-        WHERE WhatId IN :whatIds OR WhoId IN :whoIds
-      ];
+  private static List<Task> queryTasksByWhatIds(Set<Id> whatIds) {
+    if (whatIds == null || whatIds.isEmpty() || !budget().canRead(1)) {
+      return new List<Task>();
     }
 
-    if (hasWhatIds) {
-      return [
-        SELECT
-          Id,
-          Subject,
-          Status,
-          Description,
-          ActivityDate,
-          CreatedDate,
-          Priority,
-          TaskSubtype,
-          OwnerId,
-          Owner.Name,
-          WhoId,
-          Who.Name,
-          WhatId,
-          AccountId
-        FROM Task
-        WHERE WhatId IN :whatIds
-      ];
+    Integer rowLimit = budget().nextLimit(getActivityQueryLimit());
+    if (rowLimit <= 0) {
+      return new List<Task>();
     }
 
-    return [
+    List<Task> records = [
+      SELECT
+        Id,
+        Subject,
+        Status,
+        Description,
+        ActivityDate,
+        CreatedDate,
+        Priority,
+        TaskSubtype,
+        OwnerId,
+        Owner.Name,
+        WhoId,
+        Who.Name,
+        WhatId,
+        AccountId
+      FROM Task
+      WHERE WhatId IN :whatIds
+      ORDER BY ActivityDate DESC NULLS LAST, CreatedDate DESC
+      LIMIT :rowLimit
+    ];
+    budget().markTruncatedIfFull(rowLimit, records.size());
+    return records;
+  }
+
+  private static List<Task> queryTasksByWhoIds(Set<Id> whoIds) {
+    if (whoIds == null || whoIds.isEmpty() || !budget().canRead(1)) {
+      return new List<Task>();
+    }
+
+    Integer rowLimit = budget().nextLimit(getActivityQueryLimit());
+    if (rowLimit <= 0) {
+      return new List<Task>();
+    }
+
+    List<Task> records = [
       SELECT
         Id,
         Subject,
@@ -1341,81 +1614,78 @@ public with sharing class ActivityTimelineService {
         AccountId
       FROM Task
       WHERE WhoId IN :whoIds
+      ORDER BY ActivityDate DESC NULLS LAST, CreatedDate DESC
+      LIMIT :rowLimit
     ];
+    budget().markTruncatedIfFull(rowLimit, records.size());
+    return records;
   }
 
   private static List<Event> queryEventsByRelation(Set<Id> whatIds, Set<Id> whoIds) {
-    Boolean hasWhatIds = whatIds != null && !whatIds.isEmpty();
-    Boolean hasWhoIds = whoIds != null && !whoIds.isEmpty();
-
-    if (!hasWhatIds && !hasWhoIds) {
-      return new List<Event>();
-    }
-
-    if (!hasWhatIds || whatIds.size() <= QUERY_CHUNK_SIZE) {
-      return queryEventsByRelationChunk(whatIds, whoIds);
-    }
-
     Map<Id, Event> eventById = new Map<Id, Event>();
-    for (Set<Id> whatIdChunk : chunkIdSet(whatIds)) {
-      if (!canContinueSoqlWork(1)) {
-        break;
-      }
 
-      for (Event eventRecord : queryEventsByRelationChunk(whatIdChunk, whoIds)) {
-        eventById.put(eventRecord.Id, eventRecord);
+    if (whatIds != null) {
+      for (Set<Id> whatIdChunk : chunkIdSet(whatIds)) {
+        for (Event eventRecord : queryEventsByWhatIds(whatIdChunk)) {
+          eventById.put(eventRecord.Id, eventRecord);
+        }
+      }
+    }
+
+    if (whoIds != null) {
+      for (Set<Id> whoIdChunk : chunkIdSet(whoIds)) {
+        for (Event eventRecord : queryEventsByWhoIds(whoIdChunk)) {
+          eventById.put(eventRecord.Id, eventRecord);
+        }
       }
     }
 
     return eventById.values();
   }
 
-  private static List<Event> queryEventsByRelationChunk(
-    Set<Id> whatIds,
-    Set<Id> whoIds
-  ) {
-    Boolean hasWhatIds = whatIds != null && !whatIds.isEmpty();
-    Boolean hasWhoIds = whoIds != null && !whoIds.isEmpty();
-
-    if (hasWhatIds && hasWhoIds) {
-      return [
-        SELECT
-          Id,
-          Subject,
-          Type,
-          Description,
-          StartDateTime,
-          OwnerId,
-          Owner.Name,
-          WhoId,
-          Who.Name,
-          WhatId,
-          AccountId
-        FROM Event
-        WHERE WhatId IN :whatIds OR WhoId IN :whoIds
-      ];
+  private static List<Event> queryEventsByWhatIds(Set<Id> whatIds) {
+    if (whatIds == null || whatIds.isEmpty() || !budget().canRead(1)) {
+      return new List<Event>();
     }
 
-    if (hasWhatIds) {
-      return [
-        SELECT
-          Id,
-          Subject,
-          Type,
-          Description,
-          StartDateTime,
-          OwnerId,
-          Owner.Name,
-          WhoId,
-          Who.Name,
-          WhatId,
-          AccountId
-        FROM Event
-        WHERE WhatId IN :whatIds
-      ];
+    Integer rowLimit = budget().nextLimit(getActivityQueryLimit());
+    if (rowLimit <= 0) {
+      return new List<Event>();
     }
 
-    return [
+    List<Event> records = [
+      SELECT
+        Id,
+        Subject,
+        Type,
+        Description,
+        StartDateTime,
+        OwnerId,
+        Owner.Name,
+        WhoId,
+        Who.Name,
+        WhatId,
+        AccountId
+      FROM Event
+      WHERE WhatId IN :whatIds
+      ORDER BY StartDateTime DESC NULLS LAST
+      LIMIT :rowLimit
+    ];
+    budget().markTruncatedIfFull(rowLimit, records.size());
+    return records;
+  }
+
+  private static List<Event> queryEventsByWhoIds(Set<Id> whoIds) {
+    if (whoIds == null || whoIds.isEmpty() || !budget().canRead(1)) {
+      return new List<Event>();
+    }
+
+    Integer rowLimit = budget().nextLimit(getActivityQueryLimit());
+    if (rowLimit <= 0) {
+      return new List<Event>();
+    }
+
+    List<Event> records = [
       SELECT
         Id,
         Subject,
@@ -1430,7 +1700,11 @@ public with sharing class ActivityTimelineService {
         AccountId
       FROM Event
       WHERE WhoId IN :whoIds
+      ORDER BY StartDateTime DESC NULLS LAST
+      LIMIT :rowLimit
     ];
+    budget().markTruncatedIfFull(rowLimit, records.size());
+    return records;
   }
 
   private static List<ActivityTimelineModels.ActivityItem> buildEmailActivities(
@@ -1444,7 +1718,7 @@ public with sharing class ActivityTimelineService {
 
     Map<Id, EmailMessage> emailById = new Map<Id, EmailMessage>();
     for (Set<Id> whatIdChunk : chunkIdSet(whatIds)) {
-      if (!canContinueSoqlWork(1)) {
+      if (!budget().canRead(1)) {
         break;
       }
 
@@ -1568,7 +1842,7 @@ public with sharing class ActivityTimelineService {
 
     Map<Id, String> contactNameById = new Map<Id, String>();
     for (Set<Id> contactIdChunk : chunkIdSet(contactIds)) {
-      if (!canContinueSoqlWork(2)) {
+      if (!budget().canRead(2)) {
         break;
       }
 
@@ -1580,11 +1854,16 @@ public with sharing class ActivityTimelineService {
         contactNameById.put(contactRecord.Id, contactRecord.Name);
       }
 
-      if (!canContinueSoqlWork(1)) {
+      if (!budget().canRead(1)) {
         break;
       }
 
-      for (EngagementInteraction interaction : [
+      Integer rowLimit = budget().nextLimit(getActivityQueryLimit());
+      if (rowLimit <= 0) {
+        break;
+      }
+
+      List<EngagementInteraction> interactions = [
         SELECT
           Id,
           Reason,
@@ -1595,7 +1874,12 @@ public with sharing class ActivityTimelineService {
           InitiatingAttendeeId
         FROM EngagementInteraction
         WHERE InitiatingAttendeeId IN :contactIdChunk
-      ]) {
+        ORDER BY StartDateTime DESC NULLS LAST
+        LIMIT :rowLimit
+      ];
+      budget().markTruncatedIfFull(rowLimit, interactions.size());
+
+      for (EngagementInteraction interaction : interactions) {
         String activityType = resolveEngagementActivityType(
           interaction.CommunicationChannel
         );
@@ -1710,12 +1994,25 @@ public with sharing class ActivityTimelineService {
       );
     }
 
-    for (EventRelation eventRelation : [
+    if (!budget().canRead(1)) {
+      return relatedByEventId;
+    }
+
+    Integer rowLimit = budget().nextLimit(getActivityQueryLimit());
+    if (rowLimit <= 0) {
+      return relatedByEventId;
+    }
+
+    List<EventRelation> eventRelations = [
       SELECT EventId, RelationId, Relation.Name
       FROM EventRelation
       WHERE EventId IN :eventIds AND IsInvitee = TRUE
       ORDER BY Relation.Name ASC NULLS LAST
-    ]) {
+      LIMIT :rowLimit
+    ];
+    budget().markTruncatedIfFull(rowLimit, eventRelations.size());
+
+    for (EventRelation eventRelation : eventRelations) {
       if (
         eventRelation.RelationId == null ||
         String.isBlank(eventRelation.Relation?.Name)
@@ -2297,11 +2594,16 @@ public with sharing class ActivityTimelineService {
   }
 
   private static List<EmailMessage> queryEmailMessagesByRelatedIds(Set<Id> whatIds) {
-    if (whatIds == null || whatIds.isEmpty()) {
+    if (whatIds == null || whatIds.isEmpty() || !budget().canRead(1)) {
       return new List<EmailMessage>();
     }
 
-    return [
+    Integer rowLimit = budget().nextLimit(EMAIL_ACTIVITY_QUERY_LIMIT);
+    if (rowLimit <= 0) {
+      return new List<EmailMessage>();
+    }
+
+    List<EmailMessage> records = [
       SELECT
         Id,
         Subject,
@@ -2318,7 +2620,11 @@ public with sharing class ActivityTimelineService {
         )
       FROM EmailMessage
       WHERE RelatedToId IN :whatIds OR ParentId IN :whatIds
+      ORDER BY MessageDate DESC NULLS LAST
+      LIMIT :rowLimit
     ];
+    budget().markTruncatedIfFull(rowLimit, records.size());
+    return records;
   }
 
   private without sharing class ActivityTimelineScopeQuery {
@@ -2361,13 +2667,21 @@ public with sharing class ActivityTimelineService {
 
       Map<Id, Account> accountById = new Map<Id, Account>();
       Set<Id> householdIds = new Set<Id>();
+      Integer accountRowLimit = budget().nextLimit(ACCOUNT_SCOPE_QUERY_LIMIT);
+      if (accountRowLimit <= 0) {
+        return new List<Account>();
+      }
 
-      for (Account account : [
+      List<Account> teamAccounts = [
         SELECT Id, Household__c, RecordType.DeveloperName, RecordType.Name, Type
         FROM Account
         WHERE Financial_Advisor_Team__c IN :teamIds
         AND RecordType.DeveloperName IN :eligibleDeveloperNames
-      ]) {
+        LIMIT :accountRowLimit
+      ];
+      budget().markTruncatedIfFull(accountRowLimit, teamAccounts.size());
+
+      for (Account account : teamAccounts) {
         accountById.put(account.Id, account);
 
         if (
@@ -2378,14 +2692,21 @@ public with sharing class ActivityTimelineService {
         }
       }
 
-      if (!householdIds.isEmpty()) {
-        for (Account account : [
-          SELECT Id, Household__c, RecordType.DeveloperName, RecordType.Name, Type
-          FROM Account
-          WHERE Household__c IN :householdIds
-          AND RecordType.DeveloperName IN :clientDeveloperNames
-        ]) {
-          accountById.put(account.Id, account);
+      if (!householdIds.isEmpty() && budget().canRead(1)) {
+        Integer householdMemberLimit = budget().nextLimit(ACCOUNT_SCOPE_QUERY_LIMIT);
+        if (householdMemberLimit > 0) {
+          List<Account> householdMembers = [
+            SELECT Id, Household__c, RecordType.DeveloperName, RecordType.Name, Type
+            FROM Account
+            WHERE Household__c IN :householdIds
+            AND RecordType.DeveloperName IN :clientDeveloperNames
+            LIMIT :householdMemberLimit
+          ];
+          budget().markTruncatedIfFull(householdMemberLimit, householdMembers.size());
+
+          for (Account account : householdMembers) {
+            accountById.put(account.Id, account);
+          }
         }
       }
 
