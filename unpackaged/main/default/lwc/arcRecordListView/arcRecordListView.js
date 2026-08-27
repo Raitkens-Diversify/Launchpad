@@ -20,7 +20,6 @@ import {
 } from "lightning/uiListsApi";
 import { getObjectInfo } from "lightning/uiObjectInfoApi";
 import searchRecords from "@salesforce/apex/ArcRecordSearchController.searchRecords";
-import countRecords from "@salesforce/apex/ArcRecordSearchController.countRecords";
 import diversifyStyles from "@salesforce/resourceUrl/diversifyStyles";
 import NEXS_ICONS from "@salesforce/resourceUrl/arcicon";
 import { CurrentPageReference, NavigationMixin } from "lightning/navigation";
@@ -358,12 +357,8 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   _listObjectInfoWire;
 
   // ---- Server search mode state ------------------------------------------
-  isServerSearching = false;
-  /** null until the async count call resolves once. */
-  totalRecordCount = null;
   _serverSearchGeneration = 0;
   _lastConfirmedSearchSignature = "";
-  _hasMoreServerRows = false;
   _serverSearchedListViewApiName = "";
 
   connectedCallback() {
@@ -1416,24 +1411,11 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     return "Showing results from the rows already loaded — press Enter to search all matching records.";
   }
 
-  get recordCountLabel() {
-    if (!this.enableServerSearch) {
-      return "";
-    }
-    if (this.totalRecordCount == null) {
-      return `Showing ${this.tableRows.length}${this._hasMoreServerRows ? "+" : ""}`;
-    }
-    return `Showing ${this.tableRows.length} of ${this.totalRecordCount}`;
-  }
-
   /**
-   * Runs a real server-side search/count with whatever filters, search
-   * term, and columns are current right now, replacing tableRows with the
-   * actual matching set (up to SERVER_SEARCH_PAGE_SIZE) instead of
-   * re-slicing whatever happened to already be loaded. The count is fetched
-   * separately and never blocks the rows from rendering -- on an unfiltered
-   * multi-hundred-thousand-row object it costs about what the row query
-   * itself does, so it arrives on its own schedule.
+   * Runs a real server-side search with whatever filters, search term, and
+   * columns are current right now, replacing tableRows with the actual
+   * matching set (up to SERVER_SEARCH_PAGE_SIZE) instead of re-slicing
+   * whatever happened to already be loaded.
    */
   async runServerSearch() {
     if (!this.enableServerSearch || !this.objectApiName) {
@@ -1444,9 +1426,7 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     this._lastConfirmedSearchSignature = this.currentFilterSearchSignature;
     this.isLoading = true;
     this.errorMessage = undefined;
-    this.totalRecordCount = null;
 
-    const fieldApiNames = this.searchFieldApiNames;
     const filters = this.activeFilters
       .filter((f) => f.fieldApiName && f.operandValue)
       .map((f) => ({
@@ -1460,7 +1440,7 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     try {
       const result = await searchRecords({
         objectApiName: this.objectApiName,
-        fieldApiNames,
+        fieldApiNames: this.searchFieldApiNames,
         filters,
         searchTerm,
         searchableFields,
@@ -1470,10 +1450,14 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
       if (generation !== this._serverSearchGeneration) {
         return;
       }
+      // Aligned by the field list the server actually selected, not the one
+      // requested -- a requested path can fail server-side validation and
+      // get dropped, which would silently shift every later cell by one if
+      // rows were mapped against the request instead.
+      const selectedFieldApiNames = result?.fieldApiNames || [];
       this.tableRows = (result?.rows || []).map((row) =>
-        this.mapSearchRowToTableRow(row, fieldApiNames)
+        this.mapSearchRowToTableRow(row, selectedFieldApiNames)
       );
-      this._hasMoreServerRows = result?.hasMore === true;
     } catch (error) {
       if (generation === this._serverSearchGeneration) {
         this.errorMessage = this.reduceError(error);
@@ -1484,21 +1468,6 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
         this.isLoading = false;
       }
     }
-
-    countRecords({
-      objectApiName: this.objectApiName,
-      filters,
-      searchTerm,
-      searchableFields
-    })
-      .then((count) => {
-        if (generation === this._serverSearchGeneration) {
-          this.totalRecordCount = count;
-        }
-      })
-      .catch(() => {
-        /* Non-fatal: the count is a nice-to-have, rows already rendered. */
-      });
   }
 
   /** Builds a table row from ArcRecordSearchController.SearchRow's flat cells. */

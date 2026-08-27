@@ -420,7 +420,7 @@ function mapHouseholdResponse(data) {
         meta: buildMeta([label]),
         iconVariant: "member",
         isNew: isEnvelopeMember && !m.submitted,
-        removable: isEnvelopeMember && !m.submitted,
+        removable: !m.submitted && !isPendingElsewhere,
         pendingElsewhere: isPendingElsewhere,
         hasClientProfile: m.hasClientProfile === true,
         actions: isEnvelopeMember
@@ -1199,6 +1199,7 @@ export default class EnvelopeShellV2 extends LightningElement {
         this.userContext = {
           Relationship_to_Firm__c: pref?.relationshipToFirm ?? null
         };
+        this._licenseType = pref?.licenseType ?? null;
       })
       .catch(() => {
         // Non-fatal: `$User.`-gated fields stay hidden until (if) this resolves.
@@ -2342,10 +2343,28 @@ export default class EnvelopeShellV2 extends LightningElement {
     });
   }
 
+  get isSalesforceUser() {
+    return this._licenseType === 'Salesforce';
+  }
+
+  get eligibleExistingMembers() {
+    return (this.model.householdMembers || [])
+      .filter((m) => !m.actions?.length && !m.pendingElsewhere)
+      .map((m) => ({ label: m.name, value: m.id }));
+  }
+
   handleFormCancel() {
     Promise.resolve().then(() => {
       this.activeForm = null;
     });
+  }
+
+  async handleAddExistingFromForm(event) {
+    const entityId = event.detail?.entityId;
+    if (entityId) {
+      await this._addExistingMemberToEnvelope(entityId);
+      this.activeForm = null;
+    }
   }
 
   // Content-area add form submit: the variant + selected type resolve to the target group.
@@ -2768,6 +2787,7 @@ export default class EnvelopeShellV2 extends LightningElement {
         ...e,
         typeLabel: "Client",
         meta: buildMeta(["Client"]),
+        isNew: true,
         actions: [
           {
             id: `${e.id}-1`,

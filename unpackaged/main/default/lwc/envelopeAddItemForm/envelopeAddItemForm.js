@@ -45,18 +45,68 @@ const CONFIG = {
  */
 export default class EnvelopeAddItemForm extends LightningElement {
     @api variant = 'member';
-    // Set by the host while it persists the added item; keeps the form in a busy state.
     @api saving = false;
+    @api isSalesforceUser = false;
+    @api eligibleMembers = [];
 
     nickname = '';
     typeValue = '';
+    selectedExistingId = '';
+    _formMode = null;
 
     get config() {
         return CONFIG[this.variant] || CONFIG.member;
     }
 
+    get showModeButtons() {
+        return this.isSalesforceUser && this.variant === 'member' && !this._formMode;
+    }
+
+    get showSelectExisting() {
+        return this.isSalesforceUser && this.variant === 'member' && this._formMode === 'selectExisting';
+    }
+
+    get showCreateNew() {
+        return (this.variant !== 'member' || !this.isSalesforceUser) || this._formMode === 'createNew';
+    }
+
     get disableSubmit() {
         return this.saving || !(this.nickname?.trim() && this.typeValue);
+    }
+
+    get disableSelectSubmit() {
+        return this.saving || !this.selectedExistingId;
+    }
+
+    get eligibleMemberOptions() {
+        return this.eligibleMembers || [];
+    }
+
+    handleSelectExistingMode() {
+        this._formMode = 'selectExisting';
+    }
+
+    handleCreateNewMode() {
+        this._formMode = 'createNew';
+    }
+
+    handleBackToModes() {
+        this._formMode = null;
+        this.selectedExistingId = '';
+        this.nickname = '';
+        this.typeValue = '';
+    }
+
+    handleExistingMemberChange(event) {
+        this.selectedExistingId = event.detail.value;
+    }
+
+    handleExistingSubmit() {
+        this.dispatchEvent(
+            new CustomEvent('addexisting', {
+                detail: { entityId: this.selectedExistingId }
+            })
+        );
     }
 
     handleNicknameChange(event) {
@@ -67,7 +117,20 @@ export default class EnvelopeAddItemForm extends LightningElement {
         this.typeValue = event.detail.value;
     }
 
+    get cancelOrBackLabel() {
+        return this.isSalesforceUser && this.variant === 'member' ? 'Back' : 'Cancel';
+    }
+
+    handleCancelOrBack() {
+        if (this.isSalesforceUser && this.variant === 'member') {
+            this.handleBackToModes();
+        } else {
+            this.handleCancel();
+        }
+    }
+
     handleCancel() {
+        this._formMode = null;
         this.dispatchEvent(new CustomEvent('cancel'));
     }
 

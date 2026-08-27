@@ -108,8 +108,11 @@
                     <c-envelope-add-item-form
                       variant={activeForm}
                       saving={isAddingItem}
+                      is-salesforce-user={isSalesforceUser}
+                      eligible-members={eligibleExistingMembers}
                       oncancel={handleFormCancel}
                       onadditem={handleAddItem}
+                      onaddexisting={handleAddExistingFromForm}
                     >
                     </c-envelope-add-item-form>
                   </template>

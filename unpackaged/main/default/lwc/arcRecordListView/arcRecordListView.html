@@ -101,50 +101,58 @@
     <div class="arc-record-list-view__content">
       <!-- Actions - Widget Customization (Figma 505:67788) -->
       <div class="arc-record-list-view__actions">
-        <div
-          class="arc-record-list-view__segmented"
-          role="group"
-          aria-label="View mode"
-        >
-          <button
-            class={tableSegmentClass}
-            type="button"
-            data-mode="table"
-            aria-pressed={isTableView}
-            onclick={handleViewModeChange}
+        <div class="arc-record-list-view__view-mode-group">
+          <div
+            class="arc-record-list-view__segmented"
+            role="group"
+            aria-label="View mode"
           >
-            <span
-              class="arc-record-list-view__icon arc-record-list-view__icon--sm arc-record-list-view__icon--table"
-              aria-hidden="true"
-            ></span>
-            <span>Table</span>
-          </button>
-          <button
-            class={cardsSegmentClass}
-            type="button"
-            data-mode="cards"
-            aria-pressed={isCardsView}
-            onclick={handleViewModeChange}
-          >
-            <span
-              class="arc-record-list-view__icon arc-record-list-view__icon--sm arc-record-list-view__icon--cards"
-              aria-hidden="true"
-            ></span>
-            <span>Cards</span>
-          </button>
-          <button
-            class={chartSegmentClass}
-            type="button"
-            data-mode="chart"
-            aria-pressed={isChartView}
-            onclick={handleViewModeChange}
-          >
-            <span
-              class="arc-record-list-view__icon arc-record-list-view__icon--sm arc-record-list-view__icon--chart"
-              aria-hidden="true"
-            ></span>
-            <span>Chart</span>
-          </button>
+            <button
+              class={tableSegmentClass}
+              type="button"
+              data-mode="table"
+              aria-pressed={isTableView}
+              onclick={handleViewModeChange}
+            >
+              <span
+                class="arc-record-list-view__icon arc-record-list-view__icon--sm arc-record-list-view__icon--table"
+                aria-hidden="true"
+              ></span>
+              <span>Table</span>
+            </button>
+            <button
+              class={cardsSegmentClass}
+              type="button"
+              data-mode="cards"
+              aria-pressed={isCardsView}
+              onclick={handleViewModeChange}
+            >
+              <span
+                class="arc-record-list-view__icon arc-record-list-view__icon--sm arc-record-list-view__icon--cards"
+                aria-hidden="true"
+              ></span>
+              <span>Cards</span>
+            </button>
+            <button
+              class={chartSegmentClass}
+              type="button"
+              data-mode="chart"
+              aria-pressed={isChartView}
+              onclick={handleViewModeChange}
+            >
+              <span
+                class="arc-record-list-view__icon arc-record-list-view__icon--sm arc-record-list-view__icon--chart"
+                aria-hidden="true"
+              ></span>
+              <span>Chart</span>
+            </button>
+          </div>
+
+          <template lwc:if={hasUnconfirmedServerSearch}>
+            <span class="arc-record-list-view__server-search-hint">
+              {serverSearchHintMessage}
+            </span>
+          </template>
         </div>
 
         <div class="arc-record-list-view__actions-right">
@@ -455,21 +463,6 @@
 
       <template lwc:if={hasError}>
         <div class="arc-record-list-view__error" role="alert">{errorMessage}</div>
-      </template>
-
-      <template lwc:if={enableServerSearch}>
-        <div class="arc-record-list-view__server-search-meta">
-          <template lwc:if={hasUnconfirmedServerSearch}>
-            <span class="arc-record-list-view__server-search-hint">
-              {serverSearchHintMessage}
-            </span>
-          </template>
-          <template lwc:else>
-            <span class="arc-record-list-view__server-search-count">
-              {recordCountLabel}
-            </span>
-          </template>
-        </div>
       </template>
 
       <template lwc:if={hasColumns}>

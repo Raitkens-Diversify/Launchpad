@@ -490,14 +490,15 @@ Wizard_View_Preference__c = viewMode
     @AuraEnabled(cacheable=false)
     public static UserPreferenceWrapper getUserPreferences() {
         User u = [
-            SELECT Wizard_View_Preference__c, Relationship_to_firm__c
+            SELECT Wizard_View_Preference__c, Relationship_to_firm__c, Profile.UserLicense.Name
             FROM User
             WHERE Id = :UserInfo.getUserId()
         ];
-        
+
         return new UserPreferenceWrapper(
             u.Wizard_View_Preference__c,
-            u.Relationship_to_firm__c
+            u.Relationship_to_firm__c,
+            u.Profile.UserLicense.Name
         );
     }
     // JACKSON DEAD CODE CLEANUP: dead-path method. Only importer is the superseded V1 envelopeShell (zero live
@@ -966,10 +967,12 @@ return result;
     public class UserPreferenceWrapper {
         @AuraEnabled public String wizardViewPreference;
         @AuraEnabled public String relationshipToFirm;
-        
-        public UserPreferenceWrapper(String wizardViewPreference, String relationshipToFirm) {
+        @AuraEnabled public String licenseType;
+
+        public UserPreferenceWrapper(String wizardViewPreference, String relationshipToFirm, String licenseType) {
             this.wizardViewPreference = wizardViewPreference;
             this.relationshipToFirm = relationshipToFirm;
+            this.licenseType = licenseType;
         }
     }
     @AuraEnabled(cacheable=false)

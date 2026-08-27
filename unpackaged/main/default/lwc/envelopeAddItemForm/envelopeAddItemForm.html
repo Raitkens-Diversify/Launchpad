@@ -12,50 +12,114 @@
                 <span class="add-form__title">{config.title}</span>
             </div>
 
-            <div class="add-form__row">
-                <lightning-input
-                    class="add-form__field"
-                    type="text"
-                    label={config.nicknameLabel}
-                    placeholder={config.nicknamePlaceholder}
-                    value={nickname}
-                    onchange={handleNicknameChange}>
-                </lightning-input>
-
-                <lightning-combobox
-                    class="add-form__field"
-                    label={config.typeLabel}
-                    placeholder={config.typePlaceholder}
-                    options={config.typeOptions}
-                    value={typeValue}
-                    onchange={handleTypeChange}>
-                </lightning-combobox>
-
-                <div class="add-form__actions">
+            <!-- Mode toggle: Select Existing / Create New (Salesforce users + member variant only) -->
+            <template lwc:if={showModeButtons}>
+                <div class="add-form__toggle-row">
+                    <lightning-button
+                        variant="neutral"
+                        label="Select Existing"
+                        onclick={handleSelectExistingMode}>
+                    </lightning-button>
+                    <lightning-button
+                        variant="neutral"
+                        label="Create New"
+                        onclick={handleCreateNewMode}>
+                    </lightning-button>
                     <lightning-button
                         class="env-base-button"
                         variant="base"
                         label="Cancel"
-                        disabled={saving}
                         onclick={handleCancel}>
                     </lightning-button>
-                    <div class="env-busy-button">
+                </div>
+            </template>
+
+            <!-- Select Existing mode -->
+            <template lwc:elseif={showSelectExisting}>
+                <div class="add-form__row">
+                    <lightning-combobox
+                        class="add-form__field"
+                        label="Household Member"
+                        placeholder="Select Existing Household Member"
+                        options={eligibleMemberOptions}
+                        value={selectedExistingId}
+                        onchange={handleExistingMemberChange}>
+                    </lightning-combobox>
+
+                    <div class="add-form__actions">
                         <lightning-button
-                            variant="brand"
-                            label={config.submitLabel}
-                            disabled={disableSubmit}
-                            onclick={handleSubmit}>
+                            class="env-base-button"
+                            variant="base"
+                            label="Back"
+                            disabled={saving}
+                            onclick={handleBackToModes}>
                         </lightning-button>
-                        <template lwc:if={saving}>
-                            <lightning-spinner
-                                size="small"
+                        <div class="env-busy-button">
+                            <lightning-button
                                 variant="brand"
-                                alternative-text="Saving">
-                            </lightning-spinner>
-                        </template>
+                                label="Add Client"
+                                disabled={disableSelectSubmit}
+                                onclick={handleExistingSubmit}>
+                            </lightning-button>
+                            <template lwc:if={saving}>
+                                <lightning-spinner
+                                    size="small"
+                                    variant="brand"
+                                    alternative-text="Saving">
+                                </lightning-spinner>
+                            </template>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </template>
+
+            <!-- Create New mode (or default for non-Salesforce / ISA) -->
+            <template lwc:elseif={showCreateNew}>
+                <div class="add-form__row">
+                    <lightning-input
+                        class="add-form__field"
+                        type="text"
+                        label={config.nicknameLabel}
+                        placeholder={config.nicknamePlaceholder}
+                        value={nickname}
+                        onchange={handleNicknameChange}>
+                    </lightning-input>
+
+                    <lightning-combobox
+                        class="add-form__field"
+                        label={config.typeLabel}
+                        placeholder={config.typePlaceholder}
+                        options={config.typeOptions}
+                        value={typeValue}
+                        onchange={handleTypeChange}>
+                    </lightning-combobox>
+
+                    <div class="add-form__actions">
+                        <lightning-button
+                            class="env-base-button"
+                            variant="base"
+                            label={cancelOrBackLabel}
+                            disabled={saving}
+                            onclick={handleCancelOrBack}>
+                        </lightning-button>
+                        <div class="env-busy-button">
+                            <lightning-button
+                                variant="brand"
+                                label={config.submitLabel}
+                                disabled={disableSubmit}
+                                onclick={handleSubmit}>
+                            </lightning-button>
+                            <template lwc:if={saving}>
+                                <lightning-spinner
+                                    size="small"
+                                    variant="brand"
+                                    alternative-text="Saving">
+                                </lightning-spinner>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </template>
         </div>
     </c-card>
 </template>

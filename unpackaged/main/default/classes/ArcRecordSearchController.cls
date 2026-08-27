@@ -44,6 +44,16 @@ public with sharing class ArcRecordSearchController {
   }
 
   public class SearchResult {
+    /**
+     * The field paths actually selected, in the same order as each row's
+     * cells -- not necessarily identical to the requested fieldApiNames.
+     * Some requested paths (a UI-API-resolved column name that isn't a
+     * plain SOQL-queryable field/relationship path) can fail validation and
+     * get silently dropped; a caller that assumed positional alignment with
+     * its own request would then read every later cell one column early.
+     */
+    @AuraEnabled
+    public List<String> fieldApiNames;
     @AuraEnabled
     public List<SearchRow> rows;
     /** True if the query matched more rows than this page returned. */
@@ -71,6 +81,7 @@ public with sharing class ArcRecordSearchController {
     }
 
     List<String> selected = validateFieldPaths(fieldMap, fieldApiNames);
+    result.fieldApiNames = selected;
     if (selected.isEmpty()) {
       return result;
     }
@@ -133,40 +144,6 @@ public with sharing class ArcRecordSearchController {
     return result;
   }
 
-  @AuraEnabled(cacheable=true)
-  public static Integer countRecords(
-    String objectApiName,
-    List<SearchFilter> filters,
-    String searchTerm,
-    List<String> searchableFields
-  ) {
-    Map<String, Schema.SObjectField> fieldMap = describeFields(objectApiName);
-    if (fieldMap == null) {
-      return 0;
-    }
-
-    Map<String, Object> binds = new Map<String, Object>();
-    String whereClause = buildWhereClause(
-      fieldMap,
-      filters,
-      searchTerm,
-      searchableFields,
-      binds
-    );
-
-    String soql =
-      'SELECT COUNT() FROM ' +
-      objectApiName +
-      (String.isBlank(whereClause) ? '' : ' WHERE ' + whereClause);
-
-    try {
-      return Database.countQueryWithBinds(soql, binds, AccessLevel.USER_MODE);
-    } catch (Exception e) {
-      System.debug(LoggingLevel.ERROR, 'ArcRecordSearchController.countRecords failed: ' + e);
-      return 0;
-    }
-  }
-
   private static Map<String, Schema.SObjectField> describeFields(String objectApiName) {
     if (String.isBlank(objectApiName)) {
       return null;
@@ -217,9 +194,17 @@ public with sharing class ArcRecordSearchController {
       List<String> searchClauses = new List<String>();
       String bindKey = 'searchTerm';
       binds.put(bindKey, '%' + escapeLike(searchTerm.trim()) + '%');
-      for (String path : searchableFields) {
-        if (String.isNotBlank(path) && isReadablePath(fieldMap, path.trim())) {
-          searchClauses.add(path.trim() + ' LIKE :' + bindKey);
+      for (String rawPath : searchableFields) {
+        if (String.isBlank(rawPath)) {
+          continue;
+        }
+        String path = rawPath.trim();
+        // SOQL's LIKE operator only works on string-shaped fields -- a
+        // displayed column can easily be a Date/Currency/etc, which would
+        // otherwise throw "like operator only valid on string field" and
+        // fail every search the moment such a column is on screen.
+        if (isReadablePath(fieldMap, path) && isLikeCompatibleType(fieldMap, path)) {
+          searchClauses.add(path + ' LIKE :' + bindKey);
         }
       }
       if (!searchClauses.isEmpty()) {
@@ -248,6 +233,18 @@ public with sharing class ArcRecordSearchController {
     Map<String, Object> binds
   ) {
     String op = String.isBlank(operatorKey) ? 'Contains' : operatorKey;
+    Boolean isLikeOperator = op == 'StartsWith' || op == 'NotContain' ||
+      (op != 'Equals' && op != 'NotEqual' && op != 'GreaterThan' &&
+       op != 'GreaterOrEqual' && op != 'LessThan' && op != 'LessOrEqual');
+
+    // Same constraint as the free-text search: LIKE only works on
+    // string-shaped fields. A field the client offered a text-style
+    // operator for anyway (its own operator list falls back to every text
+    // operator when the object describe has no per-field metadata) is
+    // skipped here rather than sent to SOQL and failing the whole search.
+    if (isLikeOperator && !isLikeCompatibleType(fieldMap, fieldApiName)) {
+      return null;
+    }
 
     if (op == 'StartsWith') {
       binds.put(bindKey, escapeLike(operandValue) + '%');
@@ -257,8 +254,7 @@ public with sharing class ArcRecordSearchController {
       binds.put(bindKey, '%' + escapeLike(operandValue) + '%');
       return '(NOT ' + fieldApiName + ' LIKE :' + bindKey + ')';
     }
-    if (op != 'Equals' && op != 'NotEqual' && op != 'GreaterThan' &&
-        op != 'GreaterOrEqual' && op != 'LessThan' && op != 'LessOrEqual') {
+    if (isLikeOperator) {
       binds.put(bindKey, '%' + escapeLike(operandValue) + '%');
       return fieldApiName + ' LIKE :' + bindKey;
     }
@@ -418,6 +414,29 @@ public with sharing class ArcRecordSearchController {
     }
 
     return Schema.DisplayType.STRING;
+  }
+
+  /**
+   * SOQL's LIKE operator only accepts string-shaped fields -- Date,
+   * Datetime, number types, Boolean, and Reference (an Id) all throw "like
+   * operator only valid on string field" if you try. Everything else
+   * (String, TextArea, Email, Phone, Url, Picklist, MultiselectPicklist,
+   * Id itself) is fine.
+   */
+  private static Boolean isLikeCompatibleType(
+    Map<String, Schema.SObjectField> fieldMap,
+    String path
+  ) {
+    Schema.DisplayType dataType = resolvePathType(fieldMap, path);
+    return dataType != Schema.DisplayType.DATE &&
+      dataType != Schema.DisplayType.DATETIME &&
+      dataType != Schema.DisplayType.TIME &&
+      dataType != Schema.DisplayType.DOUBLE &&
+      dataType != Schema.DisplayType.CURRENCY &&
+      dataType != Schema.DisplayType.PERCENT &&
+      dataType != Schema.DisplayType.INTEGER &&
+      dataType != Schema.DisplayType.BOOLEAN &&
+      dataType != Schema.DisplayType.REFERENCE;
   }
 
   /** Walks a dotted path on a queried record; blank when any hop is null. */

@@ -1093,7 +1093,15 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
     }
 
     if (columnType === "date") {
-      return new Intl.DateTimeFormat("en-US").format(new Date(value));
+      const parsed = new Date(value);
+      // A value that doesn't parse into a real date must not take the whole
+      // table down with it -- render it as-is (still visible, still
+      // debuggable) rather than letting Intl.DateTimeFormat throw on an
+      // Invalid Date.
+      if (Number.isNaN(parsed.getTime())) {
+        return value;
+      }
+      return new Intl.DateTimeFormat("en-US").format(parsed);
     }
 
     return value;

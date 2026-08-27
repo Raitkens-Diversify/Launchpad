@@ -158,6 +158,13 @@
   flex-wrap: wrap;
 }
 
+.arc-record-list-view__view-mode-group {
+  display: flex;
+  align-items: center;
+  gap: var(--slds-g-spacing-3, 12px);
+  flex-wrap: wrap;
+}
+
 /* Table / Cards / Chart button group (Figma "⚡ Button Group") */
 .arc-record-list-view__segmented {
   display: inline-flex;
@@ -719,11 +726,6 @@
   font-size: var(--slds-g-font-scale-neg-1, 12px);
 }
 
-.arc-record-list-view__server-search-meta {
-  margin: 0 0 var(--slds-g-spacing-2, 8px);
-  font-size: var(--slds-g-font-scale-neg-1, 12px);
-}
-
 .arc-record-list-view__server-search-hint {
   display: inline-flex;
   align-items: center;
@@ -731,10 +733,7 @@
   border-radius: var(--slds-g-radius-border-2, 8px);
   background: #fffbeb;
   color: #92400e;
-}
-
-.arc-record-list-view__server-search-count {
-  color: var(--slds-g-color-on-surface-2, #6b7280);
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
 }
 
 .arc-record-list-view__sr-only {

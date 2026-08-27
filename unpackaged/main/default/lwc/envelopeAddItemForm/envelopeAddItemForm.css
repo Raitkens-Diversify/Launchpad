@@ -46,3 +46,9 @@
     gap: var(--slds-g-spacing-4, 16px);
     flex: none;
 }
+
+.add-form__toggle-row {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-4, 16px);
+}
