@@ -26,6 +26,9 @@ public class NotificationGovernorLimitService {
   @TestVisible
   private static Integer testRemainingEmailInvocationBudgetOverride;
 
+  @TestVisible
+  private static Integer testRemainingSoqlBudgetOverride;
+
   public static Boolean shouldDeferPrepareToAsync() {
     if (System.isQueueable() || System.isBatch()) {
       return false;
@@ -44,11 +47,14 @@ public class NotificationGovernorLimitService {
         return true;
       }
 
+      if (testRemainingSoqlBudgetOverride != null) {
+        return !canAffordPrepareSourceRecord();
+      }
+
       return false;
     }
 
-    return getRemainingSoqlBudget() <
-      NotificationConstants.SOQL_PREPARE_DEFER_MIN_BUDGET ||
+    return !canAffordPrepareSourceRecord() ||
       getRemainingQueueableBudget() <
       NotificationConstants.MIN_QUEUEABLE_BUDGET_FOR_SYNC_PREPARE;
   }
@@ -85,8 +91,9 @@ public class NotificationGovernorLimitService {
   }
 
   public static Boolean canProcessAnotherRecipientChunk() {
-    return getRemainingSoqlBudget() >=
-      NotificationConstants.SOQL_QUERIES_PER_RECIPIENT_PREPARE_CHUNK;
+    return canAffordSoql(
+      NotificationConstants.SOQL_QUERIES_PER_RECIPIENT_PREPARE_CHUNK
+    );
   }
 
   public static Boolean canProcessImmediateDelivery() {
@@ -94,8 +101,38 @@ public class NotificationGovernorLimitService {
       return false;
     }
 
-    return getRemainingSoqlBudget() >=
-      NotificationConstants.SOQL_QUERIES_PER_IMMEDIATE_DELIVERY;
+    return canAffordSoql(NotificationConstants.SOQL_QUERIES_PER_IMMEDIATE_DELIVERY);
+  }
+
+  public static Boolean canAffordPrepareSourceRecord() {
+    return canAffordSoql(NotificationConstants.SOQL_QUERIES_PER_PREPARE_SOURCE) &&
+      getRemainingSoqlBudget() >= NotificationConstants.SOQL_PREPARE_DEFER_MIN_BUDGET;
+  }
+
+  public static Boolean canAffordSoql(Integer estimatedQueries) {
+    Integer safeEstimate = estimatedQueries == null || estimatedQueries < 1
+      ? 1
+      : estimatedQueries;
+
+    return getRawRemainingSoqlQueries() >
+      safeEstimate + NotificationConstants.SOQL_HARD_STOP_BUFFER;
+  }
+
+  public static Integer getRawRemainingSoqlQueries() {
+    if (Test.isRunningTest() && testRemainingSoqlBudgetOverride != null) {
+      return Math.max(0, testRemainingSoqlBudgetOverride);
+    }
+
+    return Math.max(0, getSoqlLimit() - Limits.getQueries());
+  }
+
+  public static Boolean isSoqlLimitMessage(String errorMessage) {
+    if (String.isBlank(errorMessage)) {
+      return false;
+    }
+
+    return errorMessage.contains('Too many SOQL queries') ||
+      errorMessage == NotificationConstants.ERROR_SOQL_QUERY_LIMIT;
   }
 
   public static Boolean canInvokeSendEmail() {
@@ -140,7 +177,7 @@ public class NotificationGovernorLimitService {
   }
 
   public static Integer getRemainingSoqlBudget() {
-    Integer remainingQueries = getSoqlLimit() - Limits.getQueries();
+    Integer remainingQueries = getRawRemainingSoqlQueries();
     return Math.max(0, remainingQueries - NotificationConstants.SOQL_SAFETY_BUFFER);
   }
 
@@ -265,6 +302,7 @@ public class NotificationGovernorLimitService {
     testForceDeferPrepareToAsync = false;
     testRemainingQueueableBudgetOverride = null;
     testRemainingEmailInvocationBudgetOverride = null;
+    testRemainingSoqlBudgetOverride = null;
     loggedLimitMessages = new List<String>();
 
     if (Test.isRunningTest()) {

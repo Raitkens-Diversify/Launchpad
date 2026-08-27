@@ -45,12 +45,12 @@ private class NotificationGovernorLimitServiceTest {
   @IsTest
   static void shrinkRecipientChunkSizeNeverFallsBelowMinimum() {
     System.assertEquals(
-      5,
-      NotificationGovernorLimitService.shrinkRecipientChunkSize(5)
+      NotificationConstants.MIN_RECIPIENTS_PER_PREPARE_CHUNK,
+      NotificationGovernorLimitService.shrinkRecipientChunkSize(1)
     );
     System.assertEquals(
-      5,
-      NotificationGovernorLimitService.shrinkRecipientChunkSize(6)
+      2,
+      NotificationGovernorLimitService.shrinkRecipientChunkSize(5)
     );
     System.assertEquals(
       25,
@@ -271,6 +271,52 @@ private class NotificationGovernorLimitServiceTest {
     System.assertEquals(
       0,
       NotificationGovernorLimitService.getRemainingEmailInvocationBudget()
+    );
+  }
+
+  @IsTest
+  static void canAffordSoqlHonorsRemainingBudgetOverride() {
+    NotificationGovernorLimitService.resetTestState();
+    System.assertEquals(
+      true,
+      NotificationGovernorLimitService.canAffordPrepareSourceRecord()
+    );
+
+    NotificationGovernorLimitService.testRemainingSoqlBudgetOverride = 10;
+
+    System.assertEquals(
+      false,
+      NotificationGovernorLimitService.canAffordSoql(
+        NotificationConstants.SOQL_QUERIES_PER_PREPARE_SOURCE
+      )
+    );
+    System.assertEquals(
+      false,
+      NotificationGovernorLimitService.canAffordPrepareSourceRecord()
+    );
+    System.assertEquals(
+      true,
+      NotificationGovernorLimitService.isSoqlLimitMessage(
+        'Too many SOQL queries: 101'
+      )
+    );
+    System.assertEquals(
+      true,
+      NotificationGovernorLimitService.isSoqlLimitMessage(
+        NotificationConstants.ERROR_SOQL_QUERY_LIMIT
+      )
+    );
+  }
+
+  @IsTest
+  static void shouldDeferPrepareToAsyncWhenSoqlBudgetIsLow() {
+    NotificationGovernorLimitService.resetTestState();
+    NotificationGovernorLimitService.testRemainingSoqlBudgetOverride = 12;
+
+    System.assertEquals(
+      true,
+      NotificationGovernorLimitService.shouldDeferPrepareToAsync(),
+      'Expected prepare work to defer when remaining SOQL cannot cover one source.'
     );
   }
 

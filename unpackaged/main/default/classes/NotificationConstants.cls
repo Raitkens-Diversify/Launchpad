@@ -55,9 +55,20 @@ public class NotificationConstants {
   /** Slots reserved for overflow chain queueables when chunking delivery jobs. */
   public static final Integer QUEUEABLE_CHAIN_RESERVE_SLOTS = 1;
 
+  /**
+   * Leave this many SOQL queries unused so the transaction never hits
+   * System.LimitException: Too many SOQL queries: 101 (uncatchable).
+   */
+  public static final Integer SOQL_HARD_STOP_BUFFER = 5;
   public static final Integer SOQL_SAFETY_BUFFER = 15;
-  public static final Integer SOQL_PREPARE_DEFER_MIN_BUDGET = 40;
-  public static final Integer SOQL_QUERIES_PER_RECIPIENT_PREPARE_CHUNK = 2;
+  /**
+   * Sync prepare is skipped unless this many buffered SOQL queries remain.
+   * Recipient resolution + change enrich + preferences can exceed 40 queries
+   * when the Flow has already used some of the 100-query limit.
+   */
+  public static final Integer SOQL_PREPARE_DEFER_MIN_BUDGET = 55;
+  public static final Integer SOQL_QUERIES_PER_PREPARE_SOURCE = 40;
+  public static final Integer SOQL_QUERIES_PER_RECIPIENT_PREPARE_CHUNK = 6;
   public static final Integer SOQL_QUERIES_PER_IMMEDIATE_DELIVERY = 8;
   /**
    * Salesforce allows 10 Messaging.sendEmail invocations per transaction.
@@ -68,13 +79,15 @@ public class NotificationConstants {
   public static final Integer MAX_EMAILS_PER_SEND_EMAIL_INVOCATION = 10;
   public static final Integer EMAIL_INVOCATION_SAFETY_BUFFER = 1;
   public static final Integer MAX_RECIPIENTS_PER_PREPARE_CHUNK = 50;
-  public static final Integer MIN_RECIPIENTS_PER_PREPARE_CHUNK = 5;
+  public static final Integer MIN_RECIPIENTS_PER_PREPARE_CHUNK = 1;
   public static final Integer MAX_RECIPIENT_IDS_PER_SOQL_IN = 200;
   public static final Integer MAX_LOGS_PER_DML_CHUNK = 200;
   public static final Integer MAX_RECIPIENT_PREPARE_CHAIN_ATTEMPTS = 3;
 
   public static final String ERROR_GOVERNOR_LIMIT =
     'Governor limit reached while preparing notification logs';
+  public static final String ERROR_SOQL_QUERY_LIMIT =
+    'Insufficient SOQL query budget for notification prepare';
   public static final String ERROR_EMAIL_INVOCATION_LIMIT =
     'Insufficient email invocation budget for notification delivery';
 

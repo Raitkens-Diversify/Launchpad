@@ -31,17 +31,6 @@
 public with sharing class ArcRecordSearchController {
   private static final Integer DEFAULT_PAGE_SIZE = 100;
   private static final Integer MAX_PAGE_SIZE = 200;
-  /**
-   * A Financial_Advisor_Team__c filter carrying exactly this sentinel
-   * operandValue (see arcRecordListView's teamScope tab config) means "the
-   * running user's own team(s)", resolved here via
-   * FinancialAdvisorTeamAccessService rather than a real team Id -- a
-   * static list view filter has no way to reference the running user, so
-   * this is the arcRecordListView-side equivalent of the dynamic
-   * Financial_Advisor_Team__c-membership scoping WorkDatatableController
-   * already does for the Work dashboard's own Team toggle.
-   */
-  private static final String TEAM_SCOPE_SENTINEL = '$CurrentUserTeam';
 
   /** One filter chip's worth of criteria, mirroring arcRecordListView's own. */
   public class SearchFilter {
@@ -321,21 +310,6 @@ public with sharing class ArcRecordSearchController {
       Boolean isNegative = op == 'NotEqual' || op == 'Excludes' || op == 'NotIn';
       binds.put(bindKey, recordTypeIds);
       return 'RecordTypeId' + (isNegative ? ' NOT IN :' : ' IN :') + bindKey;
-    }
-
-    // "My Team's" style scoping (see TEAM_SCOPE_SENTINEL) -- an empty
-    // teamIds set (the running user belongs to no team) deliberately binds
-    // an empty List<Id>, which correctly matches zero rows rather than
-    // dropping the filter and showing every record.
-    if (
-      fieldApiName == 'Financial_Advisor_Team__c' &&
-      operandValue == TEAM_SCOPE_SENTINEL
-    ) {
-      List<Id> teamIds = new List<Id>(
-        new FinancialAdvisorTeamAccessService().getCurrentUserTeamAccess().teamIds
-      );
-      binds.put(bindKey, teamIds);
-      return 'Financial_Advisor_Team__c IN :' + bindKey;
     }
 
     Boolean isLikeOperator = op == 'StartsWith' || op == 'NotContain' ||

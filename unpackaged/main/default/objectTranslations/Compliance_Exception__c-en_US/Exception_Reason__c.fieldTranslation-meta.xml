@@ -6,4 +6,12 @@
             <masterLabel>Other</masterLabel>
             <translation><!-- Other --></translation>
         </picklistValues>
+        <picklistValues>
+            <masterLabel>Policy</masterLabel>
+            <translation><!-- Policy --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Process</masterLabel>
+            <translation><!-- Process --></translation>
+        </picklistValues>
     </CustomFieldTranslation>

@@ -57,7 +57,10 @@ public without sharing class NotificationDeliveryDispatcher {
         new NotificationDeliveryChainQueueable(overflowRequests, 0)
       );
       testEnqueuedJobCount++;
-    } else if (!overflowRequests.isEmpty()) {
+    } else if (
+      !overflowRequests.isEmpty() &&
+      NotificationGovernorLimitService.canProcessImmediateDelivery()
+    ) {
       deliverOverflowInline(overflowRequests);
     }
   }
@@ -141,7 +144,10 @@ public without sharing class NotificationDeliveryDispatcher {
           new NotificationDeliveryChainQueueable(overflowRequests, 0)
         );
         testEnqueuedJobCount++;
-      } else if (!overflowRequests.isEmpty()) {
+      } else if (
+        !overflowRequests.isEmpty() &&
+        NotificationGovernorLimitService.canProcessImmediateDelivery()
+      ) {
         deliverOverflowInline(overflowRequests);
       }
     }
@@ -178,6 +184,10 @@ public without sharing class NotificationDeliveryDispatcher {
 
     try {
       for (NotificationDeliveryModels.DeliveryRequest request : requests) {
+        if (!NotificationGovernorLimitService.canProcessImmediateDelivery()) {
+          break;
+        }
+
         try {
           deliveryService.deliver(request);
         } catch (Exception error) {
@@ -206,6 +216,10 @@ public without sharing class NotificationDeliveryDispatcher {
 
     try {
       while (index < requests.size()) {
+        if (!NotificationGovernorLimitService.canProcessImmediateDelivery()) {
+          break;
+        }
+
         try {
           deliveryService.deliver(requests[index]);
         } catch (Exception error) {

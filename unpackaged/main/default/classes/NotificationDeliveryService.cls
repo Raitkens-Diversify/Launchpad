@@ -648,6 +648,7 @@ public without sharing class NotificationDeliveryService {
   private static Boolean isGovernorLimitMessage(String errorMessage) {
     return !String.isBlank(errorMessage) &&
       (errorMessage.contains('Insufficient SOQL budget') ||
+      NotificationGovernorLimitService.isSoqlLimitMessage(errorMessage) ||
       NotificationGovernorLimitService.isEmailInvocationLimitMessage(
         errorMessage
       ) ||

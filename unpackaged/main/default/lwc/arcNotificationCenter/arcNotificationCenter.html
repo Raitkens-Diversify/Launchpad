@@ -13,7 +13,10 @@
   -->
   <section class="arc-notification-center" aria-label={regionLabel}>
     <c-notification-center
+      lwc:ref="center"
       hide-admin-settings={hideAdminSettings}
+      full-width={fullWidth}
+      initial-view={initialView}
     ></c-notification-center>
   </section>
 </template>

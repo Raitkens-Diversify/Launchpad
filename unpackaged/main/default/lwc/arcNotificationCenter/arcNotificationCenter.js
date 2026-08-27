@@ -1,4 +1,7 @@
-import { LightningElement, api } from "lwc";
+import { LightningElement, api, wire } from "lwc";
+import { CurrentPageReference } from "lightning/navigation";
+import { resolveCurrentQueryParams } from "c/arcNavTrailState";
+import { NOTIFICATION_VIEW_REQUEST_EVENT } from "c/notificationCenterUtils";
 
 /**
  * arcNotificationCenter
@@ -62,6 +65,22 @@ import { LightningElement, api } from "lwc";
  */
 const HIDE_ADMIN_SETTINGS = true;
 
+/**
+ * ARC gives the Notification Center the full width of the page. In CRM the
+ * component sits inside Lightning's page chrome and its 1024px centred column
+ * is right; in ARC the component *is* the page, so that cap wasted about 230px
+ * on each side and clipped the wider tables. Requested 2026-08-27.
+ */
+const FULL_WIDTH = true;
+
+/**
+ * Query parameter naming the Notification Center view to open on. The header
+ * bell's "View All" sets it to "notification-log" so it lands on the log rather
+ * than the dashboard. c/notificationCenter validates the value and ignores
+ * anything it does not recognise, so nothing here needs to.
+ */
+const VIEW_PARAM = "view";
+
 export default class ArcNotificationCenter extends LightningElement {
   /**
    * Accessible name for the page region. Kept as a design property so the page
@@ -78,5 +97,70 @@ export default class ArcNotificationCenter extends LightningElement {
   /** Real boolean for c/notificationCenter's hideAdminSettings property. */
   get hideAdminSettings() {
     return HIDE_ADMIN_SETTINGS;
+  }
+
+  /** Real boolean for c/notificationCenter's fullWidth property. */
+  get fullWidth() {
+    return FULL_WIDTH;
+  }
+
+  /**
+   * The page reference is wired for LWR's client-side routing, where a
+   * navigation can change the query string without a document load.
+   * resolveCurrentQueryParams also reads window.location.search, so the
+   * parameter is available synchronously on a cold load too -- which matters,
+   * because c/notificationCenter reads initialView in its connectedCallback.
+   */
+  @wire(CurrentPageReference)
+  pageRef;
+
+  /** View id from ?view=, or undefined to let the dashboard open as normal. */
+  get initialView() {
+    return resolveCurrentQueryParams(this.pageRef).get(VIEW_PARAM) || undefined;
+  }
+
+  /**
+   * Handles a view request that arrives while this page is already on screen —
+   * the header bell's "View All". initialView cannot serve this case: the
+   * center reads it in connectedCallback, which does not run again, and the
+   * navigation that carries ?view= is a no-op when the URL is already current.
+   *
+   * The event is listened for on window because the bell lives in the site
+   * header, in a separate component tree, and window CustomEvents are how ARC
+   * already crosses that boundary (see NAV_PATH_CHANGE_EVENT,
+   * SIDEBAR_COLLAPSE_CHANGE_EVENT).
+   *
+   * The center validates the view id and ignores anything it does not
+   * recognise, so nothing is checked here.
+   */
+  connectedCallback() {
+    this._onViewRequest = (event) => {
+      const view = event?.detail?.view;
+
+      if (!view) {
+        return;
+      }
+
+      // Optional-chained: an event can land before the first render, and on the
+      // way out after the child is gone.
+      this.refs?.center?.showView?.(view);
+    };
+
+    window.addEventListener(
+      NOTIFICATION_VIEW_REQUEST_EVENT,
+      this._onViewRequest
+    );
+  }
+
+  disconnectedCallback() {
+    if (!this._onViewRequest) {
+      return;
+    }
+
+    window.removeEventListener(
+      NOTIFICATION_VIEW_REQUEST_EVENT,
+      this._onViewRequest
+    );
+    this._onViewRequest = null;
   }
 }

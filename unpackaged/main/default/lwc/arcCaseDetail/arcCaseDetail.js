@@ -160,6 +160,23 @@ const PIT_STOP_FLOWS = {
   }
 };
 
+/**
+ * Whether the case status bar -- the New / In Progress / On Hold / Closed /
+ * Canceled chevron track across the top of a case -- is drawn.
+ *
+ * Turned off 2026-08-27 at the request of the business: the same information is
+ * already on the page as the Status field, and the track took a full row of
+ * vertical space above the fold.
+ *
+ * Hidden rather than deleted. statusPath, hasStatusPath and pathValues are left
+ * intact, as is the Status picklist wire that feeds them, so setting this back
+ * to true restores the bar with nothing else to put back. pathValues in
+ * particular is worth keeping: it exists because the raw picklist made every
+ * step read as "upcoming", so the track rendered as a row of grey chevrons with
+ * the case appearing to be nowhere.
+ */
+const SHOW_STATUS_PATH = false;
+
 export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
   taskColumns = TASK_COLUMNS;
   relatedCaseColumns = RELATED_CASE_COLUMNS;
@@ -378,7 +395,7 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
   }
 
   get hasStatusPath() {
-    return this.statusPath.length > 0;
+    return SHOW_STATUS_PATH && this.statusPath.length > 0;
   }
 
   /*

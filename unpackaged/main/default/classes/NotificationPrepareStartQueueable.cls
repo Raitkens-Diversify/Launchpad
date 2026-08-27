@@ -1,9 +1,11 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-08-26
+ * Date: 2026-08-27
  *
  * Runs notification prepare work in a fresh transaction when the caller
- * has insufficient remaining SOQL budget.
+ * (typically the Notification Center Event Flow) has already consumed SOQL.
+ * SOQL 101 is uncatchable, so this job never continues once remaining queries
+ * drop below the prepare reserve.
  */
 public without sharing class NotificationPrepareStartQueueable implements Queueable, System.Finalizer {
   @TestVisible
@@ -15,10 +17,27 @@ public without sharing class NotificationPrepareStartQueueable implements Queuea
   @TestVisible
   public static Boolean testSkipDeliveryEnqueue = false;
 
-  private final String sourceType;
-  private final String sourceId;
-  private final String changeContextJson;
-  private final Boolean prepareNotificationLog;
+  public class PrepareRequest {
+    public String sourceType;
+    public String sourceId;
+    public String changeContextJson;
+    public Boolean prepareNotificationLog;
+
+    public PrepareRequest(
+      String sourceType,
+      String sourceId,
+      String changeContextJson,
+      Boolean prepareNotificationLog
+    ) {
+      this.sourceType = sourceType;
+      this.sourceId = sourceId;
+      this.changeContextJson = changeContextJson;
+      this.prepareNotificationLog = prepareNotificationLog == true;
+    }
+  }
+
+  private final List<PrepareRequest> prepareRequests;
+  private final Integer startIndex;
 
   public NotificationPrepareStartQueueable(
     String sourceType,
@@ -35,10 +54,28 @@ public without sharing class NotificationPrepareStartQueueable implements Queuea
     String changeContextJson,
     Boolean prepareNotificationLog
   ) {
-    this.sourceType = sourceType;
-    this.sourceId = sourceId;
-    this.changeContextJson = changeContextJson;
-    this.prepareNotificationLog = prepareNotificationLog == true;
+    this(
+      new List<PrepareRequest>{
+        new PrepareRequest(
+          sourceType,
+          sourceId,
+          changeContextJson,
+          prepareNotificationLog
+        )
+      },
+      0
+    );
+  }
+
+  @TestVisible
+  private NotificationPrepareStartQueueable(
+    List<PrepareRequest> prepareRequests,
+    Integer startIndex
+  ) {
+    this.prepareRequests = prepareRequests == null
+      ? new List<PrepareRequest>()
+      : prepareRequests;
+    this.startIndex = startIndex == null ? 0 : startIndex;
   }
 
   public static void enqueue(
@@ -55,11 +92,39 @@ public without sharing class NotificationPrepareStartQueueable implements Queuea
     String changeContextJson,
     Boolean prepareNotificationLog
   ) {
+    enqueueRequests(
+      new List<PrepareRequest>{
+        new PrepareRequest(
+          sourceType,
+          sourceId,
+          changeContextJson,
+          prepareNotificationLog
+        )
+      },
+      0
+    );
+  }
+
+  public static void enqueueRequests(List<PrepareRequest> prepareRequests) {
+    enqueueRequests(prepareRequests, 0);
+  }
+
+  public static void enqueueRequests(
+    List<PrepareRequest> prepareRequests,
+    Integer startIndex
+  ) {
+    if (prepareRequests == null || prepareRequests.isEmpty()) {
+      return;
+    }
+
+    Integer safeStartIndex = startIndex == null ? 0 : startIndex;
+    if (safeStartIndex >= prepareRequests.size()) {
+      return;
+    }
+
     NotificationPrepareStartQueueable job = new NotificationPrepareStartQueueable(
-      sourceType,
-      sourceId,
-      changeContextJson,
-      prepareNotificationLog
+      prepareRequests,
+      safeStartIndex
     );
 
     if (Test.isRunningTest() && !testForceAsyncEnqueue) {
@@ -69,8 +134,12 @@ public without sharing class NotificationPrepareStartQueueable implements Queuea
     }
 
     if (!NotificationGovernorLimitService.canEnqueueQueueableJob()) {
-      job.runPrepare();
-      testEnqueuedJobCount++;
+      NotificationGovernorLimitService.logLimitException(
+        'NotificationPrepareStartQueueable.enqueueRequests',
+        new NotificationDeliveryService.NotificationDeliveryException(
+          NotificationConstants.ERROR_SOQL_QUERY_LIMIT
+        )
+      );
       return;
     }
 
@@ -86,24 +155,23 @@ public without sharing class NotificationPrepareStartQueueable implements Queuea
   @TestVisible
   private void runPrepare() {
     NotificationCenterEventService service = new NotificationCenterEventService();
-    List<NotificationCenterDeliveryItem> deliveryItems;
     NotificationEmailDeliveryService.beginBatch();
 
     try {
-      if (prepareNotificationLog) {
-        deliveryItems = service.prepareNotificationLog(sourceId);
-      } else {
-        deliveryItems = service.prepareSourceRecord(
-          sourceType,
-          sourceId,
-          changeContextJson
-        );
-      }
+      for (
+        Integer index = startIndex;
+        index < prepareRequests.size();
+        index++
+      ) {
+        if (
+          index > startIndex &&
+          !NotificationGovernorLimitService.canAffordPrepareSourceRecord()
+        ) {
+          enqueueRequests(prepareRequests, index);
+          return;
+        }
 
-      if (!(Test.isRunningTest() && testSkipDeliveryEnqueue)) {
-        NotificationDeliveryEnqueueService.enqueueImmediateDeliveryItems(
-          deliveryItems
-        );
+        processPrepareRequest(service, prepareRequests[index]);
       }
     } finally {
       try {
@@ -114,6 +182,39 @@ public without sharing class NotificationPrepareStartQueueable implements Queuea
           flushError
         );
       }
+    }
+  }
+
+  private void processPrepareRequest(
+    NotificationCenterEventService service,
+    PrepareRequest prepareRequest
+  ) {
+    if (prepareRequest == null) {
+      return;
+    }
+
+    try {
+      List<NotificationCenterDeliveryItem> deliveryItems;
+      if (prepareRequest.prepareNotificationLog) {
+        deliveryItems = service.prepareNotificationLog(prepareRequest.sourceId);
+      } else {
+        deliveryItems = service.prepareSourceRecord(
+          prepareRequest.sourceType,
+          prepareRequest.sourceId,
+          prepareRequest.changeContextJson
+        );
+      }
+
+      if (!(Test.isRunningTest() && testSkipDeliveryEnqueue)) {
+        NotificationDeliveryEnqueueService.enqueueImmediateDeliveryItems(
+          deliveryItems
+        );
+      }
+    } catch (Exception error) {
+      NotificationGovernorLimitService.logLimitException(
+        'NotificationPrepareStartQueueable.processPrepareRequest',
+        error
+      );
     }
   }
 

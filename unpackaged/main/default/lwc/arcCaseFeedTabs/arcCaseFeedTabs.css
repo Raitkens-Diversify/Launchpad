@@ -1,0 +1,170 @@
+/*
+ * Layout and neutral typography only. No brand colours are hard-coded — the ARC
+ * page this sits on supplies them, and duplicating them here would leave two
+ * places to change when the palette moves.
+ */
+
+.arc-case-feed {
+  display: block;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #dddbda;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.arc-case-feed__panel {
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.arc-case-feed__loading {
+  position: relative;
+  min-height: 4rem;
+}
+
+.arc-case-feed__error {
+  margin: 0;
+  color: #c23934;
+  font-size: 0.875rem;
+}
+
+.arc-case-feed__empty {
+  margin: 0.5rem 0 0;
+  color: #706e6b;
+  font-size: 0.875rem;
+}
+
+/* ---- feed ---- */
+
+.arc-case-feed__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.arc-case-feed__item {
+  padding: 1rem 0;
+  border-bottom: 1px solid #f3f2f2;
+}
+
+.arc-case-feed__item:last-child {
+  border-bottom: none;
+}
+
+.arc-case-feed__actor {
+  margin: 0;
+  font-weight: 700;
+  font-size: 0.9375rem;
+}
+
+.arc-case-feed__date,
+.arc-case-feed__header {
+  margin: 0.125rem 0 0;
+  font-size: 0.8125rem;
+  color: #706e6b;
+}
+
+.arc-case-feed__header {
+  font-weight: 600;
+  color: #181818;
+}
+
+.arc-case-feed__body {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+  /* Chatter bodies carry their own newlines; keep them without allowing a long
+     unbroken string to widen the card. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.arc-case-feed__changes {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+}
+
+.arc-case-feed__change {
+  display: flex;
+  gap: 0.375rem;
+  padding: 0.0625rem 0;
+}
+
+.arc-case-feed__change-label {
+  color: #706e6b;
+  flex-shrink: 0;
+}
+
+.arc-case-feed__change-value {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.arc-case-feed__change-old {
+  color: #706e6b;
+  text-decoration: line-through;
+}
+
+.arc-case-feed__change-arrow {
+  color: #706e6b;
+  padding: 0 0.125rem;
+}
+
+.arc-case-feed__more {
+  margin: 0.75rem 0 0;
+  font-size: 0.8125rem;
+  color: #706e6b;
+}
+
+/* ---- related ---- */
+
+.arc-case-feed__card {
+  padding: 0.875rem 0;
+  border-bottom: 1px solid #f3f2f2;
+}
+
+.arc-case-feed__card:last-child {
+  border-bottom: none;
+}
+
+.arc-case-feed__card-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+  margin-bottom: 0.5rem;
+}
+
+.arc-case-feed__card-title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.arc-case-feed__card-count {
+  font-size: 0.8125rem;
+  color: #706e6b;
+}
+
+.arc-case-feed__table-scroll {
+  overflow-x: auto;
+}
+
+.arc-case-feed__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.arc-case-feed__table th,
+.arc-case-feed__table td {
+  text-align: left;
+  padding: 0.375rem 0.75rem 0.375rem 0;
+  border-bottom: 1px solid #f3f2f2;
+  vertical-align: top;
+}
+
+.arc-case-feed__table th {
+  font-weight: 600;
+  color: #706e6b;
+  white-space: nowrap;
+}

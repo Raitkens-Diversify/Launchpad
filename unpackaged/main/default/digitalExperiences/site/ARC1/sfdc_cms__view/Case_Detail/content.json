@@ -27,6 +27,13 @@
               "definition" : "c:arcCaseDetail",
               "id" : "8776a3ef-5d2f-49d5-9633-0680de4f4c14",
               "type" : "component"
+            }, {
+              "attributes" : {
+                "dxpStyle" : { }
+              },
+              "definition" : "c:arcCaseFeedTabs",
+              "id" : "3f2b8c14-7a95-4e6d-9b01-5c8e2d47af60",
+              "type" : "component"
             } ],
             "id" : "728704ea-15bd-4786-a32c-22161bcc19ff",
             "name" : "col1",

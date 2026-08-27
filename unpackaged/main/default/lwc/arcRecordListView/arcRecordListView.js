@@ -1203,10 +1203,15 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
       const displayValue =
         RECORD_TYPE_FILTER_VALUE_ALIASES[filter.operandValue] ||
         filter.operandValue;
+      // A NotEqual filter (e.g. Cases' own Status != Canceled, adopted
+      // straight from the list view's saved criteria) read identically to
+      // an Equals one here -- "Status: Canceled" looks like it's matching
+      // Canceled rows, the opposite of what it actually excludes.
+      const isExclusion = filter.operator === "NotEqual";
       return {
         ...filter,
         chipLabel: filter.operandValue
-          ? `${filter.label}: ${displayValue}`
+          ? `${filter.label}: ${isExclusion ? "Not " : ""}${displayValue}`
           : filter.label,
         isOpen: this.openPopover === filter.key,
         hasValue: Boolean(filter.operandValue),

@@ -1,0 +1,159 @@
+<template>
+  <div class="arc-case-feed">
+    <!-- c/dsTabs is ARC's own tab strip, used unmodified so this panel's tabs
+         look and behave like every other tab strip in the site. Two tabs only:
+         there is no Files tab by design. -->
+    <c-ds-tabs
+      tabs={tabs}
+      selected={activeTab}
+      label="Record activity"
+      ontabchange={handleTabChange}
+    ></c-ds-tabs>
+
+    <!-- ============================ FEED ============================ -->
+    <template lwc:if={showFeed}>
+      <div class="arc-case-feed__panel" role="tabpanel" aria-label="Feed">
+        <template lwc:if={isFeedLoading}>
+          <div class="arc-case-feed__loading">
+            <lightning-spinner
+              alternative-text="Loading feed"
+              size="small"
+            ></lightning-spinner>
+          </div>
+        </template>
+
+        <template lwc:if={feedError}>
+          <p class="arc-case-feed__error" role="alert">{feedError}</p>
+        </template>
+
+        <template lwc:if={hasFeedEntries}>
+          <ul class="arc-case-feed__list">
+            <template for:each={feedEntries} for:item="entry">
+              <li key={entry.id} class="arc-case-feed__item">
+                <p class="arc-case-feed__actor">{entry.actorName}</p>
+                <p class="arc-case-feed__date">
+                  <lightning-formatted-date-time
+                    value={entry.createdDate}
+                    year="numeric"
+                    month="long"
+                    day="numeric"
+                    hour="2-digit"
+                    minute="2-digit"
+                  ></lightning-formatted-date-time>
+                </p>
+
+                <template lwc:if={entry.hasHeader}>
+                  <p class="arc-case-feed__header">{entry.header}</p>
+                </template>
+
+                <template lwc:if={entry.hasBody}>
+                  <p class="arc-case-feed__body">{entry.body}</p>
+                </template>
+
+                <!-- The field-by-field detail of a creation or change post.
+                     A blank value is still listed, the way Lightning lists it,
+                     because "this field was set to nothing" is information. -->
+                <template lwc:if={entry.hasChanges}>
+                  <dl class="arc-case-feed__changes">
+                    <template for:each={entry.changes} for:item="change">
+                      <div key={change.key} class="arc-case-feed__change">
+                        <dt class="arc-case-feed__change-label">
+                          {change.label}:
+                        </dt>
+                        <dd class="arc-case-feed__change-value">
+                          <template lwc:if={change.showOldValue}>
+                            <span class="arc-case-feed__change-old"
+                              >{change.oldValue}</span
+                            >
+                            <span
+                              class="arc-case-feed__change-arrow"
+                              aria-label="changed to"
+                              >&rarr;</span
+                            >
+                          </template>
+                          {change.newValue}
+                        </dd>
+                      </div>
+                    </template>
+                  </dl>
+                </template>
+              </li>
+            </template>
+          </ul>
+
+          <template lwc:if={feedHasMore}>
+            <p class="arc-case-feed__more">
+              Older posts are not shown.
+            </p>
+          </template>
+        </template>
+
+        <template lwc:if={showFeedEmpty}>
+          <p class="arc-case-feed__empty">No activity on this record yet.</p>
+        </template>
+      </div>
+    </template>
+
+    <!-- ========================== RELATED =========================== -->
+    <template lwc:if={showRelated}>
+      <div class="arc-case-feed__panel" role="tabpanel" aria-label="Related">
+        <template lwc:if={isRelatedLoading}>
+          <div class="arc-case-feed__loading">
+            <lightning-spinner
+              alternative-text="Loading related lists"
+              size="small"
+            ></lightning-spinner>
+          </div>
+        </template>
+
+        <template lwc:if={relatedError}>
+          <p class="arc-case-feed__error" role="alert">{relatedError}</p>
+        </template>
+
+        <template for:each={relatedCards} for:item="card">
+          <article key={card.key} class="arc-case-feed__card">
+            <header class="arc-case-feed__card-header">
+              <h3 class="arc-case-feed__card-title">{card.label}</h3>
+              <span class="arc-case-feed__card-count">({card.count})</span>
+            </header>
+
+            <template lwc:if={card.hasRows}>
+              <!-- Own scroll container: a wide related list scrolls itself
+                   rather than pushing the page into a horizontal scroll. -->
+              <div class="arc-case-feed__table-scroll">
+                <table class="arc-case-feed__table">
+                  <thead>
+                    <tr>
+                      <template for:each={card.columns} for:item="column">
+                        <th key={column.key} scope="col">{column.label}</th>
+                      </template>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template for:each={card.rows} for:item="row">
+                      <tr key={row.id}>
+                        <template for:each={row.cells} for:item="cell">
+                          <td key={cell.key}>{cell.value}</td>
+                        </template>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+
+              <template lwc:if={card.hasMore}>
+                <p class="arc-case-feed__more">
+                  Showing the first {card.count}.
+                </p>
+              </template>
+            </template>
+
+            <template lwc:else>
+              <p class="arc-case-feed__empty">Nothing related yet.</p>
+            </template>
+          </article>
+        </template>
+      </div>
+    </template>
+  </div>
+</template>

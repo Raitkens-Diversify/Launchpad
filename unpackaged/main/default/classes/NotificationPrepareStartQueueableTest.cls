@@ -167,6 +167,43 @@ private class NotificationPrepareStartQueueableTest {
   }
 
   @IsTest
+  static void enqueueRequests_chainsRemainingWorkWhenSoqlBudgetIsLow() {
+    NotificationGovernorLimitService.resetTestState();
+    NotificationPrepareStartQueueable.resetTestState();
+    NotificationPrepareStartQueueable.testSkipDeliveryEnqueue = true;
+    NotificationDeliveryService.skipRetryEnqueueForTest = true;
+
+    String dummySourceId = String.valueOf(UserInfo.getUserId());
+    List<NotificationPrepareStartQueueable.PrepareRequest> prepareRequests = new List<NotificationPrepareStartQueueable.PrepareRequest>{
+      new NotificationPrepareStartQueueable.PrepareRequest(
+        NotificationConstants.OBJECT_TYPE_TASK,
+        dummySourceId,
+        null,
+        false
+      ),
+      new NotificationPrepareStartQueueable.PrepareRequest(
+        NotificationConstants.OBJECT_TYPE_TASK,
+        dummySourceId,
+        null,
+        false
+      )
+    };
+
+    Test.startTest();
+    NotificationGovernorLimitService.testRemainingSoqlBudgetOverride = 0;
+    NotificationPrepareStartQueueable.enqueueRequests(prepareRequests);
+    Test.stopTest();
+
+    System.assertEquals(
+      2,
+      NotificationPrepareStartQueueable.testEnqueuedJobCount,
+      'Expected remaining prepare work to chain when SOQL budget is low.'
+    );
+
+    NotificationDeliveryService.skipRetryEnqueueForTest = false;
+  }
+
+  @IsTest
   static void finalizerLogsUnhandledExceptions() {
     NotificationGovernorLimitService.resetTestState();
     NotificationPrepareStartQueueable.handleFinalizerFailure(

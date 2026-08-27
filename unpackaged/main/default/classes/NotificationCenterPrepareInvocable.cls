@@ -1,8 +1,10 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-08-26
+ * Date: 2026-08-27
  *
  * Invocable preparation for Notification Center Event delivery.
+ * Always hops to a Queueable from Flow/PE so this transaction cannot hit
+ * uncatchable SOQL 101. Prepare is query-heavy (recipients, household, rules).
  */
 public without sharing class NotificationCenterPrepareInvocable {
   public class EventInput {
@@ -30,68 +32,36 @@ public without sharing class NotificationCenterPrepareInvocable {
     List<EventInput> inputs
   ) {
     List<PrepareOutput> outputs = new List<PrepareOutput>();
-    NotificationCenterEventService service = new NotificationCenterEventService();
-    NotificationEmailDeliveryService.beginBatch();
-
-    try {
-      for (EventInput input : inputs) {
-        PrepareOutput output = new PrepareOutput();
-        output.deliveryLogIds = new List<String>();
-
-        try {
-          if (NotificationGovernorLimitService.shouldDeferPrepareToAsync()) {
-            NotificationPrepareStartQueueable.enqueue(
-              input.sourceType,
-              input.sourceId,
-              input.changeContext,
-              input.sourceType ==
-                NotificationConstants.OBJECT_TYPE_NOTIFICATION_LOG
-            );
-            outputs.add(output);
-            continue;
-          }
-
-          List<NotificationCenterDeliveryItem> deliveryItems = new List<NotificationCenterDeliveryItem>();
-
-          if (
-            input.sourceType == NotificationConstants.OBJECT_TYPE_NOTIFICATION_LOG
-          ) {
-            deliveryItems = service.prepareNotificationLog(input.sourceId);
-          } else {
-            deliveryItems = service.prepareSourceRecord(
-              input.sourceType,
-              input.sourceId,
-              input.changeContext
-            );
-          }
-
-          for (NotificationCenterDeliveryItem deliveryItem : deliveryItems) {
-            output.deliveryLogIds.add(String.valueOf(deliveryItem.logId));
-          }
-
-          NotificationDeliveryEnqueueService.enqueueImmediateDeliveryItems(
-            deliveryItems
-          );
-        } catch (Exception error) {
-          NotificationGovernorLimitService.logLimitException(
-            'NotificationCenterPrepareInvocable.prepareDelivery',
-            error
-          );
-        }
-
-        outputs.add(output);
-      }
-    } finally {
-      try {
-        NotificationEmailDeliveryService.endBatch();
-      } catch (Exception flushError) {
-        NotificationGovernorLimitService.logLimitException(
-          'NotificationCenterPrepareInvocable.flush',
-          flushError
-        );
-      }
+    if (inputs == null || inputs.isEmpty()) {
+      return outputs;
     }
 
+    List<NotificationPrepareStartQueueable.PrepareRequest> prepareRequests = new List<NotificationPrepareStartQueueable.PrepareRequest>();
+
+    for (EventInput input : inputs) {
+      PrepareOutput output = new PrepareOutput();
+      output.deliveryLogIds = new List<String>();
+      outputs.add(output);
+
+      if (input == null || String.isBlank(input.sourceType) || String.isBlank(input.sourceId)) {
+        continue;
+      }
+
+      prepareRequests.add(
+        new NotificationPrepareStartQueueable.PrepareRequest(
+          input.sourceType,
+          input.sourceId,
+          input.changeContext,
+          input.sourceType == NotificationConstants.OBJECT_TYPE_NOTIFICATION_LOG
+        )
+      );
+    }
+
+    if (prepareRequests.isEmpty()) {
+      return outputs;
+    }
+
+    NotificationPrepareStartQueueable.enqueueRequests(prepareRequests);
     return outputs;
   }
 }

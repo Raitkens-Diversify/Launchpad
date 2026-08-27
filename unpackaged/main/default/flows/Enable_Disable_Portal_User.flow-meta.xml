@@ -227,7 +227,7 @@
     <formulas>
         <name>communityUsername</name>
         <dataType>String</dataType>
-        <expression>{!getAccount.PersonEmail} + &#39;.launchpad&#39;</expression>
+        <expression>{!getAccount.PersonEmail} + &#39;.arclaunchpad&#39;</expression>
     </formulas>
     <interviewLabel>Enable/Disable Portal User {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Enable/Disable Portal User</label>
@@ -711,7 +711,7 @@
             <targetReference>getAccount</targetReference>
         </connector>
     </start>
-    <status>Active</status>
+    <status>Draft</status>
     <variables>
         <name>recordId</name>
         <dataType>String</dataType>

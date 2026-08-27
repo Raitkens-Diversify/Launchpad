@@ -8,14 +8,6 @@
         <plural>true</plural>
         <value>Compliance Exceptions</value>
     </caseValues>
-    
-    
-    
-    
-    
-    
-    
-    
     <layouts>
         <layout>Compliance Exception Layout</layout>
         <sections>
@@ -23,5 +15,13 @@
             <section>Custom Links</section>
         </sections>
     </layouts>
+    
+    
+    
+    
+    
+    
+    
+    
     <startsWith>Consonant</startsWith>
 </CustomObjectTranslation>

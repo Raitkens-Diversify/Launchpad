@@ -1017,6 +1017,21 @@ export const formatRelativeTime = (value) => {
   return diffDays === 1 ? "1 day ago" : `${diffDays} days ago`;
 };
 
+/**
+ * Window event asking an already-rendered Notification Center to switch view.
+ *
+ * A URL parameter cannot do this job on its own: when the page is already open,
+ * navigating to the same /notifications?view=... URL is a no-op in LWR, and even
+ * when it is not, connectedCallback does not run again, so nothing re-reads the
+ * parameter. The parameter is state for a cold load; this event is the command
+ * for a live one. c/arcNotificationBell fires it, c/arcNotificationCenter
+ * listens and calls showView on the center.
+ *
+ * detail: { view: <c/notificationCenter view id> }
+ */
+export const NOTIFICATION_VIEW_REQUEST_EVENT =
+  "arc-notification-view-request";
+
 export const reduceError = (error) => {
   if (Array.isArray(error?.body)) {
     return error.body.map((entry) => entry.message).join(", ");

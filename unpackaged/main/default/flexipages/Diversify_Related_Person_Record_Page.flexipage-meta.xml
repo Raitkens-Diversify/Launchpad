@@ -102,6 +102,9 @@
                         <valueListItems>
                             <value>Account.Enable_Disable_Portal_User</value>
                         </valueListItems>
+                        <valueListItems>
+                            <value>EnableCustomerPortalUser</value>
+                        </valueListItems>
                     </valueList>
                 </componentInstanceProperties>
                 <componentInstanceProperties>

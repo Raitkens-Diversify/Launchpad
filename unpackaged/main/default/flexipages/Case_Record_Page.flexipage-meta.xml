@@ -364,26 +364,26 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.FinServ__FinancialAccount__c</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_cField9</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_cField3</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.FinServ__FinancialAccount__r.FinServ__PrimaryOwner__c</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_rFinServ_PrimaryOwner_cField</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Primary_Owner__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rPrimary_Owner_cField3</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.FinServ__FinancialAccount__r.FinServ__JointOwner__c</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_rFinServ_JointOwner_cField</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Joint_Owner__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rJoint_Owner_cField3</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.FinServ__FinancialAccount__r.Managed_Account_Platform__c</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_rManaged_Account_Platform_cField</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Managed_Account_Platform__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rManaged_Account_Platform_cField2</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -467,26 +467,26 @@
         </itemInstances>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.FinServ__FinancialAccount__r.Rep_Code_Lookup__c</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_rRep_Code_Lookup_cField2</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Rep_Code__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rRep_Code_cField</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.FinServ__FinancialAccount__r.Custodian__c</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_rCustodian_cField</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Custodian__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rCustodian_cField2</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.FinServ__FinancialAccount__r.Registration_Type__c</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_rRegistration_Type_cField</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Registration_Type__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rRegistration_Type_cField2</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.FinServ__FinancialAccount__r.Product_Type__c</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_rProduct_Type_cField</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Product_Type__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rProduct_Type_cField2</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -508,11 +508,11 @@
         </itemInstances>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.FinServ__FinancialAccount__r.Reg_BI_Client_Override_Explanation__c</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_rReg_BI_Client_Override_Explanation_cField</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Reg_BI_Client_Override_Explanation__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rReg_BI_Client_Override_Explanation_cField</identifier>
                 <visibilityRule>
                     <criteria>
-                        <leftValue>{!Record.FinServ__FinancialAccount__r.BD_or_RIA__c}</leftValue>
+                        <leftValue>{!Record.Wizard_Financial_Account__r.BD_or_RIA__c}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>BD</rightValue>
                     </criteria>

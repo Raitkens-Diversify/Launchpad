@@ -189,7 +189,14 @@ private class NotificationCoverageGapTest {
     Test.stopTest();
 
     System.assertEquals(1, outputs.size());
-    System.assertEquals(1, outputs[0].deliveryLogIds.size());
+    System.assertEquals(0, outputs[0].deliveryLogIds.size());
+
+    List<Notification_Log__c> logs = [
+      SELECT Id
+      FROM Notification_Log__c
+      WHERE Id = :digestLog.Id
+    ];
+    System.assertEquals(1, logs.size());
   }
 
   @IsTest

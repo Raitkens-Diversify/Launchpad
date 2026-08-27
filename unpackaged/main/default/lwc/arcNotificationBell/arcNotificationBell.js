@@ -22,7 +22,10 @@ import {
   requestOpenHeaderPopover,
   subscribeToHeaderPopover,
 } from "c/arcHeaderPopoverCoordinator";
-import { reduceError } from "c/notificationCenterUtils";
+import {
+  NOTIFICATION_VIEW_REQUEST_EVENT,
+  reduceError
+} from "c/notificationCenterUtils";
 
 const BELL_ICON = "bell.svg";
 const VIEW_ALL_ICON = "caret-right.svg";
@@ -30,6 +33,14 @@ const INBOX_FILTER_UNREAD = "UNREAD";
 const INBOX_PAGE_SIZE = 100;
 /** Route urlPrefix of the Notifications page (ARC1 sfdc_cms__route/Notifications__c). */
 const NOTIFICATIONS_PATH = "/notifications";
+
+/**
+ * Notification Center view that "View All" opens, as a c/notificationCenter
+ * view id. The bell lists delivered notifications, so the log -- same rows,
+ * full history, filterable -- is the page that continues that thought; the
+ * dashboard would make the user click across to get there.
+ */
+const VIEW_ALL_VIEW = "notification-log";
 
 const SOURCE_TYPE_TO_OBJECT = Object.freeze({
   Case: "Case",
@@ -415,13 +426,43 @@ export default class ArcNotificationBell extends NavigationMixin(LightningElemen
     this[NavigationMixin.Navigate](pageReference);
   }
 
-  /** "View All" (Figma 760:132655) opens the full ARC1 Notifications page. */
+  /**
+   * "View All" (Figma 760:132655) opens the full ARC1 Notifications page on the
+   * Notification Log. The ?view= parameter is read by c/arcNotificationCenter
+   * and passed to c/notificationCenter as initialView; if that ever stops being
+   * honoured the link still lands on the Notifications page, just on its
+   * default view, so this degrades rather than breaks.
+   */
   handleViewAllClick(event) {
     event.stopPropagation();
     this.closePanel();
+    /*
+     * Two channels on purpose, because one cannot cover both cases.
+     *
+     * The event switches a Notification Center that is already on screen. This
+     * is the case the ?view= parameter alone got wrong: the user is on
+     * /notifications, so navigating there again is a no-op in LWR and
+     * connectedCallback never re-runs, leaving them on whatever view they were
+     * already looking at.
+     *
+     * The navigation covers arriving from anywhere else, and carries the
+     * parameter so the freshly mounted center starts on the log. When the page
+     * is already open the navigation is a no-op and the event has done the
+     * work; when it is not, there is no listener yet and the parameter does it.
+     * Fired before navigating so the listener is still alive if the navigation
+     * does turn into a document load.
+     */
+    window.dispatchEvent(
+      new CustomEvent(NOTIFICATION_VIEW_REQUEST_EVENT, {
+        detail: { view: VIEW_ALL_VIEW }
+      })
+    );
+
     this[NavigationMixin.Navigate]({
       type: "standard__webPage",
-      attributes: { url: NOTIFICATIONS_PATH }
+      attributes: {
+        url: `${NOTIFICATIONS_PATH}?view=${encodeURIComponent(VIEW_ALL_VIEW)}`
+      }
     });
   }
 }

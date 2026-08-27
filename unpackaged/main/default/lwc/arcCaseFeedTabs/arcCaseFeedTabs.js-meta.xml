@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Record Feed and Related</masterLabel>
+    <description>Feed and Related tabs for an ARC record page, rebuilt from Lightning&#39;s record page. Read-only, no Files tab. Reads through ArcRelatedListController and ArcCaseFeedController, rendering its own posts and cards.</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property name="objectApiName" type="String" label="Object API Name" default="Case" description="Object whose record page this sits on. The record id is resolved against it." />
+            <property name="feedPageSize" type="Integer" label="Feed Page Size" default="10" description="How many feed posts to show. Capped at 50 server-side." />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>
