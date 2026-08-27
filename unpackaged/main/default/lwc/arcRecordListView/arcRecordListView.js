@@ -351,9 +351,23 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     return this.serverSearchListViewNames.includes(this.selectedListViewApiName);
   }
 
-  /** arcDataTable's pager cue that a load-more page button belongs at the end. */
+  /**
+   * arcDataTable's pager cue that a load-more page button belongs at the
+   * end. Suppressed while hasUnconfirmedServerSearch is true: at that point
+   * the rows on screen are a client-side-narrowed preview of whatever
+   * batch is already loaded (see visibleRows), and totalRows/localPageCount
+   * are sized to that narrowed set -- but _hasMoreServerRows still reflects
+   * the last CONFIRMED (unfiltered-by-this-preview) search, which can
+   * genuinely have more pages of its own. Showing that hint here would
+   * offer to fetch more of the wrong, unconfirmed thing on top of an
+   * already-short preview page count.
+   */
   get hasMoreServerRows() {
-    return this.enableServerSearch && this._hasMoreServerRows;
+    return (
+      this.enableServerSearch &&
+      this._hasMoreServerRows &&
+      !this.hasUnconfirmedServerSearch
+    );
   }
 
   /** Swaps arcDataTable's empty-page message for a spinner while a load-more fetch is in flight. */

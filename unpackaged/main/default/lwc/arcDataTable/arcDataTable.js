@@ -515,17 +515,26 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
   }
 
   /**
-   * True only when nextData is previousData with more rows appended after
-   * it, unchanged and in the same order -- everything else (a shorter
-   * list, a reordered or replaced one, the very first load) is a genuine
-   * dataset change the pager should reset for, not a fetch extending the
-   * page the user is already on.
+   * True when nextData is previousData unchanged, or previousData with more
+   * rows appended after it, either way in the same order -- everything else
+   * (a shorter list, a reordered or replaced one, the very first load) is a
+   * genuine dataset change the pager should reset for, not a fetch extending
+   * the page the user is already on.
+   *
+   * The equal-length case matters because the host's `data` binding is
+   * commonly a derived getter (e.g. a live client-side filter) that returns
+   * a brand-new array reference on every render, including renders with no
+   * real content change -- such as the one a load-more fetch's own loading
+   * flag triggers before its new rows have even arrived. Treating "same
+   * length, same rows" as a reset-worthy change would snap the page back to
+   * 1 on that intermediate render, before the appended batch this same
+   * click asked for ever gets a chance to land on it.
    */
   isDataAppendOnly(previousData, nextData) {
     const previousRows = Array.isArray(previousData) ? previousData : [];
     const nextRows = Array.isArray(nextData) ? nextData : [];
 
-    if (!previousRows.length || nextRows.length <= previousRows.length) {
+    if (!previousRows.length || nextRows.length < previousRows.length) {
       return false;
     }
 
