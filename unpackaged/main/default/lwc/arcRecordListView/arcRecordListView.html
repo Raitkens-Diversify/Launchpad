@@ -159,6 +159,7 @@
               type="search"
               placeholder="Search…"
               oninput={handleSearchInput}
+              onkeydown={handleSearchKeyDown}
             />
           </label>
 
@@ -418,6 +419,7 @@
                           data-key={chip.key}
                           value={chip.operandValue}
                           oninput={handleChipValueChange}
+                          onkeydown={handleChipValueKeyDown}
                         />
                       </template>
                       <template lwc:if={chip.hasValue}>
@@ -453,6 +455,21 @@
 
       <template lwc:if={hasError}>
         <div class="arc-record-list-view__error" role="alert">{errorMessage}</div>
+      </template>
+
+      <template lwc:if={enableServerSearch}>
+        <div class="arc-record-list-view__server-search-meta">
+          <template lwc:if={hasUnconfirmedServerSearch}>
+            <span class="arc-record-list-view__server-search-hint">
+              {serverSearchHintMessage}
+            </span>
+          </template>
+          <template lwc:else>
+            <span class="arc-record-list-view__server-search-count">
+              {recordCountLabel}
+            </span>
+          </template>
+        </div>
       </template>
 
       <template lwc:if={hasColumns}>

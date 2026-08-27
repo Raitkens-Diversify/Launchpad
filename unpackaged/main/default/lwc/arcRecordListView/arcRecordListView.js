@@ -19,6 +19,8 @@ import {
   updateListInfoByName
 } from "lightning/uiListsApi";
 import { getObjectInfo } from "lightning/uiObjectInfoApi";
+import searchRecords from "@salesforce/apex/ArcRecordSearchController.searchRecords";
+import countRecords from "@salesforce/apex/ArcRecordSearchController.countRecords";
 import diversifyStyles from "@salesforce/resourceUrl/diversifyStyles";
 import NEXS_ICONS from "@salesforce/resourceUrl/arcicon";
 import { CurrentPageReference, NavigationMixin } from "lightning/navigation";
@@ -80,6 +82,15 @@ const LIST_VIEW_FETCH_SIZE = 2000;
 const TABLE_PAGE_SIZE = 25;
 const TABLE_PAGE_SIZE_OPTIONS = [10, 25, 50];
 const SEARCH_DEBOUNCE_MS = 275;
+/**
+ * Page size for the opt-in "server search" mode (see enableServerSearch):
+ * a small, fast first fetch instead of the default LIST_VIEW_FETCH_SIZE=2000
+ * fetch-then-filter-client-side pattern. Real filtering/search in this mode
+ * runs server-side via ArcRecordSearchController, keyset-paginated (SOQL's
+ * own OFFSET is capped at 2000 same as the UI API, so pages are fetched via
+ * "WHERE Id > last id" instead).
+ */
+const SERVER_SEARCH_PAGE_SIZE = 100;
 /** Saved views past this count collapse into the trailing "More" tab menu. */
 const MAX_VISIBLE_TABS = 5;
 
@@ -274,6 +285,36 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
    * already returns. Blank leaves the view's own column set/order alone.
    */
   @api defaultColumns = "";
+  /**
+   * Opt-in pilot mode, scoped per list view rather than per placement: one
+   * arcRecordListView instance handles every tab on its page (Account_List's
+   * 7 tabs are one instance, not seven), so a plain on/off flag would turn
+   * this on for all of them. Instead this is a comma-separated list of the
+   * list view API names it should apply to, e.g. "AllAccounts" -- any tab
+   * not named here keeps today's behavior exactly: one fetch of up to
+   * LIST_VIEW_FETCH_SIZE=2000 rows via lightning/uiListsApi, filtered/
+   * grouped/searched entirely client-side. For a named tab, the initial
+   * fetch is a small keyset-paginated page via ArcRecordSearchController
+   * instead (fast first paint even on a huge unfiltered view), plus an
+   * async total-record count. Filter chips, the search box, and group-by
+   * still apply live over whatever's currently loaded for instant feedback
+   * -- but on Enter (search box or a filter chip's value), a real server
+   * re-query runs with that criteria applied, replacing the loaded rows
+   * with the actual matching set instead of just re-slicing what happened
+   * to be on the first page.
+   */
+  @api serverSearchListViews = "";
+
+  get enableServerSearch() {
+    return this.serverSearchListViewNames.includes(this.selectedListViewApiName);
+  }
+
+  get serverSearchListViewNames() {
+    return (this.serverSearchListViews || "")
+      .split(",")
+      .map((name) => name.trim())
+      .filter(Boolean);
+  }
 
   /** Every field the object describe knows about, keyed by API name. */
   objectFieldInfo = null;
@@ -315,6 +356,15 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   _listInfoWire;
   _recordsWire;
   _listObjectInfoWire;
+
+  // ---- Server search mode state ------------------------------------------
+  isServerSearching = false;
+  /** null until the async count call resolves once. */
+  totalRecordCount = null;
+  _serverSearchGeneration = 0;
+  _lastConfirmedSearchSignature = "";
+  _hasMoreServerRows = false;
+  _serverSearchedListViewApiName = "";
 
   connectedCallback() {
     this.applyIconVariables();
@@ -722,6 +772,19 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     return LIST_VIEW_FETCH_SIZE;
   }
 
+  /**
+   * getListRecordsByName's own listViewApiName is a required identifier --
+   * an undefined value is the standard, documented way to keep a wire
+   * adapter from firing at all (the same pattern this file's other wires
+   * already use, gated on $_recordId-style values). In server search mode
+   * the row data comes from runServerSearch/ArcRecordSearchController
+   * instead, so this suppresses the old fetch-2000-rows call entirely
+   * rather than letting it run to waste alongside the new one.
+   */
+  get wireListViewApiName() {
+    return this.enableServerSearch ? undefined : this.selectedListViewApiName;
+  }
+
   get linkQueryParamObjectApiNames() {
     return usesQueryParamRecordRoute(this.objectApiName)
       ? this.objectApiName
@@ -1101,6 +1164,17 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
       this.filterLogicString = data.filterLogicString || "";
       this.adoptSavedFilters(data.filteredByInfo || []);
       this.errorMessage = undefined;
+      // Runs once per view (not on every wire re-emit, e.g. a refreshApex
+      // mid-edit) -- columns and the view's own base filters (just adopted
+      // above) are both ready by this point, which connectedCallback alone
+      // can't guarantee since they arrive from this same wire.
+      if (
+        this.enableServerSearch &&
+        this._serverSearchedListViewApiName !== this.selectedListViewApiName
+      ) {
+        this._serverSearchedListViewApiName = this.selectedListViewApiName;
+        this.runServerSearch();
+      }
     } else if (error && this.selectedListViewApiName) {
       this.errorMessage = this.reduceError(error);
       this.columns = [];
@@ -1216,12 +1290,19 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
 
   @wire(getListRecordsByName, {
     objectApiName: "$objectApiName",
-    listViewApiName: "$selectedListViewApiName",
+    listViewApiName: "$wireListViewApiName",
     optionalFields: "$optionalFields",
     pageSize: "$listViewFetchSize"
   })
   wiredRecords(result) {
     this._recordsWire = result;
+    if (this.enableServerSearch) {
+      // Row data comes from runServerSearch instead; wireListViewApiName
+      // already keeps this adapter from actually fetching, but a stray
+      // empty emission (if the platform ever sends one for an undefined
+      // required param) must not race with a search already in flight.
+      return;
+    }
     const { data, error } = result;
     this.isLoading = false;
     if (data) {
@@ -1290,6 +1371,156 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     });
 
     return row;
+  }
+
+  // ---- Server search mode -------------------------------------------------
+
+  /** Displayed columns plus any field only a filter/group-by references. */
+  get searchFieldApiNames() {
+    return [
+      ...this.columns.map((col) => col.fieldApiName),
+      ...this.supportingFieldApiNames
+    ];
+  }
+
+  get currentFilterSearchSignature() {
+    return JSON.stringify({
+      search: this.searchTerm,
+      filters: this.activeFilters
+        .filter((f) => f.fieldApiName && f.operandValue)
+        .map((f) => ({
+          field: f.fieldApiName,
+          operator: f.operator,
+          value: f.operandValue
+        }))
+    });
+  }
+
+  /**
+   * True once the user has typed/picked a filter or search value that
+   * hasn't been confirmed (Enter) yet -- what's on screen is only whatever
+   * was already loaded, live-filtered client-side, not a real search of
+   * every matching record.
+   */
+  get hasUnconfirmedServerSearch() {
+    if (!this.enableServerSearch) {
+      return false;
+    }
+    const hasCriteria =
+      Boolean(this.searchTerm.trim()) ||
+      this.activeFilters.some((f) => f.fieldApiName && f.operandValue);
+    return hasCriteria && this.currentFilterSearchSignature !== this._lastConfirmedSearchSignature;
+  }
+
+  get serverSearchHintMessage() {
+    return "Showing results from the rows already loaded — press Enter to search all matching records.";
+  }
+
+  get recordCountLabel() {
+    if (!this.enableServerSearch) {
+      return "";
+    }
+    if (this.totalRecordCount == null) {
+      return `Showing ${this.tableRows.length}${this._hasMoreServerRows ? "+" : ""}`;
+    }
+    return `Showing ${this.tableRows.length} of ${this.totalRecordCount}`;
+  }
+
+  /**
+   * Runs a real server-side search/count with whatever filters, search
+   * term, and columns are current right now, replacing tableRows with the
+   * actual matching set (up to SERVER_SEARCH_PAGE_SIZE) instead of
+   * re-slicing whatever happened to already be loaded. The count is fetched
+   * separately and never blocks the rows from rendering -- on an unfiltered
+   * multi-hundred-thousand-row object it costs about what the row query
+   * itself does, so it arrives on its own schedule.
+   */
+  async runServerSearch() {
+    if (!this.enableServerSearch || !this.objectApiName) {
+      return;
+    }
+
+    const generation = ++this._serverSearchGeneration;
+    this._lastConfirmedSearchSignature = this.currentFilterSearchSignature;
+    this.isLoading = true;
+    this.errorMessage = undefined;
+    this.totalRecordCount = null;
+
+    const fieldApiNames = this.searchFieldApiNames;
+    const filters = this.activeFilters
+      .filter((f) => f.fieldApiName && f.operandValue)
+      .map((f) => ({
+        fieldApiName: f.fieldApiName,
+        operator: f.operator,
+        operandValue: f.operandValue
+      }));
+    const searchTerm = this.searchTerm.trim();
+    const searchableFields = this.columns.map((col) => col.fieldApiName);
+
+    try {
+      const result = await searchRecords({
+        objectApiName: this.objectApiName,
+        fieldApiNames,
+        filters,
+        searchTerm,
+        searchableFields,
+        afterId: null,
+        pageSize: SERVER_SEARCH_PAGE_SIZE
+      });
+      if (generation !== this._serverSearchGeneration) {
+        return;
+      }
+      this.tableRows = (result?.rows || []).map((row) =>
+        this.mapSearchRowToTableRow(row, fieldApiNames)
+      );
+      this._hasMoreServerRows = result?.hasMore === true;
+    } catch (error) {
+      if (generation === this._serverSearchGeneration) {
+        this.errorMessage = this.reduceError(error);
+        this.tableRows = [];
+      }
+    } finally {
+      if (generation === this._serverSearchGeneration) {
+        this.isLoading = false;
+      }
+    }
+
+    countRecords({
+      objectApiName: this.objectApiName,
+      filters,
+      searchTerm,
+      searchableFields
+    })
+      .then((count) => {
+        if (generation === this._serverSearchGeneration) {
+          this.totalRecordCount = count;
+        }
+      })
+      .catch(() => {
+        /* Non-fatal: the count is a nice-to-have, rows already rendered. */
+      });
+  }
+
+  /** Builds a table row from ArcRecordSearchController.SearchRow's flat cells. */
+  mapSearchRowToTableRow(row, fieldApiNames) {
+    const tableRow = { id: row.id, objectApiName: this.objectApiName };
+    const pillFieldNames = this.pillFieldNames;
+
+    fieldApiNames.forEach((fieldApiName, index) => {
+      const rawValue = row.cells?.[index] ?? "";
+      tableRow[fieldApiName] = rawValue;
+
+      if (pillFieldNames.includes(fieldApiName)) {
+        tableRow[`${fieldApiName}PillClass`] = pillToneClass(rawValue);
+      }
+
+      if (this.isDateFieldApiName(fieldApiName)) {
+        tableRow[`${fieldApiName}__raw`] = rawValue || null;
+        tableRow[`${fieldApiName}__dayKey`] = formatLocalDateKey(rawValue);
+      }
+    });
+
+    return tableRow;
   }
 
   isNumericFieldType(fieldApiName) {
@@ -1467,6 +1698,16 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     }, SEARCH_DEBOUNCE_MS);
   }
 
+  /** Enter confirms a server search immediately, bypassing the debounce. */
+  handleSearchKeyDown(event) {
+    if (event.key !== "Enter" || !this.enableServerSearch) {
+      return;
+    }
+    window.clearTimeout(this._searchTimer);
+    this.searchTerm = event.target.value;
+    this.runServerSearch();
+  }
+
   /**
    * Navigates to the object's standard "new" page. The `newrecord` event is
    * kept so a host page can intercept and handle creation its own way.
@@ -1548,12 +1789,31 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     });
   }
 
+  /** Enter confirms this filter chip's value as a real server search. */
+  handleChipValueKeyDown(event) {
+    if (event.key !== "Enter" || !this.enableServerSearch) {
+      return;
+    }
+    const key = event.currentTarget.dataset.key;
+    const operandValue = event.target.value;
+    this.activeFilters = this.activeFilters.map((filter) => {
+      return filter.key === key ? { ...filter, operandValue } : filter;
+    });
+    this.runServerSearch();
+  }
+
   handleChipDateChange(event) {
     const key = event.currentTarget.dataset.key;
     const operandValue = event.target.value;
     this.activeFilters = this.activeFilters.map((filter) => {
       return filter.key === key ? { ...filter, operandValue } : filter;
     });
+    // A date picker selection is already a complete, discrete choice --
+    // confirm it as a real search immediately rather than waiting for a
+    // separate Enter press the date input has no obvious way to make.
+    if (this.enableServerSearch) {
+      this.runServerSearch();
+    }
   }
 
   /**
@@ -1584,6 +1844,9 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   handleClearFilters() {
     this.activeFilters = [];
     this.openPopover = "";
+    if (this.enableServerSearch) {
+      this.runServerSearch();
+    }
   }
 
   // ---- Interaction: save view -------------------------------------------
@@ -1805,11 +2068,17 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     if (this._listInfoWire) {
       refreshTasks.push(refreshApex(this._listInfoWire));
     }
-    if (this._recordsWire) {
+    // In server search mode the records wire is disabled (see
+    // wireListViewApiName) and never carries real data, so refreshing it
+    // would be a no-op -- runServerSearch below is the real refresh.
+    if (this._recordsWire && !this.enableServerSearch) {
       refreshTasks.push(refreshApex(this._recordsWire));
     }
     if (refreshTasks.length) {
       await Promise.all(refreshTasks);
+    }
+    if (this.enableServerSearch) {
+      await this.runServerSearch();
     }
   }
 

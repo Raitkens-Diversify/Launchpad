@@ -26,6 +26,7 @@
                 "dxpStyle" : { },
                 "objectApiName" : "Account",
                 "pillFields" : "BillingState",
+                "serverSearchListViews" : "AllAccounts",
                 "title" : "Contacts",
                 "viewTabs" : "AllAccounts=All Contacts,All_Individuals=Individuals,All_Clients=Clients,ARC_All_Households=Households,All_Businesses=Businesses,All_Retirement_Plans=Retirement Plans,All_Trusts_Estates=Trusts & Estates"
               },

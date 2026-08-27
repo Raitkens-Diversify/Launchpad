@@ -511,7 +511,7 @@ setOfTypeToName.add('Account Servicing - Approval Required');
                 WHERE Type_of_Template__c = 'Fixed'
             ];
             
-        } else if (currentUser.Profile.UserLicense.Name == 'Salesforce Platform' ||currentUser.Profile.UserLicense.Name == 'Salesforce') {
+        } else if (currentUser.Profile.UserLicense.Name == 'Salesforce') {
             caseTemplateType = 'PrePostFixed';
             
             lstCaseTemplate = [

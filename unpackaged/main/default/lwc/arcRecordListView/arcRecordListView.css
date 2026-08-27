@@ -719,6 +719,24 @@
   font-size: var(--slds-g-font-scale-neg-1, 12px);
 }
 
+.arc-record-list-view__server-search-meta {
+  margin: 0 0 var(--slds-g-spacing-2, 8px);
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
+}
+
+.arc-record-list-view__server-search-hint {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.arc-record-list-view__server-search-count {
+  color: var(--slds-g-color-on-surface-2, #6b7280);
+}
+
 .arc-record-list-view__sr-only {
   position: absolute;
   width: 1px;

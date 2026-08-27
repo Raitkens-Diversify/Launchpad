@@ -54,6 +54,12 @@
         description="Ordered, comma-separated field API names to show by default, e.g. Name,Check__r.Name,Amount__c. Can name fields the list view's own Setup config doesn't carry at all. Blank leaves the view's own columns/order alone."
       />
             <property
+        name="serverSearchListViews"
+        type="String"
+        label="Server Search List Views (pilot)"
+        description="Comma-separated list view API names that should use the server-side search/pagination pilot instead of the default fetch-2000-then-filter-client-side behavior. Blank (default) leaves every tab unchanged."
+      />
+            <property
         name="defaultListViewApiName"
         type="String"
         label="Default List View API Name"
