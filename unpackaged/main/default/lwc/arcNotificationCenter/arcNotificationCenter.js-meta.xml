@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Notification Center</masterLabel>
+    <description>Hosts the shared Notification Center (c/notificationCenter) on ARC&#39;s /notifications route, so the left nav&#39;s Notifications item opens the same component as the CRM Notification_Center tab. Adds no Apex of its own.</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property name="pageTitle" type="String" label="Page Title" default="Notifications" description="Accessible name for the page region. Not shown as visible text — the Notification Center draws its own heading." />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

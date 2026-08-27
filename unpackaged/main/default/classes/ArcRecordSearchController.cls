@@ -31,6 +31,17 @@
 public with sharing class ArcRecordSearchController {
   private static final Integer DEFAULT_PAGE_SIZE = 100;
   private static final Integer MAX_PAGE_SIZE = 200;
+  /**
+   * A Financial_Advisor_Team__c filter carrying exactly this sentinel
+   * operandValue (see arcRecordListView's teamScope tab config) means "the
+   * running user's own team(s)", resolved here via
+   * FinancialAdvisorTeamAccessService rather than a real team Id -- a
+   * static list view filter has no way to reference the running user, so
+   * this is the arcRecordListView-side equivalent of the dynamic
+   * Financial_Advisor_Team__c-membership scoping WorkDatatableController
+   * already does for the Work dashboard's own Team toggle.
+   */
+  private static final String TEAM_SCOPE_SENTINEL = '$CurrentUserTeam';
 
   /** One filter chip's worth of criteria, mirroring arcRecordListView's own. */
   public class SearchFilter {
@@ -312,6 +323,21 @@ public with sharing class ArcRecordSearchController {
       return 'RecordTypeId' + (isNegative ? ' NOT IN :' : ' IN :') + bindKey;
     }
 
+    // "My Team's" style scoping (see TEAM_SCOPE_SENTINEL) -- an empty
+    // teamIds set (the running user belongs to no team) deliberately binds
+    // an empty List<Id>, which correctly matches zero rows rather than
+    // dropping the filter and showing every record.
+    if (
+      fieldApiName == 'Financial_Advisor_Team__c' &&
+      operandValue == TEAM_SCOPE_SENTINEL
+    ) {
+      List<Id> teamIds = new List<Id>(
+        new FinancialAdvisorTeamAccessService().getCurrentUserTeamAccess().teamIds
+      );
+      binds.put(bindKey, teamIds);
+      return 'Financial_Advisor_Team__c IN :' + bindKey;
+    }
+
     Boolean isLikeOperator = op == 'StartsWith' || op == 'NotContain' ||
       (op != 'Equals' && op != 'NotEqual' && op != 'GreaterThan' &&
        op != 'GreaterOrEqual' && op != 'LessThan' && op != 'LessOrEqual');
@@ -446,6 +472,21 @@ public with sharing class ArcRecordSearchController {
       } catch (Exception e) {
         return null;
       }
+    }
+
+    // A list view's own saved filter on a checkbox field (e.g. IsClosed)
+    // arrives from the UI API's filteredByInfo as the string "0"/"1", never
+    // a real Boolean -- binding that string straight into a dynamic SOQL
+    // comparison against a Boolean column throws "Invalid bind expression
+    // type of String for column of type Boolean" (confirmed live). "0" and
+    // "false" (either case) are the only falsy spellings seen from the UI
+    // API or typed by a user; everything else -- "1", "true", anything
+    // else -- is treated as true rather than silently dropping the filter.
+    if (dataType == Schema.DisplayType.BOOLEAN) {
+      String normalized = String.isBlank(operandValue)
+        ? ''
+        : operandValue.trim().toLowerCase();
+      return normalized != '0' && normalized != 'false';
     }
 
     return operandValue;

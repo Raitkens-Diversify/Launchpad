@@ -15,7 +15,10 @@ private class ZoomNotificationDevServiceTest {
     }
 
     public HttpResponse respond(HttpRequest request) {
-      if (request.getEndpoint() == TOKEN_ENDPOINT) {
+      if (
+        request.getEndpoint() == TOKEN_ENDPOINT ||
+        request.getHeader('Content-Type') == 'application/x-www-form-urlencoded'
+      ) {
         return buildTokenResponse();
       }
 
@@ -32,6 +35,12 @@ private class ZoomNotificationDevServiceTest {
 
     private HttpResponse buildTokenResponse() {
       HttpResponse response = new HttpResponse();
+      if (this.mode == 'failure') {
+        response.setStatusCode(500);
+        response.setBody('{"error":"token_exchange_failed"}');
+        return response;
+      }
+
       response.setStatusCode(200);
       response.setBody(
         '{"access_token":"new-access-token","refresh_token":"refresh-token","expires_in":3600,"token_type":"bearer"}'
@@ -84,5 +93,50 @@ private class ZoomNotificationDevServiceTest {
       new List<ZoomNotificationDevService.FlowInput>{ input }
     );
     Test.stopTest();
+  }
+
+  @IsTest
+  static void exchangeAuthorizationCode_throwsWhenTokenExchangeFails() {
+    Test.setMock(HttpCalloutMock.class, new ZoomDevNotificationMock('failure'));
+    Boolean didThrow = false;
+
+    try {
+      ZoomNotificationDevService.exchangeAuthorizationCode(
+        'auth-code-123',
+        'client-secret'
+      );
+    } catch (ZoomNotificationDevService.ZoomNotificationDevException expected) {
+      didThrow = true;
+    }
+
+    System.assertEquals(true, didThrow);
+  }
+
+  @IsTest
+  static void refreshAccessToken_returnsAccessToken() {
+    Test.setMock(HttpCalloutMock.class, new ZoomDevNotificationMock('success'));
+
+    Test.startTest();
+    ZoomNotificationDevService.TokenResponse tokenResponse = ZoomNotificationDevService.refreshAccessToken(
+      'refresh-token',
+      'client-secret'
+    );
+    Test.stopTest();
+
+    System.assertEquals('new-access-token', tokenResponse.access_token);
+  }
+
+  @IsTest
+  static void refreshAccessToken_throwsWhenRefreshFails() {
+    Test.setMock(HttpCalloutMock.class, new ZoomDevNotificationMock('failure'));
+    Boolean didThrow = false;
+
+    try {
+      ZoomNotificationDevService.refreshAccessToken('refresh-token', 'client-secret');
+    } catch (ZoomNotificationDevService.ZoomNotificationDevException expected) {
+      didThrow = true;
+    }
+
+    System.assertEquals(true, didThrow);
   }
 }

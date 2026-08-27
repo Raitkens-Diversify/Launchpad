@@ -19,5 +19,10 @@
         <operation>equals</operation>
         <value>0</value>
     </filters>
+    <filters>
+        <field>CASES.STATUS</field>
+        <operation>notEqual</operation>
+        <value>Canceled</value>
+    </filters>
     <label>My Team&#39;s Open Cases</label>
 </ListView>

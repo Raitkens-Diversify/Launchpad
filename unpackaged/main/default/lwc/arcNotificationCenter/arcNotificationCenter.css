@@ -1,0 +1,20 @@
+/*
+ * Layout only. Every colour, font and control inside this page comes from the
+ * diversifyStyles resource that c/notificationCenter loads for itself, so
+ * nothing here may set typography or colour — that would diverge ARC's copy of
+ * the Notification Center from the CRM tab's.
+ */
+
+.arc-notification-center {
+  display: block;
+  width: 100%;
+  /* The child renders an app shell with its own sidebar; let it use the full
+     width of the ARC content column rather than sitting in a narrower card. */
+  max-width: none;
+}
+
+/* The child's shell manages its own internal scrolling. Clip here so a wide
+   table inside it cannot push the ARC page body into a horizontal scroll. */
+.arc-notification-center > * {
+  min-width: 0;
+}

@@ -226,4 +226,26 @@ private class NotificationPrepareDispatcherTest {
 
     System.assert(true, 'Completed or null continuation requests should no-op safely.');
   }
+
+  @IsTest
+  static void processRecipients_enqueuesContinuationWhenSyncChunkLimitReached() {
+    NotificationRecipientPrepareDispatcher.resetTestState();
+    NotificationRecipientPrepareDispatcher.testMaxSyncChunks = 0;
+
+    NotificationRecipientPrepareModels.SourcePrepareContext context =
+      new NotificationRecipientPrepareModels.SourcePrepareContext();
+    context.sourceType = NotificationConstants.OBJECT_TYPE_CASE;
+    context.sourceId = String.valueOf(UserInfo.getUserId());
+    context.recipientIds = new List<Id>{ UserInfo.getUserId() };
+
+    Test.startTest();
+    List<NotificationCenterDeliveryItem> deliveryItems =
+      NotificationRecipientPrepareDispatcher.processRecipients(context);
+    Test.stopTest();
+
+    System.assertEquals(0, deliveryItems.size());
+    System.assert(
+      NotificationRecipientPrepareDispatcher.testEnqueuedContinuationCount >= 1
+    );
+  }
 }

@@ -24,4 +24,17 @@ private class NotificationEventUiTestSeederTest {
     System.assertEquals(household.Id, result.ac1NexsEvent.WhatId);
     System.assertEquals(household.Id, result.ac2HomeOfficeEvent.WhatId);
   }
+
+  @IsTest
+  static void seedForHousehold_requiresHouseholdId() {
+    Boolean didThrow = false;
+
+    try {
+      NotificationEventUiTestSeeder.seedForHousehold(null);
+    } catch (IllegalArgumentException expected) {
+      didThrow = true;
+    }
+
+    System.assertEquals(true, didThrow);
+  }
 }

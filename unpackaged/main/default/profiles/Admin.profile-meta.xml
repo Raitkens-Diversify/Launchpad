@@ -1387,6 +1387,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>NotificationCoverageGapTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>NotificationCustomNotifServiceTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -1496,6 +1500,10 @@
     </classAccesses>
     <classAccesses>
         <apexClass>NotificationDigestJobDispatcher</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>NotificationDigestJobDispatcherTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>

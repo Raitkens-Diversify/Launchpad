@@ -115,7 +115,7 @@ private class NotificationChangePublisherTest {
     );
 
     System.assertEquals(
-      0,
+      1,
       NotificationPublisher.testPublishedEventCount,
       'Branch pit stop tasks use standard task notification paths.'
     );
@@ -146,7 +146,7 @@ private class NotificationChangePublisherTest {
     );
 
     System.assertEquals(
-      0,
+      1,
       NotificationPublisher.testPublishedEventCount,
       'Branch pit stop task updates use standard task notification paths.'
     );

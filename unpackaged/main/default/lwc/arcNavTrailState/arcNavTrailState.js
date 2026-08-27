@@ -917,6 +917,58 @@ function normalizePath(path) {
   return path.replace(/\/$/, "") || "/";
 }
 
+/**
+ * Best available label for a builder-tabset tab button -- aria-label, then
+ * the `label` attribute, then title, then a nested <label>, then the
+ * button's own text. Used by lwrTabUrlHandler to identify which tab a click
+ * landed on; raw (un-normalized) so it round-trips cleanly through a URL
+ * param and back through resolveTabTarget's own name-matching, which
+ * normalizes on both sides.
+ */
+export function resolveTabLabelFromElement(button) {
+  if (!button) {
+    return "";
+  }
+
+  const candidates = [
+    button.getAttribute("aria-label"),
+    button.getAttribute("label"),
+    button.getAttribute("title"),
+    button.querySelector("label")?.textContent,
+    button.textContent
+  ]
+    .map((value) => (value || "").trim())
+    .filter(Boolean);
+
+  return candidates[0] || "";
+}
+
+/**
+ * Writes the clicked builder tab's label into the URL as a name-based
+ * ?c__tabName= param, so a reload or a shared link reopens the same tab --
+ * lwrTabUrlHandler's own processTabNavigation already knows how to read
+ * this param back on load (see resolveTabTarget/urlHasTabName). Clears any
+ * stale id-based param first: resolveTabTarget checks id-mode before
+ * name-mode, so a leftover ?c__tabId= from an earlier nav-driven visit
+ * would otherwise silently win over the tab the user just actually clicked.
+ */
+export function syncNavParamsOnTabClick(tabName) {
+  if (typeof window === "undefined" || !tabName) {
+    return;
+  }
+
+  const url = new URL(window.location.href);
+
+  if (url.searchParams.get("c__tabName") === tabName) {
+    return;
+  }
+
+  url.searchParams.delete("c__tabId");
+  url.searchParams.delete("tabId");
+  url.searchParams.set("c__tabName", tabName);
+  window.history.replaceState(window.history.state, "", url.toString());
+}
+
 export function patchHistoryForNavigation() {
   if (window.__arcNavHistoryPatched) {
     return;

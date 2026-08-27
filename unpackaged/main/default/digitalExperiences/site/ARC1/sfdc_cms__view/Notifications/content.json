@@ -24,7 +24,7 @@
               "attributes" : {
                 "dxpStyle" : { }
               },
-              "definition" : "c:arcNotifications",
+              "definition" : "c:arcNotificationCenter",
               "id" : "bc6e5448-7306-4754-8988-0ac7974e9c5e",
               "type" : "component"
             } ],

@@ -6,7 +6,7 @@
  * Child views inherit design tokens, buttons, div-callout, div-filter, and datatable styles
  * from the stylesheet injected here.
  */
-import { LightningElement, wire } from "lwc";
+import { LightningElement, api, wire } from "lwc";
 import { loadStyle } from "lightning/platformResourceLoader";
 import { getRecord, getFieldValue } from "lightning/uiRecordApi";
 import USER_PROFILE_NAME from "@salesforce/schema/User.Profile.Name";
@@ -75,6 +75,26 @@ export default class NotificationCenter extends LightningElement {
   isViewLoading = true;
   pendingViewRefresh = new Set();
 
+  /**
+   * Hides the Admin Settings view even for a System Administrator.
+   *
+   * Off by default, so every surface that does not set it keeps the behaviour
+   * it has always had: Admin Settings appears for System Administrators and for
+   * nobody else. The CRM tab (Notification_Center) and Notification_Center_Test
+   * do not set it and are unaffected.
+   *
+   * ARC sets it, via c/arcNotificationCenter. Org-wide notification
+   * configuration is administered from CRM, not from inside the advisor-facing
+   * site, so the view is suppressed there for admins too — an admin browsing
+   * ARC is using it as an advisor would.
+   *
+   * This suppresses, it does not grant: a non-admin can never reach the view
+   * regardless of this flag. See showAdminSettings below, which both the nav
+   * list and the navigation guard read, so hiding the item also closes the
+   * direct-navigation route to it.
+   */
+  @api hideAdminSettings = false;
+
   connectedCallback() {
     if (this.stylesLoaded) {
       return;
@@ -115,8 +135,17 @@ export default class NotificationCenter extends LightningElement {
     );
   }
 
+  /**
+   * Whether the Admin Settings view is available at all. Read by both the nav
+   * list and handleNavigate, so the item cannot be hidden in one place and
+   * still be reachable in the other.
+   */
+  get showAdminSettings() {
+    return this.isSystemAdministrator && !this.hideAdminSettings;
+  }
+
   get navItems() {
-    const navItemIds = this.isSystemAdministrator
+    const navItemIds = this.showAdminSettings
       ? [...BASE_NAV_ITEM_IDS, ...ADMIN_NAV_ITEM_IDS]
       : [...BASE_NAV_ITEM_IDS];
 
@@ -168,7 +197,7 @@ export default class NotificationCenter extends LightningElement {
       return;
     }
 
-    if (!this.isSystemAdministrator && ADMIN_ONLY_VIEW_IDS.includes(viewId)) {
+    if (!this.showAdminSettings && ADMIN_ONLY_VIEW_IDS.includes(viewId)) {
       return;
     }
 

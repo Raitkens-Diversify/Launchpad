@@ -549,32 +549,32 @@
     <flexiPageRegions>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.FinServ__FinancialAccount__r.FinServ__PrimaryOwner__c</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_rFinServ_PrimaryOwner_cField2</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Primary_Owner__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rPrimary_Owner_cField2</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.FinServ__FinancialAccount__r.FinServ__PrimaryOwner__r.Tax_ID__c</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_rFinServ_PrimaryOwner_rTax_ID_cField</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Primary_Owner__r.Tax_ID__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rPrimary_Owner_rTax_ID_cField</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.FinServ__FinancialAccount__r.FinServ__PrimaryOwner__r.PersonMobilePhone</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_rFinServ_PrimaryOwner_rPersonMobilePhoneField</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Primary_Owner__r.PersonMobilePhone</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rPrimary_Owner_rPersonMobilePhoneField</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.FinServ__FinancialAccount__r.FinServ__PrimaryOwner__r.PersonBirthdate</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_rFinServ_PrimaryOwner_rPersonBirthdateField</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Primary_Owner__r.PersonBirthdate</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rPrimary_Owner_rPersonBirthdateField</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.FinServ__FinancialAccount__r.FinServ__PrimaryOwner__r.PersonEmail</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_rFinServ_PrimaryOwner_rPersonEmailField</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Primary_Owner__r.PersonEmail</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rPrimary_Owner_rPersonEmailField</identifier>
             </fieldInstance>
         </itemInstances>
         <name>Facet-26d7c5dc-5bc9-4b62-87e9-6a7a20cc3b37</name>
@@ -583,26 +583,26 @@
     <flexiPageRegions>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.FinServ__FinancialAccount__r.FinServ__PrimaryOwner__r.IMA_Ops_Reviewed__c</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_rFinServ_PrimaryOwner_rIMA_Ops_Reviewed_cField</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Primary_Owner__r.IMA_Ops_Reviewed__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rPrimary_Owner_rIMA_Ops_Reviewed_cField</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.FinServ__FinancialAccount__r.FinServ__PrimaryOwner__r.IMA_Ex_A_Reviewed__c</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_rFinServ_PrimaryOwner_rIMA_Ex_A_Reviewed_cField</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Primary_Owner__r.IMA_Ex_A_Reviewed__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rPrimary_Owner_rIMA_Ex_A_Reviewed_cField</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.FinServ__FinancialAccount__r.FinServ__PrimaryOwner__r.IMA_Ex_B_Ops_Reviewed__c</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_rFinServ_PrimaryOwner_rIMA_Ex_B_Ops_Reviewed_cField</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Primary_Owner__r.IMA_Ex_B_Ops_Reviewed__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rPrimary_Owner_rIMA_Ex_B_Ops_Reviewed_cField</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.FinServ__FinancialAccount__r.FinServ__PrimaryOwner__r.DMS_Addendum_on_File__c</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_rFinServ_PrimaryOwner_rDMS_Addendum_on_File_cField</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Primary_Owner__r.DMS_Addendum_on_File__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rPrimary_Owner_rDMS_Addendum_on_File_cField</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -641,32 +641,32 @@
     <flexiPageRegions>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.FinServ__FinancialAccount__r.FinServ__JointOwner__c</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_rFinServ_JointOwner_cField2</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Joint_Owner__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rJoint_Owner_cField2</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.FinServ__FinancialAccount__r.FinServ__JointOwner__r.Tax_ID__c</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_rFinServ_JointOwner_rTax_ID_cField</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Joint_Owner__r.Tax_ID__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rJoint_Owner_rTax_ID_cField</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.FinServ__FinancialAccount__r.FinServ__JointOwner__r.PersonMobilePhone</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_rFinServ_JointOwner_rPersonMobilePhoneField</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Joint_Owner__r.PersonMobilePhone</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rJoint_Owner_rPersonMobilePhoneField</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.FinServ__FinancialAccount__r.FinServ__JointOwner__r.PersonBirthdate</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_rFinServ_JointOwner_rPersonBirthdateField</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Joint_Owner__r.PersonBirthdate</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rJoint_Owner_rPersonBirthdateField</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.FinServ__FinancialAccount__r.FinServ__JointOwner__r.PersonEmail</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_rFinServ_JointOwner_rPersonEmailField</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Joint_Owner__r.PersonEmail</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rJoint_Owner_rPersonEmailField</identifier>
             </fieldInstance>
         </itemInstances>
         <name>Facet-5x1mtmwnjd6</name>
@@ -675,26 +675,26 @@
     <flexiPageRegions>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.Joint_Account_Owner__r.IMA_Ops_Reviewed__c</fieldItem>
-                <identifier>RecordJoint_Account_Owner_rIMA_Ops_Reviewed_cField</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Joint_Owner__r.IMA_Ops_Reviewed__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rJoint_Owner_rIMA_Ops_Reviewed_cField</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.Joint_Account_Owner__r.IMA_Ex_A_Reviewed__c</fieldItem>
-                <identifier>RecordJoint_Account_Owner_rIMA_Ex_A_Reviewed_cField</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Joint_Owner__r.IMA_Ex_A_Reviewed__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rJoint_Owner_rIMA_Ex_A_Reviewed_cField</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.Joint_Account_Owner__r.IMA_Ex_B_Ops_Reviewed__c</fieldItem>
-                <identifier>RecordJoint_Account_Owner_rIMA_Ex_B_Ops_Reviewed_cField</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Joint_Owner__r.IMA_Ex_B_Ops_Reviewed__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rJoint_Owner_rIMA_Ex_B_Ops_Reviewed_cField</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
             <fieldInstance>
-                <fieldItem>Record.Joint_Account_Owner__r.DMS_Addendum_on_File__c</fieldItem>
-                <identifier>RecordJoint_Account_Owner_rDMS_Addendum_on_File_cField</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__r.Joint_Owner__r.DMS_Addendum_on_File__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_rJoint_Owner_rDMS_Addendum_on_File_cField</identifier>
             </fieldInstance>
         </itemInstances>
         <name>Facet-7p8xmzpk2h4</name>
@@ -1875,8 +1875,8 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.FinServ__FinancialAccount__c</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_cField3</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_cField2</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>

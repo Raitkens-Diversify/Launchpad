@@ -22,115 +22,16 @@
           "children" : [ {
             "children" : [ {
               "attributes" : {
-                "activeTabBorderHighlightWeight" : "2px",
-                "activeTabTextEmphasis" : "{\"bold\":true}",
-                "activeTabTextStyle" : "{\"textStyle\":\"paragraph1\",\"headingTag\":\"p\"}",
-                "borderColor" : "",
-                "borderRadius" : "0px",
-                "borderWeight" : "0px",
+                "defaultListViewApiName" : "All_Cases",
                 "dxpStyle" : { },
-                "enableOverflowMenu" : false,
-                "imageFit" : "cover",
-                "imagePosition" : "center center",
-                "overflowIconColor" : "rgb(116,116,116)",
-                "overflowIconStyle" : "down-arrow",
-                "overflowMenuLabel" : "More",
-                "tabAlignment" : "left",
-                "tabBorderColor" : "",
-                "tabBorderRadius" : "0px",
-                "tabBorderWeight" : "0px",
-                "tabHoverBorderHighlightWeight" : "1px",
-                "tabLayout" : "horizontal",
-                "tabPadding" : "12px",
-                "tabTextStyle" : "{\"textStyle\":\"paragraph1\",\"headingTag\":\"p\"}",
-                "tabsetConfig" : "{\"UUID\":\"6c1285e4-7849-4137-a268-1c5141db3ba7\",\"activeTab\":null,\"useOverflowMenu\":null,\"tabs\":[{\"UUID\":\"b671960b-c7cb-4fa9-8710-cff378bc7385\",\"tabName\":\"All Work\",\"tabKey\":\"tab1\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"fe24f6ae-5f44-4617-8776-3fb66cd7be97\",\"tabName\":\"Cases\",\"tabKey\":\"tab2\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"5dc33864-47cb-4dbf-b4f0-453084ff0bdf\",\"tabName\":\"Tasks\",\"tabKey\":\"tab3\",\"locked\":false,\"allowGuestUser\":false},{\"UUID\":\"fced54d3-ecdd-417c-963a-0eb1f5d154b2\",\"tabName\":\"Check Log\",\"tabKey\":\"ff964\",\"locked\":false,\"allowGuestUser\":false}]}",
-                "width" : "100%"
+                "objectApiName" : "Case",
+                "pillFields" : "Status,Priority",
+                "serverSearchListViews" : "All_Cases,MyOpenCases,My_teams_open_cases",
+                "title" : "",
+                "viewTabs" : "[{\"view\":\"All_Cases\",\"label\":\"All Cases\",\"chartField\":\"Status\"},{\"view\":\"MyOpenCases\",\"label\":\"My Open Cases\",\"chartField\":\"Status\",\"columns\":\"CaseNumber=Case Number,Account.Name=Account Name,Subject=Subject,Status=Status,Priority=Priority,CreatedDate=Created Date,Owner.Name=Owner,Financial_Advisor_Team__r.Name=Financial Advisor Team,FinServ__Household__r.Name=Household Name\"},{\"view\":\"My_teams_open_cases\",\"label\":\"My Team's Open Cases\",\"chartField\":\"Status\",\"columns\":\"CaseNumber=Case Number,Account.Name=Account Name,Subject=Subject,Status=Status,Priority=Priority,CreatedDate=Created Date,Owner.Name=Owner,Financial_Advisor_Team__r.Name=Financial Advisor Team,FinServ__Household__r.Name=Household Name\"}]"
               },
-              "children" : [ {
-                "children" : [ {
-                  "attributes" : {
-                    "dxpStyle" : { },
-                    "enablePagination" : true,
-                    "enableSearch" : true,
-                    "pageSize" : 10,
-                    "searchPlaceholder" : "Search work...",
-                    "title" : ""
-                  },
-                  "definition" : "c:workTable",
-                  "id" : "342d8ae1-7fb6-4ebf-8143-40f2d6f220fe",
-                  "type" : "component"
-                } ],
-                "id" : "b671960b-c7cb-4fa9-8710-cff378bc7385",
-                "name" : "tab1",
-                "title" : "All Work",
-                "type" : "region"
-              }, {
-                "children" : [ {
-                  "attributes" : {
-                    "defaultListViewApiName" : "All_Cases",
-                    "dxpStyle" : { },
-                    "objectApiName" : "Case",
-                    "pillFields" : "Status,Priority",
-                    "serverSearchListViews" : "All_Cases,MyOpenCases,My_teams_open_cases",
-                    "title" : "",
-                    "viewTabs" : "[{\"view\":\"All_Cases\",\"label\":\"All Cases\",\"chartField\":\"Status\"},{\"view\":\"MyOpenCases\",\"label\":\"My Open Cases\",\"chartField\":\"Status\"},{\"view\":\"My_teams_open_cases\",\"label\":\"My Team's Open Cases\",\"chartField\":\"Status\"}]"
-                  },
-                  "definition" : "c:arcRecordListView",
-                  "id" : "25eefd59-38d1-4184-9b23-7931a6d9b191",
-                  "type" : "component"
-                } ],
-                "id" : "fe24f6ae-5f44-4617-8776-3fb66cd7be97",
-                "name" : "tab2",
-                "title" : "Cases",
-                "type" : "region"
-              }, {
-                "children" : [ {
-                  "attributes" : {
-                    "defaultListViewApiName" : "All",
-                    "dxpStyle" : { },
-                    "objectApiName" : "Task",
-                    "pillFields" : "Status",
-                    "serverSearchListViews" : "All,My_Open_Tasks,My_Team_s_Open_Tasks",
-                    "title" : "",
-                    "viewTabs" : "[{\"view\":\"All\",\"label\":\"All Tasks\"},{\"view\":\"My_Open_Tasks\",\"label\":\"My Open Tasks\"},{\"view\":\"My_Team_s_Open_Tasks\",\"label\":\"My Team's Open Tasks\"}]"
-                  },
-                  "definition" : "c:arcRecordListView",
-                  "id" : "55f1757f-c2eb-495b-8c30-3b7ca9562f20",
-                  "type" : "component"
-                } ],
-                "id" : "5dc33864-47cb-4dbf-b4f0-453084ff0bdf",
-                "name" : "tab3",
-                "title" : "Tasks",
-                "type" : "region"
-              }, {
-                "children" : [ {
-                  "attributes" : {
-                    "defaultListViewApiName" : "All",
-                    "dxpStyle" : { },
-                    "objectApiName" : "Check_Log__c",
-                    "pillFields" : "Status__c",
-                    "serverSearchListViews" : "All,Sent_and_Received_Check_Logs,checking_in_ops",
-                    "title" : "",
-                    "viewTabs" : "[{\"view\":\"All\",\"label\":\"All Check Logs\",\"subtitle\":\"Checks received, forwarded and delivered\",\"action\":\"New Check Log\",\"chartField\":\"Status__c\",\"createFields\":\"Client__c,Financial_Advisor_Team__c,Financial_Account__c,Status__c,Amount__c,Method_of_Forwarding__c,Received_Date__c,Sent_Date__c,Delivery_Date__c,Carrier__c,Tracking_Number__c,Custodian__c,Notes__c\"},{\"view\":\"Sent_and_Received_Check_Logs\",\"label\":\"Received and Sent\",\"subtitle\":\"Checks received or already forwarded\",\"action\":\"New Check Log\",\"chartField\":\"Status__c\",\"createFields\":\"Client__c,Financial_Advisor_Team__c,Financial_Account__c,Status__c,Amount__c,Method_of_Forwarding__c,Received_Date__c,Sent_Date__c,Delivery_Date__c,Carrier__c,Tracking_Number__c,Custodian__c,Notes__c\"},{\"view\":\"checking_in_ops\",\"label\":\"Checking in Ops\",\"subtitle\":\"Checks operations still holds\",\"action\":\"New Check Log\",\"chartField\":\"Status__c\",\"createFields\":\"Client__c,Financial_Advisor_Team__c,Financial_Account__c,Status__c,Amount__c,Method_of_Forwarding__c,Received_Date__c,Sent_Date__c,Delivery_Date__c,Carrier__c,Tracking_Number__c,Custodian__c,Notes__c\"}]"
-                  },
-                  "definition" : "c:arcRecordListView",
-                  "id" : "5a745af0-7de3-47db-a1f2-25c738883709",
-                  "type" : "component"
-                } ],
-                "id" : "fced54d3-ecdd-417c-963a-0eb1f5d154b2",
-                "name" : "ff964",
-                "title" : "Check Log",
-                "type" : "region"
-              } ],
-              "definition" : "dxp_layout:tabs",
-              "id" : "6c1285e4-7849-4137-a268-1c5141db3ba7",
-              "type" : "component"
-            }, {
-              "attributes" : {
-                "dxpStyle" : { }
-              },
-              "definition" : "c:lwrTabUrlHandler",
-              "id" : "d26e0e02-78cc-4d35-a16c-611d9c4cecdc",
+              "definition" : "c:arcRecordListView",
+              "id" : "25eefd59-38d1-4184-9b23-7931a6d9b191",
               "type" : "component"
             } ],
             "id" : "54bfe702-b8a5-489a-a485-88ed55e49192",

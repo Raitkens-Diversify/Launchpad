@@ -1,0 +1,19 @@
+<template>
+  <!--
+    A single full-width region. c/notificationCenter brings its own header,
+    sidebar and scrolling, so this host only gives it room and an accessible
+    name — no heading, no card, no padding that would fight the child's shell.
+
+    hide-admin-settings is the reason this host exists rather than the view
+    pointing straight at c:notificationCenter. Org-wide notification
+    configuration is administered from CRM (the Notification_Center tab), not
+    from inside the advisor-facing site, so Admin Settings is suppressed here —
+    for System Administrators too, since an admin browsing ARC is using it as an
+    advisor would. The CRM tab does not set the flag and is unchanged.
+  -->
+  <section class="arc-notification-center" aria-label={regionLabel}>
+    <c-notification-center
+      hide-admin-settings={hideAdminSettings}
+    ></c-notification-center>
+  </section>
+</template>
