@@ -4986,18 +4986,6 @@
     <picklistValues>
         <picklist>Type</picklist>
         <values>
-            <fullName>Active Client</fullName>
-            <default>false</default>
-        </values>
-        <values>
-            <fullName>Former Client</fullName>
-            <default>false</default>
-        </values>
-        <values>
-            <fullName>Former Prospect</fullName>
-            <default>false</default>
-        </values>
-        <values>
             <fullName>Lead</fullName>
             <default>false</default>
         </values>
