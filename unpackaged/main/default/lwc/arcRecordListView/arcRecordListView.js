@@ -1913,7 +1913,17 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
    * whatever happened to already be loaded.
    */
   async runServerSearch() {
+    // eslint-disable-next-line no-console
+    console.log(
+      "ARC_DIAG_FE 1/4 runServerSearch called",
+      "tab=" + this.selectedListViewApiName,
+      "enableServerSearch=" + this.enableServerSearch,
+      "objectApiName=" + this.objectApiName,
+      "activeFilters=" + JSON.stringify(this.activeFilters)
+    );
     if (!this.enableServerSearch || !this.objectApiName) {
+      // eslint-disable-next-line no-console
+      console.log("ARC_DIAG_FE 1/4 runServerSearch bailed out early (server search disabled or no object)");
       return;
     }
 
@@ -1931,6 +1941,14 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
 
     try {
       const batch = await this.fetchServerSearchBatch(null);
+      // eslint-disable-next-line no-console
+      console.log(
+        "ARC_DIAG_FE 4/4 runServerSearch got batch back",
+        "tab=" + this.selectedListViewApiName,
+        "staleGeneration=" + (generation !== this._serverSearchGeneration),
+        "rowCount=" + (batch ? batch.rows.length : "null batch"),
+        JSON.stringify(batch)
+      );
       if (generation !== this._serverSearchGeneration || !batch) {
         return;
       }
@@ -1938,6 +1956,8 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
       this._hasMoreServerRows = batch.hasMore;
       this._lastLoadedServerRowId = batch.lastRowId;
     } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log("ARC_DIAG_FE runServerSearch threw", "tab=" + this.selectedListViewApiName, JSON.stringify(error));
       if (generation === this._serverSearchGeneration) {
         this.errorMessage = this.reduceError(error);
         this.tableRows = [];
@@ -2009,15 +2029,38 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     const searchTerm = this.searchTerm.trim();
     const searchableFields = this.columns.map((col) => col.fieldApiName);
 
-    const result = await searchRecords({
+    const requestParams = {
       objectApiName: this.objectApiName,
       fieldApiNames: this.searchFieldApiNames,
-      filters,
+      // Sent JSON-encoded, not as a plain object/array -- the platform's
+      // automatic parameter marshalling for an AuraEnabled method silently
+      // drops every field on each filter object (confirmed live: the list
+      // arrives at the right length, but fieldApiName/operator/operandValue
+      // all come through null), even though every sibling parameter of a
+      // plain type on the same call arrives intact. Apex decodes this with
+      // JSON.deserialize onto the identical List<SearchFilter> type instead
+      // of relying on that marshalling.
+      filtersJson: JSON.stringify(filters),
       searchTerm,
       searchableFields,
       afterId,
       pageSize: SERVER_SEARCH_PAGE_SIZE
-    });
+    };
+    // eslint-disable-next-line no-console
+    console.log(
+      "ARC_DIAG_FE 2/4 fetchServerSearchBatch calling searchRecords",
+      "tab=" + this.selectedListViewApiName,
+      JSON.stringify(requestParams)
+    );
+
+    const result = await searchRecords(requestParams);
+
+    // eslint-disable-next-line no-console
+    console.log(
+      "ARC_DIAG_FE 3/4 fetchServerSearchBatch raw Apex result",
+      "tab=" + this.selectedListViewApiName,
+      JSON.stringify(result)
+    );
 
     // Aligned by the field list the server actually selected, not the one
     // requested -- a requested path can fail server-side validation and

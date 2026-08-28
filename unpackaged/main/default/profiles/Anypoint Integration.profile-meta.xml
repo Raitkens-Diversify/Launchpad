@@ -14316,6 +14316,9 @@
         <layout>Announcement__c-Announcement Layout</layout>
     </layoutAssignments>
     <layoutAssignments>
+        <layout>Arc_Diag_Log__c-Arc Diag Log %28TEMP - delete%29 Layout</layout>
+    </layoutAssignments>
+    <layoutAssignments>
         <layout>Article_Feedback__c-Article Feedback Layout</layout>
     </layoutAssignments>
     <layoutAssignments>

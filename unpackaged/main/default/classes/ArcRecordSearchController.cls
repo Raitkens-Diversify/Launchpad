@@ -78,101 +78,142 @@ public with sharing class ArcRecordSearchController {
   // stale first page can silently pin an otherwise-fresh chain. A search
   // that always hits the query is the one that can't lie about being
   // out of date.
+  /**
+   * filters travels as a JSON string, not List<SearchFilter>, and is decoded
+   * below with JSON.deserialize -- not a style choice. Confirmed live in
+   * this org: the platform's own JSON-to-Apex parameter marshalling for an
+   * AuraEnabled method correctly builds a List<SearchFilter> of the right
+   * length, but leaves every field on each element (fieldApiName, operator,
+   * operandValue) null, even though the client's own request payload has
+   * real values -- while every sibling parameter of a plain type (String,
+   * List<String>, Id, Integer) on the very same call arrives intact. A
+   * blank-fielded filter is indistinguishable from an empty filter chip
+   * (buildWhereClause already drops those, by design), so this silently
+   * unfiltered every search on every tab that had a filter at all. Apex's
+   * own JSON.deserialize onto the identical List<SearchFilter> type, run
+   * over the identical JSON text, decodes correctly -- so the failure is
+   * specific to the platform's automatic parameter marshalling for a
+   * custom multi-field Apex type used as a list element, not to this type
+   * or Apex's JSON support in general.
+   */
   @AuraEnabled
   public static SearchResult searchRecords(
     String objectApiName,
     List<String> fieldApiNames,
-    List<SearchFilter> filters,
+    String filtersJson,
     String searchTerm,
     List<String> searchableFields,
     Id afterId,
     Integer pageSize
   ) {
-    SearchResult result = new SearchResult();
-    result.rows = new List<SearchRow>();
-    result.hasMore = false;
+    List<SearchFilter> filters = String.isNotBlank(filtersJson)
+      ? (List<SearchFilter>) JSON.deserialize(filtersJson, List<SearchFilter>.class)
+      : new List<SearchFilter>();
 
-    Map<String, Schema.SObjectField> fieldMap = describeFields(objectApiName);
-    if (fieldMap == null) {
-      return result;
-    }
-
-    List<String> selected = validateFieldPaths(fieldMap, fieldApiNames);
-    result.fieldApiNames = selected;
-    if (selected.isEmpty()) {
-      return result;
-    }
-
-    Map<String, Object> binds = new Map<String, Object>();
-    String whereClause = buildWhereClause(
-      objectApiName,
-      fieldMap,
-      filters,
-      searchTerm,
-      searchableFields,
-      binds
+    List<String> diagLines = new List<String>();
+    diagLines.add(
+      '1/7 ENTRY objectApiName=' + objectApiName +
+        ' fieldApiNames=' + fieldApiNames +
+        ' filtersJson=' + filtersJson +
+        ' filters=' + filters +
+        ' searchTerm=' + searchTerm +
+        ' afterId=' + afterId +
+        ' pageSize=' + pageSize +
+        ' runningUserId=' + UserInfo.getUserId() +
+        ' profileId=' + UserInfo.getProfileId() +
+        ' networkId=' + Network.getNetworkId()
     );
 
-    List<String> clauses = new List<String>();
-    if (String.isNotBlank(whereClause)) {
-      clauses.add(whereClause);
-    }
-    if (afterId != null) {
-      binds.put('afterId', afterId);
-      clauses.add('Id > :afterId');
-    }
-
-    Integer effectivePageSize = pageSize == null
-      ? DEFAULT_PAGE_SIZE
-      : Math.min(Math.max(pageSize, 1), MAX_PAGE_SIZE);
-    // One extra row past the page, so "is there more" is known without a
-    // second round trip.
-    Integer fetchSize = effectivePageSize + 1;
-
-    String soql =
-      'SELECT Id, ' +
-      String.join(selected, ', ') +
-      ' FROM ' +
-      objectApiName +
-      (clauses.isEmpty() ? '' : ' WHERE ' + String.join(clauses, ' AND ')) +
-      ' ORDER BY Id ASC' +
-      ' LIMIT ' +
-      fetchSize;
-
-    System.debug(LoggingLevel.ERROR, 'TEMP_DIAG soql=' + soql);
-    System.debug(LoggingLevel.ERROR, 'TEMP_DIAG binds=' + binds);
-    System.debug(LoggingLevel.ERROR, 'TEMP_DIAG runningUser=' + UserInfo.getUserId() + ' profileId=' + UserInfo.getProfileId() + ' networkId=' + Network.getNetworkId());
-
-    List<SObject> records;
     try {
-      records = Database.queryWithBinds(soql, binds, AccessLevel.USER_MODE);
-    } catch (Exception e) {
-      System.debug(LoggingLevel.ERROR, 'ArcRecordSearchController.searchRecords failed: ' + e);
-      throw new AuraHandledException('Could not run that search: ' + e.getMessage());
-    }
+      SearchResult result = new SearchResult();
+      result.rows = new List<SearchRow>();
+      result.hasMore = false;
 
-    Integer take = Math.min(records.size(), effectivePageSize);
-    for (Integer i = 0; i < take; i++) {
-      SObject record = records[i];
-      SearchRow row = new SearchRow();
-      row.id = (Id) record.get('Id');
-      row.cells = new List<String>();
-      for (String path : selected) {
-        // Never a raw null -- the Aura/LWR JSON encoder used for
-        // @salesforce/apex imports can silently drop null entries out of a
-        // List<String> rather than serializing them as null, which shifts
-        // every later cell in the row one column early on the client (a
-        // blank Role__pc, for instance, would make every cell after it
-        // read as the previous field's value). Confirmed live: a 5-cell
-        // response for an 8-field request, empty fields simply missing
-        // rather than present-and-blank.
-        String cellValue = readPath(record, path);
-        row.cells.add(cellValue == null ? '' : cellValue);
+      Map<String, Schema.SObjectField> fieldMap = describeFields(objectApiName);
+      diagLines.add('2/7 describeFields -> ' + (fieldMap == null ? 'null (object inaccessible)' : fieldMap.size() + ' fields'));
+      if (fieldMap == null) {
+        throw new AuraHandledException('ARC_DIAG_TRAIL ' + String.join(diagLines, ' || '));
       }
-      result.rows.add(row);
+
+      List<String> selected = validateFieldPaths(fieldMap, fieldApiNames);
+      result.fieldApiNames = selected;
+      diagLines.add('3/7 validateFieldPaths -> ' + selected);
+      if (selected.isEmpty()) {
+        throw new AuraHandledException('ARC_DIAG_TRAIL ' + String.join(diagLines, ' || '));
+      }
+
+      Map<String, Object> binds = new Map<String, Object>();
+      String whereClause = buildWhereClause(
+        objectApiName,
+        fieldMap,
+        filters,
+        searchTerm,
+        searchableFields,
+        binds
+      );
+      diagLines.add('4/7 buildWhereClause -> "' + whereClause + '" binds=' + binds);
+
+      List<String> clauses = new List<String>();
+      if (String.isNotBlank(whereClause)) {
+        clauses.add(whereClause);
+      }
+      if (afterId != null) {
+        binds.put('afterId', afterId);
+        clauses.add('Id > :afterId');
+      }
+
+      Integer effectivePageSize = pageSize == null
+        ? DEFAULT_PAGE_SIZE
+        : Math.min(Math.max(pageSize, 1), MAX_PAGE_SIZE);
+      // One extra row past the page, so "is there more" is known without a
+      // second round trip.
+      Integer fetchSize = effectivePageSize + 1;
+
+      String soql =
+        'SELECT Id, ' +
+        String.join(selected, ', ') +
+        ' FROM ' +
+        objectApiName +
+        (clauses.isEmpty() ? '' : ' WHERE ' + String.join(clauses, ' AND ')) +
+        ' ORDER BY Id ASC' +
+        ' LIMIT ' +
+        fetchSize;
+
+      diagLines.add('5/7 final soql=' + soql);
+
+      List<SObject> records = Database.queryWithBinds(soql, binds, AccessLevel.USER_MODE);
+
+      diagLines.add('6/7 query returned ' + records.size() + ' rows: ' + records);
+
+      Integer take = Math.min(records.size(), effectivePageSize);
+      for (Integer i = 0; i < take; i++) {
+        SObject record = records[i];
+        SearchRow row = new SearchRow();
+        row.id = (Id) record.get('Id');
+        row.cells = new List<String>();
+        for (String path : selected) {
+          // Never a raw null -- the Aura/LWR JSON encoder used for
+          // @salesforce/apex imports can silently drop null entries out of a
+          // List<String> rather than serializing them as null, which shifts
+          // every later cell in the row one column early on the client (a
+          // blank Role__pc, for instance, would make every cell after it
+          // read as the previous field's value). Confirmed live: a 5-cell
+          // response for an 8-field request, empty fields simply missing
+          // rather than present-and-blank.
+          String cellValue = readPath(record, path);
+          row.cells.add(cellValue == null ? '' : cellValue);
+        }
+        result.rows.add(row);
+      }
+      result.hasMore = records.size() > effectivePageSize;
+      diagLines.add('7/7 RETURN rows=' + result.rows.size() + ' hasMore=' + result.hasMore + ' fieldApiNames=' + result.fieldApiNames);
+      throw new AuraHandledException('ARC_DIAG_TRAIL ' + String.join(diagLines, ' || '));
+    } catch (AuraHandledException e) {
+      throw e;
+    } catch (Exception e) {
+      diagLines.add('UNHANDLED EXCEPTION: ' + e + ' | ' + e.getStackTraceString());
+      throw new AuraHandledException('ARC_DIAG_TRAIL ' + String.join(diagLines, ' || '));
     }
-    result.hasMore = records.size() > effectivePageSize;
-    return result;
   }
 
   private static Map<String, Schema.SObjectField> describeFields(String objectApiName) {
@@ -308,10 +349,6 @@ public with sharing class ArcRecordSearchController {
     // would be a type mismatch.
     if (fieldApiName == 'RecordTypeId' || fieldApiName == 'RecordType.Name') {
       List<Id> recordTypeIds = resolveRecordTypeIds(objectApiName, operandValue);
-      System.debug(
-        LoggingLevel.ERROR,
-        'TEMP_DIAG resolveRecordTypeIds(' + objectApiName + ', "' + operandValue + '") -> ' + recordTypeIds
-      );
       if (recordTypeIds.isEmpty()) {
         return null;
       }
