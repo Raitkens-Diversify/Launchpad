@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-08-27
+ * Date: 2026-08-28
  *
  * Queries and normalizes household activity records for the timeline UI.
  */
@@ -190,8 +190,14 @@ public with sharing class ActivityTimelineService {
     if (budget().canRead(1)) {
       activities.addAll(buildEmailActivities(queryScope.whatIds));
     }
-    if (includeSignificantEvents && budget().canRead(1)) {
-      activities.addAll(buildSignificantEventActivities(recordId));
+    if (budget().canRead(1)) {
+      activities.addAll(
+        buildSignificantEventActivitiesForScope(
+          recordId,
+          queryScope,
+          includeSignificantEvents
+        )
+      );
     }
 
     return activities;
@@ -248,6 +254,11 @@ public with sharing class ActivityTimelineService {
 
     if (pageNumber == 0) {
       addStructuralWhatIds(slice.scope, fullScope, coreWhat, extraRelated);
+      if (fullScope.financialAdvisorTeamIds != null) {
+        slice.scope.financialAdvisorTeamIds.addAll(
+          fullScope.financialAdvisorTeamIds
+        );
+      }
     }
 
     return slice;
@@ -572,9 +583,12 @@ public with sharing class ActivityTimelineService {
     Set<Id> householdIds = new Set<Id>();
     Set<Id> relatedAccountIds = new Set<Id>();
     Set<Id> whatIds = new Set<Id>();
+    Set<Id> financialAdvisorTeamIds = new Set<Id>();
 
     private Boolean isEmpty() {
-      return relatedAccountIds.isEmpty() && whatIds.isEmpty();
+      return relatedAccountIds.isEmpty() &&
+        whatIds.isEmpty() &&
+        financialAdvisorTeamIds.isEmpty();
     }
   }
 
@@ -874,6 +888,8 @@ public with sharing class ActivityTimelineService {
     if (teamIds.isEmpty()) {
       return;
     }
+
+    scope.financialAdvisorTeamIds.addAll(teamIds);
 
     if (!canContinueSoqlWork(2)) {
       return;
@@ -2352,6 +2368,56 @@ public with sharing class ActivityTimelineService {
     }
   }
 
+  private List<ActivityTimelineModels.ActivityItem> buildSignificantEventActivitiesForScope(
+    Id recordId,
+    ActivityQueryScope queryScope,
+    Boolean includeCurrentRecordEvents
+  ) {
+    Set<Id> accountIds = new Set<Id>();
+    Set<Id> teamIds = new Set<Id>();
+
+    if (
+      includeCurrentRecordEvents == true &&
+      recordId != null &&
+      recordId.getSObjectType() == Account.SObjectType
+    ) {
+      accountIds.add(recordId);
+    }
+
+    if (queryScope != null) {
+      if (queryScope.relatedAccountIds != null) {
+        accountIds.addAll(queryScope.relatedAccountIds);
+      }
+      if (queryScope.householdIds != null) {
+        accountIds.addAll(queryScope.householdIds);
+      }
+      if (queryScope.householdId != null) {
+        accountIds.add(queryScope.householdId);
+      }
+      if (queryScope.financialAdvisorTeamIds != null) {
+        teamIds.addAll(queryScope.financialAdvisorTeamIds);
+      }
+    }
+
+    if (accountIds.isEmpty() && teamIds.isEmpty()) {
+      return new List<ActivityTimelineModels.ActivityItem>();
+    }
+
+    if (
+      teamIds.isEmpty() &&
+      includeCurrentRecordEvents == true &&
+      recordId != null &&
+      accountIds.size() == 1 &&
+      accountIds.contains(recordId)
+    ) {
+      return buildSignificantEventActivities(recordId);
+    }
+
+    return mapLinkedContactRowsToActivityItems(
+      SIGNIFICANT_EVENT_SERVICE.getLinkedContactsForScope(accountIds, teamIds)
+    );
+  }
+
   private List<ActivityTimelineModels.ActivityItem> buildSignificantEventActivities(
     Id recordId
   ) {
@@ -2432,6 +2498,12 @@ public with sharing class ActivityTimelineService {
     if (householdAccount != null) {
       item.associatedAccountId = String.valueOf(householdAccount.Id);
       item.associatedAccountName = householdAccount.Name;
+    } else if (
+      String.isNotBlank(row.householdId) &&
+      String.isNotBlank(row.householdName)
+    ) {
+      item.associatedAccountId = row.householdId;
+      item.associatedAccountName = row.householdName;
     }
 
     addParticipant(
@@ -2507,6 +2579,37 @@ public with sharing class ActivityTimelineService {
     }
 
     return item;
+  }
+
+  private static List<ActivityTimelineModels.ActivityItem> mapLinkedContactRowsToActivityItems(
+    List<SignificantEventActionModels.LinkedContactRow> rows
+  ) {
+    Map<String, ActivityTimelineModels.ActivityItem> itemByEventId = new Map<String, ActivityTimelineModels.ActivityItem>();
+
+    if (rows == null) {
+      return new List<ActivityTimelineModels.ActivityItem>();
+    }
+
+    for (SignificantEventActionModels.LinkedContactRow row : rows) {
+      if (row == null || String.isBlank(row.significantEventId)) {
+        continue;
+      }
+
+      if (!itemByEventId.containsKey(row.significantEventId)) {
+        itemByEventId.put(
+          row.significantEventId,
+          mapLinkedContactRowToActivityItem(row, null)
+        );
+        continue;
+      }
+
+      mergeSignificantEventParticipant(
+        itemByEventId.get(row.significantEventId),
+        row
+      );
+    }
+
+    return itemByEventId.values();
   }
 
   private static void mergeSignificantEventParticipant(

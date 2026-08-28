@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-08-27
+ * Date: 2026-08-28
  */
 @IsTest
 private class ActivityTimelineControllerTest {
@@ -1316,6 +1316,90 @@ private class ActivityTimelineControllerTest {
     System.assert(
       titlesWithExternal.contains('Financial advisor team client task'),
       'Branch timeline with external scope should include activities from accounts assigned to branch financial advisor teams.'
+    );
+  }
+
+  @IsTest
+  static void getTimelineDataFromBranchIncludesFinancialAdvisorTeamSignificantEventsWhenEnabled() {
+    FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.createTreeScenario(
+      new FscDataTestDataFactory.TreeScenarioOptions().withUniqueNames()
+    );
+
+    Advisor_Group__c branch = new Advisor_Group__c(
+      Name = 'Financial Advisor Team Significant Event Branch'
+    );
+    insert branch;
+
+    Financial_Advisor_Team__c advisorTeam = new Financial_Advisor_Team__c(
+      Name = 'Branch Advisor Team Significant Event',
+      Advisor_Group__c = branch.Id
+    );
+    insert advisorTeam;
+
+    scenario.linkedPersonAccount.Financial_Advisor_Team__c = advisorTeam.Id;
+    scenario.rootAccount.Financial_Advisor_Team__c = advisorTeam.Id;
+    update new List<Account>{
+      scenario.linkedPersonAccount,
+      scenario.rootAccount
+    };
+
+    Significant_Event__c eventRecord = new Significant_Event__c(
+      Name = 'Financial advisor team significant event',
+      Event_Type__c = 'Birthday',
+      Start_Date__c = Date.today(),
+      Household__c = scenario.rootAccount.Id,
+      Financial_Advisor_Team__c = advisorTeam.Id
+    );
+    insert eventRecord;
+
+    insert new Significant_Event_Contact__c(
+      Significant_Event__c = eventRecord.Id,
+      Account__c = scenario.linkedPersonAccount.Id,
+      Financial_Advisor_Team__c = advisorTeam.Id
+    );
+
+    Test.startTest();
+    ActivityTimelineModels.ActivityTimelineData withoutExternal = ActivityTimelineController.getTimelineData(
+      branch.Id,
+      false
+    );
+    ActivityTimelineModels.ActivityTimelineData withExternal = ActivityTimelineController.getTimelineData(
+      branch.Id,
+      true
+    );
+    Test.stopTest();
+
+    Set<String> titlesWithoutExternal = new Set<String>();
+    for (ActivityTimelineModels.ActivityItem activity : withoutExternal.activities) {
+      titlesWithoutExternal.add(activity.title);
+    }
+
+    ActivityTimelineModels.ActivityItem significantEventItem;
+    for (ActivityTimelineModels.ActivityItem activity : withExternal.activities) {
+      if (activity.activityType == 'Significant Event') {
+        significantEventItem = activity;
+        break;
+      }
+    }
+
+    System.assert(
+      !titlesWithoutExternal.contains('Financial advisor team significant event'),
+      'Branch timeline without external scope should exclude financial advisor team significant events.'
+    );
+    System.assertNotEquals(
+      null,
+      significantEventItem,
+      'Branch timeline with external scope should include significant events whose financial advisor team belongs to the branch.'
+    );
+    System.assertEquals(
+      String.valueOf(eventRecord.Id),
+      significantEventItem.id,
+      'Branch timeline should reference the financial advisor team significant event.'
+    );
+    System.assertEquals(
+      String.valueOf(scenario.rootAccount.Id),
+      significantEventItem.associatedAccountId,
+      'Branch significant event should expose the household as the associated account.'
     );
   }
 

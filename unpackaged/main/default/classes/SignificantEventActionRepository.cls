@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-07-14
+ * Date: 2026-08-28
  *
  * Repository for Significant Event create/edit reads and writes.
  */
@@ -223,6 +223,75 @@ public with sharing class SignificantEventActionRepository {
       WHERE
         Significant_Event__r.Household__c = :accountId
         OR Significant_Event__r.Person__c = :accountId
+      ORDER BY
+        Significant_Event__r.Start_Date__c DESC NULLS LAST,
+        Account__r.Name
+    ];
+  }
+
+  public List<Significant_Event_Contact__c> selectParticipantsByDirectEventAccountIds(
+    Set<Id> accountIds
+  ) {
+    if (accountIds == null || accountIds.isEmpty()) {
+      return new List<Significant_Event_Contact__c>();
+    }
+
+    return [
+      SELECT
+        Id,
+        Name,
+        Account__c,
+        Account__r.Name,
+        Significant_Event__c,
+        Significant_Event__r.Name,
+        Significant_Event__r.Event_Type__c,
+        Significant_Event__r.Other_Event_Type__c,
+        Significant_Event__r.Start_Date__c,
+        Significant_Event__r.End_Date_Optional__c,
+        Significant_Event__r.Approximate_Date__c,
+        Significant_Event__r.Description__c,
+        Significant_Event__r.Household__c,
+        Significant_Event__r.Household__r.Name,
+        Significant_Event__r.Financial_Advisor_Team__c,
+        Significant_Event__r.Financial_Advisor_Team__r.Name,
+        Significant_Event__r.Person__c
+      FROM Significant_Event_Contact__c
+      WHERE
+        Significant_Event__r.Household__c IN :accountIds
+        OR Significant_Event__r.Person__c IN :accountIds
+      ORDER BY
+        Significant_Event__r.Start_Date__c DESC NULLS LAST,
+        Account__r.Name
+    ];
+  }
+
+  public List<Significant_Event_Contact__c> selectParticipantsByFinancialAdvisorTeamIds(
+    Set<Id> teamIds
+  ) {
+    if (teamIds == null || teamIds.isEmpty()) {
+      return new List<Significant_Event_Contact__c>();
+    }
+
+    return [
+      SELECT
+        Id,
+        Name,
+        Account__c,
+        Account__r.Name,
+        Significant_Event__c,
+        Significant_Event__r.Name,
+        Significant_Event__r.Event_Type__c,
+        Significant_Event__r.Other_Event_Type__c,
+        Significant_Event__r.Start_Date__c,
+        Significant_Event__r.End_Date_Optional__c,
+        Significant_Event__r.Approximate_Date__c,
+        Significant_Event__r.Description__c,
+        Significant_Event__r.Household__c,
+        Significant_Event__r.Household__r.Name,
+        Significant_Event__r.Financial_Advisor_Team__c,
+        Significant_Event__r.Financial_Advisor_Team__r.Name
+      FROM Significant_Event_Contact__c
+      WHERE Significant_Event__r.Financial_Advisor_Team__c IN :teamIds
       ORDER BY
         Significant_Event__r.Start_Date__c DESC NULLS LAST,
         Account__r.Name

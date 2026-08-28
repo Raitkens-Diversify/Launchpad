@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-07-14
+ * Date: 2026-08-28
  */
 public with sharing class SignificantEventActionService {
   private final SignificantEventActionRepository repository;
@@ -197,6 +197,54 @@ public with sharing class SignificantEventActionService {
         significantEventId
       )
     ) {
+      rows.add(buildLinkedContactRow(participant));
+    }
+
+    return rows;
+  }
+
+  public List<SignificantEventActionModels.LinkedContactRow> getLinkedContactsForScope(
+    Set<Id> accountIds,
+    Set<Id> financialAdvisorTeamIds
+  ) {
+    Map<Id, Significant_Event_Contact__c> participantById = new Map<Id, Significant_Event_Contact__c>();
+    Set<Id> scopedAccountIds = accountIds == null
+      ? new Set<Id>()
+      : accountIds;
+    Set<Id> scopedTeamIds = financialAdvisorTeamIds == null
+      ? new Set<Id>()
+      : financialAdvisorTeamIds;
+
+    if (!scopedAccountIds.isEmpty()) {
+      for (
+        Significant_Event_Contact__c participant : repository.selectParticipantsByAccountIds(
+          scopedAccountIds
+        )
+      ) {
+        participantById.put(participant.Id, participant);
+      }
+
+      for (
+        Significant_Event_Contact__c participant : repository.selectParticipantsByDirectEventAccountIds(
+          scopedAccountIds
+        )
+      ) {
+        participantById.put(participant.Id, participant);
+      }
+    }
+
+    if (!scopedTeamIds.isEmpty()) {
+      for (
+        Significant_Event_Contact__c participant : repository.selectParticipantsByFinancialAdvisorTeamIds(
+          scopedTeamIds
+        )
+      ) {
+        participantById.put(participant.Id, participant);
+      }
+    }
+
+    List<SignificantEventActionModels.LinkedContactRow> rows = new List<SignificantEventActionModels.LinkedContactRow>();
+    for (Significant_Event_Contact__c participant : participantById.values()) {
       rows.add(buildLinkedContactRow(participant));
     }
 

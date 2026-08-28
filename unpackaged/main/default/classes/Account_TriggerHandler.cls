@@ -1,12 +1,12 @@
 public class Account_TriggerHandler {
     public void isBeforeInsert(List<Account> newList){
         updateInvestmentObjectives(newList, null);
-        setOwnerOnAccount(newList, null);
+        //setOwnerOnAccount(newList, null);
     }
     
     public void isBeforeUpdate(Map<Id, Account> newMap, Map<Id, Account> oldMap){
         updateInvestmentObjectives(newMap.values(), oldMap);
-        setOwnerOnAccount(newMap.values(), oldMap);
+        //setOwnerOnAccount(newMap.values(), oldMap);
         setAccreditationStatus(newMap, oldMap);
     }
     

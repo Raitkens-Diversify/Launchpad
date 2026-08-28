@@ -1,4 +1,4 @@
-// Author: Hoang Long Vu To | Date: 2026-08-27
+// Author: Hoang Long Vu To | Date: 2026-08-28
 import { LightningElement, api, track, wire } from "lwc";
 import { NavigationMixin, CurrentPageReference } from "lightning/navigation";
 import { getRecord, getFieldValue } from "lightning/uiRecordApi";
@@ -654,8 +654,12 @@ const buildAssociatedAccountLink = (activity) => {
   );
 };
 
+const supportsAssociatedBranchLink = (activity) =>
+  isTaskOrEventActivity(activity) ||
+  activity.activityType === "Significant Event";
+
 const buildAssociatedBranchLink = (activity, contextBranch) => {
-  if (!isTaskOrEventActivity(activity)) {
+  if (!supportsAssociatedBranchLink(activity)) {
     return null;
   }
 
@@ -1058,7 +1062,10 @@ export default class ActivityTimeline extends NavigationMixin(
   }
 
   get showAssociatedAccountContext() {
-    return !this.customerOnlyMode || this.isHouseholdRecordContext;
+    return (
+      this.isHouseholdRecordContext ||
+      (this.showExternalToggleControl && !this.customerOnlyMode)
+    );
   }
 
   get userPickerRecordId() {
@@ -1217,10 +1224,11 @@ export default class ActivityTimeline extends NavigationMixin(
           null;
 
         const summary = buildActivitySummary(activity, USER_ID, {
-          isHouseholdRecordContext: this.isHouseholdRecordContext
+          isHouseholdRecordContext: this.showAssociatedAccountContext
         });
         const linkedRecordLink = buildRelatedToLink(activity);
         const contextBranch =
+          this.showExternalToggleControl &&
           !this.customerOnlyMode &&
           this.isDrpRecordContext &&
           this.contextBranchId &&
@@ -1235,6 +1243,7 @@ export default class ActivityTimeline extends NavigationMixin(
           contextBranch
         );
         const showDrpBranchSubline =
+          this.showExternalToggleControl &&
           this.isDrpRecordContext &&
           !this.customerOnlyMode &&
           associatedBranchLink !== null;
@@ -1261,17 +1270,12 @@ export default class ActivityTimeline extends NavigationMixin(
         }
 
         const associatedAccountLink = buildAssociatedAccountLink(activity);
-        const isHouseholdSignificantEvent =
-          activity.activityType === "Significant Event" &&
-          this.isHouseholdRecordContext;
-        const isPersonAccountSignificantEvent =
-          activity.activityType === "Significant Event" &&
-          !this.isHouseholdRecordContext;
+        const isSignificantEvent = activity.activityType === "Significant Event";
         details.showParticipants =
           details.participantLinks.length > 0 &&
           activity.activityType !== "Email" &&
-          (isHouseholdSignificantEvent ||
-            (!isPersonAccountSignificantEvent &&
+          ((isSignificantEvent && this.showAssociatedAccountContext) ||
+            (!isSignificantEvent &&
               (details.participantLinks.length > 1 || !summary.hasRelated)));
         const isDetailsExpanded = !!this.expandedActivityIds[activity.id];
 
@@ -1285,10 +1289,7 @@ export default class ActivityTimeline extends NavigationMixin(
           summary,
           details,
           showAssociatedAccount:
-            associatedAccountLink !== null &&
-            (this.showAssociatedAccountContext ||
-              (activity.activityType === "Significant Event" &&
-                !this.isHouseholdRecordContext)),
+            associatedAccountLink !== null && this.showAssociatedAccountContext,
           associatedAccountLink,
           showDrpBranchSubline,
           drpBranchSublineLink: showDrpBranchSubline
