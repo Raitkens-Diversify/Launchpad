@@ -56,9 +56,6 @@
                      background-color:#EBF7FC;
                      background-image:linear-gradient(160deg,#E2F8FC 0%,#FFFFFF 55%);">
             <!--[if mso]><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"><tr><td style="background-color:#EBF7FC; padding:0;"><![endif]-->
-            <p style="margin:0 0 12px 0; font-family:'Inter',Helvetica,Arial,sans-serif; font-size:12px; letter-spacing:2px; text-transform:uppercase; color:#1A76B8; font-weight:600;">
-              Welcome to {!Network.Name}
-            </p>
             <h1 class="hero-h1" style="margin:0; font-family:'Libre Baskerville',Georgia,'Times New Roman',serif; font-size:36px; line-height:1.15; color:#0F406C; font-weight:700; letter-spacing:-0.2px;">
               Welcome,<br><em style="font-style:italic; color:#0F406C;">{!Receiving_User.FirstName}</em>.
             </h1>

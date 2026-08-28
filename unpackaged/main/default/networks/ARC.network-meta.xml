@@ -76,7 +76,7 @@
     <picassoSite>ARC1</picassoSite>
     <secondaryEmailSenderEnabled>false</secondaryEmailSenderEnabled>
     <selfRegistration>false</selfRegistration>
-    <sendWelcomeEmail>true</sendWelcomeEmail>
+    <sendWelcomeEmail>false</sendWelcomeEmail>
     <site>ARC</site>
     <siteArchiveStatus>NotArchived</siteArchiveStatus>
     <status>Live</status>

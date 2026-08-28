@@ -14,9 +14,25 @@
     <template lwc:elseif={hasSummary}>
       <section class="record-summary__section">
         <c-card class="record-summary__card">
+          <!--
+            read-only, not summary-mode. This card is a display-only summary, so
+            it carries no Edit affordance: read-only is what gates both
+            showEditButton and showSectionActions on the section, so neither the
+            Edit button nor the Cancel/Save pair renders. showHeader is
+            independent of it, so the "Record" title and its info icon stay.
+
+            summary-mode was here before and did nothing at all --
+            arcRecordDetailSection declares no such @api property, and nothing
+            else in the project passes it. Replaced rather than kept alongside,
+            so the markup does not imply a mode that isn't implemented.
+
+            Scoped to this component, so the editable sections on the same page
+            (Personal Information, Contact Information, Address Information) and
+            the header's Edit Regulated Fields action are untouched.
+          -->
           <c-arc-record-detail-section
             section={section}
-            summary-mode
+            read-only
             info-tooltip="Key record details for this contact."
           >
           </c-arc-record-detail-section>

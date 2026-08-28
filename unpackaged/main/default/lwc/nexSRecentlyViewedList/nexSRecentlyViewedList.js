@@ -8,10 +8,12 @@ import { loadStyle } from "lightning/platformResourceLoader";
 import diversifyStyles from "@salesforce/resourceUrl/diversifyStyles";
 import getRecentlyViewedItems from "@salesforce/apex/NexSRecentlyViewedListController.getRecentlyViewedItems";
 import {
-  buildRecordNavigationReference,
   resolveRecordUrl,
-  shouldAllowNativeRecordNavigation,
+  shouldAllowNativeRecordNavigation
 } from "c/recordNavigationUtils";
+import {
+  buildRecordNavigationReference
+} from "c/recordNavigationCommunityUtils";
 
 const LIST_TYPE_CONTACT = "Contact";
 const LIST_TYPE_ISA = "ISA";

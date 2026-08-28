@@ -24,7 +24,8 @@ public class Case_TriggerHandler {
         createTask(newMap, oldMap);
         //setOwnerAndStatusOnCase(newMap.values(), oldMap);
         cancelMoveMoney(newMap, oldMap);
-        recalcTaskRecord(newMap);
+        //setCaseTemplateForWizard(newMap.values());
+        recalcTaskRecord(newMap, oldMap);
         populateBranchAndHomeNames(newMap.values(), oldMap);
         populateTaskDetails(newMap.values(), oldMap);
         populateMilestoneOnCase(newMap.values(), oldMap);
@@ -550,7 +551,7 @@ setOfTypeToName.add('Account Servicing - Approval Required');
         // Match templates for each Case
         for (Case caseRecord : newList) {
             
-            if (caseRecord.Donotcalc__c != true) {
+            if (caseRecord.Donotcalc__c != true && caseRecord.submitted__c == true) {
                 
                 caseTemplateMatchFields = '';
                 
@@ -1383,11 +1384,14 @@ record.OwnerId = queuePRId;
         }
     }
     
-    private void recalcTaskRecord(Map<Id, Case> newMap){
+    private void recalcTaskRecord(Map<Id, Case> newMap, Map<Id,Case> oldMap){
         Map<Id,Case> casesAdvisorToRecalc = new Map<Id,Case>();
         Map<Id,Case> casesWizardToRecalc = new Map<Id,Case>();
+
         for(Case c : newMap.values()){
-            if(c.Recalculate_Case_Template__c){
+            Case oldCase = newMap.get(c.Id);
+            System.debug('submitted: ' + c.Submitted__c + oldCase.submitted__c);
+            if(c.Recalculate_Case_Template__c || (c.Submitted__c && !oldCase.submitted__c)){
                 //if(c.Origin == 'Wizard'){
                     casesWizardToRecalc.put(c.Id, c);
                 /*} else {
