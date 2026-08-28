@@ -1389,7 +1389,7 @@ record.OwnerId = queuePRId;
         Map<Id,Case> casesWizardToRecalc = new Map<Id,Case>();
 
         for(Case c : newMap.values()){
-            Case oldCase = newMap.get(c.Id);
+            Case oldCase = oldMap.get(c.Id);
             System.debug('submitted: ' + c.Submitted__c + oldCase.submitted__c);
             if(c.Recalculate_Case_Template__c || (c.Submitted__c && !oldCase.submitted__c)){
                 //if(c.Origin == 'Wizard'){

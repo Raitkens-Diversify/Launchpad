@@ -464,6 +464,19 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   _serverSearchGeneration = 0;
   _lastConfirmedSearchSignature = "";
   _serverSearchedListViewApiName = "";
+  /**
+   * Set by a mousedown anywhere in the results table, read (and cleared) by
+   * the search box's and a filter chip's own blur handler. mousedown always
+   * fires before the blur/focusout that same click causes -- clicking a
+   * mousedown listener is what lets a blur handler tell "the user clicked a
+   * row to open it" apart from "the user clicked/tabbed away for any other
+   * reason", which otherwise look identical by the time blur fires. Without
+   * it, confirming a search on blur would clear tableRows out from under
+   * the very row the user just clicked, since that clear happens
+   * synchronously in runServerSearch and blur fires before the row's own
+   * click finishes.
+   */
+  _suppressBlurSearch = false;
   /** Whether the last-loaded batch said more rows exist past it -- see handleLoadMoreRows. */
   _hasMoreServerRows = false;
   /** Id of the last loaded row -- afterId for the next batch's keyset fetch. */
@@ -1903,7 +1916,7 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   }
 
   get serverSearchHintMessage() {
-    return "Showing results from the rows already loaded — press Enter to search all matching records.";
+    return "Showing results from the rows already loaded — press Enter or click out to search all matching records.";
   }
 
   /**
@@ -2406,9 +2419,51 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     if (event.key !== "Enter" || !this.enableServerSearch) {
       return;
     }
+    this.confirmSearchTerm(event.target.value);
+  }
+
+  /**
+   * Leaving the search box confirms it too, same as Enter -- clicking away
+   * and then pressing Enter used to do nothing, since Enter only ever
+   * reached this input while it still had focus. Skipped when the blur was
+   * caused by clicking a row rather than clicking/tabbing elsewhere (see
+   * _suppressBlurSearch), and skipped once there's nothing left unconfirmed,
+   * so tabbing away from an already-searched box doesn't fire a redundant
+   * re-query.
+   *
+   * searchTerm is assigned before that check, not after: it only updates
+   * from the debounced timer otherwise, so blurring right after typing --
+   * faster than the debounce -- would read the value from *before* this
+   * keystroke and wrongly conclude there was nothing new to confirm.
+   */
+  handleSearchBlur(event) {
+    if (this._suppressBlurSearch) {
+      this._suppressBlurSearch = false;
+      return;
+    }
+    if (!this.enableServerSearch) {
+      return;
+    }
     window.clearTimeout(this._searchTimer);
     this.searchTerm = event.target.value;
+    if (this.hasUnconfirmedServerSearch) {
+      this.runServerSearch();
+    }
+  }
+
+  confirmSearchTerm(value) {
+    window.clearTimeout(this._searchTimer);
+    this.searchTerm = value;
     this.runServerSearch();
+  }
+
+  /**
+   * mousedown lands before the blur/focusout a click on the same row also
+   * causes, so this always sets the flag in time for that row's own blur
+   * handler to read it -- see _suppressBlurSearch.
+   */
+  handleResultsMouseDown() {
+    this._suppressBlurSearch = true;
   }
 
   /**
@@ -2531,8 +2586,27 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     if (event.key !== "Enter" || !this.enableServerSearch) {
       return;
     }
-    const key = event.currentTarget.dataset.key;
-    const operandValue = event.target.value;
+    this.confirmChipValue(event.currentTarget.dataset.key, event.target.value);
+  }
+
+  /**
+   * Leaving a filter chip's value confirms it too, same as Enter -- and
+   * same _suppressBlurSearch skip as the search box's own blur handler, so
+   * clicking a row in the live-filtered results just navigates instead of
+   * racing a re-search that clears tableRows out from under the click.
+   */
+  handleChipValueBlur(event) {
+    if (this._suppressBlurSearch) {
+      this._suppressBlurSearch = false;
+      return;
+    }
+    if (!this.enableServerSearch || !this.hasUnconfirmedServerSearch) {
+      return;
+    }
+    this.confirmChipValue(event.currentTarget.dataset.key, event.target.value);
+  }
+
+  confirmChipValue(key, operandValue) {
     this.activeFilters = this.activeFilters.map((filter) => {
       return filter.key === key ? { ...filter, operandValue } : filter;
     });

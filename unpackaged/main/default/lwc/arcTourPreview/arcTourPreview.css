@@ -149,7 +149,7 @@
   display: flex;
   flex-direction: column;
   flex: none;
-  /* Sized to the longest real label — "Investments & Agreements" — plus its
+  /* Sized to the longest real label — "Investments & Services" — plus its
      icon, gap and chevron. At 128px it truncated, and a clipped nav label
      looks like a bug rather than a small-scale rendering of one. */
   width: 154px;

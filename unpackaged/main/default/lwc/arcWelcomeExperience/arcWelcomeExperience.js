@@ -127,7 +127,7 @@ const STEPS = [
     navId: "arc-nav-isas",
     region: "list",
     title: "Accounts and agreements",
-    body: "Investments & Agreements holds your clients' accounts, their directly held investments, and the service agreements that go with them."
+    body: "Investments & Services holds your clients' accounts, their directly held investments, and the service agreements that go with them."
   },
   {
     key: "compliance",

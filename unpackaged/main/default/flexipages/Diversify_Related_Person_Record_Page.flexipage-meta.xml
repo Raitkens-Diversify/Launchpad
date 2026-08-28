@@ -232,6 +232,29 @@
             <fieldInstance>
                 <fieldInstanceProperties>
                     <name>uiBehavior</name>
+                    <value>readonly</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.OwnerId</fieldItem>
+                <identifier>RecordOwnerIdField</identifier>
+                <visibilityRule>
+                    <booleanFilter>1 OR 2</booleanFilter>
+                    <criteria>
+                        <leftValue>{!$User.LastName}</leftValue>
+                        <operator>CONTAINS</operator>
+                        <rightValue>Aitkens</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!$User.LastName}</leftValue>
+                        <operator>CONTAINS</operator>
+                        <rightValue>Brewster</rightValue>
+                    </criteria>
+                </visibilityRule>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
                 <fieldItem>Record.Advisor_Group__c</fieldItem>

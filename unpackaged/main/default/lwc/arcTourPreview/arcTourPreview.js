@@ -421,7 +421,7 @@ const SCREENS = {
 
   isas: {
     kind: "list",
-    crumbs: ["Investments & Agreements", "Accounts"],
+    crumbs: ["Investments & Services", "Accounts"],
     title: "Accounts",
     subtitle: "Financial accounts across your book",
     columns: [

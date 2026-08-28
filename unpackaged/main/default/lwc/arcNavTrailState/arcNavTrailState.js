@@ -231,7 +231,7 @@ export const STATIC_NAV_ITEMS = [
   },
   {
     id: "arc-nav-isas",
-    label: "Investments & Agreements",
+    label: "Investments & Services",
     type: "InternalLink",
     target: ISA_LIST_PATH,
     icon: "isa.svg",

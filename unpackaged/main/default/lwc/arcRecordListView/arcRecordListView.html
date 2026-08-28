@@ -272,6 +272,7 @@
               placeholder="Search…"
               oninput={handleSearchInput}
               onkeydown={handleSearchKeyDown}
+              onblur={handleSearchBlur}
             />
           </label>
 
@@ -532,6 +533,7 @@
                           value={chip.operandValue}
                           oninput={handleChipValueChange}
                           onkeydown={handleChipValueKeyDown}
+                          onblur={handleChipValueBlur}
                         />
                       </template>
                       <template lwc:if={chip.hasValue}>
@@ -590,6 +592,7 @@
               max-page-buttons="5"
               row-actions={rowActions}
               onrowaction={handleRowAction}
+              onmousedown={handleResultsMouseDown}
               enable-row-navigation
               enable-column-resize
               enable-column-reorder
