@@ -289,7 +289,7 @@ private class EnvelopeHouseholdMemberControllerTest {
       'A new client should inherit the Financial Advisor Team from the household envelope content.'
     );
     List<Account_Account_Relationship__c> relations = [
-      SELECT Association_Type__c, Active__c
+      SELECT Active__c
       FROM Account_Account_Relationship__c
       WHERE Account__c = :household.Id AND Related_Account__c = :accId
     ];
@@ -297,11 +297,6 @@ private class EnvelopeHouseholdMemberControllerTest {
       1,
       relations.size(),
       'A new client should be linked to the Household via Account_Account_Relationship__c.'
-    );
-    System.assertEquals(
-      'Member',
-      relations[0].Association_Type__c,
-      'The household link should carry Association Type = Member.'
     );
     System.assertEquals(
       true,
@@ -542,7 +537,6 @@ private class EnvelopeHouseholdMemberControllerTest {
     insert new Account_Account_Relationship__c(
       Account__c = household.Id,
       Related_Account__c = person2.Id,
-      Association_Type__c = 'Member',
       Active__c = true
     );
 
@@ -620,13 +614,11 @@ private class EnvelopeHouseholdMemberControllerTest {
       new Account_Account_Relationship__c(
         Account__c = householdA.Id,
         Related_Account__c = memberOfA.Id,
-        Association_Type__c = 'Member',
         Active__c = true
       ),
       new Account_Account_Relationship__c(
         Account__c = householdB.Id,
         Related_Account__c = memberOfB.Id,
-        Association_Type__c = 'Member',
         Active__c = true
       )
     };
@@ -733,13 +725,11 @@ private class EnvelopeHouseholdMemberControllerTest {
       new Account_Account_Relationship__c(
         Account__c = household.Id,
         Related_Account__c = draftFromOtherEnvelope.Id,
-        Association_Type__c = 'Member',
         Active__c = true
       ),
       new Account_Account_Relationship__c(
         Account__c = household.Id,
         Related_Account__c = memberAddedToThisEnvelope.Id,
-        Association_Type__c = 'Member',
         Active__c = true
       )
     };
@@ -798,7 +788,6 @@ private class EnvelopeHouseholdMemberControllerTest {
     insert new Account_Account_Relationship__c(
       Account__c = household.Id,
       Related_Account__c = retirementPlan.Id,
-      Association_Type__c = 'Member',
       Active__c = true
     );
 
@@ -867,7 +856,7 @@ private class EnvelopeHouseholdMemberControllerTest {
     Test.stopTest();
 
     List<Account_Account_Relationship__c> relations = [
-      SELECT Association_Type__c, Active__c
+      SELECT Active__c
       FROM Account_Account_Relationship__c
       WHERE Account__c = :household.Id AND Related_Account__c = :person.Id
     ];
@@ -875,11 +864,6 @@ private class EnvelopeHouseholdMemberControllerTest {
       1,
       relations.size(),
       'Exactly one relationship should exist after repeated calls.'
-    );
-    System.assertEquals(
-      'Member',
-      relations[0].Association_Type__c,
-      'Association type should be Member.'
     );
     System.assertEquals(
       true,

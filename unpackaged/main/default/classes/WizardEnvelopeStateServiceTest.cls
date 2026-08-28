@@ -428,7 +428,6 @@ private class WizardEnvelopeStateServiceTest {
         insert new Account_Account_Relationship__c(
             Account__c = household.Id,
             Related_Account__c = person.Id,
-            Association_Type__c = 'Member',
             Active__c = true
         );
         Required_Documents__c doc = new Required_Documents__c(
@@ -996,7 +995,6 @@ private class WizardEnvelopeStateServiceTest {
         insert new Account_Account_Relationship__c(
             Account__c = household.Id,
             Related_Account__c = person.Id,
-            Association_Type__c = 'Member',
             Active__c = true
         );
         insert new Envelope_Content__c(Envelope__c = env.Id, Account__c = person.Id);

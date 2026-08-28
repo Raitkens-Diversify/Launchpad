@@ -132,8 +132,7 @@ public class FscDataTestDataFactory {
       scenario.primaryAccountRelationship = createAccountRelationship(
         scenario.rootAccount,
         scenario.relatedBusinessAccount,
-        resolveDefaultAarRoleValue(),
-        resolveDefaultAssociationTypeValue()
+        resolveDefaultAarRoleValue()
       );
     }
 
@@ -295,23 +294,15 @@ public class FscDataTestDataFactory {
   public static Account_Account_Relationship__c createAccountRelationship(
     Account rootAccount,
     Account relatedAccount,
-    String role,
-    String associationType
+    String role
   ) {
-    return createAccountRelationship(
-      rootAccount,
-      relatedAccount,
-      role,
-      associationType,
-      'Business'
-    );
+    return createAccountRelationship(rootAccount, relatedAccount, role, 'Business');
   }
 
   public static Account_Account_Relationship__c createAccountRelationship(
     Account rootAccount,
     Account relatedAccount,
     String role,
-    String associationType,
     String recordTypeDeveloperName
   ) {
     Id recordTypeId = FscRelRecordTypeUtils.selectAccountRelationRecordTypeId(
@@ -320,10 +311,7 @@ public class FscDataTestDataFactory {
     Account_Account_Relationship__c relationship = new Account_Account_Relationship__c(
       Account__c = rootAccount.Id,
       Related_Account__c = relatedAccount.Id,
-      Roles__c = String.isBlank(role) ? resolveDefaultAarRoleValue() : role,
-      Association_Type__c = String.isBlank(associationType)
-        ? resolveDefaultAssociationTypeValue()
-        : associationType
+      Roles__c = String.isBlank(role) ? resolveDefaultAarRoleValue() : role
     );
 
     if (recordTypeId != null) {
@@ -381,22 +369,13 @@ public class FscDataTestDataFactory {
     }
 
     if (
-      String.isBlank(inverseRoleName) ||
-      roleName.trim().equalsIgnoreCase(inverseRoleName.trim())
+      !String.isBlank(inverseRoleName) &&
+      !roleName.trim().equalsIgnoreCase(inverseRoleName.trim())
     ) {
-      return repository.insertRole(roleName, recordTypeId);
+      repository.findOrCreateByRoleName(inverseRoleName, recordTypeId);
     }
 
-    Reciprocal_Role__c inverseRole = repository.findOrCreateByRoleName(
-      inverseRoleName,
-      recordTypeId
-    );
-
-    return repository.insertRoleWithInverseLink(
-      roleName,
-      inverseRole.Id,
-      recordTypeId
-    );
+    return repository.insertRole(roleName, recordTypeId);
   }
 
   public static Reciprocal_Role__c createReciprocalRoleForMemberRelationship(
@@ -491,18 +470,6 @@ public class FscDataTestDataFactory {
     return String.isBlank(defaultRole)
       ? new List<String>()
       : new List<String>{ defaultRole };
-  }
-
-  public static String resolveDefaultAssociationTypeValue() {
-    if (defaultAssociationTypeValue != null) {
-      return defaultAssociationTypeValue;
-    }
-
-    defaultAssociationTypeValue = resolveFirstActivePicklistValue(
-      Account_Account_Relationship__c.Association_Type__c,
-      new List<String>{ 'Member', 'Peer' }
-    );
-    return defaultAssociationTypeValue;
   }
 
   public static void assignActiveClientAccountType(List<Account> accounts) {
@@ -619,7 +586,6 @@ public class FscDataTestDataFactory {
           Account__c = householdId,
           Related_Account__c = memberAccountId,
           RecordTypeId = householdRecordTypeId,
-          Association_Type__c = resolveDefaultAssociationTypeValue(),
           Active__c = true
         )
       );
@@ -706,7 +672,7 @@ public class FscDataTestDataFactory {
     Id relatedAccountId
   ) {
     List<Account_Account_Relationship__c> relationships = [
-      SELECT Id, Account__c, Related_Account__c, Roles__c, Association_Type__c
+      SELECT Id, Account__c, Related_Account__c, Roles__c
       FROM Account_Account_Relationship__c
       WHERE Account__c = :rootAccountId AND Related_Account__c = :relatedAccountId
       LIMIT 1
@@ -757,7 +723,6 @@ public class FscDataTestDataFactory {
   private static Id personAccountRecordTypeId;
   private static String defaultRoleValue;
   private static String defaultAarRoleValue;
-  private static String defaultAssociationTypeValue;
 
   private static Id resolvePersonAccountRecordTypeId() {
     if (personAccountRecordTypeId != null) {

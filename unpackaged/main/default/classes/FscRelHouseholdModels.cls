@@ -47,8 +47,6 @@ public class FscRelHouseholdModels {
     @AuraEnabled
     public List<String> roles;
     @AuraEnabled
-    public String associationType;
-    @AuraEnabled
     public String recordTypeDeveloperName;
     @AuraEnabled
     public String recordTypeLabel;
@@ -215,8 +213,6 @@ public class FscRelHouseholdModels {
     public Boolean requiresConfirmation;
     @AuraEnabled
     public String message;
-    @AuraEnabled
-    public String existingInverseRole;
     @AuraEnabled
     public String existingRole;
 

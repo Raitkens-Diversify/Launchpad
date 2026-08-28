@@ -263,7 +263,6 @@ public with sharing class EnvelopeHouseholdMemberController {
       insert new Account_Account_Relationship__c(
         Account__c = householdId,
         Related_Account__c = memberAccountId,
-        Association_Type__c = 'Member',
         Active__c = true
       );
     }

@@ -7,7 +7,7 @@
  *
  * Only relationships created through the relationship-map modals (Reciprocal_Role__c
  * populated) are exposed. Structural household-membership links from envelope
- * provisioning carry Association_Type__c = Member and no reciprocal role.
+ * provisioning have no reciprocal role.
  */
 public without sharing class FscRelAccountRelationVisibilityService {
   private static final String MEMBER_RELATION_FIELDS =

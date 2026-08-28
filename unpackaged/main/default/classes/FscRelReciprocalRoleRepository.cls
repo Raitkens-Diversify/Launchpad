@@ -26,7 +26,7 @@ public without sharing class FscRelReciprocalRoleRepository {
 
     if (recordTypeId == null) {
       return [
-        SELECT Id, Name, Role__c, Inverse_Role__c, Inverse_Role__r.Role__c
+        SELECT Id, Name, Role__c
         FROM Reciprocal_Role__c
         WHERE Role__c LIKE :likeTerm OR Name LIKE :likeTerm
         ORDER BY Role__c, Name
@@ -35,7 +35,7 @@ public without sharing class FscRelReciprocalRoleRepository {
     }
 
     return [
-      SELECT Id, Name, Role__c, Inverse_Role__c, Inverse_Role__r.Role__c
+      SELECT Id, Name, Role__c
       FROM Reciprocal_Role__c
       WHERE
         RecordTypeId = :recordTypeId
@@ -50,7 +50,7 @@ public without sharing class FscRelReciprocalRoleRepository {
 
     if (recordTypeId == null) {
       return [
-        SELECT Id, Name, Role__c, Inverse_Role__c, Inverse_Role__r.Role__c
+        SELECT Id, Name, Role__c
         FROM Reciprocal_Role__c
         ORDER BY Role__c ASC, Name ASC
         LIMIT :resolvedLimit
@@ -58,7 +58,7 @@ public without sharing class FscRelReciprocalRoleRepository {
     }
 
     return [
-      SELECT Id, Name, Role__c, Inverse_Role__c, Inverse_Role__r.Role__c
+      SELECT Id, Name, Role__c
       FROM Reciprocal_Role__c
       WHERE RecordTypeId = :recordTypeId
       ORDER BY Role__c ASC NULLS LAST, Name ASC
@@ -104,7 +104,7 @@ public without sharing class FscRelReciprocalRoleRepository {
 
     if (String.isBlank(searchTerm)) {
       return [
-        SELECT Id, Name, Role__c, Inverse_Role__c, Inverse_Role__r.Role__c
+        SELECT Id, Name, Role__c
         FROM Reciprocal_Role__c
         WHERE RecordTypeId = :recordTypeId AND Role__c IN :roleNames
         ORDER BY Role__c ASC, Name ASC
@@ -116,7 +116,7 @@ public without sharing class FscRelReciprocalRoleRepository {
     String likeTerm = '%' + escapedTerm + '%';
 
     return [
-      SELECT Id, Name, Role__c, Inverse_Role__c, Inverse_Role__r.Role__c
+      SELECT Id, Name, Role__c
       FROM Reciprocal_Role__c
       WHERE
         RecordTypeId = :recordTypeId
@@ -131,26 +131,6 @@ public without sharing class FscRelReciprocalRoleRepository {
     return FscRelRecordTypeUtils.selectReciprocalRoleRecordTypeId(
       aarRecordTypeDeveloperName
     );
-  }
-
-  public List<Reciprocal_Role__c> findPotentialDuplicates(
-    String role,
-    Id inverseReciprocalRoleId
-  ) {
-    String normalizedRole = normalizeValue(role);
-
-    if (String.isBlank(normalizedRole) && inverseReciprocalRoleId == null) {
-      return new List<Reciprocal_Role__c>();
-    }
-
-    List<Reciprocal_Role__c> matches = new List<Reciprocal_Role__c>();
-    for (Reciprocal_Role__c existingRole : selectAllRoles()) {
-      if (isPotentialDuplicate(existingRole, normalizedRole, inverseReciprocalRoleId)) {
-        matches.add(existingRole);
-      }
-    }
-
-    return matches;
   }
 
   public List<Reciprocal_Role__c> findSimilarRoleNames(String role) {
@@ -190,7 +170,7 @@ public without sharing class FscRelReciprocalRoleRepository {
 
     if (recordTypeId != null) {
       List<Reciprocal_Role__c> typedMatches = [
-        SELECT Id, Name, Role__c, RecordTypeId, Inverse_Role__c
+        SELECT Id, Name, Role__c, RecordTypeId
         FROM Reciprocal_Role__c
         WHERE RecordTypeId = :recordTypeId AND Role__c = :trimmedRoleName
         LIMIT 1
@@ -200,7 +180,7 @@ public without sharing class FscRelReciprocalRoleRepository {
     }
 
     List<Reciprocal_Role__c> matches = [
-      SELECT Id, Name, Role__c, RecordTypeId, Inverse_Role__c
+      SELECT Id, Name, Role__c, RecordTypeId
       FROM Reciprocal_Role__c
       WHERE Role__c = :trimmedRoleName
       LIMIT 1
@@ -228,28 +208,6 @@ public without sharing class FscRelReciprocalRoleRepository {
       RecordTypeId = recordTypeId
     );
     insert reciprocalRole;
-    return reciprocalRole;
-  }
-
-  public Reciprocal_Role__c insertRoleWithInverseLink(
-    String role,
-    Id inverseReciprocalRoleId,
-    Id recordTypeId
-  ) {
-    Reciprocal_Role__c reciprocalRole = new Reciprocal_Role__c(
-      Role__c = role,
-      Inverse_Role__c = inverseReciprocalRoleId,
-      RecordTypeId = recordTypeId
-    );
-    insert reciprocalRole;
-
-    if (inverseReciprocalRoleId != null) {
-      update new Reciprocal_Role__c(
-        Id = inverseReciprocalRoleId,
-        Inverse_Role__c = reciprocalRole.Id
-      );
-    }
-
     return reciprocalRole;
   }
 
@@ -283,15 +241,7 @@ public without sharing class FscRelReciprocalRoleRepository {
     }
 
     List<Reciprocal_Role__c> roles = [
-      SELECT
-        Id,
-        Name,
-        Role__c,
-        RecordTypeId,
-        Inverse_Role__c,
-        Inverse_Role__r.Id,
-        Inverse_Role__r.Role__c,
-        Inverse_Role__r.Name
+      SELECT Id, Name, Role__c, RecordTypeId
       FROM Reciprocal_Role__c
       WHERE Id = :reciprocalRoleId
       LIMIT 1
@@ -313,14 +263,7 @@ public without sharing class FscRelReciprocalRoleRepository {
     }
 
     for (Reciprocal_Role__c role : [
-      SELECT
-        Id,
-        Name,
-        Role__c,
-        Inverse_Role__c,
-        Inverse_Role__r.Id,
-        Inverse_Role__r.Role__c,
-        Inverse_Role__r.Name
+      SELECT Id, Name, Role__c
       FROM Reciprocal_Role__c
       WHERE Id IN :reciprocalRoleIds
     ]) {
@@ -340,27 +283,6 @@ public without sharing class FscRelReciprocalRoleRepository {
     }
 
     return role.Name;
-  }
-
-  public static String resolveInverseRoleLabel(Reciprocal_Role__c role) {
-    if (role == null) {
-      return '';
-    }
-
-    if (role.Inverse_Role__r != null) {
-      return resolveDisplayName(role.Inverse_Role__r);
-    }
-
-    return '';
-  }
-
-  public static String resolveInverseSubtitle(Reciprocal_Role__c role) {
-    String inverseLabel = resolveInverseRoleLabel(role);
-    if (String.isBlank(inverseLabel)) {
-      return '';
-    }
-
-    return 'Inverse: ' + inverseLabel;
   }
 
   public static Boolean isSimilarRoleName(String normalizedRole, String normalizedExistingRole) {
@@ -388,53 +310,10 @@ public without sharing class FscRelReciprocalRoleRepository {
 
   private List<Reciprocal_Role__c> selectAllRoles() {
     return [
-      SELECT
-        Id,
-        Name,
-        Role__c,
-        Inverse_Role__c,
-        Inverse_Role__r.Id,
-        Inverse_Role__r.Role__c,
-        Inverse_Role__r.Name,
-        RecordTypeId
+      SELECT Id, Name, Role__c, RecordTypeId
       FROM Reciprocal_Role__c
       LIMIT 5000
     ];
-  }
-
-  private static Boolean isPotentialDuplicate(
-    Reciprocal_Role__c existingRole,
-    String normalizedRole,
-    Id inverseReciprocalRoleId
-  ) {
-    String existingRoleValue = normalizeValue(existingRole.Role__c);
-
-    if (
-      !String.isBlank(normalizedRole) &&
-      normalizedRole == existingRoleValue &&
-      existingRole.Inverse_Role__c == inverseReciprocalRoleId
-    ) {
-      return true;
-    }
-
-    if (!String.isBlank(normalizedRole) && normalizedRole == existingRoleValue) {
-      return true;
-    }
-
-    if (inverseReciprocalRoleId != null && existingRole.Inverse_Role__c == inverseReciprocalRoleId) {
-      return true;
-    }
-
-    if (
-      inverseReciprocalRoleId != null &&
-      existingRole.Id == inverseReciprocalRoleId &&
-      !String.isBlank(normalizedRole) &&
-      normalizedRole == existingRoleValue
-    ) {
-      return true;
-    }
-
-    return false;
   }
 
   private static String normalizeValue(String value) {

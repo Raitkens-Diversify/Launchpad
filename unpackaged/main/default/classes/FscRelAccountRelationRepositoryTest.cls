@@ -124,7 +124,6 @@ private class FscRelAccountRelationRepositoryTest {
       Account__c = scenario.rootAccount.Id,
       Related_Account__c = scenario.unlinkedPersonAccount.Id,
       RecordTypeId = householdRecordTypeId,
-      Association_Type__c = 'Member',
       Active__c = true
     );
 

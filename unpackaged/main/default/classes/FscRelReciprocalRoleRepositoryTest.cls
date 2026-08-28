@@ -34,11 +34,11 @@ private class FscRelReciprocalRoleRepositoryTest {
   }
 
   @IsTest
-  static void searchByTerm_doesNotMatchInverseRoleNames() {
+  static void searchByTerm_doesNotMatchUnrelatedRoleNames() {
     FscRelReciprocalRoleRepository repository = new FscRelReciprocalRoleRepository();
     Id recordTypeId = repository.selectContactRecordTypeId();
-    Reciprocal_Role__c childRole = repository.insertRole('Child', recordTypeId);
-    repository.insertRoleWithInverseLink('Parent', childRole.Id, recordTypeId);
+    repository.insertRole('Child', recordTypeId);
+    repository.insertRole('Parent', recordTypeId);
 
     Test.startTest();
     List<Reciprocal_Role__c> results = repository.searchByTerm('Child', 10);
@@ -120,13 +120,6 @@ private class FscRelReciprocalRoleRepositoryTest {
     );
     Reciprocal_Role__c selectedRole = repository.selectById(createdRole.Id);
     String displayName = FscRelReciprocalRoleRepository.resolveDisplayName(selectedRole);
-    String inverseSubtitle = FscRelReciprocalRoleRepository.resolveInverseSubtitle(
-      selectedRole
-    );
-    List<Reciprocal_Role__c> duplicates = repository.findPotentialDuplicates(
-      'Coverage Role One',
-      null
-    );
     Map<Id, Reciprocal_Role__c> roleById = repository.selectByIds(
       new Set<Id>{ createdRole.Id }
     );
@@ -137,8 +130,6 @@ private class FscRelReciprocalRoleRepositoryTest {
     System.assertEquals(2, filteredRoles.size());
     System.assertNotEquals(null, selectedRole);
     System.assertEquals('Coverage Role Two', displayName);
-    System.assertEquals('', inverseSubtitle);
-    System.assert(!duplicates.isEmpty());
     System.assert(roleById.containsKey(createdRole.Id));
   }
 

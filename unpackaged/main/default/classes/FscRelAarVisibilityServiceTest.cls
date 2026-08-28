@@ -84,7 +84,6 @@ private class FscRelAarVisibilityServiceTest {
       insert new Account_Account_Relationship__c(
         Account__c = householdAccount.Id,
         Related_Account__c = memberAccount.Id,
-        Association_Type__c = 'Member',
         Active__c = true
       );
     }
@@ -264,7 +263,6 @@ private class FscRelAarVisibilityServiceTest {
         Account__c = householdAccount.Id,
         Related_Account__c = memberAccount.Id,
         RecordTypeId = recordTypeId,
-        Association_Type__c = 'Member',
         Active__c = true
       );
     }

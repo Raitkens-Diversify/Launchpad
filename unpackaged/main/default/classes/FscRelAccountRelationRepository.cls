@@ -15,7 +15,7 @@ public with sharing class FscRelAccountRelationRepository {
     'Id, Account__c, Account__r.Name, Account__r.IsPersonAccount, Account__r.RecordType.DeveloperName, Account__r.RecordType.Name, ' +
     'Related_Account__c, Related_Account__r.Name, Related_Account__r.Type, Related_Account__r.IsPersonAccount, Related_Account__r.PersonContactId, ' +
     'Related_Account__r.RecordType.DeveloperName, Related_Account__r.RecordType.Name, Related_Account__r.Classification__c, ' +
-    'Roles__c, Association_Type__c, RecordTypeId, RecordType.DeveloperName, Active__c';
+    'Roles__c, RecordTypeId, RecordType.DeveloperName, Active__c';
 
   public List<Account_Account_Relationship__c> selectByRootAccount(Id rootAccountId) {
     if (rootAccountId == null) {
@@ -26,7 +26,6 @@ public with sharing class FscRelAccountRelationRepository {
       SELECT
         Id,
         Roles__c,
-        Association_Type__c,
         Related_Account__c,
         Related_Account__r.Name,
         Related_Account__r.IsPersonAccount,
@@ -125,7 +124,7 @@ public with sharing class FscRelAccountRelationRepository {
     }
 
     List<Account_Account_Relationship__c> relations = [
-      SELECT Id, Roles__c, Association_Type__c, Related_Account__c
+      SELECT Id, Roles__c, Related_Account__c
       FROM Account_Account_Relationship__c
       WHERE Account__c = :rootAccountId AND Related_Account__c = :relatedAccountId
       LIMIT 1

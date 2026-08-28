@@ -236,14 +236,6 @@ export const isClientAccount = (account = {}) => {
   );
 };
 
-export const isHouseholdMembershipPersonAccount = (account = {}) => {
-  return (
-    account.isPersonAccount === true &&
-    String(account.associationType || account.detail || "").trim() === "Member" &&
-    Boolean(account.relationId)
-  );
-};
-
 export const isHouseholdMapClientAccount = (account = {}) => {
   return isClientAccount(account);
 };
@@ -451,7 +443,6 @@ export const buildAccountViewModels = (rawAccounts) => {
       const roles = Array.isArray(account.roles)
         ? account.roles.map((role) => String(role || "").trim()).filter(Boolean)
         : [];
-      const associationTypeLabel = String(account.associationType || "").trim();
 
       return {
         id: account.relationId || account.accountId,
@@ -462,8 +453,6 @@ export const buildAccountViewModels = (rawAccounts) => {
         iconName: "standard:account",
         roles,
         selectedRoles: [...roles],
-        detail: associationTypeLabel,
-        associationType: associationTypeLabel,
         recordTypeDeveloperName: account.recordTypeDeveloperName || "",
         recordTypeLabel: account.recordTypeLabel || "",
         accountType: account.accountType || "",
@@ -493,7 +482,6 @@ export const mapAccountsForModal = (accounts) => {
       : Array.isArray(account.roles)
         ? account.roles
         : [],
-    associationType: account.associationType || account.detail || "",
     recordTypeDeveloperName: account.recordTypeDeveloperName || "",
     recordTypeLabel: account.recordTypeLabel || ""
   }));

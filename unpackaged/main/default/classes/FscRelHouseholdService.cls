@@ -409,23 +409,9 @@ public with sharing class FscRelHouseholdService {
         Account__c = householdId,
         Related_Account__c = memberAccountId,
         RecordTypeId = householdMembershipRecordTypeId,
-        Association_Type__c = resolveHouseholdMembershipAssociationType(),
         Active__c = true
       )
     );
-  }
-
-  private String resolveHouseholdMembershipAssociationType() {
-    for (
-      Schema.PicklistEntry entry : Account_Account_Relationship__c.Association_Type__c.getDescribe()
-        .getPicklistValues()
-    ) {
-      if (entry.isActive() && entry.getValue() == 'Member') {
-        return entry.getValue();
-      }
-    }
-
-    return 'Member';
   }
 
   public List<FscRelHouseholdModels.LookupOption> getAccountsByIds(
@@ -782,7 +768,6 @@ public with sharing class FscRelHouseholdService {
         : mapAccountToTreeAccount(relation.Related_Account__r);
 
       treeAccount.relationId = String.valueOf(relation.Id);
-      treeAccount.associationType = relation.Association_Type__c;
       clientAccountById.put(relation.Related_Account__c, treeAccount);
     }
 
@@ -1057,7 +1042,6 @@ public with sharing class FscRelHouseholdService {
         ? relation.Related_Account__r.Name
         : null;
       account.roles = FscRelRoleUtils.parseRoles(relation.Roles__c);
-      account.associationType = relation.Association_Type__c;
       account.recordTypeDeveloperName = relation.Related_Account__r != null &&
         relation.Related_Account__r.RecordType != null
         ? relation.Related_Account__r.RecordType.DeveloperName

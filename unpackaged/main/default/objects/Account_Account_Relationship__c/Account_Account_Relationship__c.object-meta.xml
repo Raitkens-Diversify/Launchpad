@@ -167,7 +167,7 @@
         <trackHistory>false</trackHistory>
         <type>AutoNumber</type>
     </nameField>
-    <pluralLabel>Account Account Relationshipa</pluralLabel>
+    <pluralLabel>Account Account Relationships</pluralLabel>
     <recordTypeTrackHistory>false</recordTypeTrackHistory>
     <searchLayouts />
     <sharingModel>Private</sharingModel>
