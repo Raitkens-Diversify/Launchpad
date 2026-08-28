@@ -36,6 +36,7 @@ public class Batch_TaskUpdate_Test {
             t.ActivityDate = todaysDate;
             t.OwnerId = UserInfo.getUserId();
             t.Status = 'New';
+            t.Full_Template_Order__c = i + 1;
             taskList.add(t);
         }
         for(Integer i=0;i<2;i++){
@@ -45,6 +46,7 @@ public class Batch_TaskUpdate_Test {
             t.ActivityDate = todaysDate;
             t.OwnerId = UserInfo.getUserId();
             t.Status = 'New';
+            t.Full_Template_Order__c = i + 1;
             taskList.add(t);
         }
         insert taskList;

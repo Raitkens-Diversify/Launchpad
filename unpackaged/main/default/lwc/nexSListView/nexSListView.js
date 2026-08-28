@@ -19,12 +19,11 @@ import getMySavedListViewNames from "@salesforce/apex/NexSListViewController.get
 import diversifyStyles from "@salesforce/resourceUrl/diversifyStyles";
 import NEXS_ICONS from "@salesforce/resourceUrl/arcicon";
 import { CurrentPageReference, NavigationMixin } from "lightning/navigation";
+import { openRecordInNewTab, resolveRecordUrl } from "c/recordNavigationUtils";
 import {
   buildRecordNavigationReference,
-  openRecordInNewTab,
-  resolveRecordUrl,
   usesQueryParamRecordRoute
-} from "c/recordNavigationUtils";
+} from "c/recordNavigationCommunityUtils";
 
 /**
  * Real Phosphor icons (regular weight), rendered as CSS masks so one file

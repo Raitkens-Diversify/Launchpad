@@ -89,57 +89,100 @@ public without sharing class NotificationEmailDeliveryService {
       collectRecipientIds(emailsToSend)
     );
 
-    List<Messaging.SingleEmailMessage> chunkMessages = new List<Messaging.SingleEmailMessage>();
-    List<PendingEmail> chunkEmails = new List<PendingEmail>();
     List<Notification_Log__c> sentLogs = new List<Notification_Log__c>();
     List<String> failureMessages = new List<String>();
-    Boolean hitInvocationLimit = false;
+    Integer nextEmailIndex = 0;
 
-    for (PendingEmail pendingEmail : emailsToSend) {
-      String toAddress = recipientIdToAddress.get(pendingEmail.recipientId);
-
-      if (String.isBlank(toAddress)) {
-        failureMessages.add(
-          'No email delivery address is configured for this user.'
+    while (nextEmailIndex < emailsToSend.size()) {
+      if (!NotificationGovernorLimitService.canInvokeSendEmail()) {
+        finalizeFlush(
+          emailsToSend,
+          nextEmailIndex,
+          sentLogs,
+          failureMessages,
+          true
         );
+        return;
+      }
+
+      List<Messaging.SingleEmailMessage> chunkMessages = new List<Messaging.SingleEmailMessage>();
+      List<PendingEmail> chunkEmails = new List<PendingEmail>();
+
+      while (
+        nextEmailIndex < emailsToSend.size() &&
+        chunkMessages.size() <
+          NotificationConstants.MAX_EMAILS_PER_SEND_EMAIL_INVOCATION
+      ) {
+        PendingEmail pendingEmail = emailsToSend[nextEmailIndex];
+        String toAddress = recipientIdToAddress.get(pendingEmail.recipientId);
+
+        if (String.isBlank(toAddress)) {
+          failureMessages.add(
+            'No email delivery address is configured for this user.'
+          );
+          nextEmailIndex++;
+          continue;
+        }
+
+        chunkMessages.add(
+          buildEmailMessage(
+            toAddress,
+            pendingEmail.subject,
+            pendingEmail.body,
+            true
+          )
+        );
+        chunkEmails.add(pendingEmail);
+        nextEmailIndex++;
+      }
+
+      if (chunkMessages.isEmpty()) {
         continue;
       }
 
-      chunkMessages.add(
-        buildEmailMessage(toAddress, pendingEmail.subject, pendingEmail.body, true)
-      );
-      chunkEmails.add(pendingEmail);
-
-      if (
-        chunkMessages.size() >=
-        NotificationConstants.MAX_EMAILS_PER_SEND_EMAIL_INVOCATION
-      ) {
-        SendChunkResult chunkResult = sendChunk(chunkMessages, chunkEmails);
-        sentLogs.addAll(chunkResult.sentLogs);
-        failureMessages.addAll(chunkResult.failureMessages);
-        hitInvocationLimit =
-          hitInvocationLimit || chunkResult.hitInvocationLimit;
-        chunkMessages = new List<Messaging.SingleEmailMessage>();
-        chunkEmails = new List<PendingEmail>();
-
-        if (chunkResult.hitInvocationLimit) {
-          break;
-        }
-      }
-    }
-
-    if (!chunkMessages.isEmpty() && !hitInvocationLimit) {
       SendChunkResult chunkResult = sendChunk(chunkMessages, chunkEmails);
       sentLogs.addAll(chunkResult.sentLogs);
       failureMessages.addAll(chunkResult.failureMessages);
-      hitInvocationLimit = chunkResult.hitInvocationLimit;
+
+      if (chunkResult.hitInvocationLimit) {
+        nextEmailIndex -= chunkEmails.size();
+        finalizeFlush(
+          emailsToSend,
+          nextEmailIndex,
+          sentLogs,
+          failureMessages,
+          true
+        );
+        return;
+      }
     }
 
+    finalizeFlush(
+      emailsToSend,
+      emailsToSend.size(),
+      sentLogs,
+      failureMessages,
+      false
+    );
+  }
+
+  private static void finalizeFlush(
+    List<PendingEmail> emailsToSend,
+    Integer unsentStartIndex,
+    List<Notification_Log__c> sentLogs,
+    List<String> failureMessages,
+    Boolean hitInvocationLimit
+  ) {
     if (!sentLogs.isEmpty()) {
       NotificationLogDeliveryService.markSent(sentLogs);
     }
 
-    if (hitInvocationLimit && sentLogs.isEmpty()) {
+    Integer safeUnsentStartIndex = unsentStartIndex == null
+      ? emailsToSend.size()
+      : unsentStartIndex;
+    Boolean hasUnsentEmails = safeUnsentStartIndex < emailsToSend.size();
+
+    if (hitInvocationLimit == true && hasUnsentEmails) {
       throw new NotificationEmailDeliveryException(
         NotificationConstants.ERROR_EMAIL_INVOCATION_LIMIT
       );

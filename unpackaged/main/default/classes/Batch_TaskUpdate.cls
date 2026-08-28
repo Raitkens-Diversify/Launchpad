@@ -6,9 +6,9 @@ global class Batch_TaskUpdate implements Schedulable,Database.Batchable<sObject>
 	Map<Id,List<Task>> caseToTasksMap = new Map<Id,List<Task>>();
     
     global Batch_TaskUpdate(){
-        taskMap = new Map<Id,Task>([SELECT Id, WhatId, OwnerId, Owner.Name, Order__c, ActivityDate FROM Task 
-                                         WHERE Status != 'Completed' AND Status != 'Approved' AND 
-                                         WhatId_Object__c = 'Case' ORDER BY Order__c asc]);
+        taskMap = new Map<Id,Task>([SELECT Id, WhatId, OwnerId, Owner.Name, Full_Template_Order__c, ActivityDate FROM Task
+                                         WHERE Status != 'Completed' AND Status != 'Approved' AND
+                                         WhatId_Object__c = 'Case' ORDER BY Full_Template_Order__c asc]);
         for(Task t : taskMap.values()){
             if(caseToTasksMap.get(t.WhatId)== null){
         		List<Task> tempList = new List<Task>();

@@ -134,6 +134,7 @@ public with sharing class WorkDatatableController {
         Completed_Date__c,
         WhatId,
         Order__c,
+        Full_Template_Order__c,
         CreatedDate,
         Branch_Pit_Stop__c,
         Home_Office_Pit_Stop__c,
@@ -488,8 +489,8 @@ public with sharing class WorkDatatableController {
 
   private class MainTrackTaskComparator implements System.Comparator<Task> {
     public Integer compare(Task left, Task right) {
-      Decimal leftOrder = left.Order__c == null ? 999999 : left.Order__c;
-      Decimal rightOrder = right.Order__c == null ? 999999 : right.Order__c;
+      Decimal leftOrder = left.Full_Template_Order__c == null ? 999999 : left.Full_Template_Order__c;
+      Decimal rightOrder = right.Full_Template_Order__c == null ? 999999 : right.Full_Template_Order__c;
 
       if (leftOrder == rightOrder) {
         if (left.CreatedDate == right.CreatedDate) {

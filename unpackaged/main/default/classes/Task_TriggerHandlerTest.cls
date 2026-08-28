@@ -110,9 +110,9 @@ public class Task_TriggerHandlerTest {
         Task_Template_Item__c tasktempRecord2 = [SELECT Id, Task_Template__c FROM Task_Template_Item__c WHERE Order__c = 2 LIMIT 1];
         
         List<Task> lstTask = new List<Task>();
-        lstTask.add( new Task(Subject = 'Test Task', WhatId = lstCaseRecord[0].Id, Status = 'In Progress', Task_Template__c =  tasktempRecord.Task_Template__c, Task_Template_Item__c = tasktempRecord.Id));
-        lstTask.add( new Task(Subject = 'Test Task', WhatId = lstCaseRecord[0].Id, Status = 'In Progress', Task_Template__c =  tasktempRecord.Task_Template__c, Task_Template_Item__c = tasktempRecord.Id));
-        lstTask.add( new Task(Subject = 'Test Task', WhatId = lstCaseRecord[0].Id, Status = 'In Progress', Task_Template__c =  tasktempRecord.Task_Template__c, Task_Template_Item__c = tasktempRecord2.Id));
+        lstTask.add( new Task(Subject = 'Test Task', WhatId = lstCaseRecord[0].Id, Status = 'In Progress', Full_Template_Order__c = 1, Task_Template__c =  tasktempRecord.Task_Template__c, Task_Template_Item__c = tasktempRecord.Id));
+        lstTask.add( new Task(Subject = 'Test Task', WhatId = lstCaseRecord[0].Id, Status = 'In Progress', Full_Template_Order__c = 2, Task_Template__c =  tasktempRecord.Task_Template__c, Task_Template_Item__c = tasktempRecord.Id));
+        lstTask.add( new Task(Subject = 'Test Task', WhatId = lstCaseRecord[0].Id, Status = 'In Progress', Full_Template_Order__c = 3, Task_Template__c =  tasktempRecord.Task_Template__c, Task_Template_Item__c = tasktempRecord2.Id));
         
         insert lstTask;
         Test.startTest(); 

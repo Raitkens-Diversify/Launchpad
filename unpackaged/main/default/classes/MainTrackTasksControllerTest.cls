@@ -36,7 +36,8 @@ private class MainTrackTasksControllerTest {
                 Subject = 'Test Task 1',
                 Status = 'Not Started',
                 OwnerId = UserInfo.getUserId(),
-                Task_Template_Item__c = tti.Id
+                Task_Template_Item__c = tti.Id,
+                Full_Template_Order__c = 3
             ),
             new Task(
                 WhatId = acc.Id,

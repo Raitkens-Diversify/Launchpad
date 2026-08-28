@@ -12,10 +12,10 @@ import { LightningElement, api, wire } from "lwc";
 import { CurrentPageReference, NavigationMixin } from "lightning/navigation";
 import { loadStyle } from "lightning/platformResourceLoader";
 import diversifyStyles from "@salesforce/resourceUrl/diversifyStyles";
+import { resolveRecordIdFromPageReference } from "c/recordNavigationUtils";
 import {
-  resolveRecordIdFromPageReference,
   buildRecordNavigationReference
-} from "c/recordNavigationUtils";
+} from "c/recordNavigationCommunityUtils";
 import getWorkItems from "@salesforce/apex/ArcRecordWorkItemsController.getWorkItems";
 
 const TAB_CASES = "cases";

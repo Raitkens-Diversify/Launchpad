@@ -266,6 +266,37 @@ private class NotificationPrepareStartQueueableTest {
   }
 
   @IsTest
+  static void prepareInvocable_batchesMultipleInputsIntoSingleEnqueueJob() {
+    NotificationGovernorLimitService.resetTestState();
+    NotificationPrepareStartQueueable.resetTestState();
+
+    NotificationCenterPrepareInvocable.EventInput firstInput =
+      new NotificationCenterPrepareInvocable.EventInput();
+    firstInput.sourceType = NotificationConstants.OBJECT_TYPE_TASK;
+    firstInput.sourceId = String.valueOf(UserInfo.getUserId());
+
+    NotificationCenterPrepareInvocable.EventInput secondInput =
+      new NotificationCenterPrepareInvocable.EventInput();
+    secondInput.sourceType = NotificationConstants.OBJECT_TYPE_CASE;
+    secondInput.sourceId = String.valueOf(UserInfo.getUserId());
+
+    Test.startTest();
+    NotificationCenterPrepareInvocable.prepareDelivery(
+      new List<NotificationCenterPrepareInvocable.EventInput>{
+        firstInput,
+        secondInput
+      }
+    );
+    Test.stopTest();
+
+    System.assertEquals(
+      1,
+      NotificationPrepareStartQueueable.testEnqueuedJobCount,
+      'Multiple Flow inputs should share one prepare queueable job.'
+    );
+  }
+
+  @IsTest
   static void finalizerLogsUnhandledExceptions() {
     NotificationGovernorLimitService.resetTestState();
     NotificationPrepareStartQueueable.handleFinalizerFailure(

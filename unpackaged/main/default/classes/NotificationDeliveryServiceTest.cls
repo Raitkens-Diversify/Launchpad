@@ -300,6 +300,56 @@ private class NotificationDeliveryServiceTest {
   }
 
   @IsTest
+  static void deferImmediateDelivery_logsWhenAsyncFallbackUnavailable() {
+    NotificationGovernorLimitService.resetTestState();
+    NotificationDeliveryDispatcher.testEnqueuedJobCount = 0;
+    NotificationTestDataFactory.NotificationTestContext context =
+      NotificationTestDataFactory.createHouseholdWithRecipient();
+    Notification_Rule__c rule = NotificationTestDataFactory.createUserPreference(
+      NotificationConstants.OBJECT_TYPE_CASE,
+      context.recipientUser.Id,
+      NotificationConstants.CHANNEL_EMAIL,
+      NotificationConstants.FREQUENCY_IMMEDIATE
+    );
+
+    Notification_Log__c logRecord = new Notification_Log__c(
+      Recipient__c = context.recipientUser.Id,
+      Household__c = context.household.Id,
+      Source_Type__c = NotificationConstants.OBJECT_TYPE_CASE,
+      Source_Record_Id__c = String.valueOf(context.household.Id),
+      Channel__c = NotificationConstants.CHANNEL_EMAIL,
+      Status__c = NotificationConstants.STATUS_PENDING,
+      Frequency__c = NotificationConstants.FREQUENCY_IMMEDIATE,
+      Notification_Rule__c = rule.Id
+    );
+    NotificationTestDataFactory.insertRecord(logRecord);
+
+    NotificationDeliveryModels.DeliveryRequest request =
+      NotificationDeliveryRequestBuilder.fromLogId(logRecord.Id);
+    NotificationGovernorLimitService.testForceInsufficientDeliveryBudget = true;
+    NotificationGovernorLimitService.testRemainingQueueableBudgetOverride = 0;
+    NotificationDeliveryService.skipRetryEnqueueForTest = false;
+
+    Test.startTest();
+    new NotificationDeliveryService().deliver(request);
+    Test.stopTest();
+
+    System.assertEquals(
+      NotificationConstants.STATUS_PENDING,
+      [
+        SELECT Status__c
+        FROM Notification_Log__c
+        WHERE Id = :logRecord.Id
+      ]
+      .Status__c
+    );
+    System.assert(
+      NotificationGovernorLimitService.loggedLimitMessages.size() > 0,
+      'Expected deferral to log when queueable and inline delivery are unavailable.'
+    );
+  }
+
+  @IsTest
   static void scheduleRetryUsesDispatcherChunking() {
     NotificationDeliveryDispatcher.testEnqueuedJobCount = 0;
     NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();

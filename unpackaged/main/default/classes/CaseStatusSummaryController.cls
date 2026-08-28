@@ -56,7 +56,7 @@ public with sharing class CaseStatusSummaryController {
      * main-track tasks. Counting here means the figure is right on first load
      * and needs no batch to have run.
      *
-     * The criteria are the batch's own -- tasks on the case with Order__c set --
+     * The criteria are the batch's own -- tasks on the case with Full_Template_Order__c set --
      * which is also what MainTrackTasksController selects for the Main Track
      * Tasks list, so the ratio and that list cannot disagree. One query rather
      * than two COUNT() aggregates, since the statuses are needed anyway.
@@ -68,7 +68,7 @@ public with sharing class CaseStatusSummaryController {
         for (Task t : [
             SELECT Id, Status
             FROM Task
-            WHERE WhatId = :caseId AND Order__c != NULL
+            WHERE WhatId = :caseId AND Full_Template_Order__c != NULL
         ]) {
             total++;
             if (t.Status == 'Completed') {

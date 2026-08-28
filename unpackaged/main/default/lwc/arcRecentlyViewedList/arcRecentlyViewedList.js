@@ -10,10 +10,12 @@ import diversifyStyles from "@salesforce/resourceUrl/diversifyStyles";
 import ARC_ICONS from "@salesforce/resourceUrl/arcicon";
 import getRecentlyViewedItems from "@salesforce/apex/ArcRecentlyViewedListController.getRecentlyViewedItems";
 import {
-  buildRecordNavigationReference,
   resolveRecordUrl,
   shouldAllowNativeRecordNavigation
 } from "c/recordNavigationUtils";
+import {
+  buildRecordNavigationReference
+} from "c/recordNavigationCommunityUtils";
 import { NAV_PATH_CHANGE_EVENT } from "c/arcNavTrailState";
 
 const LIST_TYPE_CONTACT = "Contact";

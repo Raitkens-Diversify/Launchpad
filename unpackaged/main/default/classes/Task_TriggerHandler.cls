@@ -27,14 +27,12 @@ public class Task_TriggerHandler {
     }
     
     public void isAfterUpdate(Map<Id, Task> newMap, Map<Id, Task> oldMap){
-        updateOwnerAndDueDateOnTask(newMap.values(), oldMap, False);
+        updateOwnerAndDueDateOnTask(newMap.values(), oldMap);
         setDateOfDeathOnCase(newMap.values(), oldMap);
         recalcOn3WayCall(newMap, oldMap);
         updateCaseStatus(newMap.values(), oldMap);
         setIsSystemAssignedField(newMap.values());
         updateCaseGroupOwnerField(newMap,oldMap);
-        handlePitStopTaskUpdate(newMap.values(), oldMap);
-        taskDetailsUpdateOnCase(newMap.values(), oldMap);
         NotificationChangePublisher.publishUpdates(
             NotificationConstants.OBJECT_TYPE_TASK,
             newMap,
@@ -47,134 +45,6 @@ public class Task_TriggerHandler {
     public void isAfterDelete(Map<Id, Task> oldMap){ }
     
     public void isAfterUndelete(Map<Id, Task> newMap){ }
-    
-        private static void taskDetailsUpdateOnCase(List<Task> newList, Map<Id, Task> oldMap) {
-        Set<Id> taskIds = new Set<Id>();
-        
-        for (Task t : newList) {
-            Task oldT = (oldMap != null) ? oldMap.get(t.Id) : null;
-            
-            if (t.WhatId != null && String.valueOf(t.WhatId).startsWith('500')) {
-                if (oldT == null || 
-                    t.OwnerId != oldT.OwnerId || 
-                    t.Subject != oldT.Subject || 
-                    t.Branch_Pit_Stop__c != oldT.Branch_Pit_Stop__c ||
-                    t.Home_Office_Pit_Stop__c != oldT.Home_Office_Pit_Stop__c ||
-                    t.Status != oldT.Status) {
-                        
-                        taskIds.add(t.Id);
-                    }
-            }
-        }
-        
-        if (!taskIds.isEmpty()) {
-            List<Case> casesToUpdate = [
-                SELECT Id FROM Case 
-                WHERE Current_Task_Id__c IN :taskIds
-            ];
-            
-            if (!casesToUpdate.isEmpty()) {
-                update casesToUpdate; 
-            }
-        }
-    }
-    
-    public static void handlePitStopTaskUpdate(List<Task> newList, Map<Id, Task> oldMap) {
-        Set<Id> caseIds = new Set<Id>();
-        
-        for (Task t : newList) {
-            Task oldT = oldMap.get(t.Id);
-            
-            if (
-                (t.Branch_Pit_Stop__c == true || t.Home_Office_Pit_Stop__c == true) &&
-                t.Status == 'Completed' &&
-                oldT.Status != 'Completed' &&
-                t.WhatId != null &&
-                String.valueOf(t.WhatId).startsWith('500') // Case prefix
-            ) {
-                caseIds.add(t.WhatId);
-            }
-        }
-        
-        if (caseIds.isEmpty()) return;
-        
-        Map<Id, Task> caseIdToNextTask = new Map<Id, Task>();
-        Map<Id, Task> caseIdToLastCompTask = new Map<Id, Task>();
-        Map<Id, Task> caseIdToFirstTask = new Map<Id, Task>();
-        
-        List<Task> nextTasks = [
-            SELECT Id, WhatId, Order__c
-            FROM Task
-            WHERE WhatId IN :caseIds
-            AND (Branch_Pit_Stop__c = false
-                 OR Home_Office_Pit_Stop__c = false)
-            AND CompletedDateTime = NULL
-            ORDER BY WhatId, Order__c ASC
-        ];
-        
-        for (Task t : nextTasks) {
-            if (!caseIdToNextTask.containsKey(t.WhatId)) {
-                caseIdToNextTask.put(t.WhatId, t); // first task per case = smallest Order__c
-            }
-        }
-        
-        List<Case> casesToUpdate = new List<Case>();
-        
-        for (Id cId : caseIdToNextTask.keySet()) {
-            casesToUpdate.add(new Case(
-                Id = cId,
-                Current_Task_Id__c = caseIdToNextTask.get(cId).Id
-            ));
-        }
-        
-        if (!casesToUpdate.isEmpty()) {
-            update casesToUpdate;
-        }
-        
-        if(nextTasks.isEmpty()){
-            
-            List<Task> normalCompTasks = [
-                SELECT Id, WhatId, Task_Template_Item__c, Task_Template__c,
-                IsClosed, Requires_a_3_Way_Call__c, Order__c,Financial_Advisor_Team__c,OwnerId
-                FROM Task
-                WHERE WhatId IN :caseIds
-                AND Task_Template__c != NULL
-                AND Task_Template_Item__c != NULL
-                ORDER BY WhatId, Order__c ASC
-            ];
-            
-            for (Task t : normalCompTasks) {
-                // Store first task (minimum Order__c) for each case
-                if (!caseIdToFirstTask.containsKey(t.WhatId)) {
-                    caseIdToFirstTask.put(t.WhatId, t);
-                }
-                
-                // Keep updating last completed task, so final value is highest Order__c closed task
-                if (t.IsClosed) {
-                    caseIdToLastCompTask.put(t.WhatId, t);
-                }
-            }
-            
-            List<Task> tasksForOwnerUpdate = new List<Task>();
-            List<Task> tasksForAssignOwner = new List<Task>();
-            
-            for (Id caseId : caseIds) {
-                if (caseIdToLastCompTask.containsKey(caseId)) {
-                    tasksForOwnerUpdate.add(caseIdToLastCompTask.get(caseId));
-                } else if (caseIdToFirstTask.containsKey(caseId)) {
-                    tasksForAssignOwner.add(caseIdToFirstTask.get(caseId));
-                }
-            }
-            
-            if (!tasksForOwnerUpdate.isEmpty()) {
-                updateOwnerAndDueDateOnTask(tasksForOwnerUpdate, null, true);
-            }
-            
-            if (!tasksForAssignOwner.isEmpty()) {
-                assignOwnersToExistingTasks(tasksForAssignOwner);
-            }
-        }
-    }
     
     private static void updateCaseStatus(List<Task> newList, Map<Id, Task> oldMap){
         List<Case> casesToUpdate = new List<Case>();
@@ -302,7 +172,7 @@ public class Task_TriggerHandler {
         }
     }
     
-    private static void updateOwnerAndDueDateOnTask(List<Task> newList, Map<Id, Task> oldMap,Boolean isDirectAssign){
+    private static void updateOwnerAndDueDateOnTask(List<Task> newList, Map<Id, Task> oldMap){
         Set<Id> setOfCaseIds = new Set<Id>();
         Set<Id> setOfTaskTempItemIds = new Set<Id>();
         Set<Id> setOfFATIds = new Set<Id>();
@@ -322,7 +192,7 @@ public class Task_TriggerHandler {
         
         for(Task newTask : newList){
             if(!String.isEmpty(newTask.Task_Template_Item__c) && !String.isEmpty(newTask.Task_Template__c) && 
-               (isDirectAssign || (newTask.isClosed && newTask.isClosed != oldMap.get(newTask.Id).isClosed))  && newTask.Requires_a_3_Way_Call__c == null){
+               newTask.isClosed && newTask.isClosed != oldMap.get(newTask.Id).isClosed && newTask.Requires_a_3_Way_Call__c == null){
                    setOfCaseIds.add(newTask.WhatId);
                    setOfTaskIds.add(newTask.Id);  
                    setOfTaskTempItemIds.add(newTask.Task_Template_Item__c);
@@ -333,8 +203,8 @@ public class Task_TriggerHandler {
                                                                 FROM Task_Template_Item__c 
                                                                 WHERE Id IN : setOfTaskTempItemIds]);
         
-        lstTask = [SELECT Id, WhatId, Task_Template_Item__c, Task_Template__c, Task_Template_Item__r.Task_Template__c, Task_Template_Item__r.Order__c, Task_Template__r.Assigned_To__c,
-                   Task_Template__r.FA_Team_Permission__c, Task_Template__r.Due_Date__c, Task_Template__r.Referenced_Field__c, Task_Template__r.Number_of_Days__c, Task_Template__r.Queue__c, 
+        lstTask = [SELECT Id, WhatId, Task_Template_Item__c, Task_Template__c, Task_Template_Item__r.Task_Template__c, Task_Template_Item__r.Order__c, Full_Template_Order__c, Task_Template__r.Assigned_To__c,
+                   Task_Template__r.FA_Team_Permission__c, Task_Template__r.Due_Date__c, Task_Template__r.Referenced_Field__c, Task_Template__r.Number_of_Days__c, Task_Template__r.Queue__c,
                    isClosed,Owner.Name, OwnerName__c FROM Task WHERE WhatId IN :setOfCaseIds AND Id NOT IN :setOfTaskIds AND Task_Template_Item__c != null];
         
         mapOfCase = new Map<Id, Case>([SELECT Id, Financial_Advisor_Team__c, Status, Review_Meeting_Scheduled_Date__c, OwnerId FROM Case WHERE Id IN :setOfCaseIds]);
@@ -382,113 +252,112 @@ public class Task_TriggerHandler {
         Id approvalTaskRecordTypeId = Schema.sObjectType.Task.getRecordTypeInfosByName().get('Approval Task').getRecordTypeId();
         
         for(Task newTask : newList){
-            if(!String.isEmpty(newTask.Task_Template_Item__c) && !String.isEmpty(newTask.Task_Template__c) && (isDirectAssign || (newTask.isClosed &&
-                                                                                                                                  newTask.isClosed != oldMap.get(newTask.Id).isClosed) ) && mapOfCaseIdToTask.containsKey(newTask.WhatId)){
-                                                                                                                                      Task_Template_Item__c taskTempItemRecord = mapOfTaskTempItem.get(newTask.Task_Template_Item__c);
-                                                                                                                                      List<Task> lstRelatedTask = mapOfCaseIdToTask.get(newTask.WhatId);
-                                                                                                                                      Case relatedCase = mapOfCase.get(newTask.WhatId);
-                                                                                                                                      Boolean isTaskFound = false;
-                                                                                                                                      //Update fields of related case 
-                                                                                                                                      relatedCase.Next_Task__c = null;
-                                                                                                                                      relatedCase.Current_Task_Id__c = null;
-                                                                                                                                      relatedCase.Previous_Task__c = newTask.Id;
-                                                                                                                                      relatedCase.Owner_Group__c = null;
-                                                                                                                                      for(Task relatedTask : lstRelatedTask){
-                                                                                                                                          if(!String.isEmpty(relatedTask.Task_Template_Item__c) && !String.isEmpty(relatedTask.Task_Template__c) && 
-                                                                                                                                             taskTempItemRecord.Order__c != null && relatedTask.Task_Template_Item__r.Order__c == taskTempItemRecord.Order__c + 1){
-                                                                                                                                                 Date ActivityDate = System.Today();
-                                                                                                                                                 
-                                                                                                                                                 if(relatedTask.Task_Template__r.Due_Date__c == 'Immediate'){
-                                                                                                                                                     relatedTask.ActivityDate = System.Today();
-                                                                                                                                                 } else if(relatedTask.Task_Template__r.Due_Date__c == 'Days from Case Creation' ||
-                                                                                                                                                           relatedTask.Task_Template__r.Due_Date__c == 'Days from Previous Task Completion'){
-                                                                                                                                                               relatedTask.ActivityDate = System.Today()+(Integer)relatedTask.Task_Template__r.Number_of_Days__c;
-                                                                                                                                                           } else if(relatedTask.Task_Template__r.Due_Date__c == 'After Referenced Field' && relatedTask.Task_Template__r.Referenced_Field__c == 'Review_Meeting_Scheduled_Date__c'){
-                                                                                                                                                               ActivityDate = relatedCase.Review_Meeting_Scheduled_Date__c + (Integer)relatedTask.Task_Template__r.Number_of_Days__c;
-                                                                                                                                                               relatedTask.ActivityDate = ActivityDate;
-                                                                                                                                                           } else if(relatedTask.Task_Template__r.Due_Date__c == 'Before Referenced Field' && relatedTask.Task_Template__r.Referenced_Field__c == 'Review_Meeting_Scheduled_Date__c'){
-                                                                                                                                                               ActivityDate = relatedCase.Review_Meeting_Scheduled_Date__c - (Integer)relatedTask.Task_Template__r.Number_of_Days__c;
-                                                                                                                                                               relatedTask.ActivityDate = ActivityDate;
-                                                                                                                                                               //System.debug('relatedTask.ActivityDate: ' + relatedTask.ActivityDate);
-                                                                                                                                                           } 
-                                                                                                                                                 //Update case
-                                                                                                                                                 System.debug('relatedTask.OwnerId: ' + relatedTask.OwnerId);
-                                                                                                                                                 relatedCase.Current_Task_Id__c = relatedTask.Id;
-                                                                                                                                                 relatedCase.Owner_Group__c = relatedTask.Owner.Name;
-                                                                                                                                                 System.debug('relatedTask.OwnerId: ' + relatedTask.OwnerId);
-                                                                                                                                                 System.debug('relatedTask.Owner.Name: ' + relatedTask.OwnerName__c);
-                                                                                                                                                 relatedCase.Sub_Status__c ='New';
-                                                                                                                                                 updateTasksMap.put(relatedTask.Id,relatedTask);          
-                                                                                                                                                 
-                                                                                                                                                 if(relatedTask.Task_Template__r.Assigned_To__c == 'Queue'){
-                                                                                                                                                     if(!String.isEmpty(relatedTask.Task_Template__r.Queue__c)){
-                                                                                                                                                         if(relatedTask.Task_Template__r.Queue__c == 'Compliance'||relatedTask.Task_Template__r.Queue__c == 'Principal Review'){
-                                                                                                                                                             relatedTask.RecordTypeId = approvalTaskRecordTypeId;
-                                                                                                                                                             relatedTask.OwnerId =  mapOfQueueIdByName.get(relatedTask.Task_Template__r.Queue__c);
-                                                                                                                                                             
-                                                                                                                                                         } else if(relatedTask.Task_Template__r.Queue__c == 'Back Office Operations'){
-                                                                                                                                                             relatedTask.OwnerId =  mapOfQueueIdByName.get('Operations');
-                                                                                                                                                         } else if(relatedTask.Task_Template__r.Queue__c == 'Financial Advisor Team Operations'){
-                                                                                                                                                             if(mapOfFatTeamAndUserForOperations.containsKey(relatedCase.Financial_Advisor_Team__c)){
-                                                                                                                                                                 relatedTask.OwnerId =  mapOfFatTeamAndUserForOperations.get(relatedCase.Financial_Advisor_Team__c);
-                                                                                                                                                             } else if(mapOfFatTeamAndUserForPrimary.containsKey(relatedCase.Financial_Advisor_Team__c)){
-                                                                                                                                                                 relatedTask.OwnerId =  mapOfFatTeamAndUserForPrimary.get(relatedCase.Financial_Advisor_Team__c);
-                                                                                                                                                             }
-                                                                                                                                                         } else if(!mapOfQueueIdByName.isEmpty() && mapOfQueueIdByName.containsKey(relatedTask.Task_Template__r.Queue__c)){
-                                                                                                                                                             relatedTask.OwnerId =  mapOfQueueIdByName.get(relatedTask.Task_Template__r.Queue__c);
-                                                                                                                                                             
-                                                                                                                                                         }                                      
-                                                                                                                                                     }
-                                                                                                                                                 } else if(relatedTask.Task_Template__r.Assigned_To__c == 'FA Team Permission'){
-                                                                                                                                                     if(!String.isEmpty(relatedCase.Financial_Advisor_Team__c)){
-                                                                                                                                                         List<Financial_Advisor_Team_Member__c> lstFATM = mapOfFATeam.get(relatedCase.Financial_Advisor_Team__c).Financial_Advisor_Team_Members__r;
-                                                                                                                                                         String fieldName = null;
-                                                                                                                                                         if(relatedTask.Task_Template__r.FA_Team_Permission__c == 'Trading'){
-                                                                                                                                                             fieldName = 'Trading__c';
-                                                                                                                                                         } else if(relatedTask.Task_Template__r.FA_Team_Permission__c == 'Draft Paperwork'){
-                                                                                                                                                             fieldName = 'Draft_Paperwork__c';
-                                                                                                                                                         } else if(relatedTask.Task_Template__r.FA_Team_Permission__c == 'Review Paperwork'){
-                                                                                                                                                             fieldName = 'Review_Paperwork__c';
-                                                                                                                                                         } else if(relatedTask.Task_Template__r.FA_Team_Permission__c == 'Send Notifications'){
-                                                                                                                                                             fieldName = 'Send_Notifications__c';
-                                                                                                                                                         } else if(relatedTask.Task_Template__r.FA_Team_Permission__c == 'CSA'){
-                                                                                                                                                             fieldName = 'CSA__c';
-                                                                                                                                                         } else if(relatedTask.Task_Template__r.FA_Team_Permission__c == 'Associate Advisor'){
-                                                                                                                                                             fieldName = 'Associate_Advisor__c';
-                                                                                                                                                         } else if(taskTempItemRecord.Task_Template__r.FA_Team_Permission__c == 'Advisor'){
-                                                                                                                                                             fieldName = 'Primary__c';
-                                                                                                                                                         } else if(taskTempItemRecord.Task_Template__r.FA_Team_Permission__c == 'Operation'){
-                                                                                                                                                             fieldName = 'Operations__c';
-                                                                                                                                                         }
-                                                                                                                                                         if(fieldName != null){
-                                                                                                                                                             for(Financial_Advisor_Team_Member__c fatm: lstFATM){
-                                                                                                                                                                 if((Boolean)fatm.get(fieldName)){
-                                                                                                                                                                     relatedTask.OwnerId = fatm.User__c;
-                                                                                                                                                                     break;
-                                                                                                                                                                 } else {
-                                                                                                                                                                     relatedTask.OwnerId = relatedCase.OwnerId;
-                                                                                                                                                                 }
-                                                                                                                                                             }
-                                                                                                                                                         }
-                                                                                                                                                     }
-                                                                                                                                                 }
-                                                                                                                                                relatedTask.Status = 'Not Started';
+            if(!String.isEmpty(newTask.Task_Template_Item__c) && !String.isEmpty(newTask.Task_Template__c) && newTask.isClosed &&
+               newTask.isClosed != oldMap.get(newTask.Id).isClosed && mapOfCaseIdToTask.containsKey(newTask.WhatId)){
+                   Task_Template_Item__c taskTempItemRecord = mapOfTaskTempItem.get(newTask.Task_Template_Item__c);
+                   List<Task> lstRelatedTask = mapOfCaseIdToTask.get(newTask.WhatId);
+                   Case relatedCase = mapOfCase.get(newTask.WhatId);
+                   Boolean isTaskFound = false;
+                   //Update fields of related case 
+                   relatedCase.Next_Task__c = null;
+                   relatedCase.Current_Task_Id__c = null;
+                   relatedCase.Previous_Task__c = newTask.Id;
+                   relatedCase.Owner_Group__c = null;
+                   for(Task relatedTask : lstRelatedTask){
+                       if(!String.isEmpty(relatedTask.Task_Template_Item__c) && !String.isEmpty(relatedTask.Task_Template__c) &&
+                          newTask.Full_Template_Order__c != null && relatedTask.Full_Template_Order__c == newTask.Full_Template_Order__c + 1){
+                              Date ActivityDate = System.Today();
+                              
+                              if(relatedTask.Task_Template__r.Due_Date__c == 'Immediate'){
+                                  relatedTask.ActivityDate = System.Today();
+                              } else if(relatedTask.Task_Template__r.Due_Date__c == 'Days from Case Creation' ||
+                                        relatedTask.Task_Template__r.Due_Date__c == 'Days from Previous Task Completion'){
+                                            relatedTask.ActivityDate = System.Today()+(Integer)relatedTask.Task_Template__r.Number_of_Days__c;
+                                        } else if(relatedTask.Task_Template__r.Due_Date__c == 'After Referenced Field' && relatedTask.Task_Template__r.Referenced_Field__c == 'Review_Meeting_Scheduled_Date__c'){
+                                            ActivityDate = relatedCase.Review_Meeting_Scheduled_Date__c + (Integer)relatedTask.Task_Template__r.Number_of_Days__c;
+                                            relatedTask.ActivityDate = ActivityDate;
+                                        } else if(relatedTask.Task_Template__r.Due_Date__c == 'Before Referenced Field' && relatedTask.Task_Template__r.Referenced_Field__c == 'Review_Meeting_Scheduled_Date__c'){
+                                            ActivityDate = relatedCase.Review_Meeting_Scheduled_Date__c - (Integer)relatedTask.Task_Template__r.Number_of_Days__c;
+                                            relatedTask.ActivityDate = ActivityDate;
+                                            //System.debug('relatedTask.ActivityDate: ' + relatedTask.ActivityDate);
+                              } 
+                              //Update case
+                              System.debug('relatedTask.OwnerId: ' + relatedTask.OwnerId);
+                              relatedCase.Current_Task_Id__c = relatedTask.Id;
+                              relatedCase.Owner_Group__c = relatedTask.Owner.Name;
+                              System.debug('relatedTask.OwnerId: ' + relatedTask.OwnerId);
+                              System.debug('relatedTask.Owner.Name: ' + relatedTask.OwnerName__c);
+                              relatedCase.Sub_Status__c ='New';
+                              updateTasksMap.put(relatedTask.Id,relatedTask);          
+                              
+                              if(relatedTask.Task_Template__r.Assigned_To__c == 'Queue'){
+                                  if(!String.isEmpty(relatedTask.Task_Template__r.Queue__c)){
+                                      if(relatedTask.Task_Template__r.Queue__c == 'Compliance'||relatedTask.Task_Template__r.Queue__c == 'Principal Review'){
+                                          relatedTask.RecordTypeId = approvalTaskRecordTypeId;
+                                          relatedTask.OwnerId =  mapOfQueueIdByName.get(relatedTask.Task_Template__r.Queue__c);
 
-                                                                                                                                                 updateTasksMap.put(relatedTask.Id,relatedTask);          
-                                                                                                                                             } else if(!String.isEmpty(relatedTask.Task_Template_Item__c) && !String.isEmpty(relatedTask.Task_Template__c) && 
-                                                                                                                                                       taskTempItemRecord.Order__c != null && relatedTask.Task_Template_Item__r.Order__c == (taskTempItemRecord.Order__c + 2)){
-                                                                                                                                                           
-                                                                                                                                                           relatedCase.Next_Task__c = relatedTask.Id;
-                                                                                                                                                       }
-                                                                                                                                          if(!relatedTask.isClosed){
-                                                                                                                                              isTaskFound = true;
-                                                                                                                                          }
-                                                                                                                                      }
-                                                                                                                                      if(!isTaskFound){
-                                                                                                                                          relatedCase.Status = 'Closed';
-                                                                                                                                      }
-                                                                                                                                      updatedCaseMap.put(relatedCase.Id,relatedCase);
-                                                                                                                                  }
+                                      } else if(relatedTask.Task_Template__r.Queue__c == 'Back Office Operations'){
+                                          relatedTask.OwnerId =  mapOfQueueIdByName.get('Operations');
+                                      } else if(relatedTask.Task_Template__r.Queue__c == 'Financial Advisor Team Operations'){
+                                          if(mapOfFatTeamAndUserForOperations.containsKey(relatedCase.Financial_Advisor_Team__c)){
+                                              relatedTask.OwnerId =  mapOfFatTeamAndUserForOperations.get(relatedCase.Financial_Advisor_Team__c);
+                                          } else if(mapOfFatTeamAndUserForPrimary.containsKey(relatedCase.Financial_Advisor_Team__c)){
+                                              relatedTask.OwnerId =  mapOfFatTeamAndUserForPrimary.get(relatedCase.Financial_Advisor_Team__c);
+                                          }
+                                      } else if(!mapOfQueueIdByName.isEmpty() && mapOfQueueIdByName.containsKey(relatedTask.Task_Template__r.Queue__c)){
+                                          relatedTask.OwnerId =  mapOfQueueIdByName.get(relatedTask.Task_Template__r.Queue__c);
+
+                                      }                                      
+                                  }
+                              } else if(relatedTask.Task_Template__r.Assigned_To__c == 'FA Team Permission'){
+                                  if(!String.isEmpty(relatedCase.Financial_Advisor_Team__c)){
+                                      List<Financial_Advisor_Team_Member__c> lstFATM = mapOfFATeam.get(relatedCase.Financial_Advisor_Team__c).Financial_Advisor_Team_Members__r;
+                                      String fieldName = null;
+                                      if(relatedTask.Task_Template__r.FA_Team_Permission__c == 'Trading'){
+                                          fieldName = 'Trading__c';
+                                      } else if(relatedTask.Task_Template__r.FA_Team_Permission__c == 'Draft Paperwork'){
+                                          fieldName = 'Draft_Paperwork__c';
+                                      } else if(relatedTask.Task_Template__r.FA_Team_Permission__c == 'Review Paperwork'){
+                                          fieldName = 'Review_Paperwork__c';
+                                      } else if(relatedTask.Task_Template__r.FA_Team_Permission__c == 'Send Notifications'){
+                                          fieldName = 'Send_Notifications__c';
+                                      } else if(relatedTask.Task_Template__r.FA_Team_Permission__c == 'CSA'){
+                                          fieldName = 'CSA__c';
+                                      } else if(relatedTask.Task_Template__r.FA_Team_Permission__c == 'Associate Advisor'){
+                                          fieldName = 'Associate_Advisor__c';
+                                      } else if(taskTempItemRecord.Task_Template__r.FA_Team_Permission__c == 'Advisor'){
+                                          fieldName = 'Primary__c';
+                                      } else if(taskTempItemRecord.Task_Template__r.FA_Team_Permission__c == 'Operation'){
+                                          fieldName = 'Operations__c';
+                                      }
+                                      if(fieldName != null){
+                                          for(Financial_Advisor_Team_Member__c fatm: lstFATM){
+                                              if((Boolean)fatm.get(fieldName)){
+                                                  relatedTask.OwnerId = fatm.User__c;
+                                                  break;
+                                              } else {
+                                                relatedTask.OwnerId = relatedCase.OwnerId;
+                                              }
+                                          }
+                                      }
+                                  }
+                              }
+
+                              updateTasksMap.put(relatedTask.Id,relatedTask);          
+                          } else if(!String.isEmpty(relatedTask.Task_Template_Item__c) && !String.isEmpty(relatedTask.Task_Template__c) &&
+
+                                    newTask.Full_Template_Order__c != null && relatedTask.Full_Template_Order__c == (newTask.Full_Template_Order__c + 2)){
+                                        relatedCase.Next_Task__c = relatedTask.Id;
+                                    }
+                       if(!relatedTask.isClosed){
+                           isTaskFound = true;
+                       }
+                   }
+                   if(!isTaskFound){
+                       relatedCase.Status = 'Closed';
+                   }
+                   updatedCaseMap.put(relatedCase.Id,relatedCase);
+               }
         }
         if(!updatedCaseMap.isEmpty()){
             update updatedCaseMap.values();
@@ -647,201 +516,6 @@ public class Task_TriggerHandler {
         }
         if(!finAcctsToUpdate.isEmpty()){
             update finAcctsToUpdate;
-        }
-    }
-    
-        public static void assignOwnersToExistingTasks(List<Task> inputTasks) {
-        if (inputTasks == null || inputTasks.isEmpty()) {
-            return;
-        }
-        
-        Set<Id> caseIds = new Set<Id>();
-        Set<Id> fatIds = new Set<Id>();
-        Set<Id> taskTemplateItemIds = new Set<Id>();
-        Set<String> queueNames = new Set<String>{ 'Unassigned', 'Operations' };
-            
-            Map<Id, Task> taskMap = new Map<Id, Task>();
-        for (Task t : inputTasks) {
-            if (t.Id != null) {
-                taskMap.put(t.Id, t);
-            }
-            if (t.WhatId != null) {
-                caseIds.add(t.WhatId);
-            }
-            if (t.Financial_Advisor_Team__c != null) {
-                fatIds.add(t.Financial_Advisor_Team__c);
-            }
-            if (t.Task_Template_Item__c != null) {
-                taskTemplateItemIds.add(t.Task_Template_Item__c);
-            }
-        }
-        
-        if (taskMap.isEmpty()) {
-            return;
-        }
-        
-        Map<Id, Case> caseMap = new Map<Id, Case>();
-        if (!caseIds.isEmpty()) {
-            caseMap = new Map<Id, Case>([
-                SELECT Id, OwnerId, Financial_Advisor_Team__c
-                FROM Case
-                WHERE Id IN :caseIds
-            ]);
-        }
-        
-        Map<Id, Task_Template_Item__c> taskTemplateItemMap = new Map<Id, Task_Template_Item__c>();
-        if (!taskTemplateItemIds.isEmpty()) {
-            for (Task_Template_Item__c tti : [
-                SELECT Id,
-                Order__c,
-                Independent__c,
-                Task_Template__c,
-                Task_Template__r.Assigned_To__c,
-                Task_Template__r.Queue__c,
-                Task_Template__r.FA_Team_Permission__c
-                FROM Task_Template_Item__c
-                WHERE Id IN :taskTemplateItemIds
-            ]) {
-                taskTemplateItemMap.put(tti.Id, tti);
-                if (!String.isBlank(tti.Task_Template__r.Queue__c)) {
-                    queueNames.add(tti.Task_Template__r.Queue__c);
-                }
-            }
-        }
-        
-        Map<Id, Financial_Advisor_Team__c> fatMap = new Map<Id, Financial_Advisor_Team__c>();
-        if (!fatIds.isEmpty()) {
-            fatMap = new Map<Id, Financial_Advisor_Team__c>([
-                SELECT Id,
-                (SELECT Id,
-                 User__c,
-                 Operations__c,
-                 Primary__c,
-                 Trading__c,
-                 Draft_Paperwork__c,
-                 Review_Paperwork__c,
-                 Send_Notifications__c,
-                 CSA__c,
-                 Associate_Advisor__c
-                 FROM Financial_Advisor_Team_Members__r)
-                FROM Financial_Advisor_Team__c
-                WHERE Id IN :fatIds
-            ]);
-        }
-        
-        Map<String, Id> queueIdByName = new Map<String, Id>();
-        for (Group g : [
-            SELECT Id, Name
-            FROM Group
-            WHERE Type = 'Queue'
-            AND Name IN :queueNames
-        ]) {
-            queueIdByName.put(g.Name, g.Id);
-        }
-        
-        Map<Id, Id> fatTeamAndUserForPrimary = new Map<Id, Id>();
-        Map<Id, Id> fatTeamAndUserForOperations = new Map<Id, Id>();
-        
-        for (Financial_Advisor_Team__c fat : fatMap.values()) {
-            for (Financial_Advisor_Team_Member__c memberRec : fat.Financial_Advisor_Team_Members__r) {
-                if (memberRec.Operations__c) {
-                    fatTeamAndUserForOperations.put(fat.Id, memberRec.User__c);
-                }
-                if (memberRec.Primary__c) {
-                    fatTeamAndUserForPrimary.put(fat.Id, memberRec.User__c);
-                }
-            }
-        }
-        
-        List<Task> tasksToUpdate = new List<Task>();
-        List<Case> casesToUpdate = new List<Case>();
-        system.debug('taskMap.values()'+taskMap.values());
-        for (Task existingTask : taskMap.values()) {
-            Task_Template_Item__c tti = taskTemplateItemMap.get(existingTask.Task_Template_Item__c);
-            Case caseRec = caseMap.get(existingTask.WhatId);
-            
-            if (tti == null || caseRec == null) {
-                continue;
-            }
-            
-            Id fatId = existingTask.Financial_Advisor_Team__c != null
-                ? existingTask.Financial_Advisor_Team__c
-                : caseRec.Financial_Advisor_Team__c;
-            
-            Id newOwnerId;
-            system.debug('tti.Task_Template__r.Assigned_To__c'+tti.Task_Template__r.Assigned_To__c);
-            if (tti.Task_Template__r.Assigned_To__c == 'Queue') {
-                
-                if (!String.isBlank(tti.Task_Template__r.Queue__c)) {
-                    if (queueIdByName.containsKey(tti.Task_Template__r.Queue__c)) {
-                        newOwnerId = queueIdByName.get(tti.Task_Template__r.Queue__c);
-                        
-                    } else if (tti.Task_Template__r.Queue__c == 'Back Office Operations') {
-                        newOwnerId = queueIdByName.get('Operations');
-                        
-                    } else if (tti.Task_Template__r.Queue__c == 'Financial Advisor Team Operations') {
-                        if (fatTeamAndUserForOperations.containsKey(fatId)) {
-                            newOwnerId = fatTeamAndUserForOperations.get(fatId);
-                        } else if (fatTeamAndUserForPrimary.containsKey(fatId)) {
-                            newOwnerId = fatTeamAndUserForPrimary.get(fatId);
-                        }
-                    }
-                }
-                
-            } else if (tti.Task_Template__r.Assigned_To__c == 'FA Team Permission') {
-                            system.debug('fatMap.containsKey(fatId)'+fatMap.containsKey(fatId));
-
-                if (fatMap.containsKey(fatId)) {
-                    List<Financial_Advisor_Team_Member__c> members =
-                        fatMap.get(fatId).Financial_Advisor_Team_Members__r;
-                                                system.debug('fieldName'+members);
-
-                    String fieldName;
-                    if (tti.Task_Template__r.FA_Team_Permission__c == 'Trading') {
-                        fieldName = 'Trading__c';
-                    } else if (tti.Task_Template__r.FA_Team_Permission__c == 'Draft Paperwork') {
-                        fieldName = 'Draft_Paperwork__c';
-                    } else if (tti.Task_Template__r.FA_Team_Permission__c == 'Review Paperwork') {
-                        fieldName = 'Review_Paperwork__c';
-                    } else if (tti.Task_Template__r.FA_Team_Permission__c == 'Send Notifications') {
-                        fieldName = 'Send_Notifications__c';
-                    } else if (tti.Task_Template__r.FA_Team_Permission__c == 'CSA') {
-                        fieldName = 'CSA__c';
-                    } else if (tti.Task_Template__r.FA_Team_Permission__c == 'Associate Advisor') {
-                        fieldName = 'Associate_Advisor__c';
-                    } else if (tti.Task_Template__r.FA_Team_Permission__c == 'Advisor') {
-                        fieldName = 'Primary_Financial_Advisor__c';
-                    } else if (tti.Task_Template__r.FA_Team_Permission__c == 'Operation') {
-                        fieldName = 'Operations__c';
-                    }
-                                                                    system.debug('fieldName'+fieldName);
-
-                    if (fieldName != null) {
-                        for (Financial_Advisor_Team_Member__c memberRec : members) {
-                            if ((Boolean) memberRec.get(fieldName)) {
-                                newOwnerId = memberRec.User__c;
-                                break;
-                            }
-                        }
-                    }
-                }
-                
-            }
-            system.debug('newOwnerId'+newOwnerId);
-            if (newOwnerId != null && newOwnerId != existingTask.OwnerId) {
-                tasksToUpdate.add(new Task(
-                    Id = existingTask.Id,
-                    OwnerId = newOwnerId,
-					Status = 'Not Started'
-                ));
-                caseRec.Current_Task_Id__c = existingTask.Id;
-                casesToUpdate.add(caseRec);
-            }
-        }
-        system.debug('tasksToUpdate'+tasksToUpdate);
-        if (!tasksToUpdate.isEmpty()) {
-            update tasksToUpdate;
-            update casesToUpdate;
         }
     }
     

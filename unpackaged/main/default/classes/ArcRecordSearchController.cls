@@ -139,6 +139,10 @@ public with sharing class ArcRecordSearchController {
       ' LIMIT ' +
       fetchSize;
 
+    System.debug(LoggingLevel.ERROR, 'TEMP_DIAG soql=' + soql);
+    System.debug(LoggingLevel.ERROR, 'TEMP_DIAG binds=' + binds);
+    System.debug(LoggingLevel.ERROR, 'TEMP_DIAG runningUser=' + UserInfo.getUserId() + ' profileId=' + UserInfo.getProfileId() + ' networkId=' + Network.getNetworkId());
+
     List<SObject> records;
     try {
       records = Database.queryWithBinds(soql, binds, AccessLevel.USER_MODE);
@@ -304,6 +308,10 @@ public with sharing class ArcRecordSearchController {
     // would be a type mismatch.
     if (fieldApiName == 'RecordTypeId' || fieldApiName == 'RecordType.Name') {
       List<Id> recordTypeIds = resolveRecordTypeIds(objectApiName, operandValue);
+      System.debug(
+        LoggingLevel.ERROR,
+        'TEMP_DIAG resolveRecordTypeIds(' + objectApiName + ', "' + operandValue + '") -> ' + recordTypeIds
+      );
       if (recordTypeIds.isEmpty()) {
         return null;
       }
@@ -365,16 +373,32 @@ public with sharing class ArcRecordSearchController {
   /**
    * The RecordType Id(s) whose current Name matches operandValue -- a
    * single label, or several joined with "; " (see the RecordTypeId
-   * branch in buildFilterClause for why). Queried live rather than via
-   * Schema.getRecordTypeInfosByName(): that method returns a Map keyed by
-   * Name, so two record types sharing an identical label (this org has
-   * exactly that -- a FinServ "Household" and a plain "Household") would
-   * silently collapse to whichever one the map happened to keep, and the
-   * caller could never recover both Ids for an OR-style label match. A
-   * plain SOQL WHERE Name IN (...) has no such collision. A label that
-   * doesn't match any record type's current name is dropped rather than
-   * failing the whole filter; the caller treats an empty result as
-   * "nothing to filter on".
+   * branch in buildFilterClause for why).
+   *
+   * Resolved from the object describe's own getRecordTypeInfos() list, not
+   * a live `SELECT Id FROM RecordType WHERE ...` query and not
+   * Schema.getRecordTypeInfosByName() either:
+   *
+   * - The live SOQL form silently returns zero rows for some running
+   *   users in some Experience Cloud site contexts even for a record type
+   *   that demonstrably exists and is in active use -- confirmed directly
+   *   against this org (Guest User context): the query found nothing for
+   *   Name = 'Business', while Schema.SObjectType.Account.getRecordTypeInfos()
+   *   found it immediately, correct Id included. That is exactly the bug
+   *   this method used to cause: a RecordType-filtered tab (Businesses,
+   *   Retirement Plans, Trusts & Estates) silently lost its WHERE clause
+   *   for some site visitors and fell through to an unfiltered, wrong-type
+   *   result set instead of failing loudly.
+   * - getRecordTypeInfosByName() (a Map keyed by Name) isn't a safe
+   *   replacement either: two record types can share an identical label
+   *   (this org has that for both "Household" and "Business"), and a Map
+   *   can only keep one entry per key, silently collapsing the other.
+   *   Iterating the plain list form avoids that collapse the same way the
+   *   old SOQL's own "Name IN (...)" did.
+   * - Availability (RecordTypeInfo.isAvailable()) is deliberately not
+   *   checked: that flag governs whether a user could pick this record
+   *   type when creating a record, not whether existing records of that
+   *   type may be read/filtered on, which is all this method is for.
    */
   private static List<Id> resolveRecordTypeIds(String objectApiName, String operandValue) {
     List<Id> ids = new List<Id>();
@@ -399,13 +423,15 @@ public with sharing class ArcRecordSearchController {
       return ids;
     }
 
-    for (RecordType recordType : [
-      SELECT Id
-      FROM RecordType
-      WHERE SObjectType = :objectApiName
-      AND Name IN :labels
-    ]) {
-      ids.add(recordType.Id);
+    Schema.SObjectType objectType = Schema.getGlobalDescribe().get(objectApiName);
+    if (objectType == null) {
+      return ids;
+    }
+
+    for (Schema.RecordTypeInfo info : objectType.getDescribe().getRecordTypeInfos()) {
+      if (labels.contains(info.getName())) {
+        ids.add(info.getRecordTypeId());
+      }
     }
     return ids;
   }

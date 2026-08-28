@@ -192,4 +192,55 @@ private class NotificationEmailDeliveryServiceTest {
       exceptionMessage
     );
   }
+
+  @IsTest
+  static void batchedSendThrowsWhenUnsentEmailsRemainAfterInvocationLimit() {
+    NotificationEmailDeliveryService.resetTestState();
+    NotificationGovernorLimitService.resetTestState();
+    NotificationTestDataFactory.NotificationTestContext context =
+      NotificationTestDataFactory.createHouseholdWithRecipient();
+    Integer invocationsBeforeLimit =
+      NotificationConstants.MAX_EMAIL_INVOCATIONS_PER_TRANSACTION -
+      NotificationConstants.EMAIL_INVOCATION_SAFETY_BUFFER;
+    Integer emailCount =
+      invocationsBeforeLimit *
+      NotificationConstants.MAX_EMAILS_PER_SEND_EMAIL_INVOCATION +
+      1;
+
+    Boolean exceptionThrown = false;
+    String exceptionMessage = '';
+
+    Test.startTest();
+    NotificationEmailDeliveryService.beginBatch();
+    try {
+      for (Integer index = 0; index < emailCount; index++) {
+        NotificationEmailDeliveryService.sendNotification(
+          context.recipientUser.Id,
+          'Subject ' + index,
+          'Body ' + index
+        );
+      }
+    } finally {
+      try {
+        NotificationEmailDeliveryService.endBatch();
+      } catch (
+        NotificationEmailDeliveryService.NotificationEmailDeliveryException ex
+      ) {
+        exceptionThrown = true;
+        exceptionMessage = ex.getMessage();
+      }
+    }
+    Test.stopTest();
+
+    System.assertEquals(true, exceptionThrown);
+    System.assertEquals(
+      NotificationConstants.ERROR_EMAIL_INVOCATION_LIMIT,
+      exceptionMessage
+    );
+    System.assertEquals(
+      invocationsBeforeLimit,
+      NotificationEmailDeliveryService.testSendEmailInvocationCount,
+      'Expected all safe email invocations to run before deferring the remainder.'
+    );
+  }
 }

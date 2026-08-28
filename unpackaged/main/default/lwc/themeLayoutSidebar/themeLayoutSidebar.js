@@ -307,7 +307,22 @@ export default class ThemeLayoutSidebar extends LightningElement {
      */
     const publish = (height) => {
       if (height > 0) {
-        rail.style.setProperty("--arc-rail-height", `${Math.round(height)}px`);
+        /*
+         * floor, not round. Both sources of this number are fractional --
+         * getBoundingClientRect().height and ResizeObserver's
+         * contentRect.height -- and rounding a 972.5px rail up to 973px
+         * published a height LARGER than the rail actually is. The nav takes
+         * it as a min-height, so it ended up a fraction of a pixel taller than
+         * the container it was measured from, and the rail is overflow-y:
+         * auto: that showed as a permanent scrollbar whose thumb fills almost
+         * the whole track. Fractional viewport heights are normal on scaled
+         * and high-DPI displays, which is why it appeared on large screens.
+         *
+         * Flooring can only ever under-report, by less than a pixel, which
+         * costs an invisible sliver of slack at the foot of the rail. That is
+         * the cheaper of the two errors by a wide margin.
+         */
+        rail.style.setProperty("--arc-rail-height", `${Math.floor(height)}px`);
       }
     };
 

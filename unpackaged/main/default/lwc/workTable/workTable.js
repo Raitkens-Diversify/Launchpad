@@ -8,11 +8,10 @@ import { LightningElement, api, wire, track } from "lwc";
 import { loadStyle } from "lightning/platformResourceLoader";
 import { NavigationMixin } from "lightning/navigation";
 import getWorkData from "@salesforce/apex/WorkDatatableController.getWorkData";
+import { openRecordInNewTab, resolveRecordUrl } from "c/recordNavigationUtils";
 import {
-  buildRecordNavigationReference,
-  openRecordInNewTab,
-  resolveRecordUrl
-} from "c/recordNavigationUtils";
+  buildRecordNavigationReference
+} from "c/recordNavigationCommunityUtils";
 import diversifyStyles from "@salesforce/resourceUrl/diversifyStyles";
 import envelopeWizardStyles from "@salesforce/resourceUrl/envelopeWizardStyles";
 import NEXS_ICONS from "@salesforce/resourceUrl/arcicon";

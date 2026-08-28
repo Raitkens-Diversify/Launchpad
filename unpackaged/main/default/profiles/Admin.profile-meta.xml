@@ -279,6 +279,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>ArcRecordSearchControllerTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>ArcRecordSummaryController</apexClass>
         <enabled>true</enabled>
     </classAccesses>

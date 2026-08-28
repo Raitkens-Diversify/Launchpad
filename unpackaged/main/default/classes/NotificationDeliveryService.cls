@@ -269,13 +269,23 @@ public without sharing class NotificationDeliveryService {
       return;
     }
 
-    if (!NotificationGovernorLimitService.canEnqueueQueueableJob()) {
-      return;
-    }
+    Integer queueableJobsBefore = Limits.getQueueableJobs();
 
     NotificationDeliveryDispatcher.enqueueRequests(
       new List<NotificationDeliveryModels.DeliveryRequest>{ request }
     );
+
+    if (
+      Limits.getQueueableJobs() == queueableJobsBefore &&
+      !NotificationGovernorLimitService.canProcessImmediateDelivery()
+    ) {
+      NotificationGovernorLimitService.logLimitException(
+        'NotificationDeliveryService.deferImmediateDelivery',
+        new NotificationDeliveryException(
+          NotificationConstants.ERROR_QUEUEABLE_JOB_LIMIT
+        )
+      );
+    }
   }
 
   private static Boolean shouldDeliverImmediateLogsIndividually(

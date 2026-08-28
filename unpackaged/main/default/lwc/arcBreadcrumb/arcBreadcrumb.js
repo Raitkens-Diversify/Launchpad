@@ -18,10 +18,10 @@ import { NavigationMixin, CurrentPageReference } from "lightning/navigation";
 import { getRecord, getFieldValue } from "lightning/uiRecordApi";
 import { loadStyle } from "lightning/platformResourceLoader";
 import diversifyStyles from "@salesforce/resourceUrl/diversifyStyles";
+import { resolveRecordIdFromPageReference } from "c/recordNavigationUtils";
 import {
-  resolveRecordIdFromPageReference,
   buildRecordNavigationReference
-} from "c/recordNavigationUtils";
+} from "c/recordNavigationCommunityUtils";
 import {
   readNavTrail,
   findDefaultListTrail,

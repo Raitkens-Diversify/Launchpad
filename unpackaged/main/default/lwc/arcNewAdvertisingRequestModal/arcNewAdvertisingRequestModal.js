@@ -10,7 +10,9 @@ import { NavigationMixin } from "lightning/navigation";
 import LightningToast from "lightning/toast";
 import searchAccounts from "@salesforce/apex/ArcNewAdvertisingRequestController.searchAccounts";
 import createAdvertisingRequest from "@salesforce/apex/ArcNewAdvertisingRequestController.createAdvertisingRequest";
-import { buildRecordNavigationReference } from "c/recordNavigationUtils";
+import {
+  buildRecordNavigationReference
+} from "c/recordNavigationCommunityUtils";
 
 const SEARCH_DEBOUNCE_MS = 300;
 const MIN_SEARCH_TERM_LENGTH = 2;

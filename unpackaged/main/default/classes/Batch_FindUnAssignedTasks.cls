@@ -2,7 +2,7 @@ public class Batch_FindUnAssignedTasks implements Schedulable, Database.Batchabl
     
     public Database.QueryLocator start(Database.BatchableContext bc) {
         // Query all Not closed Tasks that are owned by the 'UnAssigned' owner
-        return Database.getQueryLocator('SELECT Id, WhatId, Task_Template_Item__r.Order__c FROM Task WHERE IsClosed = False AND createddate=today AND OwnerId IN (SELECT Id FROM Group WHERE Type = \'Queue\' AND Name = \'UnAssigned\')');
+        return Database.getQueryLocator('SELECT Id, WhatId, Full_Template_Order__c FROM Task WHERE IsClosed = False AND createddate=today AND OwnerId IN (SELECT Id FROM Group WHERE Type = \'Queue\' AND Name = \'UnAssigned\')');
     }
     
     // The execute method processes each batch of records. 
@@ -27,7 +27,7 @@ public class Batch_FindUnAssignedTasks implements Schedulable, Database.Batchabl
         }
         system.debug('previousTaskIds'+previousTaskIds);
         // Query the Task object for Previous Tasks that are closed
-        Map<Id, Task> previousTaskMap = new Map<Id, Task>([SELECT Id,Task_Template_Item__r.Order__c FROM Task WHERE Id IN :previousTaskIds AND IsClosed = TRUE]);
+        Map<Id, Task> previousTaskMap = new Map<Id, Task>([SELECT Id, Full_Template_Order__c FROM Task WHERE Id IN :previousTaskIds AND IsClosed = TRUE]);
         
         // List to hold tasks that need to be updated
         List<Task> taskToUpdate = new List<Task>();
@@ -39,7 +39,7 @@ public class Batch_FindUnAssignedTasks implements Schedulable, Database.Batchabl
                 if(!previousTaskMap.isEmpty() && previousTaskMap.containsKey(caseMap.get(tsk.WhatId).Previous_Task__c)){
                     // Check if the Previous_Task__c of the related Case is present in the previousTaskMap
                     Task previousTask = previousTaskMap.get(caseMap.get(tsk.WhatId).Previous_Task__c);                    
-                    if(tsk.Task_Template_Item__r.Order__c == previousTask.Task_Template_Item__r.Order__c+1 ) {
+                    if(tsk.Full_Template_Order__c == previousTask.Full_Template_Order__c + 1 ) {
                         // Set IsSystemAssigned__c to true if conditions are met
                         tsk.IsSystemAssigned__c = TRUE;
                         // Add Task to the list to be updated

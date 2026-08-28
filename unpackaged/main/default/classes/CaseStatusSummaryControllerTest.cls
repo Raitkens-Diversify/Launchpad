@@ -173,11 +173,10 @@ public class CaseStatusSummaryControllerTest {
 
         // Five main-track tasks, two complete, so the 5/2 the assertions expect
         // exist as records: the counts are now read from the tasks rather than
-        // from Total_Main_Track_Tasks__c. Task.Order__c is a formula over
-        // Task_Template_Item__r.Order__c and cannot be set directly, so the
-        // tasks hang off a template item that carries an order. Its milestone
-        // flags are deliberately left off so this does not disturb the
-        // milestone assertions in the tests below.
+        // from Total_Main_Track_Tasks__c. The count selects tasks whose
+        // Full_Template_Order__c is set, so each task carries a sequence value.
+        // The template item's milestone flags are deliberately left off so this
+        // does not disturb the milestone assertions in the tests below.
         Task_Template_Item__c orderedItem = new Task_Template_Item__c(
             Case_Template__c = ctmp.Id,
             Task_Template__c = ttmp.Id,
@@ -191,6 +190,7 @@ public class CaseStatusSummaryControllerTest {
                 Subject = 'Main track ' + i,
                 WhatId = c.Id,
                 Task_Template_Item__c = orderedItem.Id,
+                Full_Template_Order__c = i,
                 Status = i <= 2 ? 'Completed' : 'Not Started'
             ));
         }
