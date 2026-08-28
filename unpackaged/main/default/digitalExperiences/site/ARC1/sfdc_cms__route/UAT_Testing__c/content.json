@@ -1,0 +1,12 @@
+{
+  "type" : "sfdc_cms__route",
+  "title" : "UAT Testing",
+  "contentBody" : {
+    "activeViewId" : "UAT_Testing",
+    "configurationTags" : [ ],
+    "pageAccess" : "UseParent",
+    "routeType" : "custom-uat-testing",
+    "urlPrefix" : "uat-testing"
+  },
+  "urlName" : "uat-testing"
+}

@@ -14,18 +14,16 @@ private class ArcRecordSearchControllerTest {
       new Account(Name = 'Acme Household', RecordTypeId = householdRecordTypeId)
     };
 
-    List<ArcRecordSearchController.SearchFilter> filters = new List<ArcRecordSearchController.SearchFilter>();
     ArcRecordSearchController.SearchFilter filter = new ArcRecordSearchController.SearchFilter();
     filter.fieldApiName = 'RecordType.Name';
     filter.operator = 'Equals';
     filter.operandValue = 'Business';
-    filters.add(filter);
 
     Test.startTest();
     ArcRecordSearchController.SearchResult result = ArcRecordSearchController.searchRecords(
       'Account',
       new List<String>{ 'Name' },
-      filters,
+      JSON.serialize(new List<ArcRecordSearchController.SearchFilter>{ filter }),
       null,
       null,
       null,
@@ -55,18 +53,16 @@ private class ArcRecordSearchControllerTest {
   static void searchRecordsDropsRecordTypeFilterWithNoMatchingLabelAndReturnsEverythingElseInstead() {
     insert new Account(Name = 'Unfiltered by anything');
 
-    List<ArcRecordSearchController.SearchFilter> filters = new List<ArcRecordSearchController.SearchFilter>();
     ArcRecordSearchController.SearchFilter filter = new ArcRecordSearchController.SearchFilter();
     filter.fieldApiName = 'RecordType.Name';
     filter.operator = 'Equals';
     filter.operandValue = 'No Such Record Type Label';
-    filters.add(filter);
 
     Test.startTest();
     ArcRecordSearchController.SearchResult result = ArcRecordSearchController.searchRecords(
       'Account',
       new List<String>{ 'Name' },
-      filters,
+      JSON.serialize(new List<ArcRecordSearchController.SearchFilter>{ filter }),
       null,
       null,
       null,
@@ -165,18 +161,16 @@ private class ArcRecordSearchControllerTest {
       new Account(Name = 'Large Fund', AnnualRevenue = 5000000)
     };
 
-    List<ArcRecordSearchController.SearchFilter> filters = new List<ArcRecordSearchController.SearchFilter>();
     ArcRecordSearchController.SearchFilter filter = new ArcRecordSearchController.SearchFilter();
     filter.fieldApiName = 'AnnualRevenue';
     filter.operator = 'GreaterThan';
     filter.operandValue = '100000';
-    filters.add(filter);
 
     Test.startTest();
     ArcRecordSearchController.SearchResult result = ArcRecordSearchController.searchRecords(
       'Account',
       new List<String>{ 'Name' },
-      filters,
+      JSON.serialize(new List<ArcRecordSearchController.SearchFilter>{ filter }),
       null,
       null,
       null,
@@ -186,5 +180,93 @@ private class ArcRecordSearchControllerTest {
 
     Assert.areEqual(1, result.rows.size());
     Assert.areEqual('Large Fund', result.rows[0].cells[0]);
+  }
+
+  @IsTest
+  static void searchRecordsAppliesTextComparisonOperators() {
+    insert new List<Account>{
+      new Account(Name = 'Zebra Holdings'),
+      new Account(Name = 'Other Company')
+    };
+
+    Test.startTest();
+    ArcRecordSearchController.SearchResult containsResult = searchWithFilter('Name', 'Contains', 'Zebra');
+    ArcRecordSearchController.SearchResult startsWithResult = searchWithFilter('Name', 'StartsWith', 'Zebra');
+    ArcRecordSearchController.SearchResult notContainResult = searchWithFilter('Name', 'NotContain', 'Zebra');
+    Test.stopTest();
+
+    Assert.areEqual('Zebra Holdings', containsResult.rows[0].cells[0]);
+    Assert.areEqual('Zebra Holdings', startsWithResult.rows[0].cells[0]);
+    Assert.areEqual('Other Company', notContainResult.rows[0].cells[0]);
+  }
+
+  @IsTest
+  static void searchRecordsAppliesRemainingNumericComparisonOperators() {
+    insert new List<Account>{
+      new Account(Name = 'Small Fund', AnnualRevenue = 5000),
+      new Account(Name = 'Large Fund', AnnualRevenue = 5000000)
+    };
+
+    Test.startTest();
+    ArcRecordSearchController.SearchResult equalsResult = searchWithFilter('AnnualRevenue', 'Equals', '5000');
+    ArcRecordSearchController.SearchResult notEqualResult = searchWithFilter('AnnualRevenue', 'NotEqual', '5000');
+    ArcRecordSearchController.SearchResult greaterOrEqualResult = searchWithFilter('AnnualRevenue', 'GreaterOrEqual', '5000000');
+    ArcRecordSearchController.SearchResult lessThanResult = searchWithFilter('AnnualRevenue', 'LessThan', '100000');
+    ArcRecordSearchController.SearchResult lessOrEqualResult = searchWithFilter('AnnualRevenue', 'LessOrEqual', '5000');
+    Test.stopTest();
+
+    Assert.areEqual('Small Fund', equalsResult.rows[0].cells[0]);
+    Assert.areEqual('Large Fund', notEqualResult.rows[0].cells[0]);
+    Assert.areEqual('Large Fund', greaterOrEqualResult.rows[0].cells[0]);
+    Assert.areEqual('Small Fund', lessThanResult.rows[0].cells[0]);
+    Assert.areEqual('Small Fund', lessOrEqualResult.rows[0].cells[0]);
+  }
+
+  @IsTest
+  static void searchRecordsDropsFilterOnUnknownFieldAndDropsUnknownColumnSelection() {
+    insert new Account(Name = 'Untouched By Bad Filter');
+
+    Test.startTest();
+    ArcRecordSearchController.SearchResult unknownFieldFilterResult = searchWithFilter(
+      'No_Such_Field__x',
+      'Equals',
+      'anything'
+    );
+    ArcRecordSearchController.SearchResult emptySelectionResult = ArcRecordSearchController.searchRecords(
+      'Account',
+      new List<String>{ 'No_Such_Field__x' },
+      null,
+      null,
+      null,
+      null,
+      25
+    );
+    Test.stopTest();
+
+    // An unrecognised filter field is dropped rather than failing the whole
+    // search, same documented behavior as an unresolvable RecordType label.
+    Assert.areEqual(1, unknownFieldFilterResult.rows.size());
+    // No requested column survives validation, so no query is even attempted.
+    Assert.isTrue(emptySelectionResult.rows.isEmpty());
+  }
+
+  private static ArcRecordSearchController.SearchResult searchWithFilter(
+    String fieldApiName,
+    String operator,
+    String operandValue
+  ) {
+    ArcRecordSearchController.SearchFilter filter = new ArcRecordSearchController.SearchFilter();
+    filter.fieldApiName = fieldApiName;
+    filter.operator = operator;
+    filter.operandValue = operandValue;
+    return ArcRecordSearchController.searchRecords(
+      'Account',
+      new List<String>{ 'Name' },
+      JSON.serialize(new List<ArcRecordSearchController.SearchFilter>{ filter }),
+      null,
+      null,
+      null,
+      25
+    );
   }
 }

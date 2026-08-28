@@ -10,6 +10,7 @@ import communityBasePath from "@salesforce/community/basePath";
 import { NavigationMixin } from "lightning/navigation";
 import {
   buildRecordPageReference,
+  hasActiveTextSelection,
   isValidSalesforceRecordId,
   resolveRecordIdFromPageReference,
   shouldAllowNativeRecordNavigation,
@@ -17,6 +18,7 @@ import {
 
 export {
   buildRecordPageReference,
+  hasActiveTextSelection,
   isValidSalesforceRecordId,
   resolveRecordIdFromPageReference,
   shouldAllowNativeRecordNavigation,

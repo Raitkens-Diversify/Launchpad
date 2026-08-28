@@ -160,11 +160,6 @@
         <default>false</default>
         <visible>false</visible>
     </applicationVisibilities>
-    <applicationVisibilities>
-        <application>standard__Platform</application>
-        <default>true</default>
-        <visible>true</visible>
-    </applicationVisibilities>
     <fieldPermissions>
         <editable>true</editable>
         <field>AccountContactRelation.EndDate</field>
@@ -6587,9 +6582,6 @@
     </layoutAssignments>
     <layoutAssignments>
         <layout>Announcement__c-Announcement Layout</layout>
-    </layoutAssignments>
-    <layoutAssignments>
-        <layout>Arc_Diag_Log__c-Arc Diag Log %28TEMP - delete%29 Layout</layout>
     </layoutAssignments>
     <layoutAssignments>
         <layout>Article_Feedback__c-Article Feedback Layout</layout>

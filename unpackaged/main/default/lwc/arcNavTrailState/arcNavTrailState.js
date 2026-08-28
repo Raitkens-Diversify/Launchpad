@@ -25,7 +25,28 @@ const APPROVED_PRODUCTS_LIST_PATH = "/product/Product__c/Default";
 /* Its own page rather than a tab on Cases: the advertising reviews are Cases,
    but nobody reaches them by browsing Cases — they come at it from Compliance. */
 const ADVERTISING_REVIEWS_PATH = "/advertising-reviews";
+const UAT_TESTING_PATH = "/uat-testing";
 export const MANUAL_CONTACTS_GROUP_ID = "arc-nav-contacts";
+
+// Matches all three domains this sandbox is actually reached on --
+// arc-launchpad.diversify.com, and the two default
+// dfpginvestments--launchpad.sandbox.my.{site,salesforce-sites}.com hosts --
+// without also matching arc.diversify.com, which this same org has
+// registered too but isn't one of the domains UAT testing runs on (and reads
+// like a placeholder for the eventual production domain, which must never
+// match this check).
+const LAUNCHPAD_HOSTNAME_MARKER = "launchpad";
+
+/**
+ * True only on the Launchpad sandbox's site domains. UAT Testing links to an
+ * internal tester tool that only ever exists there -- gating on hostname
+ * (same technique arcHeaderAvatar/themeLayoutSidebar/egnyteVfEmbed already
+ * use for environment checks) keeps it out of every other org's nav without
+ * needing a server round trip just to decide whether to show a nav entry.
+ */
+const isLaunchpadEnvironment = () =>
+  typeof window !== "undefined" &&
+  window.location.hostname.toLowerCase().includes(LAUNCHPAD_HOSTNAME_MARKER);
 
 const ROUTE_OBJECT_API_NAMES = Object.freeze({
   account: "Account",
@@ -277,6 +298,19 @@ export const STATIC_NAV_ITEMS = [
     type: "InternalLink",
     target: "/notifications",
     icon: "bell.svg"
+  },
+  {
+    id: "arc-nav-footer-divider",
+    type: "Divider",
+    hidden: !isLaunchpadEnvironment()
+  },
+  {
+    id: "arc-nav-uat-testing",
+    label: "UAT Testing (Launchpad only)",
+    type: "InternalLink",
+    target: UAT_TESTING_PATH,
+    icon: "bug.svg",
+    hidden: !isLaunchpadEnvironment()
   }
 ];
 

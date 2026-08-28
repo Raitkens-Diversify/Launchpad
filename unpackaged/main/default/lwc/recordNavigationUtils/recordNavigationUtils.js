@@ -136,6 +136,21 @@ export const shouldAllowNativeRecordNavigation = (event) => {
   );
 };
 
+/**
+ * True while the user has real (non-collapsed) selected text on the page.
+ * A mousedown-drag-mouseup gesture to select/copy a cell's text still fires
+ * a plain click on mouseup -- indistinguishable from a genuine click by
+ * event type alone -- so a row/link click handler that doesn't want to hijack
+ * a copy gesture needs to check this too. A plain click (no drag) collapses
+ * any prior selection before the click event fires, so this is only ever
+ * true here because of the gesture that produced the current click.
+ */
+export const hasActiveTextSelection = () => {
+  const selection =
+    typeof window === "undefined" ? null : window.getSelection();
+  return Boolean(selection && selection.toString().length > 0);
+};
+
 const openRecordInBrowserTab = (navigationHost, recordId) =>
   resolveRecordUrl(navigationHost, recordId).then((url) => {
     if (!url) {

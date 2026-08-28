@@ -18,6 +18,7 @@ import NEXS_ICONS from "@salesforce/resourceUrl/arcicon";
 import {
   buildExperienceRecordPath,
   buildRecordNavigationReference,
+  hasActiveTextSelection,
   resolveRecordUrl,
   shouldAllowNativeRecordNavigation,
   usesQueryParamRecordRoute
@@ -1684,6 +1685,14 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
   handleRecordLinkClick(event) {
     event.stopPropagation();
 
+    if (hasActiveTextSelection()) {
+      // A drag-to-select-and-copy gesture over the link still fires this
+      // click on mouseup -- block the anchor's own native navigation too,
+      // not just the programmatic navigate below.
+      event.preventDefault();
+      return;
+    }
+
     const recordId = event.currentTarget.dataset.recordId;
     const objectApiName = event.currentTarget.dataset.objectApiName;
     const openInNewContext = shouldAllowNativeRecordNavigation(event);
@@ -1744,6 +1753,10 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
     }
 
     if (shouldAllowNativeRecordNavigation(event)) {
+      return;
+    }
+
+    if (hasActiveTextSelection()) {
       return;
     }
 
