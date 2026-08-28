@@ -24,6 +24,13 @@
               "attributes" : {
                 "dxpStyle" : { }
               },
+              "definition" : "c:arcWelcomeExperience",
+              "id" : "1e9d5c3a-6f4e-4b8d-9a2c-7d3f8b1e4c6a",
+              "type" : "component"
+            }, {
+              "attributes" : {
+                "dxpStyle" : { }
+              },
               "definition" : "c:arcHomeHeader",
               "id" : "f3f191c0-5db7-4bf0-82b2-dc7665acfc0e",
               "type" : "component"

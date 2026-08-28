@@ -13,7 +13,7 @@
             <columnToColumn>false</columnToColumn>
             <isUnlocked>true</isUnlocked>
             <operator>equals</operator>
-            <value>Account.FinServ__IndustriesHousehold</value>
+            <value>Account.Household</value>
         </criteriaItems>
     </filter>
     <format>Summary</format>

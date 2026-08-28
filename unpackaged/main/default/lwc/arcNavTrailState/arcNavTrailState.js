@@ -817,7 +817,7 @@ function normalizePathForComparison(path) {
   return normalizeMenuTarget(path).toLowerCase();
 }
 
-function resolveSiteBasePath(path = window.location.pathname) {
+function resolveSiteBasePath() {
   if (communityBasePath) {
     return normalizePath(communityBasePath);
   }
@@ -826,13 +826,16 @@ function resolveSiteBasePath(path = window.location.pathname) {
     return normalizePath(globalThis.LWR.env.basePath);
   }
 
-  const normalizedPath = normalizePath(path);
-  const segments = normalizedPath.split("/").filter(Boolean);
-
-  if (segments.length >= 1) {
-    return `/${segments[0]}`;
-  }
-
+  /*
+   * No configured prefix means the site is root-mapped (the published
+   * custom domain) and the base path is simply "". Guessing it from the
+   * first path segment instead treated "/case" as the site base on
+   * /case/{id}/{slug}: stripSiteBase then ate the route segment,
+   * inferObjectApiNameFromPath returned "", and isOffNavRoute hid the
+   * breadcrumb on every record page — only on the published domain, since
+   * the /ARC-prefixed hosts get a real communityBasePath. Same reasoning
+   * as resolveCommunityBasePath in c/recordNavigationCommunityUtils.
+   */
   return "";
 }
 

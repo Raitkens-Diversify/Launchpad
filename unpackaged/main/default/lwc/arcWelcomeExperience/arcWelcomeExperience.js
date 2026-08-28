@@ -56,7 +56,7 @@ import markWelcomeSeen from "@salesforce/apex/ArcHomeWelcomeController.markWelco
  * Set back to false before this reaches real users, or everyone gets the tour
  * on every page view.
  */
-const ALWAYS_SHOW = true;
+const ALWAYS_SHOW = false;
 
 /**
  * The walkthrough.
@@ -127,7 +127,7 @@ const STEPS = [
     navId: "arc-nav-isas",
     region: "list",
     title: "Accounts and agreements",
-    body: "Investments & Services holds your clients' accounts, their directly held investments, and the service agreements that go with them."
+    body: "Investments & Agreements holds your clients' accounts, their directly held investments, and the service agreements that go with them."
   },
   {
     key: "compliance",
