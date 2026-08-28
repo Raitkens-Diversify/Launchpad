@@ -107,6 +107,14 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>ArcAccountRelationshipsController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>ArcAccountRelationshipsControllerTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>ArcActivityPanelController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -3944,6 +3952,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>false</editable>
+        <field>Event.Task_Template_Assigned_to_Queue__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>true</editable>
         <field>Financial_Account_Related_Product__c.Amount__c</field>
         <readable>true</readable>
@@ -4066,6 +4079,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Financial_Account_Related_Product__c.Wizard_Financial_Account__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Financial_Advisor_Team_Member__c.User_is_Active__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -5891,6 +5909,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Strategy__c.Structured_Note__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Task.Task_Template_Assigned_to_Queue__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

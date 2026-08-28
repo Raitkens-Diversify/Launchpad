@@ -1,0 +1,70 @@
+<template>
+  <template lwc:if={showSection}>
+    <details class="arc-account-relationships" open>
+      <summary class="arc-account-relationships__summary">{cardTitle}</summary>
+
+      <div class="arc-account-relationships__body">
+        <template lwc:if={isLoading}>
+          <div class="arc-account-relationships__loading">
+            <c-arc-loading-spinner
+              alternative-text="Loading relationships"
+              size="small"
+            ></c-arc-loading-spinner>
+          </div>
+        </template>
+
+        <template lwc:elseif={errorMessage}>
+          <p class="arc-account-relationships__error" role="alert">
+            {errorMessage}
+          </p>
+        </template>
+
+        <template lwc:else>
+          <template for:each={groupsView} for:item="group">
+            <div key={group.key} class="arc-account-relationships__group">
+              <h3 class="arc-account-relationships__group-title">
+                {group.label}
+                <span class="arc-account-relationships__count"
+                  >({group.countLabel})</span
+                >
+              </h3>
+
+              <template lwc:if={group.hasRows}>
+                <ul class="arc-account-relationships__list">
+                  <template for:each={group.rows} for:item="row">
+                    <li
+                      key={row.relatedAccountId}
+                      class="arc-account-relationships__row"
+                    >
+                      <a
+                        href="#"
+                        data-record-id={row.relatedAccountId}
+                        onclick={handleRowClick}
+                        >{row.relatedAccountName}</a
+                      >
+                    </li>
+                  </template>
+                </ul>
+
+                <template lwc:if={group.hasMore}>
+                  <button
+                    class="arc-account-relationships__load-more"
+                    type="button"
+                    data-group={group.label}
+                    onclick={handleLoadMore}
+                  >
+                    Load more
+                  </button>
+                </template>
+              </template>
+
+              <template lwc:else>
+                <p class="arc-account-relationships__empty">None on file.</p>
+              </template>
+            </div>
+          </template>
+        </template>
+      </div>
+    </details>
+  </template>
+</template>

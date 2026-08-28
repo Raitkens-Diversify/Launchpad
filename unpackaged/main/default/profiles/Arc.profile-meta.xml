@@ -3732,6 +3732,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>false</editable>
+        <field>Event.Task_Template_Assigned_to_Queue__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>true</editable>
         <field>Event_Cost_Line_Item__c.Amount__c</field>
         <readable>true</readable>
@@ -6224,6 +6229,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Strategy__c.Sleeve_Classification__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Task.Task_Template_Assigned_to_Queue__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

@@ -187,7 +187,8 @@
             <label>Case</label>
         </rules>
     </decisions>
-    <description>Updated to change Main Track Task Status to Blocked when Pit Stop is created.</description>
+    <description>Updated to change Main Track Task Status to Blocked when Pit Stop is created.
+8/27 - added filter for only active FA Team members to be listed</description>
     <dynamicChoiceSets>
         <name>choicesForMembers</name>
         <dataType>String</dataType>
@@ -198,6 +199,13 @@
             <operator>EqualTo</operator>
             <value>
                 <elementReference>varCase.Financial_Advisor_Team__c</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>User_is_Active__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <booleanValue>true</booleanValue>
             </value>
         </filters>
         <object>Financial_Advisor_Team_Member__c</object>

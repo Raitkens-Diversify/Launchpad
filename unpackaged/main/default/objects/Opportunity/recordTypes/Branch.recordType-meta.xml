@@ -632,23 +632,15 @@
     <picklistValues>
         <picklist>Potential_Service__c</picklist>
         <values>
-            <fullName>BD</fullName>
+            <fullName>401k Plan Services</fullName>
             <default>false</default>
         </values>
         <values>
-            <fullName>Broker Dealer</fullName>
+            <fullName>Diversify Asset Management</fullName>
             <default>false</default>
         </values>
         <values>
-            <fullName>Delaware Statutory Trust %28DST%29</fullName>
-            <default>false</default>
-        </values>
-        <values>
-            <fullName>Family Office Service Agreement</fullName>
-            <default>false</default>
-        </values>
-        <values>
-            <fullName>Fee Based Wealth Management</fullName>
+            <fullName>Estate Planning Services</fullName>
             <default>false</default>
         </values>
         <values>
@@ -656,11 +648,11 @@
             <default>false</default>
         </values>
         <values>
-            <fullName>Retirement Planning or ERISA</fullName>
+            <fullName>IT Services</fullName>
             <default>false</default>
         </values>
         <values>
-            <fullName>Tax Services</fullName>
+            <fullName>Integrated Ops</fullName>
             <default>false</default>
         </values>
     </picklistValues>

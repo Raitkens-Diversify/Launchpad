@@ -3,35 +3,27 @@
         <label><!-- Potential Service --></label>
         <name>Potential_Service__c</name>
         <picklistValues>
-            <masterLabel>Broker Dealer</masterLabel>
-            <translation><!-- Broker Dealer --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Delaware Statutory Trust (DST)</masterLabel>
-            <translation><!-- Delaware Statutory Trust (DST) --></translation>
+            <masterLabel>401k Plan Services</masterLabel>
+            <translation><!-- 401k Plan Services --></translation>
         </picklistValues>
         <picklistValues>
             <masterLabel>Diversify Asset Management</masterLabel>
             <translation><!-- Diversify Asset Management --></translation>
         </picklistValues>
         <picklistValues>
-            <masterLabel>Family Office Service Agreement</masterLabel>
-            <translation><!-- Family Office Service Agreement --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Fee Based Wealth Management</masterLabel>
-            <translation><!-- Fee Based Wealth Management --></translation>
+            <masterLabel>Estate Planning Services</masterLabel>
+            <translation><!-- Estate Planning Services --></translation>
         </picklistValues>
         <picklistValues>
             <masterLabel>Financial Planning</masterLabel>
             <translation><!-- Financial Planning --></translation>
         </picklistValues>
         <picklistValues>
-            <masterLabel>Retirement Planning or ERISA</masterLabel>
-            <translation><!-- Retirement Planning or ERISA --></translation>
+            <masterLabel>IT Services</masterLabel>
+            <translation><!-- IT Services --></translation>
         </picklistValues>
         <picklistValues>
-            <masterLabel>Tax Services</masterLabel>
-            <translation><!-- Tax Services --></translation>
+            <masterLabel>Integrated Ops</masterLabel>
+            <translation><!-- Integrated Ops --></translation>
         </picklistValues>
     </CustomFieldTranslation>

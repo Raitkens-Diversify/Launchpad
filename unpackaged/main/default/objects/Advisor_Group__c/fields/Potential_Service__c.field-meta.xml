@@ -16,45 +16,59 @@
                 <label>Financial Planning</label>
             </value>
             <value>
-                <fullName>Broker Dealer</fullName>
-                <default>false</default>
-                <label>Broker Dealer</label>
-            </value>
-            <value>
-                <fullName>Delaware Statutory Trust (DST)</fullName>
-                <default>false</default>
-                <label>Delaware Statutory Trust (DST)</label>
-            </value>
-            <value>
-                <fullName>Family Office Service Agreement</fullName>
-                <default>false</default>
-                <label>Family Office Service Agreement</label>
-            </value>
-            <value>
-                <fullName>Fee Based Wealth Management</fullName>
-                <default>false</default>
-                <label>Fee Based Wealth Management</label>
-            </value>
-            <value>
-                <fullName>Retirement Planning or ERISA</fullName>
-                <default>false</default>
-                <label>Retirement Planning or ERISA</label>
-            </value>
-            <value>
-                <fullName>Tax Services</fullName>
-                <default>false</default>
-                <label>Tax Services</label>
-            </value>
-            <value>
                 <fullName>Diversify Asset Management</fullName>
                 <default>false</default>
                 <label>Diversify Asset Management</label>
+            </value>
+            <value>
+                <fullName>Integrated Ops</fullName>
+                <default>false</default>
+                <label>Integrated Ops</label>
+            </value>
+            <value>
+                <fullName>Estate Planning Services</fullName>
+                <default>false</default>
+                <label>Estate Planning Services</label>
+            </value>
+            <value>
+                <fullName>IT Services</fullName>
+                <default>false</default>
+                <label>IT Services</label>
+            </value>
+            <value>
+                <fullName>401k Plan Services</fullName>
+                <default>false</default>
+                <label>401k Plan Services</label>
             </value>
             <value>
                 <fullName>BD</fullName>
                 <default>false</default>
                 <isActive>false</isActive>
                 <label>BD</label>
+            </value>
+            <value>
+                <fullName>Broker Dealer</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Broker Dealer</label>
+            </value>
+            <value>
+                <fullName>Delaware Statutory Trust (DST)</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Delaware Statutory Trust (DST)</label>
+            </value>
+            <value>
+                <fullName>Family Office Service Agreement</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Family Office Service Agreement</label>
+            </value>
+            <value>
+                <fullName>Fee Based Wealth Management</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Fee Based Wealth Management</label>
             </value>
             <value>
                 <fullName>RIA 1099</fullName>
@@ -79,6 +93,18 @@
                 <default>false</default>
                 <isActive>false</isActive>
                 <label>RIA W2 + BD</label>
+            </value>
+            <value>
+                <fullName>Retirement Planning or ERISA</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Retirement Planning or ERISA</label>
+            </value>
+            <value>
+                <fullName>Tax Services</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Tax Services</label>
             </value>
         </valueSetDefinition>
     </valueSet>

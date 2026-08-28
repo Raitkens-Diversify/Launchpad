@@ -22,8 +22,11 @@
           "children" : [ {
             "children" : [ {
               "attributes" : {
+                "badgeField" : "Status",
                 "dxpStyle" : { },
-                "fieldLayout" : "grid"
+                "fieldLayout" : "grid",
+                "tagFields" : "Priority",
+                "titleField" : "Subject"
               },
               "definition" : "c:arcRecordDetail",
               "id" : "6f1dfcc1-8054-46ce-bd07-d3d2d6dbbef3",

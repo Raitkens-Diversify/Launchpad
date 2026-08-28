@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Account Relationships</masterLabel>
+    <description
+  >Relationships for an Account (Trusted Contact, Trustee/Grantor, Executor, Control Person/Beneficial Owner/Authorized Person), grouped by role -- not scoped to any one household.</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property
+        name="cardTitle"
+        type="String"
+        label="Heading"
+        default="Relationships"
+        description="Section heading."
+      />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

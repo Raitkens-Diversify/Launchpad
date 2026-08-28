@@ -180,8 +180,35 @@
   overflow-x: clip;
 }
 
-.theme-layout__footer:empty {
-  display: none;
+/* ── Footer — collapsed in the runtime shell. ──────────────────────────────
+   The Figma frame has no footer: the header and the rail are fixed and the
+   main region owns everything below them. Both theme layouts built on this
+   shell still carry a footer region anyway — Custom_Header_Side_Nav_and_Footer
+   parks c:arcUpgradeModal there, scopedHeaderAndFooter has two empty sections
+   — and neither renders anything a user can see. What the user *could* see was
+   the platform's community_layout:section wrapper, which brings its own
+   padding: a blank white band across the bottom of every page, taking that
+   height straight off the content above it.
+
+   Collapsed rather than deleted from the layout. arcUpgradeModal has to stay
+   mounted for the site-wide upgrade dialog to open at all, and it renders
+   c-ds-modal-v2 at position: fixed — a fixed descendant's containing block is
+   the viewport, so the overflow: hidden here cannot clip it (nothing in this
+   chain sets transform, filter, perspective, contain or will-change, which is
+   what would have made an ancestor a containing block for it).
+
+   Runtime only, so the Experience Builder canvas still shows the footer region
+   as a droppable target — same split as the header and sidebar rules above.
+
+   This replaces `.theme-layout__footer:empty`, which was dead: the footer
+   always has a <slot> element child, so it is never actually :empty. */
+:host(.arc-runtime-shell) .theme-layout__footer {
+  flex: 0 0 0;
+  height: 0;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
 }
 
 /* ── Responsive — below the sidebar breakpoint, stack and let the page scroll

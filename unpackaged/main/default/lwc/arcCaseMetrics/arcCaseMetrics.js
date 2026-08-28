@@ -25,28 +25,34 @@ const SEGMENT_COLORS = [
   "#64748b"
 ];
 
+/*
+ * Fixed colour per milestone, so a stage keeps the same colour between the My
+ * and My Team donuts and from one refresh to the next — an index-based palette
+ * recolours every segment as soon as one bucket empties. Keys are the
+ * normalized labels ArcCaseMetricsRepository.normalizeSegmentKey derives from
+ * Case.Milestone__c.
+ *
+ * 'ho-approval' and 'not-set' are pinned here rather than left to the palette
+ * fallback below. In milestone order HO Approval lands at index 1, whose
+ * palette entry is the very #066afe that Branch Goal is already pinned to, so
+ * the two stages drew as one indistinct arc. The fallback stays for any value
+ * the trigger starts writing that this map has not caught up with.
+ */
+const MILESTONE_COLORS = {
+  "ho-submission": "#032d60",
+  "ho-approval": "#9050e9",
+  "branch-goal": "#066afe",
+  "ho-goal": "#fe5c4c",
+  "not-set": "#64748b"
+};
+
 const resolveSegmentColor = (segmentKey, index) => {
-  const normalizedKey = (segmentKey || "").toLowerCase();
+  const normalizedKey = (segmentKey || "").toLowerCase().replace(/\s+/g, "-");
 
-  if (
-    normalizedKey.includes("ho-submission") ||
-    normalizedKey.includes("ho submission")
-  ) {
-    return "#032d60";
-  }
-
-  if (
-    normalizedKey.includes("branch-goal") ||
-    normalizedKey.includes("branch goal")
-  ) {
-    return "#066afe";
-  }
-
-  if (normalizedKey.includes("ho-goal") || normalizedKey.includes("ho goal")) {
-    return "#fe5c4c";
-  }
-
-  return SEGMENT_COLORS[index % SEGMENT_COLORS.length];
+  return (
+    MILESTONE_COLORS[normalizedKey] ||
+    SEGMENT_COLORS[index % SEGMENT_COLORS.length]
+  );
 };
 
 const mapSegments = (data) => {

@@ -466,6 +466,13 @@
                 <elementReference>setOfGroupMemberIds</elementReference>
             </value>
         </filters>
+        <filters>
+            <field>IsActive</field>
+            <operator>EqualTo</operator>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </filters>
         <getFirstRecordOnly>false</getFirstRecordOnly>
         <object>User</object>
         <queriedFields>Id</queriedFields>

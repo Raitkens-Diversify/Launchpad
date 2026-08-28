@@ -52,7 +52,7 @@
     </values>
     <values>
         <field>Order__c</field>
-        <value xsi:type="xsd:double">10.0</value>
+        <value xsi:type="xsd:double">11.0</value>
     </values>
     <values>
         <field>Original_Account_Field__c</field>
@@ -76,7 +76,7 @@
     </values>
     <values>
         <field>Section_Name__c</field>
-        <value xsi:type="xsd:string">Progress</value>
+        <value xsi:type="xsd:string">Additional Information</value>
     </values>
     <values>
         <field>Shown_WHERE_Statement__c</field>

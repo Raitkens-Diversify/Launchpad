@@ -113,6 +113,6 @@
         <fullName>Canceled</fullName>
         <default>false</default>
         <label>Canceled</label>
-        <closed>false</closed>
+        <closed>true</closed>
     </standardValue>
 </StandardValueSet>

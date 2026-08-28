@@ -87,6 +87,14 @@
                   "definition" : "c:arcActivityPanel",
                   "id" : "3a7c1f92-64bd-4d1e-9c07-5f8ab2e6d411",
                   "type" : "component"
+                }, {
+                  "attributes" : {
+                    "cardTitle" : "Relationships",
+                    "dxpStyle" : { }
+                  },
+                  "definition" : "c:arcAccountRelationships",
+                  "id" : "9a1f957f-0796-4d6e-8118-a9d349826bbb",
+                  "type" : "component"
                 } ],
                 "id" : "baf1d6ec-f2e2-40cf-bca5-8857df9dbd36",
                 "name" : "col2",

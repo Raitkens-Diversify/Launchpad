@@ -812,6 +812,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
+        <field>Event.Task_Template_Assigned_to_Queue__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
         <field>Financial_Account_Related_Product__c.Commission__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -1683,6 +1688,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Strategy__c.Sleeve_Classification__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Task.Task_Template_Assigned_to_Queue__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

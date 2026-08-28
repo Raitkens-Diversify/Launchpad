@@ -1,0 +1,107 @@
+/*
+ * Same tokens as c/arcHouseholdDetail (Manoj's Details section), so the two
+ * cards read as one visual family even though shadow DOM means no class or
+ * rule can actually be shared between them.
+ */
+
+.arc-account-relationships {
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+  border: 1px solid var(--lwc-colorBorder, #c9c9c9);
+  border-radius: var(--lwc-borderRadiusMedium, 4px);
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+  margin-bottom: 0.75rem;
+}
+
+.arc-account-relationships__summary {
+  cursor: pointer;
+  padding: 0.75rem 1rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--div-color-text-primary, #181818);
+  list-style-position: outside;
+}
+
+.arc-account-relationships__summary:focus-visible {
+  outline: 2px solid var(--div-color-accent-blue, #0176d3);
+  outline-offset: -2px;
+}
+
+.arc-account-relationships__body {
+  padding: 0 1rem 1rem;
+}
+
+.arc-account-relationships__loading {
+  /* c-arc-loading-spinner is position:absolute and centres on the nearest
+     POSITIONED ancestor -- without this it escapes this card entirely. */
+  position: relative;
+  min-height: 4rem;
+}
+
+.arc-account-relationships__error {
+  margin: 0;
+  color: #c23934;
+  font-size: 0.875rem;
+}
+
+.arc-account-relationships__group {
+  padding: 0.625rem 0;
+  border-bottom: 1px solid var(--div-color-border-subtle, #f3f2f2);
+}
+
+.arc-account-relationships__group:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.arc-account-relationships__group-title {
+  margin: 0 0 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--div-color-text-primary, #181818);
+}
+
+.arc-account-relationships__count {
+  font-weight: 400;
+  color: var(--div-color-text-muted, #706e6b);
+}
+
+.arc-account-relationships__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.arc-account-relationships__row {
+  padding: 0.25rem 0;
+  font-size: 0.875rem;
+}
+
+.arc-account-relationships__row a {
+  color: var(--div-color-accent-blue, #0176d3);
+  text-decoration: none;
+}
+
+.arc-account-relationships__row a:hover {
+  text-decoration: underline;
+}
+
+.arc-account-relationships__empty {
+  margin: 0;
+  color: var(--div-color-text-muted, #706e6b);
+  font-size: 0.875rem;
+}
+
+.arc-account-relationships__load-more {
+  margin-top: 0.375rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--div-color-accent-blue, #0176d3);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.arc-account-relationships__load-more:hover {
+  text-decoration: underline;
+}
