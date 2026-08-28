@@ -919,6 +919,8 @@ setOfTypeToName.add('Account Servicing - Approval Required');
                     taskRec.Status = 'Not Started';
                     taskRec.Needs_2nd_Ops_Review__c = taskTempItemRecord.Task_Template__r.Needs_2nd_Ops_Review__c;
                     taskRec.WhatId = caseRecord.Id;
+                    //Single-template path: the item's Order__c is the full sequence for the case.
+                    taskRec.Full_Template_Order__c = (Integer)taskTempItemRecord.Order__c;
                     taskRec.Task_Template_Item__c = taskTempItemRecord.Id;
                     taskRec.Task_Template__c = taskTempItemRecord.Task_Template__c;
                     if(String.isEmpty(taskTempItemRecord.Task_Template__r.Priority__c)){
@@ -1031,8 +1033,10 @@ taskRec.ActivityDate = ActivityDate;
         Set<Id> setAccounts = new Set<Id>();
         
         Set<Id> setOfFinAccountId = new Set<Id>();
-        Map<Id, Id> mapOfCaseIdToCaseTempId = new  Map<Id, Id>();
-        
+        //Ordered list of template Ids per case: Pre first, then Fixed (Case_Template__c), then Post.
+        Map<Id, List<Id>> mapOfCaseIdToOrderedTempIds = new Map<Id, List<Id>>();
+        Set<Id> allTemplateIds = new Set<Id>();
+
         Map<Id, Financial_Advisor_Team__c> mapOfFATeam = new Map<Id, Financial_Advisor_Team__c>();
         Map<String, Id> mapOfQueueIdByName = new Map<String, Id>();
         Map<Id,Id> perToAccIds = new Map<Id,Id>();
@@ -1058,10 +1062,23 @@ taskRec.ActivityDate = ActivityDate;
             if(!String.isEmpty(caseRecord.Wizard_Financial_Account__c)){
                 setOfFinAccountId.add(caseRecord.Wizard_Financial_Account__c);
             }
-            if(!String.isEmpty(caseRecord.Case_Template__c)){
-                mapOfCaseIdToCaseTempId.put(caseRecord.Id,caseRecord.Case_Template__c);
+            //Build the ordered template list so tasks are created and sequenced
+            //Pre -> Fixed -> Post. A case may have any subset of the three.
+            List<Id> orderedTempIds = new List<Id>();
+            if(!String.isEmpty(caseRecord.Pre_Case_Template__c)){
+                orderedTempIds.add(caseRecord.Pre_Case_Template__c);
             }
-            
+            if(!String.isEmpty(caseRecord.Case_Template__c)){
+                orderedTempIds.add(caseRecord.Case_Template__c);
+            }
+            if(!String.isEmpty(caseRecord.Post_Case_Template__c)){
+                orderedTempIds.add(caseRecord.Post_Case_Template__c);
+            }
+            if(!orderedTempIds.isEmpty()){
+                mapOfCaseIdToOrderedTempIds.put(caseRecord.Id, orderedTempIds);
+                allTemplateIds.addAll(orderedTempIds);
+            }
+
         }
         
         if(!setOfFATIds.isEmpty()){
@@ -1094,16 +1111,16 @@ taskRec.ActivityDate = ActivityDate;
             perToAccIds.put(a.PersonContactId,a.Id);
         }         
         
-        if(!mapOfCaseIdToCaseTempId.isEmpty()){
+        if(!allTemplateIds.isEmpty()){
             lstTaskTempItem = [SELECT Id, Task_Template__r.Priority__c, Case_Template__c,
                                Task_Template__r.Assigned_To__c,
                                Task_Template__r.FA_Team_Permission__c, Order__c,
                                Task_Template__r.Queue__c, Task_Template__r.Due_Date__c,
                                Task_Template__r.Number_of_Days__c,
                                Task_Template__r.Description__c, Independent__C, Task_Template__r.Name
-                               FROM Task_Template_Item__c 
-                               WHERE Case_Template__c IN : mapOfCaseIdToCaseTempId.values()];
-        } 
+                               FROM Task_Template_Item__c
+                               WHERE Case_Template__c IN : allTemplateIds];
+        }
         
         setOfQueueNames.add('Unassigned'); 
         setOfQueueNames.add('Operations'); 
@@ -1121,13 +1138,26 @@ taskRec.ActivityDate = ActivityDate;
         for(Group groupRecord : lstGroup){
             mapOfQueueIdByName.put(groupRecord.Name, groupRecord.Id);
         }
-        Id approvalTaskRecordTypeId = Schema.sObjectType.Task.getRecordTypeInfosByName().get('Approval Task').getRecordTypeId(); 
-        for(Id caseId : mapOfCaseIdToCaseTempId.keySet()){
+        Id approvalTaskRecordTypeId = Schema.sObjectType.Task.getRecordTypeInfosByName().get('Approval Task').getRecordTypeId();
+        for(Id caseId : mapOfCaseIdToOrderedTempIds.keySet()){
             Case caseRecord = newMap.get(caseId);
-            if(!mapOfCaseTempIdToLstTemp.isEmpty() && mapOfCaseTempIdToLstTemp.containsKey(mapOfCaseIdToCaseTempId.get(caseId))){
-                List<Task_Template_Item__c> lstTaskTempItemRecord = mapOfCaseTempIdToLstTemp.get(mapOfCaseIdToCaseTempId.get(caseId));
+            //Flatten the case's templates into a single ordered item list:
+            //Pre items, then Fixed items, then Post items, each group sorted by its own Order__c.
+            List<Task_Template_Item__c> lstTaskTempItemRecord = new List<Task_Template_Item__c>();
+            for(Id templateId : mapOfCaseIdToOrderedTempIds.get(caseId)){
+                if(!mapOfCaseTempIdToLstTemp.isEmpty() && mapOfCaseTempIdToLstTemp.containsKey(templateId)){
+                    List<Task_Template_Item__c> itemsForTemplate = mapOfCaseTempIdToLstTemp.get(templateId);
+                    itemsForTemplate.sort(new TaskTemplateItemOrderComparator());
+                    lstTaskTempItemRecord.addAll(itemsForTemplate);
+                }
+            }
+            if(!lstTaskTempItemRecord.isEmpty()){
+                //Running sequence across the whole Pre/Fixed/Post set for this case.
+                Integer fullTemplateOrder = 0;
                 for(Task_Template_Item__c taskTempItemRecord : lstTaskTempItemRecord){
+                    fullTemplateOrder++;
                     Task taskRec = new Task();
+                    taskRec.Full_Template_Order__c = fullTemplateOrder;
                     if(caseRecord.ContactId != null){
                         taskRec.WhoId = caseRecord.ContactId; 
                         taskRec.Person_Account_Id__c = perToAccIds.get(caseRecord.ContactId);
@@ -1152,7 +1182,7 @@ taskRec.ActivityDate = ActivityDate;
                     taskRec.Subject = taskTempItemRecord.Task_Template__r.Name;
                     taskRec.Task_Instructions__c = taskTempItemRecord.Task_Template__r.Description__c;
                     taskRec.Financial_Advisor_Team__c = caseRecord.Financial_Advisor_Team__c;
-                    if(taskTempItemRecord.Order__c == 1 || taskTempItemRecord.Independent__c || taskTempItemRecord.Order__c == null){
+                    if(fullTemplateOrder == 1 || taskTempItemRecord.Independent__c){
                         if(taskTempItemRecord.Task_Template__r.Due_Date__c == 'Immediate'){
                             taskRec.ActivityDate = System.Today();
                         } else if(taskTempItemRecord.Task_Template__r.Due_Date__c == 'Days from Case Creation' ||
@@ -1228,11 +1258,11 @@ taskRec.ActivityDate = ActivityDate;
             insert lstTask;
         }
         //Set Current Task On Case
-        if(!mapOfCaseIdToCaseTempId.isEmpty()){
-            setCurrentTask(mapOfCaseIdToCaseTempId.keySet());
-        }    
+        if(!mapOfCaseIdToOrderedTempIds.isEmpty()){
+            setCurrentTask(mapOfCaseIdToOrderedTempIds.keySet());
+        }
     }
-    
+
     private void createCDLforCase(Map<Id, Case> newMap, Map<Id, Case> oldMap){
         List<ContentDocumentLink> cdlsToInsert = new List<ContentDocumentLink>();
         Map<String, Id> flowInterviewIdsToCaseIds = new Map<String,Id>();
@@ -1557,18 +1587,18 @@ record.OwnerId = queuePRId;
     //FUTURE METHODS
     @future
     public static void setCurrentTask(set<Id> caseIds){
-        List<Task> lstTask = [SELECT Id,WhatId,Owner.Name,Order__c FROM Task WHERE Order__c IN(1,2) AND WhatId IN : caseIds];
-        
+        List<Task> lstTask = [SELECT Id,WhatId,Owner.Name,Full_Template_Order__c FROM Task WHERE Full_Template_Order__c IN(1,2) AND WhatId IN : caseIds];
+
         Map<Id,Case> caseMap = new MAp<Id,Case>();
         for(Task tsk : lstTask){
             Case ca = new case(id = tsk.WhatId, Sub_Status__c ='New');
             if(caseMap.containsKey(tsk.WhatId)){
                 ca =  caseMap.get(tsk.WhatId);
             }
-            if(tsk.Order__c == 1){
+            if(tsk.Full_Template_Order__c == 1){
                 ca.Current_Task_Id__c = tsk.Id;
                 ca.Owner_Group__c = tsk.Owner.Name;
-            }else if(tsk.Order__c == 2){
+            }else if(tsk.Full_Template_Order__c == 2){
                 ca.Next_Task__c = tsk.Id;
             }
             caseMap.put(tsk.WhatId,ca);
@@ -1657,5 +1687,19 @@ record.OwnerId = queuePRId;
         }
         values.sort();
         return values;
+    }
+
+    //Sorts Task_Template_Item__c records by their own Order__c (ascending, nulls last)
+    //so each template's items keep their intended sequence when flattened into the
+    //combined Pre -> Fixed -> Post task list.
+    private class TaskTemplateItemOrderComparator implements System.Comparator<Task_Template_Item__c> {
+        public Integer compare(Task_Template_Item__c a, Task_Template_Item__c b){
+            Decimal aOrder = a.Order__c == null ? 999999 : a.Order__c;
+            Decimal bOrder = b.Order__c == null ? 999999 : b.Order__c;
+            if(aOrder == bOrder){
+                return 0;
+            }
+            return aOrder > bOrder ? 1 : -1;
+        }
     }
 }

@@ -106,8 +106,8 @@ public class Task_TriggerHandler {
             SELECT Id, WhatId, Order__c
             FROM Task
             WHERE WhatId IN :caseIds
-            AND (Branch_Pit_Stop__c = TRUE
-                 OR Home_Office_Pit_Stop__c = TRUE)
+            AND (Branch_Pit_Stop__c = false
+                 OR Home_Office_Pit_Stop__c = false)
             AND CompletedDateTime = NULL
             ORDER BY WhatId, Order__c ASC
         ];

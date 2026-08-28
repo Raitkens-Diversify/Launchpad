@@ -181,6 +181,27 @@
               <p class="settings-textarea__count">{charactersLeftLabel}</p>
             </div>
           </div>
+
+          <!-- Same destination as the avatar menu's "Change password": the
+               Password tab. Kept as a pointer rather than a second copy of the
+               form so there is only ever one place the password is changed. -->
+          <div class="settings-row settings-row--password">
+            <div class="settings-row__label">
+              <span class="settings-row__label-text">Password</span>
+              <span class="settings-row__label-help">
+                Change the password you use to sign in to ARC.
+              </span>
+            </div>
+            <div class="settings-row__field">
+              <button
+                type="button"
+                class="settings-button"
+                onclick={handleChangePassword}
+              >
+                Change password
+              </button>
+            </div>
+          </div>
         </div>
 
         <footer class="settings__footer">

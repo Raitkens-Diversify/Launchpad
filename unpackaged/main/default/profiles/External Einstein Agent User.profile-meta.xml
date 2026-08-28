@@ -803,6 +803,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>true</editable>
+        <field>Event.Full_Template_Order__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>false</editable>
         <field>Event.Task_Template_Assigned_to_Queue__c</field>
         <readable>true</readable>
@@ -2104,6 +2109,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Standing_Letter_of_Authorization__c.Wizard_Financial_Account__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Strategy__c.Bond_Ladder__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -2140,6 +2150,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Strategy__c.Structured_Note__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Task.Full_Template_Order__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

@@ -22,13 +22,9 @@
           "children" : [ {
             "children" : [ {
               "attributes" : {
-                "badgeField" : "Status",
-                "dxpStyle" : { },
-                "fieldLayout" : "grid",
-                "tagFields" : "Priority",
-                "titleField" : "Subject"
+                "dxpStyle" : { }
               },
-              "definition" : "c:arcRecordDetail",
+              "definition" : "c:arcTaskDetail",
               "id" : "6f1dfcc1-8054-46ce-bd07-d3d2d6dbbef3",
               "type" : "component"
             } ],

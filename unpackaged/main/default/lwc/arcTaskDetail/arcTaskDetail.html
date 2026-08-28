@@ -1,0 +1,102 @@
+<template>
+  <template lwc:if={hasRecordId}>
+    <div class="arc-task-detail">
+      <header class="arc-task-detail__header">
+        <div class="arc-task-detail__header-top">
+          <div class="arc-task-detail__title-wrap">
+            <span class="arc-task-detail__eyebrow">Task</span>
+            <h1 class="arc-task-detail__title">{subject}</h1>
+          </div>
+          <div class="arc-task-detail__header-right">
+            <div class="arc-task-detail__badges">
+              <template lwc:if={status}>
+                <span class="arc-task-detail__status-pill">{status}</span>
+              </template>
+              <template lwc:if={hasPriority}>
+                <span class={priorityPillClass}>{priority} Priority</span>
+              </template>
+            </div>
+            <template lwc:if={hasMarkCompleteError}>
+              <p class="arc-task-detail__inline-error" role="alert">
+                {markCompleteErrorMessage}
+              </p>
+            </template>
+            <template lwc:if={showMarkComplete}>
+              <div class="arc-task-detail__actions">
+                <lightning-button
+                  label="Mark Complete"
+                  variant="brand"
+                  disabled={isCompleted}
+                  onclick={handleMarkComplete}
+                ></lightning-button>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <dl class="arc-task-detail__key-facts">
+          <template lwc:if={hasDueDate}>
+            <div class="arc-task-detail__key-fact">
+              <dt>Due Date</dt>
+              <dd>{formattedDueDate}</dd>
+            </div>
+          </template>
+          <template lwc:if={hasWhat}>
+            <div class="arc-task-detail__key-fact">
+              <dt>Related To</dt>
+              <dd>
+                <a href="#" onclick={handleWhatClick}>{taskContext.whatName}</a>
+              </dd>
+            </div>
+          </template>
+          <template lwc:if={hasWho}>
+            <div class="arc-task-detail__key-fact">
+              <dt>Name</dt>
+              <dd>
+                <a href="#" onclick={handleWhoClick}>{taskContext.whoName}</a>
+              </dd>
+            </div>
+          </template>
+        </dl>
+      </header>
+
+      <div class="arc-task-detail__body">
+        <c-arc-record-detail field-layout="grid"></c-arc-record-detail>
+
+        <template lwc:if={showOpenActivities}>
+          <lightning-card title={openActivitiesLabel}>
+            <template lwc:if={hasOpenActivities}>
+              <c-arc-data-table
+                aria-label="Open activities for parent case"
+                key-field="id"
+                columns={activityColumns}
+                data={openActivities}
+                placeholder="-"
+                enable-row-navigation
+              ></c-arc-data-table>
+            </template>
+            <template lwc:else>
+              <div class="slds-p-around_medium">No open activities.</div>
+            </template>
+          </lightning-card>
+        </template>
+
+        <lightning-card title={householdCasesLabel}>
+          <template lwc:if={hasHouseholdCases}>
+            <c-arc-data-table
+              aria-label="Open cases for household"
+              key-field="id"
+              columns={householdCaseColumns}
+              data={householdCases}
+              placeholder="-"
+              enable-row-navigation
+            ></c-arc-data-table>
+          </template>
+          <template lwc:else>
+            <div class="slds-p-around_medium">No open cases for this household.</div>
+          </template>
+        </lightning-card>
+      </div>
+    </div>
+  </template>
+</template>

@@ -1,0 +1,217 @@
+/**
+ * Task detail page for Experience Cloud: a Case-Detail-style header (built
+ * from ArcTaskDetailController.getTaskContext, since c-arc-record-detail
+ * doesn't expose its loaded values to a parent) wrapping the generic
+ * c-arc-record-detail field sections (unchanged), plus the two related lists
+ * the CRM Task page has that the generic Envelope_Field__mdt pipeline can't
+ * produce: Open Activities for Parent Case and Open Cases for Household.
+ */
+import { LightningElement, wire } from "lwc";
+import { NavigationMixin, CurrentPageReference } from "lightning/navigation";
+import { refreshApex } from "@salesforce/apex";
+import USER_ID from "@salesforce/user/Id";
+import {
+  resolveRecordIdFromPageReference,
+  isValidSalesforceRecordId,
+  buildRecordNavigationReference
+} from "c/recordNavigationCommunityUtils";
+import getTaskContext from "@salesforce/apex/ArcTaskDetailController.getTaskContext";
+import getOpenActivitiesForParentCase from "@salesforce/apex/ArcTaskDetailController.getOpenActivitiesForParentCase";
+import getOpenCasesForHousehold from "@salesforce/apex/ArcTaskDetailController.getOpenCasesForHousehold";
+import markComplete from "@salesforce/apex/CaseCurrentTaskController.markComplete";
+
+const ACTIVITY_COLUMNS = [
+  {
+    label: "Subject",
+    fieldName: "subject",
+    isLink: true,
+    linkObjectApiName: "Task"
+  },
+  { label: "Status", fieldName: "status" },
+  { label: "Owner", fieldName: "ownerName" },
+  { label: "Due Date", fieldName: "dueDate", type: "date" }
+];
+
+const HOUSEHOLD_CASE_COLUMNS = [
+  {
+    label: "Case",
+    fieldName: "caseNumber",
+    isLink: true,
+    linkObjectApiName: "Case"
+  },
+  { label: "Subject", fieldName: "subject" },
+  { label: "Status", fieldName: "status" },
+  { label: "Owner", fieldName: "ownerName" },
+  { label: "Created", fieldName: "createdDate", type: "date" }
+];
+
+export default class ArcTaskDetail extends NavigationMixin(LightningElement) {
+  _recordId;
+  _pageRef;
+  currentUserId = USER_ID;
+  activityColumns = ACTIVITY_COLUMNS;
+  householdCaseColumns = HOUSEHOLD_CASE_COLUMNS;
+
+  taskContext = {};
+  _taskContextResult;
+  openActivities = [];
+  _activitiesResult;
+  householdCases = [];
+  _householdCasesResult;
+
+  isMarkingComplete = false;
+  markCompleteErrorMessage = "";
+
+  @wire(CurrentPageReference)
+  wiredPageReference(pageRef) {
+    this._pageRef = pageRef;
+    this._recordId = resolveRecordIdFromPageReference(pageRef, "Task");
+  }
+
+  @wire(getTaskContext, { taskId: "$_recordId" })
+  wiredTaskContext(result) {
+    this._taskContextResult = result;
+    this.taskContext = result?.data || {};
+  }
+
+  @wire(getOpenActivitiesForParentCase, { taskId: "$_recordId" })
+  wiredActivities(result) {
+    this._activitiesResult = result;
+    this.openActivities = result?.data || [];
+  }
+
+  @wire(getOpenCasesForHousehold, { taskId: "$_recordId" })
+  wiredHouseholdCases(result) {
+    this._householdCasesResult = result;
+    this.householdCases = result?.data || [];
+  }
+
+  get hasRecordId() {
+    return isValidSalesforceRecordId(this._recordId);
+  }
+
+  get subject() {
+    return this.taskContext?.subject || "";
+  }
+
+  get status() {
+    return this.taskContext?.status || "";
+  }
+
+  get priority() {
+    return this.taskContext?.priority || "";
+  }
+
+  get hasPriority() {
+    return Boolean(this.priority);
+  }
+
+  get priorityPillClass() {
+    const base = "arc-task-detail__pill";
+    const variant = this.priority.toLowerCase();
+    return `${base} ${base}--${variant}`;
+  }
+
+  get hasDueDate() {
+    return Boolean(this.taskContext?.dueDate);
+  }
+
+  get formattedDueDate() {
+    if (!this.taskContext?.dueDate) {
+      return "";
+    }
+    const [year, month, day] = this.taskContext.dueDate.split("-");
+    return `${month}/${day}/${year}`;
+  }
+
+  get hasWhat() {
+    return Boolean(this.taskContext?.whatId && this.taskContext?.whatName);
+  }
+
+  get hasWho() {
+    return Boolean(this.taskContext?.whoId && this.taskContext?.whoName);
+  }
+
+  get isCompleted() {
+    return this.status === "Completed";
+  }
+
+  get isOwnedByCurrentUser() {
+    return String(this.taskContext?.ownerId) === String(this.currentUserId);
+  }
+
+  get showMarkComplete() {
+    return this.isOwnedByCurrentUser;
+  }
+
+  get showOpenActivities() {
+    return this.taskContext?.isParentCase === true;
+  }
+
+  get hasOpenActivities() {
+    return this.openActivities.length > 0;
+  }
+
+  get openActivitiesLabel() {
+    return `Open Activities for Parent Case (${this.openActivities.length})`;
+  }
+
+  get hasHouseholdCases() {
+    return this.householdCases.length > 0;
+  }
+
+  get householdCasesLabel() {
+    return `Open Cases for Household (${this.householdCases.length})`;
+  }
+
+  get hasMarkCompleteError() {
+    return Boolean(this.markCompleteErrorMessage);
+  }
+
+  handleWhatClick(event) {
+    event.preventDefault();
+    this.navigateToRecord(this.taskContext.whatId, this.taskContext.whatObjectApiName);
+  }
+
+  handleWhoClick(event) {
+    event.preventDefault();
+    this.navigateToRecord(this.taskContext.whoId, this.taskContext.whoObjectApiName);
+  }
+
+  navigateToRecord(recordId, objectApiName) {
+    if (!recordId || !objectApiName) {
+      return;
+    }
+    const pageReference = buildRecordNavigationReference(recordId, objectApiName);
+    if (!pageReference) {
+      return;
+    }
+    this[NavigationMixin.Navigate](pageReference);
+  }
+
+  async handleMarkComplete() {
+    if (this.isMarkingComplete || this.isCompleted) {
+      return;
+    }
+
+    this.isMarkingComplete = true;
+    this.markCompleteErrorMessage = "";
+    try {
+      await markComplete({ taskId: this._recordId });
+      await Promise.all([
+        refreshApex(this._taskContextResult),
+        refreshApex(this._activitiesResult)
+      ]);
+      this.getRecordDetail()?.refresh();
+    } catch (error) {
+      this.markCompleteErrorMessage =
+        error?.body?.message || error?.message || "Could not mark this task complete.";
+    } finally {
+      this.isMarkingComplete = false;
+    }
+  }
+
+  getRecordDetail() {
+    return this.template.querySelector("c-arc-record-detail");
+  }
+}

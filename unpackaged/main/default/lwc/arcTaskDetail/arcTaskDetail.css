@@ -1,0 +1,167 @@
+/*
+ * Matched to arcCaseDetail's own header/card styling (itself matched to the
+ * Lightning Case page's computed values) so Task Detail reads as the same
+ * product rather than a visually distinct generic form.
+ */
+
+.arc-task-detail {
+  font-family: var(
+    --lwc-fontFamily,
+    -apple-system,
+    "system-ui",
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: 13px;
+  line-height: 19.5px;
+  color: var(--lwc-colorTextDefault, #181818);
+}
+
+/* ── Page header ────────────────────────────────────────────────────────── */
+
+.arc-task-detail__header {
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+  border: 1px solid var(--lwc-colorBorder, #c9c9c9);
+  border-radius: var(--lwc-borderRadiusMedium, 4px);
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+}
+
+.arc-task-detail__header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.arc-task-detail__title-wrap {
+  min-width: 0;
+}
+
+.arc-task-detail__eyebrow {
+  display: block;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--lwc-colorTextWeak, #444444);
+}
+
+.arc-task-detail__title {
+  margin: 0;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+  color: var(--lwc-colorTextDefault, #181818);
+}
+
+.arc-task-detail__header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.arc-task-detail__badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.arc-task-detail__status-pill,
+.arc-task-detail__pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.arc-task-detail__status-pill {
+  background: #eef4ff;
+  color: #0b5cab;
+}
+
+.arc-task-detail__pill {
+  background: #e5e5e5;
+  color: #181818;
+}
+
+.arc-task-detail__pill--high {
+  background: #fef1ee;
+  color: #8c1c04;
+}
+
+.arc-task-detail__pill--normal {
+  background: #eef4ff;
+  color: #0b5cab;
+}
+
+.arc-task-detail__pill--low {
+  background: #ebf7e6;
+  color: #2e6b2e;
+}
+
+.arc-task-detail__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.arc-task-detail__inline-error {
+  margin: 0;
+  font-size: 13px;
+  color: #b91c1c;
+  text-align: right;
+}
+
+/* Highlights row: label-over-value pairs, matching arcCaseDetail's key facts. */
+
+.arc-task-detail__key-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 32px;
+  margin: 12px 0 0;
+}
+
+.arc-task-detail__key-fact {
+  min-width: 0;
+}
+
+.arc-task-detail__key-fact dt {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--lwc-colorTextWeak, #444444);
+}
+
+.arc-task-detail__key-fact dd {
+  margin: 0;
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--lwc-colorTextDefault, #181818);
+}
+
+.arc-task-detail__key-fact dd a {
+  color: var(--lwc-colorTextLink, #0176d3);
+  text-decoration: none;
+}
+
+.arc-task-detail__key-fact dd a:hover,
+.arc-task-detail__key-fact dd a:focus {
+  text-decoration: underline;
+}
+
+/* ── Body layout ────────────────────────────────────────────────────────── */
+
+.arc-task-detail__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}

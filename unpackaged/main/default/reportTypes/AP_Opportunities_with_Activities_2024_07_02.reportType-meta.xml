@@ -378,6 +378,11 @@
             <field>Compliance_Review_Task__c</field>
             <table>Opportunity.Activities</table>
         </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>Full_Template_Order__c</field>
+            <table>Opportunity.Activities</table>
+        </columns>
         <masterLabel>Activities</masterLabel>
     </sections>
 </ReportType>

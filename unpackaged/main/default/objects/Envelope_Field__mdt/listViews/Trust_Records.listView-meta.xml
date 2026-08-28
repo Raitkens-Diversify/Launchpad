@@ -10,6 +10,7 @@
     <columns>Shown_WHERE_Statement__c</columns>
     <columns>Section_Name__c</columns>
     <columns>Order__c</columns>
+    <columns>MasterLabel</columns>
     <filterScope>Everything</filterScope>
     <filters>
         <field>Type__c</field>

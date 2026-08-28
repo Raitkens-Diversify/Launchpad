@@ -12,6 +12,16 @@
 }
 
 .nav-sidebar {
+  /*
+   * border-box so the 8px block padding sits INSIDE the min-height set in the
+   * media query below, rather than on top of it. Under the default content-box
+   * that min-height resolved against the content box and the padding pushed
+   * the nav 16px past the rail it was measured from — and the rail is
+   * overflow-y: auto, so those 16px showed up as a permanent scrollbar with
+   * almost no travel. .nav-item and .nav-group__header already do this; this
+   * rule is the one that fills the rail, so it needs it most.
+   */
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   padding: 8px 0;

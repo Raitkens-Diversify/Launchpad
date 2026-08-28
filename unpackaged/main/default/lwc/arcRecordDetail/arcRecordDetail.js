@@ -257,6 +257,12 @@ export default class ArcRecordDetail extends LightningElement {
     return 'No fields configured for this record.';
   }
 
+  /** Re-runs the load, for a parent that just changed a field this component displays. */
+  @api
+  refresh() {
+    this.scheduleLoad();
+  }
+
   get activeRecordId() {
     return this._displayRecordId || this.recordId;
   }
@@ -271,6 +277,11 @@ export default class ArcRecordDetail extends LightningElement {
 
   get hasTitle() {
     return Boolean(this.title?.trim());
+  }
+
+  /** Suppresses the section Edit button while EDIT_ENABLED is false, instead of leaving a pencil that does nothing when clicked. */
+  get editingDisabled() {
+    return !EDIT_ENABLED;
   }
 
   /** The field's current draft value, or '' if unresolved/not loaded yet. */

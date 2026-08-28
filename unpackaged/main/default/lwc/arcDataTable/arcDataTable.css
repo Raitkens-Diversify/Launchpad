@@ -583,9 +583,16 @@
   font-size: var(--div-font-scale-base, 0.8125rem);
 }
 
+/*
+ * Every rule in this block used to draw its borders in #f3f4f6 — the same
+ * colour as the panel they sit on — so the separators existed but were
+ * invisible, and the whole sub-table read as one flat grey slab. They are now
+ * a hairline a step darker than the panel: visible enough to scan by, lighter
+ * than the parent table's own #d1d5db row rules so the nesting still reads.
+ */
 .arc-data-table__work-detail-table thead th {
   padding: 0.125rem 0.75rem;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid #dfe2e6;
   background: #f3f4f6;
   color: #4b5563;
   font-size: 0.8125rem;
@@ -595,8 +602,17 @@
 }
 
 .arc-data-table__work-detail-table tbody td {
+  /*
+   * Stated, not inherited. This table is nested inside a <td> of the outer
+   * table, so its own cells are descendants of `.div-table--comfortable tbody`
+   * and were picking up that rule's `height: 64px` — the OUTER table's Figma
+   * row height. The override here set padding, border and colour but never
+   * height, so 2px of padding still rendered as 64px rows and eight tasks
+   * filled the screen. A task row is a sub-row; 40px is enough for it.
+   */
+  height: 40px;
   padding: 0.125rem 0.75rem;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid #e3e5e9;
   color: #2b3544;
   font-size: 0.8125rem;
   vertical-align: middle;
@@ -634,6 +650,9 @@
 .arc-data-table__work-detail-table
   tbody
   td.arc-data-table__work-detail-group-cell {
+  /* Shorter than the 40px task rows above: a group header labels the rows
+     under it, so it should not carry the same weight as one of them. */
+  height: 32px;
   padding: 0.125rem 0 0.125rem 1.75rem;
   border-bottom: none;
   background: #f3f4f6;
@@ -650,12 +669,17 @@
   padding: 0.25rem 0.5rem;
   border: 0;
   border-radius: 0.25rem 0 0 0.25rem;
-  background: #e5e7eb;
+  background: #e2e5e9;
   color: #4b5563;
-  font-size: 0.8125rem;
+  /* Section-label treatment: smaller and tracked-out rather than the same 13px
+     the task rows use, so "Main Track (8)" reads as a heading over the rows
+     instead of competing with them. */
+  font-size: 0.6875rem;
   font-weight: 600;
+  letter-spacing: 0.04em;
   line-height: 1.125rem;
   text-align: left;
+  text-transform: uppercase;
   cursor: pointer;
 }
 
@@ -723,6 +747,32 @@
 .div-table__cell--numeric {
   text-align: right;
   font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Values right, header left.
+ *
+ * The three rules above right-align numeric and currency cells, and they hit
+ * the header as well as the body. But a th's contents are all inline-level —
+ * the drag handle is inline-block, the sort button inline-flex — so
+ * text-align: right carried the REORDER HANDLE across the cell along with the
+ * label. On a wide column that left the handle sitting in the middle of the
+ * table, right next to the previous column's resize grip, where it read as a
+ * stray mark rather than as this column's handle; every other column has its
+ * handle at the column's leading edge.
+ *
+ * Header chrome is not data, so it is aligned like every other header instead
+ * of following the numbers. Scoped to thead th, so tbody cells keep the
+ * right-alignment and tabular figures these classes exist for.
+ *
+ * Placed after all three rules above — including the .div-table--comfortable
+ * pair — since it matches at the same specificity and wins on order.
+ */
+.div-table thead th.div-table__cell--numeric,
+.div-table thead th.div-table__cell--currency,
+.div-table--comfortable thead th.div-table__cell--numeric,
+.div-table--comfortable thead th.div-table__cell--currency {
+  text-align: left;
 }
 
 .div-table__cell--muted {

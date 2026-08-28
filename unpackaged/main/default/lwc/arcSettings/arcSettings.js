@@ -328,6 +328,18 @@ export default class ArcSettings extends LightningElement {
     }
   }
 
+  /**
+   * My Details' "Change password" and the avatar menu's item lead to the same
+   * place: the Password tab. Switched locally instead of navigating to
+   * /settings?c__tab=password, because this component already owns that tab —
+   * a reload would throw away an unsaved My Details draft to arrive exactly
+   * where setting activeTab gets us. ds-tabs takes selected={activeTab}, so
+   * the tab strip follows on its own.
+   */
+  handleChangePassword() {
+    this.activeTab = "password";
+  }
+
   handleInput(event) {
     const field = event.target.dataset.field;
     if (field) {
