@@ -63,7 +63,7 @@
      opened downwards — the global search results — was painted over by the
      main region purely because main comes later in the document. */
   position: relative;
-  z-index: 3;
+  z-index: 101;
 }
 
 :host(.arc-runtime-shell) .theme-layout__header {
@@ -120,9 +120,23 @@
   border-right: 1px solid #d1d5db;
   /* Positioned for the same reason as the header: static made the z-index
      inert. It keeps the rail — and the flyout its collapsed groups open —
-     above the main region, while staying under the header. */
+     above the main region, while staying under the header.
+     z-index 100, not a small number like 2: .theme-layout__main itself never
+     sets a z-index, so it never becomes a stacking context of its own --
+     which means ANY sticky/positioned element inside a routed page (a sticky
+     page header, a search box's own popover, anything with an explicit
+     z-index) escapes straight up and competes at THIS level, not scoped
+     inside the page. A page component using something as ordinary as
+     z-index: 20 for its own sticky header (uatTesterApp's .uta-chrome,
+     resourceCenter's .rc-chrome__header, nexsLanding's own header) would
+     outrank a small sidebar z-index and paint over the collapsed nav's
+     flyout cards -- confirmed live for UAT Testing and the dashboard's
+     search boxes. 100 clears every in-page sticky/dropdown z-index in this
+     codebase (the highest short of true modals is 50) while staying well
+     under the 9000+ tier real modals/toasts use, so those still correctly
+     cover the nav when they open. */
   position: relative;
-  z-index: 2;
+  z-index: 100;
   transition:
     width 0.2s ease,
     flex-basis 0.2s ease;

@@ -1,4 +1,4 @@
-import { LightningElement } from 'lwc';
+import { LightningElement, api } from 'lwc';
 import diversifyLogo from '@salesforce/resourceUrl/DiversifyLogoV2';
 import USER_ID from '@salesforce/user/Id';
 import getMyCycles from '@salesforce/apex/UatRunController.getMyCycles';
@@ -51,6 +51,25 @@ function writeStoredCycleId(cycleId) {
  * between them; runner and exploratory always exit back to the queue.
  */
 export default class UatTesterApp extends LightningElement {
+    /** @api hideBranding — hides the Diversify logo + "UAT Testing" crumb in
+     *  the header (the cycle switcher and view band still show) for
+     *  embeddings, like ARC, that already have their own site chrome. Same
+     *  coercion as resourceCenter/nexsLanding's hideBranding: a checkbox in
+     *  the Builder property panel or a content.json attribute can hand this
+     *  over as the string "false" rather than a real boolean. */
+    _hideBranding = false;
+    @api
+    get hideBranding() {
+        return this._hideBranding;
+    }
+    set hideBranding(value) {
+        this._hideBranding = value !== false && value !== 'false';
+    }
+
+    get showBranding() {
+        return !this._hideBranding;
+    }
+
     logoUrl = diversifyLogo;
 
     view = 'dashboard'; // dashboard | queue | pool | runner | exploratory | session

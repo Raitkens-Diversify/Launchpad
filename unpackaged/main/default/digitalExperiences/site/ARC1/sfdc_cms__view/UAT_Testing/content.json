@@ -22,7 +22,8 @@
           "children" : [ {
             "children" : [ {
               "attributes" : {
-                "dxpStyle" : { }
+                "dxpStyle" : { },
+                "hideBranding" : true
               },
               "definition" : "c:uatTesterApp",
               "id" : "b1c2d3e4-6f7a-4b8c-9d9e-3f4a5b6c7d8e",

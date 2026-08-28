@@ -4,11 +4,13 @@
              Diversify logo + divider + section label. Lives in the component so
              it renders identically on the LWR site and the core app page. -->
         <header class="nexs-chrome__header">
-            <img class="nexs-chrome__logo" src={logoUrl} alt="Diversify" />
-            <span class="nexs-chrome__divider" aria-hidden="true"></span>
-            <button type="button" class="nexs-chrome__crumb" onclick={handleGoHome}>
-                Help Center
-            </button>
+            <template if:true={showBranding}>
+                <img class="nexs-chrome__logo" src={logoUrl} alt="Diversify" />
+                <span class="nexs-chrome__divider" aria-hidden="true"></span>
+                <button type="button" class="nexs-chrome__crumb" onclick={handleGoHome}>
+                    Help Center
+                </button>
+            </template>
             <!-- Header search on inner pages (home has the hero search). -->
             <template if:true={isBrowse}>
                 <div class="nexs-chrome__search">

@@ -1,0 +1,12 @@
+{
+  "type" : "sfdc_cms__route",
+  "title" : "Help Center",
+  "contentBody" : {
+    "activeViewId" : "Help_Center",
+    "configurationTags" : [ ],
+    "pageAccess" : "UseParent",
+    "routeType" : "custom-help-center",
+    "urlPrefix" : "help-center"
+  },
+  "urlName" : "help-center"
+}

@@ -195,6 +195,48 @@
     </template>
     <div class="nav-footer">
       <div class="nav-footer__divider" role="separator"></div>
+      <template lwc:if={showUatTesting}>
+        <template lwc:if={sidebarCollapsed}>
+          <div
+            class="nav-flyout-anchor nav-footer__uat-anchor"
+            onmouseenter={handleFlyoutOpen}
+            onfocusin={handleFlyoutOpen}
+          >
+            <a
+              href="#"
+              class="nav-item"
+              data-tour-id="arc-nav-uat-testing"
+              onclick={handleUatTestingClick}
+            >
+              <span
+                class="nav-item__icon nav-item__icon--asset"
+                style={uatTestingIconStyle}
+                aria-hidden="true"
+              ></span>
+            </a>
+            <div class="nav-flyout nav-flyout--single" role="tooltip">
+              <p class="nav-flyout__title nav-flyout__title--only">
+                UAT Testing (Launchpad only)
+              </p>
+            </div>
+          </div>
+        </template>
+        <template lwc:else>
+          <a
+            href="#"
+            class="nav-item nav-footer__uat-link"
+            data-tour-id="arc-nav-uat-testing"
+            onclick={handleUatTestingClick}
+          >
+            <span
+              class="nav-item__icon nav-item__icon--asset"
+              style={uatTestingIconStyle}
+              aria-hidden="true"
+            ></span>
+            <span class="nav-item__label">UAT Testing (Launchpad only)</span>
+          </a>
+        </template>
+      </template>
       <template lwc:if={sidebarCollapsed}>
         <img
           src={circleLogoUrl}

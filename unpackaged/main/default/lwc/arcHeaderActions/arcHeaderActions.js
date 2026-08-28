@@ -3,8 +3,8 @@ import { NavigationMixin } from "lightning/navigation";
 
 /** Route urlPrefix of the Settings page (ARC1 sfdc_cms__route/Settings__c). */
 const SETTINGS_PATH = "/settings";
-/** Route urlPrefix of the Resource Center page (ARC1 sfdc_cms__route/Learning__c). */
-const RESOURCE_CENTER_PATH = "/learning";
+/** Route urlPrefix of the Help Center page (ARC1 sfdc_cms__route/Help_Center__c). */
+const HELP_CENTER_PATH = "/help-center";
 
 /**
  * Right-hand header action group: search (grows to fill available space) +
@@ -28,11 +28,15 @@ export default class ArcHeaderActions extends NavigationMixin(
     });
   }
 
-  /** The "?" opens the Resource Center, same wired Learning route as the nav item. */
+  /**
+   * The "?" opens the Help Center (nexsLanding, the same help center shown
+   * at Diversify_Help_Center1's own /help/ site) -- distinct from the
+   * Resource Center still reachable from the left nav's Resource item.
+   */
   handleHelpClick() {
     this[NavigationMixin.Navigate]({
       type: "standard__webPage",
-      attributes: { url: RESOURCE_CENTER_PATH }
+      attributes: { url: HELP_CENTER_PATH }
     });
   }
 }

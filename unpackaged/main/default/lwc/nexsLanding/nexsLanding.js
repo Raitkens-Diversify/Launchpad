@@ -1,4 +1,4 @@
-import { LightningElement, wire, track } from 'lwc';
+import { LightningElement, api, wire, track } from 'lwc';
 import getWelcomeState from '@salesforce/apex/NexSWelcomeController.getWelcomeState';
 // Same brand logo the new wizard top bar (envelopeTopBarV2) uses.
 import diversifyLogo from '@salesforce/resourceUrl/DiversifyLogoV2';
@@ -23,6 +23,25 @@ import diversifyLogo from '@salesforce/resourceUrl/DiversifyLogoV2';
  * view handlers for a NavigationMixin redirect guarded by surface.
  */
 export default class NexsLanding extends LightningElement {
+    /** @api hideBranding — hides the Diversify logo + "Help Center" crumb in
+     *  the header (search bar and the "?" help menu still show) for
+     *  embeddings, like ARC, that already have their own site chrome. Same
+     *  coercion as resourceCenter's hideBranding: a checkbox in the Builder
+     *  property panel or a content.json attribute can hand this over as the
+     *  string "false" rather than a real boolean. */
+    _hideBranding = false;
+    @api
+    get hideBranding() {
+        return this._hideBranding;
+    }
+    set hideBranding(value) {
+        this._hideBranding = value !== false && value !== 'false';
+    }
+
+    get showBranding() {
+        return !this._hideBranding;
+    }
+
     logoUrl = diversifyLogo;
     @track view = 'loading'; // 'loading' | 'home' | 'browse'
     @track showWelcomeBanner = false;

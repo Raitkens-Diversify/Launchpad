@@ -2,9 +2,11 @@
     <div class={shellClass}>
         <div class="uta-chrome">
             <header class="uta-chrome__header">
-                <img class="uta-chrome__logo" src={logoUrl} alt="Diversify" />
-                <span class="uta-chrome__divider" aria-hidden="true"></span>
-                <span class="uta-chrome__crumb">UAT Testing</span>
+                <template if:true={showBranding}>
+                    <img class="uta-chrome__logo" src={logoUrl} alt="Diversify" />
+                    <span class="uta-chrome__divider" aria-hidden="true"></span>
+                    <span class="uta-chrome__crumb">UAT Testing</span>
+                </template>
                 <template if:true={showNav}>
                     <c-uat-cycle-switcher class="uta-chrome__switcher"
                                           cycles={myCycles}

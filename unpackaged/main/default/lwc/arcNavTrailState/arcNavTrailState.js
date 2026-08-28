@@ -25,7 +25,7 @@ const APPROVED_PRODUCTS_LIST_PATH = "/product/Product__c/Default";
 /* Its own page rather than a tab on Cases: the advertising reviews are Cases,
    but nobody reaches them by browsing Cases — they come at it from Compliance. */
 const ADVERTISING_REVIEWS_PATH = "/advertising-reviews";
-const UAT_TESTING_PATH = "/uat-testing";
+export const UAT_TESTING_PATH = "/uat-testing";
 export const MANUAL_CONTACTS_GROUP_ID = "arc-nav-contacts";
 
 // Matches all three domains this sandbox is actually reached on --
@@ -44,7 +44,7 @@ const LAUNCHPAD_HOSTNAME_MARKER = "launchpad";
  * use for environment checks) keeps it out of every other org's nav without
  * needing a server round trip just to decide whether to show a nav entry.
  */
-const isLaunchpadEnvironment = () =>
+export const isLaunchpadEnvironment = () =>
   typeof window !== "undefined" &&
   window.location.hostname.toLowerCase().includes(LAUNCHPAD_HOSTNAME_MARKER);
 
@@ -298,19 +298,6 @@ export const STATIC_NAV_ITEMS = [
     type: "InternalLink",
     target: "/notifications",
     icon: "bell.svg"
-  },
-  {
-    id: "arc-nav-footer-divider",
-    type: "Divider",
-    hidden: !isLaunchpadEnvironment()
-  },
-  {
-    id: "arc-nav-uat-testing",
-    label: "UAT Testing (Launchpad only)",
-    type: "InternalLink",
-    target: UAT_TESTING_PATH,
-    icon: "bug.svg",
-    hidden: !isLaunchpadEnvironment()
   }
 ];
 
