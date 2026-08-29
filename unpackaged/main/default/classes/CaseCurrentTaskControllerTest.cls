@@ -72,6 +72,133 @@ private class CaseCurrentTaskControllerTest {
     }
 
     @isTest
+    static void testMarkCompletePitStopReassignsByFaTeamPermission() {
+        Financial_Advisor_Team__c fat = new Financial_Advisor_Team__c(Name = 'Test FAT');
+        insert fat;
+
+        insert new Financial_Advisor_Team_Member__c(
+            Financial_Advisor_Team__c = fat.Id,
+            User__c = UserInfo.getUserId(),
+            Primary__c = true
+        );
+
+        Task_Template__c tmpl = new Task_Template__c(
+            Assigned_To__c = 'FA Team Permission',
+            FA_Team_Permission__c = 'Advisor'
+        );
+        insert tmpl;
+
+        Case c = new Case(Subject = 'Pit Stop Case', Financial_Advisor_Team__c = fat.Id);
+        insert c;
+
+        Task blocked = new Task(
+            Subject = 'Blocked Main Track Task',
+            Status = 'Blocked',
+            WhatId = c.Id,
+            Full_Template_Order__c = 2,
+            Task_Template__c = tmpl.Id
+        );
+        Task pitStop = new Task(
+            Subject = 'Branch Pit Stop',
+            Status = 'Not Started',
+            WhatId = c.Id,
+            Branch_Pit_Stop__c = true
+        );
+        insert new List<Task>{ blocked, pitStop };
+
+        Test.startTest();
+        CaseCurrentTaskController.markComplete(pitStop.Id);
+        Test.stopTest();
+
+        Task updated = [SELECT Status, OwnerId FROM Task WHERE Id = :blocked.Id];
+        Assert.areEqual('Not Started', updated.Status, 'Blocked task should be reactivated');
+        Assert.areEqual(UserInfo.getUserId(), updated.OwnerId, 'Should reassign to the FAT primary member');
+
+        Case updatedCase = [SELECT Current_Task_Id__c FROM Case WHERE Id = :c.Id];
+        Assert.areEqual(blocked.Id, updatedCase.Current_Task_Id__c, 'Case current task should point to the reactivated task');
+    }
+
+    @isTest
+    static void testMarkCompletePitStopReassignsByQueue() {
+        Map<String, Id> queues = createQueues(new List<String>{ 'Operations' });
+
+        Task_Template__c tmpl = new Task_Template__c(
+            Assigned_To__c = 'Queue',
+            Queue__c = 'Back Office Operations'
+        );
+        insert tmpl;
+
+        Case c = new Case(Subject = 'Pit Stop Queue Case');
+        insert c;
+
+        Task blocked = new Task(
+            Subject = 'Blocked Queue Task',
+            Status = 'Blocked',
+            WhatId = c.Id,
+            Full_Template_Order__c = 3,
+            Task_Template__c = tmpl.Id
+        );
+        Task pitStop = new Task(
+            Subject = 'Home Office Pit Stop',
+            Status = 'Not Started',
+            WhatId = c.Id,
+            Home_Office_Pit_Stop__c = true
+        );
+        insert new List<Task>{ blocked, pitStop };
+
+        Test.startTest();
+        CaseCurrentTaskController.markComplete(pitStop.Id);
+        Test.stopTest();
+
+        Task updated = [SELECT Status, OwnerId FROM Task WHERE Id = :blocked.Id];
+        Assert.areEqual('Not Started', updated.Status, 'Blocked task should be reactivated');
+        Assert.areEqual(queues.get('Operations'), updated.OwnerId, 'Should reassign to the Operations queue');
+    }
+
+    @isTest
+    static void testMarkCompletePitStopNoBlockedTask() {
+        Case c = new Case(Subject = 'Pit Stop No Blocked');
+        insert c;
+
+        Task pitStop = new Task(
+            Subject = 'Branch Pit Stop',
+            Status = 'Not Started',
+            WhatId = c.Id,
+            Branch_Pit_Stop__c = true
+        );
+        insert pitStop;
+
+        Test.startTest();
+        CaseCurrentTaskController.markComplete(pitStop.Id);
+        Test.stopTest();
+
+        Task updated = [SELECT Status FROM Task WHERE Id = :pitStop.Id];
+        Assert.areEqual('Completed', updated.Status, 'Pit stop task should still complete with no next task');
+    }
+
+    private static Map<String, Id> createQueues(List<String> names) {
+        Map<String, Id> result = new Map<String, Id>();
+        System.runAs(new User(Id = UserInfo.getUserId())) {
+            List<Group> groups = new List<Group>();
+            for (String name : names) {
+                groups.add(new Group(Name = name, Type = 'Queue'));
+            }
+            insert groups;
+
+            List<QueueSObject> queueSobjects = new List<QueueSObject>();
+            for (Group g : groups) {
+                queueSobjects.add(new QueueSObject(QueueId = g.Id, SObjectType = 'Task'));
+            }
+            insert queueSobjects;
+
+            for (Group g : groups) {
+                result.put(g.Name, g.Id);
+            }
+        }
+        return result;
+    }
+
+    @isTest
     static void testSearchUsersAndQueues() {
         // Search for the current user's name
         String searchKey = UserInfo.getName().substring(0, 3);

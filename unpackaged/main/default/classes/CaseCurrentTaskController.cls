@@ -22,8 +22,63 @@ public with sharing class CaseCurrentTaskController {
 
     @AuraEnabled
     public static void markComplete(Id taskId) {
-        system.System.debug(taskId);
-        update new Task(Id = taskId, Status = 'Completed');
+        Task completedTask = [
+            SELECT Id, Status, WhatId, Branch_Pit_Stop__c, Home_Office_Pit_Stop__c
+            FROM Task
+            WHERE Id = :taskId
+            LIMIT 1
+        ];
+
+        completedTask.Status = 'Completed';
+        update completedTask;
+
+        reactivateNextTaskAfterPitStop(completedTask);
+    }
+
+    /**
+     * When a Branch or Home Office Pit Stop task is completed, re-activate the
+     * next task on the same Case: the first incomplete task (by
+     * Full_Template_Order__c) that the Pit Stop had left in 'Blocked' status is
+     * set back to 'Not Started' and reassigned from its Task Template.
+     */
+    private static void reactivateNextTaskAfterPitStop(Task completedTask) {
+        Boolean isPitStop =
+            completedTask.Branch_Pit_Stop__c == true
+            || completedTask.Home_Office_Pit_Stop__c == true;
+
+        Boolean isCaseWhatId =
+            completedTask.WhatId != null && String.valueOf(completedTask.WhatId).startsWith('500');
+
+        if (!isPitStop || !isCaseWhatId) {
+            return;
+        }
+
+        List<Task> nextTasks = [
+            SELECT Id, WhatId, Full_Template_Order__c,
+                   Task_Template__r.Assigned_To__c,
+                   Task_Template__r.Queue__c,
+                   Task_Template__r.FA_Team_Permission__c
+            FROM Task
+            WHERE WhatId = :completedTask.WhatId
+            AND IsClosed = false
+            AND Status = 'Blocked'
+            ORDER BY Full_Template_Order__c ASC NULLS LAST
+            LIMIT 1
+        ];
+
+        if (nextTasks.isEmpty()) {
+            return;
+        }
+
+        Task nextTask = nextTasks[0];
+        nextTask.Status = 'Not Started';
+        TaskTemplateAssignmentService.assignOwners(nextTasks);
+        update nextTask;
+
+        update new Case(
+            Id = completedTask.WhatId,
+            Current_Task_Id__c = nextTask.Id
+        );
     }
 
     @AuraEnabled

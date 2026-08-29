@@ -54,6 +54,19 @@ private class Financial_Account_TriggerHandlerTest {
     }
 
     @IsTest
+    static void dpiAlternativeInvestmentCaseIsRetypedOnSubmit() {
+        Financial_Account__c fa = setupDpi('Alternative Investment', true);
+
+        Test.startTest();
+        fa.Submitted__c = true;
+        update fa;
+        Test.stopTest();
+
+        Assert.areEqual('Purchase Alternative Investment', caseTypeFor(fa.Id),
+            'A submitted DPI with Product Type Alternative Investment should retype its Case.');
+    }
+
+    @IsTest
     static void nonDpiVariableAnnuityCaseKeepsAccountOpening() {
         Financial_Account__c fa = setupDpi('Variable Annuity', false);
 

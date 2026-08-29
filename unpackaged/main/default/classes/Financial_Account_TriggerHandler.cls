@@ -442,13 +442,14 @@ update ridersToUpdate;
     // already writes free-text types like 'Account Opening' that are not defined picklist values), so a
     // value here need not be added in Setup — but adding it keeps reports and filters tidy.
     //
-    // Constraint: a value here must NOT collide with an account- or member-action Case Type
-    // (EnvelopeActionCaseController's spec maps). readActionCases excludes the account-opening case by
-    // Type != 'Account Opening'; a retyped Case whose Type the outline catalog recognises as an action
-    // type would surface as a stray action card. 'Purchase a Variable Annuity' does not collide.
+    // A value here MAY match an account-action Case Type (e.g. 'Purchase Alternative Investment', which
+    // is also one of EnvelopeActionCaseController's account actions): the outline tells the two apart
+    // by the Case's Financial Account being an envelope account/DPI entity, not by Type, so a retyped
+    // DPI Case is not mistaken for an action item — see WizardEnvelopeStateService.readActionCases.
     private static final Map<String, String> DPI_PRODUCT_TYPE_TO_CASE_TYPE =
         new Map<String, String>{
-            'Variable Annuity' => 'Purchase a Variable Annuity'
+            'Variable Annuity' => 'Purchase a Variable Annuity',
+            'Alternative Investment' => 'Purchase Alternative Investment'
         };
 
     private void updateRelatedCase(

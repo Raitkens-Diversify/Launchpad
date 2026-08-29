@@ -1753,12 +1753,28 @@ return result;
     // record but is not part of the household's settled state: it belongs to the one envelope that
     // raised it, so a submitted case from a previous envelope must not surface on this one.
     //
-    // The account-opening case is excluded — it belongs to a Financial Account's own mixed interview
-    // (see saveAccountCaseInfo), not to an outline row of its own.
+    // The account/DPI mixed-interview case is excluded — it belongs to a Financial Account's own
+    // interview (see saveAccountCaseInfo), not to an outline row of its own. It is identified by its
+    // Financial Account being an account/DPI entity of this envelope (an Envelope_Content row links
+    // the envelope to Wizard_Financial_Account__c), NOT by its Case Type: a DPI's Case is retyped from
+    // its Product Type at submit (Financial_Account_TriggerHandler), so a value like
+    // 'Purchase Alternative Investment' would otherwise be mistaken for an account action and rendered
+    // as a stray card. The Type != 'Account Opening' filter stays as an additive guard for the
+    // un-retyped case; the entity check is what makes the exclusion Type-independent.
     private static List<ActionCaseData> readActionCases(Id envelopeId) {
         List<ActionCaseData> actionCases = new List<ActionCaseData>();
         if (envelopeId == null) {
             return actionCases;
+        }
+        // The Financial Accounts that are account/DPI entities of this envelope. Their own
+        // mixed-interview Cases are shown through the account row, never as action items.
+        Set<Id> envelopeAccountFaIds = new Set<Id>();
+        for (Envelope_Content__c ec : [
+            SELECT Wizard_Financial_Account__c
+            FROM Envelope_Content__c
+            WHERE Envelope__c = :envelopeId AND Wizard_Financial_Account__c != null
+        ]) {
+            envelopeAccountFaIds.add(ec.Wizard_Financial_Account__c);
         }
         for (Case c : [
             SELECT Id, Type, Subject, Submitted__c,
@@ -1772,6 +1788,11 @@ return result;
             AND Type != :ACCOUNT_OPENING_CASE_TYPE
             ORDER BY CreatedDate ASC
         ]) {
+            // The account/DPI's own interview Case, retyped from its Product Type — not an action item.
+            if (c.Wizard_Financial_Account__c != null
+                    && envelopeAccountFaIds.contains(c.Wizard_Financial_Account__c)) {
+                continue;
+            }
             ActionCaseData data = new ActionCaseData();
             data.id = c.Id;
             data.caseType = c.Type;
