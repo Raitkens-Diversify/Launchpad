@@ -910,6 +910,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Event.Envelope__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Event.Full_Template_Order__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -2206,6 +2211,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Strategy__c.Structured_Note__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Task.Envelope__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

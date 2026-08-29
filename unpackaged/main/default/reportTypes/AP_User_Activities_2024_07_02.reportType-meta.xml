@@ -561,6 +561,11 @@
             <field>Full_Template_Order__c</field>
             <table>User.Activity$OwnerId</table>
         </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>Envelope__c</field>
+            <table>User.Activity$OwnerId</table>
+        </columns>
         <masterLabel>Activities</masterLabel>
     </sections>
 </ReportType>
