@@ -433,6 +433,24 @@ update ridersToUpdate;
 }*/
     }
     
+    // A DPI's Product Type decides the kind of work its Case represents, so the wizard Case opens
+    // generically as 'Account Opening' (EnvelopeISAController) and is retyped here, at submit, once
+    // the interview has settled the product. Add a product type by adding a row — no code change.
+    // Only product types listed here retype the Case; anything else keeps the 'Account Opening' type.
+    //
+    // Keyed by Financial_Account__c.Product_Type__c. Case.Type is an unrestricted picklist (the wizard
+    // already writes free-text types like 'Account Opening' that are not defined picklist values), so a
+    // value here need not be added in Setup — but adding it keeps reports and filters tidy.
+    //
+    // Constraint: a value here must NOT collide with an account- or member-action Case Type
+    // (EnvelopeActionCaseController's spec maps). readActionCases excludes the account-opening case by
+    // Type != 'Account Opening'; a retyped Case whose Type the outline catalog recognises as an action
+    // type would surface as a stray action card. 'Purchase a Variable Annuity' does not collide.
+    private static final Map<String, String> DPI_PRODUCT_TYPE_TO_CASE_TYPE =
+        new Map<String, String>{
+            'Variable Annuity' => 'Purchase a Variable Annuity'
+        };
+
     private void updateRelatedCase(
         Map<Id, Financial_Account__c> newMap,
         Map<Id, Financial_Account__c> oldMap
@@ -568,6 +586,17 @@ update ridersToUpdate;
                 System.debug('value: ' + value);
                 System.debug('fieldApiName: ' + fieldApiName);
             }
+
+            // Retype a DPI's Case from its Product Type. Only DPIs carry a product-driven Case type;
+            // a regular account keeps whatever type it opened with. A product type not in the map (or
+            // a blank one) leaves the Case type untouched rather than clearing it.
+            if (fa.DPI__c == true && fa.Product_Type__c != null) {
+                String mappedCaseType = DPI_PRODUCT_TYPE_TO_CASE_TYPE.get(fa.Product_Type__c);
+                if (mappedCaseType != null) {
+                    c.Type = mappedCaseType;
+                }
+            }
+
           	c.Recalculate_Case_Template__c = true;
             casesToUpdate.add(c);
         }

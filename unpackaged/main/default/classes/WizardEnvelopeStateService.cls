@@ -363,6 +363,11 @@ Wizard_View_Preference__c = viewMode
      * (saveAccountCaseInfo opens the Case on demand from the first filled Case answer), so a missing
      * Case leaves Case__c null and a later save backfills it. Once stamped it is never repointed.
      *
+     * Amount__c mirrors the same Case's Amount__c — the interview captures the amount as a Case field
+     * (saveAccountCaseInfo runs before this in every call site, so the Case value is already current)
+     * and the product row carries a copy of it. Unlike the Case link it is kept in sync: an edited or
+     * cleared amount tracks onto the row. It is null whenever the Case is not resolved yet.
+     *
      * @param productId          the chosen product, or null to clear
      * @param financialAccountId the wizard Financial Account the answer belongs to
      */
@@ -373,7 +378,7 @@ Wizard_View_Preference__c = viewMode
         }
 
         List<Financial_Account_Related_Product__c> existing = [
-            SELECT Id, Product__c, Case__c
+            SELECT Id, Product__c, Case__c, Amount__c
             FROM Financial_Account_Related_Product__c
             WHERE Wizard_Financial_Account__c = :financialAccountId
             ORDER BY CreatedDate ASC
@@ -381,9 +386,10 @@ Wizard_View_Preference__c = viewMode
         ];
 
         // The account's wizard Case, resolved the same way as saveAccountCaseInfo so this row links to
-        // the Case the interview writes to. Empty when the Case has not been opened yet.
+        // the Case the interview writes to. Amount__c is read here so the row mirrors the Case's amount.
+        // Empty when the Case has not been opened yet.
         List<Case> wizardCases = [
-            SELECT Id
+            SELECT Id, Amount__c
             FROM Case
             WHERE Wizard_Financial_Account__c = :financialAccountId
             AND Origin = :WIZARD_CASE_ORIGIN
@@ -392,6 +398,7 @@ Wizard_View_Preference__c = viewMode
             LIMIT 1
         ];
         Id caseId = wizardCases.isEmpty() ? null : wizardCases[0].Id;
+        Decimal caseAmount = wizardCases.isEmpty() ? null : wizardCases[0].Amount__c;
 
         try {
             if (productId == null) {
@@ -405,7 +412,8 @@ Wizard_View_Preference__c = viewMode
                 insert new Financial_Account_Related_Product__c(
                     Product__c = productId,
                     Wizard_Financial_Account__c = financialAccountId,
-                    Case__c = caseId
+                    Case__c = caseId,
+                    Amount__c = caseAmount
                 );
                 return;
             }
@@ -417,13 +425,19 @@ Wizard_View_Preference__c = viewMode
             // Backfill the Case only while it is still empty: the row may have been created before the
             // Case existed, and once stamped the Case must not be repointed.
             Boolean needsCaseBackfill = existing[0].Case__c == null && caseId != null;
+            // Keep the amount in step with the Case's, but only while a Case is resolved, so a momentary
+            // empty Case lookup never wipes an amount the row already carries.
+            Boolean amountChanged = caseId != null && existing[0].Amount__c != caseAmount;
             if (productChanged) {
                 existing[0].Product__c = productId;
             }
             if (needsCaseBackfill) {
                 existing[0].Case__c = caseId;
             }
-            if (productChanged || needsCaseBackfill) {
+            if (amountChanged) {
+                existing[0].Amount__c = caseAmount;
+            }
+            if (productChanged || needsCaseBackfill || amountChanged) {
                 update existing[0];
             }
         } catch (DmlException e) {

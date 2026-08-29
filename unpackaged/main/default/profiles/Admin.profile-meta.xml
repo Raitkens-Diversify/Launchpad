@@ -831,6 +831,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>Financial_Account_TriggerHandlerTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>Financial_Advisor_Team_TriggerHandler</apexClass>
         <enabled>true</enabled>
     </classAccesses>

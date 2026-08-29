@@ -211,4 +211,9 @@
         <default>false</default>
         <label>Purchase Alternative Investment</label>
     </standardValue>
+    <standardValue>
+        <fullName>Purchase a Variable Annuity</fullName>
+        <default>false</default>
+        <label>Purchase a Variable Annuity</label>
+    </standardValue>
 </StandardValueSet>
