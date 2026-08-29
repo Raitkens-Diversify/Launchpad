@@ -894,8 +894,9 @@ public with sharing class FieldDetailController {
      * the row is the only place this answer lives, so an account whose product was cleared has to come
      * back cleared rather than keeping whatever the interview last showed.
      *
-     * Resolves the same row as WizardEnvelopeStateService.saveRelatedProduct — oldest first, first per
-     * account wins, ignoring the rows the flow path owns.
+     * Resolves the same row as WizardEnvelopeStateService.saveRelatedProduct — the wizard is the only
+     * path that creates these rows, so Wizard_Financial_Account__c alone resolves it, oldest first,
+     * first per account wins.
      */
     @AuraEnabled
     public static Map<Id, Map<String, Object>> getRelatedProductValuesForAccounts(
@@ -936,8 +937,6 @@ public with sharing class FieldDetailController {
             SELECT Wizard_Financial_Account__c, Product__c
             FROM Financial_Account_Related_Product__c
             WHERE Wizard_Financial_Account__c IN :financialAccountIds
-            AND Case__c = null
-            AND Flow_Interview_Id__c = null
             ORDER BY CreatedDate ASC
         ]) {
             if (!resolved.add(row.Wizard_Financial_Account__c)) {

@@ -37,7 +37,7 @@ public class Case_TriggerHandler {
     
     public void isAfterInsert(Map<Id, Case> newMap){
         createShareRecord(newMap, null);
-        createAdvisorRequestTask(newMap);
+        //createAdvisorRequestTask(newMap);
         createWizardTask(newMap);
         createCDLforCase(newMap, null);
         populateJointOwner(newMap, null);
@@ -551,7 +551,7 @@ setOfTypeToName.add('Account Servicing - Approval Required');
         // Match templates for each Case
         for (Case caseRecord : newList) {
             
-            if (caseRecord.Donotcalc__c != true && caseRecord.submitted__c == true) {
+            if ((caseRecord.Donotcalc__c != true && caseRecord.submitted__c == true) || caseRecord.origin == 'Service Request') {
                 
                 caseTemplateMatchFields = '';
                 
@@ -796,7 +796,7 @@ setOfTypeToName.add('Account Servicing - Approval Required');
         
     }
     
-    private void createAdvisorRequestTask(Map<Id, Case> newMap){
+/*    private void createAdvisorRequestTask(Map<Id, Case> newMap){
         Set<Id> setOfFATIds = new Set<Id>();
         Set<String> setOfQueueNames = new Set<String>();
         Set<Id> setAccounts = new Set<Id>();
@@ -945,7 +945,7 @@ taskRec.ActivityDate = ActivityDate;
 } else if(taskTempItemRecord.Task_Template__r.Due_Date__c == 'Before Referenced Field' && taskTempItemRecord.Task_Template__r.Referenced_Field__c == 'Review_Meeting_Scheduled_Date__c'){
 ActivityDate = caseRecord.Review_Meeting_Scheduled_Date__c - (Integer)taskTempItemRecord.Task_Template__r.Number_of_Days__c;
 taskRec.ActivityDate = ActivityDate;
-}*/
+}
                         if(taskTempItemRecord.Task_Template__r.Assigned_To__c == 'Queue'){
                             if(!String.isEmpty(taskTempItemRecord.Task_Template__r.Queue__c)){
                                 if(!mapOfQueueIdByName.isEmpty() && mapOfQueueIdByName.containsKey(taskTempItemRecord.Task_Template__r.Queue__c)){
@@ -1012,7 +1012,7 @@ taskRec.ActivityDate = ActivityDate;
 } else if(taskTempItemRecord.Task_Template__r.Due_Date__c == 'Before Referenced Field' && taskTempItemRecord.Task_Template__r.Referenced_Field__c == 'Review_Meeting_Scheduled_Date__c'){
 ActivityDate = caseRecord.Review_Meeting_Scheduled_Date__c - (Integer)taskTempItemRecord.Task_Template__r.Number_of_Days__c;
 taskRec.ActivityDate = ActivityDate;
-}*/
+}
                     }
                     lstTask.add(taskRec);
                 }
@@ -1025,7 +1025,7 @@ taskRec.ActivityDate = ActivityDate;
         if(!mapOfCaseIdToCaseTempId.isEmpty()){
             setCurrentTask(mapOfCaseIdToCaseTempId.keySet());
         }
-    }
+    }*/
     
     private void createWizardTask(Map<Id, Case> newMap){
         
@@ -1391,7 +1391,7 @@ record.OwnerId = queuePRId;
         for(Case c : newMap.values()){
             Case oldCase = oldMap.get(c.Id);
             System.debug('submitted: ' + c.Submitted__c + oldCase.submitted__c);
-            if(c.Recalculate_Case_Template__c || (c.Submitted__c && !oldCase.submitted__c)){
+            if(c.Recalculate_Case_Template__c || (c.Submitted__c && !oldCase.submitted__c || c.origin == 'Service Request')){
                 //if(c.Origin == 'Wizard'){
                     casesWizardToRecalc.put(c.Id, c);
                 /*} else {

@@ -1,4 +1,6 @@
-import { LightningElement, api } from 'lwc';
+import { LightningElement, api, wire } from 'lwc';
+import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
+import TASK_ENVELOPE_FIELD from '@salesforce/schema/Task.Envelope__c';
 import LightningToast from 'lightning/toast';
 import updateContentDocumentLinks from '@salesforce/apex/DocumentService.updateContentDocumentLinks';
 import getRequiredDocuments from '@salesforce/apex/DocumentService.getRequiredDocuments';
@@ -38,6 +40,14 @@ export default class EnvelopeManageDocuments extends LightningElement {
     @api householdName = '';
     @api envelopeId= '';
 
+    // Set automatically by the platform when the component sits on a Lightning record page
+    // (here, the Task record page). The shell never binds this; it passes envelopeId directly.
+    @api recordId = '';
+
+    // Envelope__c id resolved off the Task record via the wire below. Empty in the shell, where
+    // envelopeId is bound instead. effectiveEnvelopeId reconciles the two entry points.
+    _resolvedEnvelopeId = '';
+
     documents = [];
 
     // Files chosen via the file-selector (browse or drop). Client-side only for now.
@@ -57,6 +67,17 @@ export default class EnvelopeManageDocuments extends LightningElement {
     // "Household - Envelope"; either part is dropped if empty.
     get subtitle() {
         return [this.householdName, this.envelopeTitle].filter(Boolean).join(' - ');
+    }
+
+    // Single source of truth for the envelope id, whichever entry point supplied it. The shell's
+    // explicit envelopeId wins; on a Task page it falls back to the id resolved off the Task.
+    get effectiveEnvelopeId() {
+        return this.envelopeId || this._resolvedEnvelopeId;
+    }
+
+    // Only the shell has an items view to return to, so hide "Back to Envelope" on a record page.
+    get showBackButton() {
+        return !!this.envelopeId;
     }
 
     get hasUploadedFiles() {
@@ -132,35 +153,61 @@ export default class EnvelopeManageDocuments extends LightningElement {
         });
     }
 
-async connectedCallback() {
-     try {
-
-        await this._loadUploadedFiles();
-
-        const docs = await getRequiredDocuments({
-                    envelopeId : this.envelopeId
-                });
-                if(docs != null){
-                this.documents = docs.map(doc => ({
-                            ...doc,
-                            id : doc.Id,
-                            name : doc.Name,
-                linkedFileId: doc.ContentDocumentLinks?.length
-                ? doc.ContentDocumentLinks[0].ContentDocumentId
-                : null,
-                            // Join each signee's account name into the comma-separated string the card renders.
-                            signees: doc.Signee__r?.length
-                                ? doc.Signee__r.map((s) => s.Account__r?.Name).filter(Boolean).join(', ')
-                                : null
-                        }));
-                }else{
-                    this.documents = MOCK_DOCUMENTS;
-                }
-        
-    } catch (error) {
-        console.error('Error loading required documents:', error);
+    // Task-page entry point: resolve the linked Envelope__c off the Task record, then load. The
+    // wire only fetches when recordId is set (record page); in the shell recordId is empty and it
+    // never fires, so envelopeId drives loading via connectedCallback instead.
+    @wire(getRecord, { recordId: '$recordId', fields: [TASK_ENVELOPE_FIELD] })
+    wiredTask({ data, error }) {
+        if (data) {
+            const id = getFieldValue(data, TASK_ENVELOPE_FIELD);
+            if (id && id !== this._resolvedEnvelopeId) {
+                this._resolvedEnvelopeId = id;
+                this._loadEnvelopeData();
+            }
+        } else if (error) {
+            console.error('Error resolving envelope from task:', error);
+        }
     }
-}
+
+    connectedCallback() {
+        // Shell path: envelopeId is bound directly, so load now. The Task path waits for the wire.
+        if (this.envelopeId) {
+            this._loadEnvelopeData();
+        }
+    }
+
+    // Loads the envelope's uploaded files and required documents. Shared by both entry points;
+    // no-ops until an envelope id is known so an unpopulated Task lookup fails soft.
+    async _loadEnvelopeData() {
+        if (!this.effectiveEnvelopeId) {
+            return;
+        }
+        try {
+            await this._loadUploadedFiles();
+
+            const docs = await getRequiredDocuments({
+                envelopeId: this.effectiveEnvelopeId
+            });
+            if (docs != null) {
+                this.documents = docs.map(doc => ({
+                    ...doc,
+                    id: doc.Id,
+                    name: doc.Name,
+                    linkedFileId: doc.ContentDocumentLinks?.length
+                        ? doc.ContentDocumentLinks[0].ContentDocumentId
+                        : null,
+                    // Join each signee's account name into the comma-separated string the card renders.
+                    signees: doc.Signee__r?.length
+                        ? doc.Signee__r.map((s) => s.Account__r?.Name).filter(Boolean).join(', ')
+                        : null
+                }));
+            } else {
+                this.documents = MOCK_DOCUMENTS;
+            }
+        } catch (error) {
+            console.error('Error loading required documents:', error);
+        }
+    }
 
 
     // Uploads go through the standard platform dialog. Its uploadfinished payload reports file
@@ -369,7 +416,7 @@ handleLinkConfirm(event) {
     // is resolved from the stored FileExtension, matching what the platform upload dialog shows.
     async _loadUploadedFiles() {
         const files = await getUploadedFiles({
-            envelopeId: this.envelopeId
+            envelopeId: this.effectiveEnvelopeId
         });
         if (files != null) {
             this.uploadedFiles = files.map((file) => ({

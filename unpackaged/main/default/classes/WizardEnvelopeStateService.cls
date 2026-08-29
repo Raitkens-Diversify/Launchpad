@@ -354,10 +354,14 @@ Wizard_View_Preference__c = viewMode
      * emptied, so a cleared answer removes the row rather than blanking it, and a row only comes into
      * existence once a product has actually been chosen.
      *
-     * The predicate is what keeps this off rows another path owns: the flow that also writes these
-     * rows stamps Flow_Interview_Id__c, and Case_TriggerHandler stamps Case__c once the work is
-     * submitted. The wizard sets neither, and read, update and delete all resolve the row the same
-     * way, so the interview can never display one row and write another.
+     * The wizard is the only path that creates these rows, so Wizard_Financial_Account__c alone
+     * resolves the interview's row — read, update and delete all resolve it the same way, so the
+     * interview can never display one row and write another.
+     *
+     * The row is also stamped with the account's wizard Case (Case__c) so the product is linked to the
+     * Case from creation. The Case may not exist yet when only the product has been answered
+     * (saveAccountCaseInfo opens the Case on demand from the first filled Case answer), so a missing
+     * Case leaves Case__c null and a later save backfills it. Once stamped it is never repointed.
      *
      * @param productId          the chosen product, or null to clear
      * @param financialAccountId the wizard Financial Account the answer belongs to
@@ -369,14 +373,25 @@ Wizard_View_Preference__c = viewMode
         }
 
         List<Financial_Account_Related_Product__c> existing = [
-            SELECT Id, Product__c
+            SELECT Id, Product__c, Case__c
             FROM Financial_Account_Related_Product__c
             WHERE Wizard_Financial_Account__c = :financialAccountId
-            AND Case__c = null
-            AND Flow_Interview_Id__c = null
             ORDER BY CreatedDate ASC
             LIMIT 1
         ];
+
+        // The account's wizard Case, resolved the same way as saveAccountCaseInfo so this row links to
+        // the Case the interview writes to. Empty when the Case has not been opened yet.
+        List<Case> wizardCases = [
+            SELECT Id
+            FROM Case
+            WHERE Wizard_Financial_Account__c = :financialAccountId
+            AND Origin = :WIZARD_CASE_ORIGIN
+            AND Type = :ACCOUNT_OPENING_CASE_TYPE
+            ORDER BY CreatedDate ASC
+            LIMIT 1
+        ];
+        Id caseId = wizardCases.isEmpty() ? null : wizardCases[0].Id;
 
         try {
             if (productId == null) {
@@ -389,7 +404,8 @@ Wizard_View_Preference__c = viewMode
             if (existing.isEmpty()) {
                 insert new Financial_Account_Related_Product__c(
                     Product__c = productId,
-                    Wizard_Financial_Account__c = financialAccountId
+                    Wizard_Financial_Account__c = financialAccountId,
+                    Case__c = caseId
                 );
                 return;
             }
@@ -397,8 +413,17 @@ Wizard_View_Preference__c = viewMode
             // Repoint the row rather than replacing it: it is history-tracked and each write announces
             // it downstream by id, so a delete-and-insert would read as a different record. Skipping an
             // unchanged write is also what stops an idle interview re-announcing it on every autosave.
-            if (existing[0].Product__c != productId) {
+            Boolean productChanged = existing[0].Product__c != productId;
+            // Backfill the Case only while it is still empty: the row may have been created before the
+            // Case existed, and once stamped the Case must not be repointed.
+            Boolean needsCaseBackfill = existing[0].Case__c == null && caseId != null;
+            if (productChanged) {
                 existing[0].Product__c = productId;
+            }
+            if (needsCaseBackfill) {
+                existing[0].Case__c = caseId;
+            }
+            if (productChanged || needsCaseBackfill) {
                 update existing[0];
             }
         } catch (DmlException e) {

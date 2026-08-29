@@ -1,13 +1,15 @@
 <template>
     <header class="docs__header">
-        <lightning-button
-            class="docs__back"
-            variant="base"
-            icon-name="utility:back"
-            icon-position="left"
-            label="Back to Envelope"
-            onclick={handleBack}>
-        </lightning-button>
+        <template lwc:if={showBackButton}>
+            <lightning-button
+                class="docs__back"
+                variant="base"
+                icon-name="utility:back"
+                icon-position="left"
+                label="Back to Envelope"
+                onclick={handleBack}>
+            </lightning-button>
+        </template>
         <h1 class="docs__title">Manage Documents</h1>
         <p class="docs__subtitle">{subtitle}</p>
     </header>
@@ -39,7 +41,7 @@
                     label="Upload documents"
                     name="fileUploader"
                     accept=".pdf,.zip,.doc,.docx,.xls,.xlsx"
-                    record-id={envelopeId}
+                    record-id={effectiveEnvelopeId}
                     onuploadfinished={handleFilesChange}
                     multiple>
                 </lightning-file-upload>
