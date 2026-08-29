@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Referral_Source__c</fullName>
+    <description>How the prospect was referred. Mirrors Opportunity.Referral_Source__c so attribution carries from the prospect to the deal. Replaces the FSC referral Lead record types.</description>
+    <label>Referral Source</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>401k</fullName>
+                <default>false</default>
+                <label>401k</label>
+            </value>
+            <value>
+                <fullName>Client Referral</fullName>
+                <default>false</default>
+                <label>Client Referral</label>
+            </value>
+            <value>
+                <fullName>Diversify Advisor Referral</fullName>
+                <default>false</default>
+                <label>Diversify Advisor Referral</label>
+            </value>
+            <value>
+                <fullName>Home Office Referral</fullName>
+                <default>false</default>
+                <label>Home Office Referral</label>
+            </value>
+            <value>
+                <fullName>Personal Relationship</fullName>
+                <default>false</default>
+                <label>Personal Relationship</label>
+            </value>
+            <value>
+                <fullName>Website Lead</fullName>
+                <default>false</default>
+                <label>Website Lead</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

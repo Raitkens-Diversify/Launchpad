@@ -20,12 +20,13 @@
     <enableQuickCreate>true</enableQuickCreate>
     <enableQuickSetupPanel>false</enableQuickSetupPanel>
     <enableRelatedListHovers>true</enableRelatedListHovers>
-    <enableSldsV2>false</enableSldsV2>
     <enableSldsV2DarkModeInCosmos>false</enableSldsV2DarkModeInCosmos>
     <enableSpotlight>true</enableSpotlight>
     <enableTabOrganizer>true</enableTabOrganizer>
     <enableVertNavThemedIconsEnabled>true</enableVertNavThemedIconsEnabled>
     <enableVerticalNavSeamlessSwitching>false</enableVerticalNavSeamlessSwitching>
+    <listViewIleBypassLayout>false</listViewIleBypassLayout>
+    <listViewIleMultiRecordType>false</listViewIleMultiRecordType>
     <multiColumnSort>false</multiColumnSort>
     <multiColumnSortLv>true</multiColumnSortLv>
     <multiColumnSortRl>true</multiColumnSortRl>

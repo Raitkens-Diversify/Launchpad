@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <Profile xmlns="http://soap.sforce.com/2006/04/metadata">
     <custom>false</custom>
     <userLicense>Einstein Agent</userLicense>
@@ -15705,6 +15705,15 @@
     </layoutAssignments>
     <layoutAssignments>
         <layout>Incident-Incident Layout</layout>
+    </layoutAssignments>
+    <layoutAssignments>
+        <layout>InsuranceAsyncBulkRecordDetail-Insurance Async Bulk Record Detail Layout</layout>
+    </layoutAssignments>
+    <layoutAssignments>
+        <layout>InsuranceAsyncBulkRequest-Insurance Async Bulk Request Layout</layout>
+    </layoutAssignments>
+    <layoutAssignments>
+        <layout>InsuranceAsyncBulkRequestItem-Insurance Async Bulk Request Item Layout</layout>
     </layoutAssignments>
     <layoutAssignments>
         <layout>InsurancePolicyAsset-Insurance Policy Asset Layout</layout>

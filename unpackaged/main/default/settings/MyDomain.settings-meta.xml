@@ -18,7 +18,7 @@
     <enableShareBrowserSessionIOSForAuth>false</enableShareBrowserSessionIOSForAuth>
     <instancedUrlRedirectHandling>NoRedirect</instancedUrlRedirectHandling>
     <isFirstPartyCookieUseRequired>false</isFirstPartyCookieUseRequired>
-    <isIcorInstApiTrafficBlocked>false</isIcorInstApiTrafficBlocked>
+    <isIcorInstApiTrafficBlocked>true</isIcorInstApiTrafficBlocked>
     <isInstancedApiTrafficBlocked>false</isInstancedApiTrafficBlocked>
     <logRedirections>false</logRedirections>
     <myDomainName>dfpginvestments</myDomainName>

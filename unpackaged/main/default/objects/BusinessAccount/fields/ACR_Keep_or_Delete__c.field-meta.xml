@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>ACR_Keep_or_Delete__c</fullName>
+    <description>Field Just for Salesforce data clean up project. Can be deleted once it is finished.</description>
+    <externalId>false</externalId>
+    <label>ACR Keep or Delete</label>
+    <length>255</length>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

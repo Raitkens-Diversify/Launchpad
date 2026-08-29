@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Trust_Estate_Sub_Type__c</fullName>
+    <label>Trust / Estate Sub-Type</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Revocable Trust</fullName>
+                <default>false</default>
+                <label>Revocable Trust</label>
+            </value>
+            <value>
+                <fullName>Irrevocable Trust</fullName>
+                <default>false</default>
+                <label>Irrevocable Trust</label>
+            </value>
+            <value>
+                <fullName>Estate</fullName>
+                <default>false</default>
+                <label>Estate</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Estimated_AUM__c</fullName>
+    <description>Assets the prospect is expected to bring under management, used for pipeline sizing. Mirrors Lead.Estimated_AUM__c. Distinct from Approximate Total Assets, which is a suitability measure of assets held anywhere.</description>
+    <inlineHelpText>Assets we expect to manage for this prospect. For total assets held anywhere, use Approximate Total Assets.</inlineHelpText>
+    <label>Estimated AUM</label>
+    <precision>18</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Currency</type>
+</CustomField>

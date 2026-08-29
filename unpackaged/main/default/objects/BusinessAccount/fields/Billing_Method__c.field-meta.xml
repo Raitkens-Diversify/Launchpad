@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Billing_Method__c</fullName>
+    <label>Billing Method</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Branch Allocation</fullName>
+                <default>false</default>
+                <label>Branch Allocation</label>
+            </value>
+            <value>
+                <fullName>External Billing - Diversify Insurance</fullName>
+                <default>false</default>
+                <label>External Billing - Diversify Insurance</label>
+            </value>
+            <value>
+                <fullName>External Billing - FirstPurpose Tax</fullName>
+                <default>false</default>
+                <label>External Billing - FirstPurpose Tax</label>
+            </value>
+            <value>
+                <fullName>External Billing - FPW CFO Services</fullName>
+                <default>false</default>
+                <label>External Billing - FPW CFO Services</label>
+            </value>
+            <value>
+                <fullName>Membership Billing</fullName>
+                <default>false</default>
+                <label>Membership Billing</label>
+            </value>
+            <value>
+                <fullName>No Billing</fullName>
+                <default>false</default>
+                <label>No Billing</label>
+            </value>
+            <value>
+                <fullName>No Billing - Home Office</fullName>
+                <default>false</default>
+                <label>No Billing - Home Office</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

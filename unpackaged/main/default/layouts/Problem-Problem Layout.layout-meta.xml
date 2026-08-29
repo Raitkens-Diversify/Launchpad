@@ -139,7 +139,7 @@
         <customLabel>false</customLabel>
         <detailHeading>false</detailHeading>
         <editHeading>false</editHeading>
-        <layoutColumns/>
+        <layoutColumns />
         <style>CustomLinks</style>
     </layoutSections>
     <relatedLists>
@@ -203,12 +203,6 @@
         <fields>RelationshipType</fields>
         <fields>Name</fields>
         <relatedList>RelatedChangeRequests</relatedList>
-    </relatedLists>
-    <relatedLists>
-        <fields>Case</fields>
-        <fields>RelationshipType</fields>
-        <fields>Name</fields>
-        <relatedList>CaseRelatedIssues</relatedList>
     </relatedLists>
     <showEmailCheckbox>false</showEmailCheckbox>
     <showRunAssignmentRulesCheckbox>false</showRunAssignmentRulesCheckbox>

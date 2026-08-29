@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Current_Plan_Provider_s__c</fullName>
+    <description>Incumbent provider(s) on a retirement plan prospect. Mirrors Lead.Current_Plan_Provider_s__c via the Current Plan Provider(s) global value set.</description>
+    <label>Current Plan Provider(s)</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>MultiselectPicklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetName>Current_Plan_Provider_s</valueSetName>
+    </valueSet>
+    <visibleLines>4</visibleLines>
+</CustomField>

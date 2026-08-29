@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Prospect_Status__c</fullName>
+    <description>Nurture funnel for a wealth prospect, replacing the Lead status funnel. Set manually. The macro lifecycle stage lives on Account.Type (Lead, Prospect, Active Client, Former Prospect, Former Client).</description>
+    <inlineHelpText>Where this prospect sits in the nurture funnel. Set this to New when creating a prospect, and set Account Type to Prospect once the prospect is actively engaged.</inlineHelpText>
+    <label>Prospect Status</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>New</fullName>
+                <default>false</default>
+                <label>New</label>
+            </value>
+            <value>
+                <fullName>Attempted Contact</fullName>
+                <default>false</default>
+                <label>Attempted Contact</label>
+            </value>
+            <value>
+                <fullName>Connected</fullName>
+                <default>false</default>
+                <label>Connected</label>
+            </value>
+            <value>
+                <fullName>Nurturing</fullName>
+                <default>false</default>
+                <label>Nurturing</label>
+            </value>
+            <value>
+                <fullName>Qualified</fullName>
+                <default>false</default>
+                <label>Qualified</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

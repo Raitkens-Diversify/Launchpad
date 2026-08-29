@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Signer_2__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <label>Signer 2</label>
+    <referenceTo>Contact</referenceTo>
+    <relationshipLabel>Accounts (Signer 2)</relationshipLabel>
+    <relationshipName>Accounts2</relationshipName>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Lookup</type>
+</CustomField>

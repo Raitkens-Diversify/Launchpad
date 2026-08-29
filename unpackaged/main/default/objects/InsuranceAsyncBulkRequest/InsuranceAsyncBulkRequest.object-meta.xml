@@ -126,7 +126,46 @@
         <formFactor>Small</formFactor>
         <type>Default</type>
     </actionOverrides>
+    <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
     <enableFeeds>false</enableFeeds>
     <externalSharingModel>Private</externalSharingModel>
+    <searchLayouts>
+        <customTabListAdditionalFields>Account</customTabListAdditionalFields>
+        <customTabListAdditionalFields>ReferenceRecord</customTabListAdditionalFields>
+        <customTabListAdditionalFields>Type</customTabListAdditionalFields>
+        <customTabListAdditionalFields>Status</customTabListAdditionalFields>
+        <customTabListAdditionalFields>JobCount</customTabListAdditionalFields>
+        <customTabListAdditionalFields>PendingJobCount</customTabListAdditionalFields>
+        <customTabListAdditionalFields>SuccessfulJobCount</customTabListAdditionalFields>
+        <customTabListAdditionalFields>FailedJobCount</customTabListAdditionalFields>
+        <customTabListAdditionalFields>LastModifiedDate</customTabListAdditionalFields>
+        <lookupDialogsAdditionalFields>Account</lookupDialogsAdditionalFields>
+        <lookupDialogsAdditionalFields>ReferenceRecord</lookupDialogsAdditionalFields>
+        <lookupDialogsAdditionalFields>Type</lookupDialogsAdditionalFields>
+        <lookupDialogsAdditionalFields>Status</lookupDialogsAdditionalFields>
+        <lookupDialogsAdditionalFields>JobCount</lookupDialogsAdditionalFields>
+        <lookupDialogsAdditionalFields>PendingJobCount</lookupDialogsAdditionalFields>
+        <lookupDialogsAdditionalFields>SuccessfulJobCount</lookupDialogsAdditionalFields>
+        <lookupDialogsAdditionalFields>FailedJobCount</lookupDialogsAdditionalFields>
+        <lookupDialogsAdditionalFields>LastModifiedDate</lookupDialogsAdditionalFields>
+        <lookupPhoneDialogsAdditionalFields>Account</lookupPhoneDialogsAdditionalFields>
+        <lookupPhoneDialogsAdditionalFields>ReferenceRecord</lookupPhoneDialogsAdditionalFields>
+        <lookupPhoneDialogsAdditionalFields>Type</lookupPhoneDialogsAdditionalFields>
+        <lookupPhoneDialogsAdditionalFields>Status</lookupPhoneDialogsAdditionalFields>
+        <lookupPhoneDialogsAdditionalFields>JobCount</lookupPhoneDialogsAdditionalFields>
+        <lookupPhoneDialogsAdditionalFields>PendingJobCount</lookupPhoneDialogsAdditionalFields>
+        <lookupPhoneDialogsAdditionalFields>SuccessfulJobCount</lookupPhoneDialogsAdditionalFields>
+        <lookupPhoneDialogsAdditionalFields>FailedJobCount</lookupPhoneDialogsAdditionalFields>
+        <lookupPhoneDialogsAdditionalFields>LastModifiedDate</lookupPhoneDialogsAdditionalFields>
+        <searchResultsAdditionalFields>Account</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>ReferenceRecord</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Type</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Status</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>JobCount</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>PendingJobCount</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>SuccessfulJobCount</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>FailedJobCount</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>LastModifiedDate</searchResultsAdditionalFields>
+    </searchLayouts>
     <sharingModel>Private</sharingModel>
 </CustomObject>

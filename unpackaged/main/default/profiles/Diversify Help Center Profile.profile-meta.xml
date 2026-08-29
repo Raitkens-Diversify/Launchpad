@@ -115,11 +115,6 @@
         <default>false</default>
         <visible>false</visible>
     </applicationVisibilities>
-    <applicationVisibilities>
-        <application>standard__Platform</application>
-        <default>true</default>
-        <visible>true</visible>
-    </applicationVisibilities>
     <fieldPermissions>
         <editable>true</editable>
         <field>AccountContactRelation.EndDate</field>
@@ -6613,6 +6608,15 @@
     </layoutAssignments>
     <layoutAssignments>
         <layout>Incident-Incident Layout</layout>
+    </layoutAssignments>
+    <layoutAssignments>
+        <layout>InsuranceAsyncBulkRecordDetail-Insurance Async Bulk Record Detail Layout</layout>
+    </layoutAssignments>
+    <layoutAssignments>
+        <layout>InsuranceAsyncBulkRequest-Insurance Async Bulk Request Layout</layout>
+    </layoutAssignments>
+    <layoutAssignments>
+        <layout>InsuranceAsyncBulkRequestItem-Insurance Async Bulk Request Item Layout</layout>
     </layoutAssignments>
     <layoutAssignments>
         <layout>InsurancePolicyAsset-Insurance Policy Asset Layout</layout>

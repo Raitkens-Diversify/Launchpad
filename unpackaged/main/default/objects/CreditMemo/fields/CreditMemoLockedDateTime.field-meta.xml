@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>CreditMemoLockedDateTime</fullName>
+    <inlineHelpText>The time at which the credit memo record was locked.</inlineHelpText>
+    <trackHistory>false</trackHistory>
+</CustomField>

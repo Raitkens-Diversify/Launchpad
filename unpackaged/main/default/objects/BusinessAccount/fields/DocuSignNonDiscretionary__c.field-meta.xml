@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>DocuSignNonDiscretionary__c</fullName>
+    <formula>ISPICKVAL(Authority__c,&#39;Non-Discretionary basis&#39;)</formula>
+    <label>DocuSignNonDiscretionary</label>
+    <trackHistory>false</trackHistory>
+    <type>Checkbox</type>
+</CustomField>

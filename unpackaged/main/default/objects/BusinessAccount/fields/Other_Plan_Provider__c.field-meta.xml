@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Other_Plan_Provider__c</fullName>
+    <description>Captures the provider name when Other is selected in Current Plan Provider(s). Mirrors Lead.Other_Plan_Provider__c.</description>
+    <externalId>false</externalId>
+    <inlineHelpText>Populate details if &#39;Other&#39; was selected in the Current Plan Provider(s) field.</inlineHelpText>
+    <label>Other Plan Provider</label>
+    <length>255</length>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

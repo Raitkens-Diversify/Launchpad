@@ -126,7 +126,38 @@
         <formFactor>Small</formFactor>
         <type>Default</type>
     </actionOverrides>
+    <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
     <enableFeeds>false</enableFeeds>
     <externalSharingModel>ControlledByParent</externalSharingModel>
+    <searchLayouts>
+        <customTabListAdditionalFields>InsuranceAsyncBulkRequest</customTabListAdditionalFields>
+        <customTabListAdditionalFields>Status</customTabListAdditionalFields>
+        <customTabListAdditionalFields>SequenceNumber</customTabListAdditionalFields>
+        <customTabListAdditionalFields>ReferenceRecord</customTabListAdditionalFields>
+        <customTabListAdditionalFields>ItemType</customTabListAdditionalFields>
+        <customTabListAdditionalFields>BatchJob</customTabListAdditionalFields>
+        <customTabListAdditionalFields>LastModifiedDate</customTabListAdditionalFields>
+        <lookupDialogsAdditionalFields>InsuranceAsyncBulkRequest</lookupDialogsAdditionalFields>
+        <lookupDialogsAdditionalFields>Status</lookupDialogsAdditionalFields>
+        <lookupDialogsAdditionalFields>SequenceNumber</lookupDialogsAdditionalFields>
+        <lookupDialogsAdditionalFields>ReferenceRecord</lookupDialogsAdditionalFields>
+        <lookupDialogsAdditionalFields>ItemType</lookupDialogsAdditionalFields>
+        <lookupDialogsAdditionalFields>BatchJob</lookupDialogsAdditionalFields>
+        <lookupDialogsAdditionalFields>LastModifiedDate</lookupDialogsAdditionalFields>
+        <lookupPhoneDialogsAdditionalFields>InsuranceAsyncBulkRequest</lookupPhoneDialogsAdditionalFields>
+        <lookupPhoneDialogsAdditionalFields>Status</lookupPhoneDialogsAdditionalFields>
+        <lookupPhoneDialogsAdditionalFields>SequenceNumber</lookupPhoneDialogsAdditionalFields>
+        <lookupPhoneDialogsAdditionalFields>ReferenceRecord</lookupPhoneDialogsAdditionalFields>
+        <lookupPhoneDialogsAdditionalFields>ItemType</lookupPhoneDialogsAdditionalFields>
+        <lookupPhoneDialogsAdditionalFields>BatchJob</lookupPhoneDialogsAdditionalFields>
+        <lookupPhoneDialogsAdditionalFields>LastModifiedDate</lookupPhoneDialogsAdditionalFields>
+        <searchResultsAdditionalFields>InsuranceAsyncBulkRequest</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Status</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>SequenceNumber</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>ReferenceRecord</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>ItemType</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>BatchJob</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>LastModifiedDate</searchResultsAdditionalFields>
+    </searchLayouts>
     <sharingModel>ControlledByParent</sharingModel>
 </CustomObject>

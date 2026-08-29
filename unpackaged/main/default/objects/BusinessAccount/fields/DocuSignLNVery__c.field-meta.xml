@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>DocuSignLNVery__c</fullName>
+    <formula>ISPICKVAL(Liquidity_Needs__c, &#39;Very Important&#39;)</formula>
+    <label>DocuSignLNVery</label>
+    <trackHistory>false</trackHistory>
+    <type>Checkbox</type>
+</CustomField>

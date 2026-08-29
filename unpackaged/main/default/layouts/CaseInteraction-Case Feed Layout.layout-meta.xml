@@ -90,10 +90,6 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Description</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
                 <field>SuppliedEmail</field>
             </layoutItems>
             <layoutItems>
@@ -105,14 +101,14 @@
                 <field>Maestro_SSN__c</field>
             </layoutItems>
         </layoutColumns>
-        <layoutColumns/>
+        <layoutColumns />
         <style>TwoColumnsTopToBottom</style>
     </layoutSections>
     <layoutSections>
         <customLabel>false</customLabel>
         <detailHeading>false</detailHeading>
         <editHeading>false</editHeading>
-        <layoutColumns/>
+        <layoutColumns />
         <style>CustomLinks</style>
     </layoutSections>
     <miniLayout>
@@ -125,7 +121,6 @@
         <fields>ContactEmail</fields>
         <fields>Origin</fields>
         <fields>Subject</fields>
-        <fields>Description</fields>
         <fields>SuppliedEmail</fields>
     </miniLayout>
     <relatedObjects>ContactId</relatedObjects>

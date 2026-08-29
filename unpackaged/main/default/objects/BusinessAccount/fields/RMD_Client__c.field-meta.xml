@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>RMD_Client__c</fullName>
+    <formula>OR(PersonContact.FinServ__Age__c &gt;=73, RMD_Applies_Inherited__c = TRUE)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>RMD Client</label>
+    <trackHistory>false</trackHistory>
+    <type>Checkbox</type>
+</CustomField>
