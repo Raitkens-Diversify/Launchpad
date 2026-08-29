@@ -1,0 +1,97 @@
+<template>
+  <template lwc:if={isOpen}>
+    <section
+      class="quick-view"
+      role="dialog"
+      aria-modal="true"
+      aria-label={headingLabel}
+      onkeydown={handleKeyDown}
+    >
+      <div class="quick-view__backdrop" onclick={handleClose}></div>
+      <div class="quick-view__panel">
+        <header class="quick-view__header">
+          <h2 class="quick-view__title">{headingLabel}</h2>
+          <div class="quick-view__header-actions">
+            <button
+              type="button"
+              class="quick-view__close"
+              aria-label="Close"
+              onclick={handleClose}
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        </header>
+
+        <div class="quick-view__body">
+          <template lwc:if={isLoading}>
+            <div class="quick-view__loading">
+              <lightning-spinner
+                alternative-text="Loading order ticket"
+                size="small"
+              ></lightning-spinner>
+            </div>
+          </template>
+
+          <template lwc:elseif={errorMessage}>
+            <p class="quick-view__error" role="alert">{errorMessage}</p>
+          </template>
+
+          <template lwc:elseif={hasDetail}>
+            <dl class="quick-view__fields">
+              <template lwc:if={hasFinancialAccount}>
+                <!-- Plain text, not a link: this lookup is the FinServ
+                     financial account, and the site's /financial-account
+                     route serves only the custom Financial_Account__c
+                     (routeType detail-Financial_Account__c), so there is no
+                     page to send it to. The wizard lookup below is that
+                     custom object and does link. -->
+                <div class="quick-view__field">
+                  <dt>Financial Account</dt>
+                  <dd>{financialAccountName}</dd>
+                </div>
+              </template>
+
+              <template lwc:if={hasWizardFinancialAccount}>
+                <div class="quick-view__field">
+                  <dt>Wizard Financial Account</dt>
+                  <dd>
+                    <a
+                      href={wizardFinancialAccountUrl}
+                      data-record-id={wizardFinancialAccountId}
+                      data-object-api-name="Financial_Account__c"
+                      onclick={handleLookupClick}
+                      >{wizardFinancialAccountName}</a
+                    >
+                  </dd>
+                </div>
+              </template>
+
+              <template lwc:if={hasCase}>
+                <div class="quick-view__field">
+                  <dt>Case</dt>
+                  <dd>
+                    <a
+                      href={caseUrl}
+                      data-record-id={caseId}
+                      data-object-api-name="Case"
+                      onclick={handleLookupClick}
+                      >{caseNumber}</a
+                    >
+                  </dd>
+                </div>
+              </template>
+
+              <template for:each={detailRows} for:item="row">
+                <div class="quick-view__field" key={row.label}>
+                  <dt>{row.label}</dt>
+                  <dd>{row.value}</dd>
+                </div>
+              </template>
+            </dl>
+          </template>
+        </div>
+      </div>
+    </section>
+  </template>
+</template>

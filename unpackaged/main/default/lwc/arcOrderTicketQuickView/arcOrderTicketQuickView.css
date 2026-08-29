@@ -1,0 +1,150 @@
+/* Matches the dialog frame arcQuickCreate/the advertising request modal
+   already use, so the app has one dialog look rather than several. .quick-view
+   itself is the flex-centering container (not .quick-view__panel via
+   margin:auto -- that only centers horizontally, since its sibling
+   .quick-view__backdrop being position:fixed doesn't establish a flex
+   context the panel participates in) so the panel lands in the true middle
+   of the screen on both axes. */
+.quick-view {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.quick-view__backdrop {
+  position: fixed;
+  inset: 0;
+  /* Neutral grey (the app's own --div-color-disabled-1), not a brand-blue
+     tint -- a dimmed/disabled background, not a colour statement. */
+  background: rgba(107, 114, 128, 0.5);
+}
+
+.quick-view__panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  overflow: hidden;
+  background: var(--div-color-white, #ffffff);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+.quick-view__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--div-color-border-1, #d1d5db);
+}
+
+.quick-view__title {
+  margin: 0;
+  font-family: var(--div-font-family-base, "Inter", sans-serif);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--div-color-on-surface-2, #374151);
+}
+
+.quick-view__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.quick-view__close {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--div-color-on-surface-1, #4b5563);
+}
+
+.quick-view__body {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.quick-view__loading {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.quick-view__error {
+  margin: 0 0 12px;
+  font-size: 0.8125rem;
+  color: var(--div-color-red-700, #b91c1c);
+}
+
+.quick-view__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px 20px;
+  margin: 0;
+}
+
+.quick-view__field dt {
+  margin: 0 0 2px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--div-color-neutral-500, #838a97);
+}
+
+.quick-view__field dd {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--div-color-gray-900, #030712);
+}
+
+.quick-view__field dd a {
+  color: var(--div-color-blue-700, #1a76bb);
+  text-decoration: none;
+}
+
+.quick-view__field dd a:hover,
+.quick-view__field dd a:focus {
+  text-decoration: underline;
+}
+
+.quick-view__form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--div-color-border-1, #d1d5db);
+}
+
+.quick-view__button {
+  padding: 8px 16px;
+  border: 1px solid var(--div-color-border-1, #d1d5db);
+  border-radius: 6px;
+  background: var(--div-color-white, #ffffff);
+  font-family: var(--div-font-family-base, "Inter", sans-serif);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--div-color-on-surface-2, #374151);
+  cursor: pointer;
+}
+
+.quick-view__button--primary {
+  border-color: var(--div-color-blue-900, #0f406f);
+  background: var(--div-color-blue-900, #0f406f);
+  color: var(--div-color-white, #ffffff);
+}
+
+.quick-view__button[disabled] {
+  opacity: 0.6;
+  cursor: default;
+}

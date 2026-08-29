@@ -100,13 +100,35 @@ public with sharing class ArcRelatedListController {
    * can match a result back to the card it belongs to. A request that fails
    * validation is skipped rather than failing the whole batch, so one
    * misconfigured card can't blank out the others.
+   *
+   * The requests arrive as a JSON string, not a List<RelatedListRequest>: on
+   * the LWR site's cacheable Apex endpoint a parameter typed as a list of
+   * inner classes deserializes to null, so the method returned an empty map
+   * and every card on the case page rendered its empty state while the data
+   * sat in the org (the flat-typed getRelatedRecords worked all along). The
+   * client JSON.stringifies the same request objects it always built.
    */
   @AuraEnabled(cacheable=true)
   public static Map<String, RelatedRecords> getRelatedRecordsBatch(
     Id recordId,
-    List<RelatedListRequest> requests
+    String requestsJson
   ) {
     Map<String, RelatedRecords> results = new Map<String, RelatedRecords>();
+    if (String.isBlank(requestsJson)) {
+      return results;
+    }
+
+    List<RelatedListRequest> requests;
+    try {
+      requests = (List<RelatedListRequest>) JSON.deserialize(
+        requestsJson,
+        List<RelatedListRequest>.class
+      );
+    } catch (Exception e) {
+      throw new AuraHandledException(
+        'Related list requests could not be read: ' + e.getMessage()
+      );
+    }
     if (requests == null) {
       return results;
     }

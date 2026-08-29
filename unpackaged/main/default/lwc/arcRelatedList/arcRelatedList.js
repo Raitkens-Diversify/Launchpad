@@ -86,8 +86,24 @@ export default class ArcRelatedList extends NavigationMixin(LightningElement) {
   }
   set preloadedResult(value) {
     this._preloadedResult = value;
+    /*
+     * A value that lands after the first render must be applied here, because
+     * it never causes a render on its own: _preloadedResult feeds no template
+     * binding, so renderedCallback -- where the initial value is applied --
+     * does not run again for it. On every cold page load the parent's batch
+     * resolves after this card's first render, which left all six case-page
+     * cards stuck on their empty state while the rows sat unapplied right
+     * here. renderedCallback still owns the FIRST application, because @api
+     * properties land in no fixed order; by the time a later value arrives
+     * the initial properties are settled and applying immediately is safe.
+     */
+    if (this._hasRendered && this.usePreloadedData) {
+      this.applyPreloadedResult();
+    }
   }
   _preloadedResult;
+  /** True once renderedCallback has run — see the preloadedResult setter. */
+  _hasRendered = false;
   /**
    * The preloadedResult value last applied to rows/types/etc — see
    * renderedCallback. Starts as NOT_APPLIED, not undefined: see that constant.
@@ -144,16 +160,13 @@ export default class ArcRelatedList extends NavigationMixin(LightningElement) {
   }
 
   renderedCallback() {
+    this._hasRendered = true;
     if (this.usePreloadedData) {
       // @api properties are not guaranteed to land in a fixed order (same
-      // reason loadSignature exists below), so preloadedResult is only
-      // ever read here, after every initial property is settled -- never
-      // from inside its own setter.
-      if (this._preloadedResult !== this._appliedPreloadedResult) {
-        this._appliedPreloadedResult = this._preloadedResult;
-        this.applyResult(this._preloadedResult);
-        this.isLoading = false;
-      }
+      // reason loadSignature exists below), so the INITIAL preloadedResult is
+      // only read here, after every initial property is settled. Later values
+      // apply from the setter instead -- see it for why they have to.
+      this.applyPreloadedResult();
       return;
     }
     const signature = this.loadSignature;
@@ -283,6 +296,16 @@ export default class ArcRelatedList extends NavigationMixin(LightningElement) {
     }
   }
 
+  /** Applies _preloadedResult once per distinct value, wherever it arrives. */
+  applyPreloadedResult() {
+    if (this._preloadedResult === this._appliedPreloadedResult) {
+      return;
+    }
+    this._appliedPreloadedResult = this._preloadedResult;
+    this.applyResult(this._preloadedResult);
+    this.isLoading = false;
+  }
+
   /** Shared by loadRows' own fetch and a parent's preloadedResult. */
   applyResult(result) {
     this.rows = result?.rows || [];
@@ -369,6 +392,25 @@ export default class ArcRelatedList extends NavigationMixin(LightningElement) {
     }
 
     const linkId = event.currentTarget.dataset.link;
+
+    /*
+     * Cancelable, same contract as arcDataTable's rownavigate: a parent with
+     * somewhere better to send the click -- a quick-view popup for an object
+     * that has no page of its own in this site (Order Tickets on the case
+     * page) -- calls preventDefault() and this card skips navigation. With
+     * no listener, behavior is exactly what it always was.
+     */
+    const navigateEvent = new CustomEvent("rownavigate", {
+      cancelable: true,
+      detail: {
+        recordId: linkId,
+        objectApiName: this.linkObjectApiName || this.relatedObjectApiName
+      }
+    });
+    this.dispatchEvent(navigateEvent);
+    if (navigateEvent.defaultPrevented) {
+      return;
+    }
 
     // A ContentDocument has no Experience Cloud detail page of its own --
     // there is nothing for buildRecordNavigationReference to route to, so a

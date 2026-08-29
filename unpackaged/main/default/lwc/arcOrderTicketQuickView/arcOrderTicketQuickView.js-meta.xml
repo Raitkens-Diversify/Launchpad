@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Arc Order Ticket Quick View</masterLabel>
+    <description>Read-only popup card for a single Order_Ticket__c record, opened from the Case page&#39;s Order Tickets card. Order tickets have no page of their own in this site, so a row click opens this instead of navigating.</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+</LightningComponentBundle>

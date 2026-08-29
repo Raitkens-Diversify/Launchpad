@@ -156,7 +156,17 @@ const RELATED_LIST_REQUESTS = [
     key: "relatedProducts",
     objectApiName: "Financial_Account_Related_Product__c",
     parentFieldApiName: "Case__c",
-    fieldApiNames: ["Name", "Wizard_Financial_Account__r.Name", "CreatedDate"]
+    // Product_Name__c and Financial_Account__c, not the row's auto-number
+    // Name and the wizard-only lookup: the Lightning case layout's Related
+    // Products list shows the plain Financial_Account__c, Product_Name__c is
+    // set on every row, and Wizard_Financial_Account__c is null on rows
+    // created outside the wizard -- which rendered as a blank column under
+    // an RP-000000 title that identified nothing.
+    fieldApiNames: [
+      "Product_Name__c",
+      "Financial_Account__r.Name",
+      "CreatedDate"
+    ]
   },
   {
     key: "checkLogs",
@@ -348,9 +358,11 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
   /** The rail's six related-list cards, fetched in one Apex call. */
   relatedListsByKey = {};
 
+  // Serialized because the endpoint nulls out a List<inner class> param --
+  // see getRelatedRecordsBatch's own doc comment.
   @wire(getRelatedRecordsBatch, {
     recordId: "$_recordId",
-    requests: RELATED_LIST_REQUESTS
+    requestsJson: JSON.stringify(RELATED_LIST_REQUESTS)
   })
   wiredRelatedListsBatch({ data, error }) {
     if (data) {
@@ -645,6 +657,28 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
    * refreshed from here, but they subscribe to CaseStatusUpdated — so one
    * publish refreshes all of them along with the Current Task tile.
    */
+  /*
+   * Order tickets and related products have no page of their own in this
+   * site -- navigating to them lands on Invalid Page -- so their cards'
+   * cancelable rownavigate is intercepted and a quick-view popup opens
+   * instead, the same pattern Product Detail's Related Products table uses.
+   */
+  handleOrderTicketRowNavigate(event) {
+    event.preventDefault();
+    const recordId = event.detail?.recordId;
+    if (recordId) {
+      this.refs.orderTicketQuickView?.open(recordId);
+    }
+  }
+
+  handleRelatedProductRowNavigate(event) {
+    event.preventDefault();
+    const recordId = event.detail?.recordId;
+    if (recordId) {
+      this.refs.relatedProductQuickView?.open(recordId);
+    }
+  }
+
   handleFlowFinished() {
     if (this._tasksResult) {
       refreshApex(this._tasksResult);

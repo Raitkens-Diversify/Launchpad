@@ -343,6 +343,10 @@
             preloaded-result={caseCommentsResult}
           ></c-arc-related-list>
 
+          <!-- Order tickets and related products have no page of their own in
+               this site, so a row click opens a quick-view popup instead of
+               navigating -- the same interception Product Detail's Related
+               Products table uses. -->
           <c-arc-related-list
             record-id={detail.id}
             card-label="Order Tickets"
@@ -352,6 +356,7 @@
             collapsible
             use-preloaded-data
             preloaded-result={orderTicketsResult}
+            onrownavigate={handleOrderTicketRowNavigate}
           ></c-arc-related-list>
 
           <c-arc-related-list
@@ -359,10 +364,11 @@
             card-label="Related Products"
             related-object-api-name="Financial_Account_Related_Product__c"
             parent-field-api-name="Case__c"
-            columns="Product:Name,Financial Account:Wizard_Financial_Account__r.Name,Created:CreatedDate"
+            columns="Product:Product_Name__c,Financial Account:Financial_Account__r.Name,Created:CreatedDate"
             collapsible
             use-preloaded-data
             preloaded-result={relatedProductsResult}
+            onrownavigate={handleRelatedProductRowNavigate}
           ></c-arc-related-list>
 
           <template lwc:if={showCheckLogs}>
@@ -379,12 +385,15 @@
           </template>
 
           <template lwc:if={showTradeErrorsLog}>
+            <!-- disable-row-links: Trade_Error_Log__c has no route in this
+                 site, so a row click had nowhere valid to go. -->
             <c-arc-related-list
               record-id={detail.id}
               card-label="Trade Errors Log"
               related-object-api-name="Trade_Error_Log__c"
               parent-field-api-name="Case__c"
               columns="Trade Error:Name,Amount:Total_Trade_Error_Amount__c,Status:Status__c"
+              disable-row-links
               collapsible
               use-preloaded-data
               preloaded-result={tradeErrorsResult}
@@ -435,6 +444,12 @@
         lwc:ref="flowModal"
         onflowfinished={handleFlowFinished}
       ></c-arc-flow-modal>
+      <c-arc-order-ticket-quick-view
+        lwc:ref="orderTicketQuickView"
+      ></c-arc-order-ticket-quick-view>
+      <c-arc-related-product-quick-view
+        lwc:ref="relatedProductQuickView"
+      ></c-arc-related-product-quick-view>
     </template>
   </div>
 </template>

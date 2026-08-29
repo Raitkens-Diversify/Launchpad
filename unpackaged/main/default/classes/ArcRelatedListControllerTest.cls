@@ -254,4 +254,68 @@ private class ArcRelatedListControllerTest {
     }
     Assert.isTrue(threw, 'A null record id is refused, not queried.');
   }
+
+  /**
+   * The batch takes its requests as a JSON string (a typed list nulls out on
+   * the LWR endpoint — see the method's doc comment). One good request and one
+   * pointing at an unknown object: the good one comes back keyed, the bad one
+   * is skipped rather than blanking the batch.
+   */
+  @IsTest
+  static void getRelatedRecordsBatchAnswersEachRequestByKey() {
+    Check_Log__c log = logWithDeposits();
+
+    String requestsJson =
+      '[{"key":"deposits","objectApiName":"Check_Deposit__c",' +
+      '"parentFieldApiName":"Check__c","fieldApiNames":["Name","Amount__c"]},' +
+      '{"key":"broken","objectApiName":"Not_An_Object__c",' +
+      '"parentFieldApiName":"Check__c","fieldApiNames":["Name"]}]';
+
+    Test.startTest();
+    Map<String, ArcRelatedListController.RelatedRecords> results = ArcRelatedListController.getRelatedRecordsBatch(
+      log.Id,
+      requestsJson
+    );
+    Test.stopTest();
+
+    Assert.isTrue(
+      results.containsKey('deposits'),
+      'The valid request is answered under the key the caller chose.'
+    );
+    Assert.areEqual(
+      2,
+      results.get('deposits').rows.size(),
+      'The batch runs the same query the single-card path runs.'
+    );
+    Assert.isFalse(
+      results.containsKey('broken'),
+      'A request that fails validation is skipped, not fatal to the batch.'
+    );
+  }
+
+  @IsTest
+  static void getRelatedRecordsBatchRefusesUnreadableJson() {
+    Check_Log__c log = logWithDeposits();
+
+    Map<String, ArcRelatedListController.RelatedRecords> emptyResults = ArcRelatedListController.getRelatedRecordsBatch(
+      log.Id,
+      ' '
+    );
+    Assert.areEqual(
+      0,
+      emptyResults.size(),
+      'A blank request list yields an empty map, not an error.'
+    );
+
+    Boolean threw = false;
+    try {
+      ArcRelatedListController.getRelatedRecordsBatch(log.Id, 'not json');
+    } catch (AuraHandledException e) {
+      threw = true;
+    }
+    Assert.isTrue(
+      threw,
+      'JSON that cannot be read is a caller bug worth surfacing, not an empty page.'
+    );
+  }
 }
