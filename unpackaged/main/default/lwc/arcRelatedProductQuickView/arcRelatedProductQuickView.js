@@ -39,6 +39,8 @@ const FIELDS = [
   `${OBJECT_API_NAME}.Amount__c`,
   `${OBJECT_API_NAME}.Maestro_Product_Code__c`,
   `${OBJECT_API_NAME}.Onbase_Migration_Id__c`,
+  `${OBJECT_API_NAME}.Financial_Account__c`,
+  `${OBJECT_API_NAME}.Financial_Account__r.Name`,
   `${OBJECT_API_NAME}.Wizard_Financial_Account__c`,
   `${OBJECT_API_NAME}.Wizard_Financial_Account__r.Name`,
   `${OBJECT_API_NAME}.Product__c`,
@@ -130,6 +132,21 @@ export default class ArcRelatedProductQuickView extends NavigationMixin(
           "Financial_Account__c"
         )
       : "";
+  }
+
+  /**
+   * Rows created outside the wizard carry only Financial_Account__c -- the
+   * FinServ lookup -- and rendered this row as an empty link. Only the wizard
+   * lookup gets a link: the site's /financial-account route serves the custom
+   * Financial_Account__c object alone (routeType detail-Financial_Account__c),
+   * so the FinServ record has no page here and shows as plain text.
+   */
+  get hasFinancialAccountLink() {
+    return Boolean(this.financialAccountId);
+  }
+
+  get financialAccountFallbackName() {
+    return this.fieldValue("Financial_Account__r.Name") || "—";
   }
 
   get productId() {

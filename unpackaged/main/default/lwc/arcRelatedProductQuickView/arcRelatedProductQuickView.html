@@ -51,13 +51,16 @@
               <div class="quick-view__field">
                 <dt>Financial Account</dt>
                 <dd>
-                  <a
-                    href={financialAccountUrl}
-                    data-record-id={financialAccountId}
-                    data-object-api-name="Financial_Account__c"
-                    onclick={handleLookupClick}
-                    >{financialAccountName}</a
-                  >
+                  <template lwc:if={hasFinancialAccountLink}>
+                    <a
+                      href={financialAccountUrl}
+                      data-record-id={financialAccountId}
+                      data-object-api-name="Financial_Account__c"
+                      onclick={handleLookupClick}
+                      >{financialAccountName}</a
+                    >
+                  </template>
+                  <template lwc:else>{financialAccountFallbackName}</template>
                 </dd>
               </div>
 
