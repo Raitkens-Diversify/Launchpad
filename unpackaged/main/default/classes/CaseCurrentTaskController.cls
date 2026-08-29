@@ -37,9 +37,9 @@ public with sharing class CaseCurrentTaskController {
 
     /**
      * When a Branch or Home Office Pit Stop task is completed, re-activate the
-     * next task on the same Case: the first incomplete task (by
-     * Full_Template_Order__c) that the Pit Stop had left in 'Blocked' status is
-     * set back to 'Not Started' and reassigned from its Task Template.
+     * task the Pit Stop had parked in 'Blocked' status: the first incomplete
+     * blocked task on the same Case (by Full_Template_Order__c) is set back to
+     * 'Not Started' and reassigned from its Task Template.
      */
     private static void reactivateNextTaskAfterPitStop(Task completedTask) {
         Boolean isPitStop =
