@@ -77,6 +77,62 @@
                     </template>
                   </dl>
                 </template>
+
+                <!-- Comments under the post, oldest first, then the composer —
+                     the per-post "Write a comment..." Lightning's feed has. -->
+                <template lwc:if={entry.hasComments}>
+                  <ul class="arc-case-feed__comments">
+                    <template for:each={entry.comments} for:item="comment">
+                      <li key={comment.id} class="arc-case-feed__comment">
+                        <p class="arc-case-feed__comment-meta">
+                          <span class="arc-case-feed__comment-actor"
+                            >{comment.actorName}</span
+                          >
+                          <lightning-formatted-date-time
+                            value={comment.createdDate}
+                            year="numeric"
+                            month="long"
+                            day="numeric"
+                            hour="2-digit"
+                            minute="2-digit"
+                          ></lightning-formatted-date-time>
+                        </p>
+                        <p class="arc-case-feed__comment-body">
+                          {comment.body}
+                        </p>
+                      </li>
+                    </template>
+                  </ul>
+                </template>
+
+                <div class="arc-case-feed__composer">
+                  <lightning-textarea
+                    class="arc-case-feed__composer-input"
+                    label="Write a comment"
+                    variant="label-hidden"
+                    placeholder="Write a comment…"
+                    value={entry.draft}
+                    max-length="4000"
+                    data-entry-id={entry.id}
+                    onchange={handleDraftChange}
+                  ></lightning-textarea>
+                  <template lwc:if={entry.composerError}>
+                    <p class="arc-case-feed__error" role="alert">
+                      {entry.composerError}
+                    </p>
+                  </template>
+                  <div class="arc-case-feed__composer-actions">
+                    <button
+                      type="button"
+                      class="arc-case-feed__composer-button"
+                      data-entry-id={entry.id}
+                      disabled={entry.composerDisabled}
+                      onclick={handleCommentPost}
+                    >
+                      Comment
+                    </button>
+                  </div>
+                </div>
               </li>
             </template>
           </ul>

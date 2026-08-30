@@ -17,6 +17,7 @@ import {
 } from "c/recordNavigationCommunityUtils";
 import getTaskContext from "@salesforce/apex/ArcTaskDetailController.getTaskContext";
 import getOpenActivitiesForParentCase from "@salesforce/apex/ArcTaskDetailController.getOpenActivitiesForParentCase";
+import getOpenActivitiesForParent from "@salesforce/apex/ArcTaskDetailController.getOpenActivitiesForParent";
 import getOpenCasesForHousehold from "@salesforce/apex/ArcTaskDetailController.getOpenCasesForHousehold";
 import markComplete from "@salesforce/apex/CaseCurrentTaskController.markComplete";
 
@@ -29,6 +30,23 @@ const ACTIVITY_COLUMNS = [
   },
   { label: "Status", fieldName: "status" },
   { label: "Owner", fieldName: "ownerName" },
+  { label: "Due Date", fieldName: "dueDate", type: "date" }
+];
+
+/*
+ * The non-Case parent's open activities, with the columns Lightning's own
+ * OpenActivities related list shows: Subject, the activity's Who, whether the
+ * row is a task (events mix into the same list), and the due date.
+ */
+const PARENT_ACTIVITY_COLUMNS = [
+  {
+    label: "Subject",
+    fieldName: "subject",
+    isLink: true,
+    linkObjectApiName: "Task"
+  },
+  { label: "Name", fieldName: "whoName" },
+  { label: "Task", fieldName: "taskMark" },
   { label: "Due Date", fieldName: "dueDate", type: "date" }
 ];
 
@@ -50,12 +68,14 @@ export default class ArcTaskDetail extends NavigationMixin(LightningElement) {
   _pageRef;
   currentUserId = USER_ID;
   activityColumns = ACTIVITY_COLUMNS;
+  parentActivityColumns = PARENT_ACTIVITY_COLUMNS;
   householdCaseColumns = HOUSEHOLD_CASE_COLUMNS;
 
   taskContext = {};
   _taskContextResult;
   openActivities = [];
   _activitiesResult;
+  parentActivities = [];
   householdCases = [];
   _householdCasesResult;
 
@@ -78,6 +98,16 @@ export default class ArcTaskDetail extends NavigationMixin(LightningElement) {
   wiredActivities(result) {
     this._activitiesResult = result;
     this.openActivities = result?.data || [];
+  }
+
+  @wire(getOpenActivitiesForParent, { taskId: "$_recordId" })
+  wiredParentActivities(result) {
+    this.parentActivities = (result?.data || []).map((activity) => ({
+      ...activity,
+      // The screenshot's Task column is a checkbox; a mark reads the same
+      // in a plain text cell, and an event row simply leaves it blank.
+      taskMark: activity.isTask ? "✓" : ""
+    }));
   }
 
   @wire(getOpenCasesForHousehold, { taskId: "$_recordId" })
@@ -154,6 +184,32 @@ export default class ArcTaskDetail extends NavigationMixin(LightningElement) {
 
   get openActivitiesLabel() {
     return `Open Activities for Parent Case (${this.openActivities.length})`;
+  }
+
+  /** Case parents keep their own richer section above; everything else gets
+   *  the parent's open activities, the way the Lightning task page does. */
+  get showParentActivities() {
+    return Boolean(this.taskContext?.whatId) && !this.taskContext?.isParentCase;
+  }
+
+  get hasParentActivities() {
+    return this.parentActivities.length > 0;
+  }
+
+  get parentActivitiesLabel() {
+    const label = this.taskContext?.whatObjectLabel || "Record";
+    return `Open Activities for Parent ${label} (${this.parentActivities.length})`;
+  }
+
+  /**
+   * Events mix into OpenActivities but have no page in this site, so a click
+   * on an event row is swallowed rather than sent to an invalid /task URL.
+   */
+  handleParentActivityRowNavigate(event) {
+    const recordId = String(event.detail?.recordId || "");
+    if (recordId.startsWith("00U")) {
+      event.preventDefault();
+    }
   }
 
   get hasHouseholdCases() {

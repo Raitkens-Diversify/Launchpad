@@ -75,14 +75,11 @@
   user-select: none;
 }
 
-.related-list__tr:hover {
-  background: var(--div-color-neutral-50, #f9fafb);
-}
-
-/* Matches arc-data-table's own clickable-row hover (--div-color-sidebar-
-   hover-bg) so a related-list row and a data-table row read as the same
-   click affordance. Needs to beat the plain hover rule above on
-   specificity. */
+/* Only clickable rows get a hover background -- highlighting a row that
+   goes nowhere (Case Comments, Trade Errors) reads as a click affordance
+   the row does not have. Matches arc-data-table's own clickable-row hover
+   (--div-color-sidebar-hover-bg) so a related-list row and a data-table
+   row read as the same affordance. */
 .related-list__tr--link:hover {
   background: var(--div-color-sidebar-hover-bg, #e2f8ff);
 }

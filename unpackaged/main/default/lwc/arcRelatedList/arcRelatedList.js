@@ -344,11 +344,25 @@ export default class ArcRelatedList extends NavigationMixin(LightningElement) {
       if (Number.isNaN(parsed.getTime())) {
         return value;
       }
-      return parsed.toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
-        year: "numeric"
-      });
+      // A DATETIME carries a meaningful time -- when a comment was added,
+      // when a ticket was created -- so it renders with one, the way the
+      // Lightning related list shows it. A DATE has none worth inventing.
+      return parsed.toLocaleDateString(
+        undefined,
+        type === "DATETIME"
+          ? {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+              hour: "numeric",
+              minute: "2-digit"
+            }
+          : {
+              month: "short",
+              day: "numeric",
+              year: "numeric"
+            }
+      );
     }
 
     return value;

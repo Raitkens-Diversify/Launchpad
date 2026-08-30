@@ -1,9 +1,11 @@
 import { LightningElement, api, wire } from "lwc";
 import { CurrentPageReference } from "lightning/navigation";
 import { getObjectInfo } from "lightning/uiObjectInfoApi";
+import { refreshApex } from "@salesforce/apex";
 import { resolveRecordIdFromPageReference } from "c/recordNavigationUtils";
 import getRecordFeed from "@salesforce/apex/ArcCaseFeedController.getRecordFeed";
 import getRecordHistory from "@salesforce/apex/ArcCaseFeedController.getRecordHistory";
+import postFeedComment from "@salesforce/apex/ArcCaseFeedController.postFeedComment";
 
 /**
  * arcCaseFeedTabs
@@ -33,8 +35,9 @@ import getRecordHistory from "@salesforce/apex/ArcCaseFeedController.getRecordHi
  * and raw history is not what the page shows — see the note on the history
  * wire below.
  *
- * The feed is READ-ONLY. Posting or commenting is DML, which this deliberately
- * does not do.
+ * The feed's one write is commenting on an existing post — the per-post
+ * "Write a comment..." Lightning's feed offers (added on request 2026-08-29).
+ * Creating new posts is still deliberately out of scope.
  */
 
 /** Tabs, in order. Files is not one of them — see the note above. */
@@ -123,11 +126,17 @@ export default class ArcCaseFeedTabs extends LightningElement {
   @wire(getObjectInfo, { objectApiName: "$objectApiName" })
   objectInfo;
 
+  /** The whole wire result, kept so a posted comment can refreshApex it. */
+  _feedResult;
+
   @wire(getRecordFeed, {
     recordId: "$activeRecordId",
     pageSize: "$feedPageSize"
   })
-  wiredFeed({ data, error }) {
+  wiredFeed(result) {
+    this._feedResult = result;
+    const { data, error } = result;
+
     if (data) {
       this.feed = data;
       this.feedError = undefined;
@@ -225,6 +234,14 @@ export default class ArcCaseFeedTabs extends LightningElement {
         showOldValue: Boolean(change.oldValue)
       }));
 
+      const comments = (entry.comments || []).map((comment) => ({
+        id: comment.id,
+        actorName: comment.actorName || "Unknown user",
+        createdDate: comment.createdDate,
+        body: comment.body
+      }));
+      const draft = this._drafts[entry.id] || "";
+
       return {
         id: entry.id,
         actorName: entry.actorName || "Unknown user",
@@ -234,9 +251,57 @@ export default class ArcCaseFeedTabs extends LightningElement {
         changes,
         hasChanges: changes.length > 0,
         header: this.headerFor(entry.type),
-        hasHeader: Boolean(this.headerFor(entry.type))
+        hasHeader: Boolean(this.headerFor(entry.type)),
+        comments,
+        hasComments: comments.length > 0,
+        draft,
+        composerError: this._composerErrors[entry.id] || "",
+        composerDisabled: !draft.trim() || this._postingEntryId === entry.id
       };
     });
+  }
+
+  // ---- comment composer -----------------------------------------------------
+
+  /** Unsent comment text per post id. Reassigned, never mutated, so the
+   *  template re-renders on every keystroke's change event. */
+  _drafts = {};
+  /** Failure message per post id, cleared by the next attempt. */
+  _composerErrors = {};
+  /** The post whose comment is in flight; disables just that button. */
+  _postingEntryId;
+
+  handleDraftChange(event) {
+    const entryId = event.target.dataset.entryId;
+    this._drafts = { ...this._drafts, [entryId]: event.target.value };
+  }
+
+  async handleCommentPost(event) {
+    const entryId = event.currentTarget.dataset.entryId;
+    const body = (this._drafts[entryId] || "").trim();
+
+    if (!entryId || !body || this._postingEntryId) {
+      return;
+    }
+
+    this._postingEntryId = entryId;
+    this._composerErrors = { ...this._composerErrors, [entryId]: "" };
+
+    try {
+      await postFeedComment({ feedItemId: entryId, body });
+      this._drafts = { ...this._drafts, [entryId]: "" };
+      // The feed wire is cacheable; refreshing it is what makes the new
+      // comment appear under the post it was written on.
+      await refreshApex(this._feedResult);
+    } catch (error) {
+      this._composerErrors = {
+        ...this._composerErrors,
+        [entryId]:
+          error?.body?.message || "Could not post the comment right now."
+      };
+    } finally {
+      this._postingEntryId = undefined;
+    }
   }
 
   headerFor(type) {

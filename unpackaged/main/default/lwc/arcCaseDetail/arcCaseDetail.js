@@ -96,6 +96,19 @@ const MASTER_RECORD_TYPE_ID = "012000000000000AAA";
  * do on the Lightning layout.
  */
 const DESCRIPTION_FIELDS = ["Subject", "Description"];
+/*
+ * "Rep Codes on the Case", copied field-for-field from
+ * Case_Record_Page.flexipage's own section of that name. On Lightning the
+ * section carries a visibility rule (System Administrator profile, plus one
+ * named user); here it renders for everyone and field-level security decides
+ * what a given user actually sees, since this site has no per-profile page
+ * rules to hang it on.
+ */
+const REP_CODE_FIELDS = [
+  "Maestro_Rep_ID__c",
+  "Rep_Code__c",
+  "Rep_Code_for_Transaction__c"
+];
 const SYSTEM_FIELDS = [
   "CreatedById",
   "CreatedDate",
@@ -222,6 +235,7 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
   fieldSections = [];
   caseInfoFields = [];
   descriptionFields = DESCRIPTION_FIELDS;
+  repCodeFields = REP_CODE_FIELDS;
   systemFields = SYSTEM_FIELDS;
   householdCases = { openCases: [], closedCases: [] };
   errorMessage = "";

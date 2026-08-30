@@ -46,7 +46,10 @@ public with sharing class ArcTaskDetailController {
     context.isParentCase = isCaseId(record.WhatId);
 
     if (record.WhatId != null) {
-      context.whatObjectApiName = record.WhatId.getSObjectType().getDescribe().getName();
+      Schema.DescribeSObjectResult whatDescribe = record.WhatId.getSObjectType()
+        .getDescribe();
+      context.whatObjectApiName = whatDescribe.getName();
+      context.whatObjectLabel = whatDescribe.getLabel();
       context.whatName = resolveDisplayName(record.WhatId, context.whatObjectApiName);
     }
     if (record.WhoId != null) {
@@ -196,8 +199,95 @@ public with sharing class ArcTaskDetailController {
     return results;
   }
 
+  /**
+   * Open activities (tasks and events together) on the task's parent record,
+   * for parents that are not Cases -- the Lightning task page shows this as
+   * the parent's own OpenActivities related list (relatedListSingleContainer
+   * on Task.WhatId), titled "Open Activities for Parent Financial Account"
+   * there because a financial account is what a wizard task hangs off.
+   * Case parents keep getOpenActivitiesForParentCase, whose pit-stop columns
+   * this generic list has no equivalent of.
+   *
+   * Queried through the parent's OpenActivities child relationship so tasks
+   * and events arrive merged and ordered the way the platform merges them.
+   * A parent object with activities disabled fails that subquery; that comes
+   * back as an empty list rather than an error, since "no activities to
+   * show" is exactly what such a page should say.
+   */
+  @AuraEnabled(cacheable=true)
+  public static List<OpenActivityInfo> getOpenActivitiesForParent(Id taskId) {
+    List<OpenActivityInfo> results = new List<OpenActivityInfo>();
+    if (taskId == null) {
+      return results;
+    }
+
+    List<Task> matches = [
+      SELECT WhatId
+      FROM Task
+      WHERE Id = :taskId
+      WITH USER_MODE
+      LIMIT 1
+    ];
+    if (matches.isEmpty() || matches[0].WhatId == null || isCaseId(matches[0].WhatId)) {
+      return results;
+    }
+
+    Id whatId = matches[0].WhatId;
+    String objectName = whatId.getSObjectType().getDescribe().getName();
+
+    List<SObject> parents;
+    try {
+      parents = Database.query(
+        'SELECT Id, (SELECT Id, Subject, Who.Name, IsTask, ActivityDate' +
+          ' FROM OpenActivities' +
+          ' ORDER BY ActivityDate ASC NULLS LAST LIMIT 50)' +
+          ' FROM ' + objectName +
+          ' WHERE Id = :whatId WITH USER_MODE LIMIT 1'
+      );
+    } catch (Exception e) {
+      return results;
+    }
+    if (parents.isEmpty()) {
+      return results;
+    }
+
+    List<OpenActivity> activities = parents[0].getSObjects('OpenActivities') == null
+      ? new List<OpenActivity>()
+      : (List<OpenActivity>) parents[0].getSObjects('OpenActivities');
+    for (OpenActivity activity : activities) {
+      OpenActivityInfo info = new OpenActivityInfo();
+      info.id = activity.Id;
+      info.subject = activity.Subject;
+      info.whoName = activity.Who != null ? activity.Who.Name : null;
+      info.isTask = activity.IsTask == true;
+      info.dueDate = activity.ActivityDate;
+      results.add(info);
+    }
+
+    return results;
+  }
+
   private static Boolean isCaseId(Id value) {
     return value != null && value.getSObjectType() == Case.SObjectType;
+  }
+
+  public class OpenActivityInfo {
+    @AuraEnabled
+    public Id id;
+
+    @AuraEnabled
+    public String subject;
+
+    /** The activity's Who (contact/lead) display name; null when unset. */
+    @AuraEnabled
+    public String whoName;
+
+    /** True for a task, false for an event -- the checkbox column. */
+    @AuraEnabled
+    public Boolean isTask;
+
+    @AuraEnabled
+    public Date dueDate;
   }
 
   public class TaskContext {
@@ -209,6 +299,10 @@ public with sharing class ArcTaskDetailController {
 
     @AuraEnabled
     public String whatObjectApiName;
+
+    /** The parent object's label, for "Open Activities for Parent <label>". */
+    @AuraEnabled
+    public String whatObjectLabel;
 
     @AuraEnabled
     public Id whoId;

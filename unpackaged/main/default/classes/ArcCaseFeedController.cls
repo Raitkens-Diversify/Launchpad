@@ -75,7 +75,12 @@ public with sharing class ArcCaseFeedController {
         CreatedDate,
         CreatedById,
         CreatedBy.Name,
-        (SELECT FieldName, OldValue, NewValue FROM FeedTrackedChanges)
+        (SELECT FieldName, OldValue, NewValue FROM FeedTrackedChanges),
+        (
+          SELECT Id, CommentBody, CreatedDate, CreatedBy.Name
+          FROM FeedComments
+          ORDER BY CreatedDate ASC
+        )
       FROM FeedItem
       WHERE ParentId = :recordId
       WITH USER_MODE
@@ -356,7 +361,51 @@ public with sharing class ArcCaseFeedController {
     entry.actorId = item.CreatedById;
     entry.actorName = item.CreatedBy == null ? null : item.CreatedBy.Name;
     entry.changes = toChanges(item.FeedTrackedChanges);
+    entry.comments = new List<FeedCommentEntry>();
+    if (item.FeedComments != null) {
+      for (FeedComment comment : item.FeedComments) {
+        FeedCommentEntry commentEntry = new FeedCommentEntry();
+        commentEntry.id = comment.Id;
+        commentEntry.body = comment.CommentBody;
+        commentEntry.createdDate = comment.CreatedDate;
+        commentEntry.actorName = comment.CreatedBy == null
+          ? null
+          : comment.CreatedBy.Name;
+        entry.comments.add(commentEntry);
+      }
+    }
     return entry;
+  }
+
+  /**
+   * The feed's one write: a comment on an existing post, matching Lightning's
+   * own per-post "Write a comment...". Plain text -- FeedComment.CommentBody
+   * stores what a person typed; the rich-text toolbar Lightning offers rides
+   * on ConnectApi and was not asked for.
+   *
+   * Not cacheable, and the client refreshes its feed wire after a successful
+   * post so the new comment appears where it was written.
+   */
+  @AuraEnabled
+  public static Id postFeedComment(Id feedItemId, String body) {
+    if (feedItemId == null) {
+      throw new AuraHandledException('A feed post is required.');
+    }
+    if (String.isBlank(body)) {
+      throw new AuraHandledException('A comment is required.');
+    }
+    if (!Schema.sObjectType.FeedComment.isCreateable()) {
+      throw new AuraHandledException(
+        'You do not have permission to comment.'
+      );
+    }
+
+    FeedComment comment = new FeedComment(
+      FeedItemId = feedItemId,
+      CommentBody = body.trim()
+    );
+    insert as user comment;
+    return comment.Id;
   }
 
   /**
@@ -536,6 +585,24 @@ public with sharing class ArcCaseFeedController {
     /** Empty for a plain text post. */
     @AuraEnabled
     public List<FieldChange> changes;
+
+    /** Comments under the post, oldest first, the way Lightning stacks them. */
+    @AuraEnabled
+    public List<FeedCommentEntry> comments;
+  }
+
+  public class FeedCommentEntry {
+    @AuraEnabled
+    public Id id;
+
+    @AuraEnabled
+    public String body;
+
+    @AuraEnabled
+    public Datetime createdDate;
+
+    @AuraEnabled
+    public String actorName;
   }
 
   public class HistoryResult {

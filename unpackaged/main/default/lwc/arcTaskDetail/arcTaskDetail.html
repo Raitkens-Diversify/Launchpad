@@ -81,6 +81,29 @@
           </lightning-card>
         </template>
 
+        <!-- The parent record's open activities (tasks and events merged),
+             for non-Case parents — the Lightning task page's
+             "Open Activities for Parent Financial Account" list. New Task /
+             New Event stay out for now: multi-screen, deferred on request. -->
+        <template lwc:if={showParentActivities}>
+          <lightning-card title={parentActivitiesLabel}>
+            <template lwc:if={hasParentActivities}>
+              <c-arc-data-table
+                aria-label="Open activities for the parent record"
+                key-field="id"
+                columns={parentActivityColumns}
+                data={parentActivities}
+                placeholder="-"
+                enable-row-navigation
+                onrownavigate={handleParentActivityRowNavigate}
+              ></c-arc-data-table>
+            </template>
+            <template lwc:else>
+              <div class="slds-p-around_medium">No open activities.</div>
+            </template>
+          </lightning-card>
+        </template>
+
         <lightning-card title={householdCasesLabel}>
           <template lwc:if={hasHouseholdCases}>
             <c-arc-data-table

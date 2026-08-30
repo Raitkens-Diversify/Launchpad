@@ -171,6 +171,25 @@
             </details>
           </template>
 
+          <!-- Same record-form treatment as the sections around it: the
+               platform draws the help-text icons and puts the inline-edit
+               pencil only on the fields the user can change (Maestro Rep ID
+               is a formula, so it gets none). -->
+          <details class="case-section" open>
+            <summary class="case-section__summary">
+              Rep Codes on the Case
+            </summary>
+            <div class="case-section__body">
+              <lightning-record-form
+                record-id={detail.id}
+                object-api-name="Case"
+                fields={repCodeFields}
+                columns="1"
+                mode="view"
+              ></lightning-record-form>
+            </div>
+          </details>
+
           <details class="case-section" open>
             <summary class="case-section__summary">
               Description Information
