@@ -22,7 +22,7 @@
           "children" : [ {
             "children" : [ {
               "attributes" : {
-                "defaultColumns" : "Name,Account_Status__c,Account_Number__c,Primary_Owner__r.Name,CreatedDate",
+                "defaultColumns" : "Name,Registration_Type__c=Type,Account_Status__c,Account_Number__c,Primary_Owner__r.Name,Household__r.Name,Balance__c,CreatedDate",
                 "defaultListViewApiName" : "Accounts",
                 "dxpStyle" : { },
                 "objectApiName" : "Financial_Account__c",

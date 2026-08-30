@@ -652,7 +652,14 @@ public with sharing class ArcRecordDetailController {
       throw new AuraHandledException('Record not found.');
     }
 
-    return rows[0].DPI__c == true ? 'ISA - DPI' : 'ISA - Fin Acct';
+    // The record page used to borrow the wizard's form schemas
+    // ('ISA - DPI' / 'ISA - Fin Acct'), which carry form phrasing like
+    // "If you already have the account number, please enter it here" and
+    // only the handful of fields the wizard asks about. 'Financial Account'
+    // is the record-detail schema, mirroring the Lightning record page's
+    // Information section. The wizard itself never resolves through here —
+    // its schemas live client-side in envelopeFormSchema.js.
+    return 'Financial Account';
   }
 
   private static String resolveCaseSchemaType(Id recordId) {

@@ -198,6 +198,29 @@ private class ArcRelatedListControllerTest {
   }
 
   @IsTest
+  static void getRelatedRecordsPadsNullValuesSoColumnsStayAligned() {
+    Check_Log__c log = logWithDeposits();
+    // Employee_Deferral_Amount__c is unset on the fixture deposits, so it
+    // sits null between two populated columns. The LWR endpoint drops null
+    // list elements from the serialized response, which would shift every
+    // later cell one column left — the controller must emit '' instead.
+    ArcRelatedListController.RelatedRecords result = ArcRelatedListController.getRelatedRecords(
+      log.Id,
+      'Check_Deposit__c',
+      'Check__c',
+      new List<String>{ 'Name', 'Employee_Deferral_Amount__c', 'Amount__c' },
+      null
+    );
+
+    System.assertEquals(2, result.rows.size());
+    for (ArcRelatedListController.RelatedRow row : result.rows) {
+      System.assertEquals(3, row.cells.size(), 'One cell per column');
+      System.assertEquals('', row.cells[1], 'Null value pads as empty string');
+      System.assertNotEquals('', row.cells[2], 'Later columns keep their values');
+    }
+  }
+
+  @IsTest
   static void getRelatedRecordsRejectsAnUnknownObject() {
     Check_Log__c log = logWithDeposits();
 

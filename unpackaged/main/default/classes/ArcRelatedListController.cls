@@ -257,7 +257,13 @@ public with sharing class ArcRelatedListController {
         : String.valueOf(record.get(linkField));
       row.cells = new List<String>();
       for (String path : selected) {
-        row.cells.add(readPath(record, path));
+        // Never null: the LWR Apex endpoint drops null list elements from
+        // the serialized response, which shifts every later cell one column
+        // left (a row with a blank Amount showed its created date under
+        // Amount and nothing under Created). Empty string survives the trip
+        // and the client renders it as the usual em dash.
+        String cell = readPath(record, path);
+        row.cells.add(cell == null ? '' : cell);
       }
       result.rows.add(row);
     }

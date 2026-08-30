@@ -382,7 +382,7 @@ private class ArcRecordDetailControllerTest {
   }
 
   @IsTest
-  static void loadFinancialAccountResolvesFinAcctSchema() {
+  static void loadFinancialAccountResolvesRecordDetailSchema() {
     Financial_Account__c fa = new Financial_Account__c(
       Name = 'Fin Acct Test',
       DPI__c = false
@@ -398,11 +398,11 @@ private class ArcRecordDetailControllerTest {
     );
 
     System.assertEquals('Financial_Account__c', context.objectApiName);
-    System.assertEquals('ISA - Fin Acct', context.schemaType);
+    System.assertEquals('Financial Account', context.schemaType);
   }
 
   @IsTest
-  static void loadFinancialAccountResolvesDpiSchema() {
+  static void loadDpiFinancialAccountResolvesSameRecordSchema() {
     Financial_Account__c fa = new Financial_Account__c(
       Name = 'DPI Test',
       DPI__c = true
@@ -417,7 +417,7 @@ private class ArcRecordDetailControllerTest {
       null
     );
 
-    System.assertEquals('ISA - DPI', context.schemaType);
+    System.assertEquals('Financial Account', context.schemaType);
   }
 
   @IsTest
@@ -461,6 +461,9 @@ private class ArcRecordDetailControllerTest {
         if (
           field.addRecord != true &&
           String.isNotBlank(field.fieldPath) &&
+          // A lookup would reject the arbitrary string this test writes —
+          // the point here is the save plumbing, not reference coercion.
+          String.valueOf(field.type).toUpperCase() != 'REFERENCE' &&
           (String.isBlank(field.objectApiName) ||
           field.objectApiName == 'Financial_Account__c')
         ) {

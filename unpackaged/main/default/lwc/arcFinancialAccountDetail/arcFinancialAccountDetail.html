@@ -1,0 +1,98 @@
+<template>
+  <template lwc:if={hasRecordId}>
+    <div class="arc-fa-detail">
+      <header class="arc-fa-detail__header">
+        <div class="arc-fa-detail__header-top">
+          <div class="arc-fa-detail__title-wrap">
+            <span class="arc-fa-detail__eyebrow">Financial Account</span>
+            <h1 class="arc-fa-detail__title">{name}</h1>
+          </div>
+          <div class="arc-fa-detail__badges">
+            <template lwc:if={accountStatus}>
+              <span class="arc-fa-detail__status-pill">{accountStatus}</span>
+            </template>
+            <template lwc:if={hasRegistrationType}>
+              <span class="arc-fa-detail__pill">{registrationType}</span>
+            </template>
+          </div>
+        </div>
+
+        <dl class="arc-fa-detail__key-facts">
+          <template lwc:if={hasPrimaryOwner}>
+            <div class="arc-fa-detail__key-fact">
+              <dt>Primary Owner</dt>
+              <dd>
+                <a href="#" onclick={handlePrimaryOwnerClick}
+                  >{primaryOwnerName}</a
+                >
+              </dd>
+            </div>
+          </template>
+          <template lwc:if={hasHousehold}>
+            <div class="arc-fa-detail__key-fact">
+              <dt>Household</dt>
+              <dd>
+                <a href="#" onclick={handleHouseholdClick}>{householdName}</a>
+              </dd>
+            </div>
+          </template>
+          <template lwc:if={hasAccountNumber}>
+            <div class="arc-fa-detail__key-fact">
+              <dt>Account Number</dt>
+              <dd>{accountNumber}</dd>
+            </div>
+          </template>
+          <template lwc:if={hasBalance}>
+            <div class="arc-fa-detail__key-fact">
+              <dt>Balance</dt>
+              <dd>{balance}</dd>
+            </div>
+          </template>
+          <template lwc:if={hasAdvisorTeam}>
+            <div class="arc-fa-detail__key-fact">
+              <dt>Financial Advisor Team</dt>
+              <dd>{advisorTeamName}</dd>
+            </div>
+          </template>
+        </dl>
+      </header>
+
+      <div class="arc-fa-detail__body">
+        <c-arc-record-detail
+          field-layout="grid"
+          side-card-label="Record"
+          side-card-fields="Date Created:CreatedDate,Last Modified:LastModifiedDate"
+        ></c-arc-record-detail>
+
+        <c-arc-related-list
+          card-label="Financial Account Roles"
+          related-object-api-name="Financial_Account_Role__c"
+          parent-field-api-name="Financial_Account__c"
+          columns="Role Name:Name,Account:Account__r.Name,Role:Role__c"
+          link-field-api-name="Account__c"
+          link-object-api-name="Account"
+        ></c-arc-related-list>
+
+        <c-arc-related-list
+          card-label="Related Products"
+          related-object-api-name="Financial_Account_Related_Product__c"
+          parent-field-api-name="Wizard_Financial_Account__c"
+          columns="Product:Product_Name__c,Amount:Amount__c,Created:CreatedDate"
+          onrownavigate={handleRelatedProductRowNavigate}
+        ></c-arc-related-list>
+
+        <c-arc-related-list
+          card-label="Financial Account History"
+          related-object-api-name="Financial_Account__History"
+          parent-field-api-name="ParentId"
+          columns="Field:Field,Changed:CreatedDate,By:CreatedBy.Name,From:OldValue,To:NewValue"
+          disable-row-links
+        ></c-arc-related-list>
+      </div>
+
+      <c-arc-related-product-quick-view
+        lwc:ref="relatedProductQuickView"
+      ></c-arc-related-product-quick-view>
+    </div>
+  </template>
+</template>

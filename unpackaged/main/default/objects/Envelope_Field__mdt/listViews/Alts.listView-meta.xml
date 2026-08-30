@@ -15,7 +15,7 @@
     <filters>
         <field>Type__c</field>
         <operation>equals</operation>
-        <value>Purchase Alternative Investments</value>
+        <value>Purchase Alternative Investment</value>
     </filters>
     <label>Alts</label>
 </ListView>

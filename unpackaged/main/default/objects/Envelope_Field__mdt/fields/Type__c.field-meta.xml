@@ -200,9 +200,19 @@
                 <label>Check Log</label>
             </value>
             <value>
+                <fullName>Financial Account</fullName>
+                <default>false</default>
+                <label>Financial Account</label>
+            </value>
+            <value>
                 <fullName>Task</fullName>
                 <default>false</default>
                 <label>Task</label>
+            </value>
+            <value>
+                <fullName>Unused</fullName>
+                <default>false</default>
+                <label>Unused</label>
             </value>
             <value>
                 <fullName>Client - Authorized Person</fullName>

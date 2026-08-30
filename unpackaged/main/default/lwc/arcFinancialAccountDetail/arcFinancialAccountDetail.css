@@ -1,0 +1,131 @@
+/*
+ * Matched to arcTaskDetail / arcCaseDetail's header and card styling so the
+ * Financial Account page reads as the same product as the Case and Task pages.
+ */
+
+.arc-fa-detail {
+  font-family: var(
+    --lwc-fontFamily,
+    -apple-system,
+    "system-ui",
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif
+  );
+  font-size: 13px;
+  line-height: 19.5px;
+  color: var(--lwc-colorTextDefault, #181818);
+}
+
+/* ── Page header ────────────────────────────────────────────────────────── */
+
+.arc-fa-detail__header {
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+  border: 1px solid var(--lwc-colorBorder, #c9c9c9);
+  border-radius: var(--lwc-borderRadiusMedium, 4px);
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+}
+
+.arc-fa-detail__header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.arc-fa-detail__title-wrap {
+  min-width: 0;
+}
+
+.arc-fa-detail__eyebrow {
+  display: block;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--lwc-colorTextWeak, #444444);
+}
+
+.arc-fa-detail__title {
+  margin: 0;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+  color: var(--lwc-colorTextDefault, #181818);
+}
+
+.arc-fa-detail__badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.arc-fa-detail__status-pill,
+.arc-fa-detail__pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.arc-fa-detail__status-pill {
+  background: #eef4ff;
+  color: #0b5cab;
+}
+
+.arc-fa-detail__pill {
+  background: #e5e5e5;
+  color: #181818;
+}
+
+/* Highlights row: label-over-value pairs, matching arcCaseDetail's key facts. */
+
+.arc-fa-detail__key-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 32px;
+  margin: 12px 0 0;
+}
+
+.arc-fa-detail__key-fact {
+  min-width: 0;
+}
+
+.arc-fa-detail__key-fact dt {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--lwc-colorTextWeak, #444444);
+}
+
+.arc-fa-detail__key-fact dd {
+  margin: 0;
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--lwc-colorTextDefault, #181818);
+}
+
+.arc-fa-detail__key-fact dd a {
+  color: var(--lwc-colorTextLink, #0176d3);
+  text-decoration: none;
+}
+
+.arc-fa-detail__key-fact dd a:hover,
+.arc-fa-detail__key-fact dd a:focus {
+  text-decoration: underline;
+}
+
+
+/* ── Body layout ────────────────────────────────────────────────────────── */
+
+.arc-fa-detail__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}

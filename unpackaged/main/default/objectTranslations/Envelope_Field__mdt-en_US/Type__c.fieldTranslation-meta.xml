@@ -71,6 +71,10 @@
             <translation><!-- Control Person --></translation>
         </picklistValues>
         <picklistValues>
+            <masterLabel>Financial Account</masterLabel>
+            <translation><!-- Financial Account --></translation>
+        </picklistValues>
+        <picklistValues>
             <masterLabel>Grantor - Irrevocable Trust</masterLabel>
             <translation><!-- Grantor - Irrevocable Trust --></translation>
         </picklistValues>
@@ -157,5 +161,9 @@
         <picklistValues>
             <masterLabel>Trustee</masterLabel>
             <translation><!-- Trustee --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Unused</masterLabel>
+            <translation><!-- Unused --></translation>
         </picklistValues>
     </CustomFieldTranslation>

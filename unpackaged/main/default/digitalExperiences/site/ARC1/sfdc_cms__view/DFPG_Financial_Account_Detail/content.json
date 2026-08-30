@@ -22,32 +22,9 @@
           "children" : [ {
             "children" : [ {
               "attributes" : {
-                "backgroundColor" : "",
-                "dxpStyle" : { },
-                "layout" : "{!Item._layout}",
-                "mainTitlePaddingHorizontal" : "none",
-                "mainTitlePaddingVertical" : "none",
-                "mainTitleText" : "Your text",
-                "mainTitleTextDisplayInfo" : "{}",
-                "metadata" : "{!Item._metadata._context}",
-                "recordIdFromDataProvider" : "{!Item.Id}",
-                "showTitle" : true
+                "dxpStyle" : { }
               },
-              "children" : [ {
-                "children" : [ {
-                  "attributes" : {
-                    "dxpStyle" : { }
-                  },
-                  "definition" : "dxp_page_layout:placeHolder",
-                  "id" : "993257c1-0ccd-4834-a268-0b7e72b4d2f6",
-                  "type" : "component"
-                } ],
-                "id" : "bf710aac-4ed9-40cf-92b5-f23e6ae0ee28",
-                "name" : "placeholder",
-                "title" : "placeholder",
-                "type" : "region"
-              } ],
-              "definition" : "dxp_records:detailPanel",
+              "definition" : "c:arcFinancialAccountDetail",
               "id" : "45917242-5fd3-4cb9-930a-1cc5f900f250",
               "type" : "component"
             } ],

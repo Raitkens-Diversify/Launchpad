@@ -38,21 +38,23 @@
     <div class="docs__content">
         <section class="docs__column">
             <p class="docs__column-label">Uploaded Files</p>
-            <div class="docs__dropzone">
-                <div class="docs__dropzone-copy">
-                    <p class="docs__dropzone-title">Choose a file or drag and drop it here</p>
-                    <p class="docs__dropzone-hint">PDF, ZIP, DOC, DOCX, XLS and XLSX formats, up to 25MB</p>
+            <template lwc:if={canUpload}>
+                <div class="docs__dropzone">
+                    <div class="docs__dropzone-copy">
+                        <p class="docs__dropzone-title">Choose a file or drag and drop it here</p>
+                        <p class="docs__dropzone-hint">PDF, ZIP, DOC, DOCX, XLS and XLSX formats, up to 25MB</p>
+                    </div>
+                    <lightning-file-upload
+                        class="docs__file-input"
+                        label="Upload documents"
+                        name="fileUploader"
+                        accept=".pdf,.zip,.doc,.docx,.xls,.xlsx"
+                        record-id={effectiveEnvelopeId}
+                        onuploadfinished={handleFilesChange}
+                        multiple>
+                    </lightning-file-upload>
                 </div>
-                <lightning-file-upload
-                    class="docs__file-input"
-                    label="Upload documents"
-                    name="fileUploader"
-                    accept=".pdf,.zip,.doc,.docx,.xls,.xlsx"
-                    record-id={effectiveEnvelopeId}
-                    onuploadfinished={handleFilesChange}
-                    multiple>
-                </lightning-file-upload>
-            </div>
+            </template>
 
             <template lwc:if={hasUploadedFiles}>
                 <ul class="docs__file-list">
@@ -92,16 +94,18 @@
                                         alternative-text="file">
                                     </lightning-icon>
                                     <span class="docs__file-name">{file.name}</span>
-                                    <lightning-button
-                                        class="docs__file-link"
-                                        variant="base"
-                                        icon-name="utility:link"
-                                        icon-position="left"
-                                        label="Manage document links"
-                                        data-id={file.id}
-                                        data-name={file.name}
-                                        onclick={handleLinkDocuments}>
-                                    </lightning-button>
+                                    <template lwc:if={canManageLinks}>
+                                        <lightning-button
+                                            class="docs__file-link"
+                                            variant="base"
+                                            icon-name="utility:link"
+                                            icon-position="left"
+                                            label="Manage document links"
+                                            data-id={file.id}
+                                            data-name={file.name}
+                                            onclick={handleLinkDocuments}>
+                                        </lightning-button>
+                                    </template>
                                     <lightning-button-menu
                                         class="docs__file-menu"
                                         variant="bare"
@@ -117,11 +121,13 @@
                                             label="Download"
                                             prefix-icon-name="utility:download">
                                         </lightning-menu-item>
-                                        <lightning-menu-item
-                                            value="remove"
-                                            label="Remove file"
-                                            prefix-icon-name="utility:delete">
-                                        </lightning-menu-item>
+                                        <template lwc:if={canRemoveFile}>
+                                            <lightning-menu-item
+                                                value="remove"
+                                                label="Remove file"
+                                                prefix-icon-name="utility:delete">
+                                            </lightning-menu-item>
+                                        </template>
                                     </lightning-button-menu>
                                 </div>
                                 <template lwc:if={file.hasLinks}>

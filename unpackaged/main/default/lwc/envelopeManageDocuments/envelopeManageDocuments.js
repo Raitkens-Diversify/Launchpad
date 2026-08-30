@@ -3,6 +3,7 @@ import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import envelopeWizardStyles from '@salesforce/resourceUrl/envelopeWizardStyles';
 import TASK_ENVELOPE_FIELD from '@salesforce/schema/Task.Envelope__c';
+import TASK_STATUS_FIELD from '@salesforce/schema/Task.Status';
 import LightningToast from 'lightning/toast';
 import updateContentDocumentLinks from '@salesforce/apex/DocumentService.updateContentDocumentLinks';
 import getRequiredDocuments from '@salesforce/apex/DocumentService.getRequiredDocuments';
@@ -50,6 +51,10 @@ export default class EnvelopeManageDocuments extends LightningElement {
     // envelopeId is bound instead. effectiveEnvelopeId reconciles the two entry points.
     _resolvedEnvelopeId = '';
 
+    // Status of the host Task, read off the same wire. Empty in the shell (no Task); on the Task
+    // page a value of 'Completed' locks the screen to read-only (no upload/link/remove).
+    _taskStatus = '';
+
     documents = [];
 
     // Files chosen via the file-selector (browse or drop). Client-side only for now.
@@ -86,6 +91,26 @@ export default class EnvelopeManageDocuments extends LightningElement {
     // applies inside the shell flow, so it's hidden when the component stands alone on a record page.
     get showInfoAlert() {
         return !!this.envelopeId;
+    }
+
+    // A Completed Task locks document editing on the record page. Only ever true on the Task side;
+    // the shell never populates _taskStatus, so all editing controls stay available there.
+    get isTaskCompleted() {
+        return this._taskStatus === 'Completed';
+    }
+
+    // Editing affordances, all suppressed once the Task is Completed: the upload dropzone, the
+    // per-file "Manage document links" link, and the "Remove file" item in the more-actions menu.
+    get canUpload() {
+        return !this.isTaskCompleted;
+    }
+
+    get canManageLinks() {
+        return !this.isTaskCompleted;
+    }
+
+    get canRemoveFile() {
+        return !this.isTaskCompleted;
     }
 
     get hasUploadedFiles() {
@@ -164,9 +189,12 @@ export default class EnvelopeManageDocuments extends LightningElement {
     // Task-page entry point: resolve the linked Envelope__c off the Task record, then load. The
     // wire only fetches when recordId is set (record page); in the shell recordId is empty and it
     // never fires, so envelopeId drives loading via connectedCallback instead.
-    @wire(getRecord, { recordId: '$recordId', fields: [TASK_ENVELOPE_FIELD] })
+    @wire(getRecord, { recordId: '$recordId', fields: [TASK_ENVELOPE_FIELD, TASK_STATUS_FIELD] })
     wiredTask({ data, error }) {
         if (data) {
+            // Status drives the Completed read-only lock; it can change without the envelope link
+            // changing, so mirror it every time the record refreshes.
+            this._taskStatus = getFieldValue(data, TASK_STATUS_FIELD) ?? '';
             const id = getFieldValue(data, TASK_ENVELOPE_FIELD);
             if (id && id !== this._resolvedEnvelopeId) {
                 this._resolvedEnvelopeId = id;
