@@ -1,5 +1,7 @@
 import { LightningElement, api, wire } from 'lwc';
 import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
+import { loadStyle } from 'lightning/platformResourceLoader';
+import envelopeWizardStyles from '@salesforce/resourceUrl/envelopeWizardStyles';
 import TASK_ENVELOPE_FIELD from '@salesforce/schema/Task.Envelope__c';
 import LightningToast from 'lightning/toast';
 import updateContentDocumentLinks from '@salesforce/apex/DocumentService.updateContentDocumentLinks';
@@ -77,6 +79,12 @@ export default class EnvelopeManageDocuments extends LightningElement {
 
     // Only the shell has an items view to return to, so hide "Back to Envelope" on a record page.
     get showBackButton() {
+        return !!this.envelopeId;
+    }
+
+    // The info alert explains how the list changes as the envelope is edited — context that only
+    // applies inside the shell flow, so it's hidden when the component stands alone on a record page.
+    get showInfoAlert() {
         return !!this.envelopeId;
     }
 
@@ -170,10 +178,26 @@ export default class EnvelopeManageDocuments extends LightningElement {
     }
 
     connectedCallback() {
-        // Shell path: envelopeId is bound directly, so load now. The Task path waits for the wire.
         if (this.envelopeId) {
+            // Shell path: envelopeId is bound directly, so load now. The Task path waits for the wire.
             this._loadEnvelopeData();
+        } else {
+            // Standalone (record page): envelopeApp normally loads the shared wizard stylesheet
+            // high in the tree, but here this component stands alone, so load it directly. Paired
+            // with the .env-layout wrapper in the template. Experimental — remove this call and the
+            // wrapper together to revert to the plain, unthemed standalone rendering.
+            this._loadSharedStyles();
         }
+    }
+
+    // Injects the shared envelopeWizardStyles static resource so the file-upload dropzone, design
+    // tokens, and base-component theming survive when this component is used outside the shell.
+    // Global by nature of loadStyle; the .env-layout wrapper keeps the component rules scoped to
+    // this subtree, so the only page-wide effect is the stylesheet's :root token block.
+    _loadSharedStyles() {
+        loadStyle(this, envelopeWizardStyles).catch((error) => {
+            console.error('Error loading envelopeWizardStyles:', error);
+        });
     }
 
     // Loads the envelope's uploaded files and required documents. Shared by both entry points;

@@ -7,6 +7,13 @@
     font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
 }
 
+/* Styling-only wrapper that scopes the shared wizard stylesheet into this subtree (see the
+   template note). display:contents removes its own box so the sections stay direct flex
+   children of :host and the vertical rhythm above is unchanged. */
+.env-layout {
+    display: contents;
+}
+
 /* Header: back link, title, household/envelope subtitle. */
 .docs__header {
     display: flex;

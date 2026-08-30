@@ -1,4 +1,9 @@
 <template>
+  <!-- .env-layout carries the shared wizard styles into this subtree. In the shell an ancestor
+       already provides it; standalone (Task record page) this local wrapper is what lets the
+       loadStyle'd rules match. display:contents keeps layout identical either way. Remove this
+       wrapper together with _loadSharedStyles() to revert standalone to the unthemed rendering. -->
+  <div class="env-layout">
     <header class="docs__header">
         <template lwc:if={showBackButton}>
             <lightning-button
@@ -14,19 +19,21 @@
         <p class="docs__subtitle">{subtitle}</p>
     </header>
 
-    <output class="docs__alert">
-        <lightning-icon
-            icon-name="utility:info"
-            size="x-small"
-            class="docs__alert-icon"
-            alternative-text="Information">
-        </lightning-icon>
-        <p class="docs__alert-text">
-            The documents listed below reflect the envelope as currently constituted. This
-            list is subject to change as action items are added and as key points within each
-            action item are completed or changed.
-        </p>
-    </output>
+    <template lwc:if={showInfoAlert}>
+        <output class="docs__alert">
+            <lightning-icon
+                icon-name="utility:info"
+                size="x-small"
+                class="docs__alert-icon"
+                alternative-text="Information">
+            </lightning-icon>
+            <p class="docs__alert-text">
+                The documents listed below reflect the envelope as currently constituted. This
+                list is subject to change as action items are added and as key points within each
+                action item are completed or changed.
+            </p>
+        </output>
+    </template>
 
     <div class="docs__content">
         <section class="docs__column">
@@ -182,4 +189,5 @@
         onconfirm={handleLinkConfirm}
         onclose={handleLinkClose}>
     </c-envelope-document-links-modal>
+  </div>
 </template>
