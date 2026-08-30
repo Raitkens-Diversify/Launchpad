@@ -118,6 +118,9 @@ export default class ArcRecordDetail extends LightningElement {
 
   sections = [];
   sectionLayout = null;
+  /** fieldPath -> referenced record's display name, from the load response.
+   *  A read-mode lookup row holds an id; this is what it prints instead. */
+  referenceLabels = {};
   draft = {};
   savedDraft = {};
   userContext = {};
@@ -376,6 +379,7 @@ export default class ArcRecordDetail extends LightningElement {
     const inputs = [
       this.sections,
       this.sectionLayout,
+      this.referenceLabels,
       this.draft,
       this.userContext,
       this.sectionFilter,
@@ -427,6 +431,7 @@ export default class ArcRecordDetail extends LightningElement {
         this._displayRecordId = null;
         this.sections = [];
         this.sectionLayout = null;
+        this.referenceLabels = {};
         this.draft = {};
         this.savedDraft = {};
         this.errorMessage = '';
@@ -439,6 +444,7 @@ export default class ArcRecordDetail extends LightningElement {
       this._isPersonAccount = context?.isPersonAccount === true;
       this.sections = context?.sections || [];
       this.sectionLayout = context?.sectionLayout || null;
+      this.referenceLabels = context?.referenceLabels || {};
       const values = context?.values || {};
       this.draft = { ...values };
       this.savedDraft = { ...values };
@@ -464,9 +470,19 @@ export default class ArcRecordDetail extends LightningElement {
     const draft = this.draft;
     const filterSet = this.parseSectionFilter();
 
+    const referenceLabels = this.referenceLabels || {};
     let shapedSections = (this.sections || [])
       .map((section, index) => {
-        const fields = shapeVisibleFields(section.fields, draft, this.userContext);
+        // The section prints field.referenceLabel for read-mode lookups; the
+        // server resolves those names into context.referenceLabels, keyed by
+        // field path. Without this stitch every lookup row shows "—".
+        const fields = shapeVisibleFields(section.fields, draft, this.userContext).map(
+          (field) => ({
+            ...field,
+            referenceLabel:
+              referenceLabels[field.fieldPath || field.apiName] ?? null
+          })
+        );
         return {
           key: `sec-${index}`,
           label: section.name,

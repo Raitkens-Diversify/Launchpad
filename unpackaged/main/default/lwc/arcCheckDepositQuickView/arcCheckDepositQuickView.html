@@ -1,0 +1,54 @@
+<template>
+  <template lwc:if={isOpen}>
+    <section
+      class="quick-view"
+      role="dialog"
+      aria-modal="true"
+      aria-label={headingLabel}
+      onkeydown={handleKeyDown}
+    >
+      <div class="quick-view__backdrop" onclick={handleClose}></div>
+      <div class="quick-view__panel">
+        <header class="quick-view__header">
+          <h2 class="quick-view__title">{headingLabel}</h2>
+          <div class="quick-view__header-actions">
+            <button
+              type="button"
+              class="quick-view__close"
+              aria-label="Close"
+              onclick={handleClose}
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        </header>
+
+        <div class="quick-view__body">
+          <template lwc:if={isLoading}>
+            <div class="quick-view__loading">
+              <lightning-spinner
+                alternative-text="Loading check deposit"
+                size="small"
+              ></lightning-spinner>
+            </div>
+          </template>
+
+          <template lwc:elseif={errorMessage}>
+            <p class="quick-view__error" role="alert">{errorMessage}</p>
+          </template>
+
+          <template lwc:elseif={hasDetail}>
+            <dl class="quick-view__fields">
+              <template for:each={detailRows} for:item="row">
+                <div class="quick-view__field" key={row.label}>
+                  <dt>{row.label}</dt>
+                  <dd>{row.value}</dd>
+                </div>
+              </template>
+            </dl>
+          </template>
+        </div>
+      </div>
+    </section>
+  </template>
+</template>

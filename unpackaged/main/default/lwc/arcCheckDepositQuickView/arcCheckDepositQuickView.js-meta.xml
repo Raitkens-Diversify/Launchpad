@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Arc Check Deposit Quick View</masterLabel>
+    <description>Read-only popup card for a single Check_Deposit__c record, opened from the Check Log page&#39;s Check Deposits card. Deposits are all read-only fields, so a popup keeps the user on the check log instead of navigating away.</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+</LightningComponentBundle>

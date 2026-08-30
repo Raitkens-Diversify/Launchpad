@@ -22,47 +22,10 @@
           "children" : [ {
             "children" : [ {
               "attributes" : {
-                "dxpStyle" : { },
-                "fieldLayout" : "grid"
+                "dxpStyle" : { }
               },
-              "definition" : "c:arcRecordDetail",
+              "definition" : "c:arcCheckLogDetail",
               "id" : "d04a7d2e-d9cd-32e2-1fe5-caf73401c74f",
-              "type" : "component"
-            }, {
-              "attributes" : {
-                "cardLabel" : "Check Deposits",
-                "columns" : "Check Deposit:Name,Financial Account:Financial_Account__r.Name,Amount:Amount__c",
-                "dxpStyle" : { },
-                "parentFieldApiName" : "Check__c",
-                "relatedObjectApiName" : "Check_Deposit__c"
-              },
-              "definition" : "c:arcRelatedList",
-              "id" : "1e33488e-4a3a-10a8-0d41-f2124dc5eeb8",
-              "type" : "component"
-            }, {
-              "attributes" : {
-                "cardLabel" : "Files",
-                "columns" : "File:ContentDocument.Title,Type:ContentDocument.FileExtension,Updated:ContentDocument.ContentModifiedDate",
-                "dxpStyle" : { },
-                "linkFieldApiName" : "ContentDocumentId",
-                "linkObjectApiName" : "ContentDocument",
-                "parentFieldApiName" : "LinkedEntityId",
-                "relatedObjectApiName" : "ContentDocumentLink"
-              },
-              "definition" : "c:arcRelatedList",
-              "id" : "e5a19a77-6e13-5064-af67-4c64e51b0b0d",
-              "type" : "component"
-            }, {
-              "attributes" : {
-                "cardLabel" : "Check Log History",
-                "columns" : "Field:Field,Changed:CreatedDate,By:CreatedBy.Name,From:OldValue,To:NewValue",
-                "disableRowLinks" : true,
-                "dxpStyle" : { },
-                "parentFieldApiName" : "ParentId",
-                "relatedObjectApiName" : "Check_Log__History"
-              },
-              "definition" : "c:arcRelatedList",
-              "id" : "de0c7f03-79f2-6ec3-3786-184bb4d037a4",
               "type" : "component"
             } ],
             "id" : "dbabc9f1-5b2b-f6ba-1368-bef741c0e236",

@@ -264,6 +264,22 @@ public with sharing class ArcRecordDetailController {
 
     Map<Id, String> nameById = new Map<Id, String>();
     for (String objectName : idsByObject.keySet()) {
+      // The FinServ financial account is invisible to portal users (no
+      // object permission, Private external sharing), so the USER_MODE
+      // query below finds nothing and the form shows a blank where
+      // Lightning shows the account's name. Its display name is resolved
+      // through the narrowly-scoped system-mode resolver instead — the id
+      // was read off a record the user already accessed under USER_MODE.
+      if (objectName == 'FinServ__FinancialAccount__c') {
+        Map<Id, ArcFinServAccountLabels.Entry> finServLabels = ArcFinServAccountLabels.resolve(
+          idsByObject.get(objectName)
+        );
+        for (Id accountId : finServLabels.keySet()) {
+          nameById.put(accountId, finServLabels.get(accountId).name);
+        }
+        continue;
+      }
+
       String nameField = NAME_FIELD_BY_OBJECT.containsKey(objectName)
         ? NAME_FIELD_BY_OBJECT.get(objectName)
         : 'Name';

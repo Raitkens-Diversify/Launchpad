@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-    <label>Check Deposit - Financial Account</label>
+    <label>Check Log - Review Status</label>
     <protected>false</protected>
     <values>
         <field>Account_Type__c</field>
@@ -16,7 +16,7 @@
     </values>
     <values>
         <field>Field_API__c</field>
-        <value xsi:type="xsd:string">Financial_Account__c</value>
+        <value xsi:type="xsd:string">Review_Status__c</value>
     </values>
     <values>
         <field>Field_Type_Override__c</field>
@@ -36,7 +36,7 @@
     </values>
     <values>
         <field>Label__c</field>
-        <value xsi:type="xsd:string">Financial Account</value>
+        <value xsi:type="xsd:string">Review Status</value>
     </values>
     <values>
         <field>Max__c</field>
@@ -48,11 +48,11 @@
     </values>
     <values>
         <field>Object__c</field>
-        <value xsi:type="xsd:string">Check_Deposit__c</value>
+        <value xsi:type="xsd:string">Check_Log__c</value>
     </values>
     <values>
         <field>Order__c</field>
-        <value xsi:type="xsd:double">1.5</value>
+        <value xsi:type="xsd:double">16.0</value>
     </values>
     <values>
         <field>Original_Account_Field__c</field>
@@ -76,7 +76,7 @@
     </values>
     <values>
         <field>Section_Name__c</field>
-        <value xsi:type="xsd:string">Deposit Details</value>
+        <value xsi:type="xsd:string">Ops Review</value>
     </values>
     <values>
         <field>Shown_WHERE_Statement__c</field>
@@ -88,6 +88,6 @@
     </values>
     <values>
         <field>Type__c</field>
-        <value xsi:type="xsd:string">Check Deposit</value>
+        <value xsi:type="xsd:string">Check Log</value>
     </values>
 </CustomMetadata>

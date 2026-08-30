@@ -1,0 +1,140 @@
+<template>
+  <template lwc:if={hasRecordId}>
+    <div class="arc-check-log-detail">
+      <header class="arc-check-log-detail__header">
+        <div class="arc-check-log-detail__header-top">
+          <div class="arc-check-log-detail__title-wrap">
+            <span class="arc-check-log-detail__eyebrow">Check Log</span>
+            <h1 class="arc-check-log-detail__title">{name}</h1>
+          </div>
+          <div class="arc-check-log-detail__badges">
+            <template lwc:if={status}>
+              <span class="arc-check-log-detail__status-pill">{status}</span>
+            </template>
+            <template lwc:if={hasReviewStatus}>
+              <span class="arc-check-log-detail__pill">{reviewStatusLabel}</span>
+            </template>
+            <template lwc:if={hasMethodOfForwarding}>
+              <span class="arc-check-log-detail__pill">{methodOfForwarding}</span>
+            </template>
+          </div>
+        </div>
+
+        <dl class="arc-check-log-detail__key-facts">
+          <template lwc:if={hasClient}>
+            <div class="arc-check-log-detail__key-fact">
+              <dt>Client</dt>
+              <dd>
+                <a href="#" onclick={handleClientClick}>{context.clientName}</a>
+              </dd>
+            </div>
+          </template>
+          <template lwc:if={hasFinancialAccount}>
+            <!-- Plain text: the lookup targets the FinServ financial account,
+                 which has no page in this site. The wizard account below is
+                 the routable custom object and does link. -->
+            <div class="arc-check-log-detail__key-fact">
+              <dt>Financial Account</dt>
+              <dd>{financialAccountName}</dd>
+            </div>
+          </template>
+          <template lwc:if={hasFinancialAccountNumber}>
+            <div class="arc-check-log-detail__key-fact">
+              <dt>Account Number</dt>
+              <dd>{financialAccountNumber}</dd>
+            </div>
+          </template>
+          <template lwc:if={hasWizardFinancialAccount}>
+            <div class="arc-check-log-detail__key-fact">
+              <dt>Wizard Financial Account</dt>
+              <dd>
+                <a href="#" onclick={handleWizardFinancialAccountClick}
+                  >{context.wizardFinancialAccountName}</a
+                >
+              </dd>
+            </div>
+          </template>
+          <template lwc:if={hasAmount}>
+            <div class="arc-check-log-detail__key-fact">
+              <dt>Amount</dt>
+              <dd>{formattedAmount}</dd>
+            </div>
+          </template>
+          <template lwc:if={hasCase}>
+            <div class="arc-check-log-detail__key-fact">
+              <dt>Case</dt>
+              <dd>
+                <a href="#" onclick={handleCaseClick}>{context.caseNumber}</a>
+              </dd>
+            </div>
+          </template>
+          <template lwc:if={hasReceivedDate}>
+            <div class="arc-check-log-detail__key-fact">
+              <dt>Received Date</dt>
+              <dd>{formattedReceivedDate}</dd>
+            </div>
+          </template>
+        </dl>
+      </header>
+
+      <div class="arc-check-log-detail__body">
+        <c-arc-record-detail
+          field-layout="grid"
+          side-card-label="Record"
+          side-card-fields="Date Created:CreatedDate,Last Modified:LastModifiedDate"
+        ></c-arc-record-detail>
+
+        <lightning-card title={depositsLabel}>
+          <template lwc:if={hasDeposits}>
+            <c-arc-data-table
+              aria-label="Check deposits on this check log"
+              key-field="id"
+              columns={depositColumns}
+              data={deposits}
+              placeholder="-"
+              enable-row-navigation
+              onrownavigate={handleDepositRowNavigate}
+            ></c-arc-data-table>
+          </template>
+          <template lwc:else>
+            <div class="slds-p-around_medium">No check deposits.</div>
+          </template>
+        </lightning-card>
+
+        <lightning-card title={filesLabel}>
+          <template lwc:if={fileErrorMessage}>
+            <p class="slds-p-horizontal_medium arc-check-log-detail__file-error" role="alert">
+              {fileErrorMessage}
+            </p>
+          </template>
+          <template lwc:if={hasFiles}>
+            <c-arc-data-table
+              aria-label="Files attached to this check log"
+              key-field="id"
+              columns={fileColumns}
+              data={files}
+              placeholder="-"
+              enable-row-navigation
+              onrownavigate={handleFileRowNavigate}
+            ></c-arc-data-table>
+          </template>
+          <template lwc:else>
+            <div class="slds-p-around_medium">No files.</div>
+          </template>
+        </lightning-card>
+
+        <c-arc-related-list
+          card-label="Check Log History"
+          related-object-api-name="Check_Log__History"
+          parent-field-api-name="ParentId"
+          columns="Field:Field,Changed:CreatedDate,By:CreatedBy.Name,From:OldValue,To:NewValue"
+          disable-row-links
+        ></c-arc-related-list>
+      </div>
+
+      <c-arc-check-deposit-quick-view
+        lwc:ref="depositQuickView"
+      ></c-arc-check-deposit-quick-view>
+    </div>
+  </template>
+</template>
