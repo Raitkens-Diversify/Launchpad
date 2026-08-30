@@ -232,10 +232,15 @@ export default class ArcCheckLogDetail extends NavigationMixin(
    * The bytes come through Apex and open as a blob URL rather than the
    * platform's /sfc/servlet.shepherd download endpoint, because the
    * live-preview host does not serve that servlet (404) and preview is
-   * where this site is tested. The tab is opened synchronously in the
-   * click so popup blocking never eats it, then pointed at the blob once
-   * the data arrives. Files over the server's size cap fall back to the
-   * platform download URL, which works on the published site.
+   * where this site is tested. The tab is opened by clicking a detached
+   * anchor, never window.open: under this site's Lightning Web Security,
+   * window.open's RETURN VALUE cannot cross the sandbox membrane — the tab
+   * opens and then the handler dies in the locker's distortion layer
+   * ("Cannot read properties of undefined (reading 'apply')", observed
+   * live 2026-08-30) before any data loads. An anchor click hands the
+   * browser the navigation without ever holding a window reference.
+   * Files over the server's size cap fall back to the platform download
+   * URL, which works on the published site.
    */
   async handleFileRowNavigate(event) {
     event.preventDefault();
@@ -245,31 +250,23 @@ export default class ArcCheckLogDetail extends NavigationMixin(
     }
 
     this.fileErrorMessage = "";
-    const viewerTab = window.open("", "_blank");
     try {
       const payload = await getFileData({ contentDocumentId });
+      let url;
       if (payload.tooLarge) {
-        const downloadUrl = `${communityBasePath}/sfc/servlet.shepherd/document/download/${contentDocumentId}`;
-        if (viewerTab) {
-          viewerTab.location = downloadUrl;
-        }
-        return;
-      }
-
-      const bytes = Uint8Array.from(atob(payload.base64Data), (char) =>
-        char.charCodeAt(0)
-      );
-      const blob = new Blob([bytes], { type: payload.mimeType });
-      const blobUrl = URL.createObjectURL(blob);
-      if (viewerTab) {
-        viewerTab.location = blobUrl;
+        url = `${communityBasePath}/sfc/servlet.shepherd/document/download/${contentDocumentId}`;
       } else {
-        window.open(blobUrl, "_blank");
+        const bytes = Uint8Array.from(atob(payload.base64Data), (char) =>
+          char.charCodeAt(0)
+        );
+        url = URL.createObjectURL(new Blob([bytes], { type: payload.mimeType }));
       }
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.target = "_blank";
+      anchor.rel = "noopener";
+      anchor.click();
     } catch (error) {
-      if (viewerTab) {
-        viewerTab.close();
-      }
       this.fileErrorMessage =
         error?.body?.message || "Unable to open this file right now.";
     }
