@@ -22,32 +22,9 @@
           "children" : [ {
             "children" : [ {
               "attributes" : {
-                "backgroundColor" : "",
-                "dxpStyle" : { },
-                "layout" : "{!Item._layout}",
-                "mainTitlePaddingHorizontal" : "none",
-                "mainTitlePaddingVertical" : "none",
-                "mainTitleText" : "Your text",
-                "mainTitleTextDisplayInfo" : "{}",
-                "metadata" : "{!Item._metadata._context}",
-                "recordIdFromDataProvider" : "{!Item.Id}",
-                "showTitle" : false
+                "dxpStyle" : { }
               },
-              "children" : [ {
-                "children" : [ {
-                  "attributes" : {
-                    "dxpStyle" : { }
-                  },
-                  "definition" : "dxp_page_layout:placeHolder",
-                  "id" : "ab2690c0-44fe-4e66-b555-28472c05b8de",
-                  "type" : "component"
-                } ],
-                "id" : "a4f1f121-a77b-40af-b53a-a61dc706d288",
-                "name" : "placeholder",
-                "title" : "placeholder",
-                "type" : "region"
-              } ],
-              "definition" : "dxp_records:detailPanel",
+              "definition" : "c:arcServiceDetail",
               "id" : "9b6edde3-1b1c-4949-85ea-35f5281b2352",
               "type" : "component"
             } ],

@@ -74,12 +74,17 @@ public with sharing class EnvelopeActionCaseController {
         managementStyle.recordsPreviousManagementStyle = true;
         specs.put('Change Management Style', managementStyle);
 
+        // The caseType is the Case.Type picklist value (singular); the spec is keyed by the
+        // Envelope_Field__mdt Type__c / client sourceId, which is the plural 'Purchase Alternative
+        // Investments'. The two vocabularies deliberately differ — the same split the DMS actions
+        // carry — so the Case stores the singular Type while the interview schema resolves from the
+        // plural. See ACCOUNT_TYPE_TO_CASE_TYPE in envelopeFormSchema.
         ActionCaseSpec purchaseAlts = new ActionCaseSpec(
             'Purchase Alternative Investment',
-            'Purchase Alternative Investment',
-            'Purchase Alternative Investment'
+            'Purchase Alternative Investments',
+            'Purchase Alternative Investments'
         );
-        specs.put('Purchase Alternative Investment', purchaseAlts);
+        specs.put('Purchase Alternative Investments', purchaseAlts);
 
         return specs;
     }

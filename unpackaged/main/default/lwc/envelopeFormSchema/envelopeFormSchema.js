@@ -488,7 +488,7 @@ const ACCOUNT_TYPE_TO_MDT = {
     updateDmsInstructions: 'Manage DMS Instructions',
     updateManagementStyle: 'Change Management Style',
     additionalFunding: 'Additional Funding',
-    purchaseAlts: 'Purchase Alternative Investment'
+    purchaseAlts: 'Purchase Alternative Investments'
 };
 
 const ACCOUNT_ACTION_TYPES = new Set(Object.keys(ACCOUNT_TYPE_TO_MDT));
@@ -497,10 +497,13 @@ const ACCOUNT_ACTION_TYPES = new Set(Object.keys(ACCOUNT_TYPE_TO_MDT));
 // because the two vocabularies are not interchangeable: the DMS action's interview is configured
 // under 'Manage DMS Instructions', but its Case is an 'Update DMS Instructions' — the value the rest
 // of the org keys on (the Case and Order Ticket record pages, Order_Ticket__c.Type_of_Request__c).
-// The other four happen to coincide; that coincidence is what made a single map look sufficient.
+// Purchase Alternative Investments splits the same way: its Envelope_Field__mdt schema (and the
+// Apex sourceId) is the plural 'Purchase Alternative Investments', but the Case it opens carries the
+// singular 'Purchase Alternative Investment' Type. The remaining three happen to coincide.
 const ACCOUNT_TYPE_TO_CASE_TYPE = {
     ...ACCOUNT_TYPE_TO_MDT,
-    updateDmsInstructions: 'Update DMS Instructions'
+    updateDmsInstructions: 'Update DMS Instructions',
+    purchaseAlts: 'Purchase Alternative Investment'
 };
 
 // The inverse of ACCOUNT_TYPE_TO_CASE_TYPE, for reading an action item back from its Case: the
@@ -852,15 +855,33 @@ function schemaCacheKey(key) {
 // other token against the draft. The user field name is matched case-insensitively, since the
 // metadata casing (`Relationship_to_Firm__c`) can differ from the org field's (`Relationship_to_firm__c`).
 const USER_TOKEN = /^\$User\.(\w+)$/i;
+// A `$Party.<roleKey>.<Field>` token resolves against the related party occupying <roleKey> — the
+// requirementKey (rule.key from RELATED_PARTY_RULES) the party was selected into — read from the
+// reserved `$party` sub-object of the context bag (see derivePartyContext). Both segments are matched
+// case-insensitively, like $User, since the metadata casing can differ from the org field's. An
+// unselected role or an unknown field yields undefined, so a clause naming a party that has not been
+// picked is simply unsatisfied: this is also how "is this person a related party?" is expressed.
+const PARTY_TOKEN = /^\$Party\.(\w+)\.(\w+)$/i;
 
-function resolveOperand(token, draft, userContext) {
+// Case-insensitive property read, shared by the $User and $Party operand branches.
+function caseInsensitiveGet(obj, wanted) {
+    if (!obj) {
+        return undefined;
+    }
+    const want = String(wanted).toLowerCase();
+    const key = Object.keys(obj).find((k) => k.toLowerCase() === want);
+    return key === undefined ? undefined : obj[key];
+}
+
+function resolveOperand(token, draft, context) {
     const userMatch = token.match(USER_TOKEN);
     if (userMatch) {
-        const wanted = userMatch[1].toLowerCase();
-        const key = Object.keys(userContext || {}).find(
-            (k) => k.toLowerCase() === wanted
-        );
-        return key === undefined ? undefined : userContext[key];
+        return caseInsensitiveGet(context, userMatch[1]);
+    }
+    const partyMatch = token.match(PARTY_TOKEN);
+    if (partyMatch) {
+        const role = caseInsensitiveGet(context && context.$party, partyMatch[1]);
+        return caseInsensitiveGet(role, partyMatch[2]);
     }
     return draft[token];
 }
@@ -966,8 +987,9 @@ function splitTopLevelWhereOperator(statement, operator) {
  * and `LIKE` / `NOT LIKE` against a quoted pattern (`%` and `_` wildcards, case-insensitive). For a
  * multi-select value (stored as an array) a `LIKE` clause matches when any selected entry matches the
  * pattern, so it can test membership. A left-hand `$User.<Field>` token is resolved against
- * userContext rather than the draft. Returns true for a blank/unparseable statement (fail-open,
- * matching the v1 form behavior).
+ * userContext rather than the draft, and a `$Party.<roleKey>.<Field>` token against the selected
+ * related party in that role (userContext.$party — see derivePartyContext). Returns true for a
+ * blank/unparseable statement (fail-open, matching the v1 form behavior).
  *
  * Note the AND/OR split runs before grouping is unwrapped, so it does not respect parentheses: a
  * statement mixing the two operators across groups (`(A AND B) OR C`) is split on AND first and will
@@ -1005,10 +1027,17 @@ function evaluateWhereStatement(statement, draft = {}, userContext = {}) {
         return !evaluateWhereStatement(notMatch[1].trim(), draft, userContext);
     }
 
+    // Every matcher below anchors its left operand on the same alternation:
+    //   $User.<field>            — running-user attribute (userContext)
+    //   $Party.<role>.<field>    — the selected related party in <role> (userContext.$party)
+    //   <field>                  — a plain draft answer
+    // resolveOperand routes each shape to the right source; keep the alternation in sync across the
+    // matchers, or a token will silently fall through to the fail-open tail and read as always-shown.
+
     // `LIKE` / `NOT LIKE` against a quoted pattern (e.g. `Source_of_Funds__c LIKE '%Advisory Account%'`).
     // For a multi-select value the clause matches when any selected entry matches the pattern, so it
     // can test membership. NOT LIKE is checked first so it is not swallowed by the LIKE matcher.
-    const notLikeMatch = statement.match(/^(\$User\.\w+|\w+)\s+NOT\s+LIKE\s+'([^']*)'$/i);
+    const notLikeMatch = statement.match(/^(\$User\.\w+|\$Party\.\w+\.\w+|\w+)\s+NOT\s+LIKE\s+'([^']*)'$/i);
     if (notLikeMatch) {
         return !valueMatchesLike(
             resolveOperand(notLikeMatch[1], draft, userContext),
@@ -1016,7 +1045,7 @@ function evaluateWhereStatement(statement, draft = {}, userContext = {}) {
         );
     }
 
-    const likeMatch = statement.match(/^(\$User\.\w+|\w+)\s+LIKE\s+'([^']*)'$/i);
+    const likeMatch = statement.match(/^(\$User\.\w+|\$Party\.\w+\.\w+|\w+)\s+LIKE\s+'([^']*)'$/i);
     if (likeMatch) {
         return valueMatchesLike(
             resolveOperand(likeMatch[1], draft, userContext),
@@ -1024,7 +1053,7 @@ function evaluateWhereStatement(statement, draft = {}, userContext = {}) {
         );
     }
 
-    const eqMatch = statement.match(/^(\$User\.\w+|\w+)\s*=\s*'([^']*)'$/);
+    const eqMatch = statement.match(/^(\$User\.\w+|\$Party\.\w+\.\w+|\w+)\s*=\s*'([^']*)'$/);
     if (eqMatch) {
         // Some statements quote a boolean literal (e.g. `Other__c = 'True'`) against a checkbox
         // value; compare boolean-wise in that case, otherwise a plain string compare.
@@ -1036,7 +1065,7 @@ function evaluateWhereStatement(statement, draft = {}, userContext = {}) {
         return String(resolveOperand(eqMatch[1], draft, userContext) ?? '') === eqMatch[2];
     }
 
-    const neqMatch = statement.match(/^(\$User\.\w+|\w+)\s*!=\s*'([^']*)'$/);
+    const neqMatch = statement.match(/^(\$User\.\w+|\$Party\.\w+\.\w+|\w+)\s*!=\s*'([^']*)'$/);
     if (neqMatch) {
         if (/^(true|false)$/i.test(neqMatch[2])) {
             const expected = neqMatch[2].toLowerCase() === 'true';
@@ -1046,27 +1075,27 @@ function evaluateWhereStatement(statement, draft = {}, userContext = {}) {
         return String(resolveOperand(neqMatch[1], draft, userContext) ?? '') !== neqMatch[2];
     }
 
-    const eqBoolMatch = statement.match(/^(\$User\.\w+|\w+)\s*=\s*(true|false)$/i);
+    const eqBoolMatch = statement.match(/^(\$User\.\w+|\$Party\.\w+\.\w+|\w+)\s*=\s*(true|false)$/i);
     if (eqBoolMatch) {
         const expected = eqBoolMatch[2].toLowerCase() === 'true';
         const actual = resolveOperand(eqBoolMatch[1], draft, userContext);
         return (actual === true || actual === 'true') === expected;
     }
 
-    const neqBoolMatch = statement.match(/^(\$User\.\w+|\w+)\s*!=\s*(true|false)$/i);
+    const neqBoolMatch = statement.match(/^(\$User\.\w+|\$Party\.\w+\.\w+|\w+)\s*!=\s*(true|false)$/i);
     if (neqBoolMatch) {
         const expected = neqBoolMatch[2].toLowerCase() === 'true';
         const actual = resolveOperand(neqBoolMatch[1], draft, userContext);
         return (actual === true || actual === 'true') !== expected;
     }
 
-    const eqNullMatch = statement.match(/^(\$User\.\w+|\w+)\s*=\s*null$/i);
+    const eqNullMatch = statement.match(/^(\$User\.\w+|\$Party\.\w+\.\w+|\w+)\s*=\s*null$/i);
     if (eqNullMatch) {
         const v = resolveOperand(eqNullMatch[1], draft, userContext);
         return v === null || v === undefined || v === '';
     }
 
-    const neqNullMatch = statement.match(/^(\$User\.\w+|\w+)\s*!=\s*null$/i);
+    const neqNullMatch = statement.match(/^(\$User\.\w+|\$Party\.\w+\.\w+|\w+)\s*!=\s*null$/i);
     if (neqNullMatch) {
         const v = resolveOperand(neqNullMatch[1], draft, userContext);
         return v !== null && v !== undefined && v !== '';
@@ -1791,6 +1820,32 @@ function resolveRelatedPartyRequirements(
             // so anything not named here is dropped.
             waiver: rule.waiver
         }));
+}
+
+/**
+ * Build the `$party` evaluation context for one action from its selected related parties and a
+ * person-attribute lookup, keyed by requirementKey (rule.key) so a metadata WHERE can read
+ * `$Party.<roleKey>.<Field>`. Feeds the reserved `$party` slot of the context bag threaded into
+ * evaluateWhereStatement / shapeVisibleFields.
+ *
+ * A role with several people selected uses the first occupant; a rule that needs "any of them" should
+ * instead store the slot's people as an array and test membership with LIKE (see valueMatchesLike).
+ * A role whose person has no attribute row is omitted, so the token resolves undefined — the same
+ * fail-open the grammar already gives an unselected party.
+ * @param {object} relatedParties  action.formData[RELATED_PARTIES_FIELD_KEY]: roleKey -> [{ id, ... }]
+ * @param {object} attributesById  person Account Id -> { field: value } stored on the person
+ * @returns {object} roleKey -> { field: value }
+ */
+function derivePartyContext(relatedParties = {}, attributesById = {}) {
+    const out = {};
+    Object.keys(relatedParties || {}).forEach((roleKey) => {
+        const first = (relatedParties[roleKey] || [])[0];
+        const attributes = first && attributesById && attributesById[first.id];
+        if (attributes) {
+            out[roleKey] = attributes;
+        }
+    });
+    return out;
 }
 
 /**
@@ -2612,7 +2667,11 @@ function sumMissingInputs(items, context = {}) {
     const {
         schemaCache = {},
         registrationAttributes = {},
-        userContext = {}
+        userContext = {},
+        // Person Account Id -> stored attributes. When supplied, each item's own selected related
+        // parties are folded into a per-item `$party` context so a $Party-gated required field is
+        // counted against the people that item actually named, not one global set.
+        partyAttributes = null
     } = context;
     let count = 0;
     let hasPlus = false;
@@ -2627,11 +2686,20 @@ function sumMissingInputs(items, context = {}) {
         const schema = key
             ? filterSectionsByAccountType(rawSchema, key.accountType)
             : rawSchema;
+        const itemContext = partyAttributes
+            ? {
+                  ...userContext,
+                  $party: derivePartyContext(
+                      (formData || {})[RELATED_PARTIES_FIELD_KEY],
+                      partyAttributes
+                  )
+              }
+            : userContext;
         const { count: itemCount, hasPlus: itemPlus } = actionCompletion(
             schema || [],
             entity,
             formData || {},
-            userContext,
+            itemContext,
             registrationAttributes
         );
         count += itemCount;
@@ -2988,6 +3056,7 @@ export {
     sectionStatus,
     markUpdatedFields,
     resolveRelatedPartyRequirements,
+    derivePartyContext,
     resolveRegistrationGroup,
     memberRecordTypesFor,
     aarRoleForKey,

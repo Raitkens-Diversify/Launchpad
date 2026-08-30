@@ -600,7 +600,10 @@ public with sharing class ArcRecordDetailController {
     }
 
     if (objectName == 'Service__c') {
-      resolution.schemaType = 'ISA - Service Agreement';
+      // 'Service' is the record-detail schema (mirrors the Lightning record
+      // page); the wizard's 'ISA - Service Agreement' schema stays for the
+      // wizard, which never resolves through here.
+      resolution.schemaType = 'Service';
       resolution.isSubmitted = querySubmittedFlag(recordId, objectName);
       return resolution;
     }

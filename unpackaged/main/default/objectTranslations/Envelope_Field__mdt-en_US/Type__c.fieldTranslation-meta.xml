@@ -15,10 +15,6 @@
             <translation><!-- Additional Funding --></translation>
         </picklistValues>
         <picklistValues>
-            <masterLabel>Alternative Investment</masterLabel>
-            <translation><!-- Alternative Investment --></translation>
-        </picklistValues>
-        <picklistValues>
             <masterLabel>Authorized Person</masterLabel>
             <translation><!-- Authorized Person --></translation>
         </picklistValues>
@@ -119,12 +115,20 @@
             <translation><!-- Proposed Changes --></translation>
         </picklistValues>
         <picklistValues>
+            <masterLabel>Purchase Alternative Investments</masterLabel>
+            <translation><!-- Purchase Alternative Investments --></translation>
+        </picklistValues>
+        <picklistValues>
             <masterLabel>Retirement Plan Detail</masterLabel>
             <translation><!-- Retirement Plan Detail --></translation>
         </picklistValues>
         <picklistValues>
             <masterLabel>Retirement Plan Related Party</masterLabel>
             <translation><!-- Retirement Plan Related Party --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Service</masterLabel>
+            <translation><!-- Service --></translation>
         </picklistValues>
         <picklistValues>
             <masterLabel>Service Plan</masterLabel>
@@ -161,9 +165,5 @@
         <picklistValues>
             <masterLabel>Trustee</masterLabel>
             <translation><!-- Trustee --></translation>
-        </picklistValues>
-        <picklistValues>
-            <masterLabel>Unused</masterLabel>
-            <translation><!-- Unused --></translation>
         </picklistValues>
     </CustomFieldTranslation>

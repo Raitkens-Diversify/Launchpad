@@ -1,0 +1,76 @@
+<template>
+  <template lwc:if={hasRecordId}>
+    <div class="arc-service-detail">
+      <header class="arc-service-detail__header">
+        <div class="arc-service-detail__header-top">
+          <div class="arc-service-detail__title-wrap">
+            <span class="arc-service-detail__eyebrow">Service</span>
+            <h1 class="arc-service-detail__title">{name}</h1>
+          </div>
+          <div class="arc-service-detail__badges">
+            <template lwc:if={hasServiceType}>
+              <span class="arc-service-detail__status-pill">{serviceType}</span>
+            </template>
+            <template lwc:if={hasMethodOfPayment}>
+              <span class="arc-service-detail__pill">{methodOfPayment}</span>
+            </template>
+          </div>
+        </div>
+
+        <dl class="arc-service-detail__key-facts">
+          <template lwc:if={hasHousehold}>
+            <div class="arc-service-detail__key-fact">
+              <dt>Household</dt>
+              <dd>
+                <a href="#" onclick={handleHouseholdClick}>{householdName}</a>
+              </dd>
+            </div>
+          </template>
+          <template lwc:if={hasCase}>
+            <div class="arc-service-detail__key-fact">
+              <dt>Case</dt>
+              <dd>
+                <a href="#" onclick={handleCaseClick}>{caseNumber}</a>
+              </dd>
+            </div>
+          </template>
+          <template lwc:if={hasAnnualFee}>
+            <div class="arc-service-detail__key-fact">
+              <dt>Annual Fee</dt>
+              <dd>{annualFee}</dd>
+            </div>
+          </template>
+          <template lwc:if={hasStartDate}>
+            <div class="arc-service-detail__key-fact">
+              <dt>Start Date</dt>
+              <dd>{startDate}</dd>
+            </div>
+          </template>
+        </dl>
+      </header>
+
+      <div class="arc-service-detail__body">
+        <c-arc-record-detail
+          field-layout="grid"
+          side-card-label="Record"
+          side-card-fields="Date Created:CreatedDate,Last Modified:LastModifiedDate"
+        ></c-arc-record-detail>
+
+        <c-arc-related-list
+          card-label="Cases"
+          related-object-api-name="Case"
+          parent-field-api-name="Service__c"
+          columns="Case:CaseNumber,Subject:Subject,Priority:Priority,Created:CreatedDate"
+        ></c-arc-related-list>
+
+        <c-arc-related-list
+          card-label="Service History"
+          related-object-api-name="Service__History"
+          parent-field-api-name="ParentId"
+          columns="Field:Field,Changed:CreatedDate,By:CreatedBy.Name,From:OldValue,To:NewValue"
+          disable-row-links
+        ></c-arc-related-list>
+      </div>
+    </div>
+  </template>
+</template>

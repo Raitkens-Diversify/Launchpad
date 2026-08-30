@@ -333,7 +333,7 @@ private class ArcRecordDetailControllerTest {
     Test.stopTest();
 
     System.assertEquals('Service__c', context.objectApiName);
-    System.assertEquals('ISA - Service Agreement', context.schemaType);
+    System.assertEquals('Service', context.schemaType);
     System.assertEquals(false, context.isSubmitted);
     System.assertNotEquals(null, context.sections);
   }
@@ -810,7 +810,7 @@ private class ArcRecordDetailControllerTest {
     System.assertEquals(caseRecord.Id, context.pageRecordId);
     System.assertEquals(service.Id, context.displayRecordId);
     System.assertEquals('Service__c', context.objectApiName);
-    System.assertEquals('ISA - Service Agreement', context.schemaType);
+    System.assertEquals('Service', context.schemaType);
     System.assertEquals(
       'Hourly Fee',
       context.values.get('Terms_of_Payment__c'),

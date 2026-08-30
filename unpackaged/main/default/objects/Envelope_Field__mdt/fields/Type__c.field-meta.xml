@@ -145,9 +145,9 @@
                 <label>AML Documentation</label>
             </value>
             <value>
-                <fullName>Alternative Investment</fullName>
+                <fullName>Purchase Alternative Investments</fullName>
                 <default>false</default>
-                <label>Alternative Investment</label>
+                <label>Purchase Alternative Investments</label>
             </value>
             <value>
                 <fullName>ISA - DPI</fullName>
@@ -205,14 +205,14 @@
                 <label>Financial Account</label>
             </value>
             <value>
+                <fullName>Service</fullName>
+                <default>false</default>
+                <label>Service</label>
+            </value>
+            <value>
                 <fullName>Task</fullName>
                 <default>false</default>
                 <label>Task</label>
-            </value>
-            <value>
-                <fullName>Unused</fullName>
-                <default>false</default>
-                <label>Unused</label>
             </value>
             <value>
                 <fullName>Client - Authorized Person</fullName>
@@ -255,6 +255,12 @@
                 <default>false</default>
                 <isActive>false</isActive>
                 <label>Regulated Fields</label>
+            </value>
+            <value>
+                <fullName>Unused</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Unused</label>
             </value>
         </valueSetDefinition>
     </valueSet>

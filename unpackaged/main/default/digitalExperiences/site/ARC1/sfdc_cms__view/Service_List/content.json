@@ -22,7 +22,7 @@
           "children" : [ {
             "children" : [ {
               "attributes" : {
-                "defaultColumns" : "",
+                "defaultColumns" : "Name,Household__r.Name,Type__c,Case__r.CaseNumber,Annual_Fee__c,Method_of_Payment__c,CreatedDate",
                 "defaultListViewApiName" : "All",
                 "dxpStyle" : { },
                 "objectApiName" : "Service__c",
