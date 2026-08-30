@@ -12,6 +12,9 @@ private class ArcGlobalSearchControllerTest {
   static void setup() {
     insert new Account(Name = 'Acme Test Account', Type = 'Household');
     insert new Case(Subject = 'Test Case Subject', Status = 'New');
+    insert new Task(Subject = 'Test Task Subject', Status = 'Open');
+    // Name is an auto-number (CL-######), so it can't be set here.
+    insert new Check_Log__c(Status__c = 'Received');
 
     // The site's financial-account pages are built on the DFPG custom object,
     // which is what search recalls; see ArcGlobalSearchController.
@@ -71,6 +74,8 @@ private class ArcGlobalSearchControllerTest {
       LIMIT 1
     ];
     Case cs = [SELECT Id FROM Case LIMIT 1];
+    Task tsk = [SELECT Id FROM Task LIMIT 1];
+    Check_Log__c checkLog = [SELECT Id, Name FROM Check_Log__c LIMIT 1];
     Financial_Account__c fa = [
       SELECT Id
       FROM Financial_Account__c
@@ -80,7 +85,9 @@ private class ArcGlobalSearchControllerTest {
     // Compliance_Exception__c has Search disabled at the object level, so
     // it's recalled via a plain SOQL LIKE query (which does see this
     // transaction's inserts) rather than mocked SOSL results.
-    Test.setFixedSearchResults(new List<Id>{ acc.Id, cs.Id, fa.Id });
+    Test.setFixedSearchResults(
+      new List<Id>{ acc.Id, cs.Id, tsk.Id, checkLog.Id, fa.Id }
+    );
 
     Test.startTest();
     ArcGlobalSearchController.SearchSuggestions result = ArcGlobalSearchController.typeahead(
@@ -89,9 +96,9 @@ private class ArcGlobalSearchControllerTest {
     Test.stopTest();
 
     System.assertEquals(
-      4,
+      6,
       result.totalCount,
-      'One matching record per category'
+      'One account, one financial account, one compliance exception, and three Work rows (case + task + check log)'
     );
 
     Map<String, ArcGlobalSearchController.CategoryGroup> byKey = new Map<String, ArcGlobalSearchController.CategoryGroup>();
@@ -110,9 +117,25 @@ private class ArcGlobalSearchControllerTest {
       byKey.get('contacts').items[0].objectApiName
     );
 
-    System.assertEquals(1, byKey.get('work').totalCount);
+    // Work merges Case + Task + Check_Log__c, interleaved case-first.
+    System.assertEquals(3, byKey.get('work').totalCount);
     System.assertEquals('Test Case Subject', byKey.get('work').items[0].title);
     System.assert(byKey.get('work').items[0].subtitle.contains('New'));
+    System.assertEquals('Case', byKey.get('work').items[0].objectApiName);
+
+    System.assertEquals('Test Task Subject', byKey.get('work').items[1].title);
+    System.assertEquals('Task • Open', byKey.get('work').items[1].subtitle);
+    System.assertEquals('Task', byKey.get('work').items[1].objectApiName);
+
+    System.assertEquals(checkLog.Name, byKey.get('work').items[2].title);
+    System.assertEquals(
+      'Check Log • Received',
+      byKey.get('work').items[2].subtitle
+    );
+    System.assertEquals(
+      'Check_Log__c',
+      byKey.get('work').items[2].objectApiName
+    );
 
     System.assertEquals(1, byKey.get('accounts').totalCount);
     System.assertEquals(
@@ -126,6 +149,43 @@ private class ArcGlobalSearchControllerTest {
       byKey.get('compliance').items[0].title
     );
     System.assertEquals('Other', byKey.get('compliance').items[0].subtitle);
+  }
+
+  @IsTest
+  static void workPreviewInterleavesSoCasesCannotCrowdOutOtherTypes() {
+    List<Case> extras = new List<Case>();
+    for (Integer i = 0; i < 4; i++) {
+      extras.add(new Case(Subject = 'Extra Test Case ' + i, Status = 'New'));
+    }
+    insert extras;
+
+    List<Id> ids = new List<Id>();
+    for (Case c : [SELECT Id FROM Case]) {
+      ids.add(c.Id);
+    }
+    Task tsk = [SELECT Id FROM Task LIMIT 1];
+    ids.add(tsk.Id);
+    Test.setFixedSearchResults(ids);
+
+    Test.startTest();
+    ArcGlobalSearchController.SearchSuggestions result = ArcGlobalSearchController.typeahead(
+      'Test'
+    );
+    Test.stopTest();
+
+    ArcGlobalSearchController.CategoryGroup work;
+    for (ArcGlobalSearchController.CategoryGroup g : result.categories) {
+      if (g.key == 'work') {
+        work = g;
+      }
+    }
+    System.assertEquals(6, work.totalCount, 'Five cases plus one task');
+    System.assertEquals(3, work.items.size(), 'Preview stays capped at 3');
+    System.assertEquals(
+      'Task',
+      work.items[1].objectApiName,
+      'The task must appear in the preview even though cases outnumber it'
+    );
   }
 
   @IsTest

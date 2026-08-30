@@ -105,7 +105,10 @@ public with sharing class ArcGlobalSearchController {
     // "entity type X does not support search" and aborts the whole
     // federated pass, which is why Financial_Account__c must be excluded
     // from it entirely, not just guarded by object accessibility.
-    // Everything else supports SOSL and shares one federated recall pass.
+    // Task and Check_Log__c ARE search-enabled (confirmed live 2026-08-30:
+    // describe searchable=true and a FIND against each returns rows), so
+    // they ride the same federated pass and land in the Work category
+    // alongside Case.
     //
     // Leading + trailing wildcard so a term matches anywhere in the field
     // (contains), not just at the start of a word — e.g. "cme" still finds
@@ -120,6 +123,12 @@ public with sharing class ArcGlobalSearchController {
       '), ' +
       'Case(Id, CaseNumber, Subject, Status LIMIT ' +
       SOSL_LIMIT +
+      '), ' +
+      'Task(Id, Subject, Status LIMIT ' +
+      SOSL_LIMIT +
+      '), ' +
+      'Check_Log__c(Id, Name, Status__c LIMIT ' +
+      SOSL_LIMIT +
       ')';
 
     List<List<SObject>> searchResults;
@@ -133,10 +142,11 @@ public with sharing class ArcGlobalSearchController {
       throw ahe;
     }
 
-    populateGroup(
+    populateWorkGroup(
       result.categories[0],
       casesAccessible() ? searchResults[1] : new List<SObject>(),
-      'Case',
+      tasksAccessible() ? searchResults[2] : new List<SObject>(),
+      checkLogsAccessible() ? searchResults[3] : new List<SObject>(),
       maxPerCategory
     );
     populateGroup(
@@ -168,6 +178,36 @@ public with sharing class ArcGlobalSearchController {
     return result;
   }
 
+  /**
+   * The Work category merges three objects (Case, Task, Check_Log__c), so
+   * its rows are interleaved round-robin rather than concatenated: with a
+   * 3-row dropdown preview, 50 matching cases would otherwise push every
+   * task and check log out of sight entirely — the exact complaint that
+   * prompted adding them. SOSL relevance order is preserved within each
+   * object; across objects the scores aren't comparable anyway.
+   */
+  private static void populateWorkGroup(
+    CategoryGroup grp,
+    List<SObject> cases,
+    List<SObject> tasks,
+    List<SObject> checkLogs,
+    Integer maxPerCategory
+  ) {
+    grp.totalCount = cases.size() + tasks.size() + checkLogs.size();
+    Integer longest = Math.max(cases.size(), Math.max(tasks.size(), checkLogs.size()));
+    for (Integer i = 0; i < longest && grp.items.size() < maxPerCategory; i++) {
+      if (i < cases.size()) {
+        grp.items.add(toItem(cases[i], 'Case'));
+      }
+      if (i < tasks.size() && grp.items.size() < maxPerCategory) {
+        grp.items.add(toItem(tasks[i], 'Task'));
+      }
+      if (i < checkLogs.size() && grp.items.size() < maxPerCategory) {
+        grp.items.add(toItem(checkLogs[i], 'Check_Log__c'));
+      }
+    }
+  }
+
   /** Fill in a category's capped rows, plus the full recalled count for its tab/section badge. */
   private static void populateGroup(
     CategoryGroup grp,
@@ -195,6 +235,18 @@ public with sharing class ArcGlobalSearchController {
       item.subtitle = String.isNotBlank(caseNumber)
         ? caseNumber + (String.isNotBlank(status) ? ' • ' + status : '')
         : status;
+    } else if (objectApiName == 'Task') {
+      // Work mixes three objects; a case row's number already reads as a
+      // case, so the other two carry their type in the subtitle instead.
+      item.title = (String) row.get('Subject');
+      String status = (String) row.get('Status');
+      item.subtitle = String.isNotBlank(status) ? 'Task • ' + status : 'Task';
+    } else if (objectApiName == 'Check_Log__c') {
+      item.title = (String) row.get('Name');
+      String status = (String) row.get('Status__c');
+      item.subtitle = String.isNotBlank(status)
+        ? 'Check Log • ' + status
+        : 'Check Log';
     } else if (objectApiName == 'Financial_Account__c') {
       item.title = (String) row.get('Name');
       item.subtitle = (String) row.get('Financial_Account_Type__c');
@@ -211,6 +263,14 @@ public with sharing class ArcGlobalSearchController {
 
   private static Boolean casesAccessible() {
     return Schema.sObjectType.Case.isAccessible();
+  }
+
+  private static Boolean tasksAccessible() {
+    return Schema.sObjectType.Task.isAccessible();
+  }
+
+  private static Boolean checkLogsAccessible() {
+    return Schema.sObjectType.Check_Log__c.isAccessible();
   }
 
   private static Boolean financialAccountsAccessible() {
