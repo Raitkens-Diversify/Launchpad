@@ -187,10 +187,37 @@
                 <componentName>flexipage:richText</componentName>
                 <identifier>flexipage_richText2</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.No_Template_Found__c}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>true</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
+                    </criteria>
+                </visibilityRule>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
+                <componentInstanceProperties>
+                    <name>decorate</name>
+                    <value>true</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>richTextValue</name>
+                    <value>&lt;p style=&quot;text-align: center;&quot;&gt;&lt;strong style=&quot;font-size: 16px; color: rgb(255, 0, 0);&quot;&gt;This case has not yet been submitted.&lt;/strong&gt;&lt;/p&gt;</value>
+                </componentInstanceProperties>
+                <componentName>flexipage:richText</componentName>
+                <identifier>flexipage_richText</identifier>
+                <visibilityRule>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>false</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -207,7 +234,7 @@
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>label</name>
-                    <value>Section</value>
+                    <value>Case Cancelation Information</value>
                 </componentInstanceProperties>
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection42</identifier>
@@ -355,373 +382,6 @@
             </componentInstance>
         </itemInstances>
         <name>Facet-9587b37f-c355-4aa8-8e3b-5b2c7d7c10fc</name>
-        <type>Facet</type>
-    </flexiPageRegions>
-    <flexiPageRegions>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Wizard_Financial_Account__c</fieldItem>
-                <identifier>RecordWizard_Financial_Account_cField3</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Primary_Owner__c</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rPrimary_Owner_cField3</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Joint_Owner__c</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rJoint_Owner_cField3</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Managed_Account_Platform__c</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rManaged_Account_Platform_cField2</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>readonly</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Fee_Schedule__c</fieldItem>
-                <identifier>RecordFee_Schedule_cField2</identifier>
-                <visibilityRule>
-                    <criteria>
-                        <leftValue>{!Record.Management_Style_for_Lightning__c}</leftValue>
-                        <operator>EQUAL</operator>
-                        <rightValue>OMS</rightValue>
-                    </criteria>
-                </visibilityRule>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.FinServ__FinancialAccount__r.Fee_Schedule__c</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_rFee_Schedule_cField</identifier>
-                <visibilityRule>
-                    <booleanFilter>(1 OR 2 OR 3) AND 4</booleanFilter>
-                    <criteria>
-                        <leftValue>{!$Permission.CustomPermission.Ops_SSE}</leftValue>
-                        <operator>EQUAL</operator>
-                        <rightValue>true</rightValue>
-                    </criteria>
-                    <criteria>
-                        <leftValue>{!$User.UserRole.Name}</leftValue>
-                        <operator>EQUAL</operator>
-                        <rightValue>System Administrator</rightValue>
-                    </criteria>
-                    <criteria>
-                        <leftValue>{!$User.Department_Picklist__c}</leftValue>
-                        <operator>EQUAL</operator>
-                        <rightValue>Systems</rightValue>
-                    </criteria>
-                    <criteria>
-                        <leftValue>{!Record.FinServ__FinancialAccount__r.BD_or_RIA__c}</leftValue>
-                        <operator>EQUAL</operator>
-                        <rightValue>RIA</rightValue>
-                    </criteria>
-                </visibilityRule>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.FinServ__FinancialAccount__r.Reg_BI_Best_Interest_Rationale__c</fieldItem>
-                <identifier>RecordFinServ_FinancialAccount_rReg_BI_Best_Interest_Rationale_cField</identifier>
-                <visibilityRule>
-                    <criteria>
-                        <leftValue>{!Record.FinServ__FinancialAccount__r.BD_or_RIA__c}</leftValue>
-                        <operator>EQUAL</operator>
-                        <rightValue>BD</rightValue>
-                    </criteria>
-                </visibilityRule>
-            </fieldInstance>
-        </itemInstances>
-        <name>Facet-b36b55d9-6fb3-4a0d-a4a8-2d9fb762ce44</name>
-        <type>Facet</type>
-    </flexiPageRegions>
-    <flexiPageRegions>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Rep_Code_for_Transaction__c</fieldItem>
-                <identifier>RecordRep_Code_for_Transaction_cField2</identifier>
-                <visibilityRule>
-                    <criteria>
-                        <leftValue>{!Record.Rep_Code_for_Transaction__c}</leftValue>
-                        <operator>NE</operator>
-                    </criteria>
-                </visibilityRule>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Rep_Code__c</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rRep_Code_cField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Custodian__c</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rCustodian_cField2</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Registration_Type__c</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rRegistration_Type_cField2</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Product_Type__c</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rProduct_Type_cField2</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Outside_Manager__c</fieldItem>
-                <identifier>RecordOutside_Manager_cField2</identifier>
-                <visibilityRule>
-                    <criteria>
-                        <leftValue>{!Record.Management_Style_for_Lightning__c}</leftValue>
-                        <operator>EQUAL</operator>
-                        <rightValue>OMS</rightValue>
-                    </criteria>
-                </visibilityRule>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Reg_BI_Client_Override_Explanation__c</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rReg_BI_Client_Override_Explanation_cField</identifier>
-                <visibilityRule>
-                    <criteria>
-                        <leftValue>{!Record.Wizard_Financial_Account__r.BD_or_RIA__c}</leftValue>
-                        <operator>EQUAL</operator>
-                        <rightValue>BD</rightValue>
-                    </criteria>
-                </visibilityRule>
-            </fieldInstance>
-        </itemInstances>
-        <name>Facet-01b076f9-ff18-4ffd-85e0-2e06b5c53aec</name>
-        <type>Facet</type>
-    </flexiPageRegions>
-    <flexiPageRegions>
-        <itemInstances>
-            <componentInstance>
-                <componentInstanceProperties>
-                    <name>body</name>
-                    <value>Facet-b36b55d9-6fb3-4a0d-a4a8-2d9fb762ce44</value>
-                </componentInstanceProperties>
-                <componentName>flexipage:column</componentName>
-                <identifier>flexipage_column2</identifier>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
-                <componentInstanceProperties>
-                    <name>body</name>
-                    <value>Facet-01b076f9-ff18-4ffd-85e0-2e06b5c53aec</value>
-                </componentInstanceProperties>
-                <componentName>flexipage:column</componentName>
-                <identifier>flexipage_column31</identifier>
-            </componentInstance>
-        </itemInstances>
-        <name>Facet-89eb7b08-1070-4525-b2b0-cdc9e1e8e79a</name>
-        <type>Facet</type>
-    </flexiPageRegions>
-    <flexiPageRegions>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Primary_Owner__c</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rPrimary_Owner_cField2</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Primary_Owner__r.Tax_ID__c</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rPrimary_Owner_rTax_ID_cField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Primary_Owner__r.PersonMobilePhone</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rPrimary_Owner_rPersonMobilePhoneField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Primary_Owner__r.PersonBirthdate</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rPrimary_Owner_rPersonBirthdateField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Primary_Owner__r.PersonEmail</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rPrimary_Owner_rPersonEmailField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <name>Facet-26d7c5dc-5bc9-4b62-87e9-6a7a20cc3b37</name>
-        <type>Facet</type>
-    </flexiPageRegions>
-    <flexiPageRegions>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Primary_Owner__r.IMA_Ops_Reviewed__c</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rPrimary_Owner_rIMA_Ops_Reviewed_cField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Primary_Owner__r.IMA_Ex_A_Reviewed__c</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rPrimary_Owner_rIMA_Ex_A_Reviewed_cField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Primary_Owner__r.IMA_Ex_B_Ops_Reviewed__c</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rPrimary_Owner_rIMA_Ex_B_Ops_Reviewed_cField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Primary_Owner__r.DMS_Addendum_on_File__c</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rPrimary_Owner_rDMS_Addendum_on_File_cField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
-                <componentName>flexipage:blankSpace</componentName>
-                <identifier>flexipage_blankSpace2</identifier>
-            </componentInstance>
-        </itemInstances>
-        <name>Facet-9b08c122-e898-4987-88a3-654726f415b6</name>
-        <type>Facet</type>
-    </flexiPageRegions>
-    <flexiPageRegions>
-        <itemInstances>
-            <componentInstance>
-                <componentInstanceProperties>
-                    <name>body</name>
-                    <value>Facet-26d7c5dc-5bc9-4b62-87e9-6a7a20cc3b37</value>
-                </componentInstanceProperties>
-                <componentName>flexipage:column</componentName>
-                <identifier>flexipage_column46</identifier>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
-                <componentInstanceProperties>
-                    <name>body</name>
-                    <value>Facet-9b08c122-e898-4987-88a3-654726f415b6</value>
-                </componentInstanceProperties>
-                <componentName>flexipage:column</componentName>
-                <identifier>flexipage_column47</identifier>
-            </componentInstance>
-        </itemInstances>
-        <name>Facet-7e63af20-77ff-485e-af13-7412f509403a</name>
-        <type>Facet</type>
-    </flexiPageRegions>
-    <flexiPageRegions>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Joint_Owner__c</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rJoint_Owner_cField2</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Joint_Owner__r.Tax_ID__c</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rJoint_Owner_rTax_ID_cField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Joint_Owner__r.PersonMobilePhone</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rJoint_Owner_rPersonMobilePhoneField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Joint_Owner__r.PersonBirthdate</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rJoint_Owner_rPersonBirthdateField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Joint_Owner__r.PersonEmail</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rJoint_Owner_rPersonEmailField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <name>Facet-5x1mtmwnjd6</name>
-        <type>Facet</type>
-    </flexiPageRegions>
-    <flexiPageRegions>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Joint_Owner__r.IMA_Ops_Reviewed__c</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rJoint_Owner_rIMA_Ops_Reviewed_cField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Joint_Owner__r.IMA_Ex_A_Reviewed__c</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rJoint_Owner_rIMA_Ex_A_Reviewed_cField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Joint_Owner__r.IMA_Ex_B_Ops_Reviewed__c</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rJoint_Owner_rIMA_Ex_B_Ops_Reviewed_cField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldItem>Record.Wizard_Financial_Account__r.Joint_Owner__r.DMS_Addendum_on_File__c</fieldItem>
-                <identifier>RecordWizard_Financial_Account_rJoint_Owner_rDMS_Addendum_on_File_cField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <name>Facet-7p8xmzpk2h4</name>
-        <type>Facet</type>
-    </flexiPageRegions>
-    <flexiPageRegions>
-        <itemInstances>
-            <componentInstance>
-                <componentInstanceProperties>
-                    <name>body</name>
-                    <value>Facet-5x1mtmwnjd6</value>
-                </componentInstanceProperties>
-                <componentName>flexipage:column</componentName>
-                <identifier>flexipage_column48</identifier>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
-                <componentInstanceProperties>
-                    <name>body</name>
-                    <value>Facet-7p8xmzpk2h4</value>
-                </componentInstanceProperties>
-                <componentName>flexipage:column</componentName>
-                <identifier>flexipage_column49</identifier>
-            </componentInstance>
-        </itemInstances>
-        <name>Facet-50wase5ye9g</name>
         <type>Facet</type>
     </flexiPageRegions>
     <flexiPageRegions>
@@ -4811,7 +4471,7 @@
                 <componentName>caseOverviewTile</componentName>
                 <identifier>c_caseOverviewTile</identifier>
                 <visibilityRule>
-                    <booleanFilter>1 AND 2 AND 3</booleanFilter>
+                    <booleanFilter>1 AND 2 AND 3 AND 4</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Use_Old_Case_Layout__c}</leftValue>
                         <operator>EQUAL</operator>
@@ -4826,6 +4486,11 @@
                         <leftValue>{!Record.Case_Template__r.Name}</leftValue>
                         <operator>NE</operator>
                     </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>false</rightValue>
+                    </criteria>
                 </visibilityRule>
             </componentInstance>
         </itemInstances>
@@ -4834,10 +4499,16 @@
                 <componentName>cmp_BranchPitStopComponent</componentName>
                 <identifier>c_cmp_BranchPitStopComponent</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Use_Old_Case_Layout__c}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>false</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -4847,7 +4518,7 @@
                 <componentName>cmp_MainTrackTasks</componentName>
                 <identifier>c_cmp_MainTrackTasks</identifier>
                 <visibilityRule>
-                    <booleanFilter>1 AND 2</booleanFilter>
+                    <booleanFilter>1 AND 2 AND 3</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.No_Template_Found__c}</leftValue>
                         <operator>EQUAL</operator>
@@ -4858,6 +4529,11 @@
                         <operator>EQUAL</operator>
                         <rightValue>false</rightValue>
                     </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
+                    </criteria>
                 </visibilityRule>
             </componentInstance>
         </itemInstances>
@@ -4866,10 +4542,16 @@
                 <componentName>cmp_HomeOfficePitStop</componentName>
                 <identifier>c_cmp_HomeOfficePitStop</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Use_Old_Case_Layout__c}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>false</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -4892,80 +4574,7 @@
                 <identifier>flexipage_fieldSection39</identifier>
                 <visibilityRule>
                     <criteria>
-                        <leftValue>{!$Permission.CustomPermission.Wizard_User}</leftValue>
-                        <operator>EQUAL</operator>
-                        <rightValue>true</rightValue>
-                    </criteria>
-                </visibilityRule>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
-                <componentInstanceProperties>
-                    <name>columns</name>
-                    <value>Facet-89eb7b08-1070-4525-b2b0-cdc9e1e8e79a</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>horizontalAlignment</name>
-                    <value>false</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>label</name>
-                    <value>Financial Account Details</value>
-                </componentInstanceProperties>
-                <componentName>flexipage:fieldSection</componentName>
-                <identifier>flexipage_fieldSection2</identifier>
-                <visibilityRule>
-                    <criteria>
-                        <leftValue>{!Record.Wizard_Financial_Account__r.Name}</leftValue>
-                        <operator>NE</operator>
-                    </criteria>
-                </visibilityRule>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
-                <componentInstanceProperties>
-                    <name>columns</name>
-                    <value>Facet-7e63af20-77ff-485e-af13-7412f509403a</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>horizontalAlignment</name>
-                    <value>false</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>label</name>
-                    <value>Required Primary Owner Information</value>
-                </componentInstanceProperties>
-                <componentName>flexipage:fieldSection</componentName>
-                <identifier>flexipage_fieldSection37</identifier>
-                <visibilityRule>
-                    <criteria>
-                        <leftValue>{!Record.Wizard_Financial_Account__r.Name}</leftValue>
-                        <operator>NE</operator>
-                    </criteria>
-                </visibilityRule>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
-                <componentInstanceProperties>
-                    <name>columns</name>
-                    <value>Facet-50wase5ye9g</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>horizontalAlignment</name>
-                    <value>false</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>label</name>
-                    <value>Required Joint Owner Information</value>
-                </componentInstanceProperties>
-                <componentName>flexipage:fieldSection</componentName>
-                <identifier>flexipage_fieldSection38</identifier>
-                <visibilityRule>
-                    <criteria>
-                        <leftValue>{!Record.isJointOwnerPopulated__c}</leftValue>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>true</rightValue>
                     </criteria>
@@ -4989,8 +4598,14 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection26</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Source_of_Funds_Value__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>true</rightValue>
                     </criteria>
@@ -5014,10 +4629,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection27</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Financial Planning</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5039,10 +4660,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection28</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Multi-Family Office</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5064,10 +4691,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection4</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Life Insurance Quote</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5089,10 +4722,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection5</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Move Money - One Time</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5114,10 +4753,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection6</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Move Money - Recurring</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5139,10 +4784,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection7</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Cancel Move Money Recurring</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5164,10 +4815,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection8</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Transfer</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5189,10 +4846,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection9</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>401k Rollover</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5214,10 +4877,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection10</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Journal Between Accounts - On Demand</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5239,10 +4908,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection11</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Client Terminated Services</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5264,10 +4939,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection12</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Review Meeting</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5289,10 +4970,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection13</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Grant Donation</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5314,10 +5001,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection14</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Donation in Kind</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5339,10 +5032,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection17</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Qualified Charitable Distribution</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5364,10 +5063,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection15</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Roth Conversion</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5389,10 +5094,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection16</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Prepare Trades</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5414,10 +5125,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection18</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Trade Error</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5439,10 +5156,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection19</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Client Reimbursement</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5464,10 +5187,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection20</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Change Management Style</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5489,10 +5218,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection21</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Update IMA</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5514,10 +5249,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection22</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Deposit Check</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5539,10 +5280,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection23</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Client Passed Away</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5564,10 +5311,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection24</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Draft and Submit - Alt Investment</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5589,10 +5342,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection25</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Draft and Submit - New Account</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5614,10 +5373,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection32</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Third Party Money Movement</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5639,10 +5404,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Account Closure</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5664,10 +5435,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection3</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Change of Registration</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5689,10 +5466,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection29</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Draft and Submit - Form</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5714,10 +5497,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection30</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Update DMS Instructions</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5739,10 +5528,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection34</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Purchase Alternative Investment</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5764,10 +5559,16 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection35</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Variable Annuity Additional Purchase</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -5789,176 +5590,14 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection31</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Person Account Requested Changes</rightValue>
                     </criteria>
-                </visibilityRule>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
-                <componentInstanceProperties>
-                    <name>createQuickActionName</name>
-                    <value>NewAccount</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>lookupFieldName</name>
-                    <value>Case.FinServ__Household__c</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>titleFieldName</name>
-                    <value>Update IMA</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>updateQuickActionName</name>
-                    <value>Account.Update_IMA</value>
-                </componentInstanceProperties>
-                <componentName>console:relatedRecord</componentName>
-                <identifier>console_relatedRecord</identifier>
-                <visibilityRule>
                     <criteria>
-                        <leftValue>{!Record.Type}</leftValue>
-                        <operator>EQUAL</operator>
-                        <rightValue>Update IMA</rightValue>
-                    </criteria>
-                </visibilityRule>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
-                <componentInstanceProperties>
-                    <name>createQuickActionName</name>
-                    <value>NewAccount</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>lookupFieldName</name>
-                    <value>Case.FinServ__Household__c</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>titleFieldName</name>
-                    <value>Update Client Profile</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>updateQuickActionName</name>
-                    <value>Account.Update_Client_Profile</value>
-                </componentInstanceProperties>
-                <componentName>console:relatedRecord</componentName>
-                <identifier>console_relatedRecord2</identifier>
-                <visibilityRule>
-                    <criteria>
-                        <leftValue>{!Record.Type}</leftValue>
-                        <operator>EQUAL</operator>
-                        <rightValue>Update Client Profile</rightValue>
-                    </criteria>
-                </visibilityRule>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
-                <componentInstanceProperties>
-                    <name>createQuickActionName</name>
-                    <value>NewAccount</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>lookupFieldName</name>
-                    <value>Case.Primary_Account_Owner__c</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>titleFieldName</name>
-                    <value>Update Primary Owner Investment Experience</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>updateQuickActionName</name>
-                    <value>Account.Update_Investment_Experience</value>
-                </componentInstanceProperties>
-                <componentName>console:relatedRecord</componentName>
-                <identifier>console_relatedRecord3</identifier>
-                <visibilityRule>
-                    <booleanFilter>(1 OR 2) AND 3 AND 4 AND 5 AND 6 AND 7 AND 8 AND 9</booleanFilter>
-                    <criteria>
-                        <leftValue>{!Record.Type}</leftValue>
-                        <operator>EQUAL</operator>
-                        <rightValue>Update Client Profile</rightValue>
-                    </criteria>
-                    <criteria>
-                        <leftValue>{!Record.Type}</leftValue>
-                        <operator>EQUAL</operator>
-                        <rightValue>Update IMA</rightValue>
-                    </criteria>
-                    <criteria>
-                        <leftValue>{!Record.FinServ__Household__r.Entity_Type__c}</leftValue>
-                        <operator>NE</operator>
-                        <rightValue>Irrevocable Trust</rightValue>
-                    </criteria>
-                    <criteria>
-                        <leftValue>{!Record.FinServ__Household__r.Entity_Type__c}</leftValue>
-                        <operator>NE</operator>
-                        <rightValue>LLC</rightValue>
-                    </criteria>
-                    <criteria>
-                        <leftValue>{!Record.FinServ__Household__r.Entity_Type__c}</leftValue>
-                        <operator>NE</operator>
-                        <rightValue>Partnership</rightValue>
-                    </criteria>
-                    <criteria>
-                        <leftValue>{!Record.FinServ__Household__r.Entity_Type__c}</leftValue>
-                        <operator>NE</operator>
-                        <rightValue>Sole Proprietorship</rightValue>
-                    </criteria>
-                    <criteria>
-                        <leftValue>{!Record.FinServ__Household__r.Entity_Type__c}</leftValue>
-                        <operator>NE</operator>
-                        <rightValue>C-Corp</rightValue>
-                    </criteria>
-                    <criteria>
-                        <leftValue>{!Record.FinServ__Household__r.Entity_Type__c}</leftValue>
-                        <operator>NE</operator>
-                        <rightValue>S-Corp</rightValue>
-                    </criteria>
-                    <criteria>
-                        <leftValue>{!Record.FinServ__Household__r.Entity_Type__c}</leftValue>
-                        <operator>NE</operator>
-                        <rightValue>Unincorporated Business</rightValue>
-                    </criteria>
-                </visibilityRule>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
-                <componentInstanceProperties>
-                    <name>createQuickActionName</name>
-                    <value>NewAccount</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>lookupFieldName</name>
-                    <value>Case.Joint_Account_Owner__c</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>titleFieldName</name>
-                    <value>Update Joint Owner Investment Experience</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>updateQuickActionName</name>
-                    <value>Account.Update_Investment_Experience</value>
-                </componentInstanceProperties>
-                <componentName>console:relatedRecord</componentName>
-                <identifier>console_relatedRecord4</identifier>
-                <visibilityRule>
-                    <booleanFilter>(1 OR 2) AND 3</booleanFilter>
-                    <criteria>
-                        <leftValue>{!Record.Type}</leftValue>
-                        <operator>EQUAL</operator>
-                        <rightValue>Update Client Profile</rightValue>
-                    </criteria>
-                    <criteria>
-                        <leftValue>{!Record.Type}</leftValue>
-                        <operator>EQUAL</operator>
-                        <rightValue>Update IMA</rightValue>
-                    </criteria>
-                    <criteria>
-                        <leftValue>{!Record.isJointOwnerPopulated__c}</leftValue>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>true</rightValue>
                     </criteria>
@@ -6133,7 +5772,7 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection40</identifier>
                 <visibilityRule>
-                    <booleanFilter>1 OR 2 OR 3</booleanFilter>
+                    <booleanFilter>(1 OR 2 OR 3) AND 4</booleanFilter>
                     <criteria>
                         <leftValue>{!$Permission.CustomPermission.Senior_Ops}</leftValue>
                         <operator>EQUAL</operator>
@@ -6148,6 +5787,11 @@
                         <leftValue>{!$User.LastName}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Aitkens</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -6169,7 +5813,7 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection33</identifier>
                 <visibilityRule>
-                    <booleanFilter>1 OR 2</booleanFilter>
+                    <booleanFilter>(1 OR 2) AND 3</booleanFilter>
                     <criteria>
                         <leftValue>{!$User.Profile.Name}</leftValue>
                         <operator>EQUAL</operator>
@@ -6179,6 +5823,11 @@
                         <leftValue>{!$User.Department_Picklist__c}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Operations</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -6200,7 +5849,7 @@
                 <componentName>flexipage:fieldSection</componentName>
                 <identifier>flexipage_fieldSection41</identifier>
                 <visibilityRule>
-                    <booleanFilter>1 OR 2</booleanFilter>
+                    <booleanFilter>(1 OR 2) AND 3</booleanFilter>
                     <criteria>
                         <leftValue>{!$User.FirstName}</leftValue>
                         <operator>EQUAL</operator>
@@ -6210,6 +5859,11 @@
                         <leftValue>{!$User.Profile.Name}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>System Administrator</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -6400,10 +6054,16 @@
                 <componentName>caseCurrentTask</componentName>
                 <identifier>c_caseCurrentTask</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Use_Old_Case_Layout__c}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>false</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -6432,6 +6092,13 @@
                 </componentInstanceProperties>
                 <componentName>force:relatedListSingleContainer</componentName>
                 <identifier>force_relatedListSingleContainer2</identifier>
+                <visibilityRule>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
+                    </criteria>
+                </visibilityRule>
             </componentInstance>
         </itemInstances>
         <itemInstances>
@@ -6490,10 +6157,16 @@
                 <componentName>lst:dynamicRelatedList</componentName>
                 <identifier>lst_dynamicRelatedList2</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!$User.Profile.Name}</leftValue>
                         <operator>NE</operator>
                         <rightValue>Wizard Only</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -6552,10 +6225,16 @@
                 <componentName>lst:dynamicRelatedList</componentName>
                 <identifier>lst_dynamicRelatedList5</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!$User.Profile.Name}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Wizard Only</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -6627,6 +6306,13 @@
                 </componentInstanceProperties>
                 <componentName>lst:dynamicRelatedList</componentName>
                 <identifier>lst_dynamicRelatedList6</identifier>
+                <visibilityRule>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
+                    </criteria>
+                </visibilityRule>
             </componentInstance>
         </itemInstances>
         <itemInstances>
@@ -6758,7 +6444,7 @@
                 <componentName>lst:dynamicRelatedList</componentName>
                 <identifier>lst_dynamicRelatedList7</identifier>
                 <visibilityRule>
-                    <booleanFilter>1 OR 2</booleanFilter>
+                    <booleanFilter>(1 OR 2 ) AND 3</booleanFilter>
                     <criteria>
                         <leftValue>{!$Permission.CustomPermission.Grant_Compliance_Exception}</leftValue>
                         <operator>EQUAL</operator>
@@ -6768,6 +6454,11 @@
                         <leftValue>{!$User.Profile.Name}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>System Administrator</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -6797,10 +6488,16 @@
                 <componentName>force:relatedListSingleContainer</componentName>
                 <identifier>force_relatedListSingleContainer9</identifier>
                 <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Trade Error</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>
@@ -6830,7 +6527,7 @@
                 <componentName>force:relatedListSingleContainer</componentName>
                 <identifier>force_relatedListSingleContainer6</identifier>
                 <visibilityRule>
-                    <booleanFilter>1 OR 2</booleanFilter>
+                    <booleanFilter>(1 OR 2) AND 3</booleanFilter>
                     <criteria>
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
@@ -6840,6 +6537,11 @@
                         <leftValue>{!Record.Type}</leftValue>
                         <operator>EQUAL</operator>
                         <rightValue>Multi-Family Office</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>

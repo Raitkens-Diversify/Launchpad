@@ -1,7 +1,9 @@
 import { LightningElement, api } from 'lwc';
 import {
     COMMIT_IDLE_MS,
+    formatMoney,
     normalizeStrategyRows,
+    resolveExpectedValue,
     strategyRowsEqual,
     strategyTotals
 } from 'c/envelopeFormSchema';
@@ -13,18 +15,21 @@ const NOTES = 'notes';
 
 /**
  * envelopeTradeInstructions — the Trade Instructions section body: one Allocations table where
- * fixed-vs-modeled is a per-row attribute (see envelopeStrategyList), and a footer that shows the
- * remainder arithmetic instead of describing it — account value, minus the fixed carve-outs, equals
- * the modeled pool the percentage rows must cover.
+ * fixed-vs-percentage is a per-row attribute (see envelopeStrategyList), and a footer that shows the
+ * ledger instead of describing it — account value, minus what the sleeves allocate and minus any
+ * excluded sleeves, equals the remaining balance, which reconciles to zero when the account is
+ * fully allocated.
  *
  * Controlled by its `value` object ({ expectedAccountValue, strategies, advisorNotes }); emits
  * `tradechange` with the recomputed object. The rows pass through to the table as the one persisted
  * array — nothing is split, so envelopes saved by any previous build keep loading.
  *
- * `funded` reflects the entry point. New Account setup and Change Management style establish an
- * account value, so the Expected Account Value is captured and the footer can do the dollar math.
- * Editing existing Trade Instructions has no funded amount available, so that field and every
- * dollar figure are absent there rather than computed from a number we don't have.
+ * Every entry point captures an Expected Account Value, because every row needs a denominator: the
+ * allocation table shows each sleeve as both a target weight and a dollar figure, and neither can be
+ * calculated from the other without one. Where the advisor has not typed a value, `fallbackAccountValue`
+ * stands in — the Financial Account's Source of Funds Amount on a new account, the current allocation's
+ * expected value on a Manage DMS Instructions case. The fallback is only ever read: it is never written
+ * into the draft, so the section keeps tracking its source if that source later changes.
  *
  * ---
  *
@@ -46,7 +51,7 @@ const NOTES = 'notes';
  * why neither editable input carries `formatter="currency"`: a formatter makes the displayed value a
  * function of the bound value rather than a copy of it, which makes I2 unachievable by construction.
  * Formatted figures are read-outs and live in read-only text — the footer ledger below the input, and
- * each row's Est. dollars cell.
+ * the calculated cell of any row whose strategy is locked to one unit.
  */
 export default class EnvelopeTradeInstructions extends LightningElement {
     /**
@@ -95,22 +100,25 @@ export default class EnvelopeTradeInstructions extends LightningElement {
             label: option.label,
             value: option.value,
             allowedBasis: option.allowedBasis,
-            classification: option.classification
+            classification: option.classification,
+            excluded: option.excluded === true
         }));
-        this._labelByValue = new Map(
-            this._plainOptions.map((option) => [option.value, option.label])
-        );
     }
 
     _options = [];
     _plainOptions = [];
-    _labelByValue = new Map();
 
-    // Whether this entry point has a funded amount to work from.
-    @api funded = false;
+    /**
+     * The account value to fall back on where the advisor has not typed an Expected Account Value.
+     *
+     * Display and derivation only — deliberately never merged into the emitted value. Writing it into
+     * the draft would freeze it at whatever the source held the first time this section rendered, and
+     * the advisor would have no way to tell an inherited number from one they entered.
+     */
+    @api fallbackAccountValue;
 
     // Values typed but not yet committed, keyed by EXPECTED / NOTES. Reactive on purpose: the footer
-    // ledger and the modeled-% status have to move as the advisor types. Each entry holds exactly what
+    // ledger and the allocation status have to move as the advisor types. Each entry holds exactly what
     // the control reported (see I2) — the parsing happens at commit, not here.
     _pending = {};
 
@@ -149,7 +157,25 @@ export default class EnvelopeTradeInstructions extends LightningElement {
     // The expected value the arithmetic runs on: the buffered figure while the advisor is typing, so
     // the ledger tracks the keystrokes rather than lagging a commit behind them.
     get _expectedNumber() {
-        return this._toNumber(this.expectedAccountValue);
+        return resolveExpectedValue(this.expectedAccountValue, this.fallbackAccountValue);
+    }
+
+    // True while the arithmetic is running on the fallback rather than on a typed figure, which the
+    // footer says out loud so an inherited number is never mistaken for an entered one.
+    get usingFallback() {
+        return (
+            this._expectedNumber !== null &&
+            // Resolved against no fallback, so a typed figure the resolver would reject anyway
+            // (zero, blank, unparseable) counts as nothing typed — the same reading both getters use.
+            resolveExpectedValue(this.expectedAccountValue, null) === null
+        );
+    }
+
+    // Shown in the empty Expected Account Value input so the advisor can see the number the section
+    // is already using, without it being submitted as though they had typed it.
+    get expectedPlaceholder() {
+        const fallback = this._toNumber(this.fallbackAccountValue);
+        return fallback === null ? '' : String(fallback);
     }
 
     get rows() {
@@ -164,9 +190,9 @@ export default class EnvelopeTradeInstructions extends LightningElement {
      * deeply-nested proxy straight to envelopeStrategyList — one hop deeper again, and read per row by
      * its picker — made LWC's reactive membrane recurse on element access for several seconds, a
      * synchronous freeze the moment the section mounted. Rebuilding the array as plain objects severs
-     * that chain, so the list receives a shallow, cheap-to-observe copy. Only label/value/allowedBasis
-     * are load-bearing (the picker and the basis rule); classification is carried for parity with the
-     * source shape.
+     * that chain, so the list receives a shallow, cheap-to-observe copy. label/value/allowedBasis
+     * feed the picker and the basis rule, `excluded` feeds the ledger's excluded split and the row's
+     * tag; classification is carried for parity with the source shape.
      *
      * Built in the options setter, not here: typing re-renders this section per character, and a fresh
      * copy per render would both re-walk the membrane every time and patch the table's `options` prop
@@ -183,39 +209,51 @@ export default class EnvelopeTradeInstructions extends LightningElement {
     }
 
     get totals() {
-        return strategyTotals(this._rows, this.funded ? this._expectedNumber : null);
+        return strategyTotals(this._rows, this._expectedNumber, this._plainOptions);
     }
 
-    // The dollars left for the percentage sleeves once the carve-outs are taken out. Null where no
-    // funded amount exists, which keeps every derived figure out of that entry point.
-    get remainder() {
-        return this.funded ? this.totals.remainder : null;
+    // The resolved account value the table derives every calculated cell from — the same resolver
+    // as everything else here (see _expectedNumber), so no derived figure can run on a different
+    // basis than the ledger.
+    get accountValue() {
+        return this._expectedNumber;
     }
 
     // --- Footer ------------------------------------------------------------------------------
 
-    // The dollar arithmetic needs a positive account value; strategyTotals resolves the remainder
-    // only then, so its null doubles as "nothing to compute from yet".
+    // The dollar arithmetic needs a positive account value — typed or inherited.
     get _expectedKnown() {
-        return this.funded && this.totals.remainder !== null;
+        return this._expectedNumber !== null;
     }
 
     get showDollarMath() {
         return this.hasRows && this._expectedKnown;
     }
 
-    // The subtraction lines appear once a fixed-dollar amount is actually entered — a "−$0" line
-    // for a table with no carve-outs would be exactly the $0 noise the footer exists to kill.
-    get showFixedLines() {
-        return this.showDollarMath && this.totals.fixedDollarSum > 0;
+    // The subtraction lines appear once a finished row actually holds dollars — a "−$0" line for an
+    // untouched table would be exactly the $0 noise the footer exists to kill. The total line shows
+    // with them: a remaining balance is only meaningful once something subtracts from the account.
+    get showLedgerLines() {
+        return this.showDollarMath && (this.totals.allocatedAmount > 0 || this.totals.excludedAmount > 0);
+    }
+
+    get showAllocatedLine() {
+        return this.showDollarMath && this.totals.allocatedAmount > 0;
+    }
+
+    // Only where an excluded sleeve holds dollars — the ledger names exclusions, it does not
+    // advertise the feature on every table.
+    get showExcludedLine() {
+        return this.showDollarMath && this.totals.excludedAmount > 0;
     }
 
     get showEnterValueHint() {
-        return this.hasRows && this.funded && !this._expectedKnown;
+        return this.hasRows && !this._expectedKnown;
     }
 
     // The footer div holds only the dollar ledger and its hint; the percentage status renders in
-    // its own always-present live region, so it never forces an empty footer into unfunded mode.
+    // its own always-present live region, so it never forces an empty footer onto a table that has
+    // no dollar arithmetic to show yet.
     get showFooter() {
         return this.showDollarMath || this.showEnterValueHint;
     }
@@ -224,83 +262,100 @@ export default class EnvelopeTradeInstructions extends LightningElement {
         return this._currency(this._expectedNumber);
     }
 
-    get fixedDisplay() {
-        return `−${this._currency(this.totals.fixedDollarSum)}`;
+    get allocatedDisplay() {
+        return `−${this._currency(this.totals.allocatedAmount)}`;
     }
 
-    get poolDisplay() {
-        return this._currency(this.totals.remainder);
+    get excludedDisplay() {
+        return `−${this._currency(this.totals.excludedAmount)}`;
     }
 
-    // The modeled-allocation status: green at exactly 100%, amber under, red over — over-allocation
-    // blocks (percentage rows must total 100%), so red is consistent with the submit rule.
-    get _modeledStatus() {
+    get remainingDisplay() {
+        return this._currency(this.totals.remainingBalance);
+    }
+
+    // The allocation status, judged the same way completeness is. With an account value known it
+    // reads off the ledger — green when the remaining balance reconciles to zero, amber under,
+    // amber over too (over-allocation warns without blocking, see strategyTotals). Without one
+    // there is no ledger, so the percentage reading stands: green at exactly 100%, amber under,
+    // red over — with no denominator the 100% rule is still the blocker.
+    get _allocationStatus() {
         const totals = this.totals;
-        if (!this.hasRows || !totals.hasPercentRows) {
+        if (!this.hasRows) {
+            return null;
+        }
+        // Nothing is finished yet, so there is no allocation to report on. A blank row still counts
+        // toward hasPercentRows — strategyTotals sets that before it decides the row is incomplete —
+        // so without this the section opens under an amber "Allocated: $0.00 remaining" line before
+        // the advisor has done anything. Judged here rather than in strategyTotals, where the
+        // row counts also feed isComplete.
+        if (totals.incompleteRows.length === this._rows.length) {
+            return null;
+        }
+        if (this._expectedKnown) {
+            const committed = totals.allocatedAmount + totals.excludedAmount;
+            const balance = totals.remainingBalance;
+            const ofExpected = `${this._currency(committed)} of ${this._currency(this._expectedNumber)}`;
+            const balanceCents = Math.round(balance * 100);
+            if (balanceCents === 0) {
+                return { text: `Allocated: ${ofExpected} ✓`, tone: 'ok' };
+            }
+            if (balanceCents > 0) {
+                return {
+                    text: `Allocated: ${ofExpected} — ${this._currency(balance)} remaining`,
+                    tone: 'warn'
+                };
+            }
+            return {
+                text: `Allocated: ${ofExpected} — over by ${this._currency(-balance)}`,
+                tone: 'warn'
+            };
+        }
+        if (!totals.hasPercentRows) {
             return null;
         }
         const cents = Math.round(totals.percentSum * 100);
         const pct = this._round(totals.percentSum);
         if (cents === 100 * 100) {
-            const pool =
-                this._expectedKnown && totals.remainder >= 0
-                    ? ` (${this._currency(totals.remainder)})`
-                    : '';
-            return { text: `Modeled allocated: 100%${pool} ✓`, tone: 'ok' };
+            return { text: `Allocated: 100% ✓`, tone: 'ok' };
         }
         if (cents < 100 * 100) {
             return {
-                text: `Modeled allocated: ${pct}% — ${this._round(100 - totals.percentSum)}% remaining to allocate`,
+                text: `Allocated: ${pct}% — ${this._round(100 - totals.percentSum)}% remaining`,
                 tone: 'warn'
             };
         }
         return {
-            text: `Modeled allocated: ${pct}% — over-allocated by ${this._round(totals.percentSum - 100)}%`,
+            text: `Allocated: ${pct}% — over by ${this._round(totals.percentSum - 100)}%`,
             tone: 'error'
         };
     }
 
-    get modeledStatusText() {
-        return this._modeledStatus?.text ?? '';
+    get allocationStatusText() {
+        return this._allocationStatus?.text ?? '';
     }
 
-    get modeledStatusClass() {
-        return `trade__status-line trade__status-line_${this._modeledStatus?.tone ?? 'ok'}`;
+    get allocationStatusClass() {
+        return `trade__status-line trade__status-line_${this._allocationStatus?.tone ?? 'ok'}`;
     }
 
     // --- Messages ----------------------------------------------------------------------------
 
-    // The section explains itself only once the advisor has engaged, so an untouched section
-    // doesn't open under a red alert. Decided from the memoized totals rather than by building
-    // mismatchMessage — the template already evaluates the message once where it shows it, and this
-    // getter runs on every render.
-    get showMismatch() {
-        return this._touched && this.totals.incompleteRows.length > 0;
-    }
-
     get showOverFundedWarning() {
-        return this.funded && this.totals.isOverFunded;
+        return this.totals.isOverFunded;
     }
 
-    // Names the sleeves that still need input, so the advisor knows where to look. The percentage
-    // total no longer needs a sentence here — the footer status carries that arithmetic live.
-    get mismatchMessage() {
-        const unfinished = this.totals.incompleteRows;
-        if (!unfinished.length) {
-            return '';
-        }
-        const named = unfinished.map((row) => this._strategyLabel(row)).filter(Boolean);
-        const subject = named.length
-            ? named.join(', ')
-            : `${unfinished.length} ${unfinished.length === 1 ? 'sleeve' : 'sleeves'}`;
-        return `Needs a strategy and an amount: ${subject}.`;
-    }
-
+    // Names the actual overrun: dollar carve-outs beyond the account value where that is the story
+    // (the ledger can still reconcile to zero around a negative pool), otherwise the ledger total.
     get overFundedMessage() {
         const totals = this.totals;
-        return `Fixed-dollar sleeves total ${this._currency(totals.fixedDollarSum)}, more than the ${this._currency(
-            this._expectedNumber
-        )} expected account value. You can still submit — the amounts are recorded as entered.`;
+        const expected = this._expectedNumber;
+        const suffix = `, more than the ${this._currency(expected)} expected account value. You can still submit — the amounts are recorded as entered.`;
+        if (Math.round(totals.fixedDollarSum * 100) > Math.round(expected * 100)) {
+            return `Fixed-dollar sleeves total ${this._currency(totals.fixedDollarSum)}${suffix}`;
+        }
+        const committed = totals.allocatedAmount + totals.excludedAmount;
+        return `Allocations total ${this._currency(committed)}${suffix}`;
     }
 
     // --- Editing --------------------------------------------------------------------------------
@@ -336,7 +391,6 @@ export default class EnvelopeTradeInstructions extends LightningElement {
         if (strategyRowsEqual(strategies, this._rows)) {
             return;
         }
-        this._touched = true;
         this._emit({ ...this._current, strategies });
     }
 
@@ -356,8 +410,6 @@ export default class EnvelopeTradeInstructions extends LightningElement {
             table.flushPendingEdits();
         }
     }
-
-    _touched = false;
 
     _buffer(id, reported) {
         // I1 at the buffer hop: an echo of the value already bound to the control must not reassign
@@ -402,7 +454,6 @@ export default class EnvelopeTradeInstructions extends LightningElement {
         if (expectedAccountValue === (this._current.expectedAccountValue ?? null)) {
             return;
         }
-        this._touched = true;
         this._emit({ ...this._current, expectedAccountValue });
     }
 
@@ -422,12 +473,6 @@ export default class EnvelopeTradeInstructions extends LightningElement {
         return normalizeStrategyRows(this._current.strategies);
     }
 
-    // Label lookup goes through the index built in the options setter — never through `this.options`,
-    // whose per-element reads cross the reactive membrane (see pickerOptions).
-    _strategyLabel(row) {
-        return this._labelByValue.get(row.strategy) || '';
-    }
-
     // Uniquely named (not 'change') so the parent's listener isn't also triggered by the bubbling,
     // composed 'change' events of the inner base inputs — which would overwrite the value with a raw string.
     _emit(value) {
@@ -445,15 +490,17 @@ export default class EnvelopeTradeInstructions extends LightningElement {
         return Number.isFinite(parsed) ? parsed : null;
     }
 
+    // Up to four decimals with trailing zeros dropped, matching the table's derived-weight
+    // precision, so the status line never rounds a 99.9995% total up to a clean "100%".
     _round(value) {
-        return Number.isFinite(value) ? Math.round(value * 100) / 100 : 0;
+        return Number.isFinite(value) ? Math.round(value * 10000) / 10000 : 0;
     }
 
-    // Whole dollars in the footer: the arithmetic is a read-out, and cents would only add noise.
+    // Dollars at two decimals in the footer — a ledger asked to reconcile to zero has to show the
+    // cents it reconciles at. Shared rounding with the table's read-outs (formatMoney), so the
+    // ledger and a row can never disagree about the same figure.
     _currency(value) {
-        const amount = Number.isFinite(value) ? Math.round(value) : 0;
-        return amount < 0
-            ? `−$${Math.abs(amount).toLocaleString('en-US')}`
-            : `$${amount.toLocaleString('en-US')}`;
+        const amount = Number.isFinite(value) ? value : 0;
+        return amount < 0 ? `−$${formatMoney(Math.abs(amount))}` : `$${formatMoney(amount)}`;
     }
 }

@@ -445,6 +445,82 @@ Wizard_View_Preference__c = viewMode
         }
     }
 
+    /**
+     * saveRelatedProduct's counterpart for an Account Action Item (e.g. Purchase Alternative
+     * Investments), whose interview is also mixed-object (Case + Financial_Account_Related_Product__c)
+     * but whose Case is a servicing action, not the account-opening Case.
+     *
+     * The row is scoped to the action's own Case (Case__c = caseId), not just the Financial Account,
+     * so it never touches or repoints the account's existing account-opening product row — an existing
+     * account may already carry one. Amount__c mirrors this action Case's Amount__c, kept in sync the
+     * same way saveRelatedProduct keeps it in step with the opening Case.
+     *
+     * @param productId          the chosen product, or null to clear (deletes this action's row)
+     * @param financialAccountId the wizard Financial Account the answer belongs to
+     * @param caseId             the action's Case, which scopes and links the row
+     */
+    @AuraEnabled
+    public static void saveActionRelatedProduct(Id productId, Id financialAccountId, Id caseId) {
+        if (financialAccountId == null) {
+            throw new AuraHandledException('Financial Account Id is required.');
+        }
+        if (caseId == null) {
+            throw new AuraHandledException('Case Id is required.');
+        }
+
+        // Scoped by Case, so the action's row is independent of the account-opening row (which carries
+        // a different Case, or none).
+        List<Financial_Account_Related_Product__c> existing = [
+            SELECT Id, Product__c, Case__c, Amount__c
+            FROM Financial_Account_Related_Product__c
+            WHERE Wizard_Financial_Account__c = :financialAccountId
+            AND Case__c = :caseId
+            ORDER BY CreatedDate ASC
+            LIMIT 1
+        ];
+
+        // The amount the row mirrors is this action Case's own Amount__c (the interview captures it as a
+        // Case field, written before this call in every call site).
+        List<Case> actionCases = [
+            SELECT Id, Amount__c FROM Case WHERE Id = :caseId LIMIT 1
+        ];
+        Decimal caseAmount = actionCases.isEmpty() ? null : actionCases[0].Amount__c;
+
+        try {
+            if (productId == null) {
+                if (!existing.isEmpty()) {
+                    delete existing[0];
+                }
+                return;
+            }
+
+            if (existing.isEmpty()) {
+                insert new Financial_Account_Related_Product__c(
+                    Product__c = productId,
+                    Wizard_Financial_Account__c = financialAccountId,
+                    Case__c = caseId,
+                    Amount__c = caseAmount
+                );
+                return;
+            }
+
+            // Repoint the row rather than replacing it (history-tracked, announced downstream by id).
+            Boolean productChanged = existing[0].Product__c != productId;
+            Boolean amountChanged = existing[0].Amount__c != caseAmount;
+            if (productChanged) {
+                existing[0].Product__c = productId;
+            }
+            if (amountChanged) {
+                existing[0].Amount__c = caseAmount;
+            }
+            if (productChanged || amountChanged) {
+                update existing[0];
+            }
+        } catch (DmlException e) {
+            throw new AuraHandledException('Save failed: ' + e.getDmlMessage(0));
+        }
+    }
+
 
     // saveAccountInfo's counterpart for Service Agreements: writes a service interview's field
     // values onto the real Service__c record (update-only, keyed by real field API names). String

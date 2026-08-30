@@ -34,14 +34,6 @@
 
 /* Explains why an entry point cannot show dollar equivalents, so the absence reads as intended
    rather than as a missing field. */
-.trade__note {
-  margin: 0;
-  max-width: 70ch;
-  font-size: var(--slds-g-font-scale-neg-1, 12px);
-  line-height: 17px;
-  color: var(--slds-g-color-on-surface-1, #4b5563);
-}
-
 /* The math footer: a small ledger under the table. Figures right-aligned in a fixed column so the
    subtraction reads down the page. */
 .trade__footer {
@@ -66,8 +58,8 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* The pool is the result line of the subtraction above it. */
-.trade__footer-line_pool {
+/* The remaining balance is the result line of the subtraction above it. */
+.trade__footer-line_total {
   padding-top: var(--slds-g-spacing-1, 4px);
   border-top: 1px solid var(--slds-g-color-border-1, #e5e7eb);
   font-weight: var(--slds-g-font-weight-7, 700);
@@ -103,13 +95,6 @@
 }
 
 .trade__status-line_error {
-  color: var(--ds-error-text, #a83232);
-}
-
-.trade__mismatch {
-  margin: 0;
-  font-size: var(--slds-g-font-size-base, 13px);
-  line-height: 18px;
   color: var(--ds-error-text, #a83232);
 }
 

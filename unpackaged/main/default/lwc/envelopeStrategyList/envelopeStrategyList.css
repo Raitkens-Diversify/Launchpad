@@ -27,28 +27,14 @@
   color: var(--slds-g-color-on-surface-2, #374151);
 }
 
-/* What the $ and % units mean, stated once for the table rather than per row. */
-.strategy__hint {
-  margin: 0;
-  max-width: 80ch;
-  font-size: var(--slds-g-font-scale-neg-1, 12px);
-  line-height: 17px;
-  color: var(--slds-g-color-on-surface-1, #4b5563);
-}
-
-/* Rows and the column header strip share one track so they stay aligned. The dollar-equivalent
-   column exists only where a funded amount does, so the track widens with it. */
+/* Rows and the column header strip share one track so they stay aligned. Both value columns are
+   always present — a row always has a weight and a dollar figure, whichever of them it records. */
 .strategy__columns,
 .strategy__row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 170px 96px 32px;
+  grid-template-columns: minmax(0, 1fr) 196px 196px 32px;
   gap: var(--slds-g-spacing-4, 16px);
   align-items: start;
-}
-
-.strategy_derived .strategy__columns,
-.strategy_derived .strategy__row {
-  grid-template-columns: minmax(0, 1fr) 170px 96px 110px 32px;
 }
 
 .strategy__column-label {
@@ -70,33 +56,53 @@
   gap: var(--slds-g-spacing-1, 4px);
 }
 
-/* The unit column: a static badge where the rule locks the unit, the $/% toggle where it doesn't,
-   and the help icon beside either. */
-.strategy__cell_unit {
+/* The calculated side of a row where the strategy's rule forbids recording that unit: the box stays,
+   disabled, holding the calculated figure, with a help icon beside it. Greyed rather than removed so
+   the row keeps its shape and the number stays visible. The icon is what needs room here, which is
+   why the value columns are wider than the input alone would require. */
+.strategy__calculated {
   display: flex;
   align-items: center;
   gap: var(--slds-g-spacing-1, 4px);
-  margin-top: 2px;
 }
 
-.strategy__unit-badge {
-  display: inline-flex;
+/* A live cell: the box plus its unit symbol. Same shape as .strategy__calculated so the two kinds of
+   cell line up down the column. */
+.strategy__field {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  min-width: 28px;
-  padding: 3px 8px;
-  border: 1px solid var(--slds-g-color-border-1, #d1d5db);
-  border-radius: var(--slds-g-radius-border-2, 6px);
-  font-weight: var(--slds-g-font-weight-7, 700);
+  gap: var(--slds-g-spacing-1, 4px);
+}
+
+/* Let the box shrink for the symbol and icon instead of overflowing the grid track. */
+.strategy__calculated lightning-input,
+.strategy__field lightning-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* The column's unit, beside the box rather than inside it — a formatter on an editable input is what
+   the echo invariants forbid. Muted and non-selectable: it labels the field, it is not part of the
+   value, and each input carries a real label for assistive tech. */
+.strategy__unit {
+  flex: 0 0 auto;
   font-size: var(--slds-g-font-scale-1, 14px);
-  line-height: 19px;
-  color: var(--slds-g-color-on-surface-2, #374151);
-  background: var(--slds-g-color-surface-2, #f9fafb);
+  line-height: 20px;
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+  user-select: none;
+}
+
+/* The disabled box styles itself; only the figure's alignment is ours. Inherited, so it crosses into
+   the base component's shadow root, which a non-inherited property could not. */
+.strategy__readout {
+  font-variant-numeric: tabular-nums;
 }
 
 /* The row's inline note: amber while it simply needs input, red when a stale draft value has to be
-   re-entered in the rule's unit. */
+   re-entered in the rule's unit. Sits on its own grid line under both value columns, because it
+   describes the row rather than either cell. */
 .strategy__flag {
+  grid-column: 2 / 4;
   margin: 0;
   font-size: var(--slds-g-font-scale-neg-1, 12px);
   line-height: 17px;
@@ -107,18 +113,18 @@
   color: var(--ds-error-text, #a83232);
 }
 
-/* The dollar equivalent is a read-out, not an input: plain text so it can never be mistaken for a
-   second number the advisor is expected to reconcile. */
-.strategy__derived {
-  display: inline-block;
-  margin-top: 8px;
-  font-size: var(--slds-g-font-scale-neg-1, 12px);
-  line-height: 17px;
-  color: var(--slds-g-color-on-surface-1, #4b5563);
-  font-variant-numeric: tabular-nums;
-}
-
 .strategy__cell_remove {
   align-self: start;
   margin-top: 4px;
+}
+
+/* Names a sleeve the metadata excludes from the allocation. Muted, and on the flag's grid line
+   under the strategy column — its own line inside the cell stretched the whole row. It describes
+   the strategy choice, not a problem with the row, so it must not read like a flag. */
+.strategy__excluded {
+  grid-column: 1 / 2;
+  margin: 0;
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
+  line-height: 17px;
+  color: var(--slds-g-color-on-surface-1, #4b5563);
 }

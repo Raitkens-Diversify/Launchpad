@@ -14,6 +14,7 @@ import {
   resolveRelatedPartyRequirements,
   relatedPartyPeers,
   relatedPartiesStatus,
+  resolveExpectedValue,
   strategyTotals,
   STRATEGY_BASIS,
   actionCompletion
@@ -73,10 +74,18 @@ const DEFAULT_TRADE = {
 
 // The cases-group action types whose interviews also carry Trade Instructions. Update DMS
 // Instructions edits an existing account's sleeve allocation (seeded by the shell from the account's
-// current instructions) and has no funded amount; Update Management Style moves the account onto a
-// managed platform and establishes one, so it behaves like New Account setup.
+// current instructions, expected account value included); Update Management Style moves the account
+// onto a managed platform. Both capture an Expected Account Value, as New Account setup does.
 const DMS_UPDATE_CASE_TYPE = "updateDmsInstructions";
 const MANAGEMENT_STYLE_CASE_TYPE = "updateManagementStyle";
+
+// The draft keys the Trade Instructions section falls back to when no Expected Account Value has
+// been typed, tried in order. The draft is keyed by field API name — the same convention as
+// MANAGED_ACCOUNT_PLATFORM_FIELD. The org's live ISA - Fin Acct form captures the source-of-funds
+// amount as Case Amount__c in its "Source of Funds" section (Envelope_Field ISA_SOF_Amount) — the
+// Source_of_Funds_Amount__c form field exists only in this repo, its CMDT record was deleted
+// org-side — so both are tried; entity types with neither rely on the typed figure.
+const SOURCE_OF_FUNDS_AMOUNT_FIELDS = ["Source_of_Funds_Amount__c", "Amount__c"];
 
 export default class EnvelopeActionDetails extends LightningElement {
   // The opened action's context: { actionId, entityId, entityName, entityType, entityGroupId,
@@ -379,9 +388,10 @@ export default class EnvelopeActionDetails extends LightningElement {
   // draft (default until edited), and it's complete when every sleeve carries a strategy and a
   // positive value and the model allocations total 100%.
   //
-  // The first two establish an account value, so they are funded: the Expected Account Value is
-  // captured and each row can show its counterpart figure. Editing existing instructions has no
-  // funded amount available, so nothing may be derived from one there — the section runs unfunded.
+  // All three capture an Expected Account Value, because each allocation row is shown as both a
+  // target weight and a dollar figure and neither can be calculated without a denominator. Where the
+  // advisor leaves it blank the Financial Account's Source of Funds Amount stands in — read out of
+  // this same draft, and never written back into it.
   _tradeSection(draft) {
     const groupId = this.action?.entityGroupId;
     const entityType = this.action?.entityType;
@@ -395,10 +405,13 @@ export default class EnvelopeActionDetails extends LightningElement {
       return null;
     }
     const value = draft[TRADE_FIELD_KEY] || DEFAULT_TRADE;
-    const funded = isDmsAccount || isManagementStyleCase;
+    const fallbackAccountValue =
+      SOURCE_OF_FUNDS_AMOUNT_FIELDS.map((field) => draft[field]).find(
+        (held) => held !== null && held !== undefined && held !== ""
+      ) ?? null;
     const valid = strategyTotals(
       value.strategies,
-      funded ? value.expectedAccountValue : null
+      resolveExpectedValue(value.expectedAccountValue, fallbackAccountValue)
     ).isComplete;
     return {
       key: "sec-trade",
@@ -407,7 +420,7 @@ export default class EnvelopeActionDetails extends LightningElement {
       fieldKey: TRADE_FIELD_KEY,
       value,
       options: this.strategyOptions,
-      funded,
+      fallbackAccountValue,
       status: valid ? "complete" : "incomplete"
     };
   }

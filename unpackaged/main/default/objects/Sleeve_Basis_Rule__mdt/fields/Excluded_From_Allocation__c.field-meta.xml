@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Excluded_From_Allocation__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Sleeves of this classification sit outside the allocation: the Order Ticket wizard still records them, but its ledger itemizes their dollars as Excluded rather than Allocated and labels the row. Which classifications count as excluded lives here, never in code. See TradeInstructionController.excludedFor and c/envelopeFormSchema excludedStrategyIds.</description>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <inlineHelpText>Checked = the wizard shows sleeves of this classification as Excluded in the allocation ledger.</inlineHelpText>
+    <label>Excluded From Allocation</label>
+    <type>Checkbox</type>
+</CustomField>

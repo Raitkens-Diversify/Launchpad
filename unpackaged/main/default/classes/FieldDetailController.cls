@@ -951,6 +951,69 @@ public with sharing class FieldDetailController {
         return result;
     }
 
+    /**
+     * getRelatedProductValuesForAccounts' counterpart for Account Action Items: the product each
+     * action's interview selected, keyed by the action's Case rather than the Financial Account.
+     *
+     * An action's product row is scoped to its own Case (see
+     * WizardEnvelopeStateService.saveActionRelatedProduct), so it must be read by Case too — reading by
+     * Financial Account (as the account-opening path does) would return the account's opening product
+     * instead. Returns caseId -> { fieldApiName: productId }, with the schema's product field(s) seeded
+     * null so a cleared selection prefills cleared rather than keeping the interview's last value.
+     */
+    @AuraEnabled
+    public static Map<Id, Map<String, Object>> getActionRelatedProductValues(
+        String type,
+        List<Id> caseIds
+    ) {
+        Map<Id, Map<String, Object>> result = new Map<Id, Map<String, Object>>();
+        if (String.isBlank(type) || caseIds == null || caseIds.isEmpty()) {
+            return result;
+        }
+
+        String relatedProductObject = WizardEnvelopeStateService.RELATED_PRODUCT_OBJECT;
+        Set<String> fieldApis = new Set<String>();
+        for (Envelope_Field__mdt row : [
+            SELECT Field_API__c
+            FROM Envelope_Field__mdt
+            WHERE Object__c = :relatedProductObject
+            AND Type__c = :type
+        ]) {
+            if (String.isNotBlank(row.Field_API__c)) {
+                fieldApis.add(row.Field_API__c);
+            }
+        }
+        if (fieldApis.isEmpty()) {
+            return result;
+        }
+
+        for (Id caseId : caseIds) {
+            Map<String, Object> values = new Map<String, Object>();
+            for (String fieldApi : fieldApis) {
+                values.put(fieldApi, null);
+            }
+            result.put(caseId, values);
+        }
+
+        Set<Id> resolved = new Set<Id>();
+        for (Financial_Account_Related_Product__c row : [
+            SELECT Case__c, Product__c
+            FROM Financial_Account_Related_Product__c
+            WHERE Case__c IN :caseIds
+            ORDER BY CreatedDate ASC
+        ]) {
+            if (row.Case__c == null || !resolved.add(row.Case__c)) {
+                continue;
+            }
+            Map<String, Object> values = result.get(row.Case__c);
+            for (String fieldApi : fieldApis) {
+                values.put(fieldApi, row.Product__c);
+            }
+        }
+
+        return result;
+    }
+
     // TODAY is the only supported token in Min__c/Max__c; anything else (decimal literal, ISO date)
     // passes through verbatim for the client to bind directly.
     private static String resolveBound(String raw) {

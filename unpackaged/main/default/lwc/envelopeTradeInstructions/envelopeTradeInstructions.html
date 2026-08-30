@@ -1,43 +1,39 @@
 <!-- Author: Mile Cacanovic -->
 <template>
     <div class="trade">
-        <!-- Only the entry points that establish an account value capture one. Editing existing trade
-             instructions has no funded amount, so the field is absent rather than empty. -->
-        <template lwc:if={funded}>
-            <div class="trade__block trade__block_expected">
-                <!-- No currency formatter, deliberately: a formatter rewrites whatever it is handed,
-                     so the input could never be bound the exact value it just reported — and that
-                     equality is what keeps this controlled field from echoing itself into a loop. The
-                     formatted figure is the footer ledger's first line, immediately below. -->
-                <lightning-input
-                    type="number"
-                    step="0.01"
-                    label="Expected Account Value"
-                    value={expectedAccountValue}
-                    onchange={handleExpectedChange}
-                    onblur={handleExpectedBlur}>
-                </lightning-input>
-            </div>
-        </template>
-        <template lwc:else>
-            <p class="trade__note">
-                This request updates the trade instructions on an existing account, which has no
-                funded amount here — model allocations are recorded as weights only.
-            </p>
-        </template>
+        <!-- Every entry point captures an account value: each allocation row shows both a weight and
+             a dollar figure, and neither can be calculated from the other without one. Left empty, the
+             section falls back to the value already captured elsewhere in the interview, offered here
+             as the placeholder rather than pre-filled — an inherited number must stay visibly
+             inherited. -->
+        <div class="trade__block trade__block_expected">
+            <!-- No currency formatter, deliberately: a formatter rewrites whatever it is handed,
+                 so the input could never be bound the exact value it just reported — and that
+                 equality is what keeps this controlled field from echoing itself into a loop. The
+                 formatted figure is the footer ledger's first line, immediately below. -->
+            <lightning-input
+                type="number"
+                step="0.01"
+                label="Expected Account Value"
+                value={expectedAccountValue}
+                placeholder={expectedPlaceholder}
+                onchange={handleExpectedChange}
+                onblur={handleExpectedBlur}>
+            </lightning-input>
+        </div>
 
         <div class="trade__block trade__block_strategy">
             <c-envelope-strategy-list
                 lwc:ref="table"
                 strategies={rows}
                 options={pickerOptions}
-                show-derived={funded}
-                remainder={remainder}
+                account-value={accountValue}
                 onstrategieschange={handleRowsChange}>
             </c-envelope-strategy-list>
 
-            <!-- The remainder arithmetic, shown instead of described: account value, minus the fixed
-                 carve-outs, equals the pool the percentage rows must cover. -->
+            <!-- The ledger, shown instead of described: account value, minus what the sleeves
+                 allocate, minus any excluded sleeves, equals the remaining balance — zero when the
+                 account is fully allocated. -->
             <template lwc:if={showFooter}>
                 <div class="trade__footer">
                     <template lwc:if={showDollarMath}>
@@ -45,14 +41,29 @@
                             <span>Account value</span>
                             <span class="trade__footer-figure">{accountValueDisplay}</span>
                         </div>
-                        <template lwc:if={showFixedLines}>
-                            <div class="trade__footer-line">
-                                <span>Fixed allocations</span>
-                                <span class="trade__footer-figure">{fixedDisplay}</span>
-                            </div>
-                            <div class="trade__footer-line trade__footer-line_pool">
-                                <span>Modeled pool</span>
-                                <span class="trade__footer-figure">{poolDisplay}</span>
+                        <!-- Says where the figure came from when it was inherited rather than typed.
+                             The amount itself is the ledger line directly above and the input that
+                             overrides it is directly above that, so naming either again would only
+                             restate the layout. -->
+                        <template lwc:if={usingFallback}>
+                            <p class="trade__footer-hint">Inherited from Source of Funds.</p>
+                        </template>
+                        <template lwc:if={showLedgerLines}>
+                            <template lwc:if={showAllocatedLine}>
+                                <div class="trade__footer-line">
+                                    <span>Allocated</span>
+                                    <span class="trade__footer-figure">{allocatedDisplay}</span>
+                                </div>
+                            </template>
+                            <template lwc:if={showExcludedLine}>
+                                <div class="trade__footer-line">
+                                    <span>Excluded</span>
+                                    <span class="trade__footer-figure">{excludedDisplay}</span>
+                                </div>
+                            </template>
+                            <div class="trade__footer-line trade__footer-line_total">
+                                <span>Remaining balance</span>
+                                <span class="trade__footer-figure">{remainingDisplay}</span>
                             </div>
                         </template>
                     </template>
@@ -66,17 +77,13 @@
 
             <!-- Always-present live region so status changes are announced as the numbers move. -->
             <div class="trade__status" aria-live="polite">
-                <template lwc:if={modeledStatusText}>
-                    <p class={modeledStatusClass}>{modeledStatusText}</p>
+                <template lwc:if={allocationStatusText}>
+                    <p class={allocationStatusClass}>{allocationStatusText}</p>
                 </template>
                 <template lwc:if={showOverFundedWarning}>
                     <p class="trade__warning">{overFundedMessage}</p>
                 </template>
             </div>
-
-            <template lwc:if={showMismatch}>
-                <p class="trade__mismatch" role="alert">{mismatchMessage}</p>
-            </template>
         </div>
 
         <div class="trade__block trade__block_notes">

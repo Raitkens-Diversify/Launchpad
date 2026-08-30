@@ -7,6 +7,7 @@ import getRecordValuesForType from "@salesforce/apex/FieldDetailController.getRe
 import getOriginalAccountValues from "@salesforce/apex/FieldDetailController.getOriginalAccountValues";
 import getCaseValuesForAccounts from "@salesforce/apex/FieldDetailController.getCaseValuesForAccounts";
 import getRelatedProductValuesForAccounts from "@salesforce/apex/FieldDetailController.getRelatedProductValuesForAccounts";
+import getActionRelatedProductValues from "@salesforce/apex/FieldDetailController.getActionRelatedProductValues";
 import getHouseholdMembersAndAccounts from "@salesforce/apex/WizardEnvelopeStateService.getHouseholdMembersAndAccounts";
 import saveEntity from "@salesforce/apex/EnvelopeHouseholdMemberController.saveEntity";
 import saveRelatedParties from "@salesforce/apex/EnvelopeHouseholdMemberController.saveRelatedParties";
@@ -26,6 +27,7 @@ import createServiceAgreement from "@salesforce/apex/WizardEnvelopeStateService.
 import saveAccountInfo from "@salesforce/apex/WizardEnvelopeStateService.saveAccountInfo";
 import saveAccountCaseInfo from "@salesforce/apex/WizardEnvelopeStateService.saveAccountCaseInfo";
 import saveRelatedProduct from "@salesforce/apex/WizardEnvelopeStateService.saveRelatedProduct";
+import saveActionRelatedProduct from "@salesforce/apex/WizardEnvelopeStateService.saveActionRelatedProduct";
 import saveServiceInfo from "@salesforce/apex/WizardEnvelopeStateService.saveServiceInfo";
 import getUserPreferences from "@salesforce/apex/WizardEnvelopeStateService.getUserPreferences";
 import saveProposedCase from "@salesforce/apex/WizardEnvelopeStateService.saveProposedCase";
@@ -60,6 +62,7 @@ import {
   memberActionTypeFor,
   memberActionLabelFor,
   schemaCacheKey,
+  derivePartyContext,
   applyLookupOptions,
   filterSectionsByAccountType,
   accountValuesToProposedDraft,
@@ -1125,6 +1128,27 @@ export default class EnvelopeShellV2 extends LightningElement {
     return found?.action?.formData || {};
   }
 
+  // The evaluation context for one action's form: the envelope-global running-user attributes
+  // ($User.*) plus that action's own selected related parties ($Party.<role>.*). Unlike userContext,
+  // $party is per-action — it depends on who this action named — so it is derived from the action's
+  // formData rather than hoisted onto the shared userContext. Returns userContext unchanged when the
+  // action has no related parties, keeping object identity stable for children that memoize on it.
+  _contextForAction(formData) {
+    const parties = formData?.[RELATED_PARTIES_FIELD_KEY];
+    if (!parties) {
+      return this.userContext;
+    }
+    return {
+      ...this.userContext,
+      $party: derivePartyContext(parties, this._partyAttributes)
+    };
+  }
+
+  // The open interview's evaluation context, passed to envelopeActionDetails as user-context.
+  get activeActionContext() {
+    return this._contextForAction(this.selectedActionFormData);
+  }
+
   // The member action items' frozen baselines, keyed by Case id then by field API name. Replaced
   // wholesale on every household fetch, so the interview picks the snapshot up as soon as the read
   // lands (it resolves after the first render).
@@ -1154,6 +1178,12 @@ export default class EnvelopeShellV2 extends LightningElement {
   // field shown only when `$User.Relationship_to_Firm__c = 'Dual'`). Fetched once and passed to the
   // interview/review children; empty until it resolves, so such fields stay hidden until known.
   userContext = {};
+
+  // Person Account Id -> stored attributes that `$Party.<role>.<field>` WHERE conditions read (e.g. a
+  // field shown only when the selected Trustee's Is_Foreign_National__c is true). Filled from the
+  // household/accounts fetch (see _fetchHouseholdMembersAndAccounts); empty until it resolves, so
+  // $Party-gated fields stay hidden until known.
+  _partyAttributes = {};
 
   // Strategy__c options for Trade Instructions sleeves: [{ label, value }] with the record Id as
   // value. Prefetched once (cacheable read) and threaded to envelopeActionDetails.
@@ -1514,6 +1544,13 @@ export default class EnvelopeShellV2 extends LightningElement {
           this._fetchActionCaseRecordValues(mapped)
         ]);
       this._caseOriginalValues = caseRead.originals;
+      // Person Account Id -> read-back field values, the source `$Party.<role>.<field>` conditions
+      // resolve against. Reassigned (not mutated) so the context getters recompute once it lands.
+      // Only the person members' fields are exposed today; an account-type party's attributes could
+      // be folded in the same way from accountValues if a rule ever needs them. The attribute a
+      // condition reads must be part of the type's read-back field set (an Envelope_Field__mdt row,
+      // or added to the getRecordValuesForType selection) or it arrives undefined.
+      this._partyAttributes = { ...memberValues };
       this._mergeServerEntities(
         mapped,
         memberValues,
@@ -1927,6 +1964,19 @@ export default class EnvelopeShellV2 extends LightningElement {
           console.error("getRecordValuesForType failed", error);
           return {};
         })
+      ),
+      // The product an account action's interview selected (e.g. Purchase Alternative Investments) —
+      // a related record scoped to the action Case, so it never appears in the Case read above. Read
+      // by Case id and merged under the same key. Types with no related-product schema rows (member
+      // actions, and account actions without a product) return {}, so this is safe for every type.
+      ...reads.map(([type, recordIds]) =>
+        getActionRelatedProductValues({
+          type,
+          caseIds: recordIds
+        }).catch((error) => {
+          console.error("getActionRelatedProductValues failed", error);
+          return {};
+        })
       )
     ]);
     const originals = {};
@@ -1935,10 +1985,17 @@ export default class EnvelopeShellV2 extends LightningElement {
         originals[caseId] = originalsByAccount[accountId];
       }
     });
-    // Keyed by Case id, and each Case is read under exactly one type, so the maps merge cleanly.
-    // A member action's prefill is its baseline with the stored proposals on top: the interview
-    // opens showing the member's current data, and only genuinely proposed fields differ from it.
-    const values = Object.assign({}, ...results);
+    // Merged one level deep: each Case's own field values and its product value arrive as separate
+    // maps under the same Case id (a top-level assign would let one replace the other). The field sets
+    // are disjoint — a schema row names one object — so the inner spread never resolves a conflict.
+    // A member action's prefill is its baseline with the stored proposals on top: the interview opens
+    // showing the member's current data, and only genuinely proposed fields differ from it.
+    const values = {};
+    results.forEach((result) => {
+      Object.entries(result || {}).forEach(([caseId, fieldValues]) => {
+        values[caseId] = { ...(values[caseId] || {}), ...fieldValues };
+      });
+    });
     Object.keys(originals).forEach((caseId) => {
       values[caseId] = { ...originals[caseId], ...(values[caseId] || {}) };
     });
@@ -2192,7 +2249,7 @@ export default class EnvelopeShellV2 extends LightningElement {
             schema,
             entity,
             formData,
-            this.userContext,
+            this._contextForAction(formData),
             this._registrationAttributes
           );
           return {
@@ -3515,7 +3572,14 @@ export default class EnvelopeShellV2 extends LightningElement {
       Object.keys(values),
       entity
     );
-    if (!Object.keys(fields).length) {
+    // A product selection is a related record, routed out of the field map above; written on its own
+    // so an alt-purchase interview whose only change is the product still persists it.
+    const productChange = this._relatedProductChange(
+      values,
+      Object.keys(values),
+      entity
+    );
+    if (!Object.keys(fields).length && !productChange.hasAnswer) {
       return;
     }
     if (isMemberActionType(entity.type)) {
@@ -3526,12 +3590,16 @@ export default class EnvelopeShellV2 extends LightningElement {
       });
       return;
     }
-    await saveAccountActionCase({
-      financialAccountId: entity.financialAccountId,
-      formData: { Id: entity.id, ...fields },
-      envelopeId: this.envelopeId,
-      sourceId: ACCOUNT_TYPE_TO_MDT[entity.type] || entity.type
-    });
+    if (Object.keys(fields).length) {
+      await saveAccountActionCase({
+        financialAccountId: entity.financialAccountId,
+        formData: { Id: entity.id, ...fields },
+        envelopeId: this.envelopeId,
+        sourceId: ACCOUNT_TYPE_TO_MDT[entity.type] || entity.type
+      });
+    }
+    // After the Case write, so the row mirrors the Amount__c that write just landed.
+    await this._saveRelatedProductFor(entity, productChange);
   }
 
   // Write an open member interview's answers to the person Account via the group's saveEntity
@@ -3710,11 +3778,14 @@ export default class EnvelopeShellV2 extends LightningElement {
   }
 
   // Whether a field's answer is a related product record rather than a value on the entity's own
-  // record. Those go through saveRelatedProduct, so they are routed out of both the primary-record
-  // and the related-Case writes.
+  // record. Those go through saveRelatedProduct / saveActionRelatedProduct, so they are routed out of
+  // both the primary-record and the related-Case writes. True for the account groups (whose interview
+  // is mixed-object) and for an Account Action Item whose interview also carries a product selection
+  // (e.g. Purchase Alternative Investments) — its row is scoped to the action Case, see
+  // _saveRelatedProductFor.
   _isRelatedProductField(entity, fieldName) {
     return (
-      ACCOUNT_GROUP_IDS.has(entity?.groupId) &&
+      (ACCOUNT_GROUP_IDS.has(entity?.groupId) || entity?.groupId === "cases") &&
       this._fieldObjectFor(entity, fieldName) === RELATED_PRODUCT_OBJECT
     );
   }
@@ -3731,6 +3802,29 @@ export default class EnvelopeShellV2 extends LightningElement {
     return name
       ? { productId: formData[name] || null, hasAnswer: true }
       : { productId: null, hasAnswer: false };
+  }
+
+  // Persist a related-product answer, routed by the entity's group. An account/DPI interview links the
+  // row to the Financial Account (its opening Case resolved server-side); an Account Action Item's row
+  // is scoped to the action's own Case, so it never touches the account's opening product row — hence
+  // the separate Apex call keyed by the Case id (entity.id) with the servicing account passed through.
+  // A no-op when there is no product answer among the changes.
+  async _saveRelatedProductFor(entity, productChange) {
+    if (!productChange.hasAnswer) {
+      return;
+    }
+    if (entity.groupId === "cases") {
+      await saveActionRelatedProduct({
+        productId: productChange.productId,
+        financialAccountId: entity.financialAccountId,
+        caseId: entity.id
+      });
+      return;
+    }
+    await saveRelatedProduct({
+      productId: productChange.productId,
+      financialAccountId: entity.id
+    });
   }
 
   // The Apex field map for a set of changed field names, read from the action's current form data
@@ -3916,10 +4010,7 @@ export default class EnvelopeShellV2 extends LightningElement {
     }
     if (productChange.hasAnswer) {
       try {
-        await saveRelatedProduct({
-          productId: productChange.productId,
-          financialAccountId: found.entity.id
-        });
+        await this._saveRelatedProductFor(found.entity, productChange);
       } catch (error) {
         firstError = firstError || error;
       }
@@ -4277,8 +4368,20 @@ export default class EnvelopeShellV2 extends LightningElement {
     // An Account Action Item's answers live only on its own Case — the cases group is stripped from
     // envelope state — so skipping it here would drop whatever was typed inside the autosave idle
     // window. The timed counterpart is _persistOpenCaseFields; both share the group's update call.
-    if (entity.groupId === "cases" && Object.keys(fields).length) {
-      await GROUPS.cases.persistUpdate(entity, fields, this.envelopeId);
+    if (entity.groupId === "cases") {
+      // A product selection (e.g. Purchase Alternative Investments) is a related record written on
+      // its own, so a flush whose only change is the product still persists it.
+      const productChange = this._relatedProductChange(
+        formData,
+        fieldNames,
+        entity
+      );
+      if (Object.keys(fields).length) {
+        await GROUPS.cases.persistUpdate(entity, fields, this.envelopeId);
+      }
+      // After the Case write, so the row mirrors the Amount__c it just landed. A no-op without a
+      // product answer, matching the account branch's guard.
+      await this._saveRelatedProductFor(entity, productChange);
       return;
     }
     // Submitted members route edits to a proposed-change case (handled in _handleProposedCase),
@@ -4738,7 +4841,7 @@ export default class EnvelopeShellV2 extends LightningElement {
     const missingSections = selectMissingSections(
       schemaSections,
       formData,
-      this.userContext
+      this._contextForAction(formData)
     );
     const partByName = new Map();
     const partsInOrder = missingSections.map((section, index) => {
@@ -4829,7 +4932,15 @@ export default class EnvelopeShellV2 extends LightningElement {
       title: [entity.name, action.title].filter(Boolean).join(" - "),
       allFields,
       values,
-      sections
+      sections,
+      // This action's selected related parties resolved to their attributes, so the screen's own
+      // Shown WHERE filtering can honor $Party.<role>.<field> the same way the interview does.
+      // Derived here (not in the component) because `values` deliberately drops the relatedParties
+      // composite key to keep it out of the screen's draft.
+      partyContext: derivePartyContext(
+        formData[RELATED_PARTIES_FIELD_KEY],
+        this._partyAttributes
+      )
     };
   }
 
@@ -4906,7 +5017,8 @@ export default class EnvelopeShellV2 extends LightningElement {
     return sumMissingInputs(items, {
       schemaCache: this._schemaCache,
       registrationAttributes: this._registrationAttributes,
-      userContext: this.userContext
+      userContext: this.userContext,
+      partyAttributes: this._partyAttributes
     });
   }
 
@@ -4949,7 +5061,8 @@ export default class EnvelopeShellV2 extends LightningElement {
     return sumMissingInputs(items, {
       schemaCache: this._schemaCache,
       registrationAttributes: this._registrationAttributes,
-      userContext: this.userContext
+      userContext: this.userContext,
+      partyAttributes: this._partyAttributes
     });
   }
 
@@ -5107,7 +5220,7 @@ export default class EnvelopeShellV2 extends LightningElement {
           const fields = shapeVisibleFields(
             section.fields,
             draft,
-            this.userContext
+            this._contextForAction(draft)
           )
             .map((field) => ({
               key: field.apiName,
@@ -5223,7 +5336,7 @@ export default class EnvelopeShellV2 extends LightningElement {
           schema,
           entity,
           action.formData || {},
-          this.userContext,
+          this._contextForAction(action.formData || {}),
           this._registrationAttributes
         ).isComplete
     );

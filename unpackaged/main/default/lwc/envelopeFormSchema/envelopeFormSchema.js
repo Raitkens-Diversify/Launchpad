@@ -2814,18 +2814,16 @@ function basisForOption(option) {
 }
 
 /**
- * The dollar equivalent of a percentage allocation row: its share of the *modeled pool*, which is
- * the Expected Account Value less every fixed-dollar carve-out (`strategyTotals().remainder`).
+ * The dollar equivalent of a percentage allocation row: its share of the **resolved Expected
+ * Account Value** — the same denominator `percentForDollarRow` uses the other way, so the same
+ * weight always means the same dollars regardless of what the other rows hold. (An earlier build
+ * used the modeled pool — the account value less the fixed-dollar carve-outs — which made a
+ * weight's dollars shift whenever another row's carve-out moved; reversed 2026-08-30 by request.)
  *
- * Null — never a fictional $0 — whenever the pool is unknown or the percentage is not a positive
- * number, so a row with nothing to say renders an em dash rather than an arithmetic claim.
- *
- * There is deliberately no helper going the other way. A fixed-dollar sleeve is carved out before
- * the pool exists, so it holds no weight in the allocation at all — `strategyTotals` excludes it
- * from the percentage total and `Order__c.Funding_Basis_Matches_Value` forbids it from even storing
- * a percentage. A dollar row's weight is absent, not calculable.
+ * Null — never a fictional $0 — whenever the denominator is unknown or the percentage is not a
+ * positive number, so a row with nothing to say renders an em dash rather than an arithmetic claim.
  * @param {number|string} percent  percentage points
- * @param {number|string} pool     the modeled pool in dollars
+ * @param {number|string} pool     the resolved account value in dollars
  * @returns {number|null}
  */
 function dollarsForPercentRow(percent, pool) {
@@ -2838,6 +2836,82 @@ function dollarsForPercentRow(percent, pool) {
         return null;
     }
     return (base * pct) / 100;
+}
+
+/**
+ * The percentage equivalent of a fixed-dollar allocation row — its share of the **resolved Expected
+ * Account Value**, the same denominator `dollarsForPercentRow` uses the other way.
+ *
+ * The derived weight is display-only: `strategyTotals` still keeps dollar rows out of the percentage
+ * total, and `Order__c.Funding_Basis_Matches_Value` still forbids a Dollar sleeve from *storing* a
+ * percentage. (An earlier build removed this helper on the grounds that a dollar row's weight is
+ * "absent, not calculable" — showing the share back is the requested behavior now.)
+ * @param {number|string} amount        dollars
+ * @param {number|string} accountValue  the resolved Expected Account Value
+ * @returns {number|null}
+ */
+function percentForDollarRow(amount, accountValue) {
+    const value = Number(amount);
+    const base = Number(accountValue);
+    if (!Number.isFinite(value) || value <= 0) {
+        return null;
+    }
+    if (accountValue === null || accountValue === undefined || !Number.isFinite(base) || base <= 0) {
+        return null;
+    }
+    return (value / base) * 100;
+}
+
+// Round to cents — the one rounding point for a derived dollar figure before it is displayed or
+// compared. Arithmetic upstream stays in raw dollars so intermediate steps never accumulate
+// rounding drift; only the edge rounds.
+function roundCurrency(value) {
+    return Math.round(Number(value) * 100) / 100;
+}
+
+// Grouped currency at exactly two decimals, U+2212 for negatives, no symbol — the '$' is composed
+// at each call site (beside an input box, or prefixed in a footer line), matching how the trade
+// surfaces already print it. Shared so the table's read-outs and the section's ledger cannot
+// round the same figure two different ways.
+const MONEY_DISPLAY = new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+});
+
+function formatMoney(value) {
+    const amount = Number.isFinite(Number(value)) ? roundCurrency(value) : 0;
+    return amount < 0 ? `−${MONEY_DISPLAY.format(Math.abs(amount))}` : MONEY_DISPLAY.format(amount);
+}
+
+/**
+ * The strategy ids whose sleeves are excluded from the allocation, resolved from the shaped options'
+ * `excluded` flag — which mirrors Sleeve_Basis_Rule__mdt.Excluded_From_Allocation__c, so what counts
+ * as excluded lives in metadata, never in a hardcoded classification list here.
+ *
+ * Memoized per options-array identity (the section hands an identity-stable plain copy), and reads
+ * named fields only — Object.keys over a membrane proxy walks its internals.
+ * @param {Array<{value, excluded}>} [options]  shaped strategy options
+ * @returns {Set<string>}
+ */
+const EXCLUDED_IDS_MEMO = new WeakMap();
+const NO_EXCLUDED_IDS = new Set();
+
+function excludedStrategyIds(options) {
+    if (!options) {
+        return NO_EXCLUDED_IDS;
+    }
+    const cached = EXCLUDED_IDS_MEMO.get(options);
+    if (cached) {
+        return cached;
+    }
+    const ids = new Set();
+    for (const option of options) {
+        if (option && option.excluded === true) {
+            ids.add(option.value);
+        }
+    }
+    EXCLUDED_IDS_MEMO.set(options, ids);
+    return ids;
 }
 
 /**
@@ -2878,49 +2952,78 @@ function resolveExpectedValue(typed, fallback) {
  * table, the Trade Instructions section, and the action page total — and judge completeness —
  * identically.
  *
- * Completeness follows the ticket's validation story: every row carries a strategy and a value
- * greater than zero, and — only when percentage rows are present — those rows sum to 100%, with
- * dollar sleeves excluded from that sum. Dollar sleeves are deliberately NOT required to reconcile
- * to the Expected Account Value: a submission is valid when the percentage rows total 100% and every
- * dollar row has a valid amount. Exceeding the expected value is surfaced as `isOverFunded`, a
- * warning the section shows without blocking, mirroring how the legacy screens ask for an
- * expected-value reason rather than refusing the entry.
+ * The result is a ledger against the Expected Account Value:
+ *
+ *     remainingBalance = expected − allocatedAmount − excludedAmount
+ *
+ * where each completed row's dollar figure is its amount (dollar rows) or its share of the whole
+ * expected value, `expected × pct/100` (percentage rows) — ONE denominator, the same one both
+ * derived-cell helpers use, so the same weight always means the same dollars. (`remainder`, the
+ * old modeled-pool figure, is still published for reference but no longer prices anything.) Rows
+ * whose strategy is flagged excluded (`options[].excluded`, mirroring
+ * Sleeve_Basis_Rule__mdt.Excluded_From_Allocation__c) sum into `excludedAmount` instead of
+ * `allocatedAmount`, so the footer can name them separately — the ledger's bottom line is the same
+ * either way, which is why completeness needs no options.
+ *
+ * Completeness, once an expected value is known, is that ledger reconciling: `remainingBalance ≤ 0`
+ * at cent precision. Under-allocation blocks — including a dollar-only table that underfills the
+ * account. Over-allocation is deliberately NOT a blocker: it surfaces as `isOverFunded`, a warning
+ * the section shows without refusing the entry, mirroring how the legacy screens ask for an
+ * expected-value reason instead. With no expected value known there is nothing to reconcile
+ * against, so the pre-ledger judgment stands: every row valid, and — only when percentage rows are
+ * present — those rows totalling 100%, dollar sleeves excluded from that sum.
  *
  * `expectedValue` is optional. Every entry point captures one now (see resolveExpectedValue), but it
  * can still be unknown — nothing typed and no fallback to stand in — and nothing may be derived from
- * a number we don't have: `remainder`, `allocatedAmount` and `isOverFunded` come back null/false and
- * completeness is judged on the rows alone. Completeness never reads it either way.
+ * a number we don't have: `remainder`, `allocatedAmount`, `excludedAmount` and `remainingBalance`
+ * come back null and `isOverFunded` false.
  *
  * @param {Array<{type, strategy, fundingAmount, fundingPercent}>} strategies
  * @param {number} [expectedValue]  the Expected Account Value, once one is known
+ * @param {Array<{value, excluded}>} [options]  shaped strategy options, for the excluded split only
  * @returns {{fixedDollarSum: number, percentSum: number, remainder: number|null,
- *            allocatedAmount: number|null, hasPercentRows: boolean, hasDollarRows: boolean,
- *            isOverFunded: boolean, isComplete: boolean, incompleteRows: Array<object>}}
+ *            allocatedAmount: number|null, excludedAmount: number|null,
+ *            remainingBalance: number|null, hasPercentRows: boolean, hasDollarRows: boolean,
+ *            hasExcludedRows: boolean, isOverFunded: boolean, isComplete: boolean,
+ *            incompleteRows: Array<object>}}
  */
 const TOTALS_MEMO = new WeakMap();
+// Stands in as the options branch key when no options are passed — WeakMap keys must be objects.
+const NO_OPTIONS = Object.freeze({});
 
-function strategyTotals(strategies, expectedValue) {
+function strategyTotals(strategies, expectedValue, options) {
     const rows = normalizeStrategyRows(strategies);
-    // Memoized per (normalized rows, expectedValue). The section's footer ledger, all four status
-    // getters, both messages and envelopeActionDetails._tradeSection each call this with the same
-    // inputs inside a single render — fifteen to twenty full passes over the rows, every one of which
-    // also allocated a normalized copy. Keyed on the normalized rows rather than the raw array so the
-    // memo lines up with normalizeStrategyRows' own cache.
-    let byExpected = TOTALS_MEMO.get(rows);
+    // Memoized per (normalized rows, options identity, expectedValue). The section's footer ledger,
+    // all four status getters, both messages and envelopeActionDetails._tradeSection each call this
+    // with the same inputs inside a single render — fifteen to twenty full passes over the rows,
+    // every one of which also allocated a normalized copy. Keyed on the normalized rows rather than
+    // the raw array so the memo lines up with normalizeStrategyRows' own cache; the options key is
+    // the identity-stable shaped array each caller holds (or NO_OPTIONS), so passing options never
+    // costs a recompute per render either.
+    let byOptions = TOTALS_MEMO.get(rows);
+    if (!byOptions) {
+        byOptions = new WeakMap();
+        TOTALS_MEMO.set(rows, byOptions);
+    }
+    const optionsKey = options || NO_OPTIONS;
+    let byExpected = byOptions.get(optionsKey);
     if (!byExpected) {
         byExpected = new Map();
-        TOTALS_MEMO.set(rows, byExpected);
+        byOptions.set(optionsKey, byExpected);
     }
     const memoKey = String(expectedValue);
     const cached = byExpected.get(memoKey);
     if (cached) {
         return cached;
     }
+    const excludedIds = excludedStrategyIds(options);
     const incompleteRows = [];
+    const completedRows = [];
     let fixedDollarSum = 0;
     let percentSum = 0;
     let hasPercentRows = false;
     let hasDollarRows = false;
+    let hasExcludedRows = false;
     for (const row of rows) {
         const isDollar = row.type === STRATEGY_BASIS.DOLLAR;
         const value = Number(isDollar ? row.fundingAmount : row.fundingPercent);
@@ -2936,6 +3039,11 @@ function strategyTotals(strategies, expectedValue) {
             incompleteRows.push(row);
             continue;
         }
+        const excluded = excludedIds.has(row.strategy);
+        if (excluded) {
+            hasExcludedRows = true;
+        }
+        completedRows.push({ isDollar, value, excluded });
         if (isDollar) {
             fixedDollarSum += value;
         } else {
@@ -2945,20 +3053,46 @@ function strategyTotals(strategies, expectedValue) {
     const expected = Number(expectedValue);
     const hasExpected = Number.isFinite(expected) && expected > 0;
     const remainder = hasExpected ? expected - fixedDollarSum : null;
-    const allocatedAmount = hasExpected ? fixedDollarSum + (remainder * percentSum) / 100 : null;
     const cents = (value) => Math.round(value * 100);
-    const isOverFunded = hasExpected && cents(fixedDollarSum) > cents(expected);
+    // The ledger split. Raw dollars all the way through the sums; each published figure rounds once
+    // at the end (roundCurrency), so the three lines and the comparisons cannot drift apart.
+    let allocatedAmount = null;
+    let excludedAmount = null;
+    let remainingBalance = null;
+    if (hasExpected) {
+        let allocated = 0;
+        let excludedSum = 0;
+        for (const row of completedRows) {
+            const dollars = row.isDollar ? row.value : (expected * row.value) / 100;
+            if (row.excluded) {
+                excludedSum += dollars;
+            } else {
+                allocated += dollars;
+            }
+        }
+        allocatedAmount = roundCurrency(allocated);
+        excludedAmount = roundCurrency(excludedSum);
+        remainingBalance = roundCurrency(expected - allocated - excludedSum);
+    }
+    const isOverFunded =
+        hasExpected &&
+        (cents(fixedDollarSum) > cents(expected) || cents(remainingBalance) < 0);
     const isComplete =
         rows.length > 0 &&
         incompleteRows.length === 0 &&
-        (!hasPercentRows || cents(percentSum) === cents(100));
+        (hasExpected
+            ? cents(remainingBalance) <= 0
+            : !hasPercentRows || cents(percentSum) === cents(100));
     const totals = {
         fixedDollarSum,
         percentSum,
         remainder,
         allocatedAmount,
+        excludedAmount,
+        remainingBalance,
         hasPercentRows,
         hasDollarRows,
+        hasExcludedRows,
         isOverFunded,
         isComplete,
         incompleteRows
@@ -3098,6 +3232,10 @@ export {
     normalizeStrategyRows,
     basisForOption,
     dollarsForPercentRow,
+    percentForDollarRow,
+    excludedStrategyIds,
+    roundCurrency,
+    formatMoney,
     resolveExpectedValue,
     formatFieldDisplayValue
 };

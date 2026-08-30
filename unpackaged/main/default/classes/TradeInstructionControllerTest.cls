@@ -104,6 +104,9 @@ private class TradeInstructionControllerTest {
             'Model Exclusion' => 'Either',
             'Default' => 'Percent Only'
         };
+        TradeInstructionController.exclusionRules = new Map<String, Boolean>{
+            'Model Exclusion' => true
+        };
     }
 
     @isTest
@@ -132,6 +135,15 @@ private class TradeInstructionControllerTest {
             'Percent Only',
             byName.get('Unclassified Sleeve').get('allowedBasis'),
             'An unclassified strategy follows the Default rule.'
+        );
+        // The exclusion flag rides the same rule table: configured classifications read true,
+        // everything else — including the Default fallback with no exclusion rule — reads false.
+        Assert.areEqual(true, byName.get('Model Exclusion Sleeve').get('excluded'));
+        Assert.areEqual(false, byName.get('Core Equity').get('excluded'));
+        Assert.areEqual(
+            false,
+            byName.get('Unclassified Sleeve').get('excluded'),
+            'With no Default exclusion rule, an unclassified strategy is not excluded.'
         );
     }
 

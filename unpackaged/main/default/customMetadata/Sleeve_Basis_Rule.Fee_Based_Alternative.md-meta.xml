@@ -4,7 +4,11 @@
     <protected>false</protected>
     <values>
         <field>Allowed_Funding_Basis__c</field>
-        <value xsi:type="xsd:string">Dollar Only</value>
+        <value xsi:type="xsd:string">Either</value>
+    </values>
+    <values>
+        <field>Excluded_From_Allocation__c</field>
+        <value xsi:type="xsd:boolean">false</value>
     </values>
     <values>
         <field>Sleeve_Classification__c</field>

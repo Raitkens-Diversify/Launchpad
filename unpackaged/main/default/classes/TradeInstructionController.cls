@@ -38,19 +38,32 @@ public with sharing class TradeInstructionController {
     @TestVisible
     private static Map<String, String> basisRules;
 
+    // Excluded_From_Allocation__c by classification, loaded from the same rule table. Drives which
+    // sleeves the client's ledger itemizes as "Excluded" rather than "Allocated" — configuration,
+    // never a hardcoded classification list. @TestVisible for the same reason as basisRules; a test
+    // that seeds basisRules alone reads every classification as not excluded.
+    @TestVisible
+    private static Map<String, Boolean> exclusionRules;
+
     /**
      * Allowed Funding Basis by sleeve classification, from the Sleeve_Basis_Rule__mdt rule table.
      * Queried without a WHERE clause because custom metadata SOQL rejects disjunctions and the table
-     * is a handful of rows; matched in Apex instead.
+     * is a handful of rows; matched in Apex instead. Loads the exclusion flags in the same pass.
      */
     private static Map<String, String> rules() {
         if (basisRules == null) {
             basisRules = new Map<String, String>();
+            exclusionRules = new Map<String, Boolean>();
             for (Sleeve_Basis_Rule__mdt rule : [
-                SELECT Sleeve_Classification__c, Allowed_Funding_Basis__c FROM Sleeve_Basis_Rule__mdt
+                SELECT Sleeve_Classification__c, Allowed_Funding_Basis__c, Excluded_From_Allocation__c
+                FROM Sleeve_Basis_Rule__mdt
             ]) {
                 if (String.isNotBlank(rule.Sleeve_Classification__c)) {
                     basisRules.put(rule.Sleeve_Classification__c, rule.Allowed_Funding_Basis__c);
+                    exclusionRules.put(
+                        rule.Sleeve_Classification__c,
+                        rule.Excluded_From_Allocation__c == true
+                    );
                 }
             }
         }
@@ -70,6 +83,23 @@ public with sharing class TradeInstructionController {
             allowed = configured.get(DEFAULT_RULE_KEY);
         }
         return String.isBlank(allowed) ? ALLOWED_EITHER : allowed;
+    }
+
+    /**
+     * Whether sleeves of this classification sit outside the allocation. Same resolution order as
+     * allowedBasisFor (classification rule, then the Default rule), defaulting to false — a sleeve
+     * is excluded only where the metadata says so.
+     */
+    private static Boolean excludedFor(String classification) {
+        rules();
+        Map<String, Boolean> configured = exclusionRules == null
+            ? new Map<String, Boolean>()
+            : exclusionRules;
+        Boolean excluded = String.isBlank(classification) ? null : configured.get(classification);
+        if (excluded == null) {
+            excluded = configured.get(DEFAULT_RULE_KEY);
+        }
+        return excluded == true;
     }
 
     /**
@@ -94,7 +124,8 @@ public with sharing class TradeInstructionController {
                 'name' => strategy.Name,
                 'strategyCode' => strategy.Strategy_Code__c,
                 'classification' => strategy.Sleeve_Classification__c,
-                'allowedBasis' => allowedBasisFor(strategy.Sleeve_Classification__c)
+                'allowedBasis' => allowedBasisFor(strategy.Sleeve_Classification__c),
+                'excluded' => excludedFor(strategy.Sleeve_Classification__c)
             });
         }
         return options;
