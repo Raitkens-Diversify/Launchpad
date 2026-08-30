@@ -9,6 +9,7 @@ public without sharing class Financial_Account_TriggerHandler{
         setHousehold(newList);
         setFinancialAccountName(newList);
         setMaestroAccountType(newList, null);
+        setCustodianOnDPI(newList);
         //setWizFinAccountName(newList);
     }
     
@@ -154,6 +155,16 @@ wfa.Name = wfa.Name +  ' - ' + wfa.Account_Number__c;
         }
     }
     
+    // A DPI is always held DIRECT, so stamp the custodian at creation. Insert-only: this is the
+    // opening default, not an ongoing lock, so a later custodian change on an existing DPI stands.
+    public void setCustodianOnDPI(List<Financial_Account__c> newList){
+        for(Financial_Account__c fa : newList){
+            if(fa.DPI__c == true){
+                fa.Custodian__c = 'DIRECT';
+            }
+        }
+    }
+
     public void setDMSOnHousehold(List<Financial_Account__c> newList, Map<Id,Financial_Account__c> oldMap){
         Set<Id> managementStyles = new Set<Id>();
         Set<Id> hhSet = new Set<Id>();

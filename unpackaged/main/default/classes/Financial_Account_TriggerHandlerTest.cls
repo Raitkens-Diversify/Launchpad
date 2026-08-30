@@ -41,6 +41,32 @@ private class Financial_Account_TriggerHandlerTest {
     }
 
     @IsTest
+    static void dpiGetsDirectCustodianOnInsert() {
+        Financial_Account__c fa = new Financial_Account__c(Name = 'DPI FA', DPI__c = true);
+
+        Test.startTest();
+        insert fa;
+        Test.stopTest();
+
+        Assert.areEqual('DIRECT',
+            [SELECT Custodian__c FROM Financial_Account__c WHERE Id = :fa.Id].Custodian__c,
+            'A DPI should be stamped with the DIRECT custodian on creation.');
+    }
+
+    @IsTest
+    static void nonDpiDoesNotGetDirectCustodianOnInsert() {
+        Financial_Account__c fa = new Financial_Account__c(Name = 'Non-DPI FA', DPI__c = false);
+
+        Test.startTest();
+        insert fa;
+        Test.stopTest();
+
+        Assert.areEqual(null,
+            [SELECT Custodian__c FROM Financial_Account__c WHERE Id = :fa.Id].Custodian__c,
+            'A non-DPI account should not have its custodian defaulted.');
+    }
+
+    @IsTest
     static void dpiVariableAnnuityCaseIsRetypedOnSubmit() {
         Financial_Account__c fa = setupDpi('Variable Annuity', true);
 

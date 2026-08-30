@@ -644,11 +644,11 @@
             <default>false</default>
         </values>
         <values>
-            <fullName>Update IMA</fullName>
+            <fullName>Update DMS Instructions</fullName>
             <default>false</default>
         </values>
         <values>
-            <fullName>Update Trade Instructions</fullName>
+            <fullName>Update IMA</fullName>
             <default>false</default>
         </values>
         <values>

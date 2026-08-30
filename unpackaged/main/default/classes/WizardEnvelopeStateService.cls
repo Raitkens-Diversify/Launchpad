@@ -920,6 +920,7 @@ return result;
             SELECT Id
             FROM Required_Documents__c
             WHERE Person__c IN :ids OR Business__c IN :ids OR Trust__c IN :ids
+                OR Financial_Account__c IN :ids
         ];
         Set<Id> documentIds = new Map<Id, Required_Documents__c>(documents).keySet();
 
@@ -1022,21 +1023,6 @@ return result;
         }
         
         try {
-            // Query AccountContactRelation records where the household is the primary account
-            List<AccountContactRelation> relationships = [
-                SELECT Id, ContactId, Contact.FirstName, Contact.LastName, Contact.AccountId,
-                Contact.Account.RecordType.DeveloperName, Contact.Account.RecordTypeId,
-                Contact.Account.Name, Contact.Account.Type, Contact.Account.Submitted__c,
-                Contact.Email, Contact.Phone, Contact.MailingStreet,
-                Contact.MailingCity, Contact.MailingState, Contact.MailingPostalCode,
-                Contact.MailingCountry, Contact.Birthdate
-                FROM AccountContactRelation
-                WHERE AccountId = :householdId
-                AND IsActive = TRUE
-                WITH USER_MODE
-                ORDER BY Contact.LastName, Contact.FirstName
-            ];
-            
             // Financial Accounts and Services linked to this envelope via Envelope_Content. Including
             // these means a record whose Household__c doesn't match the household (or is unset) still
             // loads, so the outline follows the envelope's contents, not only the household roster.
@@ -1073,8 +1059,8 @@ return result;
                 WITH USER_MODE
             ];
             
-            // Business and trust members are linked to the household via Account_Account_Relationship__c,
-            // not AccountContactRelation (person accounts only).
+            // Every member (person, business, trust) is linked to the household via
+            // Account_Account_Relationship__c.
             List<Account_Account_Relationship__c> accountRelationships = [
                 SELECT Related_Account__c,
                 Related_Account__r.Name,
@@ -1099,7 +1085,6 @@ return result;
             ];
             
             return transformToHouseholdMembersAndAccounts(
-                relationships,
                 accountRelationships,
                 finAccounts,
                 services,
@@ -1513,13 +1498,12 @@ return result;
     }
     
     /**
-* Transforms AccountContactRelation records into the household members structure.
-* 
-* @param relationships List of AccountContactRelation records
+* Transforms Account_Account_Relationship__c records into the household members structure.
+*
+* @param accountRelationships List of Account_Account_Relationship__c records
 * @return HouseholdMembersWrapper with categorized members
 */
     private static HouseholdMembersAndAccountsWrapper transformToHouseholdMembersAndAccounts(
-        List<AccountContactRelation> relationships,
         List<Account_Account_Relationship__c> accountRelationships,
         List<Financial_Account__c> finAccounts,
         List<Service__c> services,
@@ -1566,11 +1550,6 @@ return result;
             }
         }
         Set<Id> candidateAccountIds = new Set<Id>();
-        for (AccountContactRelation acr : relationships) {
-            if (acr.Contact != null && acr.Contact.AccountId != null) {
-                candidateAccountIds.add(acr.Contact.AccountId);
-            }
-        }
         for (Account_Account_Relationship__c relation : accountRelationships) {
             if (relation.Related_Account__c != null) {
                 candidateAccountIds.add(relation.Related_Account__c);
@@ -1608,29 +1587,6 @@ return result;
                     linkedToAnyEnvelopeIds.add(ec.Service__c);
                 }
             }
-        }
-
-        for (AccountContactRelation acr : relationships) {
-            if (acr.Contact == null || acr.Contact.AccountId == null) {
-                continue;
-            }
-            if (memberAccountIds.contains(acr.Contact.AccountId)) {
-                continue;
-            }
-            memberAccountIds.add(acr.Contact.AccountId);
-
-            String recordTypeName = acr.Contact.Account.RecordType?.DeveloperName;
-            MemberData member = createMemberData(acr);
-            member.linkedToEnvelope = existingRecordIds.contains(acr.Contact.AccountId);
-            member.pendingEnvelopeName = pendingEnvelopeNameByAccountId.get(acr.Contact.AccountId);
-            addMemberByRecordType(
-                member,
-                recordTypeName,
-                clients,
-                businesses,
-                trusts,
-                retirementPlans
-            );
         }
 
         for (Account_Account_Relationship__c relation : accountRelationships) {
@@ -1820,13 +1776,6 @@ return result;
             || (!linkedToAnyEnvelopeIds.contains(recordId) && submitted != true);
     }
     
-    /**
-* Creates a MemberData object from an AccountContactRelation record.
-* Maps Account fields to match envelopeFormMember.js field names exactly.
-* 
-* @param acr AccountContactRelation record
-* @return MemberData object with populated fields matching envelopeFormMember expectations
-*/
     private static void addMemberByRecordType(
         MemberData member,
         String recordTypeName,
@@ -1872,49 +1821,6 @@ return result;
         member.recordTypeId = accountRecord.RecordTypeId;
         member.accountType = accountRecord.Type;
         member.submitted = accountRecord.Submitted__c == true;
-        return member;
-    }
-    
-    private static MemberData createMemberData(AccountContactRelation acr) {
-        MemberData member = new MemberData();
-        
-        // Core identifiers
-        member.id = acr.Contact.AccountId;
-        member.entityId = acr.Contact.AccountId;
-        
-        // Personal information - match envelopeFormMember field names exactly
-        member.FirstName = acr.Contact.FirstName;
-        member.LastName = acr.Contact.LastName;
-        member.Name = acr.Contact.Account.Name;
-        member.PersonEmail = acr.Contact.Email;
-        member.PersonMobilePhone = acr.Contact.Phone;
-        member.PersonBirthdate = acr.Contact.Birthdate;
-        
-        // Mailing Address - match PersonMailing* field names
-        member.PersonMailingStreet = acr.Contact.MailingStreet;
-        member.PersonMailingCity = acr.Contact.MailingCity;
-        member.PersonMailingStateCode = acr.Contact.MailingState;
-        member.PersonMailingPostalCode = acr.Contact.MailingPostalCode;
-        
-        // Note: Billing address fields would need to be queried from Account object
-        // These are typically populated for Business/Trust entities
-        member.BillingStreet = null;
-        member.BillingCity = null;
-        member.BillingStateCode = null;
-        member.BillingPostalCode = null;
-        
-        // Business/Trust specific fields
-        member.TaxId = null;
-        member.FormationDate = null;
-        member.EntityType = acr.Contact.Account.Type;
-        member.EntityJurisdiction = null;
-        member.PrimaryTrustee = null;
-        
-        // Record type information
-        member.recordTypeId = acr.Contact.Account.RecordTypeId;
-        member.accountType = acr.Contact.Account.Type;
-        member.submitted = acr.Contact.Account.Submitted__c == true;
-        
         return member;
     }
     

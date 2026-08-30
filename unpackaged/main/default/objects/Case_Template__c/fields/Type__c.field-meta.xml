@@ -60,9 +60,9 @@
                 <label>Change Management Style</label>
             </value>
             <value>
-                <fullName>Update Trade Instructions</fullName>
+                <fullName>Update DMS Instructions</fullName>
                 <default>false</default>
-                <label>Update Trade Instructions</label>
+                <label>Update DMS Instructions</label>
             </value>
             <value>
                 <fullName>Purchase Alternative Investment</fullName>

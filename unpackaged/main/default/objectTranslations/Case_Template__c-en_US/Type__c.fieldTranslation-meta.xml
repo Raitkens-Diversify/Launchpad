@@ -127,12 +127,12 @@
             <translation><!-- Transfer --></translation>
         </picklistValues>
         <picklistValues>
-            <masterLabel>Update IMA</masterLabel>
-            <translation><!-- Update IMA --></translation>
+            <masterLabel>Update DMS Instructions</masterLabel>
+            <translation><!-- Update DMS Instructions --></translation>
         </picklistValues>
         <picklistValues>
-            <masterLabel>Update Trade Instructions</masterLabel>
-            <translation><!-- Update Trade Instructions --></translation>
+            <masterLabel>Update IMA</masterLabel>
+            <translation><!-- Update IMA --></translation>
         </picklistValues>
         <picklistValues>
             <masterLabel>Variable Annuity Additional Purchase</masterLabel>

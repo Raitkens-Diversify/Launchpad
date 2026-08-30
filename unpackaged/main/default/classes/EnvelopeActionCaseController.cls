@@ -241,7 +241,7 @@ public with sharing class EnvelopeActionCaseController {
                 (Id) memberAccount.get('Financial_Advisor_Team__c');
         }
         // The household is the envelope's, not the member's: a member Account has no household
-        // lookup of its own, it is related to one through AccountContactRelation.
+        // lookup of its own, it is related to one through Account_Account_Relationship__c.
         newCase.Household__c = EnvelopeHouseholdResolver.resolveHouseholdId(envelopeId);
         return newCase;
     }

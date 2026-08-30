@@ -485,8 +485,8 @@ private class EnvelopeHouseholdMemberControllerTest {
   @isTest
   static void testGetAllMembers_ReturnsMembersAcrossUserHouseholds() {
     // A household on a Financial Advisor Team the running user belongs to, with person members
-    // linked via AccountContactRelation (legacy) and Account_Account_Relationship__c (the shape
-    // new wizard-created members use) — the roster getAllMembers should surface both.
+    // linked via Account_Account_Relationship__c (the shape wizard-created members use) — the
+    // roster getAllMembers should surface them.
     Group grp = new Group(Name = 'Test FAT Group', Type = 'Regular');
     insert grp;
     Financial_Advisor_Team__c team = new Financial_Advisor_Team__c(
@@ -516,14 +516,10 @@ private class EnvelopeHouseholdMemberControllerTest {
         .getRecordTypeId()
     );
     insert person;
-    Account personWithContact = [
-      SELECT PersonContactId
-      FROM Account
-      WHERE Id = :person.Id
-    ];
-    insert new AccountContactRelation(
-      ContactId = personWithContact.PersonContactId,
-      AccountId = household.Id
+    insert new Account_Account_Relationship__c(
+      Account__c = household.Id,
+      Related_Account__c = person.Id,
+      Active__c = true
     );
 
     Account person2 = new Account(
@@ -550,11 +546,11 @@ private class EnvelopeHouseholdMemberControllerTest {
     }
     System.assert(
       memberIds.contains(person.Id),
-      'The household person member should be returned by getAllMembers.'
+      'A person member linked via Account_Account_Relationship__c should be returned by getAllMembers.'
     );
     System.assert(
       memberIds.contains(person2.Id),
-      'A person member linked via Account_Account_Relationship__c should be returned by getAllMembers.'
+      'A second person member linked via Account_Account_Relationship__c should be returned by getAllMembers.'
     );
     System.assert(
       !memberIds.contains(household.Id),
@@ -648,11 +644,10 @@ private class EnvelopeHouseholdMemberControllerTest {
   }
 
   @isTest
-  static void testGetHouseholdRoster_IncludesPersonMembersLinkedViaAccountContactRelation() {
-    // Person members commonly link to the household via AccountContactRelation (the shape
-    // getHouseholdMembersAndAccounts reads for the outline rail), not
-    // Account_Account_Relationship__c — the picker's roster must match that, not just the
-    // business/trust shape.
+  static void testGetHouseholdRoster_IncludesPersonMembersLinkedViaAccountAccountRelationship() {
+    // Person members link to the household via Account_Account_Relationship__c (the same shape
+    // getHouseholdMembersAndAccounts reads for the outline rail) — the picker's roster must
+    // surface them alongside the business/trust shape.
     Id householdRecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
       .get('Household')
       .getRecordTypeId();
@@ -664,16 +659,16 @@ private class EnvelopeHouseholdMemberControllerTest {
     insert household;
 
     Account person = new Account(
-      FirstName = 'ACR',
+      FirstName = 'AAR',
       LastName = 'Linked',
       RecordTypeId = personRecordTypeId,
       Submitted__c = true
     );
     insert person;
-    Account personWithContact = [SELECT PersonContactId FROM Account WHERE Id = :person.Id];
-    insert new AccountContactRelation(
-      ContactId = personWithContact.PersonContactId,
-      AccountId = household.Id
+    insert new Account_Account_Relationship__c(
+      Account__c = household.Id,
+      Related_Account__c = person.Id,
+      Active__c = true
     );
 
     Test.startTest();
@@ -688,7 +683,7 @@ private class EnvelopeHouseholdMemberControllerTest {
 
     System.assert(
       memberIds.contains(person.Id),
-      'A person linked via AccountContactRelation should be in the household roster.'
+      'A person linked via Account_Account_Relationship__c should be in the household roster.'
     );
   }
 

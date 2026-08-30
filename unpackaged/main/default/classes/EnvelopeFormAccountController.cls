@@ -199,7 +199,6 @@ public with sharing class EnvelopeFormAccountController {
         }
         system.debug('accountRecord'+accountRecord);
         insert accountRecord;
-        accountRecord = [SELECT PersonContactId FROM Account WHERE Id =: accountRecord.Id];
         // Create Envelope Content
         if (envelopeId != null) {
 
@@ -207,28 +206,8 @@ public with sharing class EnvelopeFormAccountController {
                 Envelope__c = envelopeId,
                 Account__c = accountRecord.Id
             );
-
-            // Create Account Contact Relation for Person Account
-            if (recordType.equalsIgnoreCase('client')) {
-
-                List<Envelope_Content__c> householdECs = [
-                    SELECT Account__c
-                    FROM Envelope_Content__c
-                    WHERE Envelope__c = :envelopeId
-                    AND Account__c != null
-                    AND Account__r.RecordType.Name = 'Household'
-                    LIMIT 1
-                ];
-
-                if (!householdECs.isEmpty()) {
-                    insert new AccountContactRelation(
-                        ContactId = accountRecord.PersonContactId,
-                        AccountId = householdECs[0].Account__c
-                    );
-                }
-            }
         }
-        
+
         return accountRecord.Id;
     }
 }

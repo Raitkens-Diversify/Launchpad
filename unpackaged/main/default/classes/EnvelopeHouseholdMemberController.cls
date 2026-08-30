@@ -308,8 +308,8 @@ public with sharing class EnvelopeHouseholdMemberController {
       }
     }
 
-    // Existing household roster: person members (AccountContactRelation) and related
-    // business/trust accounts (Account_Account_Relationship__c).
+    // Existing household roster: every member account (person, business, trust) linked to the
+    // household via Account_Account_Relationship__c.
     if (householdId != null) {
       for (Account_Account_Relationship__c relation : [
         SELECT Related_Account__c
@@ -364,9 +364,9 @@ public with sharing class EnvelopeHouseholdMemberController {
       return new List<MemberView>();
     }
 
-    // Gather every household roster into one set: person members (AccountContactRelation) plus
-    // related business/trust accounts (Account_Account_Relationship__c). A person in several
-    // households is de-duplicated by the set.
+    // Gather every household roster into one set: every member account (person, business, trust)
+    // linked via Account_Account_Relationship__c. A person in several households is de-duplicated
+    // by the set.
     Set<Id> memberAccountIds = new Set<Id>();
     for (Account_Account_Relationship__c relation : [
       SELECT Related_Account__c
@@ -397,8 +397,8 @@ public with sharing class EnvelopeHouseholdMemberController {
   // household's roster, and only that household — for pickers like an ISA's Primary Owner
   // "Select existing" dialog, which must offer only parties already tied to the specific
   // account/household the ISA belongs to, unlike getAllMembers()'s intentionally team-wide
-  // search. Person members link via AccountContactRelation; business/trust members link via
-  // Account_Account_Relationship__c — same two sources getHouseholdMembersAndAccounts reads for
+  // search. Every member (person, business, trust) links via Account_Account_Relationship__c —
+  // the same source getHouseholdMembersAndAccounts reads for
   // the outline rail, so this picker's roster always matches what the outline already shows,
   // including the same cross-envelope draft guard (belongsInEnvelope): an unsubmitted member
   // that belongs to a different, unrelated envelope must not leak in here either, even though it
@@ -427,11 +427,6 @@ public with sharing class EnvelopeHouseholdMemberController {
       }
     }
 
-    List<AccountContactRelation> personRelations = [
-      SELECT Contact.AccountId, Contact.Account.Submitted__c, Contact.Account.RecordType.DeveloperName
-      FROM AccountContactRelation
-      WHERE AccountId = :householdId AND IsActive = TRUE
-    ];
     List<Account_Account_Relationship__c> accountRelations = [
       SELECT Related_Account__c, Related_Account__r.Submitted__c, Related_Account__r.RecordType.DeveloperName
       FROM Account_Account_Relationship__c
@@ -442,11 +437,6 @@ public with sharing class EnvelopeHouseholdMemberController {
     ];
 
     Set<Id> candidateAccountIds = new Set<Id>();
-    for (AccountContactRelation relation : personRelations) {
-      if (relation.Contact != null && relation.Contact.AccountId != null) {
-        candidateAccountIds.add(relation.Contact.AccountId);
-      }
-    }
     for (Account_Account_Relationship__c relation : accountRelations) {
       if (relation.Related_Account__c != null) {
         candidateAccountIds.add(relation.Related_Account__c);
@@ -467,18 +457,6 @@ public with sharing class EnvelopeHouseholdMemberController {
     }
 
     Set<Id> memberAccountIds = new Set<Id>();
-    for (AccountContactRelation relation : personRelations) {
-      if (relation.Contact == null || relation.Contact.AccountId == null) {
-        continue;
-      }
-      if (!HOUSEHOLD_ROSTER_RECORD_TYPES.contains(relation.Contact.Account.RecordType?.DeveloperName)) {
-        continue;
-      }
-      if (!belongsInEnvelope(relation.Contact.AccountId, relation.Contact.Account.Submitted__c, existingRecordIds, linkedToAnyEnvelopeIds)) {
-        continue;
-      }
-      memberAccountIds.add(relation.Contact.AccountId);
-    }
     for (Account_Account_Relationship__c relation : accountRelations) {
       if (!HOUSEHOLD_ROSTER_RECORD_TYPES.contains(relation.Related_Account__r.RecordType?.DeveloperName)) {
         continue;

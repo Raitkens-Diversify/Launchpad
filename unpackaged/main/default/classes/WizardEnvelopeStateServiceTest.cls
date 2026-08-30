@@ -38,34 +38,7 @@ private class WizardEnvelopeStateServiceTest {
             Name = 'Test Household',Type ='Other',Classification__c = 'Vendor;'
         );
         insert household;
-        
-        // If using Person Accounts, create them here instead.
-        // Otherwise create Contacts for the members.
-        
-        List<Contact> contacts = new List<Contact>{
-            new Contact(
-                LastName = 'One',
-                AccountId = members[0].Id
-            ),
-                new Contact(
-                    LastName = 'Two',
-                    AccountId = members[1].Id
-                )
-                };
-                    insert contacts;
-        
-        List<AccountContactRelation> relations = new List<AccountContactRelation>();
-        
-        for(Contact con : contacts){
-            relations.add(new AccountContactRelation(
-                AccountId = household.Id,
-                ContactId = con.Id,
-                IsActive = true
-            ));
-        }
-        
-        insert relations;
-        
+
         // Link Financial Accounts to Household
         for(Financial_Account__c fa : financialAccounts){
             fa.Household__c = household.Id;
@@ -323,10 +296,7 @@ private class WizardEnvelopeStateServiceTest {
     static void testRemoveHouseholdMembers() {
         
         List<Account> members = [SELECT Id FROM Account where Name = 'Member 1' OR Name = 'Member 2'];
-        delete  [SELECT Id FROM contact];
-        delete  [SELECT Id FROM AccountContactRelation];
-        
-        
+
         Envelope__c env = [SELECT Id FROM Envelope__c LIMIT 1];
         
         Test.startTest();
@@ -978,10 +948,10 @@ private class WizardEnvelopeStateServiceTest {
     
     @isTest
     static void testGetHouseholdMembersAndAccounts_PersonMemberViaAAR() {
-        // New wizard-created person members are linked to the household via
-        // Account_Account_Relationship__c instead of AccountContactRelation; the
-        // read path must surface them as clients. The envelope link is what puts the
-        // member in scope, and saveEntity creates it when the member is added.
+        // Wizard-created person members are linked to the household via
+        // Account_Account_Relationship__c; the read path must surface them as clients.
+        // The envelope link is what puts the member in scope, and saveEntity creates it
+        // when the member is added.
         Account household = [SELECT Id FROM Account WHERE Name = 'Test Household' LIMIT 1];
         Envelope__c env = [SELECT Id FROM Envelope__c LIMIT 1];
         

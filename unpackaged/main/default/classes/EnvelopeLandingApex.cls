@@ -576,26 +576,8 @@ public with sharing class EnvelopeLandingApex {
         Map<Id, Set<Id>> submittedServicesByHousehold = new Map<Id, Set<Id>>();
 
         if (!householdIds.isEmpty()) {
-            for (AccountContactRelation acr : [
-                SELECT AccountId, Contact.AccountId, Contact.Account.Submitted__c
-                FROM AccountContactRelation
-                WHERE AccountId IN :householdIds
-                AND IsActive = TRUE
-                WITH USER_MODE
-            ]) {
-                if (acr.Contact == null || acr.Contact.AccountId == null) {
-                    continue;
-                }
-                addHouseholdMember(
-                    membersByHousehold,
-                    acr.AccountId,
-                    acr.Contact.AccountId,
-                    acr.Contact.Account != null && acr.Contact.Account.Submitted__c == true
-                );
-            }
-
-            // Business and trust members hang off the household through
-            // Account_Account_Relationship__c rather than AccountContactRelation.
+            // Every member (person, business, trust) hangs off the household through
+            // Account_Account_Relationship__c.
             for (Account_Account_Relationship__c rel : [
                 SELECT Account__c, Related_Account__c, Related_Account__r.Submitted__c
                 FROM Account_Account_Relationship__c
@@ -936,11 +918,6 @@ public with sharing class EnvelopeLandingApex {
     
     @AuraEnabled
     public static List<Account> getEligibleAccounts(Id householdId, String wizEnvRecords) {
-        List<AccountContactRelation> acrList = [
-            SELECT ContactId 
-            FROM AccountContactRelation 
-            WHERE AccountId = :householdId
-        ];
         System.debug('wizEnvRecords' + wizEnvRecords);
         List<Envelope_Content__c> wizEnvRecordList = (List<Envelope_Content__c>) JSON.deserialize(wizEnvRecords, List<Envelope_Content__c>.class);
         System.debug('wizEnvRecordList ' + wizEnvRecordList);
