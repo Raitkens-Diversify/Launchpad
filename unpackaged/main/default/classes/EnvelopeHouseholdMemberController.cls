@@ -60,14 +60,13 @@ public with sharing class EnvelopeHouseholdMemberController {
     if (memberType == 'client') {
       accountRecord.put('PersonMailingCountryCode', 'US');
     }
-    //Added type equal propect for all type of accounts
 
-      //accountRecord.put('Type', 'Prospect');
-
-    // For NEW members joining an envelope, look up the envelope's Household so we
-    // can inherit its Financial Advisor Team (clients only, set before upsert) and
-    // link the member to the Household after insert — parity with the account-form
-    // createMember path (EnvelopeFormAccountController).
+    // For NEW members joining an envelope, look up the envelope's Household so we can
+    // link the member to it by lookup (Household__c) and mark it a Prospect, and inherit
+    // the household's Financial Advisor Team (clients only). Setting Household__c is what
+    // creates the household -> member Account_Account_Relationship__c: the
+    // AAR_Create_Relation_From_Household flow builds that relationship from the lookup, so
+    // no AAR is inserted here.
     Envelope_Content__c householdEc = null;
     if (isNewRecord && envelopeId != null) {
       List<Envelope_Content__c> householdEcs = [
@@ -81,6 +80,10 @@ public with sharing class EnvelopeHouseholdMemberController {
       ];
       if (!householdEcs.isEmpty()) {
         householdEc = householdEcs[0];
+        // Household lookup + Prospect for every member type (person, business, trust,
+        // retirement plan). The flow turns Household__c into the household -> member AAR.
+        accountRecord.Household__c = householdEc.Account__c;
+        accountRecord.Type = 'Prospect';
         if (
           memberType == 'client' &&
           householdEc.Account__r.Financial_Advisor_Team__c != null
@@ -110,16 +113,6 @@ public with sharing class EnvelopeHouseholdMemberController {
             Account__c = accountRecord.Id
           );
         }
-      }
-
-      // ---------------------------------------
-      // Household linking for NEW members
-      // Every member type (person, business, trust) joins the Household via
-      // Account_Account_Relationship__c - person members no longer get an
-      // AccountContactRelation.
-      // ---------------------------------------
-      if (householdEc != null) {
-        linkMemberToHousehold(householdEc.Account__c, accountRecord.Id);
       }
 
       // ---------------------------------------

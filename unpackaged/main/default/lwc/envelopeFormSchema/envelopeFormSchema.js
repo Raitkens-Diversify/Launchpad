@@ -488,7 +488,7 @@ const ACCOUNT_TYPE_TO_MDT = {
     updateDmsInstructions: 'Manage DMS Instructions',
     updateManagementStyle: 'Change Management Style',
     additionalFunding: 'Additional Funding',
-    purchaseAlt: 'Purchase Alternative Investments'
+    purchaseAlts: 'Purchase Alternative Investment'
 };
 
 const ACCOUNT_ACTION_TYPES = new Set(Object.keys(ACCOUNT_TYPE_TO_MDT));
