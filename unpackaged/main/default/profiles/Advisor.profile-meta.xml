@@ -2704,6 +2704,11 @@
         <default>false</default>
         <visible>true</visible>
     </applicationVisibilities>
+    <applicationVisibilities>
+        <application>standard__ScaleTestApp</application>
+        <default>false</default>
+        <visible>true</visible>
+    </applicationVisibilities>
     <customMetadataTypeAccesses>
         <enabled>true</enabled>
         <name>Maestro_Account_Type__mdt</name>

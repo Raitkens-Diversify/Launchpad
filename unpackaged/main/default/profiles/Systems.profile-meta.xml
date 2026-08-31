@@ -392,6 +392,11 @@
         <default>false</default>
         <visible>true</visible>
     </applicationVisibilities>
+    <applicationVisibilities>
+        <application>standard__ScaleTestApp</application>
+        <default>false</default>
+        <visible>true</visible>
+    </applicationVisibilities>
     <customMetadataTypeAccesses>
         <enabled>true</enabled>
         <name>Registration_Type__mdt</name>
