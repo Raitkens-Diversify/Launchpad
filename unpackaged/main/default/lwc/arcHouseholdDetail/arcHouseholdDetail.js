@@ -96,7 +96,7 @@ import getRecordValuesForType from "@salesforce/apex/FieldDetailController.getRe
  * justify a sixth field set.
  */
 const SCHEMA_BY_RECORD_TYPE = {
-  PersonAccount: "Individual Detail",
+  PersonAccount: "Client - Individual",
   IndustriesIndividual: "Individual Detail",
   Prospect: "Individual Detail",
   Diversify_Related_Person: "Individual Detail",

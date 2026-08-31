@@ -21,7 +21,6 @@ public with sharing class ArcRecordSummaryController {
         Id,
         Type,
         CreatedDate,
-        Classification__c,
         RecordType.DeveloperName,
         RecordType.Name,
         Household__c,
@@ -47,7 +46,6 @@ public with sharing class ArcRecordSummaryController {
     context.recordTypeLabel = account.RecordType?.Name;
     context.accountType = account.Type;
     context.roles = roles;
-    context.classification = account.Classification__c;
     context.householdId = account.Household__c;
     context.householdName = account.Household__r?.Name;
     context.primaryAdvisorName = resolvePrimaryAdvisorName(account);
@@ -84,7 +82,7 @@ public with sharing class ArcRecordSummaryController {
     Set<String> seen = new Set<String>();
 
     for (Account_Account_Relationship__c relation : [
-      SELECT Roles__c
+      SELECT Reciprocal_Role__r.Role__C
       FROM Account_Account_Relationship__c
       WHERE Related_Account__c = :accountId AND Active__c = TRUE
     ]) {
