@@ -66,35 +66,35 @@ private class ArcAccountRelationshipsControllerTest {
       new Account_Account_Relationship__c(
         Account__c = trustAccount.Id,
         Related_Account__c = trusteePerson.Id,
-        Roles__c = 'Trustee',
+        //Roles__c = 'Trustee',
         RecordTypeId = fiduciaryRecordTypeId,
         Active__c = true
       ),
       new Account_Account_Relationship__c(
         Account__c = trustAccount.Id,
         Related_Account__c = grantorPerson.Id,
-        Roles__c = 'Grantor',
+        //Roles__c = 'Grantor',
         RecordTypeId = fiduciaryRecordTypeId,
         Active__c = true
       ),
       new Account_Account_Relationship__c(
         Account__c = estateAccount.Id,
         Related_Account__c = executorPerson.Id,
-        Roles__c = 'Executor / Personal Representative',
+        //Roles__c = 'Executor / Personal Representative',
         RecordTypeId = fiduciaryRecordTypeId,
         Active__c = true
       ),
       new Account_Account_Relationship__c(
         Account__c = businessAccount.Id,
         Related_Account__c = beneficialOwnerPerson.Id,
-        Roles__c = 'Beneficial Owner',
+        //Roles__c = 'Beneficial Owner',
         RecordTypeId = fiduciaryRecordTypeId,
         Active__c = true
       ),
       new Account_Account_Relationship__c(
         Account__c = individualAccount.Id,
         Related_Account__c = trustedContactPerson.Id,
-        Roles__c = 'Trusted Contact',
+        //Roles__c = 'Trusted Contact',
         RecordTypeId = fiduciaryRecordTypeId,
         Active__c = true
       ),
@@ -102,7 +102,7 @@ private class ArcAccountRelationshipsControllerTest {
       new Account_Account_Relationship__c(
         Account__c = trustAccount.Id,
         Related_Account__c = trustedContactPerson.Id,
-        Roles__c = 'Trustee',
+        //Roles__c = 'Trustee',
         RecordTypeId = fiduciaryRecordTypeId,
         Active__c = false
       )

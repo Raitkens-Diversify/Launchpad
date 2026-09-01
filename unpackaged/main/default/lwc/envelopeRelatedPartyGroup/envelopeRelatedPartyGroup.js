@@ -14,8 +14,8 @@ import { LightningElement, api } from 'lwc';
 
 // The two ways a party can be added, rendered in this order. `key` reaches the host on `partyaction`.
 const ACTIONS = [
-    { key: 'selectExisting', label: 'Select Existing' },
-    { key: 'createNew', label: 'Create New' }
+    { key: 'selectExisting', label: 'Select Existing Contact' },
+    { key: 'createNew', label: 'Create New Contact' }
 ];
 
 export default class EnvelopeRelatedPartyGroup extends LightningElement {

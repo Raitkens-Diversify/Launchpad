@@ -690,6 +690,8 @@ export default class FscRelRecordLookup extends LightningElement {
   }
 
   dispatchCreateRequest(recordTypeOption) {
+    const searchTerm = String(this.searchTerm || "").trim();
+
     this.closeDropdown();
 
     if (!this.objectApiName) {
@@ -708,6 +710,7 @@ export default class FscRelRecordLookup extends LightningElement {
           recordTypeId:
             recordTypeOption?.recordTypeId || this.effectiveRecordTypeId,
           headerLabel,
+          searchTerm,
           isPersonAccount:
             recordTypeOption?.isPersonType === true ||
             this.resolveIsPersonAccount()
@@ -718,6 +721,7 @@ export default class FscRelRecordLookup extends LightningElement {
     );
   }
 
+  @api
   beginEditing() {
     this.isEditing = true;
     this.searchTerm = "";

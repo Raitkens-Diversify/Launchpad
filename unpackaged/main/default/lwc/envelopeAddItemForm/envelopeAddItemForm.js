@@ -22,12 +22,12 @@ const CONFIG = {
     isa: {
         icon: 'utility:new',
         iconClass: 'add-form__icon add-form__icon_isa',
-        title: 'Add Investment & Service Agreements',
-        nicknameLabel: 'ISA Nickname',
-        nicknamePlaceholder: 'Enter Investment & Service Agreement Nickname',
-        typeLabel: 'Investment & Service Agreement Type',
-        typePlaceholder: 'Select Investment & Service Agreement Type',
-        submitLabel: 'Add Investment & Service Agreement',
+        title: 'Add Investment or Service',
+        nicknameLabel: 'Investment or Service Nickname',
+        nicknamePlaceholder: 'Enter Investment or Service Nickname',
+        typeLabel: 'Investment or Service Type',
+        typePlaceholder: 'Select Investment or Service Type',
+        submitLabel: 'Add Investment or Service',
         typeOptions: [
             { label: 'Accounts', value: 'accounts' },
             { label: 'DPIs - Sponsor Reported', value: 'dpi' },

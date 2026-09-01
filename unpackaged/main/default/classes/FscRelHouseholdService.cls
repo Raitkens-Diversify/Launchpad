@@ -191,6 +191,104 @@ public with sharing class FscRelHouseholdService {
     return recordTypeId == null ? null : String.valueOf(recordTypeId);
   }
 
+  public Map<String, String> getAccountCreatePrefillFieldValues(
+    Id memberAccountId,
+    Id recordTypeId,
+    String searchTerm
+  ) {
+    Map<String, String> prefillValues = new Map<String, String>();
+    Account memberAccount = accountRepository.selectById(memberAccountId);
+
+    if (memberAccount != null && memberAccount.Household__c != null) {
+      prefillValues.put(
+        'Household__c',
+        String.valueOf(memberAccount.Household__c)
+      );
+    }
+
+    String normalizedSearchTerm = String.isBlank(searchTerm)
+      ? null
+      : searchTerm.trim();
+    if (normalizedSearchTerm == null) {
+      return prefillValues;
+    }
+
+    if (isPersonAccountRecordType(recordTypeId)) {
+      appendPersonAccountNamePrefill(prefillValues, normalizedSearchTerm);
+    } else {
+      prefillValues.put('Name', normalizedSearchTerm);
+    }
+
+    return prefillValues;
+  }
+
+  private Boolean isPersonAccountRecordType(Id recordTypeId) {
+    if (recordTypeId == null) {
+      return false;
+    }
+
+    List<RecordType> recordTypes = [
+      SELECT IsPersonType
+      FROM RecordType
+      WHERE Id = :recordTypeId
+      LIMIT 1
+    ];
+
+    return !recordTypes.isEmpty() && recordTypes[0].IsPersonType == true;
+  }
+
+  private void appendPersonAccountNamePrefill(
+    Map<String, String> prefillValues,
+    String searchTerm
+  ) {
+    Integer firstSpaceIndex = searchTerm.indexOf(' ');
+
+    if (firstSpaceIndex > 0) {
+      prefillValues.put(
+        'FirstName',
+        searchTerm.substring(0, firstSpaceIndex).trim()
+      );
+      prefillValues.put(
+        'LastName',
+        searchTerm.substring(firstSpaceIndex + 1).trim()
+      );
+      return;
+    }
+
+    prefillValues.put('LastName', searchTerm);
+  }
+
+  public FscRelHouseholdModels.LookupOption resolveRecentlyCreatedAccount(
+    Id recordTypeId,
+    Long createdAfterEpochMs
+  ) {
+    if (recordTypeId == null || createdAfterEpochMs == null) {
+      return null;
+    }
+
+    Datetime createdAfter = Datetime.newInstance(createdAfterEpochMs);
+    Id currentUserId = UserInfo.getUserId();
+
+    List<Account> accounts = [
+      SELECT Id, Name
+      FROM Account
+      WHERE RecordTypeId = :recordTypeId
+        AND CreatedById = :currentUserId
+        AND CreatedDate >= :createdAfter
+      ORDER BY CreatedDate DESC
+      LIMIT 1
+    ];
+
+    if (accounts.isEmpty()) {
+      return null;
+    }
+
+    FscRelHouseholdModels.LookupOption option = new FscRelHouseholdModels.LookupOption();
+    option.id = String.valueOf(accounts[0].Id);
+    option.label = accounts[0].Name;
+    return option;
+  }
+
   public List<FscRelHouseholdModels.CreateRecordTypeOption> getCreateableRecordTypes(
     String objectApiName
   ) {

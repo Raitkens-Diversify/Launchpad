@@ -25,6 +25,37 @@ public with sharing class FscRelHouseholdController {
   }
 
   /**
+   * Default field values for inline Account create from member relationship context.
+   */
+  @AuraEnabled(cacheable=true)
+  public static Map<String, String> getAccountCreatePrefillFieldValues(
+    Id memberAccountId,
+    Id recordTypeId,
+    String searchTerm
+  ) {
+    return SERVICE.getAccountCreatePrefillFieldValues(
+      memberAccountId,
+      recordTypeId,
+      searchTerm
+    );
+  }
+
+  /**
+   * Resolves the most recent Account created by the running user after a native
+   * create overlay was opened.
+   */
+  @AuraEnabled
+  public static FscRelHouseholdModels.LookupOption resolveRecentlyCreatedAccount(
+    Id recordTypeId,
+    Long createdAfterEpochMs
+  ) {
+    return SERVICE.resolveRecentlyCreatedAccount(
+      recordTypeId,
+      createdAfterEpochMs
+    );
+  }
+
+  /**
    * Returns the Name of the supplied Contact.
    */
   @AuraEnabled(cacheable=true)

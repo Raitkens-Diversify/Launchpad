@@ -1,16 +1,16 @@
 <template>
     <c-ds-modal-v2
         is-open={isOpen}
-        title="Select existing member"
-        subtitle="Search for household member to select as account owner."
+        title="Select Existing Contact"
+        subtitle="Search for existing household contact to select as account owner."
         size="small"
         allow-overflow
         onclose={handleClose}>
         <div class="select-member__body">
             <c-envelope-searchable-combobox
                 variant="label-hidden"
-                label="Member"
-                placeholder="Search member..."
+                label="Contact"
+                placeholder="Search contact..."
                 options={memberOptions}
                 value={selectedId}
                 onchange={handleSelect}>

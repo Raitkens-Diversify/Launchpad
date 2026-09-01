@@ -1,14 +1,23 @@
 /*
  * Author: Hoang Long Vu To
- * Date: 2026-06-15
+ * Date: 2026-09-01
  */
 import { api, track } from "lwc";
 import LightningModal from "lightning/modal";
 import saveMemberAccountRelationships from "@salesforce/apex/FscRelHouseholdController.saveMemberAccountRelationships";
 import deleteMemberAccountRelationships from "@salesforce/apex/FscRelHouseholdController.deleteMemberAccountRelationships";
+import getAccountCreatePrefillFieldValues from "@salesforce/apex/FscRelHouseholdController.getAccountCreatePrefillFieldValues";
 import FscRelCreateReciprocalRoleModal from "c/fscRelCreateReciprocalRoleModal";
 import FscRelCreateRecordModal from "c/fscRelCreateRecordModal";
-import { buildModalSaveMessage, buildMemberRelationshipModalTitle, buildReadOnlyMemberRelationshipEmptyState, buildReadOnlyMemberRelationshipInstruction, ensureFscRelModalStyles, isReadOnlyMemberRelationshipRecordType, resolveMemberRelationshipHeaderIconName } from "c/fscRelUtils";
+import {
+  buildMemberRelationshipModalTitle,
+  buildModalSaveMessage,
+  buildReadOnlyMemberRelationshipEmptyState,
+  buildReadOnlyMemberRelationshipInstruction,
+  ensureFscRelModalStyles,
+  isReadOnlyMemberRelationshipRecordType,
+  resolveMemberRelationshipHeaderIconName
+} from "c/fscRelUtils";
 
 export default class FscRelManageContactRelationshipModal extends LightningModal {
   @api memberAccountId;
@@ -284,12 +293,16 @@ export default class FscRelManageContactRelationshipModal extends LightningModal
   }
 
   get bannerClass() {
-    const variant =
-      this.bannerVariant === "success"
-        ? "slds-theme_success"
-        : this.bannerVariant === "warning"
-          ? "slds-theme_warning"
-          : "slds-theme_error";
+    let variant = "slds-theme_error";
+
+    if (this.bannerVariant === "success") {
+      variant = "slds-theme_success";
+    } else if (this.bannerVariant === "warning") {
+      variant = "slds-theme_warning";
+    } else if (this.bannerVariant === "info") {
+      variant = "slds-theme_info";
+    }
+
     return `modal-banner slds-notify slds-notify_alert ${variant}`;
   }
 
@@ -572,35 +585,52 @@ export default class FscRelManageContactRelationshipModal extends LightningModal
     }
 
     const detail = event.detail || {};
-    const result = await FscRelCreateRecordModal.open({
-      size: "large",
-      objectApiName: detail.objectApiName || "Account",
-      recordTypeId: detail.recordTypeId,
-      headerLabel: detail.headerLabel || "New Account"
-    });
+    const objectApiName = detail.objectApiName || "Account";
 
-    if (!result?.recordId) {
+    if (objectApiName !== "Account") {
       return;
     }
 
     const targetRow = this.relationshipRows.find((row) => row.id === rowId);
-    const memberAccountId = this.isClientSelectMode
-      ? targetRow?.memberAccountId
-      : this.resolvedMemberAccountId;
+    const memberAccountId = this.resolveRowMemberAccountId(targetRow);
+    let defaultFieldValues = {};
 
-    if (result.recordId === memberAccountId) {
-      this.updateRow(rowId, {
-        relatedAccountId: "",
-        relatedAccountName: "",
-        errorMessage: "A member cannot be related to themselves."
+    try {
+      defaultFieldValues = await getAccountCreatePrefillFieldValues({
+        memberAccountId: memberAccountId || null,
+        recordTypeId: detail.recordTypeId || null,
+        searchTerm: detail.searchTerm || ""
       });
+    } catch (error) {
+      defaultFieldValues = {};
+    }
+
+    const result = await FscRelCreateRecordModal.open({
+      size: "large",
+      objectApiName: "Account",
+      recordTypeId: detail.recordTypeId,
+      headerLabel: detail.headerLabel || "New Account",
+      defaultFieldValues
+    });
+
+    const recordId = result?.recordId;
+    if (!recordId) {
       return;
     }
 
+    const recordLabel = result?.recordLabel || "";
+
     this.updateRow(rowId, {
-      relatedAccountId: result.recordId,
-      relatedAccountName: "",
+      relatedAccountId: recordId,
+      relatedAccountName: recordLabel,
       errorMessage: ""
+    });
+
+    window.requestAnimationFrame(() => {
+      const lookup = this.template.querySelector(
+        `c-fsc-rel-record-lookup[data-row-id="${rowId}"]`
+      );
+      lookup?.applySelection?.(recordId, recordLabel);
     });
   }
 
@@ -958,6 +988,21 @@ export default class FscRelManageContactRelationshipModal extends LightningModal
   }
 
   resolveRowId(event) {
+    const path =
+      typeof event.composedPath === "function" ? event.composedPath() : [];
+
+    for (const node of path) {
+      const raw = node?.dataset?.rowId;
+      if (!raw) {
+        continue;
+      }
+
+      const parsed = Number(raw);
+      if (!Number.isNaN(parsed)) {
+        return parsed;
+      }
+    }
+
     const raw = event.currentTarget?.dataset?.rowId;
     if (!raw) {
       return null;

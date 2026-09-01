@@ -113,7 +113,7 @@ public with sharing class ArcAccountRelationshipsController {
     List<Account_Account_Relationship__c> relations;
     try {
       relations = [
-        SELECT Related_Account__c, Related_Account__r.Name, Roles__c, Reciprocal_Role__r.Role__c
+        SELECT Related_Account__c, Related_Account__r.Name, Reciprocal_Role__r.Role__c
         FROM Account_Account_Relationship__c
         WHERE
           Account__c = :accountId
@@ -186,8 +186,8 @@ public with sharing class ArcAccountRelationshipsController {
     Set<String> found = new Set<String>();
     Set<String> tokens = new Set<String>();
 
-    if (String.isNotBlank(relation.Roles__c)) {
-      for (String token : relation.Roles__c.split(';')) {
+    if (String.isNotBlank(relation.Reciprocal_Role__r.Role__c)) {
+      for (String token : relation.Reciprocal_Role__r.Role__c.split(';')) {
         if (String.isNotBlank(token)) {
           tokens.add(token.trim().toLowerCase());
         }

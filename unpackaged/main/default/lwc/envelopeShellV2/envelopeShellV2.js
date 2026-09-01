@@ -248,8 +248,8 @@ const GROUPS = {
   householdMembers: {
     iconVariant: "member",
     cardIconVariant: "member",
-    actionTitle: "Add Client",
-    removeLabel: "Remove household member",
+    actionTitle: "Add as Client or Related Party",
+    removeLabel: "Remove Client",
     persist: (detail, envelopeId) => {
       const acc = buildMemberAccountPayload(detail);
       return acc ? saveEntity({ acc, envelopeId }) : Promise.resolve(null);
@@ -521,7 +521,7 @@ function mapHouseholdResponse(data) {
         ? membersById.get(c.accountId)
         : accountsById.get(c.financialAccountId);
       const ownerName = memberType ? c.accountName : c.financialAccountName;
-      const typeLabel = memberType ? "Household Members" : "Accounts";
+      const typeLabel = memberType ? "Household Contacts" : "Accounts";
       return {
         id: c.id,
         groupId: "cases",
@@ -4979,8 +4979,8 @@ export default class EnvelopeShellV2 extends LightningElement {
             requirement.key
           )} is required.`,
           actions: [
-            { key: "selectExisting", label: "Select Existing" },
-            { key: "createNew", label: "Create New" }
+            { key: "selectExisting", label: "Select Existing Contact" },
+            { key: "createNew", label: "Create New Contact" }
           ]
         }
       }))
@@ -5211,7 +5211,7 @@ export default class EnvelopeShellV2 extends LightningElement {
         } else if (!isMember) {
           sections.push({
             key: "type",
-            title: "Investment & Service Agreement Type",
+            title: "Investment or Service Type",
             fields: [{ key: "isaType", label: "ISA Type", value: action.title }]
           });
         }

@@ -11,6 +11,85 @@ import fscRelModalOverflow from "@salesforce/resourceUrl/fscRelModalOverflow";
 export const FIDUCIARY_LEGAL_RECORD_TYPE = "Fiduciary_Legal";
 export const HOUSEHOLD_AAR_RECORD_TYPE = "Household";
 
+/**
+ * Standard Account create URL with override bypass so the assigned Lightning
+ * record page (flexipage) is used — same path as cmp_ProspectOrClient.
+ */
+export const buildNativeAccountCreateUrl = (recordTypeId = "") => {
+  const params = new URLSearchParams({
+    nooverride: "1",
+    useRecordTypeCheck: "0"
+  });
+  const normalizedRecordTypeId = String(recordTypeId || "").trim();
+
+  if (normalizedRecordTypeId) {
+    params.set("recordTypeId", normalizedRecordTypeId);
+  }
+
+  return `/lightning/o/Account/new?${params.toString()}`;
+};
+
+/**
+ * URL for the native Account create overlay with prefilled values. Uses the
+ * same query params as NavigationMixin + navigationLocation: RELATED_LIST.
+ */
+export const buildNativeAccountCreateOverlayUrl = (
+  recordTypeId = "",
+  encodedDefaultFieldValues = ""
+) => {
+  const params = new URLSearchParams({
+    nooverride: "1",
+    useRecordTypeCheck: "0",
+    navigationLocation: "RELATED_LIST",
+    count: "1"
+  });
+  const normalizedRecordTypeId = String(recordTypeId || "").trim();
+  const normalizedDefaults = String(encodedDefaultFieldValues || "").trim();
+
+  if (normalizedRecordTypeId) {
+    params.set("recordTypeId", normalizedRecordTypeId);
+  }
+
+  if (normalizedDefaults) {
+    params.set("defaultFieldValues", normalizedDefaults);
+  }
+
+  return `/lightning/o/Account/new?${params.toString()}`;
+};
+
+export const NATIVE_RECORD_CREATE_MODAL_SELECTOR =
+  "records-modal-lwc-detail-panel-wrapper";
+
+/**
+ * Strips wrapping single quotes from NavigationMixin default field values so
+ * Salesforce can coerce them to the target field types.
+ */
+export const normalizeNativeCreateDefaultFieldValues = (
+  defaultFieldValues = {}
+) => {
+  if (
+    !defaultFieldValues ||
+    typeof defaultFieldValues !== "object" ||
+    Array.isArray(defaultFieldValues)
+  ) {
+    return {};
+  }
+
+  return Object.entries(defaultFieldValues).reduce((normalized, [key, value]) => {
+    if (value === undefined || value === null) {
+      return normalized;
+    }
+
+    if (key === "RecordTypeId") {
+      normalized[key] = String(value);
+      return normalized;
+    }
+
+    normalized[key] = String(value).replace(/(^'|'$)/g, "");
+    return normalized;
+  }, {});
+};
+
 export const normalizeAccountRelationRecordTypeDeveloperName = (
   recordTypeDeveloperName
 ) => String(recordTypeDeveloperName || "").trim();

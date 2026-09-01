@@ -86,7 +86,7 @@ public with sharing class ArcRecordSummaryController {
       FROM Account_Account_Relationship__c
       WHERE Related_Account__c = :accountId AND Active__c = TRUE
     ]) {
-      for (String role : FscRelRoleUtils.parseRoles(relation.Roles__c)) {
+      for (String role : FscRelRoleUtils.parseRoles(relation.Reciprocal_Role__r.Role__c)) {
         if (String.isBlank(role) || seen.contains(role)) {
           continue;
         }

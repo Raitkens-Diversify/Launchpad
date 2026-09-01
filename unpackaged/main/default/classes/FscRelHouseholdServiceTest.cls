@@ -441,6 +441,67 @@ private class FscRelHouseholdServiceTest {
   }
 
   @IsTest
+  static void resolveRecentlyCreatedAccount_returnsLatestMatchingAccount() {
+    FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
+    FscRelHouseholdService service = new FscRelHouseholdService();
+    Id businessRecordTypeId = FscRelRecordTypeUtils.selectDefaultAccountRecordTypeId(
+      false
+    );
+    Long createdAfterEpochMs = Datetime.now().getTime();
+
+    Account createdAccount = new Account(
+      Name = 'Native Create Overlay Test',
+      RecordTypeId = businessRecordTypeId
+    );
+    insert createdAccount;
+
+    Test.startTest();
+    FscRelHouseholdModels.LookupOption resolved = service.resolveRecentlyCreatedAccount(
+      businessRecordTypeId,
+      createdAfterEpochMs
+    );
+    Test.stopTest();
+
+    System.assertNotEquals(null, resolved);
+    System.assertEquals(String.valueOf(createdAccount.Id), resolved.id);
+    System.assertEquals(createdAccount.Name, resolved.label);
+  }
+
+  @IsTest
+  static void getAccountCreatePrefillFieldValues_prefillsHouseholdAndName() {
+    FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
+    FscRelHouseholdService service = new FscRelHouseholdService();
+    Id businessRecordTypeId = FscRelRecordTypeUtils.selectDefaultAccountRecordTypeId(
+      false
+    );
+
+    Test.startTest();
+    Map<String, String> businessPrefill = service.getAccountCreatePrefillFieldValues(
+      scenario.linkedPersonAccount.Id,
+      businessRecordTypeId,
+      'Acme Holdings'
+    );
+    Map<String, String> personPrefill = service.getAccountCreatePrefillFieldValues(
+      scenario.linkedPersonAccount.Id,
+      scenario.linkedPersonAccount.RecordTypeId,
+      'Jane Doe'
+    );
+    Test.stopTest();
+
+    System.assertEquals(
+      String.valueOf(scenario.rootAccount.Id),
+      businessPrefill.get('Household__c')
+    );
+    System.assertEquals('Acme Holdings', businessPrefill.get('Name'));
+    System.assertEquals(
+      String.valueOf(scenario.rootAccount.Id),
+      personPrefill.get('Household__c')
+    );
+    System.assertEquals('Jane', personPrefill.get('FirstName'));
+    System.assertEquals('Doe', personPrefill.get('LastName'));
+  }
+
+  @IsTest
   static void getAccountName_returnsAccountName() {
     FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
     FscRelHouseholdService service = new FscRelHouseholdService();

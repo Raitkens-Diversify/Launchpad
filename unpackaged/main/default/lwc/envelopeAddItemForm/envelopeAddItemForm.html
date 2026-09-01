@@ -17,12 +17,12 @@
                 <div class="add-form__toggle-row">
                     <lightning-button
                         variant="neutral"
-                        label="Select Existing"
+                        label="Select Existing Contact"
                         onclick={handleSelectExistingMode}>
                     </lightning-button>
                     <lightning-button
                         variant="neutral"
-                        label="Create New"
+                        label="Create New Contact"
                         onclick={handleCreateNewMode}>
                     </lightning-button>
                     <lightning-button
@@ -39,8 +39,8 @@
                 <div class="add-form__row">
                     <lightning-combobox
                         class="add-form__field"
-                        label="Household Member"
-                        placeholder="Select Existing Household Member"
+                        label="Household Contact"
+                        placeholder="Select Existing Contact"
                         options={eligibleMemberOptions}
                         value={selectedExistingId}
                         onchange={handleExistingMemberChange}>
