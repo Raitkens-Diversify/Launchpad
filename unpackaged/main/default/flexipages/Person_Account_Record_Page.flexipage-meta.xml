@@ -1430,6 +1430,16 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
+                <componentName>dfsle:Status</componentName>
+                <identifier>dfsle_Status</identifier>
+            </componentInstance>
+        </itemInstances>
+        <name>Facet-2c310c7e-a13a-4b90-99ce-1fcc4d8045c8</name>
+        <type>Facet</type>
+    </flexiPageRegions>
+    <flexiPageRegions>
+        <itemInstances>
+            <componentInstance>
                 <componentInstanceProperties>
                     <name>parentFieldApiName</name>
                     <value>Account.Id</value>
@@ -1578,6 +1588,20 @@
             <componentInstance>
                 <componentInstanceProperties>
                     <name>body</name>
+                    <value>Facet-2c310c7e-a13a-4b90-99ce-1fcc4d8045c8</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>title</name>
+                    <value>Docusign</value>
+                </componentInstanceProperties>
+                <componentName>flexipage:tab</componentName>
+                <identifier>flexipage_tab9</identifier>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
+                <componentInstanceProperties>
+                    <name>body</name>
                     <value>Facet-7cb1f153-3e66-4e4d-8b91-3961d6cda21f</value>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
@@ -1624,6 +1648,9 @@
                         </valueListItems>
                         <valueListItems>
                             <value>LoginToNetworkAsPersonUser</value>
+                        </valueListItems>
+                        <valueListItems>
+                            <value>CustomButton.Account.SendWithDocuSign</value>
                         </valueListItems>
                     </valueList>
                 </componentInstanceProperties>

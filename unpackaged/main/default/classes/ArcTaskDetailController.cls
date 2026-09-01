@@ -120,7 +120,7 @@ public with sharing class ArcTaskDetailController {
     for (Case record : [
       SELECT Id, CaseNumber, Subject, Status, Owner.Name, CreatedDate
       FROM Case
-      WHERE FinServ__Household__c = :householdId AND IsClosed = false
+      WHERE Household__c = :householdId AND IsClosed = false
       WITH USER_MODE
       ORDER BY CreatedDate DESC
       LIMIT 20
