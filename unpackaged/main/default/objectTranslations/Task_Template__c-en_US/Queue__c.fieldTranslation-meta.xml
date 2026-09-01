@@ -23,6 +23,10 @@
             <translation><!-- Finance --></translation>
         </picklistValues>
         <picklistValues>
+            <masterLabel>Ops SSE</masterLabel>
+            <translation><!-- Ops SSE --></translation>
+        </picklistValues>
+        <picklistValues>
             <masterLabel>Principal Review</masterLabel>
             <translation><!-- Principal Review --></translation>
         </picklistValues>

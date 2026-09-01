@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Restrict_Account_Number_Update_if_null</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(!ISBLANK(PRIORVALUE(Account_Number__c)),
+NOT($Permission.Senior_Ops))</errorConditionFormula>
+    <errorMessage>You cannot edit the Financial Account Number once it is populated.</errorMessage>
+</ValidationRule>

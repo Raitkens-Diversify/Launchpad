@@ -28,6 +28,10 @@
         <errorMessage><!-- If you need to change the financial advisor team, please reach out to your admin or ops teams. --></errorMessage>
         <name>RestrictFinAdvisorTeamUpdt_WizFinAcct</name>
     </validationRules>
+    <validationRules>
+        <errorMessage><!-- You cannot edit the Financial Account Number once it is populated. --></errorMessage>
+        <name>Restrict_Account_Number_Update_if_null</name>
+    </validationRules>
     
     
     

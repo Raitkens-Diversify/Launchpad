@@ -50,6 +50,11 @@
                 <default>false</default>
                 <label>Trading</label>
             </value>
+            <value>
+                <fullName>Ops SSE</fullName>
+                <default>false</default>
+                <label>Ops SSE</label>
+            </value>
         </valueSetDefinition>
     </valueSet>
 </CustomField>

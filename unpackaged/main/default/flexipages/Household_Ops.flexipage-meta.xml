@@ -1143,6 +1143,11 @@
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>adminFilters</name>
+                    <valueList>
+                        <valueListItems>
+                            <value>CASES.CLOSED|EQUALS|false</value>
+                        </valueListItems>
+                    </valueList>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>maxRecordsToDisplay</name>
@@ -1167,13 +1172,16 @@
                             <value>CASES.CASE_NUMBER</value>
                         </valueListItems>
                         <valueListItems>
-                            <value>CASES.SUBJECT</value>
+                            <value>Wizard_Financial_Account__c</value>
+                        </valueListItems>
+                        <valueListItems>
+                            <value>Current_Task_Subject_Assignee__c</value>
+                        </valueListItems>
+                        <valueListItems>
+                            <value>Case_Branch_Name_DisplayName__c</value>
                         </valueListItems>
                         <valueListItems>
                             <value>CASES.CREATED_DATE</value>
-                        </valueListItems>
-                        <valueListItems>
-                            <value>CASES.PRIORITY</value>
                         </valueListItems>
                     </valueList>
                 </componentInstanceProperties>
@@ -1209,6 +1217,11 @@
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>adminFilters</name>
+                    <valueList>
+                        <valueListItems>
+                            <value>CASES.CLOSED|EQUALS|true</value>
+                        </valueListItems>
+                    </valueList>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>maxRecordsToDisplay</name>
@@ -1233,13 +1246,13 @@
                             <value>CASES.CASE_NUMBER</value>
                         </valueListItems>
                         <valueListItems>
-                            <value>CASES.SUBJECT</value>
+                            <value>Wizard_Financial_Account__c</value>
                         </valueListItems>
                         <valueListItems>
-                            <value>CASES.CREATED_DATE</value>
+                            <value>Case_Branch_Name_DisplayName__c</value>
                         </valueListItems>
                         <valueListItems>
-                            <value>CASES.PRIORITY</value>
+                            <value>CASES.CLOSED_DATE</value>
                         </valueListItems>
                     </valueList>
                 </componentInstanceProperties>
