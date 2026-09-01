@@ -195,21 +195,27 @@ public class FscRelRecordTypeUtils {
       return options;
     }
 
-    Map<Id, Schema.RecordTypeInfo> recordTypeInfoById = describe.getRecordTypeInfosById();
-    List<RecordType> activeRecordTypes = [
-      SELECT Id, DeveloperName, Name, IsPersonType
-      FROM RecordType
-      WHERE SObjectType = :objectApiName AND IsActive = TRUE
-      ORDER BY Name
-    ];
+    Map<Id, Boolean> personTypeByRecordTypeId = selectPersonTypeByRecordTypeId(
+      objectApiName
+    );
 
-    for (RecordType recordType : activeRecordTypes) {
-      Schema.RecordTypeInfo recordTypeInfo = recordTypeInfoById.get(recordType.Id);
-      if (recordTypeInfo == null || !recordTypeInfo.isAvailable()) {
+    for (Schema.RecordTypeInfo recordTypeInfo : describe.getRecordTypeInfos()) {
+      if (
+        recordTypeInfo == null ||
+        recordTypeInfo.isMaster() ||
+        !recordTypeInfo.isActive() ||
+        !recordTypeInfo.isAvailable()
+      ) {
         continue;
       }
 
-      options.add(buildCreateRecordTypeOption(recordType));
+      Id recordTypeId = recordTypeInfo.getRecordTypeId();
+      options.add(
+        buildCreateRecordTypeOption(
+          recordTypeInfo,
+          personTypeByRecordTypeId.get(recordTypeId) == true
+        )
+      );
     }
 
     if (!options.isEmpty()) {
@@ -234,14 +240,35 @@ public class FscRelRecordTypeUtils {
     return options;
   }
 
+  private static Map<Id, Boolean> selectPersonTypeByRecordTypeId(
+    String objectApiName
+  ) {
+    Map<Id, Boolean> personTypeByRecordTypeId = new Map<Id, Boolean>();
+
+    for (RecordType recordType : [
+      SELECT Id, IsPersonType
+      FROM RecordType
+      WHERE SObjectType = :objectApiName AND IsActive = TRUE
+    ]) {
+      personTypeByRecordTypeId.put(
+        recordType.Id,
+        recordType.IsPersonType == true
+      );
+    }
+
+    return personTypeByRecordTypeId;
+  }
+
   private static FscRelHouseholdModels.CreateRecordTypeOption buildCreateRecordTypeOption(
-    RecordType recordType
+    Schema.RecordTypeInfo recordTypeInfo,
+    Boolean isPersonType
   ) {
     FscRelHouseholdModels.CreateRecordTypeOption option = new FscRelHouseholdModels.CreateRecordTypeOption();
-    option.recordTypeId = String.valueOf(recordType.Id);
-    option.developerName = recordType.DeveloperName;
-    option.label = recordType.Name;
-    option.isPersonType = recordType.IsPersonType == true;
+    Id recordTypeId = recordTypeInfo.getRecordTypeId();
+    option.recordTypeId = recordTypeId == null ? null : String.valueOf(recordTypeId);
+    option.developerName = recordTypeInfo.getDeveloperName();
+    option.label = recordTypeInfo.getName();
+    option.isPersonType = isPersonType == true;
     return option;
   }
 

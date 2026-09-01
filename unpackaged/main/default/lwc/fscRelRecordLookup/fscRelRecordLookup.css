@@ -1,4 +1,4 @@
-/* Author: Hoang Long Vu To | Date: 2026-06-08 */
+/* Author: Hoang Long Vu To | Date: 2026-09-01 */
 :host {
     display: block;
     width: 100%;
@@ -98,7 +98,7 @@
     margin: 0;
     transform: none;
     z-index: 10050;
-    max-height: 13.75rem;
+    max-height: var(--lookup-dropdown-max, 13.75rem);
     overflow: hidden;
     display: grid;
     grid-template-rows: minmax(0, 1fr);
@@ -111,6 +111,22 @@
 
 .lookup__dropdown_with-footer {
     grid-template-rows: minmax(0, 1fr) auto;
+}
+
+.lookup__dropdown_fit-content {
+    grid-template-rows: auto auto;
+    height: fit-content;
+    max-height: fit-content;
+}
+
+.lookup__dropdown_fit-content .lookup__dropdown-scroll {
+    display: none;
+    max-height: 0;
+}
+
+.lookup__dropdown_fit-content .lookup__new-record-type-list {
+    max-height: none;
+    overflow-y: visible;
 }
 
 .lookup__dropdown-scroll {
@@ -189,6 +205,10 @@
     list-style: none;
     border-top: 1px solid #e5e5e5;
     background: #ffffff;
+    max-height: var(--lookup-record-type-list-max, none);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
 }
 
 .lookup__new-record-type-item {

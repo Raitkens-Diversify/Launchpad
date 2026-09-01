@@ -118,6 +118,38 @@ private class FscRelRecordTypeUtilsTest {
   }
 
   @IsTest
+  static void selectCreateableRecordTypes_includesTrustWhenAvailable() {
+    Schema.RecordTypeInfo trustRecordTypeInfo = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
+      .get('Trust');
+    if (trustRecordTypeInfo == null || !trustRecordTypeInfo.isAvailable()) {
+      return;
+    }
+
+    Test.startTest();
+    List<FscRelHouseholdModels.CreateRecordTypeOption> options = FscRelRecordTypeUtils.selectCreateableRecordTypes(
+      'Account'
+    );
+    Test.stopTest();
+
+    Boolean includesTrust = false;
+    for (FscRelHouseholdModels.CreateRecordTypeOption option : options) {
+      if (option.developerName == 'Trust') {
+        includesTrust = true;
+        System.assertEquals(
+          String.valueOf(trustRecordTypeInfo.getRecordTypeId()),
+          option.recordTypeId
+        );
+        break;
+      }
+    }
+
+    System.assert(
+      includesTrust,
+      'Expected Trust (Trusts & Estates) when available on standard Account create.'
+    );
+  }
+
+  @IsTest
   static void selectCreateableRecordTypes_returnsEmptyForBlankObject() {
     System.assertEquals(
       0,

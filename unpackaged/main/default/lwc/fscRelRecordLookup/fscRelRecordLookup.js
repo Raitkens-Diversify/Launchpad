@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-06-08
+ * Date: 2026-09-01
  *
  * SLDS-style lookup with sharing-enforced Apex search and inline create action.
  */
@@ -23,6 +23,8 @@ const DROPDOWN_MAX_HEIGHT_PX = 220;
 const DROPDOWN_MIN_HEIGHT_PX = 80;
 const DROPDOWN_FOOTER_HEIGHT_PX = 36;
 const DROPDOWN_RECORD_TYPE_ROW_HEIGHT_PX = 32;
+const DROPDOWN_SEARCH_RESULT_ROW_HEIGHT_PX = 48;
+const DROPDOWN_STATUS_ROW_HEIGHT_PX = 48;
 const DROPDOWN_VIEWPORT_PADDING_PX = 8;
 
 export default class FscRelRecordLookup extends LightningElement {
@@ -63,6 +65,7 @@ export default class FscRelRecordLookup extends LightningElement {
   _needsDropdownPosition = false;
   _dropdownStyle = "";
   _dropdownOpensAbove = false;
+  _dropdownCompactCreateMenu = false;
   _isDropdownPointerDown = false;
   _createRecordTypeOptions = [];
   _createRecordTypesLoadPromise = null;
@@ -302,6 +305,10 @@ export default class FscRelRecordLookup extends LightningElement {
 
     if (this._dropdownOpensAbove) {
       classes.push("lookup__dropdown_above");
+    }
+
+    if (this._dropdownCompactCreateMenu) {
+      classes.push("lookup__dropdown_fit-content");
     }
 
     return classes.join(" ");
@@ -750,6 +757,7 @@ export default class FscRelRecordLookup extends LightningElement {
     this.searchResults = [];
     this._dropdownStyle = "";
     this._dropdownOpensAbove = false;
+    this._dropdownCompactCreateMenu = false;
     this.template.host?.removeAttribute("data-open");
     this.unbindDropdownPositionListeners();
   }
@@ -786,47 +794,112 @@ export default class FscRelRecordLookup extends LightningElement {
       return;
     }
 
+    const scrollElement = this.template.querySelector(".lookup__dropdown-scroll");
     const containerRect = container.getBoundingClientRect();
     const spaceBelow =
       window.innerHeight - containerRect.bottom - DROPDOWN_VIEWPORT_PADDING_PX;
     const spaceAbove = containerRect.top - DROPDOWN_VIEWPORT_PADDING_PX;
 
-    let maxHeight = Math.min(DROPDOWN_MAX_HEIGHT_PX, spaceBelow);
+    let availableSpace = spaceBelow;
     let opensAbove = false;
 
-    if (maxHeight < DROPDOWN_MIN_HEIGHT_PX && spaceAbove > spaceBelow) {
-      maxHeight = Math.min(DROPDOWN_MAX_HEIGHT_PX, spaceAbove);
+    if (spaceBelow < DROPDOWN_MIN_HEIGHT_PX && spaceAbove > spaceBelow) {
+      availableSpace = spaceAbove;
       opensAbove = true;
     }
 
-    maxHeight = Math.max(Math.round(maxHeight), DROPDOWN_MIN_HEIGHT_PX);
+    availableSpace = Math.max(Math.round(availableSpace), DROPDOWN_MIN_HEIGHT_PX);
 
-    const footerReserve = this.showCreateInDropdown
-      ? this.createFooterHeightPx
+    const footerButtonHeight = this.showCreateInDropdown
+      ? DROPDOWN_FOOTER_HEIGHT_PX
       : 0;
-    const scrollMaxHeight = Math.max(
-      maxHeight - footerReserve,
-      DROPDOWN_MIN_HEIGHT_PX - footerReserve
+    const recordTypeListNaturalHeight = this.createRecordTypeListNaturalHeightPx;
+    const footerNaturalHeight = footerButtonHeight + recordTypeListNaturalHeight;
+    const scrollContentHeight = this.resolveScrollContentHeightPx(scrollElement);
+    const isCompactCreateMenu = this.shouldUseCompactCreateMenu();
+
+    let maxHeight;
+    let scrollMaxHeight;
+    let recordTypeListMaxHeight;
+
+    if (isCompactCreateMenu) {
+      this._dropdownOpensAbove = opensAbove;
+      this._dropdownCompactCreateMenu = true;
+      this._dropdownStyle = [
+        "max-height:fit-content",
+        "--lookup-dropdown-max:fit-content",
+        "--lookup-scroll-max:0px"
+      ].join(";");
+      return;
+    }
+
+    maxHeight = Math.min(DROPDOWN_MAX_HEIGHT_PX, availableSpace);
+    scrollMaxHeight = Math.max(
+      maxHeight - footerNaturalHeight,
+      DROPDOWN_MIN_HEIGHT_PX - footerNaturalHeight
     );
 
+    if (scrollContentHeight <= scrollMaxHeight) {
+      const naturalTotal = scrollContentHeight + footerNaturalHeight;
+      maxHeight = Math.min(
+        Math.max(naturalTotal, DROPDOWN_MIN_HEIGHT_PX),
+        availableSpace
+      );
+      scrollMaxHeight = scrollContentHeight;
+    } else {
+      scrollMaxHeight = Math.max(maxHeight - footerNaturalHeight, 0);
+    }
+
+    recordTypeListMaxHeight = Math.min(
+      recordTypeListNaturalHeight,
+      Math.max(maxHeight - footerButtonHeight - scrollMaxHeight, 0)
+    );
+
+    maxHeight = Math.max(Math.round(maxHeight), DROPDOWN_MIN_HEIGHT_PX);
+    scrollMaxHeight = Math.max(Math.round(scrollMaxHeight), 0);
+    recordTypeListMaxHeight = Math.max(Math.round(recordTypeListMaxHeight), 0);
+
     this._dropdownOpensAbove = opensAbove;
-    this._dropdownStyle = `max-height:${maxHeight}px;--lookup-scroll-max:${scrollMaxHeight}px`;
+    this._dropdownCompactCreateMenu = isCompactCreateMenu;
+    this._dropdownStyle = [
+      `max-height:${maxHeight}px`,
+      `--lookup-dropdown-max:${maxHeight}px`,
+      `--lookup-scroll-max:${scrollMaxHeight}px`,
+      `--lookup-record-type-list-max:${recordTypeListMaxHeight}px`
+    ].join(";");
   }
 
-  get createFooterHeightPx() {
-    if (!this.showCreateInDropdown) {
+  shouldUseCompactCreateMenu() {
+    return (
+      this.showCreateRecordTypeMenu &&
+      !String(this.searchTerm || "").trim() &&
+      !this.isLoading &&
+      !this.hasSearchResults &&
+      !this.showEmptyResults
+    );
+  }
+
+  resolveScrollContentHeightPx(scrollElement) {
+    if (scrollElement) {
+      return scrollElement.scrollHeight;
+    }
+
+    if (this.isLoading || this.showEmptyResults) {
+      return DROPDOWN_STATUS_ROW_HEIGHT_PX;
+    }
+
+    return this.searchResults.length * DROPDOWN_SEARCH_RESULT_ROW_HEIGHT_PX;
+  }
+
+  get createRecordTypeListNaturalHeightPx() {
+    if (!this.showCreateRecordTypeMenu || !this.hasMultipleCreateRecordTypes) {
       return 0;
     }
 
-    let footerHeight = DROPDOWN_FOOTER_HEIGHT_PX;
-
-    if (this.showCreateRecordTypeMenu && this.hasMultipleCreateRecordTypes) {
-      footerHeight +=
-        this.effectiveCreateRecordTypeOptions.length *
-        DROPDOWN_RECORD_TYPE_ROW_HEIGHT_PX;
-    }
-
-    return footerHeight;
+    return (
+      this.effectiveCreateRecordTypeOptions.length *
+      DROPDOWN_RECORD_TYPE_ROW_HEIGHT_PX
+    );
   }
 
   clearSelection() {
