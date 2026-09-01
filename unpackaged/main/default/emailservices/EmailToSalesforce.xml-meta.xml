@@ -11,6 +11,13 @@
         <localPart>emailtosalesforce</localPart>
         <runAsUser>scurkendoll@diversify.com.launchpad</runAsUser>
     </emailServicesAddresses>
+    <emailServicesAddresses>
+        <authorizedSenders>bcheney@diversify.com</authorizedSenders>
+        <developerName>emailtosalesforce1</developerName>
+        <isActive>true</isActive>
+        <localPart>emailtosalesforce</localPart>
+        <runAsUser>bcheney@diversify.com.launchpad</runAsUser>
+    </emailServicesAddresses>
     <functionInactiveAction>Bounce</functionInactiveAction>
     <functionName>EmailToSalesforce</functionName>
     <isActive>true</isActive>
