@@ -408,7 +408,8 @@ public class Task_TriggerHandler {
                 taskIds.add(newTask.Id);
             }
         }
-        for(Task tsk : [SELECT Id,Owner.Name,WhatId FROM Task WHERE Id =: taskIds]){
+        List<Task> tasks = [SELECT Id,Owner.Name,WhatId FROM Task WHERE Id =: taskIds];
+        for(Task tsk : tasks){
             if(tsk.WhatId != null && tsk.WhatId.getSObjectType() == Case.sObjectType) {
                 Id caseId = tsk.WhatId;
                 String ownerName = tsk.Owner.Name;
