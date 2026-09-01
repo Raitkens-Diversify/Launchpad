@@ -5,6 +5,7 @@
     <columns>CREATEDBY_USER</columns>
     <columns>CREATED_DATE</columns>
     <columns>Status__c</columns>
+    <columns>Household__c</columns>
     <filterScope>Everything</filterScope>
     <label>All</label>
 </ListView>
