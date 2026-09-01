@@ -11,9 +11,10 @@ export default class SignificantEventCreateActionModal extends LightningModal {
 
   handleActionClose(event) {
     event?.stopPropagation();
+    const reason = event?.detail?.reason || "close";
     this.close({
-      refreshed: true,
-      reason: event?.detail?.reason || "close"
+      refreshed: reason === "save" || reason === "delete",
+      reason
     });
   }
 }

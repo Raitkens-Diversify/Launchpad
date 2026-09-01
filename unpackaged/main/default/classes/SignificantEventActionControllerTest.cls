@@ -35,7 +35,7 @@ private class SignificantEventActionControllerTest {
   }
 
   @IsTest
-  static void getCreateContext_nonHouseholdLaunch_doesNotPreselectSourceAccount() {
+  static void getCreateContext_nonHouseholdLaunch_preselectsSourceAccount() {
     SignificantEventTestDataFactory.Scenario scenario = SignificantEventTestDataFactory.loadScenario();
 
     Test.startTest();
@@ -45,7 +45,15 @@ private class SignificantEventActionControllerTest {
     Test.stopTest();
 
     System.assertEquals(false, context.isHouseholdLaunch);
-    System.assertEquals(0, context.defaultSelectedAccounts.size());
+    System.assertEquals(1, context.defaultSelectedAccounts.size());
+    System.assertEquals(
+      String.valueOf(scenario.treeScenario.linkedPersonAccount.Id),
+      context.defaultSelectedAccounts[0].accountId
+    );
+    System.assertEquals(
+      scenario.treeScenario.linkedPersonAccount.Name,
+      context.defaultSelectedAccounts[0].name
+    );
   }
 
   private static void linkHouseholdMembersForSuggestions(
@@ -239,7 +247,11 @@ private class SignificantEventActionControllerTest {
     Test.stopTest();
 
     System.assertEquals(false, context.isEditMode);
-    System.assertEquals(0, context.defaultSelectedAccounts.size());
+    System.assertEquals(1, context.defaultSelectedAccounts.size());
+    System.assertEquals(
+      String.valueOf(scenario.treeScenario.linkedPersonAccount.Id),
+      context.defaultSelectedAccounts[0].accountId
+    );
   }
 
   @IsTest

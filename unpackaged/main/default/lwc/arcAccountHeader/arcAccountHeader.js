@@ -97,7 +97,6 @@ export default class ArcAccountHeader extends LightningElement {
 
       this.header = buildAccountHeaderViewModel({
         name: context?.name,
-        photoUrl: context?.photoUrl,
         recordTypeDeveloperName: context?.recordTypeDeveloperName,
         recordTypeLabel: context?.recordTypeLabel,
         accountType: context?.accountType,

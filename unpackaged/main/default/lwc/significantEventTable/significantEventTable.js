@@ -900,6 +900,15 @@ export default class SignificantEventTable extends LightningElement {
     }
   };
 
+  shouldRefreshAfterModalClose(result) {
+    const reason = result?.reason;
+    return (
+      result?.refreshed === true ||
+      reason === "save" ||
+      reason === "delete"
+    );
+  }
+
   handleNew = async () => {
     if (this.isSignificantEventRecordView) {
       await this.handleEdit(this.recordId);
@@ -912,7 +921,7 @@ export default class SignificantEventTable extends LightningElement {
       editMode: false
     });
 
-    if (result?.refreshed) {
+    if (this.shouldRefreshAfterModalClose(result)) {
       await this.refresh();
     }
   };
@@ -928,7 +937,7 @@ export default class SignificantEventTable extends LightningElement {
       editMode: true
     });
 
-    if (result?.refreshed) {
+    if (this.shouldRefreshAfterModalClose(result)) {
       await this.refresh();
     }
   };

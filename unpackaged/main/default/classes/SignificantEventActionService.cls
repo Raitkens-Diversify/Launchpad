@@ -72,7 +72,7 @@ public with sharing class SignificantEventActionService {
       resolveFinancialAdvisorTeamId(contextAccount, householdId)
     );
 
-    context.defaultSelectedAccounts = new List<SignificantEventActionModels.LinkedAccountOption>();
+    context.defaultSelectedAccounts = buildDefaultSelectedAccounts(contextAccount);
 
     return context;
   }
@@ -481,6 +481,25 @@ public with sharing class SignificantEventActionService {
       ? new List<SignificantEventActionModels.LinkedAccountOption>()
       : contacts;
     return suggestionGroup;
+  }
+
+  private List<SignificantEventActionModels.LinkedAccountOption> buildDefaultSelectedAccounts(
+    Account contextAccount
+  ) {
+    List<SignificantEventActionModels.LinkedAccountOption> defaultSelectedAccounts = new List<SignificantEventActionModels.LinkedAccountOption>();
+
+    if (
+      contextAccount == null ||
+      FscRelAccountRepository.isHouseholdRecordType(contextAccount)
+    ) {
+      return defaultSelectedAccounts;
+    }
+
+    defaultSelectedAccounts.add(
+      buildLinkedAccountOption(contextAccount.Id, contextAccount.Name, false)
+    );
+
+    return defaultSelectedAccounts;
   }
 
   private SignificantEventActionModels.LinkedAccountOption buildLinkedAccountOption(
