@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Layout xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customButtons>SendWithDocuSign</customButtons>
     <customButtons>Deca2CTO000000lCgr2AE</customButtons>
     <customButtons>Deca2C8X000004T8YOUA0</customButtons>
     <customButtons>Deca2CTO0000006tRd2AI</customButtons>
@@ -286,10 +287,6 @@
             <sortOrder>14</sortOrder>
         </platformActionListItems>
     </platformActionList>
-    <relatedLists>
-        <fields>NAME</fields>
-        <relatedList>Notes__c.Client__c</relatedList>
-    </relatedLists>
     <relatedLists>
         <fields>ACCOUNT.NAME</fields>
         <fields>ACCOUNT.RECORDTYPE</fields>
