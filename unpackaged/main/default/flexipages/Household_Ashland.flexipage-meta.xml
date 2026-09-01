@@ -106,6 +106,16 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
+                <fieldItem>Record.ParentId</fieldItem>
+                <identifier>RecordParentIdField</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
                 <fieldItem>Record.Household_Mailing_Name__c</fieldItem>
                 <identifier>RecordHousehold_Mailing_Name_cField</identifier>
             </fieldInstance>

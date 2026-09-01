@@ -179,6 +179,13 @@ public with sharing class ArcCaseDetailController {
       throw new AuraHandledException('Case Id is required.');
     }
 
+    // Household__c (the plain custom field), not the older FinServ__Household__c
+    // managed-package field both still present on Case -- FinServ__ (Financial
+    // Services Cloud) fields are only visible to internal/FSC-licensed users;
+    // a Community/Experience Cloud license user's schema simply doesn't have
+    // that relationship at all, throwing "No such relation" the moment this
+    // query tries to traverse it. Household__c isn't namespace-restricted and
+    // is the field this org's own automation actually keeps populated.
     List<Case> matches = [
       SELECT
         Id,
@@ -196,19 +203,19 @@ public with sharing class ArcCaseDetailController {
         OwnerId,
         Account.Name,
         AccountId,
-        FinServ__Household__r.Name,
-        FinServ__Household__r.BillingStreet,
-        FinServ__Household__r.BillingCity,
-        FinServ__Household__r.BillingState,
-        FinServ__Household__r.BillingPostalCode,
-        FinServ__Household__r.Liquidity_Needs__c,
-        FinServ__Household__r.Approximate_Net_Worth__c,
-        FinServ__Household__r.Risk_Tolerance__c,
-        FinServ__Household__r.Approximate_Annual_Income_All_Sources__c,
-        FinServ__Household__r.Investment_Objective_Ranked__c,
-        FinServ__Household__r.Approximate_Highest_Tax_Bracket__c,
-        FinServ__Household__r.Advisory_Fee__c,
-        FinServ__Household__c,
+        Household__r.Name,
+        Household__r.BillingStreet,
+        Household__r.BillingCity,
+        Household__r.BillingState,
+        Household__r.BillingPostalCode,
+        Household__r.Liquidity_Needs__c,
+        Household__r.Approximate_Net_Worth__c,
+        Household__r.Risk_Tolerance__c,
+        Household__r.Approximate_Annual_Income_All_Sources__c,
+        Household__r.Investment_Objective_Ranked__c,
+        Household__r.Approximate_Highest_Tax_Bracket__c,
+        Household__r.Advisory_Fee__c,
+        Household__c,
         Financial_Advisor_Team__r.Name,
         Financial_Advisor_Team__c,
         CreatedDate,
@@ -252,7 +259,7 @@ public with sharing class ArcCaseDetailController {
     result.ownerId = record.OwnerId;
     result.accountName = record.Account != null ? record.Account.Name : null;
     result.accountId = record.AccountId;
-    result.householdId = record.FinServ__Household__c;
+    result.householdId = record.Household__c;
     result.financialAdvisorTeamName = record.Financial_Advisor_Team__r != null
       ? record.Financial_Advisor_Team__r.Name
       : null;
@@ -270,7 +277,7 @@ public with sharing class ArcCaseDetailController {
     result.pitstopTotalMinutes = toInt(record.Pitstop_Total_Minutes__c);
     result.progress = buildProgress(record);
 
-    Account household = record.FinServ__Household__r;
+    Account household = record.Household__r;
     if (household != null) {
       result.householdName = household.Name;
       result.household = buildHouseholdSummary(household);
@@ -410,24 +417,25 @@ public with sharing class ArcCaseDetailController {
       return result;
     }
 
+    // Household__c, not FinServ__Household__c -- see getCaseDetail's comment.
     List<Case> matches = [
-      SELECT FinServ__Household__c
+      SELECT Household__c
       FROM Case
       WHERE Id = :caseId
       WITH USER_MODE
       LIMIT 1
     ];
 
-    if (matches.isEmpty() || matches[0].FinServ__Household__c == null) {
+    if (matches.isEmpty() || matches[0].Household__c == null) {
       return result;
     }
 
-    Id householdId = matches[0].FinServ__Household__c;
+    Id householdId = matches[0].Household__c;
 
     for (Case record : [
       SELECT Id, CaseNumber, Subject, Status, IsClosed, Owner.Name, CreatedDate
       FROM Case
-      WHERE FinServ__Household__c = :householdId AND Id != :caseId
+      WHERE Household__c = :householdId AND Id != :caseId
       WITH USER_MODE
       ORDER BY CreatedDate DESC
       LIMIT 20

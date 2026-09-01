@@ -87,7 +87,9 @@ const SEARCH_DEBOUNCE_MS = 275;
  * fetch-then-filter-client-side pattern. Real filtering/search in this mode
  * runs server-side via ArcRecordSearchController, keyset-paginated (SOQL's
  * own OFFSET is capped at 2000 same as the UI API, so pages are fetched via
- * "WHERE Id > last id" instead).
+ * a compound "WHERE (CreatedDate, Id) < (last CreatedDate, last Id)" cursor
+ * instead -- sorted by CreatedDate DESC so the latest-created rows lead,
+ * with Id as a tie-breaker since CreatedDate alone isn't unique).
  */
 const SERVER_SEARCH_PAGE_SIZE = 100;
 /** Every field name a record-type-based filter can arrive as -- see buildFilterChip. */
@@ -479,8 +481,16 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   _suppressBlurSearch = false;
   /** Whether the last-loaded batch said more rows exist past it -- see handleLoadMoreRows. */
   _hasMoreServerRows = false;
-  /** Id of the last loaded row -- afterId for the next batch's keyset fetch. */
+  /**
+   * Id of the last loaded row, paired with _lastLoadedServerRowCreatedDate --
+   * together they're the compound keyset cursor (afterId/afterCreatedDate)
+   * for the next batch's fetch. CreatedDate alone can't be the whole cursor
+   * since it isn't unique (bulk-created rows can share one to the
+   * millisecond); Id breaks the tie. See ArcRecordSearchController.searchRecords.
+   */
   _lastLoadedServerRowId = null;
+  /** CreatedDate of the last loaded row -- see _lastLoadedServerRowId. */
+  _lastLoadedServerRowCreatedDate = null;
   /** Guards handleLoadMoreRows against a double-fire while its own fetch is in flight. */
   _isLoadingMoreRows = false;
 
@@ -1941,15 +1951,17 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     this.tableRows = [];
     this._hasMoreServerRows = false;
     this._lastLoadedServerRowId = null;
+    this._lastLoadedServerRowCreatedDate = null;
 
     try {
-      const batch = await this.fetchServerSearchBatch(null);
+      const batch = await this.fetchServerSearchBatch(null, null);
       if (generation !== this._serverSearchGeneration || !batch) {
         return;
       }
       this.tableRows = batch.rows;
       this._hasMoreServerRows = batch.hasMore;
       this._lastLoadedServerRowId = batch.lastRowId;
+      this._lastLoadedServerRowCreatedDate = batch.lastRowCreatedDate;
     } catch (error) {
       if (generation === this._serverSearchGeneration) {
         this.errorMessage = this.reduceError(error);
@@ -1963,11 +1975,11 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   }
 
   /**
-   * Fetches the next batch past whatever's already loaded (afterId = the
-   * last row's Id, keyset-paginated same as the Apex side already
-   * documents) and appends it, so pages the user already paged through
-   * stay put -- going back never re-fetches, only going past the end of
-   * what's loaded does.
+   * Fetches the next batch past whatever's already loaded (afterId/
+   * afterCreatedDate = the last row's Id/CreatedDate, compound
+   * keyset-paginated same as the Apex side already documents) and appends
+   * it, so pages the user already paged through stay put -- going back
+   * never re-fetches, only going past the end of what's loaded does.
    *
    * Triggered by arcDataTable's `loadmore` event: the user clicked into
    * the trailing "there's more" page button pageCount grows an extra slot
@@ -1987,7 +1999,8 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
 
     try {
       const batch = await this.fetchServerSearchBatch(
-        this._lastLoadedServerRowId
+        this._lastLoadedServerRowId,
+        this._lastLoadedServerRowCreatedDate
       );
       // A fresh search (filters/search/tab changed) could have started
       // and finished while this batch was in flight -- its rows belong to
@@ -1999,6 +2012,7 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
       this.tableRows = [...this.tableRows, ...batch.rows];
       this._hasMoreServerRows = batch.hasMore;
       this._lastLoadedServerRowId = batch.lastRowId;
+      this._lastLoadedServerRowCreatedDate = batch.lastRowCreatedDate;
     } catch (error) {
       if (generation === this._serverSearchGeneration) {
         this.errorMessage = this.reduceError(error);
@@ -2011,7 +2025,7 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   }
 
   /** One searchRecords round trip, mapped to table rows -- shared by a fresh search and load-more. */
-  async fetchServerSearchBatch(afterId) {
+  async fetchServerSearchBatch(afterId, afterCreatedDate) {
     const filters = this.activeFilters
       .filter((f) => f.fieldApiName && f.operandValue)
       .map((f) => ({
@@ -2037,17 +2051,19 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
       searchTerm,
       searchableFields,
       afterId,
+      afterCreatedDate,
       pageSize: SERVER_SEARCH_PAGE_SIZE
     };
 
     const result = await searchRecords(requestParams);
+    const resultRows = result?.rows || [];
 
     // Aligned by the field list the server actually selected, not the one
     // requested -- a requested path can fail server-side validation and
     // get dropped, which would silently shift every later cell by one if
     // rows were mapped against the request instead.
     const selectedFieldApiNames = result?.fieldApiNames || [];
-    const rows = (result?.rows || []).map((row) =>
+    const rows = resultRows.map((row) =>
       this.mapSearchRowToTableRow(row, selectedFieldApiNames)
     );
     // Apex's own contract only ever sets hasMore=true when it returned a
@@ -2057,10 +2073,19 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     // what result.hasMore claims.
     const hasMore =
       Boolean(result?.hasMore) && rows.length >= SERVER_SEARCH_PAGE_SIZE;
+    // The compound cursor's own values, read from the raw (unmapped) last
+    // row rather than the table row -- mapSearchRowToTableRow only carries
+    // over the requested/visible columns, not createdDate.
+    const lastResultRow = resultRows.length
+      ? resultRows[resultRows.length - 1]
+      : null;
     return {
       rows,
       hasMore,
-      lastRowId: rows.length ? rows[rows.length - 1].id : afterId
+      lastRowId: lastResultRow ? lastResultRow.id : afterId,
+      lastRowCreatedDate: lastResultRow
+        ? lastResultRow.createdDate
+        : afterCreatedDate
     };
   }
 

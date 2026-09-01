@@ -9,9 +9,23 @@
  * the fetch cap, and can't apply a user's filter/search server-side at all --
  * lightning/uiListsApi has no WHERE-clause parameter).
  *
- * Pagination is keyset (WHERE Id > :afterId ORDER BY Id), not OFFSET: SOQL's
- * own OFFSET clause is capped at 2000 regardless of who issues the query, so
- * it would only trade one 2000-row ceiling for another.
+ * Pagination is keyset, not OFFSET: SOQL's own OFFSET clause is capped at
+ * 2000 regardless of who issues the query, so it would only trade one
+ * 2000-row ceiling for another.
+ *
+ * The sort is CreatedDate DESC (latest-created first), not Id -- Id happens
+ * to correlate with creation order but isn't guaranteed to (record moves,
+ * merges, and cross-shard Id issuance can all break the correlation), so
+ * sorting by Id was quietly pushing newly created records toward the bottom
+ * instead of the top. Because CreatedDate alone isn't unique (bulk
+ * inserts/API loads routinely share an identical CreatedDate to the
+ * millisecond), Id is kept as a secondary sort/cursor key purely to keep the
+ * ordering a strict, gap-free total order -- the cursor is the pair
+ * (afterCreatedDate, afterId), not afterId alone: `ORDER BY CreatedDate DESC,
+ * Id DESC` with `WHERE (CreatedDate < :afterCreatedDate OR (CreatedDate =
+ * :afterCreatedDate AND Id < :afterId))`. CreatedDate is always selected
+ * (even when it isn't one of the requested/visible columns) so every row
+ * carries the cursor value the client needs for its next page.
  *
  * The free-text search term itself routes through ArcSoslSearchHelper for
  * any object with Search enabled -- a maintained full-text index lookup
@@ -45,6 +59,14 @@ public with sharing class ArcRecordSearchController {
   public class SearchRow {
     @AuraEnabled
     public Id id;
+    /**
+     * This row's CreatedDate -- always populated regardless of whether
+     * CreatedDate is one of the requested/visible columns, since it's the
+     * second half of the compound keyset cursor (see searchRecords' ORDER
+     * BY / afterCreatedDate).
+     */
+    @AuraEnabled
+    public Datetime createdDate;
     /** Values in the same order as the requested fieldApiNames. */
     @AuraEnabled
     public List<String> cells;
@@ -104,6 +126,7 @@ public with sharing class ArcRecordSearchController {
     String searchTerm,
     List<String> searchableFields,
     Id afterId,
+    Datetime afterCreatedDate,
     Integer pageSize
   ) {
     List<SearchFilter> filters = String.isNotBlank(filtersJson)
@@ -139,9 +162,16 @@ public with sharing class ArcRecordSearchController {
     if (String.isNotBlank(whereClause)) {
       clauses.add(whereClause);
     }
-    if (afterId != null) {
+    // Compound keyset cursor: CreatedDate isn't unique on its own (bulk
+    // inserts routinely share one to the millisecond), so Id breaks ties --
+    // both halves travel together, or not at all (a first-page request has
+    // neither).
+    if (afterId != null && afterCreatedDate != null) {
       binds.put('afterId', afterId);
-      clauses.add('Id > :afterId');
+      binds.put('afterCreatedDate', afterCreatedDate);
+      clauses.add(
+        '(CreatedDate < :afterCreatedDate OR (CreatedDate = :afterCreatedDate AND Id < :afterId))'
+      );
     }
 
     Integer effectivePageSize = pageSize == null
@@ -151,13 +181,27 @@ public with sharing class ArcRecordSearchController {
     // second round trip.
     Integer fetchSize = effectivePageSize + 1;
 
+    // CreatedDate is always selected -- even when it isn't one of the
+    // requested/visible columns -- since every row needs it as the second
+    // half of the next page's cursor. Selecting it twice (a view that also
+    // shows a "Created Date" column) throws "Duplicate field selected", so
+    // it's only added here when the caller didn't already ask for it.
+    Boolean createdDateAlreadySelected = false;
+    for (String path : selected) {
+      if (path.equalsIgnoreCase('CreatedDate')) {
+        createdDateAlreadySelected = true;
+        break;
+      }
+    }
+
     String soql =
       'SELECT Id, ' +
+      (createdDateAlreadySelected ? '' : 'CreatedDate, ') +
       String.join(selected, ', ') +
       ' FROM ' +
       objectApiName +
       (clauses.isEmpty() ? '' : ' WHERE ' + String.join(clauses, ' AND ')) +
-      ' ORDER BY Id ASC' +
+      ' ORDER BY CreatedDate DESC, Id DESC' +
       ' LIMIT ' +
       fetchSize;
 
@@ -168,6 +212,7 @@ public with sharing class ArcRecordSearchController {
       SObject record = records[i];
       SearchRow row = new SearchRow();
       row.id = (Id) record.get('Id');
+      row.createdDate = (Datetime) record.get('CreatedDate');
       row.cells = new List<String>();
       for (String path : selected) {
         // Never a raw null -- the Aura/LWR JSON encoder used for

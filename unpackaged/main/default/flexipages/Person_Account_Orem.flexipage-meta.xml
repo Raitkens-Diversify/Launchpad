@@ -19,9 +19,6 @@
                         <valueListItems>
                             <value>CustomButton.Account.Deca1s74000000DxAsAAK</value>
                         </valueListItems>
-                        <valueListItems>
-                            <value>CustomButton.Account.SendWithDocuSign</value>
-                        </valueListItems>
                     </valueList>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
@@ -1183,16 +1180,6 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
-                <componentName>dfsle:Status</componentName>
-                <identifier>dfsle_Status</identifier>
-            </componentInstance>
-        </itemInstances>
-        <name>Facet-7600f3a2-9a9a-48b9-8762-1abb37e214c3</name>
-        <type>Facet</type>
-    </flexiPageRegions>
-    <flexiPageRegions>
-        <itemInstances>
-            <componentInstance>
                 <componentInstanceProperties>
                     <name>parentFieldApiName</name>
                     <value>Account.Id</value>
@@ -1321,20 +1308,6 @@
                 </componentInstanceProperties>
                 <componentName>flexipage:tab</componentName>
                 <identifier>flexipage_tab8</identifier>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
-                <componentInstanceProperties>
-                    <name>body</name>
-                    <value>Facet-7600f3a2-9a9a-48b9-8762-1abb37e214c3</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>title</name>
-                    <value>Docusign</value>
-                </componentInstanceProperties>
-                <componentName>flexipage:tab</componentName>
-                <identifier>flexipage_tab3</identifier>
             </componentInstance>
         </itemInstances>
         <itemInstances>

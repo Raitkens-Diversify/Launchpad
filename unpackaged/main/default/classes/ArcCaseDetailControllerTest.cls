@@ -20,13 +20,52 @@ private class ArcCaseDetailControllerTest {
   }
 
   // getCaseDetail's Household-summary branch (formatAddress/formatCurrency/
-  // formatPercent) needs a Case whose FinServ__Household__c survives
-  // insert — org automation on Case (outside this class, not reproducible
-  // via a plain test-context insert) clears that lookup specifically
-  // during Apex test execution even though it persists in real usage, so
-  // the formatting helpers are unit-tested directly instead (below) rather
-  // than through a DB round trip that this org's test context can't
-  // support.
+  // formatPercent) is exercised through a direct DB round trip in
+  // getCaseDetailReturnsHouseholdSummaryWhenPopulated below (Household__c,
+  // a plain custom lookup, survives a normal test-context insert -- unlike
+  // the older FinServ__Household__c managed-package field this code used
+  // to read, which some FSC-internal automation cleared specifically in
+  // Apex test execution). The formatting helpers are additionally
+  // unit-tested directly (below) so each formatting rule has its own
+  // focused assertion.
+  @IsTest
+  static void getCaseDetailReturnsHouseholdSummaryWhenPopulated() {
+    Account household = new Account(
+      Name = 'Test Household',
+      Type = 'Prospect',
+      BillingStreet = '1 Main St',
+      BillingCity = 'Springfield',
+      BillingStateCode = 'IL',
+      BillingPostalCode = '62701',
+      Liquidity_Needs__c = 'Very Important',
+      Approximate_Net_Worth__c = 500000,
+      Risk_Tolerance__c = 'Moderate',
+      Approximate_Annual_Income_All_Sources__c = 120000,
+      Investment_Objective_Ranked__c = 'Growth',
+      Approximate_Highest_Tax_Bracket__c = '24%',
+      Advisory_Fee__c = 1.25
+    );
+    insert household;
+
+    Case record = new Case(
+      Subject = 'Household Case',
+      Status = 'New',
+      Household__c = household.Id
+    );
+    insert record;
+
+    Test.startTest();
+    ArcCaseDetailController.CaseDetailResult result = ArcCaseDetailController.getCaseDetail(
+      record.Id
+    );
+    Test.stopTest();
+
+    Assert.areEqual(household.Id, result.householdId);
+    Assert.areEqual('Test Household', result.householdName);
+    Assert.isNotNull(result.household, 'A populated Household__c should produce a summary.');
+    Assert.areEqual('Very Important', result.household.liquidityNeeds);
+  }
+
   @IsTest
   static void formatAddressJoinsStreetCityStateAndZip() {
     Account household = new Account(
@@ -194,13 +233,6 @@ private class ArcCaseDetailControllerTest {
     System.assertEquals(0, sections.size());
   }
 
-  // A "populated Household, has related siblings" test for
-  // getRelatedHouseholdCases would need FinServ__Household__c to survive
-  // insert, which — like getCaseDetail's Household branch above — this
-  // org's automation clears specifically in Apex test context. The
-  // no-Household path below (the actual query's early-exit branch) is the
-  // reliable part to cover; the row-splitting loop is otherwise identical
-  // in structure to the equally-tested getCaseTasks loop.
   @IsTest
   static void getRelatedHouseholdCasesReturnsEmptyWhenNoHousehold() {
     Case record = new Case(Subject = 'No Household Case', Status = 'New');
@@ -214,6 +246,43 @@ private class ArcCaseDetailControllerTest {
 
     System.assertEquals(0, result.openCases.size());
     System.assertEquals(0, result.closedCases.size());
+  }
+
+  @IsTest
+  static void getRelatedHouseholdCasesSplitsSiblingsIntoOpenAndClosed() {
+    Account household = new Account(Name = 'Sibling Household', Type = 'Prospect');
+    insert household;
+
+    Case current = new Case(
+      Subject = 'Current Case',
+      Status = 'New',
+      Household__c = household.Id
+    );
+    insert current;
+
+    insert new List<Case>{
+      new Case(
+        Subject = 'Open Sibling',
+        Status = 'New',
+        Household__c = household.Id
+      ),
+      new Case(
+        Subject = 'Closed Sibling',
+        Status = 'Closed',
+        Household__c = household.Id
+      )
+    };
+
+    Test.startTest();
+    ArcCaseDetailController.HouseholdCasesResult result = ArcCaseDetailController.getRelatedHouseholdCases(
+      current.Id
+    );
+    Test.stopTest();
+
+    Assert.areEqual(1, result.openCases.size());
+    Assert.areEqual('Open Sibling', result.openCases[0].subject);
+    Assert.areEqual(1, result.closedCases.size());
+    Assert.areEqual('Closed Sibling', result.closedCases[0].subject);
   }
 
   /**
