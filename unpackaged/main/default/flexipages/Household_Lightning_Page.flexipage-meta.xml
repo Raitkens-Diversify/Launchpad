@@ -388,16 +388,6 @@
                 </visibilityRule>
             </fieldInstance>
         </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Type</fieldItem>
-                <identifier>RecordType_LPExtField</identifier>
-            </fieldInstance>
-        </itemInstances>
         <name>Facet-cddb34bf-4dc0-448b-8210-ad29b766e342</name>
         <type>Facet</type>
     </flexiPageRegions>
