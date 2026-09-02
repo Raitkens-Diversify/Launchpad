@@ -868,4 +868,16 @@
       onclose={handleCreateModalClose}
     ></c-arc-quick-create>
   </template>
+
+  <!-- "New" as a flow dialog, for objects in createFlowConfig (Check Log's
+       Log a Check). Mounted only on demand: loading the flow runtime injects
+       Salesforce's default global styling hooks document-wide, which repaints
+       every slds-g token this page leaves to its fallbacks. The finished flow
+       refreshes the list. -->
+  <template lwc:if={createFlowModalMounted}>
+    <c-arc-flow-modal
+      lwc:ref="createFlowModal"
+      onflowfinished={handleCreateFlowFinished}
+    ></c-arc-flow-modal>
+  </template>
 </template>

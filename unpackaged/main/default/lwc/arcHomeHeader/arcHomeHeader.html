@@ -36,4 +36,12 @@
       onclose={handleCloseNewAdvertisingRequestModal}
     ></c-arc-quick-create>
   </template>
+
+  <!-- Log a Check: the launchpad quick action's flow, run as its ARC-site copy
+       (ARC_Log_a_Check) inside the site's flow dialog. Mounted only on demand:
+       the flow runtime injects global styling hooks document-wide, which would
+       repaint other components' slds-g fallbacks on page load. -->
+  <template lwc:if={logCheckModalMounted}>
+    <c-arc-flow-modal lwc:ref="logCheckModal"></c-arc-flow-modal>
+  </template>
 </template>

@@ -1,0 +1,69 @@
+<template>
+  <div class="arc-flow-lookup">
+    <label class="arc-flow-lookup__label">
+      <template lwc:if={isRequired}>
+        <span class="arc-flow-lookup__required" aria-hidden="true">*</span>
+      </template>
+      {label}
+    </label>
+
+    <template lwc:if={hasSelection}>
+      <div class="arc-flow-lookup__pill">
+        <lightning-icon icon-name="standard:record" size="x-small"></lightning-icon>
+        <span class="arc-flow-lookup__pill-label">{recordName}</span>
+        <button
+          type="button"
+          class="arc-flow-lookup__clear"
+          title="Clear selection"
+          aria-label="Clear selection"
+          onclick={handleClear}
+        >
+          <lightning-icon
+            icon-name="utility:close"
+            size="xx-small"
+            alternative-text="Clear"
+          ></lightning-icon>
+        </button>
+      </div>
+    </template>
+
+    <template lwc:else>
+      <div class="arc-flow-lookup__box">
+        <input
+          class={comboClass}
+          type="search"
+          placeholder={placeholder}
+          value={searchTerm}
+          aria-label={label}
+          oninput={handleSearchChange}
+        />
+        <template lwc:if={isOpen}>
+          <div class="arc-flow-lookup__dropdown" role="listbox">
+            <template for:each={results} for:item="item">
+              <div
+                key={item.value}
+                class="arc-flow-lookup__item"
+                role="option"
+                data-value={item.value}
+                data-label={item.label}
+                onclick={handleSelect}
+              >
+                <lightning-icon icon-name="standard:record" size="x-small"></lightning-icon>
+                <div class="arc-flow-lookup__item-text">
+                  <span class="arc-flow-lookup__item-label">{item.label}</span>
+                  <template lwc:if={item.hasSublabel}>
+                    <span class="arc-flow-lookup__item-sublabel">{item.sublabel}</span>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+        </template>
+      </div>
+    </template>
+
+    <template lwc:if={hasError}>
+      <p class="arc-flow-lookup__error" role="alert">{errorMessage}</p>
+    </template>
+  </div>
+</template>

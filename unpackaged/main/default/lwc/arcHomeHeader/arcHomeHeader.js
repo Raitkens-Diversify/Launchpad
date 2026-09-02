@@ -25,12 +25,10 @@ const ACTION_CHECK_LOG = "check-log";
 
 const SITE_BASE = (communityBasePath || "").replace(/\/$/, "");
 const ENVELOPE_WIZARD_PATH = `${SITE_BASE}/envelope`;
-const CHECK_LOG_PATH = `${SITE_BASE}/check-log/Check_Log__c/Default`;
 
 /** Actions that only go somewhere, keyed by the action they answer to. */
 const NAVIGATION_PATHS = Object.freeze({
-  [ACTION_ENVELOPE_WIZARD]: ENVELOPE_WIZARD_PATH,
-  [ACTION_CHECK_LOG]: CHECK_LOG_PATH
+  [ACTION_ENVELOPE_WIZARD]: ENVELOPE_WIZARD_PATH
 });
 
 const DEFAULT_ACTIONS = Object.freeze([
@@ -93,6 +91,19 @@ export default class ArcHomeHeader extends NavigationMixin(LightningElement) {
   }
 
   showNewAdvertisingRequestModal = false;
+  logCheckModalMounted = false;
+  _pendingLogCheckOpen = false;
+
+  renderedCallback() {
+    if (this._pendingLogCheckOpen && this.refs.logCheckModal) {
+      this._pendingLogCheckOpen = false;
+      this.refs.logCheckModal.open({
+        flowName: "ARC_Log_a_Check",
+        title: "Log a Check",
+        size: "large"
+      });
+    }
+  }
 
   handleActionClick(event) {
     this.runAction(event.currentTarget.dataset.action);
@@ -116,6 +127,15 @@ export default class ArcHomeHeader extends NavigationMixin(LightningElement) {
 
     if (action === ACTION_NEW_CASE) {
       this.showNewAdvertisingRequestModal = true;
+      return;
+    }
+
+    // Check Log opens the launchpad "Log a Check" experience: the ARC-site
+    // copy of its flow, in the site's flow dialog. The Check Log list stays
+    // reachable from the sidebar's Check Log item.
+    if (action === ACTION_CHECK_LOG) {
+      this.logCheckModalMounted = true;
+      this._pendingLogCheckOpen = true;
       return;
     }
 

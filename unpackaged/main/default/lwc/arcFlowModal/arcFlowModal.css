@@ -123,3 +123,18 @@
   padding: 12px 16px;
   border-top: 1px solid var(--lwc-colorBorder, #c9c9c9);
 }
+/* The launchpad-modal proportions: Log a Check (ss size) and other wide flow
+   screens. Opted into per open({size: "large"}); pit-stop dialogs keep the
+   default width. */
+.arc-flow-modal__panel--large {
+  width: min(100%, 57.5rem);
+}
+
+.arc-flow-modal__panel--large .arc-flow-modal__body {
+  padding: 8px 24px 16px;
+}
+
+.arc-flow-modal__panel--large .arc-flow-modal__title {
+  font-size: 18px;
+  line-height: 24px;
+}

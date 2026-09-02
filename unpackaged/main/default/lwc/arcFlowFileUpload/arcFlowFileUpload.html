@@ -1,0 +1,25 @@
+<template>
+  <div class="arc-flow-file-upload">
+    <lightning-file-upload
+      label={label}
+      name="arcFlowFileUpload"
+      record-id={recordId}
+      multiple={acceptsMultiple}
+      onuploadfinished={handleUploadFinished}
+    ></lightning-file-upload>
+
+    <template lwc:if={hasUploads}>
+      <ul class="arc-flow-file-upload__list">
+        <template for:each={uploadedFileNames} for:item="fileName">
+          <li key={fileName} class="arc-flow-file-upload__item">
+            <lightning-icon
+              icon-name="doctype:attachment"
+              size="x-small"
+            ></lightning-icon>
+            <span>{fileName}</span>
+          </li>
+        </template>
+      </ul>
+    </template>
+  </div>
+</template>

@@ -1134,3 +1134,35 @@
   width: 12px;
   height: 12px;
 }
+/* The page's slds-g tokens were always meant to resolve to these fallbacks --
+   nothing on the site defines them. Opening a flow dialog loads the flow
+   runtime, which injects Salesforce's default global styling hooks document-
+   wide and silently repainted them (the brand button turned #0176d3 blue).
+   Pinning the values on the root keeps this page's palette its own.
+   (--slds-g-color-on-surface-2 and --slds-g-font-scale-3 are used with two
+   different fallbacks above, so they are deliberately not pinned.) */
+.arc-record-list-view {
+  --slds-g-color-accent-1: #0f406f;
+  --slds-g-color-accent-2: #0b2f51;
+  --slds-g-color-accent-3: #071c31;
+  --slds-g-color-accent-container-1: #0f406f;
+  --slds-g-color-border-1: #d1d5db;
+  --slds-g-color-border-2: #b6bcc5;
+  --slds-g-color-neutral-base-60: #838a97;
+  --slds-g-color-on-accent-1: #ffffff;
+  --slds-g-color-on-surface-1: #4b5563;
+  --slds-g-color-on-surface-3: #09243f;
+  --slds-g-color-surface-container-1: #ffffff;
+  --slds-g-color-surface-container-2: #f3f4f6;
+  --slds-g-font-scale-1: 14px;
+  --slds-g-font-scale-4: 24px;
+  --slds-g-font-scale-neg-1: 12px;
+  --slds-g-radius-border-1: 4px;
+  --slds-g-radius-border-2: 8px;
+  --slds-g-sizing-9: 32px;
+  --slds-g-spacing-1: 4px;
+  --slds-g-spacing-2: 8px;
+  --slds-g-spacing-3: 12px;
+  --slds-g-spacing-4: 16px;
+  --slds-g-spacing-5: 24px;
+}

@@ -52,6 +52,9 @@ export default class ArcFlowModal extends LightningElement {
     @api subtitle = '';
     @api flowName = '';
     @api params = [];
+    /** "" (default width) or "large" — the launchpad-modal proportions the
+     *  Log a Check dialog uses. */
+    @api size = '';
 
     _isOpen = false;
     /** True once the flow faulted, which is the only state that needs a Close. */
@@ -83,6 +86,9 @@ export default class ArcFlowModal extends LightningElement {
         }
         if (options.params !== undefined) {
             this.params = options.params;
+        }
+        if (options.size !== undefined) {
+            this.size = options.size;
         }
 
         this.isFlowFinished = false;
@@ -116,6 +122,12 @@ export default class ArcFlowModal extends LightningElement {
 
     get dialogLabel() {
         return this.title || 'Flow';
+    }
+
+    get panelClass() {
+        return this.size === 'large'
+            ? 'arc-flow-modal__panel arc-flow-modal__panel--large'
+            : 'arc-flow-modal__panel';
     }
 
     handleFlowStatusChange(event) {

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>67.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>ARC Flow File Upload</masterLabel>
+    <description>LWR-compatible flow-screen file upload; replaces forceContent:fileUpload in the ARC-site flow copies.</description>
+    <targets>
+        <target>lightning__FlowScreen</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__FlowScreen">
+            <property name="label" type="String" label="Label" description="Text shown above the upload button." />
+            <property name="multiple" type="Boolean" label="Allow Multiple Files" />
+            <property name="recordId" type="String" label="Related Record Id" description="Optional record the uploads attach to." />
+            <property name="contentDocIds" type="String[]" label="Content Document Ids" role="outputOnly" />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

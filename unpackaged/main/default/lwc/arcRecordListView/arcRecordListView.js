@@ -513,6 +513,8 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   deleteViewError;
   isDeletingView = false;
   showCreateModal = false;
+  createFlowModalMounted = false;
+  _pendingCreateFlowOpen = false;
   filterLogicString = "";
   objectColumns = [];
   currentListViewLabel = "";
@@ -614,6 +616,11 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   renderedCallback() {
     this.observeTabStripResize();
     this.measureTabsIfNeeded();
+
+    if (this._pendingCreateFlowOpen && this.refs.createFlowModal) {
+      this._pendingCreateFlowOpen = false;
+      this.refs.createFlowModal.open(this.createFlowConfig);
+    }
   }
 
   /**
@@ -2868,6 +2875,17 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   }
 
   /**
+   * Objects whose "New" runs a flow dialog instead of the quick-create form —
+   * Check Log's launchpad "Log a Check" experience, via its ARC-site flow copy.
+   */
+  get createFlowConfig() {
+    if (this.objectApiName === "Check_Log__c") {
+      return { flowName: "ARC_Log_a_Check", title: "Log a Check", size: "large" };
+    }
+    return null;
+  }
+
+  /**
    * Navigates to the object's standard "new" page. The `newrecord` event is
    * kept so a host page can intercept and handle creation its own way.
    */
@@ -2877,6 +2895,15 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
         detail: { objectApiName: this.objectApiName }
       })
     );
+
+    if (this.createFlowConfig) {
+      // Mount on demand and open on the render after: the modal stays out of
+      // the DOM until used so the flow runtime's global styling hooks don't
+      // load with the page (they repaint this page's slds-g fallbacks).
+      this.createFlowModalMounted = true;
+      this._pendingCreateFlowOpen = true;
+      return;
+    }
 
     if (this.usesQuickCreate) {
       this.showCreateModal = true;
@@ -2894,6 +2921,11 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
 
   handleCreateModalClose() {
     this.showCreateModal = false;
+  }
+
+  /** A finished create-flow has made a record this list can't see yet. */
+  handleCreateFlowFinished() {
+    this.runServerSearch();
   }
 
   /** Lands the user on the record they just made, and refreshes the list. */
