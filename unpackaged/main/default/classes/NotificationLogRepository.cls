@@ -458,7 +458,16 @@ public without sharing class NotificationLogRepository {
       return new List<Notification_Log__c>();
     }
 
-    return [
+    Map<Id, Id> ruleIdToHouseholdId = new Map<Id, Id>();
+    for (Notification_Rule__c rule : [
+      SELECT Id, Household__c
+      FROM Notification_Rule__c
+      WHERE Id IN :ruleIds
+    ]) {
+      ruleIdToHouseholdId.put(rule.Id, rule.Household__c);
+    }
+
+    List<Notification_Log__c> queuedLogs = [
       SELECT
         Id,
         Name,
@@ -484,6 +493,26 @@ public without sharing class NotificationLogRepository {
         AND Frequency__c = :NotificationConstants.FREQUENCY_DIGEST
         AND Notification_Rule__c IN :ruleIds
     ];
+
+    return filterQueuedLogsToRuleHouseholdScope(queuedLogs, ruleIdToHouseholdId);
+  }
+
+  @TestVisible
+  private static List<Notification_Log__c> filterQueuedLogsToRuleHouseholdScope(
+    List<Notification_Log__c> queuedLogs,
+    Map<Id, Id> ruleIdToHouseholdId
+  ) {
+    List<Notification_Log__c> scopedLogs = new List<Notification_Log__c>();
+
+    for (Notification_Log__c logRecord : queuedLogs) {
+      Id ruleHouseholdId = ruleIdToHouseholdId.get(logRecord.Notification_Rule__c);
+
+      if (ruleHouseholdId == null || logRecord.Household__c == ruleHouseholdId) {
+        scopedLogs.add(logRecord);
+      }
+    }
+
+    return scopedLogs;
   }
 
   public List<Notification_Log__c> selectQueuedLogsForDeliveryGroup(
@@ -504,9 +533,11 @@ public without sharing class NotificationLogRepository {
       seedLog.Channel__c,
       null
     );
+    Id householdFilter = seedLog.Household__c;
+    List<Notification_Log__c> queuedLogs;
 
     if (String.isBlank(digestCadence)) {
-      return [
+      queuedLogs = [
         SELECT
           Id,
           Name,
@@ -534,37 +565,59 @@ public without sharing class NotificationLogRepository {
           AND Source_Type__c = :seedLog.Source_Type__c
           AND Channel__c INCLUDES (:channel)
       ];
+    } else {
+      queuedLogs = [
+        SELECT
+          Id,
+          Name,
+          Recipient__c,
+          Channel__c,
+          Source_Type__c,
+          Notification_Rule__c,
+          Title__c,
+          Body__c,
+          Change_Context__c,
+          CreatedDate,
+          Source_Record_Id__c,
+          Target_Record_Id__c,
+          Household__c,
+          Status__c,
+          Frequency__c,
+          Delivery_Attempt_Count__c,
+          Error_Message__c,
+          Suppression_Reason__c
+        FROM Notification_Log__c
+        WHERE
+          Status__c = :NotificationConstants.STATUS_QUEUED
+          AND Frequency__c = :NotificationConstants.FREQUENCY_DIGEST
+          AND Recipient__c = :seedLog.Recipient__c
+          AND Source_Type__c = :seedLog.Source_Type__c
+          AND Channel__c INCLUDES (:channel)
+          AND Notification_Rule__r.Digest_Cadence__c = :digestCadence
+      ];
     }
 
-    return [
-      SELECT
-        Id,
-        Name,
-        Recipient__c,
-        Channel__c,
-        Source_Type__c,
-        Notification_Rule__c,
-        Title__c,
-        Body__c,
-        Change_Context__c,
-        CreatedDate,
-        Source_Record_Id__c,
-        Target_Record_Id__c,
-        Household__c,
-        Status__c,
-        Frequency__c,
-        Delivery_Attempt_Count__c,
-        Error_Message__c,
-        Suppression_Reason__c
-      FROM Notification_Log__c
-      WHERE
-        Status__c = :NotificationConstants.STATUS_QUEUED
-        AND Frequency__c = :NotificationConstants.FREQUENCY_DIGEST
-        AND Recipient__c = :seedLog.Recipient__c
-        AND Source_Type__c = :seedLog.Source_Type__c
-        AND Channel__c INCLUDES (:channel)
-        AND Notification_Rule__r.Digest_Cadence__c = :digestCadence
-    ];
+    return filterQueuedLogsToHousehold(queuedLogs, householdFilter);
+  }
+
+  @TestVisible
+  private static List<Notification_Log__c> filterQueuedLogsToHousehold(
+    List<Notification_Log__c> queuedLogs,
+    Id householdId
+  ) {
+    if (householdId == null || queuedLogs == null || queuedLogs.isEmpty()) {
+      return queuedLogs;
+    }
+
+    List<Notification_Log__c> scopedLogs = new List<Notification_Log__c>();
+
+    for (Notification_Log__c logRecord : queuedLogs) {
+      if (logRecord.Household__c == householdId) {
+        scopedLogs.add(logRecord);
+      }
+    }
+
+    return scopedLogs;
   }
 
   public List<Notification_Log__c> selectLogsForRetry(List<Id> logIds) {

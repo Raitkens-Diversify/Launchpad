@@ -247,4 +247,49 @@ private class NotificationLogRepositoryTest {
     );
     System.assert(remainingIds.contains(olderSentLog.Id));
   }
+
+  @IsTest
+  static void selectQueuedLogsForRulesLimitsDigestLogsToRuleHousehold() {
+    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+    Account otherHousehold = FscDataTestDataFactory.createHouseholdAccount(
+      'Digest Scope Household'
+    );
+    Notification_Rule__c householdRule = NotificationTestDataFactory.createUserHouseholdPreference(
+      NotificationConstants.OBJECT_TYPE_CASE,
+      context.recipientUser.Id,
+      context.household.Id,
+      NotificationConstants.CHANNEL_EMAIL,
+      NotificationConstants.FREQUENCY_DIGEST
+    );
+
+    Notification_Log__c matchingLog = NotificationTestDataFactory.createLogNotification(
+      context.recipientUser.Id,
+      context.household.Id,
+      NotificationConstants.OBJECT_TYPE_CASE,
+      NotificationConstants.STATUS_QUEUED,
+      NotificationConstants.CHANNEL_EMAIL,
+      NotificationConstants.FREQUENCY_DIGEST,
+      'Matching household digest',
+      null,
+      householdRule.Id
+    );
+    NotificationTestDataFactory.createLogNotification(
+      context.recipientUser.Id,
+      otherHousehold.Id,
+      NotificationConstants.OBJECT_TYPE_CASE,
+      NotificationConstants.STATUS_QUEUED,
+      NotificationConstants.CHANNEL_EMAIL,
+      NotificationConstants.FREQUENCY_DIGEST,
+      'Other household digest',
+      null,
+      householdRule.Id
+    );
+
+    List<Notification_Log__c> queuedLogs = new NotificationLogRepository().selectQueuedLogsForRules(
+      new Set<Id>{ householdRule.Id }
+    );
+
+    System.assertEquals(1, queuedLogs.size());
+    System.assertEquals(matchingLog.Id, queuedLogs[0].Id);
+  }
 }

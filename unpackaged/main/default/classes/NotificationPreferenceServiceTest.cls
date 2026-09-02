@@ -82,7 +82,7 @@ private class NotificationPreferenceServiceTest {
   }
 
   @IsTest
-  static void resolvePrefersUserDefaultOverHouseholdSetting() {
+  static void resolvePrefersHouseholdSettingOverUserDefaultOnSameHousehold() {
     NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
     NotificationTestDataFactory.createUserPreference(
       NotificationConstants.OBJECT_TYPE_CASE,
@@ -106,11 +106,11 @@ private class NotificationPreferenceServiceTest {
 
     System.assertEquals(true, result.isAllowed);
     System.assertEquals(
-      NotificationTestDataFactory.alternateChannel(),
+      NotificationTestDataFactory.defaultChannel(),
       result.preference.Channel__c
     );
-    System.assertEquals(NotificationConstants.FREQUENCY_DIGEST, result.preference.Frequency__c);
-    System.assertEquals('USER_DEFAULT', result.resolvedScope);
+    System.assertEquals(NotificationConstants.FREQUENCY_IMMEDIATE, result.preference.Frequency__c);
+    System.assertEquals('HOUSEHOLD_SETTING', result.resolvedScope);
   }
 
   @IsTest
@@ -611,6 +611,52 @@ private class NotificationPreferenceServiceTest {
     System.assertEquals(
       false,
       channelResults.containsKey(NotificationConstants.CHANNEL_EMAIL)
+    );
+  }
+
+  @IsTest
+  static void resolveForRecipientsByChannelUsesUserDefaultOnOtherHouseholds() {
+    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+    Account otherHousehold = FscDataTestDataFactory.createHouseholdAccount(
+      'Notification Other Household'
+    );
+    NotificationTestDataFactory.createUserPreference(
+      NotificationConstants.OBJECT_TYPE_CASE,
+      context.recipientUser.Id,
+      new List<String>{
+        NotificationConstants.CHANNEL_EMAIL,
+        NotificationConstants.CHANNEL_IN_APP
+      },
+      NotificationConstants.FREQUENCY_IMMEDIATE
+    );
+    NotificationTestDataFactory.createUserHouseholdPreference(
+      NotificationConstants.OBJECT_TYPE_CASE,
+      context.recipientUser.Id,
+      context.household.Id,
+      NotificationConstants.CHANNEL_IN_APP,
+      NotificationConstants.FREQUENCY_IMMEDIATE
+    );
+
+    NotificationPreferenceService preferenceService = new NotificationPreferenceService();
+    Map<String, NotificationPreferenceService.ResolveResult> scopedHouseholdResults = preferenceService.resolveForRecipientsByChannel(
+      NotificationConstants.OBJECT_TYPE_CASE,
+      new List<Id>{ context.recipientUser.Id },
+      context.household.Id
+    ).get(context.recipientUser.Id);
+    Map<String, NotificationPreferenceService.ResolveResult> otherHouseholdResults = preferenceService.resolveForRecipientsByChannel(
+      NotificationConstants.OBJECT_TYPE_CASE,
+      new List<Id>{ context.recipientUser.Id },
+      otherHousehold.Id
+    ).get(context.recipientUser.Id);
+
+    System.assertEquals(1, scopedHouseholdResults.size());
+    System.assertEquals(
+      NotificationConstants.CHANNEL_IN_APP,
+      new List<String>(scopedHouseholdResults.keySet())[0]
+    );
+    System.assertEquals(2, otherHouseholdResults.size());
+    System.assert(
+      otherHouseholdResults.containsKey(NotificationConstants.CHANNEL_EMAIL)
     );
   }
 }

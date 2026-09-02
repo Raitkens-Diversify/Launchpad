@@ -317,6 +317,10 @@ public with sharing class NotificationPreferenceService {
     Boolean hasHouseholdSetting = false;
 
     for (Notification_Rule__c preference : preferences) {
+      if (!isHouseholdScopedForContext(preference, householdId)) {
+        continue;
+      }
+
       PreferenceScope scope = classifyScope(preference, recipientId, householdId);
 
       if (scope == PreferenceScope.USER_HOUSEHOLD_OVERRIDE) {
@@ -333,6 +337,10 @@ public with sharing class NotificationPreferenceService {
     List<Notification_Rule__c> governedPreferences = new List<Notification_Rule__c>();
 
     for (Notification_Rule__c preference : preferences) {
+      if (!isHouseholdScopedForContext(preference, householdId)) {
+        continue;
+      }
+
       PreferenceScope scope = classifyScope(preference, recipientId, householdId);
 
       if (scope == null) {
@@ -358,19 +366,35 @@ public with sharing class NotificationPreferenceService {
     return governedPreferences;
   }
 
+  @TestVisible
+  private static Boolean isHouseholdScopedForContext(
+    Notification_Rule__c preference,
+    Id householdId
+  ) {
+    return preference != null &&
+      householdId != null &&
+      preference.Household__c == householdId;
+  }
+
   private ResolveResult resolveForRecipient(
     List<Notification_Rule__c> scopedPreferences,
     List<Notification_Rule__c> systemDefaults,
     Id recipientId,
     Id householdId
   ) {
-    List<Notification_Rule__c> scopedPreferencesForRecipient = filterScopedPreferences(
+    List<Notification_Rule__c> mergedCandidates = buildCandidatePreferences(
       scopedPreferences,
+      systemDefaults,
+      recipientId,
+      householdId
+    );
+    List<Notification_Rule__c> candidatePreferences = filterPreferencesForHouseholdGovernance(
+      mergedCandidates,
       recipientId,
       householdId
     );
     Notification_Rule__c scopedPreference = selectBestPreference(
-      scopedPreferencesForRecipient,
+      candidatePreferences,
       recipientId,
       householdId
     );
@@ -382,6 +406,13 @@ public with sharing class NotificationPreferenceService {
         householdId
       );
       return new ResolveResult(scopedPreference, scopedResult.name());
+    }
+
+    if (
+      householdId != null &&
+      candidatePreferences.size() != mergedCandidates.size()
+    ) {
+      return new ResolveResult(NotificationConstants.SUPPRESSION_NO_PREFERENCE);
     }
 
     Notification_Rule__c systemDefault = selectBestPreference(
