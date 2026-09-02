@@ -6,14 +6,7 @@
  */
 public with sharing class UserPreferenceRepository {
   public User_Preference__c selectByUserAndApp(Id userId, String applicationName) {
-    System.debug(
-      '[UserPreferenceRepository][diag] selectByUserAndApp userId=' + userId +
-      ' applicationName=' + applicationName +
-      ' runningUser=' + UserInfo.getUserId() +
-      ' runningUserType=' + UserInfo.getUserType()
-    );
     if (userId == null || String.isBlank(applicationName)) {
-      System.debug('[UserPreferenceRepository][diag] selectByUserAndApp: short-circuited, missing userId or applicationName');
       return null;
     }
 
@@ -24,7 +17,6 @@ public with sharing class UserPreferenceRepository {
       LIMIT 1
     ];
 
-    System.debug('[UserPreferenceRepository][diag] selectByUserAndApp: found ' + preferences.size() + ' row(s)');
     return preferences.isEmpty() ? null : preferences[0];
   }
 
@@ -32,15 +24,6 @@ public with sharing class UserPreferenceRepository {
     if (preference == null) {
       throw new AuraHandledException('Preference record is required.');
     }
-
-    System.debug(
-      '[UserPreferenceRepository][diag] upsertPreference: Id=' + preference.Id +
-      ' User__c=' + preference.User__c +
-      ' Application_Name__c=' + preference.Application_Name__c +
-      ' stateLength=' + (preference.State__c == null ? 0 : preference.State__c.length()) +
-      ' runningUser=' + UserInfo.getUserId() +
-      ' runningUserType=' + UserInfo.getUserType()
-    );
 
     try {
       upsert preference;
@@ -51,7 +34,6 @@ public with sharing class UserPreferenceRepository {
       // browser console/network response ever sees what actually failed
       // (insufficient access, a validation rule, FLS, etc.) instead of that
       // generic placeholder.
-      System.debug('[UserPreferenceRepository][diag] upsertPreference FAILED: ' + e.getTypeName() + ': ' + e.getMessage());
       AuraHandledException wrapped = new AuraHandledException(
         'upsertPreference failed: ' + e.getTypeName() + ': ' + e.getMessage()
       );
@@ -61,7 +43,6 @@ public with sharing class UserPreferenceRepository {
       throw wrapped;
     }
 
-    System.debug('[UserPreferenceRepository][diag] upsertPreference SUCCESS: Id=' + preference.Id);
     return preference;
   }
 }

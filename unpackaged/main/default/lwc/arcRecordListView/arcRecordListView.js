@@ -23,6 +23,8 @@ import { getObjectInfo } from "lightning/uiObjectInfoApi";
 import searchRecords from "@salesforce/apex/ArcRecordSearchController.searchRecords";
 import getListViewPreference from "@salesforce/apex/UserPreferenceController.getListViewPreference";
 import saveListViewPreference from "@salesforce/apex/UserPreferenceController.saveListViewPreference";
+import getStateEntry from "@salesforce/apex/UserPreferenceController.getStateEntry";
+import saveStateEntry from "@salesforce/apex/UserPreferenceController.saveStateEntry";
 import diversifyStyles from "@salesforce/resourceUrl/diversifyStyles";
 import NEXS_ICONS from "@salesforce/resourceUrl/arcicon";
 import { CurrentPageReference, NavigationMixin } from "lightning/navigation";
@@ -107,6 +109,36 @@ const parseListViewPreference = (preferenceJson) => {
     return parsed && typeof parsed === "object" ? parsed : null;
   } catch (error) {
     return null;
+  }
+};
+
+/**
+ * Section key (generic getStateEntry/saveStateEntry, same User_Preference__c
+ * row family as LIST_VIEW_PREFERENCE_APPLICATION_NAME above) for the manifest
+ * of views this user has created here via Save View, per object. Confirmed
+ * live against the actual getListInfosByObjectName response: unlike the
+ * single-view detail endpoint (getListInfoByName), the collection response
+ * never includes a visibility field on any list item -- lv.visibility is
+ * always undefined there, so tabListViews' "lv.visibility === 'Private'"
+ * fallback can never be true. Without this manifest, the only thing that
+ * ever made a just-created view show up in the tab strip was the in-memory
+ * _createdViewApiNames Set, which starts empty on every fresh mount -- so a
+ * saved view (and the column/label inheritance keyed off
+ * _createdViewSourceApiName) silently disappeared from the strip the moment
+ * you reloaded or navigated away and back, even though the view itself, and
+ * which one was selected, both persisted correctly server-side.
+ */
+const CREATED_VIEWS_SECTION_KEY = "ARC_RECORD_LIST_VIEW_CREATED_VIEWS";
+
+const parseCreatedViewsEntry = (entryJson) => {
+  if (!entryJson) {
+    return [];
+  }
+  try {
+    const parsed = JSON.parse(entryJson);
+    return Array.isArray(parsed?.createdViews) ? parsed.createdViews : [];
+  } catch (error) {
+    return [];
   }
 };
 /**
@@ -486,7 +518,13 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   currentListViewLabel = "";
   _savedSignature = "";
   _adoptedListViewApiName = "";
-  /** Views saved from this component this session, so they tab up immediately. */
+  /**
+   * Views saved from this component, so they tab up immediately -- and,
+   * once wiredCreatedViews resolves, on every later mount too (see
+   * CREATED_VIEWS_SECTION_KEY; the platform's own list-info collection
+   * response never carries a visibility flag this could otherwise be
+   * derived from).
+   */
   _createdViewApiNames = new Set();
   /**
    * createdApiName -> the tab it was created FROM. viewTabs is static,
@@ -495,8 +533,10 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
    * that reads from it: column labels, chart field, quick-create fields)
    * would go blank the instant a saved view stops being literally one of
    * the page's configured tabs. See activeConfiguredTab's fallback.
+   * Rehydrated by wiredCreatedViews alongside _createdViewApiNames.
    */
   _createdViewSourceApiName = new Map();
+  _createdViewsWire;
   /** Overflow (configured) tabs a "More" click has brought into the strip for
    * this session -- see promoteTab. */
   _promotedTabValues = [];
@@ -691,7 +731,7 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     this._appliedTabParam = target;
 
     if (matched.value !== this.selectedListViewApiName) {
-      this.selectTabView(matched.value);
+      this.selectTabView(matched.value, { persistPreference: false });
     }
   }
 
@@ -1638,25 +1678,98 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   })
   wiredListViewPreference(result) {
     this._listViewPreferenceWire = result;
-    // eslint-disable-next-line no-console
-    console.log(
-      "[arcRecordListView][diag] wiredListViewPreference fired " +
-        JSON.stringify({
-          data: result?.data ?? null,
-          error: result?.error?.body?.message ?? result?.error ?? null
-        })
-    );
+    const { data, error } = result;
+    if (data === undefined && error === undefined) {
+      // The wire's first emission for a brand new subscription is this
+      // pending placeholder, before the network round trip has actually
+      // settled. Treating it as resolved would let
+      // applyListViewPreferenceIfNeeded run against a bogus "no
+      // preference" reading whenever wiredListInfos happened to resolve
+      // first, and its one-shot guard would then silently discard the
+      // real preference the moment it arrived after.
+      return;
+    }
     this._preferenceResolved = true;
-    const { data } = result;
     this._listViewPreference = data
       ? parseListViewPreference(data.entryJson)
       : null;
-    // eslint-disable-next-line no-console
-    console.log(
-      "[arcRecordListView][diag] wiredListViewPreference parsed " +
-        JSON.stringify(this._listViewPreference)
-    );
     this.applyListViewPreferenceIfNeeded();
+  }
+
+  /**
+   * Rehydrates _createdViewApiNames/_createdViewSourceApiName from the
+   * persisted manifest (see CREATED_VIEWS_SECTION_KEY) on every mount, not
+   * just this session. Merges rather than overwrites -- a view just created
+   * in persistCreatedViewsManifest's own still-in-flight save shouldn't
+   * vanish locally if this wire happens to re-resolve with the
+   * not-yet-updated server copy in between.
+   */
+  @wire(getStateEntry, {
+    applicationName: LIST_VIEW_PREFERENCE_APPLICATION_NAME,
+    sectionKey: CREATED_VIEWS_SECTION_KEY,
+    entryKey: "$objectApiName"
+  })
+  wiredCreatedViews(result) {
+    this._createdViewsWire = result;
+    const { data, error } = result;
+    if (data === undefined && error === undefined) {
+      return;
+    }
+    const entries = data ? parseCreatedViewsEntry(data.entryJson) : [];
+    if (!entries.length) {
+      return;
+    }
+    const mergedNames = new Set(this._createdViewApiNames);
+    const mergedSources = new Map(this._createdViewSourceApiName);
+    let changed = false;
+    entries.forEach((entry) => {
+      if (!entry?.apiName) {
+        return;
+      }
+      if (!mergedNames.has(entry.apiName)) {
+        mergedNames.add(entry.apiName);
+        changed = true;
+      }
+      if (entry.sourceApiName && !mergedSources.has(entry.apiName)) {
+        mergedSources.set(entry.apiName, entry.sourceApiName);
+        changed = true;
+      }
+    });
+    if (changed) {
+      this._createdViewApiNames = mergedNames;
+      this._createdViewSourceApiName = mergedSources;
+    }
+  }
+
+  /** Write side of wiredCreatedViews -- see CREATED_VIEWS_SECTION_KEY. */
+  persistCreatedViewsManifest() {
+    if (!this.objectApiName) {
+      return;
+    }
+    const createdViews = Array.from(this._createdViewApiNames).map((apiName) => ({
+      apiName,
+      sourceApiName: this._createdViewSourceApiName.get(apiName) || ""
+    }));
+    saveStateEntry({
+      applicationName: LIST_VIEW_PREFERENCE_APPLICATION_NAME,
+      sectionKey: CREATED_VIEWS_SECTION_KEY,
+      entryKey: this.objectApiName,
+      entryJson: JSON.stringify({ createdViews })
+    })
+      .then(() => {
+        if (this._createdViewsWire) {
+          refreshApex(this._createdViewsWire).catch(() => {
+            /* Best-effort -- local state above already reflects the change. */
+          });
+        }
+      })
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error(
+          "[arcRecordListView] Failed to persist created-views manifest",
+          error
+        );
+      });
   }
 
   /*
@@ -2392,19 +2505,7 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
 
   handleTabClick(event) {
     const listViewApiName = event.currentTarget.dataset.value;
-    // eslint-disable-next-line no-console
-    console.log(
-      "[arcRecordListView][diag] handleTabClick " +
-        JSON.stringify({
-          listViewApiName,
-          currentlySelected: this.selectedListViewApiName
-        })
-    );
     if (!listViewApiName || listViewApiName === this.selectedListViewApiName) {
-      // eslint-disable-next-line no-console
-      console.log(
-        "[arcRecordListView][diag] handleTabClick: no-op (same tab or no value)"
-      );
       return;
     }
     if (event.currentTarget.dataset.source === "overflow") {
@@ -2484,7 +2585,11 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
         listViewApiName: target.value
       });
       this.listViews = this.listViews.filter((lv) => lv.value !== target.value);
-      this._createdViewApiNames.delete(target.value);
+      const wasCreatedHere = this._createdViewApiNames.delete(target.value);
+      this._createdViewSourceApiName.delete(target.value);
+      if (wasCreatedHere) {
+        this.persistCreatedViewsManifest();
+      }
       this._promotedTabValues = this._promotedTabValues.filter(
         (value) => value !== target.value
       );
@@ -2508,9 +2613,18 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     }
   }
 
-  selectTabView(listViewApiName) {
-    // eslint-disable-next-line no-console
-    console.log("[arcRecordListView][diag] selectTabView", listViewApiName);
+  /**
+   * persistPreference: false is for applyTabFromUrl only. c__tabId reflects
+   * this page's own static Experience Builder route params -- it reads back
+   * identically (e.g. tab1) on every single mount, never the actually-last-
+   * selected view -- not genuine per-visit navigation intent. Letting that
+   * automatic selection persist unconditionally raced -- and regularly beat
+   * -- the real getListViewPreference-based restore, since it fires
+   * synchronously from the URL while the restore is still waiting on an
+   * Apex round trip. It should still change what's on screen for this
+   * visit, just never overwrite what the user will get back next time.
+   */
+  selectTabView(listViewApiName, { persistPreference = true } = {}) {
     this.openPopover = "";
     this.searchTerm = "";
     this.groupFieldApiName = "";
@@ -2522,7 +2636,9 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     this.isLoading = true;
     this.selectedListViewApiName = listViewApiName;
     this.syncTabUrlParam(listViewApiName);
-    this.persistListViewPreference(listViewApiName);
+    if (persistPreference) {
+      this.persistListViewPreference(listViewApiName);
+    }
   }
 
   /**
@@ -2533,37 +2649,17 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
    * reverted back to whatever was remembered from before this page load.
    */
   applyListViewPreferenceIfNeeded() {
-    // eslint-disable-next-line no-console
-    console.log(
-      "[arcRecordListView][diag] applyListViewPreferenceIfNeeded " +
-        JSON.stringify({
-          appliedAlready: this._appliedListViewPreference,
-          preferenceResolved: this._preferenceResolved,
-          listViewsCount: this.listViews.length,
-          preference: this._listViewPreference,
-          currentlySelected: this.selectedListViewApiName
-        })
-    );
     if (
       this._appliedListViewPreference ||
       !this._preferenceResolved ||
       !this.listViews.length
     ) {
-      // eslint-disable-next-line no-console
-      console.log(
-        "[arcRecordListView][diag] applyListViewPreferenceIfNeeded: bailing out (already applied, or preference/list not resolved yet)"
-      );
       return;
     }
     this._appliedListViewPreference = true;
 
     const preferredApiName = this._listViewPreference?.listViewApiName;
     if (!preferredApiName || this.selectedListViewApiName === preferredApiName) {
-      // eslint-disable-next-line no-console
-      console.log(
-        "[arcRecordListView][diag] applyListViewPreferenceIfNeeded: nothing to restore (no saved preference, or already on it) " +
-          JSON.stringify({ preferredApiName })
-      );
       return;
     }
     // The remembered view may have been deleted since, or (for one recently
@@ -2571,36 +2667,14 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     // merge-not-overwrite guard. Falling back to the page's own default in
     // that case beats surfacing an error for a view that's simply gone.
     if (!this.listViews.some((lv) => lv.value === preferredApiName)) {
-      // eslint-disable-next-line no-console
-      console.log(
-        "[arcRecordListView][diag] applyListViewPreferenceIfNeeded: preferred view not in listViews, skipping restore " +
-          JSON.stringify({
-            preferredApiName,
-            listViews: this.listViews.map((lv) => lv.value)
-          })
-      );
       return;
     }
-    // eslint-disable-next-line no-console
-    console.log(
-      "[arcRecordListView][diag] applyListViewPreferenceIfNeeded: restoring",
-      preferredApiName
-    );
     this.selectTabView(preferredApiName);
   }
 
   /** Best-effort -- see applyListViewPreferenceIfNeeded for the read side. */
   persistListViewPreference(listViewApiName) {
-    // eslint-disable-next-line no-console
-    console.log(
-      "[arcRecordListView][diag] persistListViewPreference called " +
-        JSON.stringify({ listViewApiName, objectApiName: this.objectApiName })
-    );
     if (!this.objectApiName || !listViewApiName) {
-      // eslint-disable-next-line no-console
-      console.log(
-        "[arcRecordListView][diag] persistListViewPreference: skipped, missing objectApiName or listViewApiName"
-      );
       return;
     }
     const params = {
@@ -2608,18 +2682,8 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
       tableId: this.objectApiName,
       preferenceJson: JSON.stringify({ listViewApiName })
     };
-    // eslint-disable-next-line no-console
-    console.log(
-      "[arcRecordListView][diag] persistListViewPreference: calling saveListViewPreference " +
-        JSON.stringify(params)
-    );
     saveListViewPreference(params)
-      .then((result) => {
-        // eslint-disable-next-line no-console
-        console.log(
-          "[arcRecordListView][diag] persistListViewPreference: saveListViewPreference SUCCESS " +
-            JSON.stringify(result)
-        );
+      .then(() => {
         // getListViewPreference is cacheable=true, so Lightning Data
         // Service caches its result independently of this plain
         // imperative save -- nothing tells that wire the underlying row
@@ -2628,20 +2692,16 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
         // the cache entry is still warm) can read back the value that
         // was current before this save instead of what was just written.
         if (this._listViewPreferenceWire) {
-          refreshApex(this._listViewPreferenceWire).catch((error) => {
-            // eslint-disable-next-line no-console
-            console.error(
-              "[arcRecordListView][diag] persistListViewPreference: refreshApex(preference) FAILED",
-              error
-            );
+          refreshApex(this._listViewPreferenceWire).catch(() => {
+            /* Best-effort -- local state above already reflects the change. */
           });
         }
       })
       .catch((error) => {
         // eslint-disable-next-line no-console
         console.error(
-          "[arcRecordListView][diag] persistListViewPreference: saveListViewPreference FAILED " +
-            JSON.stringify(error)
+          "[arcRecordListView] Failed to persist list view preference",
+          error
         );
       });
   }
@@ -2659,6 +2719,18 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
    * undo. Only ever called from user-driven tab changes (selectTabView),
    * never the initial default-tab load, so a plain page open doesn't
    * acquire a tab param nobody asked for.
+   *
+   * A custom saved view has no "tabN" slot of its own, so this leaves
+   * whichever configured tab's c__tabId was already there untouched rather
+   * than clearing it -- the nav menu has nothing that represents an
+   * individual saved view anyway, so falling back to highlighting its
+   * parent configured tab beats highlighting nothing. (An earlier version
+   * of this method deleted c__tabId here, on the theory that a stale value
+   * was what let applyTabFromUrl re-persist a wrong tab on the next mount --
+   * confirmed false: applyTabFromUrl now passes persistPreference: false, so
+   * it never persists regardless of what c__tabId says, and the actual
+   * restore race was a separate bug in wiredListViewPreference. Deleting it
+   * here only cost the nav menu its highlight for no correctness benefit.)
    */
   syncTabUrlParam(listViewApiName) {
     if (typeof window === "undefined") {
@@ -2669,28 +2741,14 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
       (tab) => tab.value === listViewApiName
     );
 
-    const url = new URL(window.location.href);
-
     if (index === -1) {
-      // A custom saved view has no "tabN" slot to encode here. Leaving
-      // whichever configured tab's c__tabId was written before this
-      // selection would make applyTabFromUrl re-select (and re-persist)
-      // that stale tab the next time this component mounts -- racing the
-      // correct getListViewPreference-based restore, and sometimes
-      // winning it (last saveListViewPreference to resolve wins on the
-      // server, not last user action). Clearing it here is what lets a
-      // custom view's own restore run uncontested.
-      this._appliedTabParam = "";
-      if (url.searchParams.has("c__tabId")) {
-        url.searchParams.delete("c__tabId");
-        window.history.replaceState(window.history.state, "", url.toString());
-      }
       return;
     }
 
     const tabParam = `tab${index + 1}`;
     this._appliedTabParam = tabParam;
 
+    const url = new URL(window.location.href);
     if (url.searchParams.get("c__tabId") === tabParam) {
       return;
     }
@@ -3091,6 +3149,7 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
         this._createdViewSourceApiName.set(createdApiName, sourceViewApiName);
       }
       this.persistListViewPreference(createdApiName);
+      this.persistCreatedViewsManifest();
 
       if (!this.listViews.some((lv) => lv.value === createdApiName)) {
         this.listViews = [

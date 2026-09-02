@@ -70,21 +70,11 @@ public with sharing class UserPreferenceController {
     String applicationName,
     String tableId
   ) {
-    System.debug(
-      '[UserPreferenceController][diag] getListViewPreference ENTRY applicationName=' + applicationName +
-      ' tableId=' + tableId +
-      ' runningUserId=' + UserInfo.getUserId() +
-      ' runningUserType=' + UserInfo.getUserType()
-    );
-    UserPreferenceModels.StateEntryResult result = SERVICE.getListViewPreference(
+    return SERVICE.getListViewPreference(
       UserInfo.getUserId(),
       applicationName,
       tableId
     );
-    System.debug(
-      '[UserPreferenceController][diag] getListViewPreference RESULT entryJson=' + result.entryJson
-    );
-    return result;
   }
 
   @AuraEnabled
@@ -93,22 +83,11 @@ public with sharing class UserPreferenceController {
     String tableId,
     String preferenceJson
   ) {
-    System.debug(
-      '[UserPreferenceController][diag] saveListViewPreference ENTRY applicationName=' + applicationName +
-      ' tableId=' + tableId +
-      ' preferenceJson=' + preferenceJson +
-      ' runningUserId=' + UserInfo.getUserId() +
-      ' runningUserType=' + UserInfo.getUserType()
-    );
-    UserPreferenceModels.StateEntryResult result = SERVICE.saveListViewPreference(
+    return SERVICE.saveListViewPreference(
       UserInfo.getUserId(),
       applicationName,
       tableId,
       preferenceJson
     );
-    System.debug(
-      '[UserPreferenceController][diag] saveListViewPreference RESULT preferenceId=' + result.preferenceId
-    );
-    return result;
   }
 }

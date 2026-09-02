@@ -1,9 +1,10 @@
 <template>
   <div>
-    <lightning-card
-      class="slds-theme_shade slds-card_boundary"
-      icon-name="utility:comments"
-    >
+    <!-- No slds-card_boundary / slds-theme_shade on the host: the host box
+         renders inline and taller than the inner article, so its own border
+         drew stray line fragments above and below the card. The inner
+         slds-card article already carries the card border. -->
+    <lightning-card icon-name="utility:comments">
       <span slot="title">
         <b>
           <a class="slds-card__header-link">

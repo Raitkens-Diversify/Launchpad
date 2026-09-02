@@ -67,7 +67,15 @@
 
       <div class="arc-task-detail__columns">
         <div class="arc-task-detail__body">
-          <c-arc-record-detail field-layout="grid"></c-arc-record-detail>
+          <!-- FA team members edit the Task Information section inline (the
+               section's own Edit → field controls → Save), the way the
+               Lightning Task page allows; everyone else reads it. -->
+          <c-arc-record-detail
+            field-layout="grid"
+            editable={canEditTask}
+            editable-sections="Task Information"
+            onrecordsaved={handleRecordSaved}
+          ></c-arc-record-detail>
 
           <template lwc:if={showOpenActivities}>
             <lightning-card title={openActivitiesLabel}>

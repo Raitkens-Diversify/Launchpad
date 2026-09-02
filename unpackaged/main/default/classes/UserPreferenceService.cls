@@ -108,12 +108,6 @@ public with sharing class UserPreferenceService {
     String sectionKey,
     String entryKey
   ) {
-    System.debug(
-      '[UserPreferenceService][diag] getStateEntry userId=' + userId +
-      ' applicationName=' + applicationName +
-      ' sectionKey=' + sectionKey +
-      ' entryKey=' + entryKey
-    );
     validateApplicationName(applicationName);
     validateSectionKey(sectionKey);
     validateEntryKey(entryKey);
@@ -124,7 +118,6 @@ public with sharing class UserPreferenceService {
     );
 
     if (preference == null || String.isBlank(preference.State__c)) {
-      System.debug('[UserPreferenceService][diag] getStateEntry: no preference record / empty State__c -- returning empty');
       return new UserPreferenceModels.StateEntryResult(null, '{}');
     }
 
@@ -132,13 +125,6 @@ public with sharing class UserPreferenceService {
     Map<String, Object> section = getSectionMap(stateMap, sectionKey);
     String normalizedEntryKey = normalizeEntryKey(entryKey);
     Object entry = section.get(normalizedEntryKey);
-
-    System.debug(
-      '[UserPreferenceService][diag] getStateEntry: preferenceId=' + preference.Id +
-      ' sectionKeys=' + section.keySet() +
-      ' normalizedEntryKey=' + normalizedEntryKey +
-      ' entryFound=' + (entry != null)
-    );
 
     return new UserPreferenceModels.StateEntryResult(
       preference.Id,
@@ -164,14 +150,6 @@ public with sharing class UserPreferenceService {
     String entryJson,
     String entryIdFieldName
   ) {
-    System.debug(
-      '[UserPreferenceService][diag] saveStateEntry userId=' + userId +
-      ' applicationName=' + applicationName +
-      ' sectionKey=' + sectionKey +
-      ' entryKey=' + entryKey +
-      ' entryJson=' + entryJson +
-      ' entryIdFieldName=' + entryIdFieldName
-    );
     validateApplicationName(applicationName);
     validateSectionKey(sectionKey);
     validateEntryKey(entryKey);
@@ -181,10 +159,6 @@ public with sharing class UserPreferenceService {
     User_Preference__c preference = preferenceRepository.selectByUserAndApp(
       userId,
       applicationName
-    );
-    System.debug(
-      '[UserPreferenceService][diag] saveStateEntry: existing preference=' +
-      (preference == null ? 'none (will insert)' : preference.Id + ' (will update)')
     );
     Map<String, Object> stateMap = preference == null || String.isBlank(preference.State__c)
       ? createEmptyStateMap()
@@ -214,9 +188,7 @@ public with sharing class UserPreferenceService {
     }
 
     preference.State__c = serializedState;
-    System.debug('[UserPreferenceService][diag] saveStateEntry: about to upsertPreference, serializedStateLength=' + serializedState.length());
     preferenceRepository.upsertPreference(preference);
-    System.debug('[UserPreferenceService][diag] saveStateEntry: upsertPreference returned, Id=' + preference.Id);
 
     return new UserPreferenceModels.StateEntryResult(
       preference.Id,

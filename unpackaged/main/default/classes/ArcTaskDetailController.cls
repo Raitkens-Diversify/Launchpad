@@ -25,7 +25,7 @@ public with sharing class ArcTaskDetailController {
     }
 
     List<Task> matches = [
-      SELECT WhatId, WhoId, OwnerId, Status, Subject, Priority, ActivityDate
+      SELECT WhatId, WhoId, OwnerId, Owner.Name, Status, Subject, Priority, ActivityDate
       FROM Task
       WHERE Id = :taskId
       WITH USER_MODE
@@ -39,11 +39,51 @@ public with sharing class ArcTaskDetailController {
     context.whatId = record.WhatId;
     context.whoId = record.WhoId;
     context.ownerId = record.OwnerId;
+    context.ownerName = record.Owner.Name;
     context.status = record.Status;
     context.subject = record.Subject;
     context.priority = record.Priority;
     context.dueDate = record.ActivityDate;
     context.isParentCase = isCaseId(record.WhatId);
+
+    // Gate for inline editing: the Lightning Task page's User_on_FA_Team__c
+    // formula, OR an active Financial_Advisor_Team_Member__c record for the
+    // running user. The formula reads the team's Users_On_Team__c text roster,
+    // which nothing in this codebase maintains and which goes stale (after a
+    // sandbox refresh it still carries pre-refresh user ids), while the member
+    // object is how advisors are actually put on a team — so membership there
+    // passes too. Queried without USER_MODE so a profile lacking FLS on these
+    // fields still gets a correct gate instead of a broken page.
+    List<Task> gate = [
+      SELECT User_on_FA_Team__c, Financial_Advisor_Team__c
+      FROM Task
+      WHERE Id = :taskId
+      LIMIT 1
+    ];
+    Boolean isOnTeam = !gate.isEmpty() && gate[0].User_on_FA_Team__c == true;
+
+    Id teamId = gate.isEmpty() ? null : gate[0].Financial_Advisor_Team__c;
+    if (teamId == null && context.isParentCase) {
+      List<Case> parents = [
+        SELECT Financial_Advisor_Team__c
+        FROM Case
+        WHERE Id = :record.WhatId
+        LIMIT 1
+      ];
+      teamId = parents.isEmpty() ? null : parents[0].Financial_Advisor_Team__c;
+    }
+    if (!isOnTeam && teamId != null) {
+      isOnTeam =
+        [
+          SELECT COUNT()
+          FROM Financial_Advisor_Team_Member__c
+          WHERE
+            Financial_Advisor_Team__c = :teamId
+            AND User__c = :UserInfo.getUserId()
+            AND Active__c = true
+        ] > 0;
+    }
+    context.isUserOnFaTeam = isOnTeam;
 
     if (record.WhatId != null) {
       Schema.DescribeSObjectResult whatDescribe = record.WhatId.getSObjectType()
@@ -315,6 +355,15 @@ public with sharing class ArcTaskDetailController {
 
     @AuraEnabled
     public Id ownerId;
+
+    @AuraEnabled
+    public String ownerName;
+
+    /** True when the running user is on the task's Financial Advisor Team
+     *  (Task.User_on_FA_Team__c) — gates the inline Assigned To / Due Date
+     *  editing, the way the Lightning Task page allows FA team members. */
+    @AuraEnabled
+    public Boolean isUserOnFaTeam = false;
 
     @AuraEnabled
     public String status;

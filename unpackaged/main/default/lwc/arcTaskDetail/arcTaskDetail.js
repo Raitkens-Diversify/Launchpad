@@ -162,6 +162,15 @@ export default class ArcTaskDetail extends NavigationMixin(LightningElement) {
     return `${month}/${day}/${year}`;
   }
 
+  /**
+   * Inline editing (the Task Information section) is for users on the task's
+   * Financial Advisor Team — the Lightning Task page's gate, resolved
+   * server-side from User_on_FA_Team__c or an active team-member record.
+   */
+  get canEditTask() {
+    return this.taskContext?.isUserOnFaTeam === true;
+  }
+
   get hasWhat() {
     return Boolean(this.taskContext?.whatId && this.taskContext?.whatName);
   }
@@ -286,6 +295,14 @@ export default class ArcTaskDetail extends NavigationMixin(LightningElement) {
 
   getRecordDetail() {
     return this.template.querySelector("c-arc-record-detail");
+  }
+
+  /**
+   * The Task Information section saved (arcRecordDetail's inline edit) — pull
+   * the header facts (Due Date, subject, status) back in line with it.
+   */
+  handleRecordSaved() {
+    refreshApex(this._taskContextResult);
   }
 
   handleAddCommentClick() {

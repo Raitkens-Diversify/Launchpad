@@ -63,6 +63,34 @@
             </div>
         </template>
 
+        <template lwc:elseif={usesCustomSearch}>
+            <div class="rdf-owner">
+                <input
+                    class={inputClass}
+                    type="search"
+                    placeholder={customSearchPlaceholder}
+                    value={customSearchTerm}
+                    aria-label={ariaLabel}
+                    oninput={handleCustomSearch}>
+                <template lwc:if={isCustomDropdownOpen}>
+                    <div class="rdf-owner__dropdown" role="listbox">
+                        <template for:each={customSearchResults} for:item="item">
+                            <div
+                                key={item.value}
+                                class="rdf-owner__item"
+                                role="option"
+                                data-value={item.value}
+                                data-label={item.label}
+                                onclick={handleCustomSelect}>
+                                <lightning-icon icon-name={item.icon} size="x-small"></lightning-icon>
+                                <span>{item.label}</span>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+        </template>
+
         <template lwc:elseif={showReferencePicker}>
             <lightning-record-picker
                 class={lookupClass}

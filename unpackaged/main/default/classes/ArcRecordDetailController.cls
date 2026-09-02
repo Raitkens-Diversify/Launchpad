@@ -337,6 +337,39 @@ public with sharing class ArcRecordDetailController {
     }
   }
 
+  /**
+   * Candidates for the Financial Advisor Team lookup in inline editing:
+   * everything except explicitly Inactive teams. Most working teams carry no
+   * Status__c at all, so filtering to Status__c = 'Active' alone would hide
+   * them; only 'Inactive' marks a team as retired.
+   */
+  @AuraEnabled
+  public static List<Map<String, String>> searchFinancialAdvisorTeams(String searchKey) {
+    if (String.isBlank(searchKey)) {
+      return new List<Map<String, String>>();
+    }
+    List<Map<String, String>> results = new List<Map<String, String>>();
+    for (Financial_Advisor_Team__c team : [
+      SELECT Id, Name
+      FROM Financial_Advisor_Team__c
+      WHERE
+        Name LIKE :('%' + searchKey + '%')
+        AND (Status__c = 'Active'
+        OR Status__c = null)
+      ORDER BY Name
+      LIMIT 10
+    ]) {
+      results.add(
+        new Map<String, String>{
+          'label' => team.Name,
+          'value' => team.Id,
+          'icon' => 'standard:team_member'
+        }
+      );
+    }
+    return results;
+  }
+
   @AuraEnabled
   public static void save(
     Id recordId,

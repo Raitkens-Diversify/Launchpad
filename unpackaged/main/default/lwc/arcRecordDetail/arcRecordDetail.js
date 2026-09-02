@@ -26,8 +26,8 @@ import {
   sectionStatus
 } from 'c/envelopeFormSchema';
 
-// Inline editing is disabled for this release.
-const EDIT_ENABLED = false;
+// Inline editing is off by default; a parent opts in per instance (and can
+// narrow it to named sections) — the task page passes its FA-team gate.
 
 export default class ArcRecordDetail extends LightningElement {
   _recordId;
@@ -44,6 +44,15 @@ export default class ArcRecordDetail extends LightningElement {
   // Deprecated Experience Builder property — kept for published community compatibility only.
   // Schema type is always resolved server-side from the record; this value is ignored.
   @api schemaType;
+
+  /**
+   * Opt-in inline editing. Everything stays read-only unless the parent sets
+   * editable (arcTaskDetail passes its FA-team gate). editableSections can
+   * narrow it to a comma-separated list of section labels — without it every
+   * section gets the Edit button, System Information included.
+   */
+  @api editable = false;
+  @api editableSections = '';
 
   @api
   get useRelatedRecord() {
@@ -282,9 +291,17 @@ export default class ArcRecordDetail extends LightningElement {
     return Boolean(this.title?.trim());
   }
 
-  /** Suppresses the section Edit button while EDIT_ENABLED is false, instead of leaving a pencil that does nothing when clicked. */
-  get editingDisabled() {
-    return !EDIT_ENABLED;
+  /** Whether one named section takes edits: editable is on, and the section
+   *  is in editableSections (or no list was given). */
+  isSectionEditable(sectionLabel) {
+    if (this.editable !== true) {
+      return false;
+    }
+    const allowed = (this.editableSections || '')
+      .split(',')
+      .map((name) => name.trim())
+      .filter(Boolean);
+    return allowed.length === 0 || allowed.includes(sectionLabel);
   }
 
   /** The field's current draft value, or '' if unresolved/not loaded yet. */
@@ -527,7 +544,8 @@ export default class ArcRecordDetail extends LightningElement {
       ...section,
       isEditing: this.editingSectionKeys.includes(section.key),
       isSaving: section.key === this.savingSectionKey,
-      hasChanges: this.sectionHasChanges(section.fields)
+      hasChanges: this.sectionHasChanges(section.fields),
+      readOnly: !this.isSectionEditable(section.label)
     }));
   }
 
@@ -576,7 +594,7 @@ export default class ArcRecordDetail extends LightningElement {
   }
 
   handleSectionEdit(event) {
-    if (!EDIT_ENABLED) {
+    if (this.editable !== true) {
       return;
     }
 
@@ -603,7 +621,7 @@ export default class ArcRecordDetail extends LightningElement {
   }
 
   async handleSectionSave(event) {
-    if (!EDIT_ENABLED) {
+    if (this.editable !== true) {
       return;
     }
 
@@ -647,6 +665,14 @@ export default class ArcRecordDetail extends LightningElement {
       this.savedDraft = nextSavedDraft;
       this.editingSectionKeys = this.editingSectionKeys.filter((key) => key !== sectionKey);
       this.showToast('Saved', `${section?.label || 'Section'} updated successfully.`, 'success');
+
+      // The parent may render its own view of these fields (the task page's
+      // header facts); tell it what was written so it can refresh.
+      this.dispatchEvent(
+        new CustomEvent('recordsaved', {
+          detail: { recordId: this.recordId, fields: { ...payload } }
+        })
+      );
     } catch (error) {
       this.showToast('Unable to save', this.resolveSaveErrorMessage(error), 'error');
     } finally {

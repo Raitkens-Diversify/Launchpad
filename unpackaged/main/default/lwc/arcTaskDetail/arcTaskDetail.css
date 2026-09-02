@@ -163,7 +163,9 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-top: 12px;
+  /* No margin-top: the columns wrapper already spaces this from the header;
+     a leftover margin here started the left cards 12px below the comments
+     card and the two columns' tops didn't line up. */
 }
 /* ── Two-column layout: detail on the left, Task Comments on the right ───── */
 

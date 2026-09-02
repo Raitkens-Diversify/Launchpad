@@ -2,6 +2,12 @@
   display: block;
 }
 
+/* The card host otherwise computes display:inline in the LWR site, which made
+   its (former) boundary border wrap line boxes and paint stray fragments. */
+lightning-card {
+  display: block;
+}
+
 .task-comment__empty {
   padding: 0.75rem 1rem 1rem;
   color: var(--lwc-colorTextWeak, #444444);

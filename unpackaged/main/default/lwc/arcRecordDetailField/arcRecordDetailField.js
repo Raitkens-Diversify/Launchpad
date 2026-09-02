@@ -12,9 +12,38 @@ import {
   applyInputMask,
   draftValuesEqual,
   isEmptyValue,
-  isFormatValid,
-  normalizeDateWireValue
+  isFormatValid
 } from 'c/envelopeFormSchema';
+
+/**
+ * A date field's wire value can arrive as 'YYYY-MM-DD', a full ISO datetime,
+ * or an epoch number; a native <input type="date"> needs plain 'YYYY-MM-DD'.
+ * Declared here because this used to be imported from c/envelopeFormSchema,
+ * which never exported it — harmless while inline editing was disabled, fatal
+ * ("normalizeDateWireValue is not a function") the moment an edit-mode date
+ * control rendered.
+ */
+const normalizeDateWireValue = (value) => {
+  if (value === null || value === undefined || value === '') {
+    return '';
+  }
+  if (typeof value === 'number') {
+    const fromEpoch = new Date(value);
+    return isNaN(fromEpoch.getTime())
+      ? ''
+      : fromEpoch.toISOString().slice(0, 10);
+  }
+  const match = String(value).match(/^(\d{4}-\d{2}-\d{2})/);
+  return match ? match[1] : '';
+};
+// The owner lookup can't use lightning-record-picker: OwnerId is polymorphic
+// (User and Group) and referenceTo resolves to Group, so the picker offered
+// only queues. This search is the one the Lightning task tile uses — active
+// Users plus Queues together.
+import searchUsers from '@salesforce/apex/CaseCurrentTaskController.searchUsers';
+// FA team candidates: everything but explicitly Inactive teams (most working
+// teams carry no Status__c at all).
+import searchFaTeams from '@salesforce/apex/ArcRecordDetailController.searchFinancialAdvisorTeams';
 
 export default class ArcRecordDetailField extends LightningElement {
   @api field;
@@ -66,13 +95,58 @@ export default class ArcRecordDetailField extends LightningElement {
     return this.normalizedType === 'REFERENCE';
   }
 
-  /** The object a lookup's candidates come from; blank hides the picker. */
+  /**
+   * The task owner lookup gets its own search (active Users + Queues, like the
+   * Lightning task page): OwnerId is polymorphic and referenceTo resolves to
+   * Group, which made the record picker offer only queues.
+   */
+  get isOwnerLookup() {
+    return this.isReference && this.field?.apiName === 'OwnerId';
+  }
+
+  /** The object a lookup's candidates come from; blank hides the picker.
+   *  WhatId/WhoId are polymorphic and referenceTo lands on the wrong member,
+   *  so the task page's Related To / Name are pinned to what they actually
+   *  hold in this org: Cases and Contacts. */
   get referenceObjectApiName() {
+    const apiName = this.field?.apiName;
+    if (apiName === 'WhatId') {
+      return 'Case';
+    }
+    if (apiName === 'WhoId') {
+      return 'Contact';
+    }
     return this.field?.referenceTo || '';
   }
 
   get showReferencePicker() {
-    return this.isReference && Boolean(this.referenceObjectApiName);
+    return (
+      this.isReference &&
+      !this.usesCustomSearch &&
+      Boolean(this.referenceObjectApiName)
+    );
+  }
+
+  /**
+   * The Financial Advisor Team lookup also gets the custom search: the raw
+   * picker offered every team, Inactive included. The Apex search keeps
+   * Active and unstamped teams (most working teams have no Status__c) and
+   * drops only the explicitly Inactive ones.
+   */
+  get isFaTeamLookup() {
+    return (
+      this.isReference && this.field?.apiName === 'Financial_Advisor_Team__c'
+    );
+  }
+
+  get usesCustomSearch() {
+    return this.isOwnerLookup || this.isFaTeamLookup;
+  }
+
+  get customSearchPlaceholder() {
+    return this.isOwnerLookup
+      ? 'Search people and queues...'
+      : 'Search financial advisor teams...';
   }
 
   get referenceValue() {
@@ -128,6 +202,7 @@ export default class ArcRecordDetailField extends LightningElement {
       !this.isDateTime &&
       !this.isPicklist &&
       !this.isMultiPicklist &&
+      !this.usesCustomSearch &&
       !this.showReferencePicker
     );
   }
@@ -374,6 +449,47 @@ export default class ArcRecordDetailField extends LightningElement {
   }
 
   /* record-picker clears to null, which is what the save payload needs too. */
+  /* ── Custom lookup search (Assigned To: Users + Queues; FA Team: non-
+        Inactive teams) ─────────────────────────────────────────────────── */
+
+  /** null = untouched, so the box seeds with the current value's name. */
+  _customSearchTerm = null;
+  customSearchResults = [];
+  isCustomDropdownOpen = false;
+
+  get customSearchTerm() {
+    if (this._customSearchTerm !== null) {
+      return this._customSearchTerm;
+    }
+    return this.field?.referenceLabel || '';
+  }
+
+  async handleCustomSearch(event) {
+    const value = (event.target.value || '').trim();
+    this._customSearchTerm = event.target.value || '';
+    if (!value) {
+      this.customSearchResults = [];
+      this.isCustomDropdownOpen = false;
+      return;
+    }
+    try {
+      const search = this.isOwnerLookup ? searchUsers : searchFaTeams;
+      this.customSearchResults = await search({ searchKey: value });
+      this.isCustomDropdownOpen = this.customSearchResults.length > 0;
+    } catch (error) {
+      this.customSearchResults = [];
+      this.isCustomDropdownOpen = false;
+    }
+  }
+
+  handleCustomSelect(event) {
+    const { value, label } = event.currentTarget.dataset;
+    this._customSearchTerm = label || '';
+    this.isCustomDropdownOpen = false;
+    this.customSearchResults = [];
+    this.emitChange(value || null);
+  }
+
   handleReferenceChange(event) {
     this.clearValidationMessage();
     this.emitChange(event.detail?.recordId ?? null);
@@ -391,6 +507,14 @@ export default class ArcRecordDetailField extends LightningElement {
   @api
   resetValue() {
     this.clearValidationMessage();
+
+    if (this.usesCustomSearch) {
+      this._customSearchTerm = null;
+      this.customSearchResults = [];
+      this.isCustomDropdownOpen = false;
+      return;
+    }
+
     const control = this.primaryControl();
     if (!control) {
       return;

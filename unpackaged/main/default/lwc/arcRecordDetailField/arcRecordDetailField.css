@@ -119,3 +119,36 @@
 .div-select.div-input--record-detail {
   font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
 }
+/* ── Owner (Assigned To) search dropdown: Users + Queues ─────────────────── */
+
+.rdf-owner {
+  position: relative;
+}
+
+.rdf-owner__dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 9000;
+  margin-top: 4px;
+  background: #ffffff;
+  border: 1px solid #c9c9c9;
+  border-radius: 4px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.rdf-owner__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.rdf-owner__item:hover {
+  background: #f3f2f2;
+}
