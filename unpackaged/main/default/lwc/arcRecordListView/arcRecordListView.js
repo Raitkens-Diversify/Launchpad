@@ -82,6 +82,12 @@ const TABLE_PAGE_SIZE = 25;
 const TABLE_PAGE_SIZE_OPTIONS = [10, 25, 50];
 const SEARCH_DEBOUNCE_MS = 275;
 /**
+ * ListView.DeveloperName's real platform limit -- confirmed live ("the value
+ * ... for the developerName field exceeds the 40 character limit"), not the
+ * 80 this file used to assume in buildListViewApiName's budget math.
+ */
+const SAVE_VIEW_NAME_MAX_LENGTH = 40;
+/**
  * Page size for the opt-in "server search" mode (see enableServerSearch):
  * a small, fast first fetch instead of the default LIST_VIEW_FETCH_SIZE=2000
  * fetch-then-filter-client-side pattern. Real filtering/search in this mode
@@ -370,8 +376,22 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
    */
   @api serverSearchListViews = "";
 
+  /**
+   * Any view configured on serverSearchListViews turns server search on for
+   * EVERY view of this object -- not just the views actually named there.
+   * This used to be a per-view allowlist check, which meant a view created
+   * at runtime (buildListViewApiName's freshly generated, unpredictable API
+   * name) could never appear in a static, page-config-time string and so
+   * was permanently stuck on the older fetch-2000-then-filter-client-side
+   * path -- losing real server-side search/filtering and the 2000-row cap
+   * exactly where a user's own saved view needs them most. serverSearchListViews
+   * itself is left as-is (still a comma-separated string, still set the same
+   * way in every page's content.json) so this is purely an interpretation
+   * change: "is server search turned on for this object here at all", not
+   * "is this specific view on the list".
+   */
   get enableServerSearch() {
-    return this.serverSearchListViewNames.includes(this.selectedListViewApiName);
+    return this.serverSearchListViewNames.length > 0;
   }
 
   /**
@@ -1561,11 +1581,26 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     const { data, error } = result;
     if (data) {
       const lists = data.lists || [];
-      this.listViews = lists.map((item) => ({
+      const fetched = lists.map((item) => ({
         label: item.label || item.apiName,
         value: item.apiName,
         visibility: item.visibility
       }));
+      // A view created earlier this session can take a moment to show up in
+      // the platform's own list-metadata cache. This wire re-fires for
+      // reasons unrelated to that specific view (e.g. deleting a different
+      // saved view also calls refreshApex on this same wire) -- a plain
+      // overwrite on one of those re-fires would silently drop a
+      // just-created view from the tab strip even though it still exists
+      // server-side and the platform just hasn't indexed it yet. Keep any
+      // locally-known created view the fresh fetch doesn't (yet) include.
+      const fetchedValues = new Set(fetched.map((lv) => lv.value));
+      const stillMissing = this.listViews.filter(
+        (lv) =>
+          this._createdViewApiNames.has(lv.value) &&
+          !fetchedValues.has(lv.value)
+      );
+      this.listViews = [...fetched, ...stillMissing];
       if (
         !this.selectedListViewApiName ||
         !this.listViews.some((lv) => lv.value === this.selectedListViewApiName)
@@ -2125,8 +2160,15 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     );
   }
 
+  /**
+   * True for both "date" and "datetime" columns -- day-key grouping and the
+   * date-picker filter chip operate on the calendar day either way (see
+   * formatLocalDateKey), so a Datetime field like CreatedDate must trigger
+   * this same handling, not just plain Date fields.
+   */
   isDateFieldApiName(fieldApiName) {
-    return this.resolveColumnType(fieldApiName) === "date";
+    const type = this.resolveColumnType(fieldApiName);
+    return type === "date" || type === "datetime";
   }
 
   /** Numerics stay raw so the table formats them; everything else uses displayValue. */
@@ -2164,6 +2206,14 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
 
     if (dataType.includes("phone")) {
       return "phone";
+    }
+
+    // Checked before the plain "date" branch below -- "datetime".includes("date")
+    // is true, so a Datetime field (e.g. CreatedDate) would otherwise be
+    // misclassified as date-only and silently lose its time-of-day on
+    // display, even though the raw value it's rendering already carries one.
+    if (dataType.includes("datetime")) {
+      return "datetime";
     }
 
     if (dataType.includes("date")) {
@@ -2709,7 +2759,19 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   }
 
   handleSaveViewNameChange(event) {
-    this.saveViewName = event.target.value;
+    this.saveViewName = (event.target.value || "").substring(
+      0,
+      SAVE_VIEW_NAME_MAX_LENGTH
+    );
+  }
+
+  /** Bound to the modal input's maxlength so the HTML and the JS budget can't drift apart. */
+  get saveViewNameMaxLength() {
+    return SAVE_VIEW_NAME_MAX_LENGTH;
+  }
+
+  get saveViewNameCharCount() {
+    return `${this.saveViewName.length} / ${SAVE_VIEW_NAME_MAX_LENGTH}`;
   }
 
   async handleOverwriteView() {
@@ -2771,6 +2833,17 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
           ...this.listViews,
           { label, value: createdApiName, visibility: "Private" }
         ];
+      }
+
+      // Best-effort -- nudges the platform's own list-metadata cache toward
+      // picking up the brand-new view now rather than leaving whether it's
+      // indexed by the time of some later reload entirely to chance. The
+      // merge-not-overwrite guard in wiredListInfos covers the case where
+      // this loses the race anyway.
+      if (this._listInfosWire) {
+        refreshApex(this._listInfosWire).catch(() => {
+          /* Best-effort refresh -- local state above already reflects the create. */
+        });
       }
 
       await this.refreshListData();
@@ -2932,6 +3005,16 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     return apiName.substring(0, 40);
   }
 
+  /**
+   * A full crypto.randomUUID() is 32 hex characters once its dashes are
+   * stripped -- on its own, under half of DeveloperName's real 40-character
+   * limit (see SAVE_VIEW_NAME_MAX_LENGTH), the rest going to a "_" separator
+   * plus whatever's left for the human-readable base. This used to budget
+   * against 80 instead of 40, so a full-length base plus the full UUID could
+   * come out to 73 characters and get rejected server-side. 8 hex characters
+   * is still effectively collision-proof for one user's own saved views on
+   * one object, and leaves the base a real amount of room.
+   */
   buildListViewApiName(label) {
     const base = this.toApiName(label);
     if (!base) {
@@ -2941,8 +3024,13 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
       typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
         ? crypto.randomUUID()
         : `${Date.now()}${Math.random().toString(36).slice(2)}`
-    ).replace(/-/g, "");
-    const maxBaseLength = Math.max(1, 80 - 1 - suffix.length);
+    )
+      .replace(/-/g, "")
+      .substring(0, 8);
+    const maxBaseLength = Math.max(
+      1,
+      SAVE_VIEW_NAME_MAX_LENGTH - 1 - suffix.length
+    );
     return `${base.substring(0, maxBaseLength)}_${suffix}`;
   }
 

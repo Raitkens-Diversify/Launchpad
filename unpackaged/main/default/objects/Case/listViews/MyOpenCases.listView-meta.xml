@@ -6,7 +6,6 @@
     <columns>Current_Task_Subject_Assignee__c</columns>
     <columns>Current_Task_Status__c</columns>
     <columns>Milestone__c</columns>
-    <columns>Main_Track_Task_Completion_Ratio__c</columns>
     <columns>OWNER_NAME</columns>
     <columns>CASES.CREATED_DATE</columns>
     <filterScope>Mine</filterScope>

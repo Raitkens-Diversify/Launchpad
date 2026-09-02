@@ -2,17 +2,12 @@
 <ListView xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>All_Cases</fullName>
     <columns>CASES.CASE_NUMBER</columns>
-    <columns>NAME</columns>
-    <columns>CASES.SUBJECT</columns>
-    <columns>CASES.STATUS</columns>
-    <columns>CASES.CREATED_DATE_DATE_ONLY</columns>
-    <columns>CORE.USERS.ALIAS</columns>
-    <columns>Wizard_Financial_Account__c</columns>
-    <columns>CREATEDBY_USER.ALIAS</columns>
-    <columns>Household__c</columns>
-    <columns>Financial_Advisor_Team__c</columns>
-    <columns>Case_Branch_Name__c</columns>
-    <columns>CASES.TYPE</columns>
+    <columns>Case_Branch_Name_DisplayName__c</columns>
+    <columns>Current_Task_Subject_Assignee__c</columns>
+    <columns>Current_Task_Status__c</columns>
+    <columns>Milestone__c</columns>
+    <columns>OWNER_NAME</columns>
+    <columns>CASES.CREATED_DATE</columns>
     <filterScope>Everything</filterScope>
     <label>All Cases</label>
 </ListView>

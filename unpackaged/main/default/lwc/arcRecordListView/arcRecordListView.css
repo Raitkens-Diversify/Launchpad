@@ -885,6 +885,13 @@
   font-size: var(--slds-g-font-scale-neg-1, 12px);
 }
 
+.arc-record-list-view__char-count {
+  margin-top: 4px;
+  text-align: right;
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
+  color: var(--slds-g-color-on-surface-2, #6b7280);
+}
+
 .arc-record-list-view__server-search-hint {
   display: inline-flex;
   align-items: center;

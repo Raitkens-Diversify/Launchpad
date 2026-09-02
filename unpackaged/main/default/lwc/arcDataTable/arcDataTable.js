@@ -1260,7 +1260,7 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
       }).format(value);
     }
 
-    if (columnType === "date") {
+    if (columnType === "date" || columnType === "datetime") {
       const parsed = new Date(value);
       // A value that doesn't parse into a real date must not take the whole
       // table down with it -- render it as-is (still visible, still
@@ -1269,7 +1269,12 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
       if (Number.isNaN(parsed.getTime())) {
         return value;
       }
-      return new Intl.DateTimeFormat("en-US").format(parsed);
+      return columnType === "datetime"
+        ? new Intl.DateTimeFormat("en-US", {
+            dateStyle: "short",
+            timeStyle: "short"
+          }).format(parsed)
+        : new Intl.DateTimeFormat("en-US").format(parsed);
     }
 
     return value;
@@ -1331,7 +1336,9 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
     // bold weight, while descriptive text stays regular. Kept on its own class
     // so tables that don't opt into the comfortable density are unaffected.
     if (
-      ["number", "currency", "percent", "date", "phone"].includes(column.type)
+      ["number", "currency", "percent", "date", "datetime", "phone"].includes(
+        column.type
+      )
     ) {
       classes.push("div-table__cell--strong");
     }

@@ -774,8 +774,10 @@
           type="text"
           aria-label="View name"
           value={saveViewName}
+          maxlength={saveViewNameMaxLength}
           oninput={handleSaveViewNameChange}
         />
+        <div class="arc-record-list-view__char-count">{saveViewNameCharCount}</div>
         <template lwc:if={saveViewError}>
           <div class="arc-record-list-view__error" role="alert">{saveViewError}</div>
         </template>
