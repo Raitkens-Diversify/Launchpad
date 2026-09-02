@@ -37,34 +37,72 @@
   font-size: 0.875rem;
 }
 
-/* ---- section card ---- */
+/* ---- tabbed card ---- */
 
-.arc-household-detail__section {
+.arc-household-detail__card {
   background: var(--lwc-colorBackgroundAlt, #ffffff);
   border: 1px solid var(--lwc-colorBorder, #c9c9c9);
   border-radius: var(--lwc-borderRadiusMedium, 4px);
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
-  margin-bottom: 0.75rem;
+  padding: 0.25rem 1rem 1rem;
 }
 
-.arc-household-detail__summary {
-  cursor: pointer;
-  padding: 0.75rem 1rem;
+/* Underline-on-white tab strip, the same level-1 navigation style c-ds-tabs
+   draws, so the Details card reads as part of the same site. The strip scrolls
+   sideways when the tabs overrun their width -- an individual can carry six
+   sections with long names, and wrapping them onto a second row would push the
+   fields down unpredictably. */
+.arc-household-detail__tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--div-color-neutral-200, #d1d5db);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.arc-household-detail__tab {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  margin-bottom: -1px; /* the active underline sits ON the strip's rule */
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-family: inherit;
   font-size: 0.9375rem;
-  font-weight: 700;
-  color: var(--div-color-text-primary, #181818);
-  /* The default triangle is kept: it is the affordance that says the card
-     collapses, and replacing it would mean re-implementing the open state. */
-  list-style-position: outside;
+  line-height: normal;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--div-color-neutral-600, #4b5563);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
 }
 
-.arc-household-detail__summary:focus-visible {
-  outline: 2px solid var(--div-color-accent-blue, #0176d3);
+.arc-household-detail__tab:hover {
+  color: var(--div-color-text-primary, #09243f);
+}
+
+.arc-household-detail__tab:focus-visible {
+  outline: 2px solid var(--div-color-accent-blue, #1a76bb);
   outline-offset: -2px;
+  border-radius: 6px 6px 0 0;
 }
 
-.arc-household-detail__body {
-  padding: 0 1rem 1rem;
+.arc-household-detail__tab--active {
+  color: var(--div-color-text-primary, #09243f);
+  font-weight: 600;
+  border-bottom-color: var(--div-color-blue-900, #0f406f);
+}
+
+.arc-household-detail__panel {
+  padding-top: 0.875rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arc-household-detail__tab {
+    transition-duration: 0.01ms;
+  }
 }
 
 /* ---- field grid ---- */

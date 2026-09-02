@@ -658,5 +658,17 @@ private class NotificationPreferenceServiceTest {
     System.assert(
       otherHouseholdResults.containsKey(NotificationConstants.CHANNEL_EMAIL)
     );
+    System.assertEquals(
+      'USER_HOUSEHOLD_OVERRIDE',
+      scopedHouseholdResults.get(NotificationConstants.CHANNEL_IN_APP).resolvedScope
+    );
+    System.assertEquals(
+      'USER_DEFAULT',
+      otherHouseholdResults.get(NotificationConstants.CHANNEL_EMAIL).resolvedScope
+    );
+    System.assertEquals(
+      'USER_DEFAULT',
+      otherHouseholdResults.get(NotificationConstants.CHANNEL_IN_APP).resolvedScope
+    );
   }
 }

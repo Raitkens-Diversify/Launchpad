@@ -1835,6 +1835,14 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>NotificationPrefHouseholdScenarioTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>NotificationPrefScenarioRunner</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>NotificationPreferenceAdminService</apexClass>
         <enabled>true</enabled>
     </classAccesses>

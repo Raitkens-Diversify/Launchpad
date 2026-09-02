@@ -440,6 +440,94 @@ export default class ArcHouseholdDetail extends LightningElement {
     return this.sections.length > 0;
   }
 
+  // ---- section tabs -------------------------------------------------------
+
+  /**
+   * The section whose tab is open. Held as a key rather than an index so it
+   * survives the record switching underneath it: `sections` is rebuilt per
+   * record, and a stored index would point at the wrong section (or off the
+   * end) once the new record's section set is shorter or reordered.
+   */
+  _activeTabKey;
+
+  /**
+   * The key that is actually shown, resolved every render rather than stored.
+   * Falls back to the first section when nothing is chosen yet, or when the
+   * chosen section no longer exists after a record change -- so the panel is
+   * never left blank pointing at a section that is gone.
+   */
+  get selectedTabKey() {
+    const sections = this.sections;
+    if (!sections.length) {
+      return undefined;
+    }
+    const exists = sections.some((section) => section.key === this._activeTabKey);
+    return exists ? this._activeTabKey : sections[0].key;
+  }
+
+  /** One entry per section for the tablist, pre-decorated with its ARIA and
+   *  class state so the template stays declarative (LWC cannot build a class
+   *  string from an expression). */
+  get tabItems() {
+    const selected = this.selectedTabKey;
+    return this.sections.map((section) => {
+      const active = section.key === selected;
+      return {
+        key: section.key,
+        label: section.name,
+        ariaSelected: active ? 'true' : 'false',
+        // Roving tabindex: only the active tab is in the tab order; the rest
+        // are reached with the arrow keys, the way a tablist should behave.
+        tabIndex: active ? '0' : '-1',
+        cssClass: active
+          ? 'arc-household-detail__tab arc-household-detail__tab--active'
+          : 'arc-household-detail__tab'
+      };
+    });
+  }
+
+  /** The fields of the open section, or null while there is nothing to show. */
+  get activeSection() {
+    const key = this.selectedTabKey;
+    return this.sections.find((section) => section.key === key) || null;
+  }
+
+  handleTabClick(event) {
+    this._activeTabKey = event.currentTarget.dataset.key;
+  }
+
+  /**
+   * Arrow-key navigation across the strip: Left/Right wrap, Home/End jump.
+   * Activation follows focus -- swapping the panel is a free client-side
+   * re-render, so there is no reason to make the user press Enter as well.
+   */
+  handleTabKeydown(event) {
+    const keys = this.sections.map((section) => section.key);
+    if (!keys.length) {
+      return;
+    }
+    const current = keys.indexOf(event.currentTarget.dataset.key);
+    let next = -1;
+    if (event.key === 'ArrowRight') {
+      next = (current + 1) % keys.length;
+    } else if (event.key === 'ArrowLeft') {
+      next = (current - 1 + keys.length) % keys.length;
+    } else if (event.key === 'Home') {
+      next = 0;
+    } else if (event.key === 'End') {
+      next = keys.length - 1;
+    }
+    if (next === -1) {
+      return;
+    }
+    event.preventDefault();
+    this._activeTabKey = keys[next];
+    const target = this.template.querySelector(`[data-key="${keys[next]}"]`);
+    if (target) {
+      target.focus();
+    }
+  }
+
   get showTitle() {
     return Boolean(this.cardTitle);
   }

@@ -70,8 +70,8 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.Financial_Account__c</fieldItem>
-                <identifier>RecordFinancial_Account_cField7</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_cField</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -232,8 +232,8 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.Financial_Account__c</fieldItem>
-                <identifier>RecordFinancial_Account_cField</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_cField2</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -394,8 +394,8 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.Financial_Account__c</fieldItem>
-                <identifier>RecordFinancial_Account_cField2</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_cField3</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -546,8 +546,8 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.Financial_Account__c</fieldItem>
-                <identifier>RecordFinancial_Account_cField3</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_cField4</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -665,8 +665,8 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.Financial_Account__c</fieldItem>
-                <identifier>RecordFinancial_Account_cField4</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_cField5</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -784,8 +784,8 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.Financial_Account__c</fieldItem>
-                <identifier>RecordFinancial_Account_cField5</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_cField6</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -923,8 +923,8 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.Financial_Account__c</fieldItem>
-                <identifier>RecordFinancial_Account_cField6</identifier>
+                <fieldItem>Record.Wizard_Financial_Account__c</fieldItem>
+                <identifier>RecordWizard_Financial_Account_cField7</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
