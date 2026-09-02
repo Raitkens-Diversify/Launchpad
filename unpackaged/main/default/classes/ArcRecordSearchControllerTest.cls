@@ -559,6 +559,80 @@ private class ArcRecordSearchControllerTest {
     }
   }
 
+  @IsTest
+  static void searchRecordsSoslMatchStillWorksAlongsideTheRelationshipLikeSupplement() {
+    Case matched = new Case(Subject = 'Matched', Status = 'New');
+    Case unmatched = new Case(Subject = 'Unmatched', Status = 'New');
+    insert new List<Case>{ matched, unmatched };
+
+    // Simulates a real SOSL index hit on `matched` only -- Test methods don't
+    // get a live search index, so this is the standard way to control what
+    // "useSosl" sees without depending on actual index timing.
+    Test.setFixedSearchResults(new List<Id>{ matched.Id });
+
+    Test.startTest();
+    ArcRecordSearchController.SearchResult result = ArcRecordSearchController.searchRecords(
+      'Case',
+      new List<String>{ 'CaseNumber' },
+      null,
+      'anything',
+      null,
+      null,
+      null,
+      25,
+      null
+    );
+    Test.stopTest();
+
+    Assert.areEqual(1, result.rows.size());
+    Assert.areEqual(matched.Id, result.rows[0].id);
+  }
+
+  @IsTest
+  static void searchRecordsFallsBackToLikeOnARelationshipColumnSoslCannotSee() {
+    // Financial_Advisor_Team_TriggerHandler.updateRepCode (unrelated,
+    // pre-existing automation described on the My Team's Open Cases test
+    // above) needs a team literally named 'Default Team' to exist.
+    insert new Financial_Advisor_Team__c(Name = 'Default Team');
+
+    Financial_Advisor_Team__c team = new Financial_Advisor_Team__c(
+      Name = 'Zenith Advisors'
+    );
+    insert team;
+
+    Case teamCase = new Case(
+      Subject = 'Team Case',
+      Status = 'New',
+      Financial_Advisor_Team__c = team.Id
+    );
+    insert teamCase;
+
+    // SOSL only indexes fields that live on Case itself --
+    // Financial_Advisor_Team__r.Name lives on the related team record, so a
+    // real SOSL search would never match "Zenith" here. An authoritative,
+    // empty fixed result simulates exactly that, so a match below can only
+    // come from the supplemental LIKE clause, not SOSL.
+    Test.setFixedSearchResults(new List<Id>());
+
+    Test.startTest();
+    ArcRecordSearchController.SearchResult result = ArcRecordSearchController.searchRecords(
+      'Case',
+      new List<String>{ 'CaseNumber', 'Financial_Advisor_Team__r.Name' },
+      null,
+      'Zenith',
+      new List<String>{ 'Financial_Advisor_Team__r.Name' },
+      null,
+      null,
+      25,
+      null
+    );
+    Test.stopTest();
+
+    Assert.areEqual(1, result.rows.size());
+    Assert.areEqual(teamCase.Id, result.rows[0].id);
+    Assert.areEqual('Zenith Advisors', result.rows[0].cells[1]);
+  }
+
   private static Integer testUserCounter = 0;
 
   /** Mirrors FATMember_TriggerHandler_Test's own working pattern for a

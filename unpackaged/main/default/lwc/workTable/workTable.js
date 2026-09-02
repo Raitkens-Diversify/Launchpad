@@ -25,12 +25,13 @@ const SCOPE_OPTIONS = [
 ];
 
 /**
- * Matches the standardized 7-column set the Cases list tabs show (see
- * "Standardize columns across all three Cases tabs") -- same fields, order,
- * and labels, so a case looks the same whether it's seen here or there.
- * Main Track Tasks is intentionally excluded, for the same reason it was
- * excluded from Cases: no active writer for Completed_Main_Track_Tasks__c
- * today, see the main-track-ratio-deferred note.
+ * Matches the standardized column set the Cases list tabs show (see
+ * "Standardize columns across all three Cases tabs" and the Financial
+ * Advisor Team column added after it) -- same fields, order, and labels, so
+ * a case looks the same whether it's seen here or there. Main Track Tasks is
+ * intentionally excluded, for the same reason it was excluded from Cases: no
+ * active writer for Completed_Main_Track_Tasks__c today, see the
+ * main-track-ratio-deferred note.
  */
 const COLUMNS = [
   {
@@ -87,6 +88,13 @@ const COLUMNS = [
     type: "datetime",
     sortable: true,
     sortType: "date"
+  },
+  {
+    label: "Financial Advisor Team",
+    fieldName: "financialAdvisorTeamName",
+    type: "text",
+    sortable: true,
+    sortType: "text"
   }
 ];
 
@@ -254,7 +262,8 @@ export default class WorkTable extends NavigationMixin(LightningElement) {
         caseRow.assigneeName,
         caseRow.overallStatus,
         caseRow.milestoneStatus,
-        caseRow.ownerName
+        caseRow.ownerName,
+        caseRow.financialAdvisorTeamName
       ]
         .filter(Boolean)
         .join(" ")

@@ -1146,14 +1146,6 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   handleRowAction(event) {
     const { action, row } = event.detail || {};
     const recordId = row?.id;
-    // eslint-disable-next-line no-console
-    console.log("[arcRecordListView][diag] handleRowAction", {
-      detail: event.detail,
-      action,
-      row,
-      recordId,
-      objectApiName: this.objectApiName
-    });
 
     if (!action?.name || !recordId) {
       return;
@@ -1164,8 +1156,6 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
       this.objectApiName,
       { useQueryParam: usesQueryParamRecordRoute(this.objectApiName) }
     );
-    // eslint-disable-next-line no-console
-    console.log("[arcRecordListView][diag] navigating", { reference });
 
     if (reference) {
       this[NavigationMixin.Navigate](reference);

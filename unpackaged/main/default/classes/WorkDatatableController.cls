@@ -34,6 +34,7 @@ public with sharing class WorkDatatableController {
     'CreatedDate',
     'LastModifiedDate',
     'Financial_Advisor_Team__c',
+    'Financial_Advisor_Team__r.Name',
     'Total_Main_Track_Tasks__c',
     'Completed_Main_Track_Tasks__c',
     'Main_Track_Task_Completion_Ratio__c',
@@ -217,6 +218,7 @@ public with sharing class WorkDatatableController {
     row.currentTaskSubjectAssignee = caseRecord.Current_Task_Subject_Assignee__c;
     row.ownerName = caseRecord.Owner?.Name;
     row.createdDate = caseRecord.CreatedDate;
+    row.financialAdvisorTeamName = caseRecord.Financial_Advisor_Team__r?.Name;
 
     Integer totalMain = caseRecord.Total_Main_Track_Tasks__c == null
       ? 0

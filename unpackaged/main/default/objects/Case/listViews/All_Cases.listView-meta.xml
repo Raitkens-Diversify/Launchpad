@@ -8,6 +8,16 @@
     <columns>Milestone__c</columns>
     <columns>OWNER_NAME</columns>
     <columns>CASES.CREATED_DATE</columns>
+    <columns>Financial_Advisor_Team__c</columns>
     <filterScope>Everything</filterScope>
+    <filters>
+        <field>Milestone__c</field>
+        <operation>notEqual</operation>
+    </filters>
+    <filters>
+        <field>Case_Branch_Name_DisplayName__c</field>
+        <operation>contains</operation>
+        <value>Change Management</value>
+    </filters>
     <label>All Cases</label>
 </ListView>

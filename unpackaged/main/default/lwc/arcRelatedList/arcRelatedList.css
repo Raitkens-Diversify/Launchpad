@@ -195,5 +195,12 @@
 }
 
 .related-list__table--fixed .related-list__td {
-  overflow-wrap: break-word;
+  /* Non-first cells are nowrap by default, so in a width-constrained card a
+     long name or date-time overflowed its column and collided with the next
+     (the Case Comments By/Added overlap). Wrap at word boundaries only — never
+     mid-word (that gave "Loga"/"n") — and let a token too wide for its column
+     spill into the card's own horizontal scroll rather than shatter. */
+  white-space: normal;
+  overflow-wrap: normal;
+  word-break: keep-all;
 }

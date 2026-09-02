@@ -47,6 +47,9 @@ private class WorkDatatableControllerTest {
     System.assertNotEquals(null, data, 'Expected work data wrapper');
     System.assert(data.totalCount >= 1, 'Expected at least one team case');
     System.assertEquals(true, containsCaseId(data, teamCase.Id));
+
+    WorkDatatableModels.WorkCaseRow row = findCaseRow(data, teamCase.Id);
+    System.assertEquals('Work Datatable Team Scope', row.financialAdvisorTeamName);
   }
 
   @IsTest

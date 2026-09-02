@@ -4,6 +4,7 @@
     <columns>CASES.CASE_NUMBER</columns>
     <columns>Case_Branch_Name_DisplayName__c</columns>
     <columns>Current_Task_Subject_Assignee__c</columns>
+    <columns>Household__c</columns>
     <columns>Current_Task_Status__c</columns>
     <columns>Milestone__c</columns>
     <columns>OWNER_NAME</columns>

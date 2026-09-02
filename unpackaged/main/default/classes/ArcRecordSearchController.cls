@@ -304,7 +304,32 @@ public with sharing class ArcRecordSearchController {
         List<Id> soslIds = ArcSoslSearchHelper.findMatchingIds(objectApiName, trimmedTerm);
         String bindKey = 'soslIds';
         binds.put(bindKey, soslIds);
-        clauses.add('Id IN :' + bindKey);
+        List<String> soslOrClauses = new List<String>{ 'Id IN :' + bindKey };
+
+        // SOSL only indexes fields that live on objectApiName itself -- a
+        // displayed relationship column (e.g. Financial_Advisor_Team__r.Name)
+        // is invisible to it, so it would never match a search term typed
+        // against the team's name. Any dotted searchable path gets a
+        // supplemental LIKE clause ORed into the SOSL match instead.
+        String relatedBindKey = 'relatedSearchTerm';
+        Boolean relatedBindUsed = false;
+        if (searchableFields != null) {
+          for (String rawPath : searchableFields) {
+            if (String.isBlank(rawPath) || !rawPath.contains('.')) {
+              continue;
+            }
+            String path = rawPath.trim();
+            if (isReadablePath(fieldMap, path) && isLikeCompatibleType(fieldMap, path)) {
+              if (!relatedBindUsed) {
+                binds.put(relatedBindKey, '%' + escapeLike(trimmedTerm) + '%');
+                relatedBindUsed = true;
+              }
+              soslOrClauses.add(path + ' LIKE :' + relatedBindKey);
+            }
+          }
+        }
+
+        clauses.add('(' + String.join(soslOrClauses, ' OR ') + ')');
       } else if (searchableFields != null) {
         // Fallback for objects with Search disabled, or a term too short
         // for SOSL to run at all.

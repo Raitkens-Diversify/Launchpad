@@ -39,6 +39,8 @@ public with sharing class WorkDatatableModels {
     @AuraEnabled
     public Datetime createdDate { get; set; }
     @AuraEnabled
+    public String financialAdvisorTeamName { get; set; }
+    @AuraEnabled
     public String overallStatus { get; set; }
     @AuraEnabled
     public String overallStatusPillClass { get; set; }
