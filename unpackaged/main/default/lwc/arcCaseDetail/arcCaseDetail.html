@@ -68,22 +68,12 @@
             <dt>Case Number</dt>
             <dd>{detail.caseNumber}</dd>
           </div>
-          <template lwc:if={detail.priority}>
+          <template lwc:if={hasHouseholdLink}>
             <div class="arc-case-detail__key-fact">
-              <dt>Priority</dt>
-              <dd>{detail.priority}</dd>
-            </div>
-          </template>
-          <div class="arc-case-detail__key-fact">
-            <dt>Status</dt>
-            <dd>{detail.status}</dd>
-          </div>
-          <template lwc:if={hasAccountLink}>
-            <div class="arc-case-detail__key-fact">
-              <dt>Account Name</dt>
+              <dt>Household</dt>
               <dd>
-                <a href="#" onclick={handleAccountClick}
-                  >{detail.accountName}</a
+                <a href="#" onclick={handleHouseholdClick}
+                  >{householdLinkLabel}</a
                 >
               </dd>
             </div>

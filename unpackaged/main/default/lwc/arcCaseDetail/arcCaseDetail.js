@@ -587,16 +587,18 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
     this.navigateToRecord(this.detail.advertisingItemId, "Advertising_Item__c");
   }
 
-  get hasAccountLink() {
-    return Boolean(this.detail?.accountId);
-  }
-
   get hasHouseholdLink() {
     return Boolean(this.detail?.householdId);
   }
 
   get household() {
     return this.detail?.household;
+  }
+
+  /* Label for the Household link in the header. Falls back when the case has a
+     household id but no readable name. */
+  get householdLinkLabel() {
+    return this.detail?.householdName || "View Household";
   }
 
   get hasHouseholdSummary() {
@@ -742,11 +744,6 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
       .finally(() => {
         this.isRefreshingHouseholdCases = false;
       });
-  }
-
-  handleAccountClick(event) {
-    event.preventDefault();
-    this.navigateToRecord(this.detail.accountId, "Account");
   }
 
   handleHouseholdClick(event) {

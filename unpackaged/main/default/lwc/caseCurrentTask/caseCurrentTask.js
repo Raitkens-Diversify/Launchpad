@@ -6,19 +6,50 @@ import updateTask from '@salesforce/apex/CaseCurrentTaskController.updateTask';
 import searchUsers from '@salesforce/apex/CaseCurrentTaskController.searchUsers';
 import isCurrentUserMemberOfQueue from '@salesforce/apex/CaseCurrentTaskController.isCurrentUserMemberOfQueue';
 import { RefreshEvent } from 'lightning/refresh';
-import { refreshApex } from '@salesforce/apex';
-import { publish, MessageContext } from 'lightning/messageService';
+import {
+    publish,
+    subscribe as subscribeToMessageChannel,
+    unsubscribe as unsubscribeFromMessageChannel,
+    MessageContext,
+    APPLICATION_SCOPE
+} from 'lightning/messageService';
 import CASE_STATUS_UPDATED from '@salesforce/messageChannel/CaseStatusUpdated__c';
 import { subscribe, unsubscribe } from 'lightning/empApi';
 import USER_ID from '@salesforce/user/Id';
 
 export default class CaseCurrentTask extends LightningElement {
-    @api recordId;
     currentUserId = USER_ID;
     channelName = '/event/Refresh_Detail__e';
     task;
-    wiredTaskResult;
     subscription;
+    caseStatusSubscription;
+
+    // Imperative-load state (see loadCurrentTask)
+    _recordId;
+    hasLoaded = false;
+    retryCount = 0;
+    retryTimeoutId;
+    RETRY_LIMIT = 6;
+    RETRY_INTERVAL_MS = 20000;
+
+    /*
+     * Loaded imperatively rather than through a cacheable @wire. On the ARC LWR
+     * site the cacheable wire served a stale null and only revalidated minutes
+     * later, so the tile read "No current task available" long after the case
+     * had one. Re-fetching on every recordId change keeps it live.
+     */
+    @api
+    get recordId() {
+        return this._recordId;
+    }
+    set recordId(value) {
+        const changed = this._recordId !== value;
+        this._recordId = value;
+        if (value && changed) {
+            this.retryCount = 0;
+            this.loadCurrentTask();
+        }
+    }
 
     // Edit State
     isEditingOwner = false;
@@ -39,31 +70,20 @@ export default class CaseCurrentTask extends LightningElement {
     @wire(MessageContext)
     messageContext;
 
-    /* ================= WIRE ================= */
-
-    @wire(getCurrentTask, { caseId: '$recordId' })
-    wiredTask(result) {
-
-        this.wiredTaskResult = result;
-        const { data, error } = result;
-
-        if (data) {
-            this.task = data;
-            this.initializeTaskData();
-            this.checkQueueMembership();
-        } else if (error) {
-            console.error(error);
-        }
-    }
-
     /* ================= LIFECYCLE ================= */
 
     connectedCallback() {
         this.subscribePlatformEvent();
+        this.subscribeCaseStatusChannel();
+        if (this._recordId && !this.hasLoaded) {
+            this.loadCurrentTask();
+        }
     }
 
     disconnectedCallback() {
         this.unsubscribePlatformEvent();
+        this.unsubscribeCaseStatusChannel();
+        this.clearRetry();
     }
 
     /* ================= GETTERS ================= */
@@ -133,11 +153,92 @@ export default class CaseCurrentTask extends LightningElement {
         }
     }
 
-    /* ================= REFRESH ================= */
-    async refreshTask() {
-        await refreshApex(this.wiredTaskResult);
-        this.dispatchEvent(new RefreshEvent());
+    /* ================= MESSAGE CHANNEL ================= */
+    /*
+     * The empApi platform-event subscription above does not deliver inside the
+     * ARC LWR site, so the tile also listens on the CaseStatusUpdated message
+     * channel. arcCaseDetail publishes it whenever a flow finishes -- including
+     * after a Branch or Home Office Pit Stop is created -- so the current task
+     * refreshes without a page reload.
+     */
+    subscribeCaseStatusChannel() {
+        if (this.caseStatusSubscription) {
+            return;
+        }
+        this.caseStatusSubscription = subscribeToMessageChannel(
+            this.messageContext,
+            CASE_STATUS_UPDATED,
+            (message) => this.handleCaseStatusUpdate(message),
+            { scope: APPLICATION_SCOPE }
+        );
+    }
 
+    unsubscribeCaseStatusChannel() {
+        if (this.caseStatusSubscription) {
+            unsubscribeFromMessageChannel(this.caseStatusSubscription);
+            this.caseStatusSubscription = null;
+        }
+    }
+
+    handleCaseStatusUpdate(message) {
+        if (!message || String(message.recordId) !== String(this.recordId)) {
+            return;
+        }
+        this.refreshTask();
+    }
+
+    /* ================= LOAD / REFRESH ================= */
+
+    /*
+     * Fetches the current task fresh from the server. Current_Task_Id__c can be
+     * stamped a little after the tasks exist (sync triggers, the pit stop flows,
+     * or the async Batch_TaskUpdate job), so when nothing comes back the tile
+     * retries a few times and fills in on its own instead of waiting for a
+     * manual reload.
+     */
+    async loadCurrentTask() {
+        if (!this._recordId) {
+            return;
+        }
+        try {
+            const data = await getCurrentTask({ caseId: this._recordId });
+            this.hasLoaded = true;
+            this.task = data;
+            if (data) {
+                this.retryCount = 0;
+                this.clearRetry();
+                this.initializeTaskData();
+                this.checkQueueMembership();
+            } else {
+                this.scheduleRetry();
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    scheduleRetry() {
+        if (this.retryTimeoutId || this.retryCount >= this.RETRY_LIMIT) {
+            return;
+        }
+        this.retryCount += 1;
+        // eslint-disable-next-line @lwc/lwc/no-async-operation
+        this.retryTimeoutId = setTimeout(() => {
+            this.retryTimeoutId = null;
+            this.loadCurrentTask();
+        }, this.RETRY_INTERVAL_MS);
+    }
+
+    clearRetry() {
+        if (this.retryTimeoutId) {
+            clearTimeout(this.retryTimeoutId);
+            this.retryTimeoutId = null;
+        }
+    }
+
+    async refreshTask() {
+        await this.loadCurrentTask();
+        this.dispatchEvent(new RefreshEvent());
     }
 
     publishRefreshMessage() {

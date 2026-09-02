@@ -1,6 +1,11 @@
 public with sharing class CaseCurrentTaskController {
 
-    @AuraEnabled(cacheable=true)
+    /*
+     * Non-cacheable on purpose: this is loaded imperatively by the caseCurrentTask
+     * tile. A cacheable @wire served a stale null on the ARC LWR site, so the tile
+     * showed "No current task available" for minutes after the case already had one.
+     */
+    @AuraEnabled
     public static Task getCurrentTask(Id caseId) {
         Case c = [
             SELECT Current_Task_Id__c
