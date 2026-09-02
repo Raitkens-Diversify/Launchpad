@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>63.0</apiVersion>
+    <isExposed>false</isExposed>
+    <masterLabel>Arc Task Financial Account Panel</masterLabel>
+    <description>Financial Account Details panel (Name, Account Number) for a Task&#39;s related Financial_Account__c, embedded in arcTaskDetail. Not the Financial_Account__c record page (see arcFinancialAccountDetail).</description>
+</LightningComponentBundle>

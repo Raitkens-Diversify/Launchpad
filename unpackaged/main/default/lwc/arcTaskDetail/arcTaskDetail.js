@@ -196,6 +196,25 @@ export default class ArcTaskDetail extends NavigationMixin(LightningElement) {
     return this.isMarkingComplete || this.isCompleted;
   }
 
+  /**
+   * Mirrors the Lightning Task page's console:relatedRecord "Financial
+   * Account Details" component (Task_Record_Page's own visibility rule):
+   * shown only for a task related to a Case whose Subject calls for an
+   * account number. Purely a display condition, not an access boundary --
+   * safe to compute from data arcTaskDetail already has, unlike
+   * canEditTask's server-resolved gate.
+   */
+  get showFinancialAccountDetails() {
+    if (this.taskContext?.isParentCase !== true) {
+      return false;
+    }
+    const subject = this.subject.toLowerCase();
+    return (
+      subject.includes("account number") ||
+      subject.includes("open account through dao tool")
+    );
+  }
+
   get showOpenActivities() {
     return this.taskContext?.isParentCase === true;
   }

@@ -77,6 +77,18 @@
             onrecordsaved={handleRecordSaved}
           ></c-arc-record-detail>
 
+          <!-- Financial Account Details -- the ARC equivalent of the
+               Lightning Task page's console:relatedRecord component, shown
+               under the same condition (see showFinancialAccountDetails).
+               Not arcFinancialAccountDetail -- that is the unrelated,
+               already-published Financial_Account__c record page. -->
+          <template lwc:if={showFinancialAccountDetails}>
+            <c-arc-task-financial-account-panel
+              task-id={recordId}
+              editable={canEditTask}
+            ></c-arc-task-financial-account-panel>
+          </template>
+
           <template lwc:if={showOpenActivities}>
             <lightning-card title={openActivitiesLabel}>
               <template lwc:if={hasOpenActivities}>

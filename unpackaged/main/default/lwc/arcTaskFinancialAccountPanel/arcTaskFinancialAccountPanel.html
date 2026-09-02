@@ -1,0 +1,59 @@
+<template>
+  <template lwc:if={hasFinancialAccount}>
+    <lightning-card title="Financial Account Details">
+      <div slot="actions">
+        <template lwc:if={isEditing}>
+          <lightning-button
+            label="Cancel"
+            onclick={handleCancelClick}
+            disabled={isSaving}
+          ></lightning-button>
+          <lightning-button
+            label="Save"
+            variant="brand"
+            onclick={handleSaveClick}
+            disabled={isSaving}
+          ></lightning-button>
+        </template>
+        <template lwc:elseif={editable}>
+          <lightning-button label="Edit" onclick={handleEditClick}></lightning-button>
+        </template>
+      </div>
+
+      <div class="arc-task-fa-panel__body">
+        <template lwc:if={hasError}>
+          <p class="arc-task-fa-panel__error" role="alert">{errorMessage}</p>
+        </template>
+
+        <template lwc:if={isEditing}>
+          <div class="arc-task-fa-panel__grid">
+            <lightning-input
+              label="Financial Account Name"
+              value={draftName}
+              required
+              message-when-value-missing="Financial Account Name is required."
+              onchange={handleNameChange}
+            ></lightning-input>
+            <lightning-input
+              label="Account Number"
+              value={draftAccountNumber}
+              onchange={handleAccountNumberChange}
+            ></lightning-input>
+          </div>
+        </template>
+        <template lwc:else>
+          <dl class="arc-task-fa-panel__grid">
+            <div class="arc-task-fa-panel__field">
+              <dt>Financial Account Name</dt>
+              <dd>{name}</dd>
+            </div>
+            <div class="arc-task-fa-panel__field">
+              <dt>Account Number</dt>
+              <dd>{accountNumber}</dd>
+            </div>
+          </dl>
+        </template>
+      </div>
+    </lightning-card>
+  </template>
+</template>

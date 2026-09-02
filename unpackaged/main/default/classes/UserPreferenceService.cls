@@ -58,7 +58,7 @@ public with sharing class UserPreferenceService {
     validateViewsJson(viewsJson);
 
     String contextKey = resolveContextKey(recordId);
-    User_Preference__c preference = preferenceRepository.selectByUserAndApp(
+    User_Preference__c preference = preferenceRepository.selectByUserAndAppForUpdate(
       userId,
       applicationName
     );
@@ -156,7 +156,7 @@ public with sharing class UserPreferenceService {
     validateEntryJson(entryJson, entryKey, entryIdFieldName);
 
     String normalizedEntryKey = normalizeEntryKey(entryKey);
-    User_Preference__c preference = preferenceRepository.selectByUserAndApp(
+    User_Preference__c preference = preferenceRepository.selectByUserAndAppForUpdate(
       userId,
       applicationName
     );

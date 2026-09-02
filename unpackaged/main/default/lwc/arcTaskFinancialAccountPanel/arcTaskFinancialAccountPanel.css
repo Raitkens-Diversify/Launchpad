@@ -1,0 +1,30 @@
+.arc-task-fa-panel__body {
+  padding: 0 16px 16px;
+}
+
+.arc-task-fa-panel__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin: 0;
+}
+
+.arc-task-fa-panel__field dt {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--lwc-colorTextWeak, #444444);
+}
+
+.arc-task-fa-panel__field dd {
+  margin: 0;
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--lwc-colorTextDefault, #181818);
+}
+
+.arc-task-fa-panel__error {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: #b91c1c;
+}

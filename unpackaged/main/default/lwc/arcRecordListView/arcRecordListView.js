@@ -2669,7 +2669,14 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     if (!this.listViews.some((lv) => lv.value === preferredApiName)) {
       return;
     }
-    this.selectTabView(preferredApiName);
+    // persistPreference: false -- this is re-confirming a value that's
+    // already what's saved server-side, so persisting it again is pure
+    // redundant churn. Worse than redundant: if the user clicks a
+    // different tab while this restore's own save is still in flight, the
+    // two saves race, and whichever happens to commit last wins --
+    // sometimes silently overwriting the user's own, more recent click
+    // with the value this call just re-saved.
+    this.selectTabView(preferredApiName, { persistPreference: false });
   }
 
   /** Best-effort -- see applyListViewPreferenceIfNeeded for the read side. */
