@@ -12,7 +12,11 @@ public with sharing class ArcFlowLookupController {
     'Financial_Account__c' => 'Household__r.Name',
     'Account' => null,
     'Contact' => 'Account.Name',
-    'Case' => 'Subject'
+    'Case' => 'Subject',
+    // The Advertising Review lookups (approved profiles, public appearances,
+    // radio/TV ads) are self-lookups onto Advertising_Item__c; the record
+    // type tells the entries apart.
+    'Advertising_Item__c' => 'RecordType.Name'
   };
 
   @AuraEnabled

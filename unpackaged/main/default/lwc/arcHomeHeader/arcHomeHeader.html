@@ -27,21 +27,11 @@
     </div>
   </header>
 
-  <template lwc:if={showNewAdvertisingRequestModal}>
-    <c-arc-quick-create
-      object-api-name="Advertising_Item__c"
-      heading-label="New Advertising Item"
-      field-api-names={advertisingItemFields}
-      oncreated={handleAdvertisingItemCreated}
-      onclose={handleCloseNewAdvertisingRequestModal}
-    ></c-arc-quick-create>
-  </template>
-
-  <!-- Log a Check: the launchpad quick action's flow, run as its ARC-site copy
-       (ARC_Log_a_Check) inside the site's flow dialog. Mounted only on demand:
-       the flow runtime injects global styling hooks document-wide, which would
-       repaint other components' slds-g fallbacks on page load. -->
-  <template lwc:if={logCheckModalMounted}>
-    <c-arc-flow-modal lwc:ref="logCheckModal"></c-arc-flow-modal>
+  <!-- New Advertising Request and Log a Check both run their launchpad
+       experiences as ARC-site flow copies inside this dialog. Mounted only on
+       demand: the flow runtime injects global styling hooks document-wide,
+       which would repaint other components' slds-g fallbacks on page load. -->
+  <template lwc:if={flowModalMounted}>
+    <c-arc-flow-modal lwc:ref="homeFlowModal"></c-arc-flow-modal>
   </template>
 </template>

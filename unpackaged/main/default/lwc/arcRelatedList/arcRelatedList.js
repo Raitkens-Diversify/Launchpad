@@ -252,22 +252,37 @@ export default class ArcRelatedList extends NavigationMixin(LightningElement) {
       .map((entry) => entry.trim())
       .filter(Boolean)
       .map((entry) => {
-        const separator = entry.indexOf(":");
-        if (separator === -1) {
-          return { label: entry, path: entry };
+        // label:path, with an optional trailing :width ("Comment:CommentBody:55%")
+        // for narrow placements where auto table layout starves the column
+        // that actually carries the text.
+        const parts = entry.split(":").map((part) => part.trim());
+        if (parts.length === 1) {
+          return { label: parts[0], path: parts[0] };
         }
+        const hasWidth = parts.length > 2 && /^[0-9.]+%$/.test(parts[parts.length - 1]);
+        const width = hasWidth ? parts.pop() : null;
         return {
-          label: entry.slice(0, separator).trim(),
-          path: entry.slice(separator + 1).trim()
+          label: parts[0],
+          path: parts.slice(1).join(":"),
+          width
         };
       })
       .filter((column) => Boolean(column.path));
+  }
+
+  /** Fixed layout only when a width is declared, so other cards keep the
+   *  browser's auto column sizing. */
+  get tableClass() {
+    return this.columnDefs.some((column) => column.width)
+      ? "related-list__table related-list__table--fixed"
+      : "related-list__table";
   }
 
   get headers() {
     return this.columnDefs.map((column, index) => ({
       key: column.path,
       label: column.label,
+      style: column.width ? `width: ${column.width}` : "",
       cssClass:
         index === 0
           ? "related-list__th related-list__th--first"

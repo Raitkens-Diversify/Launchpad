@@ -2899,7 +2899,13 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     if (this.createFlowConfig) {
       // Mount on demand and open on the render after: the modal stays out of
       // the DOM until used so the flow runtime's global styling hooks don't
-      // load with the page (they repaint this page's slds-g fallbacks).
+      // load with the page (they repaint this page's slds-g fallbacks). Once
+      // mounted, open directly -- setting the pending flag alone re-renders
+      // nothing, so renderedCallback would never fire for a second click.
+      if (this.createFlowModalMounted) {
+        this.refs.createFlowModal?.open(this.createFlowConfig);
+        return;
+      }
       this.createFlowModalMounted = true;
       this._pendingCreateFlowOpen = true;
       return;

@@ -46,20 +46,65 @@
               same flows run here through arcFlowModal, so the task is created by
               the one definition rather than a second implementation.
             -->
-            <template lwc:if={canCreatePitStopTask}>
-              <div class="arc-case-detail__actions">
+            <!-- One Actions menu instead of a row of four buttons. Items keep
+                 their own conditions (the pit stops only while the case can
+                 take one) and route to the same handlers the buttons used. -->
+            <div class="arc-case-detail__actions">
+              <div class="arc-case-detail__actions-menu-host">
                 <lightning-button
-                  label="Create Branch Pit Stop Task"
-                  data-flow="branch"
-                  onclick={handleCreatePitStopTask}
+                  label="Actions"
+                  icon-name="utility:chevrondown"
+                  icon-position="right"
+                  onclick={toggleActionsMenu}
                 ></lightning-button>
-                <lightning-button
-                  label="Create Home Office Pit Stop Task"
-                  data-flow="homeOffice"
-                  onclick={handleCreatePitStopTask}
-                ></lightning-button>
+                <template lwc:if={isActionsMenuOpen}>
+                  <div
+                    class="arc-case-detail__actions-backdrop"
+                    onclick={closeActionsMenu}
+                  ></div>
+                  <div class="arc-case-detail__actions-menu" role="menu">
+                    <template lwc:if={canCreatePitStopTask}>
+                      <button
+                        type="button"
+                        class="arc-case-detail__actions-item"
+                        role="menuitem"
+                        data-action="branch"
+                        onclick={handleActionsMenuSelect}
+                      >
+                        Create Branch Pit Stop Task
+                      </button>
+                      <button
+                        type="button"
+                        class="arc-case-detail__actions-item"
+                        role="menuitem"
+                        data-action="homeOffice"
+                        onclick={handleActionsMenuSelect}
+                      >
+                        Create Home Office Pit Stop Task
+                      </button>
+                    </template>
+                    <button
+                      type="button"
+                      class="arc-case-detail__actions-item"
+                      role="menuitem"
+                      data-action="logACheck"
+                      onclick={handleActionsMenuSelect}
+                    >
+                      Log a Check
+                    </button>
+                    <button
+                      type="button"
+                      class="arc-case-detail__actions-item"
+                      role="menuitem"
+                      data-action="addComment"
+                      onclick={handleActionsMenuSelect}
+                    >
+                      Add Comment
+                    </button>
+                  </div>
+                </template>
               </div>
-            </template>
+            </div>
           </div>
         </div>
 
@@ -345,7 +390,7 @@
             card-label="Case Comments"
             related-object-api-name="CaseComment"
             parent-field-api-name="ParentId"
-            columns="Comment:CommentBody,By:CreatedBy.Name,Added:CreatedDate"
+            columns="Comment:CommentBody:52%,By:CreatedBy.Name:20%,Added:CreatedDate:28%"
             disable-row-links
             collapsible
             use-preloaded-data
@@ -455,6 +500,67 @@
         lwc:ref="flowModal"
         onflowfinished={handleFlowFinished}
       ></c-arc-flow-modal>
+
+      <!-- Add Comment modal (the launchpad Case quick action's one field). -->
+      <template lwc:if={isCommentModalOpen}>
+        <section
+          class="arc-case-detail__modal"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Add Comment"
+        >
+          <div
+            class="arc-case-detail__modal-backdrop"
+            onclick={handleCommentCancel}
+          ></div>
+          <div class="arc-case-detail__modal-panel">
+            <header class="arc-case-detail__modal-header">
+              <h2 class="arc-case-detail__modal-title">Add Comment</h2>
+              <button
+                type="button"
+                class="arc-case-detail__modal-close"
+                title="Cancel"
+                aria-label="Cancel"
+                onclick={handleCommentCancel}
+              >
+                <lightning-icon
+                  icon-name="utility:close"
+                  size="x-small"
+                  alternative-text="Cancel"
+                ></lightning-icon>
+              </button>
+            </header>
+            <div class="arc-case-detail__modal-body">
+              <lightning-textarea
+                name="comment"
+                label="Comment"
+                value={commentBody}
+                onchange={handleCommentChange}
+                required
+                message-when-value-missing="Enter a comment."
+              ></lightning-textarea>
+              <template lwc:if={hasCommentError}>
+                <p class="arc-case-detail__modal-error" role="alert">
+                  {commentError}
+                </p>
+              </template>
+            </div>
+            <footer class="arc-case-detail__modal-footer">
+              <lightning-button
+                label="Cancel"
+                onclick={handleCommentCancel}
+                disabled={isSavingComment}
+              ></lightning-button>
+              <lightning-button
+                variant="brand"
+                label="Save"
+                onclick={handleCommentSave}
+                disabled={isSavingComment}
+              ></lightning-button>
+            </footer>
+          </div>
+        </section>
+      </template>
       <c-arc-order-ticket-quick-view
         lwc:ref="orderTicketQuickView"
       ></c-arc-order-ticket-quick-view>

@@ -38,11 +38,16 @@
 
       <template lwc:elseif={hasRows}>
         <div class="related-list__scroll">
-          <table class="related-list__table">
+          <table class={tableClass}>
             <thead>
               <tr>
                 <template for:each={headers} for:item="header">
-                  <th key={header.key} scope="col" class={header.cssClass}>
+                  <th
+                    key={header.key}
+                    scope="col"
+                    class={header.cssClass}
+                    style={header.style}
+                  >
                     {header.label}
                   </th>
                 </template>

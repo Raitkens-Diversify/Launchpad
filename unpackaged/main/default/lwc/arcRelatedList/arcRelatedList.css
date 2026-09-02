@@ -187,3 +187,13 @@
 .related-list__toggle--open::before {
   transform: rotate(45deg) translate(-1px, -1px);
 }
+/* Only when a column declares a width: percentage widths need fixed layout to
+   hold, and long values (a comment, a date-time) wrap instead of starving the
+   text column. */
+.related-list__table--fixed {
+  table-layout: fixed;
+}
+
+.related-list__table--fixed .related-list__td {
+  overflow-wrap: break-word;
+}

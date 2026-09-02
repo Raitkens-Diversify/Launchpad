@@ -31,6 +31,18 @@ const NAVIGATION_PATHS = Object.freeze({
   [ACTION_ENVELOPE_WIZARD]: ENVELOPE_WIZARD_PATH
 });
 
+const LOG_A_CHECK_DIALOG = Object.freeze({
+  flowName: "ARC_Log_a_Check",
+  title: "Log a Check",
+  size: "large"
+});
+
+const ADVERTISING_REVIEW_DIALOG = Object.freeze({
+  flowName: "ARC_Advertising_Review",
+  title: "Advertising Review Request",
+  size: "large"
+});
+
 const DEFAULT_ACTIONS = Object.freeze([
   { key: ACTION_ENVELOPE_WIZARD, label: "Envelope Wizard" },
   { key: ACTION_NEW_CASE, label: "New Advertising Request" },
@@ -90,19 +102,29 @@ export default class ArcHomeHeader extends NavigationMixin(LightningElement) {
     return DEFAULT_ACTIONS;
   }
 
-  showNewAdvertisingRequestModal = false;
-  logCheckModalMounted = false;
-  _pendingLogCheckOpen = false;
+  flowModalMounted = false;
+  _pendingFlowConfig = null;
 
   renderedCallback() {
-    if (this._pendingLogCheckOpen && this.refs.logCheckModal) {
-      this._pendingLogCheckOpen = false;
-      this.refs.logCheckModal.open({
-        flowName: "ARC_Log_a_Check",
-        title: "Log a Check",
-        size: "large"
-      });
+    if (this._pendingFlowConfig && this.refs.homeFlowModal) {
+      const config = this._pendingFlowConfig;
+      this._pendingFlowConfig = null;
+      this.refs.homeFlowModal.open(config);
     }
+  }
+
+  /**
+   * Mount the flow dialog on demand and open it: the flow runtime injects
+   * global styling hooks document-wide, so it stays unloaded until used. Once
+   * mounted, open directly -- a pending flag alone re-renders nothing.
+   */
+  openFlowDialog(config) {
+    if (this.flowModalMounted) {
+      this.refs.homeFlowModal?.open(config);
+      return;
+    }
+    this.flowModalMounted = true;
+    this._pendingFlowConfig = config;
   }
 
   handleActionClick(event) {
@@ -125,47 +147,21 @@ export default class ArcHomeHeader extends NavigationMixin(LightningElement) {
       return;
     }
 
+    // Both header actions run launchpad experiences as their ARC-site flow
+    // copies: New Advertising Request is the Advertising_Review tab's flow,
+    // Check Log is the Log a Check quick action's. The Check Log list stays
+    // reachable from the sidebar's Check Log item.
     if (action === ACTION_NEW_CASE) {
-      this.showNewAdvertisingRequestModal = true;
+      this.openFlowDialog(ADVERTISING_REVIEW_DIALOG);
       return;
     }
 
-    // Check Log opens the launchpad "Log a Check" experience: the ARC-site
-    // copy of its flow, in the site's flow dialog. The Check Log list stays
-    // reachable from the sidebar's Check Log item.
     if (action === ACTION_CHECK_LOG) {
-      this.logCheckModalMounted = true;
-      this._pendingLogCheckOpen = true;
+      this.openFlowDialog(LOG_A_CHECK_DIALOG);
       return;
     }
 
     this.dispatchAction(action);
-  }
-
-  handleCloseNewAdvertisingRequestModal() {
-    this.showNewAdvertisingRequestModal = false;
-  }
-
-  /**
-   * The old dialog collected a Case: account, subject, description, priority,
-   * status. What the business actually raises is an Advertising Item, and the
-   * fields here are the ones the Salesforce "New Advertising Item" page asks
-   * for, in its order. Items created here show up under Compliance >
-   * Advertising Reviews, which now lists Advertising Items rather than Cases.
-   */
-  get advertisingItemFields() {
-    return [
-      "Name",
-      "Advertising_Type__c",
-      "Intended_Audience__c",
-      "Financial_Advisor_Team__c",
-      "Date_of_Intended_First_Use__c",
-      "Submission_Notes__c"
-    ].join(",");
-  }
-
-  handleAdvertisingItemCreated() {
-    this.showNewAdvertisingRequestModal = false;
   }
 
   navigateToPath(url) {

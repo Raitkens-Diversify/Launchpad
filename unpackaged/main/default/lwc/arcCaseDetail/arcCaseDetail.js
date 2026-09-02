@@ -12,6 +12,7 @@ import { buildRecordNavigationReference } from "c/recordNavigationCommunityUtils
 import getCaseDetail from "@salesforce/apex/ArcCaseDetailController.getCaseDetail";
 import getCaseTasks from "@salesforce/apex/ArcCaseDetailController.getCaseTasks";
 import getRelatedRecordsBatch from "@salesforce/apex/ArcRelatedListController.getRelatedRecordsBatch";
+import addCaseComment from "@salesforce/apex/ArcCaseCommentController.addComment";
 import getCaseFieldSections from "@salesforce/apex/ArcCaseDetailController.getCaseFieldSections";
 import getCaseInformationFieldNames from "@salesforce/apex/ArcCaseDetailController.getCaseInformationFieldNames";
 import getRelatedHouseholdCases from "@salesforce/apex/ArcCaseDetailController.getRelatedHouseholdCases";
@@ -369,6 +370,16 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
 
   /** The rail's six related-list cards, fetched in one Apex call. */
   relatedListsByKey = {};
+  _relatedListsResult;
+
+  // Header Actions dropdown.
+  isActionsMenuOpen = false;
+
+  // Add Comment (the launchpad Case quick action): modal state.
+  isCommentModalOpen = false;
+  commentBody = "";
+  isSavingComment = false;
+  commentError = "";
 
   // Serialized because the endpoint nulls out a List<inner class> param --
   // see getRelatedRecordsBatch's own doc comment.
@@ -376,10 +387,11 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
     recordId: "$_recordId",
     requestsJson: JSON.stringify(RELATED_LIST_REQUESTS)
   })
-  wiredRelatedListsBatch({ data, error }) {
-    if (data) {
-      this.relatedListsByKey = data;
-    } else if (error) {
+  wiredRelatedListsBatch(result) {
+    this._relatedListsResult = result;
+    if (result.data) {
+      this.relatedListsByKey = result.data;
+    } else if (result.error) {
       this.relatedListsByKey = {};
     }
   }
@@ -654,7 +666,11 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
    * task is rather than a second one here.
    */
   handleCreatePitStopTask(event) {
-    const config = PIT_STOP_FLOWS[event.currentTarget?.dataset?.flow];
+    this.openPitStopFlow(event.currentTarget?.dataset?.flow);
+  }
+
+  openPitStopFlow(key) {
+    const config = PIT_STOP_FLOWS[key];
     if (!config || !this.detail?.id) {
       return;
     }
@@ -663,6 +679,105 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
       title: config.title,
       params: [{ name: "recordId", type: "String", value: this.detail.id }]
     });
+  }
+
+  /** The launchpad case page's Log a Check quick action: its ARC-site flow
+   *  copy, seeded with this case so the financial account prefills. */
+  handleLogACheck() {
+    if (!this.detail?.id) {
+      return;
+    }
+    this.refs.flowModal?.open({
+      flowName: "ARC_Log_a_Check",
+      title: "Log a Check",
+      size: "large",
+      params: [{ name: "recordId", type: "String", value: this.detail.id }]
+    });
+  }
+
+  /* ── Header Actions menu ─────────────────────────────────────────────── */
+
+  toggleActionsMenu() {
+    this.isActionsMenuOpen = !this.isActionsMenuOpen;
+  }
+
+  closeActionsMenu() {
+    this.isActionsMenuOpen = false;
+  }
+
+  handleActionsMenuSelect(event) {
+    const action = event.currentTarget?.dataset?.action;
+    this.isActionsMenuOpen = false;
+
+    if (action === "branch" || action === "homeOffice") {
+      this.openPitStopFlow(action);
+      return;
+    }
+    if (action === "logACheck") {
+      this.handleLogACheck();
+      return;
+    }
+    if (action === "addComment") {
+      this.handleAddCommentClick();
+    }
+  }
+
+  /* ── Add Comment: the launchpad Case quick action (creates a CaseComment
+        and it shows in the rail's Case Comments card) ─────────────────── */
+
+  get hasCommentError() {
+    return Boolean(this.commentError);
+  }
+
+  handleAddCommentClick() {
+    this.commentBody = "";
+    this.commentError = "";
+    this.isCommentModalOpen = true;
+  }
+
+  handleCommentChange(event) {
+    this.commentBody = event.detail.value;
+    if (this.commentError) {
+      this.commentError = "";
+    }
+  }
+
+  handleCommentCancel() {
+    if (this.isSavingComment) {
+      return;
+    }
+    this.isCommentModalOpen = false;
+    this.commentBody = "";
+    this.commentError = "";
+  }
+
+  async handleCommentSave() {
+    if (this.isSavingComment) {
+      return;
+    }
+    const body = (this.commentBody || "").trim();
+    if (!body) {
+      this.commentError = "Enter a comment.";
+      return;
+    }
+
+    this.isSavingComment = true;
+    this.commentError = "";
+    try {
+      await addCaseComment({ caseId: this.detail.id, body });
+      this.isCommentModalOpen = false;
+      this.commentBody = "";
+      // The rail's Case Comments card reads the batch wire; re-run it so the
+      // new comment shows without a page reload.
+      if (this._relatedListsResult) {
+        await refreshApex(this._relatedListsResult);
+      }
+    } catch (error) {
+      this.commentError =
+        error?.body?.message || error?.message || "Could not add this comment.";
+    } finally {
+      this.isSavingComment = false;
+    }
   }
 
   /*
