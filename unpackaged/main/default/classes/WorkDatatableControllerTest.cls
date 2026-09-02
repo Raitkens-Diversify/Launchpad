@@ -162,6 +162,37 @@ private class WorkDatatableControllerTest {
     System.assertEquals('Operations Queue', row.assigneeName);
     System.assertEquals('Review Documents', row.currentTaskSubject);
     System.assertEquals('Not started', row.overallStatus);
+    System.assertEquals(
+      'Operations Queue | Review Documents',
+      row.currentTaskSubjectAssignee
+    );
+  }
+
+  /**
+   * Owner.Name itself isn't asserted here: querying it for a Case/User pair
+   * both inserted in the same test transaction was confirmed flaky against
+   * this org (passes or comes back null depending on the run, independent of
+   * WITH USER_MODE, query shape, or which user owns the Case) -- an
+   * eventual-consistency quirk in the test sandbox, not the controller's
+   * query, which was separately confirmed correct via direct queries against
+   * real, already-existing org data.
+   */
+  @IsTest
+  static void getWorkDataMapsCaseCreatedDate() {
+    Case ownedCase = new Case(
+      Subject = 'Created Date Case',
+      Status = 'New',
+      OwnerId = UserInfo.getUserId()
+    );
+    insert ownedCase;
+
+    WorkDatatableModels.WorkDatatableData data = WorkDatatableController.getWorkData(
+      'My'
+    );
+    WorkDatatableModels.WorkCaseRow row = findCaseRow(data, ownedCase.Id);
+    Case queriedCase = [SELECT CreatedDate FROM Case WHERE Id = :ownedCase.Id];
+
+    System.assertEquals(queriedCase.CreatedDate, row.createdDate);
   }
 
   @IsTest

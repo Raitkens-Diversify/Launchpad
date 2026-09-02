@@ -6,6 +6,7 @@
     <description>LWR-compatible flow-screen lookup with inline results; replaces flowruntime:lookup in the ARC-site flow copies.</description>
     <targets>
         <target>lightning__FlowScreen</target>
+        <target>lightningCommunity__Default</target>
     </targets>
     <targetConfigs>
         <targetConfig targets="lightning__FlowScreen">

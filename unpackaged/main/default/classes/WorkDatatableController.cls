@@ -31,6 +31,7 @@ public with sharing class WorkDatatableController {
     'Case_Branch_Name_DisplayName__c',
     'OwnerId',
     'Owner.Name',
+    'CreatedDate',
     'LastModifiedDate',
     'Financial_Advisor_Team__c',
     'Total_Main_Track_Tasks__c',
@@ -76,7 +77,7 @@ public with sharing class WorkDatatableController {
         'SELECT ' +
           caseFields +
           ' FROM Case WHERE OwnerId = :currentUserId AND IsClosed = FALSE' +
-          ' WITH SECURITY_ENFORCED ORDER BY LastModifiedDate DESC LIMIT :ROW_LIMIT'
+          ' WITH USER_MODE ORDER BY LastModifiedDate DESC LIMIT :ROW_LIMIT'
       );
     }
 
@@ -90,7 +91,7 @@ public with sharing class WorkDatatableController {
       'SELECT ' +
         caseFields +
         ' FROM Case WHERE Financial_Advisor_Team__c IN :teamIds' +
-        ' AND IsClosed = FALSE WITH SECURITY_ENFORCED' +
+        ' AND IsClosed = FALSE WITH USER_MODE' +
         ' ORDER BY LastModifiedDate DESC LIMIT :ROW_LIMIT'
     );
   }
@@ -144,7 +145,7 @@ public with sharing class WorkDatatableController {
         Task_Template_Item__r.Home_Office_Approval_Milestone__c
       FROM Task
       WHERE WhatId IN :caseIds
-      WITH SECURITY_ENFORCED
+      WITH USER_MODE
       LIMIT :TASK_QUERY_LIMIT
     ];
   }
@@ -213,6 +214,9 @@ public with sharing class WorkDatatableController {
     row.assigneeName = resolveAssigneeName(caseRecord);
     row.lastModifiedRaw = caseRecord.LastModifiedDate;
     row.currentTaskSubject = resolveCurrentTaskSubject(caseRecord);
+    row.currentTaskSubjectAssignee = caseRecord.Current_Task_Subject_Assignee__c;
+    row.ownerName = caseRecord.Owner?.Name;
+    row.createdDate = caseRecord.CreatedDate;
 
     Integer totalMain = caseRecord.Total_Main_Track_Tasks__c == null
       ? 0

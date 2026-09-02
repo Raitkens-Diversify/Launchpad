@@ -124,10 +124,27 @@ export default class ArcFlowModal extends LightningElement {
         return this.title || 'Flow';
     }
 
+    /**
+     * Always false. Guards the never-rendered block that statically names the
+     * flow screen components (arcFlowLookup, etc.) so the LWR site compiler
+     * bundles them into the published build — a flow's extensionName reference
+     * is invisible to it, so without this they load in preview but 404 on the
+     * published site.
+     */
+    get bundleFlowScreens() {
+        return false;
+    }
+
     get panelClass() {
         return this.size === 'large'
             ? 'arc-flow-modal__panel arc-flow-modal__panel--large'
             : 'arc-flow-modal__panel';
+    }
+
+    get overlayClass() {
+        return this.size === 'large'
+            ? 'arc-flow-modal arc-flow-modal--large'
+            : 'arc-flow-modal';
     }
 
     handleFlowStatusChange(event) {

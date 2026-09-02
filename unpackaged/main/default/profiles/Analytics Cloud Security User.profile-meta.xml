@@ -167,6 +167,11 @@
         <default>false</default>
         <visible>false</visible>
     </applicationVisibilities>
+    <applicationVisibilities>
+        <application>standard__Platform</application>
+        <default>true</default>
+        <visible>true</visible>
+    </applicationVisibilities>
     <fieldPermissions>
         <editable>true</editable>
         <field>Account.Count_of_Accounts__c</field>
@@ -15933,7 +15938,7 @@
         <recordType>Account.FinServ__IndustriesBusiness</recordType>
     </layoutAssignments>
     <layoutAssignments>
-        <layout>Account-Business Layout</layout>
+        <layout>Account-Trust Layout</layout>
         <recordType>Account.Trust</recordType>
     </layoutAssignments>
     <layoutAssignments>
@@ -15945,7 +15950,7 @@
         <recordType>Account.Household</recordType>
     </layoutAssignments>
     <layoutAssignments>
-        <layout>Account-Household Layout</layout>
+        <layout>Account-Retirement Plan Layout</layout>
         <recordType>Account.Retirement_Plan</recordType>
     </layoutAssignments>
     <layoutAssignments>

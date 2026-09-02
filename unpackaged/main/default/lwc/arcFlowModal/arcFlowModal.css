@@ -35,7 +35,10 @@
 }
 
 .arc-flow-modal__backdrop {
-  position: absolute;
+  /* Fixed, not absolute: the overlay is a scroll container, and an absolute
+     backdrop only covers its first viewport — scrolled past it, the page
+     showed through undimmed beneath the dialog. */
+  position: fixed;
   inset: 0;
   background: rgba(17, 24, 39, 0.45);
 }
@@ -126,12 +129,36 @@
 /* The launchpad-modal proportions: Log a Check (ss size) and other wide flow
    screens. Opted into per open({size: "large"}); pit-stop dialogs keep the
    default width. */
+/* Unlike the default dialog (whose overlay scrolls so inline flow dropdowns
+   never clip), the large dialog holds tall screens — the Advertising Review
+   type list runs well past a viewport — and scrolls the body inside a panel
+   pinned to the screen, the way the launchpad modal does. The overlay must
+   NOT also scroll: two nested scroll containers left the wheel scrolling the
+   wrong one, and the panel must clip, or the flow's content spills out below
+   the viewport (overflow was visible) with nothing to scroll. */
+.arc-flow-modal--large {
+  overflow: hidden;
+  align-items: center;
+  padding: 1.5rem 1rem;
+}
+
 .arc-flow-modal__panel--large {
   width: min(100%, 57.5rem);
+  max-height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+.arc-flow-modal__panel--large .arc-flow-modal__header {
+  flex: 0 0 auto;
 }
 
 .arc-flow-modal__panel--large .arc-flow-modal__body {
+  flex: 1 1 auto;
+  min-height: 0;
   padding: 8px 24px 16px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .arc-flow-modal__panel--large .arc-flow-modal__title {

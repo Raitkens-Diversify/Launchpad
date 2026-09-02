@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>67.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>ARC Flow Cost Line Items</masterLabel>
+    <description>LWR replacement for cmp_FlowCreateMultiple in the ARC-site Advertising Review flow copies.</description>
+    <targets>
+        <target>lightning__FlowScreen</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__FlowScreen">
+            <property name="sObjectName" type="String" label="Object API Name" />
+            <property name="sObjectFields" type="String" label="Fields (informational)" />
+            <property name="recordTypeName" type="String" label="Record Type Name" />
+            <property name="recordId" type="String" label="Record Id" />
+            <property name="parentRecordId" type="String" label="Parent Record Id" />
+            <property name="parentLookupFieldName" type="String" label="Parent Lookup Field" />
+            <property name="MaximumNumberofRecords" type="Integer" label="Maximum Rows" />
+            <property name="LinestoShow" type="Integer" label="Initial Rows" />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

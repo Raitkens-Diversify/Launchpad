@@ -87,6 +87,21 @@
         <default>false</default>
         <visible>false</visible>
     </applicationVisibilities>
+    <applicationVisibilities>
+        <application>standard__AgentforceStudio</application>
+        <default>false</default>
+        <visible>true</visible>
+    </applicationVisibilities>
+    <applicationVisibilities>
+        <application>standard__FlowsApp</application>
+        <default>false</default>
+        <visible>true</visible>
+    </applicationVisibilities>
+    <applicationVisibilities>
+        <application>standard__ScaleTestApp</application>
+        <default>false</default>
+        <visible>true</visible>
+    </applicationVisibilities>
     <fieldPermissions>
         <editable>false</editable>
         <field>AccountContactRelation.Account_RecordType_Name__c</field>
@@ -15418,7 +15433,7 @@
         <recordType>Account.FinServ__IndustriesBusiness</recordType>
     </layoutAssignments>
     <layoutAssignments>
-        <layout>Account-Business Layout</layout>
+        <layout>Account-Trust Layout</layout>
         <recordType>Account.Trust</recordType>
     </layoutAssignments>
     <layoutAssignments>
@@ -15430,7 +15445,7 @@
         <recordType>Account.Household</recordType>
     </layoutAssignments>
     <layoutAssignments>
-        <layout>Account-Household Layout</layout>
+        <layout>Account-Retirement Plan Layout</layout>
         <recordType>Account.Retirement_Plan</recordType>
     </layoutAssignments>
     <layoutAssignments>

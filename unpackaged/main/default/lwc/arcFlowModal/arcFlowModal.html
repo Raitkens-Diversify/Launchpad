@@ -1,8 +1,24 @@
 <!-- Author: Hoang Long Vu To | Date: 2026-08-14 -->
 <template>
+  <!--
+    Never rendered ({bundleFlowScreens} is always false). These are the flow
+    screen components the site's flows load by extensionName, which the LWR
+    site compiler cannot see — so on the published site they 404 (LWR3008)
+    unless something the compiler DOES reach references them statically. This
+    dialog is always in the bundle (arcCaseDetail / arcHomeHeader /
+    arcRecordListView reference it), so naming them here pulls them in.
+  -->
+  <template lwc:if={bundleFlowScreens}>
+    <c-arc-flow-lookup></c-arc-flow-lookup>
+    <c-arc-flow-file-upload></c-arc-flow-file-upload>
+    <c-arc-flow-file-upload-ad></c-arc-flow-file-upload-ad>
+    <c-arc-flow-stylized-button></c-arc-flow-stylized-button>
+    <c-arc-flow-cost-line-items></c-arc-flow-cost-line-items>
+  </template>
+
   <template lwc:if={isOpen}>
     <section
-      class="arc-flow-modal"
+      class={overlayClass}
       role="dialog"
       aria-modal="true"
       aria-label={dialogLabel}

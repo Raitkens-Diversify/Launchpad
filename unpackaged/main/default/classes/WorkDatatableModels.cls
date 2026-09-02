@@ -33,6 +33,12 @@ public with sharing class WorkDatatableModels {
     @AuraEnabled
     public String assigneeName { get; set; }
     @AuraEnabled
+    public String currentTaskSubjectAssignee { get; set; }
+    @AuraEnabled
+    public String ownerName { get; set; }
+    @AuraEnabled
+    public Datetime createdDate { get; set; }
+    @AuraEnabled
     public String overallStatus { get; set; }
     @AuraEnabled
     public String overallStatusPillClass { get; set; }

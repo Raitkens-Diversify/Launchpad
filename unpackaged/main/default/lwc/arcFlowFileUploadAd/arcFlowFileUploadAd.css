@@ -1,0 +1,23 @@
+.ad-upload {
+  position: relative;
+}
+
+.ad-upload__error {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #ba0517;
+}
+
+.ad-upload__list {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ad-upload__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+  font-size: 13px;
+}

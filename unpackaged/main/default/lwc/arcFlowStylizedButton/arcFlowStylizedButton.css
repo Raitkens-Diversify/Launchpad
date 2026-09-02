@@ -1,0 +1,66 @@
+/* Ported from aura/cmp_FlowStylizedButton.css: block buttons centered in the
+   screen, sized by the Size input, brand #5aaadc hovering to #58595b. */
+
+.sb {
+  display: block;
+  margin: 12px auto;
+  padding: 4px 12px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-size: 18px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.sb--brand {
+  background-color: #5aaadc;
+  color: #ffffff;
+}
+
+.sb--brand:hover:not(:disabled) {
+  background-color: #58595b;
+}
+
+.sb--inactive {
+  background-color: #58595b;
+  color: #ffffff;
+  cursor: default;
+}
+
+.sb--blank {
+  background-color: #ffffff;
+  color: #ffffff;
+  border-color: #ffffff;
+  cursor: default;
+}
+
+.sb--base {
+  background: transparent;
+  color: var(--lwc-colorTextLink, #0176d3);
+  border-color: transparent;
+}
+
+.sb--large {
+  width: 100%;
+}
+
+.sb--medium {
+  width: 50%;
+}
+
+.sb--small {
+  width: 20%;
+}
+
+.sb--link-text {
+  display: block;
+  margin: 0 auto;
+  padding: 16px 0;
+  width: 30%;
+  font-size: 12px;
+  text-decoration: underline;
+  background: transparent;
+  border: none;
+  color: var(--lwc-colorTextLink, #0176d3);
+  cursor: pointer;
+}

@@ -30,7 +30,6 @@ import NEXS_ICONS from "@salesforce/resourceUrl/arcicon";
 import { CurrentPageReference, NavigationMixin } from "lightning/navigation";
 import {
   buildRecordNavigationReference,
-  resolveRecordUrl,
   usesQueryParamRecordRoute
 } from "c/recordNavigationCommunityUtils";
 
@@ -71,14 +70,12 @@ const AVATAR_OBJECT_API_NAMES = new Set([
 ]);
 
 /**
- * Row menu (Figma "⚡ Row actions menu cell", 797:120088). The design specifies
- * the cell but not its contents, so these are the actions this app can actually
- * carry out: records are edited inline on the detail page, so Edit opens that.
+ * Row menu (Figma "⚡ Row actions menu cell", 797:120088). Edit/Open in new
+ * tab/Copy link never actually worked, so the menu is collapsed to the one
+ * action that does: opening the record, same as clicking the row itself.
  */
 const ROW_ACTIONS = [
-  { name: "edit", label: "Edit", iconName: "utility:edit" },
-  { name: "newtab", label: "Open in new tab", iconName: "utility:new_window" },
-  { name: "copy", label: "Copy link", iconName: "utility:copy_to_clipboard" }
+  { name: "view", label: "View Record", iconName: "utility:preview" }
 ];
 
 const LIST_VIEW_FETCH_SIZE = 2000;
@@ -1143,72 +1140,35 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
 
   /**
    * `rowaction` carries { action, row }; the row is the record shape this
-   * component builds, so `id` is the record id.
+   * component builds, so `id` is the record id. The only action left is
+   * "view", which opens the record the same way clicking the row does.
    */
-  async handleRowAction(event) {
+  handleRowAction(event) {
     const { action, row } = event.detail || {};
     const recordId = row?.id;
+    // eslint-disable-next-line no-console
+    console.log("[arcRecordListView][diag] handleRowAction", {
+      detail: event.detail,
+      action,
+      row,
+      recordId,
+      objectApiName: this.objectApiName
+    });
 
     if (!action?.name || !recordId) {
       return;
     }
 
-    if (action.name === "newtab") {
-      await this.openRecordInNewTab(recordId);
-      return;
-    }
-
-    if (action.name === "copy") {
-      await this.copyRecordLink(recordId);
-      return;
-    }
-
-    // Edit — this app edits records inline on the detail page.
     const reference = buildRecordNavigationReference(
       recordId,
       this.objectApiName,
       { useQueryParam: usesQueryParamRecordRoute(this.objectApiName) }
     );
+    // eslint-disable-next-line no-console
+    console.log("[arcRecordListView][diag] navigating", { reference });
 
     if (reference) {
       this[NavigationMixin.Navigate](reference);
-    }
-  }
-
-  /**
-   * Opens a record in a new browser tab. Ported locally from Vestolio's
-   * recordNavigationUtils.openRecordInNewTab (which recordNavigationCommunityUtils
-   * doesn't re-export) rather than adding a shared-file export -- keeps this
-   * fork's footprint at zero shared-file changes. arcRecordListView is
-   * Experience-Cloud-only (no lightning__AppPage/RecordPage target), so only
-   * the browser-tab half of that helper ever applies; its console-workspace-tab
-   * branch is dead code here and wasn't carried over. Matches the original
-   * call site exactly, including not passing objectApiName.
-   */
-  async openRecordInNewTab(recordId) {
-    if (!recordId) {
-      return;
-    }
-    const url = await resolveRecordUrl(this, recordId);
-    if (!url) {
-      return;
-    }
-    window.open(url, "_blank", "noopener,noreferrer");
-  }
-
-  async copyRecordLink(recordId) {
-    try {
-      const path = await resolveRecordUrl(this, recordId, this.objectApiName);
-
-      if (!path) {
-        return;
-      }
-
-      const absolute = new URL(path, window.location.origin).href;
-      await navigator.clipboard.writeText(absolute);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error("[arcRecordListView] Could not copy the record link", error);
     }
   }
 
@@ -1290,6 +1250,22 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   // ---- Client-side search + filters --------------------------------------
 
   get visibleRows() {
+    // In server-search mode, tableRows is already exactly the matching set
+    // -- both activeFilters and searchTerm were already sent to and applied
+    // by ArcRecordSearchController (see fetchServerSearchBatch). Re-running
+    // this client-side pass on top would be pure redundancy at best, and at
+    // worst actively wrong: rowMatchesFilter does a naive string compare
+    // with no type awareness, so a Boolean field filter adopted from a
+    // platform ListView (e.g. IsClosed Equals "0", the exact shape
+    // adoptSavedFilters hands it) compares the row's stringified cell
+    // ("false") against the raw operand ("0") and never matches --
+    // confirmed live: a mandatory server-side filter that correctly
+    // returned 5 rows still rendered "No records to display" once this
+    // ran on top of it, for every row, unconditionally.
+    if (this.enableServerSearch) {
+      return this.tableRows;
+    }
+
     const term = this.searchTerm.trim().toLowerCase();
 
     return this.tableRows.filter((row) => {
@@ -2881,6 +2857,13 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   get createFlowConfig() {
     if (this.objectApiName === "Check_Log__c") {
       return { flowName: "ARC_Log_a_Check", title: "Log a Check", size: "large" };
+    }
+    if (this.objectApiName === "Advertising_Item__c") {
+      return {
+        flowName: "ARC_Advertising_Review",
+        title: "Advertising Review Request",
+        size: "large"
+      };
     }
     return null;
   }

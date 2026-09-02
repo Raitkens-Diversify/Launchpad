@@ -1,0 +1,75 @@
+<template>
+  <div class="cli">
+    <table class="cli__table">
+      <thead>
+        <tr>
+          <th scope="col">Name of Party</th>
+          <th scope="col">Amount</th>
+          <th scope="col" class="cli__th-remove">
+            <span class="cli__sr">Remove</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <template for:each={rows} for:item="row">
+          <tr key={row.key}>
+            <td>
+              <input
+                type="text"
+                class="cli__input"
+                name="nameOfParty"
+                data-key={row.key}
+                value={row.nameOfParty}
+                aria-label="Name of Party"
+                onchange={handleFieldChange}
+              />
+            </td>
+            <td>
+              <input
+                type="number"
+                step="0.01"
+                class="cli__input"
+                name="amount"
+                data-key={row.key}
+                value={row.amount}
+                aria-label="Amount"
+                onchange={handleFieldChange}
+              />
+            </td>
+            <td class="cli__td-remove">
+              <button
+                type="button"
+                class="cli__remove"
+                title="Remove row"
+                aria-label="Remove row"
+                data-key={row.key}
+                onclick={handleRemoveRow}
+              >
+                <lightning-icon
+                  icon-name="utility:delete"
+                  size="x-small"
+                  alternative-text="Remove"
+                ></lightning-icon>
+              </button>
+            </td>
+          </tr>
+        </template>
+      </tbody>
+    </table>
+
+    <template lwc:if={hasError}>
+      <p class="cli__error" role="alert">{errorMessage}</p>
+    </template>
+
+    <div class="cli__footer">
+      <button
+        type="button"
+        class="cli__add"
+        disabled={addDisabled}
+        onclick={handleAddRow}
+      >
+        Save and Add Row
+      </button>
+    </div>
+  </div>
+</template>

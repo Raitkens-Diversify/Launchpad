@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>67.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>ARC Flow Stylized Button</masterLabel>
+    <description>LWR port of cmp_FlowStylizedButton for the ARC-site flow copies.</description>
+    <targets>
+        <target>lightning__FlowScreen</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__FlowScreen">
+            <property name="ButtonText" type="String" label="Button Text" />
+            <property name="ButtonType" type="String" label="Button Type" />
+            <property name="ValueClicked" type="String" label="Value Clicked" />
+            <property name="Size" type="String" label="Size" />
+            <property name="Class" type="String" label="Class" />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

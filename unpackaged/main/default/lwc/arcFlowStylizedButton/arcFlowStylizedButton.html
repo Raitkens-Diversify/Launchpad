@@ -1,0 +1,39 @@
+<template>
+  <div class="sb-host">
+    <template lwc:if={isActive}>
+      <button type="button" class={computedClass} title={ButtonText} onclick={handleClick}>
+        {ButtonText}
+      </button>
+    </template>
+    <template lwc:elseif={isPause}>
+      <button type="button" class={computedClass} title={ButtonText} onclick={handlePauseClick}>
+        {ButtonText}
+      </button>
+    </template>
+    <template lwc:elseif={isLinkButton}>
+      <button type="button" class={computedClass} title={ButtonText} onclick={handleLinkClick}>
+        {ButtonText}
+      </button>
+    </template>
+    <template lwc:elseif={isInactive}>
+      <button type="button" class={computedClass} title={ButtonText} disabled>
+        {ButtonText}
+      </button>
+    </template>
+    <template lwc:elseif={isSelected}>
+      <button type="button" class={baseVariantClass} title={ButtonText}>
+        {ButtonText}
+      </button>
+    </template>
+    <template lwc:elseif={isBlank}>
+      <button type="button" class={baseVariantClass} title={ButtonText}>
+        {ButtonText}
+      </button>
+    </template>
+    <template lwc:elseif={isLink}>
+      <button type="button" class={baseVariantClass} title={ButtonText} onclick={handleClick}>
+        {ButtonText}
+      </button>
+    </template>
+  </div>
+</template>

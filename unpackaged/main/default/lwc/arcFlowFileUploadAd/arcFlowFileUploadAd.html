@@ -1,0 +1,37 @@
+<template>
+  <div class="ad-upload">
+    <template lwc:if={loading}>
+      <lightning-spinner
+        alternative-text="Loading"
+        size="medium"
+      ></lightning-spinner>
+    </template>
+    <lightning-file-upload
+      label={label}
+      name="fileUploader"
+      multiple={acceptsMultiple}
+      accept={acceptedFormats}
+      record-id={recordId}
+      disabled={isDisabled}
+      onuploadfinished={handleUploadFinished}
+    ></lightning-file-upload>
+    <template lwc:if={invalidAdType}>
+      <div class="ad-upload__error">
+        Please select valid value for Advertising Type.
+      </div>
+    </template>
+    <template lwc:if={hasUploads}>
+      <ul class="ad-upload__list">
+        <template for:each={uploadedFileNames} for:item="fileName">
+          <li key={fileName} class="ad-upload__item">
+            <lightning-icon
+              icon-name="doctype:attachment"
+              size="x-small"
+            ></lightning-icon>
+            <span>{fileName}</span>
+          </li>
+        </template>
+      </ul>
+    </template>
+  </div>
+</template>

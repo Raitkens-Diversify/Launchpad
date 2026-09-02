@@ -8,7 +8,6 @@ import { LightningElement, api, wire, track } from "lwc";
 import { loadStyle } from "lightning/platformResourceLoader";
 import { NavigationMixin } from "lightning/navigation";
 import getWorkData from "@salesforce/apex/WorkDatatableController.getWorkData";
-import { openRecordInNewTab, resolveRecordUrl } from "c/recordNavigationUtils";
 import {
   buildRecordNavigationReference
 } from "c/recordNavigationCommunityUtils";
@@ -25,41 +24,42 @@ const SCOPE_OPTIONS = [
   { value: SCOPE_TEAM, label: "My Team" }
 ];
 
+/**
+ * Matches the standardized 7-column set the Cases list tabs show (see
+ * "Standardize columns across all three Cases tabs") -- same fields, order,
+ * and labels, so a case looks the same whether it's seen here or there.
+ * Main Track Tasks is intentionally excluded, for the same reason it was
+ * excluded from Cases: no active writer for Completed_Main_Track_Tasks__c
+ * today, see the main-track-ratio-deferred note.
+ */
 const COLUMNS = [
+  {
+    label: "Case Number",
+    fieldName: "caseNumber",
+    type: "text",
+    sortable: true,
+    sortType: "text",
+    isLink: true,
+    linkObjectApiName: "Case",
+    showExpandChevron: true
+  },
   {
     label: "Case",
     fieldName: "caseName",
     type: "text",
     sortable: true,
     sortType: "text",
-    isLink: true,
-    showExpandChevron: true
+    isLink: true
   },
   {
-    label: "Case No.",
-    fieldName: "caseNumber",
-    type: "text",
-    sortable: true,
-    sortType: "text",
-    isLink: true,
-    linkObjectApiName: "Case"
-  },
-  {
-    label: "Current Task Subject",
-    fieldName: "currentTaskSubject",
+    label: "Assignee | Current Task Subject",
+    fieldName: "currentTaskSubjectAssignee",
     type: "text",
     sortable: true,
     sortType: "text"
   },
   {
-    label: "Assignee",
-    fieldName: "assigneeName",
-    type: "text",
-    sortable: true,
-    sortType: "text"
-  },
-  {
-    label: "Overall Status",
+    label: "Case Overall Status",
     fieldName: "overallStatus",
     type: "pill",
     pillClassField: "overallStatusPillClass",
@@ -75,12 +75,18 @@ const COLUMNS = [
     sortType: "text"
   },
   {
-    label: "Main Track Tasks",
-    fieldName: "mainTrackTasks",
+    label: "Case Owner",
+    fieldName: "ownerName",
     type: "text",
     sortable: true,
-    sortFieldName: "completedMainTrack",
-    sortType: "number"
+    sortType: "text"
+  },
+  {
+    label: "Date/Time Opened",
+    fieldName: "createdDate",
+    type: "datetime",
+    sortable: true,
+    sortType: "date"
   }
 ];
 
@@ -151,40 +157,19 @@ export default class WorkTable extends NavigationMixin(LightningElement) {
   scopeOptions = SCOPE_OPTIONS;
   @track columns = [...COLUMNS];
 
-  /* The same three the list pages offer, so a row behaves the same wherever it
-     is shown. Rows here are Cases. */
+  /* Matches the list pages: the row menu opens the record, same as clicking
+     the row. Rows here are Cases. */
   rowActions = [
-    { name: "edit", label: "Edit", iconName: "utility:edit" },
-    { name: "newtab", label: "Open in new tab", iconName: "utility:new_window" },
-    { name: "copy", label: "Copy link", iconName: "utility:copy_to_clipboard" }
+    { name: "view", label: "View Record", iconName: "utility:preview" }
   ];
 
-  async handleRowAction(event) {
+  handleRowAction(event) {
     const { action, row } = event.detail || {};
     const recordId = row?.id;
     if (!action?.name || !recordId) {
       return;
     }
 
-    if (action.name === "newtab") {
-      await openRecordInNewTab(this, recordId, "Case");
-      return;
-    }
-
-    if (action.name === "copy") {
-      try {
-        const url = await resolveRecordUrl(this, recordId, "Case");
-        await navigator.clipboard.writeText(
-          new URL(url, window.location.origin).href
-        );
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error("[workTable] Could not copy the record link", error);
-      }
-      return;
-    }
-
-    // Edit — records are edited inline on their detail page.
     const reference = buildRecordNavigationReference(recordId, "Case");
     if (reference) {
       this[NavigationMixin.Navigate](reference);
@@ -264,10 +249,12 @@ export default class WorkTable extends NavigationMixin(LightningElement) {
       const haystack = [
         caseRow.caseName,
         caseRow.caseNumber,
+        caseRow.currentTaskSubjectAssignee,
         caseRow.currentTaskSubject,
         caseRow.assigneeName,
         caseRow.overallStatus,
-        caseRow.milestoneStatus
+        caseRow.milestoneStatus,
+        caseRow.ownerName
       ]
         .filter(Boolean)
         .join(" ")
