@@ -57,7 +57,17 @@
                   onclick={handleRowClick}
                 >
                   <template for:each={row.cells} for:item="cell">
-                    <td key={cell.key} class={cell.cssClass}>{cell.value}</td>
+                    <td key={cell.key} class={cell.cssClass}>
+                      <template lwc:if={cell.isSecondaryLink}>
+                        <a
+                          href="#"
+                          data-id={cell.secondaryLinkId}
+                          onclick={handleSecondaryLinkClick}
+                          >{cell.value}</a
+                        >
+                      </template>
+                      <template lwc:else>{cell.value}</template>
+                    </td>
                   </template>
                 </tr>
               </template>

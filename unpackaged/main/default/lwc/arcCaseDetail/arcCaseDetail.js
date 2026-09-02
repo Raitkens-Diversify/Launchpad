@@ -169,17 +169,15 @@ const RELATED_LIST_REQUESTS = [
     key: "relatedProducts",
     objectApiName: "Financial_Account_Related_Product__c",
     parentFieldApiName: "Case__c",
-    // Product_Name__c and Financial_Account__c, not the row's auto-number
-    // Name and the wizard-only lookup: the Lightning case layout's Related
-    // Products list shows the plain Financial_Account__c, Product_Name__c is
-    // set on every row, and Wizard_Financial_Account__c is null on rows
-    // created outside the wizard -- which rendered as a blank column under
-    // an RP-000000 title that identified nothing.
+    // The Product cell links to the approved product (Product__c) detail page --
+    // the site's /product route -- so the row lands on the product itself, not
+    // the account. Name is the related-product record, linked to its quick-view.
     fieldApiNames: [
       "Product_Name__c",
-      "Financial_Account__r.Name",
-      "CreatedDate"
-    ]
+      "Amount__c",
+      "Name"
+    ],
+    linkFieldApiName: "Product__c"
   },
   {
     key: "checkLogs",
@@ -674,10 +672,9 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
    * publish refreshes all of them along with the Current Task tile.
    */
   /*
-   * Order tickets and related products have no page of their own in this
-   * site -- navigating to them lands on Invalid Page -- so their cards'
-   * cancelable rownavigate is intercepted and a quick-view popup opens
-   * instead, the same pattern Product Detail's Related Products table uses.
+   * Order tickets have no page of their own in this site -- navigating to one
+   * lands on Invalid Page -- so the card's cancelable rownavigate is
+   * intercepted and a quick-view popup opens instead.
    */
   handleOrderTicketRowNavigate(event) {
     event.preventDefault();
@@ -687,7 +684,12 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
     }
   }
 
-  handleRelatedProductRowNavigate(event) {
+  /*
+   * The Related Product Name cell opens the product quick-view, while the rest
+   * of the row links to the account. preventDefault keeps arcRelatedList from
+   * navigating to the related product (it has no page of its own in the site).
+   */
+  handleRelatedProductSecondaryNavigate(event) {
     event.preventDefault();
     const recordId = event.detail?.recordId;
     if (recordId) {

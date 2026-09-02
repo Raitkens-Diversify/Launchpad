@@ -373,11 +373,13 @@
             card-label="Related Products"
             related-object-api-name="Financial_Account_Related_Product__c"
             parent-field-api-name="Case__c"
-            columns="Product:Product_Name__c,Financial Account:Financial_Account__r.Name,Created:CreatedDate"
+            columns="Product:Product_Name__c,Amount:Amount__c,Related Product Name:Name"
+            link-object-api-name="Product__c"
+            secondary-link-column-path="Name"
             collapsible
             use-preloaded-data
             preloaded-result={relatedProductsResult}
-            onrownavigate={handleRelatedProductRowNavigate}
+            onsecondarynavigate={handleRelatedProductSecondaryNavigate}
           ></c-arc-related-list>
 
           <template lwc:if={showCheckLogs}>

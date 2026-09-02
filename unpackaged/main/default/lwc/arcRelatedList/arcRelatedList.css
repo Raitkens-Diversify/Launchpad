@@ -92,6 +92,19 @@
   white-space: nowrap;
 }
 
+/* A secondary-link cell (e.g. Related Product Name -> quick-view) reads as a
+   link even though it sits in a non-first column. */
+.related-list__td a {
+  color: var(--div-color-blue-700, #1a76bb);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.related-list__td a:hover,
+.related-list__td a:focus {
+  text-decoration: underline;
+}
+
 .related-list__td--first {
   padding-left: 0;
   text-align: left;

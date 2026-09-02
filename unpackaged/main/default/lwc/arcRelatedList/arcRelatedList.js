@@ -69,6 +69,15 @@ export default class ArcRelatedList extends NavigationMixin(LightningElement) {
   @api disableRowLinks = false;
 
   /**
+   * Optional: the column whose cell becomes its own link, independent of the
+   * row's link. Clicking it fires a cancelable `secondarynavigate` with the
+   * row's record id; a parent handles it (the case page opens the related
+   * product quick-view) or, uncaught, it navigates to that record. Unset on
+   * every other card, so their behaviour is unchanged.
+   */
+  @api secondaryLinkColumnPath = "";
+
+  /**
    * When true, this card renders whatever `preloadedResult` is handed to it
    * instead of calling getRelatedRecords itself. Set by a parent (e.g.
    * arcCaseDetail) that batches several of these cards into one
@@ -370,22 +379,64 @@ export default class ArcRelatedList extends NavigationMixin(LightningElement) {
 
   get rowsView() {
     const linkable = !this.disableRowLinks;
+    const secondaryIndex = this.secondaryLinkColumnPath
+      ? this.columnDefs.findIndex(
+          (c) => c.path === this.secondaryLinkColumnPath
+        )
+      : -1;
     return this.rows.map((row) => ({
       id: row.id,
       linkId: row.linkId || row.id,
       rowClass: linkable
         ? "related-list__tr related-list__tr--link"
         : "related-list__tr",
-      cells: (row.cells || []).map((value, index) => ({
-        key: `${row.id}-${index}`,
-        value: this.formatCell(value, index),
-        isLink: index === 0,
-        cssClass:
-          index === 0
-            ? "related-list__td related-list__td--first"
-            : "related-list__td"
-      }))
+      cells: (row.cells || []).map((value, index) => {
+        const isSecondaryLink = index === secondaryIndex;
+        return {
+          key: `${row.id}-${index}`,
+          value: this.formatCell(value, index),
+          isLink: index === 0,
+          isSecondaryLink,
+          secondaryLinkId: isSecondaryLink ? row.id : "",
+          cssClass:
+            index === 0
+              ? "related-list__td related-list__td--first"
+              : "related-list__td"
+        };
+      })
     }));
+  }
+
+  /*
+   * A secondary-link cell navigates on its own and must not also trigger the
+   * row's click (which sends this card to the account). stopPropagation keeps
+   * the two apart; the cancelable event lets a parent open a popup instead.
+   */
+  handleSecondaryLinkClick(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    const recordId = event.currentTarget.dataset.id;
+    if (!recordId) {
+      return;
+    }
+    const navigateEvent = new CustomEvent("secondarynavigate", {
+      cancelable: true,
+      detail: {
+        recordId,
+        objectApiName: this.relatedObjectApiName
+      }
+    });
+    this.dispatchEvent(navigateEvent);
+    if (navigateEvent.defaultPrevented) {
+      return;
+    }
+    const reference = buildRecordNavigationReference(
+      recordId,
+      this.relatedObjectApiName
+    );
+    if (reference) {
+      this[NavigationMixin.Navigate](reference);
+    }
   }
 
   get hasRows() {
@@ -406,6 +457,13 @@ export default class ArcRelatedList extends NavigationMixin(LightningElement) {
     }
 
     const linkId = event.currentTarget.dataset.link;
+
+    // A row whose link field is empty (e.g. a related product with no wizard
+    // financial account) has nowhere to go: skip rather than routing to a
+    // broken /object/null URL. Apex serializes a null id as the string 'null'.
+    if (!linkId || linkId === "null") {
+      return;
+    }
 
     /*
      * Cancelable, same contract as arcDataTable's rownavigate: a parent with
