@@ -662,6 +662,12 @@ export default class FscRelMap extends NavigationMixin(LightningElement) {
                 this.loadMemberRelationCountsForAccountIds([accountId]),
                 this.loadHouseholdFamilyRecordCount([accountId])
             ]);
+
+            const relationCount = this.memberRelationCountByAccountId[accountId];
+
+            if (relationCount > 0) {
+                await this.loadMemberRelationsForAccountId(accountId);
+            }
         } finally {
             this.endMapBusy();
         }

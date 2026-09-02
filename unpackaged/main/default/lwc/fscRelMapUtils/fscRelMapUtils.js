@@ -812,7 +812,96 @@ const resolveRelatedContactPresentation = (relationship = {}) => {
   };
 };
 
+const resolveMemberRoleLabel = (relationship = {}) =>
+  String(relationship.roleLabel || relationship.role || "").trim();
+
+const resolveInverseRoleLabel = (relationship = {}) =>
+  String(
+    relationship.inverseRoleLabel || relationship.inverseRole || ""
+  ).trim();
+
+const resolveCounterpartRoleLabel = (relationship = {}) => {
+  const memberRoleLabel = resolveMemberRoleLabel(relationship);
+  const inverseRoleLabel = resolveInverseRoleLabel(relationship);
+
+  if (memberRoleLabel && inverseRoleLabel) {
+    return inverseRoleLabel;
+  }
+
+  return (
+    inverseRoleLabel ||
+    memberRoleLabel ||
+    resolveRelationshipRole(relationship)
+  );
+};
+
+const isBusinessMemberRelationship = (
+  recordTypeDeveloperName = "",
+  memberRelationshipRecordTypes = []
+) => {
+  const normalizedRecordType =
+    normalizeAccountRelationRecordTypeDeveloperName(recordTypeDeveloperName) ||
+    "";
+
+  if (normalizedRecordType.toLowerCase().includes("business")) {
+    return true;
+  }
+
+  return (memberRelationshipRecordTypes || []).some((recordType) => {
+    const developerName = normalizeAccountRelationRecordTypeDeveloperName(
+      recordType?.developerName
+    );
+
+    return (
+      developerName === normalizedRecordType &&
+      developerName.toLowerCase().includes("business")
+    );
+  });
+};
+
+const resolveFocalMemberCounterpartRoleLabel = (
+  rawRelationships = [],
+  memberRelationshipRecordTypes = []
+) => {
+  for (const relationship of buildMemberAccountRelationshipViewModels(
+    rawRelationships
+  )) {
+    if (
+      !isBusinessMemberRelationship(
+        relationship.recordTypeDeveloperName,
+        memberRelationshipRecordTypes
+      )
+    ) {
+      continue;
+    }
+
+    const counterpartRoleLabel = resolveCounterpartRoleLabel(relationship);
+
+    if (counterpartRoleLabel) {
+      return counterpartRoleLabel;
+    }
+  }
+
+  for (const relationship of buildMemberAccountRelationshipViewModels(
+    rawRelationships
+  )) {
+    const counterpartRoleLabel = resolveCounterpartRoleLabel(relationship);
+
+    if (counterpartRoleLabel) {
+      return counterpartRoleLabel;
+    }
+  }
+
+  return "";
+};
+
 const resolveRelatedContactSub = (relationship = {}, roleLabel = "") => {
+  const trimmedRoleLabel = String(roleLabel || "").trim();
+
+  if (trimmedRoleLabel) {
+    return trimmedRoleLabel;
+  }
+
   const relatedRecordType = String(
     relationship.relatedAccountRecordTypeDeveloperName || ""
   ).trim();
@@ -821,12 +910,10 @@ const resolveRelatedContactSub = (relationship = {}, roleLabel = "") => {
     !relatedRecordType ||
     PERSON_ACCOUNT_RECORD_TYPE_DEVELOPER_NAMES.has(relatedRecordType)
   ) {
-    return roleLabel;
+    return "";
   }
 
-  return (
-    resolveRecordTypePresentation(relatedRecordType).label || roleLabel
-  );
+  return resolveRecordTypePresentation(relatedRecordType).label || "";
 };
 
 const buildRelationshipGroupNode = (
@@ -1272,14 +1359,6 @@ const buildMemberNode = (
   };
 };
 
-const resolveMemberRoleLabel = (relationship = {}) =>
-  String(relationship.roleLabel || relationship.role || "").trim();
-
-const resolveInverseRoleLabel = (relationship = {}) =>
-  String(
-    relationship.inverseRoleLabel || relationship.inverseRole || ""
-  ).trim();
-
 export const buildContactRelationNode = (
   relationship,
   parentMember = {},
@@ -1289,10 +1368,7 @@ export const buildContactRelationNode = (
   const { showFamilyRelatedTo = true } = options;
   const memberRoleLabel = resolveMemberRoleLabel(relationship);
   const inverseRoleLabel = resolveInverseRoleLabel(relationship);
-  const roleLabel =
-    inverseRoleLabel ||
-    memberRoleLabel ||
-    resolveRelationshipRole(relationship);
+  const roleLabel = resolveCounterpartRoleLabel(relationship);
   const resolvedRecordType =
     recordTypeDeveloperName || relationship.recordTypeDeveloperName || "";
   const parentAccountId = String(parentMember.accountId || "").trim();
@@ -1603,9 +1679,14 @@ const attachMemberRelationsToMemberNode = (
       (total, group) => total + (group.children?.length || 0),
       0
     );
+    const counterpartRoleSub = resolveFocalMemberCounterpartRoleLabel(
+      relations,
+      memberRelationshipRecordTypes
+    );
 
     return {
       ...memberNode,
+      ...(counterpartRoleSub ? { sub: counterpartRoleSub } : {}),
       children: relationGroups,
       relatedContactCount,
       memberRelationsLoaded: true,

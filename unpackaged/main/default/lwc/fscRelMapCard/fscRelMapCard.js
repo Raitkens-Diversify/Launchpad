@@ -184,15 +184,7 @@ export default class FscRelMapCard extends LightningElement {
       ? `, ${this.showRelatedToInverseRole ? `${this.node.relatedToInverseRole}, ` : ""}${this.node.relatedToName}${this.showRelatedToMemberRole ? `, ${this.node.relationshipRole}` : ""}`
       : "";
     const links = relationshipLinks ? `, ${relationshipLinks}` : "";
-    const roleFooterLabels = this.roleFooterPills
-      .map((pill) => pill.label)
-      .join(", ");
-    const sub =
-      roleFooterLabels && !this.showRelationshipLinks && !this.showRelatedToSubline
-        ? `, ${roleFooterLabels}`
-        : this.showPlainSub
-          ? `, ${this.node.sub}`
-          : "";
+    const sub = this.showPlainSub ? `, ${this.node.sub}` : "";
     return `${label}${primary}${relatedTo}${links}${sub}`;
   }
 
@@ -286,7 +278,7 @@ export default class FscRelMapCard extends LightningElement {
     return (
       this.showPrimaryPill ||
       this.showRecordTypeFooterPill ||
-      this.showRoleFooterPills
+      this.showRoleFooterPill
     );
   }
 
@@ -392,10 +384,6 @@ export default class FscRelMapCard extends LightningElement {
   }
 
   get showRecordTypeFooterPill() {
-    if (this.node?.isEntityCentricGroupedAccount) {
-      return false;
-    }
-
     return (
       this.showPlainSub &&
       (this.node?.nodeType === MAP_NODE_TYPE.ROOT ||
@@ -403,36 +391,12 @@ export default class FscRelMapCard extends LightningElement {
     );
   }
 
-  get showRoleFooterPills() {
-    return this.roleFooterPills.length > 0;
-  }
-
-  get roleFooterPills() {
-    const roleLabels = Array.isArray(this.node?.roleLabels)
-      ? this.node.roleLabels
-      : [];
-
-    if (roleLabels.length > 0) {
-      return roleLabels.map((label, index) => ({
-        key: `${label}-${index}`,
-        label
-      }));
-    }
-
-    if (
+  get showRoleFooterPill() {
+    return (
       this.showPlainSub &&
       (this.node?.nodeType === MAP_NODE_TYPE.RELATED_CONTACT ||
-        this.node?.isEntityCentricGroupedAccount)
-    ) {
-      return [
-        {
-          key: this.node.sub,
-          label: this.node.sub
-        }
-      ];
-    }
-
-    return [];
+        this.node?.nodeType === MAP_NODE_TYPE.MEMBER)
+    );
   }
 
   get showActionsMenu() {
@@ -454,7 +418,7 @@ export default class FscRelMapCard extends LightningElement {
       this.showFooterBadge ||
       this.showPrimaryPill ||
       this.showRecordTypeFooterPill ||
-      this.showRoleFooterPills
+      this.showRoleFooterPill
     );
   }
 
@@ -491,8 +455,7 @@ export default class FscRelMapCard extends LightningElement {
     }
 
     if (
-      (this.node?.nodeType === MAP_NODE_TYPE.MEMBER ||
-        this.node?.nodeType === MAP_NODE_TYPE.ACCOUNT) &&
+      this.node?.nodeType === MAP_NODE_TYPE.MEMBER &&
       (this.node?.showManageMemberRelationships || this.node?.showManageRelatedContacts)
     ) {
       return (this.node?.memberRelationshipActions || []).map((action) => ({
@@ -774,7 +737,6 @@ export default class FscRelMapCard extends LightningElement {
       objectApiName: this.previewObjectApiName,
       relationId: this.node?.relationId,
       memberName: this.node?.label,
-      memberIconName: this.node?.iconName || "",
       selectMemberFromClients:
         Boolean(this.node?.isLazyFamilyGroup) ||
         Boolean(this.node?.isLazyNetworkGroup)
