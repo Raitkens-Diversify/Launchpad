@@ -6,8 +6,7 @@
 private class ActivityTimelineControllerTest {
   @IsTest
   static void getTimelineDataReturnsHouseholdActivities() {
-    Account household = new Account(Name = 'Timeline Test Household');
-    insert household;
+    Account household = insertTestAccount(new Account(Name = 'Timeline Test Household'));
 
     Contact contactRecord = new Contact(
       LastName = 'Timeline',
@@ -100,9 +99,51 @@ private class ActivityTimelineControllerTest {
   }
 
   @IsTest
+  static void getTimelineDataPage_returnsPagedTimelineFromController() {
+    Account household = insertTestAccount(
+      new Account(Name = 'Controller Page Household')
+    );
+
+    insert new Task(
+      Subject = 'Controller page task',
+      WhatId = household.Id,
+      Status = 'Not Started',
+      Priority = 'Normal',
+      ActivityDate = Date.today()
+    );
+
+    Test.startTest();
+    ActivityTimelineModels.ActivityTimelineData pageZero = ActivityTimelineController.getTimelineDataPage(
+      household.Id,
+      true,
+      0
+    );
+    ActivityTimelineModels.ActivityTimelineData pageOne = ActivityTimelineController.getTimelineDataPage(
+      household.Id,
+      true,
+      1
+    );
+    ActivityTimelineModels.ActivityTimelineData pageWithoutExternal = ActivityTimelineController.getTimelineDataPage(
+      household.Id,
+      false,
+      0
+    );
+    ActivityTimelineModels.ActivityTimelineData pageNullExternal = ActivityTimelineController.getTimelineDataPage(
+      household.Id,
+      null,
+      0
+    );
+    Test.stopTest();
+
+    System.assertNotEquals(null, pageZero.activities);
+    System.assertNotEquals(null, pageOne.activities);
+    System.assertNotEquals(null, pageWithoutExternal.activities);
+    System.assertNotEquals(null, pageNullExternal.activities);
+  }
+
+  @IsTest
   static void getTimelineDataMapsCallTaskToPhoneCallActivity() {
-    Account household = new Account(Name = 'Call Task Household');
-    insert household;
+    Account household = insertTestAccount(new Account(Name = 'Call Task Household'));
 
     Task callTask = new Task(
       Subject = 'Call',
@@ -147,8 +188,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataIncludesEmailMessages() {
-    Account household = new Account(Name = 'Email Timeline Household');
-    insert household;
+    Account household = insertTestAccount(new Account(Name = 'Email Timeline Household'));
 
     User recipient = [
       SELECT Id, Name, Email
@@ -233,8 +273,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataUsesCorrectIconForNullEventType() {
-    Account household = new Account(Name = 'Null Event Type Household');
-    insert household;
+    Account household = insertTestAccount(new Account(Name = 'Null Event Type Household'));
 
     Event eventRecord = new Event(
       Subject = 'Untyped household event',
@@ -273,8 +312,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataMapsEventTypeToMeeting() {
-    Account household = new Account(Name = 'Event Type Household');
-    insert household;
+    Account household = insertTestAccount(new Account(Name = 'Event Type Household'));
 
     Event eventRecord = new Event(
       Subject = 'Event typed meeting',
@@ -309,8 +347,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataIncludesEventInviteesAsRelatedParticipants() {
-    Account household = new Account(Name = 'Event Invite Household');
-    insert household;
+    Account household = insertTestAccount(new Account(Name = 'Event Invite Household'));
 
     Contact firstContact = new Contact(
       LastName = 'Alpha Contact',
@@ -523,8 +560,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataFromCaseRecordUsesAccountScope() {
-    Account household = new Account(Name = 'Timeline Case Scope Household');
-    insert household;
+    Account household = insertTestAccount(new Account(Name = 'Timeline Case Scope Household'));
 
     Case caseRecord = new Case(
       Subject = 'Case page timeline case',
@@ -567,8 +603,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataExposesAssociatedAccountOnCaseActivitiesWhenExternal() {
-    Account household = new Account(Name = 'External Case Account Household');
-    insert household;
+    Account household = insertTestAccount(new Account(Name = 'External Case Account Household'));
 
     Case caseRecord = new Case(
       Subject = 'Account Closure',
@@ -608,8 +643,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataFromContactRecordUsesAccountScope() {
-    Account household = new Account(Name = 'Timeline Contact Scope Household');
-    insert household;
+    Account household = insertTestAccount(new Account(Name = 'Timeline Contact Scope Household'));
 
     Contact contactRecord = new Contact(
       LastName = 'Timeline Contact',
@@ -646,8 +680,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataFromTaskRecordUsesRelatedAccountScope() {
-    Account household = new Account(Name = 'Timeline Task Scope Household');
-    insert household;
+    Account household = insertTestAccount(new Account(Name = 'Timeline Task Scope Household'));
 
     Task taskRecord = new Task(
       Subject = 'Task page timeline task',
@@ -678,8 +711,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataExposesLinkedCaseReferenceOnRelatedTask() {
-    Account household = new Account(Name = 'Timeline Linked Case Household');
-    insert household;
+    Account household = insertTestAccount(new Account(Name = 'Timeline Linked Case Household'));
 
     Case caseRecord = new Case(
       Subject = 'Linked case task subject',
@@ -740,8 +772,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataExposesLinkedAccountReferenceOnRelatedTask() {
-    Account household = new Account(Name = 'Timeline Linked Account Household');
-    insert household;
+    Account household = insertTestAccount(new Account(Name = 'Timeline Linked Account Household'));
 
     Task taskRecord = new Task(
       Subject = 'Task related to household account',
@@ -787,8 +818,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataExposesAssociatedAccountOnTaskAndEvent() {
-    Account household = new Account(Name = 'Timeline Associated Account Household');
-    insert household;
+    Account household = insertTestAccount(new Account(Name = 'Timeline Associated Account Household'));
 
     Contact contactRecord = new Contact(
       LastName = 'Associated Account Contact',
@@ -891,8 +921,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataIncludesWhoIdEventsForRelatedContacts() {
-    Account household = new Account(Name = 'WhoId Event Household');
-    insert household;
+    Account household = insertTestAccount(new Account(Name = 'WhoId Event Household'));
 
     Contact contactRecord = new Contact(
       LastName = 'Timeline Contact',
@@ -941,11 +970,10 @@ private class ActivityTimelineControllerTest {
       return;
     }
 
-    Account drpAccount = new Account(
+    Account drpAccount = insertTestAccount(new Account(
       LastName = 'Branch Member DRP',
       RecordTypeId = drpRecordTypes[0].Id
-    );
-    insert drpAccount;
+    ));
 
     Advisor_Group__c branch = new Advisor_Group__c(Name = 'Timeline Branch');
     insert branch;
@@ -1006,11 +1034,10 @@ private class ActivityTimelineControllerTest {
       return;
     }
 
-    Account drpAccount = new Account(
+    Account drpAccount = insertTestAccount(new Account(
       LastName = 'Timeline DRP',
       RecordTypeId = drpRecordTypes[0].Id
-    );
-    insert drpAccount;
+    ));
 
     Task drpTask = new Task(
       Subject = 'DRP direct task',
@@ -1041,8 +1068,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineDataUsesCreatedDateForTasksWithoutDueDate() {
-    Account household = new Account(Name = 'Undated Task Household');
-    insert household;
+    Account household = insertTestAccount(new Account(Name = 'Undated Task Household'));
 
     Task undatedTask = new Task(
       Subject = 'Undated task created date fallback',
@@ -1113,12 +1139,11 @@ private class ActivityTimelineControllerTest {
       new FscDataTestDataFactory.TreeScenarioOptions().withUniqueNames()
     );
 
-    Account drpAccount = new Account(
+    Account drpAccount = insertTestAccount(new Account(
       LastName = 'External Scope DRP',
       RecordTypeId = drpRecordTypes[0].Id,
       Household__c = scenario.rootAccount.Id
-    );
-    insert drpAccount;
+    ));
 
     Event externalEvent = new Event(
       Subject = 'External household meeting',
@@ -1187,12 +1212,11 @@ private class ActivityTimelineControllerTest {
       new FscDataTestDataFactory.TreeScenarioOptions().withUniqueNames()
     );
 
-    Account drpAccount = new Account(
+    Account drpAccount = insertTestAccount(new Account(
       LastName = 'DRP External Scope',
       RecordTypeId = drpRecordTypes[0].Id,
       Household__c = scenario.rootAccount.Id
-    );
-    insert drpAccount;
+    ));
 
     Event externalEvent = new Event(
       Subject = 'DRP external household meeting',
@@ -1633,11 +1657,10 @@ private class ActivityTimelineControllerTest {
       return;
     }
 
-    Account drpAccount = new Account(
+    Account drpAccount = insertTestAccount(new Account(
       LastName = 'Paged Core DRP',
       RecordTypeId = drpRecordTypes[0].Id
-    );
-    insert drpAccount;
+    ));
 
     Advisor_Group__c branch = new Advisor_Group__c(Name = 'Paged Core Branch');
     insert branch;
@@ -1699,8 +1722,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineData_serviceOverloadsNullAndNegativePage() {
-    Account household = new Account(Name = 'Service Overload Household');
-    insert household;
+    Account household = insertTestAccount(new Account(Name = 'Service Overload Household'));
 
     ActivityTimelineService service = new ActivityTimelineService();
 
@@ -1746,8 +1768,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineData_resolvesOpportunityEventAndCaseRelatedContexts() {
-    Account household = new Account(Name = 'Context Household');
-    insert household;
+    Account household = insertTestAccount(new Account(Name = 'Context Household'));
 
     Contact contactRecord = new Contact(
       LastName = 'Context Contact',
@@ -1855,8 +1876,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineData_mapsEmailStatusesAndFromNameFallback() {
-    Account household = new Account(Name = 'Email Status Household');
-    insert household;
+    Account household = insertTestAccount(new Account(Name = 'Email Status Household'));
 
     List<EmailMessage> emails = new List<EmailMessage>{
       new EmailMessage(
@@ -1930,8 +1950,7 @@ private class ActivityTimelineControllerTest {
 
   @IsTest
   static void getTimelineData_activityQueryLimitOverrideStillReturnsCore() {
-    Account household = new Account(Name = 'Query Limit Household');
-    insert household;
+    Account household = insertTestAccount(new Account(Name = 'Query Limit Household'));
 
     insert new List<Task>{
       new Task(
@@ -1967,6 +1986,13 @@ private class ActivityTimelineControllerTest {
     } finally {
       ActivityTimelineService.activityQueryLimitOverride = null;
     }
+  }
+
+
+  private static Account insertTestAccount(Account account) {
+    FscDataTestDataFactory.applyRequiredAccountTypeOrClassification(account);
+    insert account;
+    return account;
   }
 
   private static Set<String> collectActivityTitles(

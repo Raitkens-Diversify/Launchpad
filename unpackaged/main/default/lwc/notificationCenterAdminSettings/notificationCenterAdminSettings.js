@@ -20,11 +20,20 @@ const ADMIN_SECTIONS = Object.freeze([
 
 export default class NotificationCenterAdminSettings extends LightningElement {
   icons = ICON;
+  isEmbeddedRulesReady = false;
 
   sections = ADMIN_SECTIONS.map((section) => ({
     ...section,
     isSystemDefaultRules: section.type === "system-default-rules"
   }));
+
+  get showSectionChrome() {
+    return this.isEmbeddedRulesReady;
+  }
+
+  handleEmbeddedRulesReady = () => {
+    this.isEmbeddedRulesReady = true;
+  };
 
   handleNewSystemDefault = () => {
     this.template

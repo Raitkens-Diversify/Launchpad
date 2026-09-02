@@ -24,7 +24,7 @@
 
 .nc-saving-overlay__message {
   margin: 0;
-  font-size: var(--div-font-scale-sm);
+  font-size: 0.8125rem;
   font-weight: 600;
   color: var(--div-color-text-primary, #181818);
 }
@@ -44,7 +44,7 @@
 
 .rule-modal__digest-help {
   margin: -0.25rem 0 0;
-  font-size: var(--div-font-scale-xs);
+  font-size: 0.75rem;
   line-height: 1.4;
 }
 
@@ -81,7 +81,7 @@
 }
 
 .rules-channel-prefs__heading {
-  font-size: calc(var(--div-font-root-size) * 0.6875);
+  font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -110,7 +110,7 @@
 }
 
 .rules-channel-pref__disabled-label {
-  font-size: calc(var(--div-font-root-size) * 0.6875);
+  font-size: 0.6875rem;
   font-weight: 600;
   color: var(--div-color-text-muted, #706e6b);
 }

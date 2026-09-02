@@ -1,4 +1,7 @@
 <template>
+  <template lwc:if={showInitialViewSkeleton}></template>
+
+  <template lwc:else>
   <article class={shellClass}>
     <template lwc:if={showCardHeader}>
       <div class="slds-card__header slds-grid">
@@ -79,10 +82,8 @@
       </template>
 
       <template lwc:if={showNonHouseholdMessage}>
-        <p class="rules-view__empty div-text-weak">Notification rules are available on Household accounts.</p>
+        <p class="rules-view__empty">Notification rules are available on Household accounts.</p>
       </template>
-
-      <template lwc:elseif={isLoading}></template>
 
       <template lwc:elseif={showRulesContent}>
         <template lwc:if={showRuleSearch}>
@@ -117,10 +118,10 @@
                     <div class="rules-section__header-row">
                       <div class="rules-section__header-copy">
                         <h3 id={section.labelId} class="div-secondary-header__title">{section.label}</h3>
-                        <p class="div-secondary-header__subtitle div-text-body-xs">{section.description}</p>
+                        <p class="div-secondary-header__subtitle">{section.description}</p>
                       </div>
                       <template lwc:if={section.showActiveSummary}>
-                        <p class="rules-section__summary div-text-body-xs">{section.activeSummary}</p>
+                        <p class="rules-section__summary">{section.activeSummary}</p>
                       </template>
                     </div>
                     <template lwc:if={section.showSearchFilterIndicator}>
@@ -156,8 +157,8 @@
                     <div key={block.id} class={block.blockClass} aria-labelledby={block.blockLabelId}>
                       <template lwc:if={block.showBlockLabel}>
                         <header class="rules-subsection__header">
-                          <h4 id={block.blockLabelId} class="rules-subsection__title div-text-body-base-semibold">{block.label}</h4>
-                          <p class="rules-subsection__subtitle div-text-body-xs">{block.description}</p>
+                          <h4 id={block.blockLabelId} class="rules-subsection__title">{block.label}</h4>
+                          <p class="rules-subsection__subtitle">{block.description}</p>
                         </header>
                       </template>
 
@@ -182,12 +183,12 @@
 
                                 <div class="rule-card__content">
                                   <div class="rule-card__header">
-                                    <span class="rule-card__name div-text-body-small">{rule.name}</span>
+                                    <span class="rule-card__name">{rule.name}</span>
                                     <template lwc:if={rule.showSystemDefaultBadge}>
-                                      <span class="div-pill rule-card__system-default-badge">System Default</span>
+                                      <span class="rule-card__system-default-badge">System Default</span>
                                     </template>
                                   </div>
-                                  <div class="rule-card__meta div-text-body-xs">
+                                  <div class="rule-card__meta">
                                     <c-notification-center-meta-strip
                                       source-type={rule.objectType}
                                       frequency={rule.frequency}
@@ -199,7 +200,7 @@
                                     ></c-notification-center-meta-strip>
                                   </div>
                                   <template lwc:if={rule.showHouseholdInMeta}>
-                                    <div class="rule-card__household div-text-body-xs">
+                                    <div class="rule-card__household">
                                       <lightning-icon
                                         icon-name={icons.HOME}
                                         size="xx-small"
@@ -289,12 +290,12 @@
 
                   <div class="rule-card__content">
                     <div class="rule-card__header">
-                      <span class="rule-card__name div-text-body-small">{rule.name}</span>
+                      <span class="rule-card__name">{rule.name}</span>
                       <template lwc:if={rule.showSystemDefaultBadge}>
-                        <span class="div-pill rule-card__system-default-badge">System Default</span>
+                        <span class="rule-card__system-default-badge">System Default</span>
                       </template>
                     </div>
-                    <div class="rule-card__meta div-text-body-xs">
+                    <div class="rule-card__meta">
                       <c-notification-center-meta-strip
                         source-type={rule.objectType}
                         frequency={rule.frequency}
@@ -306,7 +307,7 @@
                       ></c-notification-center-meta-strip>
                     </div>
                     <template lwc:if={rule.showHouseholdInMeta}>
-                      <div class="rule-card__household div-text-body-xs">
+                      <div class="rule-card__household">
                         <lightning-icon
                           icon-name={icons.HOME}
                           size="xx-small"
@@ -366,7 +367,7 @@
         </template>
 
         <template lwc:else>
-          <p class="rules-view__empty div-text-weak">{rulesEmptyMessage}</p>
+          <p class="rules-view__empty">{rulesEmptyMessage}</p>
         </template>
 
         <template lwc:if={showLegend}>
@@ -398,6 +399,7 @@
     </section>
     </div>
   </article>
+  </template>
 
   <template lwc:if={showModal}>
     <section class="rule-modal" role="dialog" aria-modal="true" aria-labelledby="rule-modal-title">

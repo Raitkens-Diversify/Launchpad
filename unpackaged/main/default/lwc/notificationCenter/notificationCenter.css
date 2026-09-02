@@ -2,6 +2,10 @@
   display: block;
 }
 
+.main-panel__view[hidden] {
+  display: none !important;
+}
+
 .app-shell.div-app {
   min-height: calc(100vh - 250px);
 }
@@ -15,15 +19,4 @@
   :host {
     height: calc(100vh - 30rem);
   }
-}
-/*
- * Full-width content column, opted into by the fullWidth public property.
- * Replaces slds-container_center + slds-container_large rather than overriding
- * them, so there is no specificity fight with the SLDS classes. The padding
- * from .main-panel__inner in diversifyStyles still applies.
- */
-.main-panel__inner_full {
-  width: 100%;
-  max-width: none;
-  margin-inline: 0;
 }

@@ -451,38 +451,10 @@ private class FscRelAarVisibilityServiceTest {
   }
 
   private static Account createPersonAccount(String lastName) {
-    Id personAccountRecordTypeId = [
-      SELECT Id
-      FROM RecordType
-      WHERE SObjectType = 'Account' AND IsPersonType = TRUE
-      LIMIT 1
-    ]
-    .Id;
-
-    Account personAccount = new Account(
-      LastName = lastName,
-      RecordTypeId = personAccountRecordTypeId
-    );
-    insert personAccount;
-    return personAccount;
+    return FscDataTestDataFactory.createPersonAccount('FscAarVisibility', lastName);
   }
 
   private static Account createHouseholdAccount(String name) {
-    List<RecordType> householdRecordTypes = [
-      SELECT Id
-      FROM RecordType
-      WHERE
-        SObjectType = 'Account'
-        AND IsPersonType = FALSE
-        AND DeveloperName LIKE '%Household%'
-      LIMIT 1
-    ];
-
-    Account householdAccount = new Account(Name = name);
-    if (!householdRecordTypes.isEmpty()) {
-      householdAccount.RecordTypeId = householdRecordTypes[0].Id;
-    }
-    insert householdAccount;
-    return householdAccount;
+    return FscDataTestDataFactory.createHouseholdAccount(name);
   }
 }

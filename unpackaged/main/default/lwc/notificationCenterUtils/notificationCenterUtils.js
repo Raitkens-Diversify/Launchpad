@@ -356,7 +356,7 @@ const CHANNEL_CONFIG = Object.freeze({
     badgeLabel: "APP",
     icon: ICON.NOTIFICATION,
     iconWrapClass: "div-channel-icon div-channel-icon--in-app",
-    badgeClass: "div-pill div-channel-badge div-channel-badge--in-app",
+    badgeClass: "div-channel-badge div-channel-badge--in-app",
     deliveryIconClass: "div-channel-icon div-channel-icon--in-app",
     deliveryBarClass: "delivery-row__bar-fill delivery-row__bar-fill--in-app"
   },
@@ -364,7 +364,7 @@ const CHANNEL_CONFIG = Object.freeze({
     badgeLabel: "EMAIL",
     icon: ICON.EMAIL,
     iconWrapClass: "div-channel-icon div-channel-icon--email",
-    badgeClass: "div-pill div-channel-badge div-channel-badge--email",
+    badgeClass: "div-channel-badge div-channel-badge--email",
     deliveryIconClass: "div-channel-icon div-channel-icon--email",
     deliveryBarClass: "delivery-row__bar-fill delivery-row__bar-fill--email"
   },
@@ -372,7 +372,7 @@ const CHANNEL_CONFIG = Object.freeze({
     badgeLabel: "SMS",
     icon: ICON.SMS,
     iconWrapClass: "div-channel-icon div-channel-icon--sms",
-    badgeClass: "div-pill div-channel-badge div-channel-badge--sms",
+    badgeClass: "div-channel-badge div-channel-badge--sms",
     deliveryIconClass: null,
     deliveryBarClass: null
   }
@@ -385,9 +385,9 @@ const CATEGORY_DOT_CLASSES = Object.freeze({
 });
 
 const CATEGORY_BADGE_CLASSES = Object.freeze({
-  [CATEGORY.URGENT]: "div-pill category-badge category-badge--urgent",
-  [CATEGORY.SERVICE]: "div-pill category-badge category-badge--service",
-  [CATEGORY.INFO]: "div-pill category-badge category-badge--info"
+  [CATEGORY.URGENT]: "category-badge category-badge--urgent",
+  [CATEGORY.SERVICE]: "category-badge category-badge--service",
+  [CATEGORY.INFO]: "category-badge category-badge--info"
 });
 
 const SOURCE_ICONS = Object.freeze({
@@ -405,31 +405,31 @@ const SOURCE_ICON_WRAP_CLASSES = Object.freeze({
 const LOG_STATUS_STYLES = Object.freeze({
   [STATUS.SENT]: {
     label: "Delivered",
-    cssClass: "div-pill div-status-pill div-status-pill--delivered",
+    cssClass: "div-status-pill div-status-pill--delivered",
     icon: ICON.SUCCESS,
     iconClass: "div-log-status__icon div-log-status__icon--delivered"
   },
   [STATUS.SUPPRESSED]: {
     label: "Suppressed",
-    cssClass: "div-pill div-status-pill div-status-pill--suppressed",
+    cssClass: "div-status-pill div-status-pill--suppressed",
     icon: ICON.BAN,
     iconClass: "div-log-status__icon div-log-status__icon--suppressed"
   },
   [STATUS.QUEUED]: {
     label: "Queued",
-    cssClass: "div-pill div-status-pill div-status-pill--queued",
+    cssClass: "div-status-pill div-status-pill--queued",
     icon: MODE_ICON.DIGEST,
     iconClass: "div-log-status__icon div-log-status__icon--queued"
   },
   [STATUS.PENDING]: {
     label: "Pending",
-    cssClass: "div-pill div-status-pill div-status-pill--pending",
+    cssClass: "div-status-pill div-status-pill--pending",
     icon: ICON.CLOCK,
     iconClass: "div-log-status__icon div-log-status__icon--pending"
   },
   [STATUS.FAILED]: {
     label: "Failed",
-    cssClass: "div-pill div-status-pill div-status-pill--failed",
+    cssClass: "div-status-pill div-status-pill--failed",
     icon: ICON.CLOSE,
     iconClass: "div-log-status__icon div-log-status__icon--failed"
   }
@@ -1016,21 +1016,6 @@ export const formatRelativeTime = (value) => {
   const diffDays = Math.floor(diffHours / 24);
   return diffDays === 1 ? "1 day ago" : `${diffDays} days ago`;
 };
-
-/**
- * Window event asking an already-rendered Notification Center to switch view.
- *
- * A URL parameter cannot do this job on its own: when the page is already open,
- * navigating to the same /notifications?view=... URL is a no-op in LWR, and even
- * when it is not, connectedCallback does not run again, so nothing re-reads the
- * parameter. The parameter is state for a cold load; this event is the command
- * for a live one. c/arcNotificationBell fires it, c/arcNotificationCenter
- * listens and calls showView on the center.
- *
- * detail: { view: <c/notificationCenter view id> }
- */
-export const NOTIFICATION_VIEW_REQUEST_EVENT =
-  "arc-notification-view-request";
 
 export const reduceError = (error) => {
   if (Array.isArray(error?.body)) {

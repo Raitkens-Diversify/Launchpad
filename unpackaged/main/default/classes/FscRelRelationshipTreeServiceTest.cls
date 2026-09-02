@@ -12,12 +12,35 @@ private class FscRelRelationshipTreeServiceTest {
   private static void assignHouseholdMembers(
     FscDataTestDataFactory.TreeScenario scenario
   ) {
-    scenario.linkedPersonAccount.Household__c = scenario.rootAccount.Id;
-    scenario.secondPersonAccount.Household__c = scenario.rootAccount.Id;
-    update new List<Account>{
-      scenario.linkedPersonAccount,
-      scenario.secondPersonAccount
-    };
+    FscDataTestDataFactory.assignClientHousehold(
+      new List<Account>{
+        scenario.linkedPersonAccount,
+        scenario.secondPersonAccount
+      },
+      scenario.rootAccount.Id
+    );
+  }
+
+  private static void removeHouseholdMembership(
+    Id householdId,
+    Id memberAccountId
+  ) {
+    Id householdRecordTypeId = FscRelRecordTypeUtils.selectAccountRelationRecordTypeId(
+      FscRelRecordTypeUtils.HOUSEHOLD_AAR_RECORD_TYPE
+    );
+
+    if (householdRecordTypeId == null) {
+      return;
+    }
+
+    delete [
+      SELECT Id
+      FROM Account_Account_Relationship__c
+      WHERE
+        Account__c = :householdId
+        AND Related_Account__c = :memberAccountId
+        AND RecordTypeId = :householdRecordTypeId
+    ];
   }
 
   @IsTest
@@ -47,12 +70,13 @@ private class FscRelRelationshipTreeServiceTest {
   @IsTest
   static void buildMemberAccountIds_householdLaunch_ignoresAcrOnlyMembers() {
     FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
-    scenario.linkedPersonAccount.Household__c = scenario.rootAccount.Id;
+    assignHouseholdMembers(scenario);
+    removeHouseholdMembership(
+      scenario.rootAccount.Id,
+      scenario.secondPersonAccount.Id
+    );
     scenario.secondPersonAccount.Household__c = null;
-    update new List<Account>{
-      scenario.linkedPersonAccount,
-      scenario.secondPersonAccount
-    };
+    update scenario.secondPersonAccount;
     FscRelRelationshipTreeService service = new FscRelRelationshipTreeService();
 
     Test.startTest();
@@ -76,14 +100,16 @@ private class FscRelRelationshipTreeServiceTest {
   @IsTest
   static void buildMemberAccountIds_nonHouseholdLaunch_includesHouseholdFieldMembers() {
     FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
-    scenario.linkedPersonAccount.Household__c = scenario.relatedBusinessAccount.Id;
-    update scenario.linkedPersonAccount;
+    FscDataTestDataFactory.assignClientHousehold(
+      new List<Account>{ scenario.linkedPersonAccount },
+      scenario.rootAccount.Id
+    );
     FscRelRelationshipTreeService service = new FscRelRelationshipTreeService();
 
     Test.startTest();
     Set<Id> memberAccountIds = service.buildMemberAccountIds(
-      scenario.relatedBusinessAccount.Id,
-      scenario.relatedBusinessAccount.Id,
+      scenario.rootAccount.Id,
+      scenario.unlinkedPersonAccount.Id,
       false
     );
     Test.stopTest();
@@ -93,22 +119,42 @@ private class FscRelRelationshipTreeServiceTest {
       'Expected household field member on non-household context.'
     );
     System.assert(
-      !memberAccountIds.contains(scenario.relatedBusinessAccount.Id),
-      'Non-client context accounts should not be included in client scope.'
+      !memberAccountIds.contains(scenario.rootAccount.Id),
+      'Household root accounts should not be included in client scope.'
     );
   }
 
   @IsTest
   static void getGroupedContactSuggestions_nonHouseholdLaunch_excludesContextAccount() {
     FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
-    scenario.linkedPersonAccount.Household__c = scenario.relatedBusinessAccount.Id;
-    update scenario.linkedPersonAccount;
+    FscDataTestDataFactory.assignClientHousehold(
+      new List<Account>{ scenario.linkedPersonAccount },
+      scenario.rootAccount.Id
+    );
+    Account vendorContextAccount = FscDataTestDataFactory.createClassifiedBusinessAccount(
+      'Tree Vendor Context ' + System.currentTimeMillis(),
+      FscRelClassificationUtils.VENDOR
+    );
+    for (
+      Schema.PicklistEntry entry : Account.Type.getDescribe().getPicklistValues()
+    ) {
+      if (
+        entry.isActive() &&
+        !FscRelClientAccountUtils.CLIENT_ACCOUNT_TYPES.contains(
+          entry.getValue()
+        )
+      ) {
+        vendorContextAccount.Type = entry.getValue();
+        update vendorContextAccount;
+        break;
+      }
+    }
     FscRelRelationshipTreeService service = new FscRelRelationshipTreeService();
 
     Test.startTest();
     List<FscRelRelationshipTreeModels.GroupedAccountContacts> groups = service.getGroupedContactSuggestions(
-      scenario.relatedBusinessAccount.Id,
-      scenario.relatedBusinessAccount.Id,
+      scenario.rootAccount.Id,
+      vendorContextAccount.Id,
       new Set<Id>(),
       false
     );
@@ -128,10 +174,8 @@ private class FscRelRelationshipTreeServiceTest {
       'Expected household field member in suggestions.'
     );
     System.assert(
-      !suggestedAccountIds.contains(
-        String.valueOf(scenario.relatedBusinessAccount.Id)
-      ),
-      'Context account should not appear in suggestions.'
+      !suggestedAccountIds.contains(String.valueOf(vendorContextAccount.Id)),
+      'Non-client context accounts should not appear in suggestions.'
     );
   }
 
@@ -215,8 +259,11 @@ private class FscRelRelationshipTreeServiceTest {
   @IsTest
   static void resolveHouseholdId_usesHouseholdFieldWhenPresent() {
     FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
-    scenario.linkedPersonAccount.Household__c = scenario.rootAccount.Id;
-    update scenario.linkedPersonAccount;
+    FscDataTestDataFactory.assignClientHousehold(
+      new List<Account>{ scenario.linkedPersonAccount },
+      scenario.rootAccount.Id
+    );
+    scenario = scenario.reload();
     FscRelRelationshipTreeService service = new FscRelRelationshipTreeService();
 
     Test.startTest();
@@ -232,8 +279,9 @@ private class FscRelRelationshipTreeServiceTest {
 
   @IsTest
   static void resolveHouseholdId_returnsHouseholdAccountId() {
-    Account household = new Account(Name = 'Tree Service Household');
-    insert household;
+    Account household = FscDataTestDataFactory.createHouseholdAccount(
+      'Tree Service Household'
+    );
     FscRelRelationshipTreeService service = new FscRelRelationshipTreeService();
 
     Test.startTest();

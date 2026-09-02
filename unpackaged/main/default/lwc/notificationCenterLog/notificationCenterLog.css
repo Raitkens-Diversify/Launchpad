@@ -19,7 +19,7 @@
 
 .log-view__field-label {
   display: block;
-  font-size: var(--div-font-scale-xs);
+  font-size: 0.75rem;
   font-weight: 600;
   line-height: 1.25;
   color: var(--slds-g-color-neutral-base-30, #444444);
@@ -94,7 +94,7 @@
 .log-table__day-cell {
   padding-top: 0.875rem;
   padding-bottom: 0.5rem;
-  font-size: var(--div-font-scale-sm);
+  font-size: var(--div-font-scale-sm, 0.8125rem);
   font-weight: 700;
   color: var(--div-color-text-default, #181818);
 }

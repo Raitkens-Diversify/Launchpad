@@ -12,12 +12,12 @@ import {
 } from "c/recordNavigationUtils";
 import {
   DISPLAY_NOT_APPLICABLE,
+  ICON,
   LOG_RECORD_TYPE_FILTER_OPTIONS,
   LOG_STATUS_FILTER,
   buildDivFilterOptionClass,
   buildSourceTypeDisplay,
   formatLogDayLabelFromTimestamp,
-  getLogStatusStyle,
   groupLogRowsByDay,
   parseSalesforceDatetime,
   reduceError,
@@ -33,8 +33,7 @@ const LOG_TABLE_COLUMNS = Object.freeze([
   { label: "Change Date", fieldName: "changeDateLabel" },
   { label: "Household", fieldName: "householdLabel" },
   { label: "Branch", fieldName: "branchLabel" },
-  { label: "Financial Advisor Team", fieldName: "financialAdvisorTeamLabel" },
-  { label: "Delivery Status", fieldName: "deliveryStatus" }
+  { label: "Financial Advisor Team", fieldName: "financialAdvisorTeamLabel" }
 ]);
 
 const formatIsoDate = (date) => {
@@ -121,6 +120,7 @@ export default class NotificationCenterLog extends NavigationMixin(
   isLoadingMore = false;
   errorMessage = "";
   lastSeenId = null;
+  icons = ICON;
   hasDispatchedViewReady = false;
   householdOptions = [];
   branchOptions = [];
@@ -189,6 +189,10 @@ export default class NotificationCenterLog extends NavigationMixin(
 
   get hasRows() {
     return this.dayGroups.length > 0;
+  }
+
+  get showInitialViewSkeleton() {
+    return this.isLoading && !this.hasDispatchedViewReady;
   }
 
   get canLoadMore() {
@@ -369,7 +373,6 @@ export default class NotificationCenterLog extends NavigationMixin(
     );
     const changeDayKey = this.buildChangeDayKey(changeTimestamp);
     const sourceTypeDisplay = buildSourceTypeDisplay(item.sourceType);
-    const statusStyle = getLogStatusStyle(item.status);
 
     return {
       ...item,
@@ -395,9 +398,7 @@ export default class NotificationCenterLog extends NavigationMixin(
         : "Open financial advisor team",
       subjectLinkAriaLabel: item.subject || item.title
         ? `Open ${item.sourceType || "record"}: ${item.subject || item.title}`
-        : "Open source record",
-      statusLabel: statusStyle.label,
-      statusPillClass: statusStyle.cssClass
+        : "Open source record"
     };
   }
 

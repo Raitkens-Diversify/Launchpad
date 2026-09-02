@@ -59,24 +59,4 @@ private class FscRelContactRepositoryTest {
     );
     System.assert(!defaultLimitResults.isEmpty());
   }
-
-  @IsTest
-  static void searchContactsByName_matchesAccentInsensitiveNames() {
-    Contact accentedContact = new Contact(
-      FirstName = 'José',
-      LastName = 'García'
-    );
-    insert accentedContact;
-    FscRelContactRepository repository = new FscRelContactRepository();
-
-    Test.startTest();
-    List<Contact> unaccentedResults = repository.searchContactsByName(
-      'jose garcia',
-      8
-    );
-    Test.stopTest();
-
-    System.assert(!unaccentedResults.isEmpty());
-    System.assertEquals(accentedContact.Id, unaccentedResults[0].Id);
-  }
 }

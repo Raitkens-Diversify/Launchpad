@@ -174,6 +174,7 @@ private class FscRelAccountRepositoryTest {
       'Member ' + System.currentTimeMillis()
     );
     untypedMember.Type = null;
+    untypedMember.Classification__c = FscRelClassificationUtils.UNCLASSIFIED;
     update untypedMember;
 
     FscDataTestDataFactory.createHouseholdMembershipRelations(
@@ -365,6 +366,7 @@ private class FscRelAccountRepositoryTest {
       LastName = 'Primary',
       RecordTypeId = personRecordTypeId
     );
+    FscDataTestDataFactory.applyRequiredAccountTypeOrClassification(personAccount);
     insert personAccount;
     FscRelAccountRepository accountRepository = new FscRelAccountRepository();
 
@@ -403,6 +405,7 @@ private class FscRelAccountRepositoryTest {
       LastName = 'Holland',
       RecordTypeId = personRecordTypeId
     );
+    FscDataTestDataFactory.applyRequiredAccountTypeOrClassification(personAccount);
     insert personAccount;
     FscRelAccountRepository accountRepository = new FscRelAccountRepository();
 
@@ -447,6 +450,7 @@ private class FscRelAccountRepositoryTest {
       LastName = 'García',
       RecordTypeId = personRecordTypeId
     );
+    FscDataTestDataFactory.applyRequiredAccountTypeOrClassification(personAccount);
     insert personAccount;
     FscRelAccountRepository accountRepository = new FscRelAccountRepository();
 

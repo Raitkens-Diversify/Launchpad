@@ -170,4 +170,81 @@ private class NotificationLogRepositoryTest {
       ].Status__c
     );
   }
+
+  @IsTest
+  static void selectLogsPaginatesQueuedLogsWithNullDeliveredAt() {
+    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+    NotificationLogRepository repository = new NotificationLogRepository();
+
+    Notification_Log__c olderSentLog = NotificationTestDataFactory.createLogNotification(
+      context.recipientUser.Id,
+      context.household.Id,
+      NotificationConstants.OBJECT_TYPE_TASK,
+      NotificationConstants.STATUS_SENT,
+      NotificationConstants.CHANNEL_IN_APP,
+      NotificationConstants.FREQUENCY_IMMEDIATE,
+      'Older delivered log',
+      null,
+      null
+    );
+    olderSentLog.Delivered_At__c = Datetime.newInstance(
+      Date.today().addDays(-10),
+      Time.newInstance(9, 0, 0, 0)
+    );
+    NotificationTestDataFactory.updateRecord(olderSentLog);
+
+    NotificationTestDataFactory.createLogNotification(
+      context.recipientUser.Id,
+      context.household.Id,
+      NotificationConstants.OBJECT_TYPE_CASE,
+      NotificationConstants.STATUS_SENT,
+      NotificationConstants.CHANNEL_IN_APP,
+      NotificationConstants.FREQUENCY_IMMEDIATE,
+      'Newer delivered log',
+      null,
+      null
+    );
+
+    Notification_Log__c queuedDigestLog = NotificationTestDataFactory.createLogNotification(
+      context.recipientUser.Id,
+      context.household.Id,
+      NotificationConstants.OBJECT_TYPE_EVENT,
+      NotificationConstants.STATUS_QUEUED,
+      NotificationConstants.CHANNEL_EMAIL,
+      NotificationConstants.FREQUENCY_DIGEST,
+      'Queued digest log',
+      null,
+      null
+    );
+
+    NotificationLogRepository.NotificationLogQuery firstPageQuery = new NotificationLogRepository.NotificationLogQuery();
+    firstPageQuery.recipientId = context.recipientUser.Id;
+    firstPageQuery.statuses = NotificationConstants.allLogViewStatuses();
+    firstPageQuery.pageSize = 1;
+    firstPageQuery.fieldSet = NotificationLogRepository.FieldSet.LOG;
+    firstPageQuery.sortDirection = 'newest';
+
+    List<Notification_Log__c> firstPage = repository.selectLogs(firstPageQuery);
+    System.assertEquals(1, firstPage.size());
+
+    NotificationLogRepository.NotificationLogQuery secondPageQuery = new NotificationLogRepository.NotificationLogQuery();
+    secondPageQuery.recipientId = context.recipientUser.Id;
+    secondPageQuery.statuses = NotificationConstants.allLogViewStatuses();
+    secondPageQuery.pageSize = 50;
+    secondPageQuery.lastSeenId = firstPage[0].Id;
+    secondPageQuery.fieldSet = NotificationLogRepository.FieldSet.LOG;
+    secondPageQuery.sortDirection = 'newest';
+
+    List<Notification_Log__c> remainingPages = repository.selectLogs(secondPageQuery);
+    Set<Id> remainingIds = new Set<Id>();
+    for (Notification_Log__c notification : remainingPages) {
+      remainingIds.add(notification.Id);
+    }
+
+    System.assert(
+      remainingIds.contains(queuedDigestLog.Id),
+      'Queued digest logs with null Delivered_At must be reachable after paginating delivered logs.'
+    );
+    System.assert(remainingIds.contains(olderSentLog.Id));
+  }
 }

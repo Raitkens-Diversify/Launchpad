@@ -30,8 +30,7 @@ export default class NotificationCenterDashboard extends NavigationMixin(
   dashboardStats = {
     deliveredTodayCount: 0,
     queuedCount: 0,
-    activeHouseholdCount: 0,
-    nextDigestRunLabel: null
+    activeHouseholdCount: 0
   };
   channelDelivery = [];
   recentEvents = [];
@@ -44,21 +43,39 @@ export default class NotificationCenterDashboard extends NavigationMixin(
   }
 
   get kpiCards() {
-    const queuedDigestSubtext = this.buildQueuedDigestSubtext();
+    const queuedCount = this.dashboardStats.queuedCount || 0;
+    const nextDigestRunLabel = this.dashboardStats.nextDigestRunLabel;
+    const digestTimezoneAbbreviation =
+      this.dashboardStats.digestTimezoneAbbreviation || "";
+    const digestTimezoneLabel = this.dashboardStats.digestTimezoneLabel || "";
+    let queuedSub = "none queued";
+
+    if (queuedCount > 0 && nextDigestRunLabel) {
+      queuedSub = digestTimezoneAbbreviation
+        ? `next: ${nextDigestRunLabel} ${digestTimezoneAbbreviation}`
+        : `next: ${nextDigestRunLabel}`;
+    } else if (queuedCount > 0) {
+      queuedSub = "awaiting next digest run";
+    }
 
     return [
       {
         id: "delivered-today",
         label: "Delivered Today",
         value: this.dashboardStats.deliveredTodayCount || 0,
+        sub: "across all channels",
+        subTitle: "",
         icon: DASHBOARD_KPI_ICONS.DELIVERED_TODAY,
         iconClass: DASHBOARD_KPI_ICON_WRAP.DELIVERED_TODAY
       },
       {
         id: "queued-digest",
         label: "Queued for Digest",
-        value: this.dashboardStats.queuedCount || 0,
-        subtext: queuedDigestSubtext,
+        value: queuedCount,
+        sub: queuedSub,
+        subTitle: digestTimezoneLabel
+          ? `Digest delivery uses organization time (${digestTimezoneLabel}).`
+          : "",
         icon: DASHBOARD_KPI_ICONS.QUEUED_DIGEST,
         iconClass: DASHBOARD_KPI_ICON_WRAP.QUEUED_DIGEST
       },
@@ -66,21 +83,12 @@ export default class NotificationCenterDashboard extends NavigationMixin(
         id: "active-households",
         label: "Active Households",
         value: this.dashboardStats.activeHouseholdCount || 0,
+        sub: "with FA Team assigned",
+        subTitle: "",
         icon: DASHBOARD_KPI_ICONS.ACTIVE_HOUSEHOLDS,
         iconClass: DASHBOARD_KPI_ICON_WRAP.ACTIVE_HOUSEHOLDS
       }
     ];
-  }
-
-  buildQueuedDigestSubtext() {
-    const queuedCount = this.dashboardStats?.queuedCount || 0;
-    const nextDigestRunLabel = this.dashboardStats?.nextDigestRunLabel;
-
-    if (queuedCount <= 0 || !nextDigestRunLabel) {
-      return null;
-    }
-
-    return `Next run ${nextDigestRunLabel}`;
   }
 
   get deliveryRows() {
@@ -106,6 +114,10 @@ export default class NotificationCenterDashboard extends NavigationMixin(
 
   get hasRecentEvents() {
     return this.recentEvents.length > 0;
+  }
+
+  get showInitialViewSkeleton() {
+    return this.isLoading && !this.hasDispatchedViewReady;
   }
 
   loadDashboard = async ({ silent = false } = {}) => {

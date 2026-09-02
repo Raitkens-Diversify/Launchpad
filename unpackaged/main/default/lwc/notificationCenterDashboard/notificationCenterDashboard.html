@@ -1,13 +1,13 @@
 <!-- Author: Hoang Long Vu To | Date: 2026-06-16 -->
 <template>
   <section class="dashboard-view">
-    <template lwc:if={errorMessage}>
-      <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">{errorMessage}</div>
-    </template>
-
-    <template lwc:if={isLoading}></template>
+    <template lwc:if={showInitialViewSkeleton}></template>
 
     <template lwc:else>
+      <template lwc:if={errorMessage}>
+        <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">{errorMessage}</div>
+      </template>
+
       <div class="kpi-cards-row">
         <template for:each={kpiCards} for:item="kpi">
           <article key={kpi.id} class="kpi-card">
@@ -15,11 +15,9 @@
               <lightning-icon icon-name={kpi.icon} size="x-small"></lightning-icon>
             </div>
             <div class="kpi-card__content">
-              <div class="kpi-card__value div-text-body-lg">{kpi.value}</div>
-              <div class="kpi-card__label div-text-body-xs">{kpi.label}</div>
-              <template lwc:if={kpi.subtext}>
-                <div class="kpi-card__subtext div-text-body-xs">{kpi.subtext}</div>
-              </template>
+              <div class="kpi-card__value">{kpi.value}</div>
+              <div class="kpi-card__label">{kpi.label}</div>
+              <div class="kpi-card__sub" title={kpi.subTitle}>{kpi.sub}</div>
             </div>
           </article>
         </template>
@@ -33,7 +31,7 @@
           </header>
 
           <template lwc:if={hasRecentEvents}>
-            <ul class="activity-list div-text-body-xs" role="list">
+            <ul class="activity-list" role="list">
               <template for:each={recentEvents} for:item="item">
                 <li key={item.id} class={item.rowClass}>
                   <template lwc:if={item.hasRecordLink}>
@@ -74,7 +72,7 @@
                             </template>
                           </div>
                         </template>
-                        <span class="activity-row__time">{item.timeLabel}</span>
+                        <span class="activity-row__time div-text-body-small">{item.timeLabel}</span>
                       </div>
                     </button>
                   </template>
@@ -110,7 +108,7 @@
                             </template>
                           </div>
                         </template>
-                        <span class="activity-row__time">{item.timeLabel}</span>
+                        <span class="activity-row__time div-text-body-small">{item.timeLabel}</span>
                       </div>
                     </div>
                   </template>

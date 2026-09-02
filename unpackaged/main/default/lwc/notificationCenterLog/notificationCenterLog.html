@@ -1,5 +1,8 @@
 <!-- Author: Hoang Long Vu To | Date: 2026-08-06 -->
 <template>
+  <template lwc:if={showInitialViewSkeleton}></template>
+
+  <template lwc:else>
   <section class="log-view">
     <div class="log-view__filter-panel">
       <div class="log-view__filter-row log-view__filter-row_search-group">
@@ -246,9 +249,6 @@
                         >
                       </template>
                     </td>
-                    <td>
-                      <span class={row.statusPillClass}>{row.statusLabel}</span>
-                    </td>
                   </template>
                 </tr>
               </template>
@@ -270,7 +270,8 @@
 
       <template lwc:else>
         <div class="div-table-card__empty">
-          <h3 class="slds-text-heading_small">
+          <lightning-icon icon-name={icons.FILE} size="large"></lightning-icon>
+          <h3 class="slds-text-heading_small slds-m-top_small">
             No notifications found
           </h3>
           <p class="slds-text-body_regular slds-m-top_x-small">
@@ -285,4 +286,5 @@
       </footer>
     </div>
   </section>
+  </template>
 </template>

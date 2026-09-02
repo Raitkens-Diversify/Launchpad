@@ -121,8 +121,12 @@ public without sharing class NotificationLogRepository {
   ) {
     if (sortDirection == 'DESC') {
       if (cursorDeliveredAt != null) {
-        return ' AND (Delivered_At__c < :cursorDeliveredAt' +
-          ' OR (Delivered_At__c = :cursorDeliveredAt AND Id < :lastSeenId))';
+        return ' AND (' +
+          'Delivered_At__c < :cursorDeliveredAt' +
+          ' OR (Delivered_At__c = :cursorDeliveredAt AND CreatedDate < :cursorCreatedDate)' +
+          ' OR (Delivered_At__c = :cursorDeliveredAt AND CreatedDate = :cursorCreatedDate AND Id < :lastSeenId)' +
+          ' OR Delivered_At__c = NULL' +
+          ')';
       }
 
       return ' AND Delivered_At__c = NULL AND (CreatedDate < :cursorCreatedDate' +
@@ -130,8 +134,12 @@ public without sharing class NotificationLogRepository {
     }
 
     if (cursorDeliveredAt != null) {
-      return ' AND (Delivered_At__c > :cursorDeliveredAt' +
-        ' OR (Delivered_At__c = :cursorDeliveredAt AND Id > :lastSeenId))';
+      return ' AND (' +
+        'Delivered_At__c > :cursorDeliveredAt' +
+        ' OR (Delivered_At__c = :cursorDeliveredAt AND CreatedDate > :cursorCreatedDate)' +
+        ' OR (Delivered_At__c = :cursorDeliveredAt AND CreatedDate = :cursorCreatedDate AND Id > :lastSeenId)' +
+        ' OR Delivered_At__c = NULL' +
+        ')';
     }
 
     return ' AND Delivered_At__c = NULL AND (CreatedDate > :cursorCreatedDate' +

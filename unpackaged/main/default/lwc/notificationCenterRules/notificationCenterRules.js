@@ -298,10 +298,7 @@ export default class NotificationCenterRules extends LightningElement {
   }
 
   get shellClass() {
-    const fontRootClass = "div-app--font-root-14";
-    return this.displayAsCard
-      ? `slds-card rules-card ${fontRootClass}`
-      : `rules-shell ${fontRootClass}`;
+    return this.displayAsCard ? "slds-card rules-card" : "rules-shell";
   }
 
   get cardBodyClass() {
@@ -341,7 +338,7 @@ export default class NotificationCenterRules extends LightningElement {
   }
 
   get showLegend() {
-    return !this.isCompact && !this.isAdminMode;
+    return !this.isCompact;
   }
 
   get showHouseholdInRow() {
@@ -359,6 +356,10 @@ export default class NotificationCenterRules extends LightningElement {
 
   get showRulesContent() {
     return !this.showNonHouseholdMessage;
+  }
+
+  get showInitialViewSkeleton() {
+    return this.isLoading && !this.hasDispatchedViewReady;
   }
 
   get showRuleSearch() {
@@ -564,7 +565,7 @@ export default class NotificationCenterRules extends LightningElement {
               "Personal rules that apply when no household-specific rule is configured.",
             rules: this.filteredGlobalUserRules,
             hasRules: this.filteredGlobalUserRules.length > 0,
-            emptyClass: "rules-subsection__empty div-text-weak",
+            emptyClass: "rules-subsection__empty",
             emptyMessage: this.getRuleSectionEmptyMessage("No global rules yet.", {
               sectionId: "global"
             })
@@ -579,7 +580,7 @@ export default class NotificationCenterRules extends LightningElement {
               "Rules scoped to individual households. These override global defaults for the linked household.",
             rules: this.filteredHouseholdRules,
             hasRules: this.filteredHouseholdRules.length > 0,
-            emptyClass: "rules-subsection__empty div-text-weak",
+            emptyClass: "rules-subsection__empty",
             emptyMessage: this.getRuleSectionEmptyMessage(
               "No household rules yet. Create a rule to override global defaults for a household.",
               { sectionId: "household" }
@@ -602,7 +603,7 @@ export default class NotificationCenterRules extends LightningElement {
             showBlockLabel: false,
             rules: this.filteredSystemDefaultRules,
             hasRules: this.filteredSystemDefaultRules.length > 0,
-            emptyClass: "rules-section__empty div-text-weak",
+            emptyClass: "rules-section__empty",
             emptyMessage: this.getRuleSectionEmptyMessage(
               "No org-wide system defaults are configured yet.",
               { applySearch: false }

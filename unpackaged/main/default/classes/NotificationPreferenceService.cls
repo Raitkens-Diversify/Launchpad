@@ -13,6 +13,9 @@
  * Per-channel resolution: when a household-scoped rule exists for H, only channels
  * explicitly configured on that household rule (or a higher user+household override)
  * are used. Lower-scope user defaults and org defaults do not backfill missing channels.
+ *
+ * When a user default (or higher scoped rule) exists for the recipient, org system
+ * defaults are not merged as fallback for channels omitted from that scoped rule.
  */
 public with sharing class NotificationPreferenceService {
   public enum PreferenceScope {
@@ -257,11 +260,47 @@ public with sharing class NotificationPreferenceService {
       householdId
     );
 
-    if (systemDefaults != null) {
+    if (
+      shouldMergeSystemDefaults(
+        candidatePreferences,
+        systemDefaults,
+        recipientId,
+        householdId
+      )
+    ) {
       candidatePreferences.addAll(systemDefaults);
     }
 
     return candidatePreferences;
+  }
+
+  private Boolean shouldMergeSystemDefaults(
+    List<Notification_Rule__c> scopedPreferences,
+    List<Notification_Rule__c> systemDefaults,
+    Id recipientId,
+    Id householdId
+  ) {
+    if (systemDefaults == null || systemDefaults.isEmpty()) {
+      return false;
+    }
+
+    Notification_Rule__c bestScopedPreference = selectBestPreference(
+      scopedPreferences,
+      recipientId,
+      householdId
+    );
+
+    if (bestScopedPreference == null) {
+      return true;
+    }
+
+    PreferenceScope scope = classifyScope(
+      bestScopedPreference,
+      recipientId,
+      householdId
+    );
+
+    return scopeRank(scope) < scopeRank(PreferenceScope.USER_DEFAULT);
   }
 
   @TestVisible

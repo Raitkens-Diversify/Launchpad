@@ -223,8 +223,33 @@ public class FscDataTestDataFactory {
    * Creates a generic business Account without a Household record type.
    * Use createHouseholdAccount for Account records that should be Household RT.
    */
+  public static void applyRequiredAccountTypeOrClassification(Account account) {
+    if (account == null) {
+      return;
+    }
+
+    if (
+      !String.isBlank(account.Type) ||
+      !String.isBlank(account.Classification__c)
+    ) {
+      return;
+    }
+
+    String accountType = FscRelClientAccountUtils.resolveClientAccountTypeForDataSetup();
+
+    if (!String.isBlank(accountType)) {
+      account.Type = accountType;
+      return;
+    }
+
+    if (hasClassificationField()) {
+      account.Classification__c = FscRelClassificationUtils.UNCLASSIFIED;
+    }
+  }
+
   public static Account createRootAccount(String name) {
     Account rootAccount = new Account(Name = name);
+    applyRequiredAccountTypeOrClassification(rootAccount);
     insert rootAccount;
     return rootAccount;
   }
@@ -269,6 +294,7 @@ public class FscDataTestDataFactory {
       LastName = lastName,
       RecordTypeId = resolvePersonAccountRecordTypeId()
     );
+    applyRequiredAccountTypeOrClassification(personAccount);
     insert personAccount;
 
     return queryAccountById(personAccount.Id);
@@ -628,7 +654,15 @@ public class FscDataTestDataFactory {
 
   private static Account queryAccountById(Id accountId) {
     return [
-      SELECT Id, Name, IsPersonAccount, PersonContactId, Classification__c
+      SELECT
+        Id,
+        Name,
+        IsPersonAccount,
+        PersonContactId,
+        Classification__c,
+        RecordTypeId,
+        Household__c,
+        Type
       FROM Account
       WHERE Id = :accountId
       LIMIT 1

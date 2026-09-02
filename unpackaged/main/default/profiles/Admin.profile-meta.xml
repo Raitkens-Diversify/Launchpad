@@ -1015,6 +1015,14 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>FscRelFaTeamMemberRepository</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FscRelFaTeamMemberRepositoryTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>FscRelHouseholdController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -1055,6 +1063,22 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>FscRelPicklistService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FscRelPicklistServiceTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FscRelReciprocalRoleAccessService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FscRelReciprocalRoleAccessServiceTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>FscRelReciprocalRoleCatalog</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -1076,6 +1100,14 @@
     </classAccesses>
     <classAccesses>
         <apexClass>FscRelRecordTypeUtilsTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FscRelRelationRepository</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FscRelRelationRepositoryTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
@@ -1920,6 +1952,14 @@
     </classAccesses>
     <classAccesses>
         <apexClass>NotificationSourceContextServiceTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>NotificationStaleLogCleanupBatch</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>NotificationStaleLogCleanupBatchTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>

@@ -2,60 +2,8 @@
  * Author: Hoang Long Vu To
  * Date: 2026-08-19
  */
-@IsTest
+@IsTest(IsParallel=false)
 private class FscRelAccountRelationShareServiceTest {
-  @IsTest
-  static void syncSharesForRelations_grantsReadAccessFromRelatedAccountShare() {
-    User advisor = createAdvisorUser();
-    User unrelatedUser = createAdvisorUser();
-
-    Account memberAccount;
-    Account relatedAccount;
-    Account_Account_Relationship__c relation;
-
-    System.runAs(advisor) {
-      memberAccount = createPersonAccount('FscAarShare Member');
-      relatedAccount = createPersonAccount('FscAarShare Related');
-
-      insert new AccountShare(
-        AccountId = relatedAccount.Id,
-        UserOrGroupId = unrelatedUser.Id,
-        AccountAccessLevel = 'Read',
-        OpportunityAccessLevel = 'None',
-        RowCause = Schema.AccountShare.RowCause.Manual
-      );
-    }
-
-    System.runAs(advisor) {
-      relation = new Account_Account_Relationship__c(
-        Account__c = memberAccount.Id,
-        Related_Account__c = relatedAccount.Id,
-        Active__c = true
-      );
-      insert relation;
-    }
-
-    Test.startTest();
-    FscRelAccountRelationShareService.syncSharesForRelations(
-      new List<Account_Account_Relationship__c>{ relation }
-    );
-    Test.stopTest();
-
-    System.runAs(unrelatedUser) {
-      List<Account_Account_Relationship__c> visibleRelations = [
-        SELECT Id
-        FROM Account_Account_Relationship__c
-        WHERE Id = :relation.Id
-      ];
-
-      System.assertEquals(
-        1,
-        visibleRelations.size(),
-        'Users with related account access should be able to read the AAR.'
-      );
-    }
-  }
-
   @IsTest
   static void accountRelationshipTrigger_syncsSharesOnInsert() {
     User advisor = createAdvisorUser();
@@ -105,6 +53,59 @@ private class FscRelAccountRelationShareServiceTest {
     }
   }
 
+  @IsTest
+  static void syncSharesForRelatedAccounts_syncsWhenRelatedAccountChanges() {
+    User advisor = createAdvisorUser();
+    User unrelatedUser = createAdvisorUser();
+
+    Account memberAccount;
+    Account originalRelatedAccount;
+    Account updatedRelatedAccount;
+    Account_Account_Relationship__c relation;
+
+    System.runAs(advisor) {
+      memberAccount = createPersonAccount('FscAarShare Member');
+      originalRelatedAccount = createPersonAccount('FscAarShare Original Related');
+      updatedRelatedAccount = createPersonAccount('FscAarShare Updated Related');
+
+      insert new AccountShare(
+        AccountId = updatedRelatedAccount.Id,
+        UserOrGroupId = unrelatedUser.Id,
+        AccountAccessLevel = 'Read',
+        OpportunityAccessLevel = 'None',
+        RowCause = Schema.AccountShare.RowCause.Manual
+      );
+
+      relation = new Account_Account_Relationship__c(
+        Account__c = memberAccount.Id,
+        Related_Account__c = originalRelatedAccount.Id,
+        Active__c = true
+      );
+      insert relation;
+    }
+
+    Test.startTest();
+    System.runAs(advisor) {
+      relation.Related_Account__c = updatedRelatedAccount.Id;
+      update relation;
+    }
+    Test.stopTest();
+
+    System.runAs(unrelatedUser) {
+      List<Account_Account_Relationship__c> visibleRelations = [
+        SELECT Id
+        FROM Account_Account_Relationship__c
+        WHERE Id = :relation.Id
+      ];
+
+      System.assertEquals(
+        1,
+        visibleRelations.size(),
+        'Users with access to the updated related account should be able to read the AAR.'
+      );
+    }
+  }
+
   private static User createAdvisorUser() {
     Profile advisorProfile = [
       SELECT Id
@@ -131,19 +132,6 @@ private class FscRelAccountRelationShareServiceTest {
   }
 
   private static Account createPersonAccount(String lastName) {
-    Id personAccountRecordTypeId = [
-      SELECT Id
-      FROM RecordType
-      WHERE SObjectType = 'Account' AND IsPersonType = TRUE
-      LIMIT 1
-    ]
-    .Id;
-
-    Account personAccount = new Account(
-      LastName = lastName,
-      RecordTypeId = personAccountRecordTypeId
-    );
-    insert personAccount;
-    return personAccount;
+    return FscDataTestDataFactory.createPersonAccount('FscAarShare', lastName);
   }
 }

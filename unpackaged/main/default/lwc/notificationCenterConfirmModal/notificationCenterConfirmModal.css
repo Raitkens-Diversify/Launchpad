@@ -20,7 +20,7 @@
 
 .nc-saving-overlay__message {
   margin: 0;
-  font-size: var(--div-font-scale-sm);
+  font-size: 0.8125rem;
   font-weight: 600;
   color: var(--div-color-text-primary, #181818);
 }

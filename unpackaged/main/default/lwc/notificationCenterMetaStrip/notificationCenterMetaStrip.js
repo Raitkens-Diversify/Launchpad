@@ -49,9 +49,11 @@ export default class NotificationCenterMetaStrip extends LightningElement {
   }
 
   get metaStripClass() {
-    return this.isTableVariant
-      ? "div-meta-strip div-meta-strip--table"
-      : "div-meta-strip";
+    const variantClass = this.isTableVariant
+      ? "div-meta-strip div-meta-strip--table div-text-body-small"
+      : "div-meta-strip div-text-body-small";
+
+    return variantClass;
   }
 
   get sourceTypeDisplay() {

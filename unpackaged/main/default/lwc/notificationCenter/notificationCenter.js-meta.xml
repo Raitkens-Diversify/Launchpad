@@ -3,12 +3,10 @@
     <apiVersion>66.0</apiVersion>
     <isExposed>true</isExposed>
     <masterLabel>Notification Center</masterLabel>
-    <description>Custom notification center inbox and preferences for Lightning apps and Experience Cloud sites.</description>
+    <description>Custom notification center inbox and preferences.</description>
     <targets>
         <target>lightning__AppPage</target>
         <target>lightning__Tab</target>
-        <target>lightningCommunity__Page</target>
-        <target>lightningCommunity__Default</target>
     </targets>
     <targetConfigs>
         <targetConfig targets="lightning__AppPage">

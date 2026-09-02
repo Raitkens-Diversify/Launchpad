@@ -582,4 +582,35 @@ private class NotificationPreferenceServiceTest {
       channelResults.get(NotificationConstants.CHANNEL_EMAIL).preference.Id
     );
   }
+
+  @IsTest
+  static void resolveForRecipientsByChannelDoesNotBackfillEmailFromSystemDefaultWhenUserRuleIsAppOnly() {
+    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+    Notification_Rule__c userRule = NotificationTestDataFactory.createUserPreference(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      context.recipientUser.Id,
+      NotificationConstants.CHANNEL_IN_APP,
+      NotificationConstants.FREQUENCY_IMMEDIATE
+    );
+    NotificationTestDataFactory.createGlobalPreference(
+      NotificationConstants.OBJECT_TYPE_TASK
+    );
+
+    NotificationPreferenceService preferenceService = new NotificationPreferenceService();
+    Map<String, NotificationPreferenceService.ResolveResult> channelResults = preferenceService.resolveForRecipientsByChannel(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      new List<Id>{ context.recipientUser.Id },
+      context.household.Id
+    ).get(context.recipientUser.Id);
+
+    System.assertEquals(1, channelResults.size());
+    System.assertEquals(
+      userRule.Id,
+      channelResults.get(NotificationConstants.CHANNEL_IN_APP).preference.Id
+    );
+    System.assertEquals(
+      false,
+      channelResults.containsKey(NotificationConstants.CHANNEL_EMAIL)
+    );
+  }
 }

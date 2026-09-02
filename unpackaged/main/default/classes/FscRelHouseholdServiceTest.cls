@@ -13,6 +13,7 @@ private class FscRelHouseholdServiceTest {
   static void resolveRootAccount_handlesNullAndMissingAccount() {
     FscRelHouseholdService service = new FscRelHouseholdService();
     Account tempAccount = new Account(Name = 'Temporary Missing Account');
+    FscDataTestDataFactory.applyRequiredAccountTypeOrClassification(tempAccount);
     insert tempAccount;
     Id missingAccountId = tempAccount.Id;
     delete tempAccount;
@@ -235,11 +236,9 @@ private class FscRelHouseholdServiceTest {
       return;
     }
 
-    Account householdAccount = new Account(
-      Name = 'Household Root Account',
-      RecordTypeId = householdRecordTypeId
+    Account householdAccount = FscDataTestDataFactory.createHouseholdAccount(
+      'Household Root Account'
     );
-    insert householdAccount;
     FscRelHouseholdService service = new FscRelHouseholdService();
 
     Test.startTest();
@@ -388,6 +387,7 @@ private class FscRelHouseholdServiceTest {
   @IsTest
   static void getRelationshipTree_throwsWhenRootAccountNotFound() {
     Account tempAccount = new Account(Name = 'Temporary Missing Root');
+    FscDataTestDataFactory.applyRequiredAccountTypeOrClassification(tempAccount);
     insert tempAccount;
     Id missingAccountId = tempAccount.Id;
     delete tempAccount;
@@ -453,6 +453,7 @@ private class FscRelHouseholdServiceTest {
       Name = 'Native Create Overlay Test',
       RecordTypeId = businessRecordTypeId
     );
+    FscDataTestDataFactory.applyRequiredAccountTypeOrClassification(createdAccount);
     insert createdAccount;
 
     Test.startTest();

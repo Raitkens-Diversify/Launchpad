@@ -1605,9 +1605,12 @@ iframe html {
 
 /* ── SLDS input overrides ────────────────────────────────────────────────────── */
 
-/* SLDS form styling hooks scoped to app shells (inherit into child LWC shadow trees). */
+/* SLDS/SDS/LWC input hooks — scoped so they inherit into lightning-input only
+   inside diversify shells. Opt in with .div-slds-input outside those shells.
+   --div-input-* design tokens stay on :root; they do not theme SLDS globally. */
 .app-shell,
-.div-app {
+.div-app,
+.div-slds-input {
   --slds-c-label-font-size: var(--div-input-font-size);
   --slds-c-label-font-weight: 500;
   --slds-c-label-text-color: var(--div-input-color-text);
@@ -1799,30 +1802,6 @@ iframe html {
   color: var(--div-color-text-muted, #706e6b);
   background-color: var(--div-color-surface-muted, #f4f6f9);
   border-color: var(--div-color-border, #dddbda);
-}
-
-/* Native SLDS inputs inside diversify app shells */
-.app-shell .slds-input,
-.app-shell .slds-input[type="search"],
-.div-app .slds-input,
-.div-app .slds-input[type="search"] {
-  font-size: var(--div-input-font-size) !important;
-}
-
-.app-shell .slds-input::placeholder,
-.div-app .slds-input::placeholder {
-  font-size: var(--div-input-font-size) !important;
-  color: var(--div-color-neutral-500, #838a97);
-  opacity: 1;
-}
-
-.app-shell .slds-input[type="search"],
-.div-app .slds-input[type="search"] {
-  height: var(--div-input-height) !important;
-  border-radius: var(--div-radius-border-2, 0.5rem) !important;
-  border: 1px solid var(--div-color-border-2, #b6bcc5) !important;
-  color: var(--div-color-text-primary, #181818) !important;
-  min-width: 300px;
 }
 
 
@@ -6649,6 +6628,36 @@ iframe html {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.375rem;
+}
+
+/* Direct .slds-input overrides — scoped so Experience Cloud / standard SLDS
+   inputs outside diversify shells keep native styling. Opt in with .div-slds-input
+   on a wrapper when the field is not inside .app-shell / .div-app. */
+.app-shell .slds-input,
+.app-shell .slds-input[type="search"],
+.div-app .slds-input,
+.div-app .slds-input[type="search"],
+.div-slds-input .slds-input,
+.div-slds-input .slds-input[type="search"] {
+  font-size: var(--div-input-font-size) !important;
+}
+
+.app-shell .slds-input::placeholder,
+.div-app .slds-input::placeholder,
+.div-slds-input .slds-input::placeholder {
+  font-size: var(--div-input-font-size) !important;
+  color: var(--div-color-neutral-500, #838a97);
+  opacity: 1;
+}
+
+.app-shell .slds-input[type="search"],
+.div-app .slds-input[type="search"],
+.div-slds-input .slds-input[type="search"] {
+  height: var(--div-input-height) !important;
+  border-radius: var(--div-radius-border-2, 0.5rem) !important;
+  border: 1px solid var(--div-color-border-2, #b6bcc5) !important;
+  color: var(--div-color-text-primary, #181818) !important;
+  min-width: 300px;
 }
 
 .margin-bottom-0 {

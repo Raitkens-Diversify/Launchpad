@@ -3,27 +3,30 @@
   <div class="admin-settings-view" role="region" aria-label="Admin settings">
     <template for:each={sections} for:item="section">
       <article key={section.id} class="div-card admin-settings-section">
-        <header class="admin-settings-section__header admin-settings-section__header--toolbar">
-          <div class="div-secondary-header">
-            <h3 class="div-secondary-header__title">{section.title}</h3>
-            <p class="div-secondary-header__subtitle div-text-body-xs">{section.description}</p>
-          </div>
-          <template lwc:if={section.isSystemDefaultRules}>
-            <lightning-button
-              variant="brand"
-              label={section.newRuleLabel}
-              icon-name={icons.ADD}
-              icon-position="left"
-              onclick={handleNewSystemDefault}
-            ></lightning-button>
-          </template>
-        </header>
+        <template lwc:if={showSectionChrome}>
+          <header class="admin-settings-section__header admin-settings-section__header--toolbar">
+            <div class="div-secondary-header">
+              <h3 class="div-secondary-header__title">{section.title}</h3>
+              <p class="div-secondary-header__subtitle">{section.description}</p>
+            </div>
+            <template lwc:if={section.isSystemDefaultRules}>
+              <lightning-button
+                variant="brand"
+                label={section.newRuleLabel}
+                icon-name={icons.ADD}
+                icon-position="left"
+                onclick={handleNewSystemDefault}
+              ></lightning-button>
+            </template>
+          </header>
+        </template>
 
         <div class="div-card__body admin-settings-section__body">
           <template lwc:if={section.isSystemDefaultRules}>
             <c-notification-center-rules
               mode="admin"
               embedded-in-section
+              onnotificationcenterviewready={handleEmbeddedRulesReady}
             ></c-notification-center-rules>
           </template>
         </div>
