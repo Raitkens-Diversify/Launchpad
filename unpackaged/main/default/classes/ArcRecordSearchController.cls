@@ -127,7 +127,8 @@ public with sharing class ArcRecordSearchController {
     List<String> searchableFields,
     Id afterId,
     Datetime afterCreatedDate,
-    Integer pageSize
+    Integer pageSize,
+    String listViewApiName
   ) {
     List<SearchFilter> filters = String.isNotBlank(filtersJson)
       ? (List<SearchFilter>) JSON.deserialize(filtersJson, List<SearchFilter>.class)
@@ -162,6 +163,14 @@ public with sharing class ArcRecordSearchController {
     if (String.isNotBlank(whereClause)) {
       clauses.add(whereClause);
     }
+    // A tab's own baked-in meaning (My Open Cases, My Team's Open Tasks,
+    // etc.) -- always ANDed on top of whatever the user's own filter chips
+    // or search term add, never something a user filter can narrow away
+    // from. The platform ListView's own <filters>/filterScope on these
+    // views is inert once server search is on (confirmed live: server
+    // search never reads it), so this is the only place that meaning
+    // actually gets enforced now.
+    appendMandatoryFilter(objectApiName, listViewApiName, clauses, binds);
     // Compound keyset cursor: CreatedDate isn't unique on its own (bulk
     // inserts routinely share one to the millisecond), so Id breaks ties --
     // both halves travel together, or not at all (a first-page request has
@@ -323,6 +332,119 @@ public with sharing class ArcRecordSearchController {
     }
 
     return clauses.isEmpty() ? '' : String.join(clauses, ' AND ');
+  }
+
+  /**
+   * Per-tab baked-in meaning that a user's own filter chips can never
+   * remove -- keyed by (objectApiName, listViewApiName) using each view's
+   * real ListView.DeveloperName, the same value arcRecordListView already
+   * tracks as selectedListViewApiName. Every clause here is additive
+   * (appended to the caller's own clauses list, ANDed with everything
+   * else), never a replacement.
+   *
+   * Case/My_teams_open_cases deliberately carries no IsClosed-style status
+   * clause -- team visibility here is defined purely by ownership within
+   * the requesting user's own Financial Advisor Team(s), nothing else.
+   */
+  private static void appendMandatoryFilter(
+    String objectApiName,
+    String listViewApiName,
+    List<String> clauses,
+    Map<String, Object> binds
+  ) {
+    if (String.isBlank(objectApiName) || String.isBlank(listViewApiName)) {
+      return;
+    }
+
+    if (objectApiName == 'Case') {
+      if (listViewApiName == 'MyOpenCases') {
+        binds.put('mandatoryOwnerId', UserInfo.getUserId());
+        clauses.add('OwnerId = :mandatoryOwnerId');
+      } else if (listViewApiName == 'My_teams_open_cases') {
+        binds.put('mandatoryTeamUserIds', resolveFinancialAdvisorTeamUserIds());
+        clauses.add('OwnerId IN :mandatoryTeamUserIds');
+      }
+      return;
+    }
+
+    if (objectApiName == 'Task') {
+      if (listViewApiName == 'My_Open_Tasks') {
+        binds.put('mandatoryClosed', false);
+        binds.put('mandatoryOwnerId', UserInfo.getUserId());
+        clauses.add('IsClosed = :mandatoryClosed');
+        clauses.add('OwnerId = :mandatoryOwnerId');
+      } else if (listViewApiName == 'My_Team_s_Open_Tasks') {
+        // The platform ListView this replaces had the same intent but a
+        // real bug alongside the inert-filterScope one: one of its four
+        // "assignee" exclusions targeted Subject instead of the owner
+        // (notContain 'maestro' on SUBJECT, not CORE.USERS.FULL_NAME) --
+        // confirmed by reading the deployed ListView metadata directly.
+        // All four here target the owner, as intended.
+        binds.put('mandatoryClosed', false);
+        binds.put('excludedOwnerUnassigned', 'Unassigned');
+        binds.put('excludedOwnerMaestro', 'Maestro');
+        binds.put('excludedOwnerDms', 'DMS');
+        binds.put('excludedOwnerSystemsPattern', '%systems%');
+        clauses.add('IsClosed = :mandatoryClosed');
+        clauses.add('Owner.Name != :excludedOwnerUnassigned');
+        clauses.add('Owner.Name != :excludedOwnerMaestro');
+        clauses.add('Owner.Name != :excludedOwnerDms');
+        clauses.add('(NOT Owner.Name LIKE :excludedOwnerSystemsPattern)');
+      }
+      return;
+    }
+
+    if (objectApiName == 'Check_Log__c') {
+      if (listViewApiName == 'checking_in_ops') {
+        binds.put('mandatoryReviewStatus', 'Needs Review');
+        clauses.add('Review_Status__c = :mandatoryReviewStatus');
+      } else if (listViewApiName == 'Sent_and_Received_Check_Logs') {
+        binds.put('mandatoryNotDeliveredStatus', 'Delivered');
+        clauses.add('Status__c != :mandatoryNotDeliveredStatus');
+      }
+    }
+  }
+
+  /**
+   * Every user on any Financial Advisor Team the running user is an active
+   * member of -- resolved in two hops (my active memberships -> their
+   * team ids -> every active membership on those teams -> their user ids)
+   * rather than a single self-join query, since Financial_Advisor_Team__c
+   * has no direct "team roster" child relationship queryable in one shot
+   * without walking the same junction object twice. An empty result (no
+   * active team membership at all) is valid -- WHERE OwnerId IN
+   * :emptySet matches zero rows rather than throwing, which is exactly
+   * the right outcome for someone on no team.
+   */
+  private static Set<Id> resolveFinancialAdvisorTeamUserIds() {
+    Set<Id> teamIds = new Set<Id>();
+    for (Financial_Advisor_Team_Member__c membership : [
+      SELECT Financial_Advisor_Team__c
+      FROM Financial_Advisor_Team_Member__c
+      WHERE User__c = :UserInfo.getUserId() AND Active__c = true
+      WITH USER_MODE
+    ]) {
+      if (membership.Financial_Advisor_Team__c != null) {
+        teamIds.add(membership.Financial_Advisor_Team__c);
+      }
+    }
+
+    Set<Id> userIds = new Set<Id>();
+    if (teamIds.isEmpty()) {
+      return userIds;
+    }
+
+    for (Financial_Advisor_Team_Member__c teammate : [
+      SELECT User__c
+      FROM Financial_Advisor_Team_Member__c
+      WHERE Financial_Advisor_Team__c IN :teamIds AND Active__c = true
+      WITH USER_MODE
+    ]) {
+      if (teammate.User__c != null) {
+        userIds.add(teammate.User__c);
+      }
+    }
+    return userIds;
   }
 
   /**

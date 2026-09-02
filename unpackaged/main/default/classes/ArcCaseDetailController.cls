@@ -704,7 +704,15 @@ public with sharing class ArcCaseDetailController {
       'ownerid',
       'accountid',
       'subject',
-      'description'
+      'description',
+      // Plain Text(18) fields that happen to hold a raw Task/User Id (set by
+      // trigger logic, never a real Lookup -- Schema.DisplayType.REFERENCE
+      // above doesn't catch these, only true relationship fields) with no
+      // reader-facing purpose: internal bookkeeping for automation, not
+      // meant to be read.
+      'next_task__c',
+      'original_owner__c',
+      'previous_task__c'
     };
 
     // The select list is built from describe rather than the SOQL FIELDS
@@ -825,7 +833,15 @@ public with sharing class ArcCaseDetailController {
       'ownerid',
       'accountid',
       'subject',
-      'description'
+      'description',
+      // Plain Text(18) fields that happen to hold a raw Task/User Id (set by
+      // trigger logic, never a real Lookup -- Schema.DisplayType.REFERENCE
+      // above doesn't catch these, only true relationship fields) with no
+      // reader-facing purpose: internal bookkeeping for automation, not
+      // meant to be read.
+      'next_task__c',
+      'original_owner__c',
+      'previous_task__c'
     };
 
     Map<String, Schema.SObjectField> fieldMap = Schema.SObjectType.Case.fields.getMap();

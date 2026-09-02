@@ -31,7 +31,8 @@ private class ArcRecordSearchControllerTest {
       null,
       null,
       null,
-      25
+      25,
+      null
     );
     Test.stopTest();
 
@@ -71,7 +72,8 @@ private class ArcRecordSearchControllerTest {
       null,
       null,
       null,
-      25
+      25,
+      null
     );
     Test.stopTest();
 
@@ -94,7 +96,8 @@ private class ArcRecordSearchControllerTest {
       null,
       null,
       null,
-      25
+      25,
+      null
     );
     Test.stopTest();
 
@@ -125,7 +128,8 @@ private class ArcRecordSearchControllerTest {
       null,
       null,
       null,
-      2
+      2,
+      null
     );
     ArcRecordSearchController.SearchResult secondPage = ArcRecordSearchController.searchRecords(
       'Account',
@@ -135,7 +139,8 @@ private class ArcRecordSearchControllerTest {
       null,
       firstPage.rows[1].id,
       firstPage.rows[1].createdDate,
-      2
+      2,
+      null
     );
     Test.stopTest();
 
@@ -170,7 +175,8 @@ private class ArcRecordSearchControllerTest {
       null,
       null,
       null,
-      25
+      25,
+      null
     );
     Test.stopTest();
 
@@ -198,7 +204,8 @@ private class ArcRecordSearchControllerTest {
       new List<String>{ 'Name' },
       null,
       null,
-      25
+      25,
+      null
     );
     Test.stopTest();
 
@@ -227,7 +234,8 @@ private class ArcRecordSearchControllerTest {
       null,
       null,
       null,
-      25
+      25,
+      null
     );
     Test.stopTest();
 
@@ -293,7 +301,8 @@ private class ArcRecordSearchControllerTest {
       null,
       null,
       null,
-      25
+      25,
+      null
     );
     Test.stopTest();
 
@@ -302,6 +311,277 @@ private class ArcRecordSearchControllerTest {
     Assert.areEqual(1, unknownFieldFilterResult.rows.size());
     // No requested column survives validation, so no query is even attempted.
     Assert.isTrue(emptySelectionResult.rows.isEmpty());
+  }
+
+  // ---- Per-tab mandatory filters (appendMandatoryFilter) ------------------
+
+  @IsTest
+  static void searchRecordsMyOpenCasesOnlyReturnsCasesOwnedByTheRunningUser() {
+    User otherOwner = createTestUser('CaseOtherOwner');
+
+    Case mine = new Case(Subject = 'Owned by me', Status = 'New');
+    Case theirs = new Case(
+      Subject = 'Owned by someone else',
+      Status = 'New',
+      OwnerId = otherOwner.Id
+    );
+    insert new List<Case>{ mine, theirs };
+
+    Test.startTest();
+    ArcRecordSearchController.SearchResult result = ArcRecordSearchController.searchRecords(
+      'Case',
+      new List<String>{ 'Subject' },
+      null,
+      null,
+      null,
+      null,
+      null,
+      25,
+      'MyOpenCases'
+    );
+    Test.stopTest();
+
+    Assert.areEqual(1, result.rows.size());
+    Assert.areEqual('Owned by me', result.rows[0].cells[0]);
+  }
+
+  @IsTest
+  static void searchRecordsMyTeamsOpenCasesReturnsCasesOwnedByActiveTeammatesOnly() {
+    User teammate = createTestUser('CaseTeammate');
+    User outsider = createTestUser('CaseOutsider');
+    User inactiveTeammate = createTestUser('CaseInactiveTeammate');
+
+    // Financial_Advisor_Team_TriggerHandler.updateRepCode (unrelated,
+    // pre-existing automation that fires on a Related_Advisors__c change
+    // cascaded from inserting team members below) hardcodes a lookup for a
+    // team literally named 'Default Team' and throws "List has no rows"
+    // without one -- mirrors FATMember_TriggerHandler_Test's own seed data
+    // for the exact same reason.
+    insert new Financial_Advisor_Team__c(Name = 'Default Team');
+
+    Financial_Advisor_Team__c myTeam = new Financial_Advisor_Team__c(Name = 'My Team');
+    Financial_Advisor_Team__c otherTeam = new Financial_Advisor_Team__c(Name = 'Other Team');
+    insert new List<Financial_Advisor_Team__c>{ myTeam, otherTeam };
+
+    insert new List<Financial_Advisor_Team_Member__c>{
+      new Financial_Advisor_Team_Member__c(
+        Financial_Advisor_Team__c = myTeam.Id,
+        User__c = UserInfo.getUserId(),
+        Role__c = 'Financial Advisor',
+        Active__c = true
+      ),
+      new Financial_Advisor_Team_Member__c(
+        Financial_Advisor_Team__c = myTeam.Id,
+        User__c = teammate.Id,
+        Role__c = 'Financial Advisor',
+        Active__c = true
+      ),
+      // Inactive membership on my own team -- their cases should NOT count
+      // as "my team's", proving Active__c is actually checked and not just
+      // team membership on its own.
+      new Financial_Advisor_Team_Member__c(
+        Financial_Advisor_Team__c = myTeam.Id,
+        User__c = inactiveTeammate.Id,
+        Role__c = 'Financial Advisor',
+        Active__c = false
+      ),
+      new Financial_Advisor_Team_Member__c(
+        Financial_Advisor_Team__c = otherTeam.Id,
+        User__c = outsider.Id,
+        Role__c = 'Financial Advisor',
+        Active__c = true
+      )
+    };
+
+    Case mine = new Case(Subject = 'Mine', Status = 'New');
+    Case teammatesCase = new Case(
+      Subject = 'Teammates',
+      Status = 'New',
+      OwnerId = teammate.Id
+    );
+    Case inactiveTeammatesCase = new Case(
+      Subject = 'InactiveTeammates',
+      Status = 'New',
+      OwnerId = inactiveTeammate.Id
+    );
+    Case outsidersCase = new Case(
+      Subject = 'Outsiders',
+      Status = 'New',
+      OwnerId = outsider.Id
+    );
+    insert new List<Case>{ mine, teammatesCase, inactiveTeammatesCase, outsidersCase };
+
+    Test.startTest();
+    ArcRecordSearchController.SearchResult result = ArcRecordSearchController.searchRecords(
+      'Case',
+      new List<String>{ 'Subject' },
+      null,
+      null,
+      null,
+      null,
+      null,
+      25,
+      'My_teams_open_cases'
+    );
+    Test.stopTest();
+
+    Set<String> subjects = new Set<String>();
+    for (ArcRecordSearchController.SearchRow row : result.rows) {
+      subjects.add(row.cells[0]);
+    }
+    Assert.areEqual(2, result.rows.size());
+    Assert.isTrue(subjects.contains('Mine'));
+    Assert.isTrue(subjects.contains('Teammates'));
+    Assert.isFalse(subjects.contains('InactiveTeammates'));
+    Assert.isFalse(subjects.contains('Outsiders'));
+  }
+
+  @IsTest
+  static void searchRecordsMyOpenTasksOnlyReturnsOpenTasksOwnedByTheRunningUser() {
+    User otherOwner = createTestUser('TaskOtherOwner');
+
+    Task openMine = new Task(Subject = 'Open, mine', Status = 'Not Started');
+    Task closedMine = new Task(
+      Subject = 'Closed, mine',
+      Status = 'Completed'
+    );
+    Task openTheirs = new Task(
+      Subject = 'Open, someone else',
+      Status = 'Not Started',
+      OwnerId = otherOwner.Id
+    );
+    insert new List<Task>{ openMine, closedMine, openTheirs };
+
+    Test.startTest();
+    ArcRecordSearchController.SearchResult result = ArcRecordSearchController.searchRecords(
+      'Task',
+      new List<String>{ 'Subject' },
+      null,
+      null,
+      null,
+      null,
+      null,
+      25,
+      'My_Open_Tasks'
+    );
+    Test.stopTest();
+
+    Assert.areEqual(1, result.rows.size());
+    Assert.areEqual('Open, mine', result.rows[0].cells[0]);
+  }
+
+  @IsTest
+  static void searchRecordsMyTeamsOpenTasksExcludesClosedAndSystemOwnedTasks() {
+    User normalOwner = createTestUser('TaskNormalOwner');
+    User unassignedOwner = createTestUser('Unassigned');
+    User maestroOwner = createTestUser('Maestro');
+    User dmsOwner = createTestUser('DMS');
+    User systemsOwner = createTestUser('Systems Bot');
+
+    List<Task> tasks = new List<Task>{
+      new Task(Subject = 'Open, normal owner', Status = 'Not Started', OwnerId = normalOwner.Id),
+      new Task(Subject = 'Closed, normal owner', Status = 'Completed', OwnerId = normalOwner.Id),
+      new Task(Subject = 'Open, Unassigned', Status = 'Not Started', OwnerId = unassignedOwner.Id),
+      new Task(Subject = 'Open, Maestro', Status = 'Not Started', OwnerId = maestroOwner.Id),
+      new Task(Subject = 'Open, DMS', Status = 'Not Started', OwnerId = dmsOwner.Id),
+      new Task(Subject = 'Open, Systems Bot', Status = 'Not Started', OwnerId = systemsOwner.Id)
+    };
+    insert tasks;
+
+    Test.startTest();
+    ArcRecordSearchController.SearchResult result = ArcRecordSearchController.searchRecords(
+      'Task',
+      new List<String>{ 'Subject' },
+      null,
+      null,
+      null,
+      null,
+      null,
+      25,
+      'My_Team_s_Open_Tasks'
+    );
+    Test.stopTest();
+
+    Assert.areEqual(1, result.rows.size());
+    Assert.areEqual('Open, normal owner', result.rows[0].cells[0]);
+  }
+
+  @IsTest
+  static void searchRecordsCheckingInOpsOnlyReturnsNeedsReviewLogs() {
+    insert new List<Check_Log__c>{
+      new Check_Log__c(Status__c = 'Received', Review_Status__c = 'Needs Review'),
+      new Check_Log__c(Status__c = 'Received', Review_Status__c = 'Review Complete'),
+      new Check_Log__c(Status__c = 'Received')
+    };
+
+    Test.startTest();
+    ArcRecordSearchController.SearchResult result = ArcRecordSearchController.searchRecords(
+      'Check_Log__c',
+      new List<String>{ 'Status__c' },
+      null,
+      null,
+      null,
+      null,
+      null,
+      25,
+      'checking_in_ops'
+    );
+    Test.stopTest();
+
+    Assert.areEqual(1, result.rows.size());
+  }
+
+  @IsTest
+  static void searchRecordsSentAndReceivedExcludesDeliveredLogs() {
+    insert new List<Check_Log__c>{
+      new Check_Log__c(Status__c = 'Delivered'),
+      new Check_Log__c(Status__c = 'Received'),
+      new Check_Log__c(Status__c = 'Sent')
+    };
+
+    Test.startTest();
+    ArcRecordSearchController.SearchResult result = ArcRecordSearchController.searchRecords(
+      'Check_Log__c',
+      new List<String>{ 'Status__c' },
+      null,
+      null,
+      null,
+      null,
+      null,
+      25,
+      'Sent_and_Received_Check_Logs'
+    );
+    Test.stopTest();
+
+    Assert.areEqual(2, result.rows.size());
+    for (ArcRecordSearchController.SearchRow row : result.rows) {
+      Assert.areNotEqual('Delivered', row.cells[0]);
+    }
+  }
+
+  private static Integer testUserCounter = 0;
+
+  /** Mirrors FATMember_TriggerHandler_Test's own working pattern for a
+   *  minimal, insertable test User. lastName drives Name (and so
+   *  Owner.Name) exactly, since FirstName is left blank. */
+  private static User createTestUser(String lastName) {
+    testUserCounter++;
+    User user = new User(
+      // Matches FATMember_TriggerHandler_Test's own proven-working profile
+      // choice -- confirmed to exist in this org.
+      ProfileId = [SELECT Id FROM Profile WHERE Name = 'System Administrator' LIMIT 1].Id,
+      LastName = lastName,
+      Username = 'arc.search.test' + testUserCounter + '@example.com.test',
+      Email = 'arc.search.test' + testUserCounter + '@example.com',
+      Alias = 'ast' + testUserCounter,
+      TimeZoneSidKey = 'America/Los_Angeles',
+      EmailEncodingKey = 'UTF-8',
+      LanguageLocaleKey = 'en_US',
+      LocaleSidKey = 'en_US',
+      IsActive = true
+    );
+    insert user;
+    return user;
   }
 
   private static ArcRecordSearchController.SearchResult searchWithFilter(
@@ -321,7 +601,8 @@ private class ArcRecordSearchControllerTest {
       null,
       null,
       null,
-      25
+      25,
+      null
     );
   }
 }

@@ -233,6 +233,32 @@ private class ArcCaseDetailControllerTest {
     System.assertEquals(0, sections.size());
   }
 
+  // Next_Task__c/Original_Owner__c/Previous_Task__c are plain Text(18) fields
+  // that trigger logic (Case_TriggerHandler) populates with a raw Task/User
+  // Id -- never a real Lookup, so the Schema.DisplayType.REFERENCE filter in
+  // getCaseInformationFieldNames doesn't catch them. Confirmed live: they
+  // rendered as bare 18-character ids on the Case Information section with
+  // no way for a portal user to make sense of them.
+  @IsTest
+  static void getCaseInformationFieldNamesExcludesRawIdTextFields() {
+    Case record = new Case(Subject = 'Id Text Field Case', Status = 'New');
+    insert record;
+
+    Test.startTest();
+    List<String> fieldNames = ArcCaseDetailController.getCaseInformationFieldNames(
+      record.Id
+    );
+    Test.stopTest();
+
+    Set<String> lowerFieldNames = new Set<String>();
+    for (String fieldName : fieldNames) {
+      lowerFieldNames.add(fieldName.toLowerCase());
+    }
+    Assert.isFalse(lowerFieldNames.contains('next_task__c'));
+    Assert.isFalse(lowerFieldNames.contains('original_owner__c'));
+    Assert.isFalse(lowerFieldNames.contains('previous_task__c'));
+  }
+
   @IsTest
   static void getRelatedHouseholdCasesReturnsEmptyWhenNoHousehold() {
     Case record = new Case(Subject = 'No Household Case', Status = 'New');

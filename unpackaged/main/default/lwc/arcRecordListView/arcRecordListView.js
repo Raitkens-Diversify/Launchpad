@@ -2307,7 +2307,11 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
       searchableFields,
       afterId,
       afterCreatedDate,
-      pageSize: SERVER_SEARCH_PAGE_SIZE
+      pageSize: SERVER_SEARCH_PAGE_SIZE,
+      // The tab's own baked-in meaning (My Open Cases, My Team's Open
+      // Tasks, etc.) is enforced server-side, keyed off this exact value
+      // -- see ArcRecordSearchController.appendMandatoryFilter.
+      listViewApiName: this.selectedListViewApiName
     };
 
     const result = await searchRecords(requestParams);

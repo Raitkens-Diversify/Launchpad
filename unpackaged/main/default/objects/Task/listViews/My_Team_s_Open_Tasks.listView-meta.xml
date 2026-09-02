@@ -18,13 +18,13 @@
         <value>Unassigned</value>
     </filters>
     <filters>
-        <field>SUBJECT</field>
-        <operation>notContain</operation>
-        <value>maestro</value>
+        <field>CORE.USERS.FULL_NAME</field>
+        <operation>notEqual</operation>
+        <value>Maestro</value>
     </filters>
     <filters>
         <field>CORE.USERS.FULL_NAME</field>
-        <operation>notContain</operation>
+        <operation>notEqual</operation>
         <value>DMS</value>
     </filters>
     <filters>
