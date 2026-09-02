@@ -7,7 +7,7 @@ private class NotificationEmailBulkQueryServiceTest {
   @IsTest
   static void selectLatestPublishedCommentByCaseIdReturnsNewestCommentPerCase() {
     Account household = new Account(Name = 'Bulk Comment Household');
-    insert household;
+    NotificationTestDataFactory.insertRecord(household);
 
     Case firstCase = new Case(Subject = 'Case A', AccountId = household.Id);
     Case secondCase = new Case(Subject = 'Case B', AccountId = household.Id);
@@ -42,7 +42,7 @@ private class NotificationEmailBulkQueryServiceTest {
   @IsTest
   static void selectAttendeeSummaryByEventIdJoinsInviteeNames() {
     Account household = new Account(Name = 'Bulk Event Household');
-    insert household;
+    NotificationTestDataFactory.insertRecord(household);
 
     Contact attendeeOne = new Contact(LastName = 'Alpha', AccountId = household.Id);
     Contact attendeeTwo = new Contact(LastName = 'Beta', AccountId = household.Id);
@@ -82,7 +82,7 @@ private class NotificationEmailBulkQueryServiceTest {
   @IsTest
   static void selectAccountsAndContactsByIdReturnsRequestedRecords() {
     Account household = new Account(Name = 'Bulk Account');
-    insert household;
+    NotificationTestDataFactory.insertRecord(household);
 
     Contact contactRecord = new Contact(LastName = 'BulkContact', AccountId = household.Id);
     insert contactRecord;

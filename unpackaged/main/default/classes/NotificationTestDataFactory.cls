@@ -65,6 +65,12 @@ public class NotificationTestDataFactory {
       return;
     }
 
+    for (SObject record : records) {
+      if (record instanceof Account) {
+        ensureAccountTypeOrClassification((Account) record);
+      }
+    }
+
     System.runAs(runningUser()) {
       insert records;
     }
@@ -345,5 +351,27 @@ public class NotificationTestDataFactory {
         AssigneeId = :userId
         AND (PermissionSetGroupId != NULL OR PermissionSet.IsOwnedByProfile = FALSE)
     ];
+  }
+
+  private static void ensureAccountTypeOrClassification(Account account) {
+    if (account == null) {
+      return;
+    }
+
+    if (
+      !String.isBlank(account.Type) ||
+      !String.isBlank(account.Classification__c)
+    ) {
+      return;
+    }
+
+    String accountType = FscRelClientAccountUtils.resolveClientAccountTypeForDataSetup();
+
+    if (!String.isBlank(accountType)) {
+      account.Type = accountType;
+      return;
+    }
+
+    account.Classification__c = FscRelClassificationUtils.UNCLASSIFIED;
   }
 }
