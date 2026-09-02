@@ -90,7 +90,18 @@
   align-items: stretch;
   /* 12px below the title block, and flush with the header's bottom rule. */
   margin-top: var(--slds-g-spacing-3, 12px);
-  overflow: hidden;
+  /* Not overflow:hidden -- measureTabsIfNeeded's own pixel-width JS is what
+     actually keeps the visible tabs from overflowing this row (see
+     MAX_VISIBLE_TABS), so clipping here was never load-bearing for that.
+     What it WAS silently doing: the "More" dropdown (.arc-record-list-view__
+     menu--tabs) is position:absolute, top:calc(100% + 4px) -- i.e. it hangs
+     BELOW this row on purpose -- and this row's own overflow:hidden clipped
+     it out of view the instant it opened, with no error anywhere since
+     nothing was actually throwing. (Splitting this into overflow-x:hidden/
+     overflow-y:visible doesn't work around it either -- per the CSS overflow
+     spec, pairing "visible" on one axis with anything else on the other
+     silently forces the "visible" one to compute as "auto" instead, which
+     still clips/scrolls a dropdown this much taller than a 40px row.) */
 }
 
 .arc-record-list-view__tab {

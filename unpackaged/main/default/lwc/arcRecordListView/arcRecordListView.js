@@ -21,6 +21,8 @@ import {
 } from "lightning/uiListsApi";
 import { getObjectInfo } from "lightning/uiObjectInfoApi";
 import searchRecords from "@salesforce/apex/ArcRecordSearchController.searchRecords";
+import getListViewPreference from "@salesforce/apex/UserPreferenceController.getListViewPreference";
+import saveListViewPreference from "@salesforce/apex/UserPreferenceController.saveListViewPreference";
 import diversifyStyles from "@salesforce/resourceUrl/diversifyStyles";
 import NEXS_ICONS from "@salesforce/resourceUrl/arcicon";
 import { CurrentPageReference, NavigationMixin } from "lightning/navigation";
@@ -87,6 +89,26 @@ const SEARCH_DEBOUNCE_MS = 275;
  * 80 this file used to assume in buildListViewApiName's budget math.
  */
 const SAVE_VIEW_NAME_MAX_LENGTH = 40;
+/**
+ * Own namespace, distinct from arcListView's ("ARC") -- this component keys
+ * its preference on objectApiName (e.g. "Case"), not the same per-placement
+ * tableId arcListView's pages configure, so a different applicationName
+ * guarantees no collision even if some tableId value happened to match.
+ */
+const LIST_VIEW_PREFERENCE_APPLICATION_NAME = "ARC_RECORD_LIST_VIEW";
+
+/** Mirrors arcListView's own parseListViewPreference. */
+const parseListViewPreference = (preferenceJson) => {
+  if (!preferenceJson) {
+    return null;
+  }
+  try {
+    const parsed = JSON.parse(preferenceJson);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch (error) {
+    return null;
+  }
+};
 /**
  * Page size for the opt-in "server search" mode (see enableServerSearch):
  * a small, fast first fetch instead of the default LIST_VIEW_FETCH_SIZE=2000
@@ -466,9 +488,25 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   _adoptedListViewApiName = "";
   /** Views saved from this component this session, so they tab up immediately. */
   _createdViewApiNames = new Set();
+  /**
+   * createdApiName -> the tab it was created FROM. viewTabs is static,
+   * page-config-time JSON, so a view created at runtime can never be one of
+   * its own entries -- without this, activeConfiguredTab (and everything
+   * that reads from it: column labels, chart field, quick-create fields)
+   * would go blank the instant a saved view stops being literally one of
+   * the page's configured tabs. See activeConfiguredTab's fallback.
+   */
+  _createdViewSourceApiName = new Map();
   /** Overflow (configured) tabs a "More" click has brought into the strip for
    * this session -- see promoteTab. */
   _promotedTabValues = [];
+  /** Parsed { listViewApiName } from getListViewPreference, or null. */
+  _listViewPreference = null;
+  _preferenceResolved = false;
+  /** Guards applyListViewPreferenceIfNeeded so a later, user-driven tab
+   * switch is never silently reverted back once the remembered view has
+   * already been restored once. */
+  _appliedListViewPreference = false;
   /** Natural fit count from the last width measurement -- see
    * measureTabsIfNeeded. Starts at the fixed fallback until first measured. */
   _measuredVisibleCount = MAX_VISIBLE_TABS;
@@ -854,11 +892,44 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     }
   }
 
-  /** The configured tab currently selected, if any. */
+  /**
+   * The configured tab currently selected -- or, for a view saved here, the
+   * tab it was created FROM (see _createdViewSourceApiName), so a saved view
+   * keeps that tab's column labels, chart field, and quick-create fields
+   * instead of losing all of them the instant it stops being literally one
+   * of the page's own configured tabs. Without this, e.g. a "Permanent
+   * State" column relabel on the source tab reverted to the raw field's own
+   * native label ("Billing State/Province") on any view saved from it.
+   */
   get activeConfiguredTab() {
-    return this.configuredTabs.find(
+    const own = this.configuredTabs.find(
       (tab) => tab.value === this.selectedListViewApiName
     );
+    if (own) {
+      return own;
+    }
+
+    const sourceValue = this._createdViewSourceApiName.get(
+      this.selectedListViewApiName
+    );
+    const source = sourceValue
+      ? this.configuredTabs.find((tab) => tab.value === sourceValue)
+      : null;
+    if (!source) {
+      return source;
+    }
+
+    // Carry the source tab's per-tab config, but keep this view's own
+    // identity/label -- it must not start looking like a second copy of the
+    // tab it was created from.
+    const ownListEntry = this.listViews.find(
+      (lv) => lv.value === this.selectedListViewApiName
+    );
+    return {
+      ...source,
+      value: this.selectedListViewApiName,
+      label: ownListEntry?.label || source.label
+    };
   }
 
   /**
@@ -1553,6 +1624,26 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     }
   }
 
+  /**
+   * Whichever view this placement's user had open last time, restored once
+   * both this and wiredListInfos have resolved (see
+   * applyListViewPreferenceIfNeeded) -- mirrors arcListView's own pin/restore
+   * mechanism (getListViewPreference/saveListViewPreference), which this
+   * component never had despite being forked from it.
+   */
+  @wire(getListViewPreference, {
+    applicationName: LIST_VIEW_PREFERENCE_APPLICATION_NAME,
+    tableId: "$objectApiName"
+  })
+  wiredListViewPreference(result) {
+    this._preferenceResolved = true;
+    const { data } = result;
+    this._listViewPreference = data
+      ? parseListViewPreference(data.entryJson)
+      : null;
+    this.applyListViewPreferenceIfNeeded();
+  }
+
   /*
    * The field describe, purely for the labels of configured columns the list
    * view does not carry. getListObjectInfo would seem to be the closer fit,
@@ -1601,6 +1692,7 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
           !fetchedValues.has(lv.value)
       );
       this.listViews = [...fetched, ...stillMissing];
+      this.applyListViewPreferenceIfNeeded();
       if (
         !this.selectedListViewApiName ||
         !this.listViews.some((lv) => lv.value === this.selectedListViewApiName)
@@ -2401,6 +2493,54 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     this.isLoading = true;
     this.selectedListViewApiName = listViewApiName;
     this.syncTabUrlParam(listViewApiName);
+    this.persistListViewPreference(listViewApiName);
+  }
+
+  /**
+   * Restores whichever view this placement's user had selected last time,
+   * the moment both the preference and the view list have resolved (either
+   * can settle first). Guarded to apply at most once per component
+   * lifetime, so a user actively switching tabs afterward is never silently
+   * reverted back to whatever was remembered from before this page load.
+   */
+  applyListViewPreferenceIfNeeded() {
+    if (
+      this._appliedListViewPreference ||
+      !this._preferenceResolved ||
+      !this.listViews.length
+    ) {
+      return;
+    }
+    this._appliedListViewPreference = true;
+
+    const preferredApiName = this._listViewPreference?.listViewApiName;
+    if (!preferredApiName || this.selectedListViewApiName === preferredApiName) {
+      return;
+    }
+    // The remembered view may have been deleted since, or (for one recently
+    // created here) not indexed by the platform yet -- see wiredListInfos'
+    // merge-not-overwrite guard. Falling back to the page's own default in
+    // that case beats surfacing an error for a view that's simply gone.
+    if (!this.listViews.some((lv) => lv.value === preferredApiName)) {
+      return;
+    }
+    this.selectTabView(preferredApiName);
+  }
+
+  /** Best-effort -- see applyListViewPreferenceIfNeeded for the read side. */
+  persistListViewPreference(listViewApiName) {
+    if (!this.objectApiName || !listViewApiName) {
+      return;
+    }
+    saveListViewPreference({
+      applicationName: LIST_VIEW_PREFERENCE_APPLICATION_NAME,
+      tableId: this.objectApiName,
+      preferenceJson: JSON.stringify({ listViewApiName })
+    }).catch(() => {
+      /* Losing this save just means the next reload falls back to the
+         page's own default tab instead of wherever the user actually was --
+         not worth surfacing as a user-facing error. */
+    });
   }
 
   /**
@@ -2808,6 +2948,9 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
       return;
     }
 
+    // Captured before createListInfo, while selectedListViewApiName is still
+    // the tab this view is being saved FROM -- see _createdViewSourceApiName.
+    const sourceViewApiName = this.selectedListViewApiName;
     this.isSavingView = true;
     this.saveViewError = undefined;
 
@@ -2827,6 +2970,10 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
       this.selectedListViewApiName = createdApiName;
       this._savedSignature = this.currentSignature;
       this._createdViewApiNames.add(createdApiName);
+      if (sourceViewApiName) {
+        this._createdViewSourceApiName.set(createdApiName, sourceViewApiName);
+      }
+      this.persistListViewPreference(createdApiName);
 
       if (!this.listViews.some((lv) => lv.value === createdApiName)) {
         this.listViews = [
