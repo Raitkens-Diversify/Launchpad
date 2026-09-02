@@ -2247,6 +2247,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>TaskCommentControllerTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>TaskSlaTriggerHandler</apexClass>
         <enabled>true</enabled>
     </classAccesses>

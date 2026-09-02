@@ -9,7 +9,6 @@
 import { LightningElement, wire } from "lwc";
 import { NavigationMixin, CurrentPageReference } from "lightning/navigation";
 import { refreshApex } from "@salesforce/apex";
-import USER_ID from "@salesforce/user/Id";
 import {
   resolveRecordIdFromPageReference,
   isValidSalesforceRecordId,
@@ -20,6 +19,7 @@ import getOpenActivitiesForParentCase from "@salesforce/apex/ArcTaskDetailContro
 import getOpenActivitiesForParent from "@salesforce/apex/ArcTaskDetailController.getOpenActivitiesForParent";
 import getOpenCasesForHousehold from "@salesforce/apex/ArcTaskDetailController.getOpenCasesForHousehold";
 import markComplete from "@salesforce/apex/CaseCurrentTaskController.markComplete";
+import addComment from "@salesforce/apex/TaskCommentController.addComment";
 
 const ACTIVITY_COLUMNS = [
   {
@@ -66,7 +66,6 @@ const HOUSEHOLD_CASE_COLUMNS = [
 export default class ArcTaskDetail extends NavigationMixin(LightningElement) {
   _recordId;
   _pageRef;
-  currentUserId = USER_ID;
   activityColumns = ACTIVITY_COLUMNS;
   parentActivityColumns = PARENT_ACTIVITY_COLUMNS;
   householdCaseColumns = HOUSEHOLD_CASE_COLUMNS;
@@ -81,6 +80,11 @@ export default class ArcTaskDetail extends NavigationMixin(LightningElement) {
 
   isMarkingComplete = false;
   markCompleteErrorMessage = "";
+
+  isCommentModalOpen = false;
+  commentBody = "";
+  isSavingComment = false;
+  commentError = "";
 
   @wire(CurrentPageReference)
   wiredPageReference(pageRef) {
@@ -118,6 +122,10 @@ export default class ArcTaskDetail extends NavigationMixin(LightningElement) {
 
   get hasRecordId() {
     return isValidSalesforceRecordId(this._recordId);
+  }
+
+  get recordId() {
+    return this._recordId;
   }
 
   get subject() {
@@ -166,12 +174,17 @@ export default class ArcTaskDetail extends NavigationMixin(LightningElement) {
     return this.status === "Completed";
   }
 
-  get isOwnedByCurrentUser() {
-    return String(this.taskContext?.ownerId) === String(this.currentUserId);
+  /**
+   * Mark Complete mirrors the Lightning Task page: the action is present on
+   * any loaded task and enabled while the task is still open, greying out once
+   * it is Completed — not restricted to the task owner.
+   */
+  get showMarkComplete() {
+    return this.hasRecordId && Boolean(this.status);
   }
 
-  get showMarkComplete() {
-    return this.isOwnedByCurrentUser;
+  get disableMarkComplete() {
+    return this.isMarkingComplete || this.isCompleted;
   }
 
   get showOpenActivities() {
@@ -224,6 +237,10 @@ export default class ArcTaskDetail extends NavigationMixin(LightningElement) {
     return Boolean(this.markCompleteErrorMessage);
   }
 
+  get hasCommentError() {
+    return Boolean(this.commentError);
+  }
+
   handleWhatClick(event) {
     event.preventDefault();
     this.navigateToRecord(this.taskContext.whatId, this.taskContext.whatObjectApiName);
@@ -269,5 +286,54 @@ export default class ArcTaskDetail extends NavigationMixin(LightningElement) {
 
   getRecordDetail() {
     return this.template.querySelector("c-arc-record-detail");
+  }
+
+  handleAddCommentClick() {
+    this.commentBody = "";
+    this.commentError = "";
+    this.isCommentModalOpen = true;
+  }
+
+  handleCommentChange(event) {
+    this.commentBody = event.detail.value;
+    if (this.commentError) {
+      this.commentError = "";
+    }
+  }
+
+  handleCommentCancel() {
+    if (this.isSavingComment) {
+      return;
+    }
+    this.isCommentModalOpen = false;
+    this.commentBody = "";
+    this.commentError = "";
+  }
+
+  async handleCommentSave() {
+    if (this.isSavingComment) {
+      return;
+    }
+
+    const body = (this.commentBody || "").trim();
+    if (!body) {
+      this.commentError = "Enter a comment.";
+      return;
+    }
+
+    this.isSavingComment = true;
+    this.commentError = "";
+    try {
+      await addComment({ taskId: this._recordId, body });
+      this.isCommentModalOpen = false;
+      this.commentBody = "";
+      // Reload the right-hand Task Comments list so the new comment shows.
+      this.refs.taskComments?.refresh();
+    } catch (error) {
+      this.commentError =
+        error?.body?.message || error?.message || "Could not add this comment.";
+    } finally {
+      this.isSavingComment = false;
+    }
   }
 }

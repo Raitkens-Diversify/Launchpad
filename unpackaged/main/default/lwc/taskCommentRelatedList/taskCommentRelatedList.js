@@ -34,6 +34,15 @@ export default class TaskCommentRelatedList extends LightningElement {
         this._loadData();
     }
 
+    /**
+     * Reload the comments — called by the parent (arcTaskDetail) after a new
+     * comment is added so the list reflects it without a page reload.
+     */
+    @api
+    refresh() {
+        this._loadData();
+    }
+
     get displayedData() {
         return this._showingAll ? this._allData : this._firstFive;
     }
@@ -46,6 +55,9 @@ export default class TaskCommentRelatedList extends LightningElement {
     }
 
     _loadData() {
+        if (!this.recordId) {
+            return;
+        }
         getComments({ recordId: this.recordId })
             .then(result => {
                 const data        = result || [];

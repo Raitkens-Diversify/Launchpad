@@ -30,6 +30,13 @@
           {viewMinMax}
         </div>
       </template>
+
+      <!-- Empty state: the card is otherwise just a header, whose border reads
+           as a stray line. A muted message fills it out, matching the other
+           related lists' "No ..." copy. -->
+      <template if:false={showData}>
+        <div class="task-comment__empty">No comments yet.</div>
+      </template>
     </lightning-card>
   </div>
 </template>

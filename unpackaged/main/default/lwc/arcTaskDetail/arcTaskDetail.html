@@ -21,16 +21,21 @@
                 {markCompleteErrorMessage}
               </p>
             </template>
-            <template lwc:if={showMarkComplete}>
-              <div class="arc-task-detail__actions">
+            <div class="arc-task-detail__actions">
+              <template lwc:if={showMarkComplete}>
                 <lightning-button
                   label="Mark Complete"
                   variant="brand"
-                  disabled={isCompleted}
+                  disabled={disableMarkComplete}
                   onclick={handleMarkComplete}
                 ></lightning-button>
-              </div>
-            </template>
+              </template>
+              <lightning-button
+                label="Add Comment"
+                variant="neutral"
+                onclick={handleAddCommentClick}
+              ></lightning-button>
+            </div>
           </div>
         </div>
 
@@ -60,66 +65,143 @@
         </dl>
       </header>
 
-      <div class="arc-task-detail__body">
-        <c-arc-record-detail field-layout="grid"></c-arc-record-detail>
+      <div class="arc-task-detail__columns">
+        <div class="arc-task-detail__body">
+          <c-arc-record-detail field-layout="grid"></c-arc-record-detail>
 
-        <template lwc:if={showOpenActivities}>
-          <lightning-card title={openActivitiesLabel}>
-            <template lwc:if={hasOpenActivities}>
+          <template lwc:if={showOpenActivities}>
+            <lightning-card title={openActivitiesLabel}>
+              <template lwc:if={hasOpenActivities}>
+                <c-arc-data-table
+                  aria-label="Open activities for parent case"
+                  key-field="id"
+                  columns={activityColumns}
+                  data={openActivities}
+                  placeholder="-"
+                  enable-row-navigation
+                ></c-arc-data-table>
+              </template>
+              <template lwc:else>
+                <div class="slds-p-around_medium">No open activities.</div>
+              </template>
+            </lightning-card>
+          </template>
+
+          <!-- The parent record's open activities (tasks and events merged),
+               for non-Case parents — the Lightning task page's
+               "Open Activities for Parent Financial Account" list. New Task /
+               New Event stay out for now: multi-screen, deferred on request. -->
+          <template lwc:if={showParentActivities}>
+            <lightning-card title={parentActivitiesLabel}>
+              <template lwc:if={hasParentActivities}>
+                <c-arc-data-table
+                  aria-label="Open activities for the parent record"
+                  key-field="id"
+                  columns={parentActivityColumns}
+                  data={parentActivities}
+                  placeholder="-"
+                  enable-row-navigation
+                  onrownavigate={handleParentActivityRowNavigate}
+                ></c-arc-data-table>
+              </template>
+              <template lwc:else>
+                <div class="slds-p-around_medium">No open activities.</div>
+              </template>
+            </lightning-card>
+          </template>
+
+          <lightning-card title={householdCasesLabel}>
+            <template lwc:if={hasHouseholdCases}>
               <c-arc-data-table
-                aria-label="Open activities for parent case"
+                aria-label="Open cases for household"
                 key-field="id"
-                columns={activityColumns}
-                data={openActivities}
+                columns={householdCaseColumns}
+                data={householdCases}
                 placeholder="-"
                 enable-row-navigation
               ></c-arc-data-table>
             </template>
             <template lwc:else>
-              <div class="slds-p-around_medium">No open activities.</div>
+              <div class="slds-p-around_medium">No open cases for this household.</div>
             </template>
           </lightning-card>
-        </template>
+        </div>
 
-        <!-- The parent record's open activities (tasks and events merged),
-             for non-Case parents — the Lightning task page's
-             "Open Activities for Parent Financial Account" list. New Task /
-             New Event stay out for now: multi-screen, deferred on request. -->
-        <template lwc:if={showParentActivities}>
-          <lightning-card title={parentActivitiesLabel}>
-            <template lwc:if={hasParentActivities}>
-              <c-arc-data-table
-                aria-label="Open activities for the parent record"
-                key-field="id"
-                columns={parentActivityColumns}
-                data={parentActivities}
-                placeholder="-"
-                enable-row-navigation
-                onrownavigate={handleParentActivityRowNavigate}
-              ></c-arc-data-table>
-            </template>
-            <template lwc:else>
-              <div class="slds-p-around_medium">No open activities.</div>
-            </template>
-          </lightning-card>
-        </template>
-
-        <lightning-card title={householdCasesLabel}>
-          <template lwc:if={hasHouseholdCases}>
-            <c-arc-data-table
-              aria-label="Open cases for household"
-              key-field="id"
-              columns={householdCaseColumns}
-              data={householdCases}
-              placeholder="-"
-              enable-row-navigation
-            ></c-arc-data-table>
-          </template>
-          <template lwc:else>
-            <div class="slds-p-around_medium">No open cases for this household.</div>
-          </template>
-        </lightning-card>
+        <!-- Task Comments on the right, matching the Lightning Task page's
+             right column (cmp_TaskCommentRelatedList / EnhancedRelatedList). -->
+        <aside class="arc-task-detail__comments">
+          <c-task-comment-related-list
+            lwc:ref="taskComments"
+            record-id={recordId}
+            sobject-label-plural="Task Comments"
+          ></c-task-comment-related-list>
+        </aside>
       </div>
     </div>
+
+    <!-- Add Comment: the Lightning Task page's "Add Comment" quick action
+         (Task_Comment flow) — a required comment field that creates a
+         Task_Comment__c, which the trigger mirrors to a CaseComment when the
+         parent is a Case. Built native here because the flow's final step is an
+         Aura navigation action that does not run in the LWR site. -->
+    <template lwc:if={isCommentModalOpen}>
+      <section
+        class="arc-task-detail__modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Add Comment"
+      >
+        <div
+          class="arc-task-detail__modal-backdrop"
+          onclick={handleCommentCancel}
+        ></div>
+        <div class="arc-task-detail__modal-panel">
+          <header class="arc-task-detail__modal-header">
+            <h2 class="arc-task-detail__modal-title">Add Comment</h2>
+            <button
+              type="button"
+              class="arc-task-detail__modal-close"
+              title="Cancel"
+              aria-label="Cancel"
+              onclick={handleCommentCancel}
+            >
+              <lightning-icon
+                icon-name="utility:close"
+                size="x-small"
+                alternative-text="Cancel"
+              ></lightning-icon>
+            </button>
+          </header>
+          <div class="arc-task-detail__modal-body">
+            <lightning-textarea
+              name="comment"
+              label="Body"
+              value={commentBody}
+              onchange={handleCommentChange}
+              required
+              message-when-value-missing="Enter a comment."
+            ></lightning-textarea>
+            <template lwc:if={hasCommentError}>
+              <p class="arc-task-detail__inline-error" role="alert">
+                {commentError}
+              </p>
+            </template>
+          </div>
+          <footer class="arc-task-detail__modal-footer">
+            <lightning-button
+              label="Cancel"
+              onclick={handleCommentCancel}
+              disabled={isSavingComment}
+            ></lightning-button>
+            <lightning-button
+              variant="brand"
+              label="Save"
+              onclick={handleCommentSave}
+              disabled={isSavingComment}
+            ></lightning-button>
+          </footer>
+        </div>
+      </section>
+    </template>
   </template>
 </template>

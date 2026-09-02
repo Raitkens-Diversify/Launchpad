@@ -165,3 +165,94 @@
   gap: 12px;
   margin-top: 12px;
 }
+/* ── Two-column layout: detail on the left, Task Comments on the right ───── */
+
+.arc-task-detail__columns {
+  display: grid;
+  grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.arc-task-detail__comments {
+  min-width: 0;
+}
+
+/* The comment list is a component in its own right; stack the layout on
+   narrower viewports so the right column drops below the detail. */
+@media (max-width: 1024px) {
+  .arc-task-detail__columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Add Comment modal ──────────────────────────────────────────────────── */
+
+.arc-task-detail__modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.arc-task-detail__modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.arc-task-detail__modal-panel {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 32rem;
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+  border-radius: var(--lwc-borderRadiusMedium, 4px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+.arc-task-detail__modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 16px;
+  border-bottom: 1px solid var(--lwc-colorBorder, #c9c9c9);
+}
+
+.arc-task-detail__modal-title {
+  margin: 0;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 700;
+  color: var(--lwc-colorTextDefault, #181818);
+}
+
+.arc-task-detail__modal-close {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 0;
+  color: var(--lwc-colorTextWeak, #444444);
+}
+
+.arc-task-detail__modal-body {
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.arc-task-detail__modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--lwc-colorBorder, #c9c9c9);
+}

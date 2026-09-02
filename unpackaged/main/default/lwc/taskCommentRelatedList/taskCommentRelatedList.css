@@ -1,0 +1,19 @@
+:host {
+  display: block;
+}
+
+.task-comment__empty {
+  padding: 0.75rem 1rem 1rem;
+  color: var(--lwc-colorTextWeak, #444444);
+  font-size: 13px;
+}
+
+.linkText {
+  color: var(--lwc-colorTextLink, #1f86d8);
+  cursor: pointer;
+  padding-bottom: 0.5rem;
+}
+
+.linkText:hover {
+  text-decoration: underline;
+}
