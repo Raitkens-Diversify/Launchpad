@@ -31,39 +31,11 @@ public with sharing class NotificationHouseholdResolver {
 
   private Map<Id, Id> resolveFromCases(List<SObject> records) {
     Map<Id, Id> recordIdToHouseholdId = new Map<Id, Id>();
-    Set<Id> financialAccountIds = new Set<Id>();
 
     for (SObject record : records) {
       Case caseRecord = (Case) record;
       if (caseRecord.AccountId != null) {
         recordIdToHouseholdId.put(caseRecord.Id, caseRecord.AccountId);
-        continue;
-      }
-
-      Id financialAccountId = (Id) caseRecord.get('FinServ__FinancialAccount__c');
-      if (financialAccountId != null) {
-        financialAccountIds.add(financialAccountId);
-      }
-    }
-
-    if (financialAccountIds.isEmpty()) {
-      return recordIdToHouseholdId;
-    }
-
-    Map<Id, Id> financialAccountIdToHouseholdId = queryFinancialAccountHouseholds(
-      financialAccountIds
-    );
-
-    for (SObject record : records) {
-      Case caseRecord = (Case) record;
-      if (recordIdToHouseholdId.containsKey(caseRecord.Id)) {
-        continue;
-      }
-
-      Id financialAccountId = (Id) caseRecord.get('FinServ__FinancialAccount__c');
-      Id householdId = financialAccountIdToHouseholdId.get(financialAccountId);
-      if (householdId != null) {
-        recordIdToHouseholdId.put(caseRecord.Id, householdId);
       }
     }
 
@@ -152,7 +124,7 @@ public with sharing class NotificationHouseholdResolver {
     }
 
     for (Case caseRecord : [
-      SELECT Id, AccountId, FinServ__FinancialAccount__c
+      SELECT Id, AccountId
       FROM Case
       WHERE Id IN :caseIds
     ]) {
@@ -167,66 +139,7 @@ public with sharing class NotificationHouseholdResolver {
       }
     }
 
-    Set<Id> unresolvedCaseIds = new Set<Id>();
-    Set<Id> financialAccountIds = new Set<Id>();
-
-    for (Id caseId : caseIds) {
-      if (caseIdToHouseholdId.containsKey(caseId)) {
-        continue;
-      }
-      unresolvedCaseIds.add(caseId);
-    }
-
-    if (unresolvedCaseIds.isEmpty()) {
-      return caseIdToHouseholdId;
-    }
-
-    for (Case caseRecord : [
-      SELECT Id, FinServ__FinancialAccount__c
-      FROM Case
-      WHERE Id IN :unresolvedCaseIds
-    ]) {
-      Id financialAccountId = (Id) caseRecord.get('FinServ__FinancialAccount__c');
-      if (financialAccountId != null) {
-        financialAccountIds.add(financialAccountId);
-      }
-    }
-
-    Map<Id, Id> financialAccountIdToHouseholdId = queryFinancialAccountHouseholds(
-      financialAccountIds
-    );
-
-    for (Case caseRecord : [
-      SELECT Id, FinServ__FinancialAccount__c
-      FROM Case
-      WHERE Id IN :unresolvedCaseIds
-    ]) {
-      Id financialAccountId = (Id) caseRecord.get('FinServ__FinancialAccount__c');
-      Id householdId = financialAccountIdToHouseholdId.get(financialAccountId);
-      if (householdId != null) {
-        caseIdToHouseholdId.put(caseRecord.Id, householdId);
-      }
-    }
-
     return caseIdToHouseholdId;
-  }
-
-  private Map<Id, Id> queryFinancialAccountHouseholds(Set<Id> financialAccountIds) {
-    Map<Id, Id> financialAccountIdToHouseholdId = new Map<Id, Id>();
-    if (financialAccountIds == null || financialAccountIds.isEmpty()) {
-      return financialAccountIdToHouseholdId;
-    }
-
-    for (SObject financialAccount : Database.query(
-      'SELECT Id, FinServ__Household__c FROM FinServ__FinancialAccount__c WHERE Id IN :financialAccountIds'
-    )) {
-      Id householdId = (Id) financialAccount.get('FinServ__Household__c');
-      if (householdId != null) {
-        financialAccountIdToHouseholdId.put(financialAccount.Id, householdId);
-      }
-    }
-
-    return financialAccountIdToHouseholdId;
   }
 
   private Map<Id, Id> queryOpportunityAccounts(Set<Id> opportunityIds) {

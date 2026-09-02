@@ -1123,6 +1123,15 @@ public with sharing class FscRelHouseholdService {
     }
   }
 
+  private List<String> buildRolesFromRelation(
+    Account_Account_Relationship__c relation
+  ) {
+    String roleName = FscRelRoleUtils.resolveRelatedAccountRoleName(relation);
+    return String.isBlank(roleName)
+      ? new List<String>()
+      : new List<String>{ roleName };
+  }
+
   private List<FscRelHouseholdModels.TreeAccount> buildRelatedAccounts(
     List<Account_Account_Relationship__c> relations
   ) {
@@ -1139,7 +1148,7 @@ public with sharing class FscRelHouseholdService {
       account.name = relation.Related_Account__r != null
         ? relation.Related_Account__r.Name
         : null;
-      account.roles = FscRelRoleUtils.parseRoles(relation.Roles__c);
+      account.roles = buildRolesFromRelation(relation);
       account.recordTypeDeveloperName = relation.Related_Account__r != null &&
         relation.Related_Account__r.RecordType != null
         ? relation.Related_Account__r.RecordType.DeveloperName
@@ -1153,6 +1162,7 @@ public with sharing class FscRelHouseholdService {
         : null;
       account.isPersonAccount = relation.Related_Account__r != null &&
         relation.Related_Account__r.IsPersonAccount == true;
+      account.associationType = relation.Association_Type__c;
       accounts.add(account);
     }
 
@@ -1548,6 +1558,132 @@ public with sharing class FscRelHouseholdService {
   public FscRelHouseholdModels.DeleteResult deleteMemberAccountRelationships(
     List<String> relationIds
   ) {
+    return deleteAccountRelationshipsInternal(relationIds, true);
+  }
+
+  public List<FscRelHouseholdModels.PicklistOption> getAccountAccountRelationshipAssociationTypeOptions() {
+    List<FscRelHouseholdModels.PicklistOption> options = new List<FscRelHouseholdModels.PicklistOption>();
+    Map<String, Schema.SObjectField> fieldMap = Account_Account_Relationship__c.SObjectType.getDescribe()
+      .fields.getMap();
+
+    if (!fieldMap.containsKey('Association_Type__c')) {
+      return options;
+    }
+
+    for (
+      Schema.PicklistEntry entry : fieldMap.get('Association_Type__c')
+        .getDescribe()
+        .getPicklistValues()
+    ) {
+      if (!entry.isActive()) {
+        continue;
+      }
+
+      options.add(
+        new FscRelHouseholdModels.PicklistOption(entry.getLabel(), entry.getValue())
+      );
+    }
+
+    return options;
+  }
+
+  public FscRelHouseholdModels.TreeAccountResult saveAccountRelationship(
+    Id rootAccountId,
+    FscRelHouseholdModels.TreeAccountRelationshipInput input
+  ) {
+    if (rootAccountId == null) {
+      return new FscRelHouseholdModels.TreeAccountResult(
+        false,
+        'No root account id provided.',
+        null
+      );
+    }
+
+    if (input == null || String.isBlank(input.accountId)) {
+      return new FscRelHouseholdModels.TreeAccountResult(
+        false,
+        'Select an account from the list.',
+        null
+      );
+    }
+
+    Id relatedAccountId;
+    try {
+      relatedAccountId = Id.valueOf(input.accountId);
+    } catch (Exception error) {
+      return new FscRelHouseholdModels.TreeAccountResult(
+        false,
+        'Invalid related account id.',
+        null
+      );
+    }
+
+    if (relatedAccountId == rootAccountId) {
+      return new FscRelHouseholdModels.TreeAccountResult(
+        false,
+        'The root account cannot be added as a related account.',
+        null
+      );
+    }
+
+    Id businessRecordTypeId = FscRelRecordTypeUtils.selectAccountRelationRecordTypeId(
+      FscRelRecordTypeUtils.BUSINESS_RECORD_TYPE
+    );
+    Savepoint savepoint = Database.setSavepoint();
+
+    try {
+      Account_Account_Relationship__c relation = resolveBusinessAccountRelationship(
+        input.relationId,
+        rootAccountId,
+        relatedAccountId,
+        businessRecordTypeId
+      );
+
+      relation.Account__c = rootAccountId;
+      relation.Related_Account__c = relatedAccountId;
+      relation.Active__c = true;
+
+      if (businessRecordTypeId != null) {
+        relation.RecordTypeId = businessRecordTypeId;
+      }
+
+      if (
+        Account_Account_Relationship__c.SObjectType.getDescribe()
+          .fields.getMap()
+          .containsKey('Association_Type__c')
+      ) {
+        relation.Association_Type__c = input.associationType;
+      }
+
+      if (relation.Id == null) {
+        accountRelationRepository.insertRelation(relation);
+      } else {
+        accountRelationRepository.updateRelation(relation);
+      }
+
+      FscRelHouseholdModels.TreeAccountResult result = new FscRelHouseholdModels.TreeAccountResult(
+        true,
+        'Saved related account relationship.',
+        String.valueOf(relatedAccountId)
+      );
+      result.relationId = String.valueOf(relation.Id);
+      return result;
+    } catch (Exception error) {
+      Database.rollback(savepoint);
+      return new FscRelHouseholdModels.TreeAccountResult(false, error.getMessage(), null);
+    }
+  }
+
+  public FscRelHouseholdModels.DeleteResult deleteAccountRelationships(
+    List<String> relationIds
+  ) {
+    return deleteAccountRelationshipsInternal(relationIds, false);
+  }
+
+  private FscRelHouseholdModels.DeleteResult deleteAccountRelationshipsInternal(
+    List<String> relationIds,
+    Boolean includeMirrorDeletes
+  ) {
     if (relationIds == null || relationIds.isEmpty()) {
       return new FscRelHouseholdModels.DeleteResult(true, 'Nothing to delete.', 0);
     }
@@ -1575,12 +1711,14 @@ public with sharing class FscRelHouseholdService {
       }
 
       List<Account_Account_Relationship__c> mirrorRelations = new List<Account_Account_Relationship__c>();
-      for (Account_Account_Relationship__c relation : targets) {
-        Account_Account_Relationship__c mirror = findMirrorMemberAccountRelationship(
-          relation
-        );
-        if (mirror != null) {
-          mirrorRelations.add(mirror);
+      if (includeMirrorDeletes == true) {
+        for (Account_Account_Relationship__c relation : targets) {
+          Account_Account_Relationship__c mirror = findMirrorMemberAccountRelationship(
+            relation
+          );
+          if (mirror != null) {
+            mirrorRelations.add(mirror);
+          }
         }
       }
 
@@ -1598,6 +1736,46 @@ public with sharing class FscRelHouseholdService {
       Database.rollback(savepoint);
       return new FscRelHouseholdModels.DeleteResult(false, error.getMessage(), 0);
     }
+  }
+
+  private Account_Account_Relationship__c resolveBusinessAccountRelationship(
+    String relationId,
+    Id rootAccountId,
+    Id relatedAccountId,
+    Id businessRecordTypeId
+  ) {
+    if (!String.isBlank(relationId)) {
+      List<Id> ids = parseRelationIds(new List<String>{ relationId });
+      if (!ids.isEmpty()) {
+        List<Account_Account_Relationship__c> existingRelations = accountRelationRepository.selectByIds(
+          ids
+        );
+        if (!existingRelations.isEmpty()) {
+          return existingRelations[0];
+        }
+      }
+    }
+
+    Account_Account_Relationship__c existingRelation = accountRelationRepository.selectByRootAccountAndRelatedAccount(
+      rootAccountId,
+      relatedAccountId
+    );
+    if (existingRelation != null) {
+      return existingRelation;
+    }
+
+    if (businessRecordTypeId != null) {
+      existingRelation = accountRelationRepository.selectByAccountRelatedAccountAndRecordType(
+        rootAccountId,
+        relatedAccountId,
+        businessRecordTypeId
+      );
+      if (existingRelation != null) {
+        return existingRelation;
+      }
+    }
+
+    return new Account_Account_Relationship__c();
   }
 
   private FscRelHouseholdModels.TreeMemberAccountRelationship mapMemberAccountRelationship(

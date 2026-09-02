@@ -4,6 +4,8 @@ import { resolveRecordIdFromPageReference } from "c/recordNavigationUtils";
 import { getRecord, getFieldValue } from "lightning/uiRecordApi";
 import getFormSchema from "@salesforce/apex/FieldDetailController.getFormSchema";
 import getRecordValuesForType from "@salesforce/apex/FieldDetailController.getRecordValuesForType";
+import getRelationships from "@salesforce/apex/ArcAccountRelationshipsController.getRelationships";
+import { evaluateWhereStatement } from "c/envelopeFormSchema";
 
 /**
  * arcHouseholdDetail
@@ -147,6 +149,13 @@ const relationshipFor = (fieldPath) => {
 
 const TYPE_REFERENCE = "REFERENCE";
 
+/**
+ * Tab key for the account's Relationships, which is not a schema section but a
+ * component (c-arc-account-relationships) shown in its own tab. A sentinel that
+ * cannot collide with a real Section_Name__c.
+ */
+const RELATIONSHIPS_TAB_KEY = "__relationships__";
+
 export default class ArcHouseholdDetail extends LightningElement {
   /** Object whose record page this sits on. */
   @api objectApiName = "Account";
@@ -237,6 +246,21 @@ export default class ArcHouseholdDetail extends LightningElement {
   }
 
   recordTypeName;
+
+  /**
+   * The Relationships tab's own gate. ArcAccountRelationshipsController returns
+   * a blank category for account types the Relationships card does not cover
+   * (Household, ...) -- the same signal arcAccountRelationships uses to render
+   * nothing -- so the tab only appears when this is non-blank. Wiring the same
+   * cacheable method the card wires means one shared server call, not two, and
+   * the account-type rule stays in Apex rather than being copied here.
+   */
+  _relationshipsCategory = "";
+
+  @wire(getRelationships, { accountId: "$recordId" })
+  wiredRelationships({ data }) {
+    this._relationshipsCategory = data?.category || "";
+  }
 
   /** Resolved schema type for this record, or undefined if its type is unmapped. */
   get resolvedSchemaType() {
@@ -349,7 +373,28 @@ export default class ArcHouseholdDetail extends LightningElement {
 
     return (this.sectionsRaw || [])
       .map((section) => {
-        const fields = (section.fields || []).map((field, index) => {
+        /*
+         * Honor each field's Shown_WHERE_Statement__c against THIS record -- the
+         * same conditions the onboarding wizard evaluates -- so a field the
+         * Lightning page gates off is gated off here too: employer fields when
+         * the client is not Employed, the mailing address when it matches the
+         * permanent one, Officer/Symbol unless they are an officer, and so on.
+         * The record's own values are the draft the condition reads (values is
+         * already keyed by field API name, which is what the statements name).
+         *
+         * evaluateWhereStatement fails OPEN: a field with no condition, or one
+         * whose statement this evaluator cannot parse, always shows. So this can
+         * only ever HIDE a field a real condition rules out -- never drop a
+         * plain field -- and an empty-but-applicable field still renders as an
+         * em dash. A section whose every field is gated off ends up with no
+         * fields and is dropped below, which is how a whole tab hides per
+         * account.
+         */
+        const visibleFields = (section.fields || []).filter((field) =>
+          evaluateWhereStatement(field.shownWhereStatement, values, {})
+        );
+
+        const fields = visibleFields.map((field, index) => {
           const raw = values[field.fieldPath];
           const type = (field.type || "").toUpperCase();
 
@@ -457,24 +502,48 @@ export default class ArcHouseholdDetail extends LightningElement {
    * never left blank pointing at a section that is gone.
    */
   get selectedTabKey() {
-    const sections = this.sections;
-    if (!sections.length) {
+    const tabs = this.allTabs;
+    if (!tabs.length) {
       return undefined;
     }
-    const exists = sections.some((section) => section.key === this._activeTabKey);
-    return exists ? this._activeTabKey : sections[0].key;
+    const exists = tabs.some((tab) => tab.key === this._activeTabKey);
+    return exists ? this._activeTabKey : tabs[0].key;
   }
 
-  /** One entry per section for the tablist, pre-decorated with its ARIA and
-   *  class state so the template stays declarative (LWC cannot build a class
-   *  string from an expression). */
+  /**
+   * Every tab in strip order: the schema sections, then Relationships (the
+   * account's related-people card, moved off the right rail into its own tab).
+   * The single source the tablist, the selected-key fallback and the arrow-key
+   * navigation all read from, so they can never disagree on what the tabs are.
+   */
+  get allTabs() {
+    const tabs = this.sections.map((section) => ({
+      key: section.key,
+      name: section.name
+    }));
+    // Only when the account's type actually carries relationships (see the
+    // wire above) -- a Household and other uncovered types get no tab.
+    if (this.showRelationshipsTab) {
+      tabs.push({ key: RELATIONSHIPS_TAB_KEY, name: 'Relationships' });
+    }
+    return tabs;
+  }
+
+  /** Whether the Relationships tab applies to this account's type. */
+  get showRelationshipsTab() {
+    return Boolean(this._relationshipsCategory);
+  }
+
+  /** One entry per tab for the tablist, pre-decorated with its ARIA and class
+   *  state so the template stays declarative (LWC cannot build a class string
+   *  from an expression). */
   get tabItems() {
     const selected = this.selectedTabKey;
-    return this.sections.map((section) => {
-      const active = section.key === selected;
+    return this.allTabs.map((tab) => {
+      const active = tab.key === selected;
       return {
-        key: section.key,
-        label: section.name,
+        key: tab.key,
+        label: tab.name,
         ariaSelected: active ? 'true' : 'false',
         // Roving tabindex: only the active tab is in the tab order; the rest
         // are reached with the arrow keys, the way a tablist should behave.
@@ -486,10 +555,40 @@ export default class ArcHouseholdDetail extends LightningElement {
     });
   }
 
+  /** True when the Relationships tab is the open one. */
+  get isRelationshipsActive() {
+    return this.selectedTabKey === RELATIONSHIPS_TAB_KEY;
+  }
+
+  /** True when a schema-section tab (the field grid) is the open one. */
+  get isFieldTabActive() {
+    return !this.isRelationshipsActive;
+  }
+
   /** The fields of the open section, or null while there is nothing to show. */
   get activeSection() {
     const key = this.selectedTabKey;
     return this.sections.find((section) => section.key === key) || null;
+  }
+
+  /**
+   * Every section decorated with its visible/hidden state. All are rendered and
+   * stacked in one grid cell (see the CSS) so the card holds the height of the
+   * tallest section and never resizes between tabs; only the active panel is
+   * shown, the rest stay in layout but hidden.
+   */
+  get panelSections() {
+    const selected = this.selectedTabKey;
+    return this.sections.map((section) => {
+      const active = section.key === selected;
+      return {
+        ...section,
+        panelClass: active
+          ? 'arc-household-detail__panel arc-household-detail__panel--active'
+          : 'arc-household-detail__panel',
+        hiddenAttr: active ? 'false' : 'true'
+      };
+    });
   }
 
   handleTabClick(event) {
@@ -502,7 +601,7 @@ export default class ArcHouseholdDetail extends LightningElement {
    * re-render, so there is no reason to make the user press Enter as well.
    */
   handleTabKeydown(event) {
-    const keys = this.sections.map((section) => section.key);
+    const keys = this.allTabs.map((tab) => tab.key);
     if (!keys.length) {
       return;
     }

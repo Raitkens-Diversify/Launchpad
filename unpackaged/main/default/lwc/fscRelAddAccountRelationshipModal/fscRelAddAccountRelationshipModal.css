@@ -1,0 +1,154 @@
+/*
+ * Author: Hoang Long Vu To
+ * Date: 2026-06-08
+ */
+:host {
+    display: block;
+    --modal-divider: #e5e5e5;
+    --modal-error: #b3261e;
+}
+
+.modal-header__group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.modal-header__breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+}
+
+.modal-body {
+    position: relative;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1 1 auto;
+}
+
+.modal-body__scroll {
+    overflow-x: auto;
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: calc(90vh - 11rem);
+    -webkit-overflow-scrolling: touch;
+}
+
+.modal-loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.modal-table {
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-table__header,
+.modal-table__row {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.4fr) minmax(180px, 1fr) 36px;
+    gap: 0.75rem;
+    align-items: center;
+    min-width: 520px;
+}
+
+.modal-table__header {
+    padding: 0.5rem 0;
+    color: #5c5c5c;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.modal-table__row-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.5rem 0;
+}
+
+.modal-table__row-wrapper_pending-delete {
+    background: #fdecec;
+    border-left: 3px solid var(--modal-error);
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    margin: 0 -0.75rem;
+}
+
+.modal-table__row-wrapper_error {
+    background: #fdecec;
+    border-left: 3px solid var(--modal-error);
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    margin: 0 -0.75rem;
+}
+
+.row-pending {
+    flex: 1 1 auto;
+    min-width: 0;
+    color: var(--modal-error);
+}
+
+.row-pending__name {
+    margin: 0;
+    font-weight: 600;
+    text-decoration: line-through;
+}
+
+.row-pending__hint {
+    margin: 0.1rem 0 0;
+    color: var(--modal-error);
+    font-style: italic;
+}
+
+.row-pending__placeholder {
+    color: #6b6b6b;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.modal-table__row-error {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    color: var(--modal-error);
+    font-size: small;
+    padding: 0.25rem 0 0.1rem 0.25rem;
+}
+
+.modal-table__add {
+    margin-top: 1rem;
+}
+
+.modal-table__col_account {
+    min-width: 0;
+}
+
+.modal-table__col_account c-fsc-rel-record-lookup {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 100%;
+    display: block;
+}
+
+.row-pending__strike {
+    text-decoration: line-through;
+    color: #706e6b;
+}
+
+.modal-banner {
+    margin-bottom: 0.75rem;
+}

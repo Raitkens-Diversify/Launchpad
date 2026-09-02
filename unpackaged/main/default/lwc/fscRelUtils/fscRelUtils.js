@@ -527,7 +527,7 @@ export const buildAccountViewModels = (rawAccounts) => {
         id: account.relationId || account.accountId,
         relationId: account.relationId,
         accountId: account.accountId || "",
-        contactId: "",
+        contactId: account.contactId || "",
         name: account.name || "",
         iconName: "standard:account",
         roles,
@@ -535,7 +535,7 @@ export const buildAccountViewModels = (rawAccounts) => {
         recordTypeDeveloperName: account.recordTypeDeveloperName || "",
         recordTypeLabel: account.recordTypeLabel || "",
         accountType: account.accountType || "",
-        contactId: account.contactId || "",
+        associationType: account.associationType || "",
         isPersonAccount: Boolean(account.isPersonAccount),
         classifications: Array.isArray(account.classifications)
           ? account.classifications
@@ -556,13 +556,9 @@ export const mapAccountsForModal = (accounts) => {
     relationId: account.relationId || "",
     accountId: account.accountId || "",
     name: account.name || "",
-    selectedRoles: Array.isArray(account.selectedRoles)
-      ? account.selectedRoles
-      : Array.isArray(account.roles)
-        ? account.roles
-        : [],
     recordTypeDeveloperName: account.recordTypeDeveloperName || "",
-    recordTypeLabel: account.recordTypeLabel || ""
+    recordTypeLabel: account.recordTypeLabel || "",
+    associationType: account.associationType || ""
   }));
 };
 

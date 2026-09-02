@@ -52,20 +52,47 @@
           </template>
         </div>
 
-        <template lwc:if={activeSection}>
+        <!-- Field-section tabs. Every section's panel is rendered and stacked in
+             one grid cell (see the CSS): only the active one is visible, but the
+             inactive ones keep their space, so the card is always as tall as the
+             TALLEST section. Switching between these tabs therefore never resizes
+             the card, which had been nudging the Documents section below it up
+             and down. Relationships is a different kind of content and gets its
+             own panel below rather than being force-fit to the field height. -->
+        <template lwc:if={isFieldTabActive}>
+          <div class="arc-household-detail__panels">
+            <template for:each={panelSections} for:item="section">
+              <div
+                key={section.key}
+                class={section.panelClass}
+                role="tabpanel"
+                aria-label={section.name}
+                aria-hidden={section.hiddenAttr}
+              >
+                <dl class="arc-household-detail__grid">
+                  <template for:each={section.fields} for:item="field">
+                    <div key={field.key} class="arc-household-detail__field">
+                      <dt class="arc-household-detail__label">{field.label}</dt>
+                      <dd class={field.valueClass}>{field.value}</dd>
+                    </div>
+                  </template>
+                </dl>
+              </div>
+            </template>
+          </div>
+        </template>
+
+        <!-- Relationships tab: the account's related-people card, moved off the
+             right rail into the strip. It brings its own heading and layout. -->
+        <template lwc:if={isRelationshipsActive}>
           <div
-            class="arc-household-detail__panel"
+            class="arc-household-detail__relationships-panel"
             role="tabpanel"
-            aria-label={activeSection.name}
+            aria-label="Relationships"
           >
-            <dl class="arc-household-detail__grid">
-              <template for:each={activeSection.fields} for:item="field">
-                <div key={field.key} class="arc-household-detail__field">
-                  <dt class="arc-household-detail__label">{field.label}</dt>
-                  <dd class={field.valueClass}>{field.value}</dd>
-                </div>
-              </template>
-            </dl>
+            <c-arc-account-relationships
+              card-title="Relationships"
+            ></c-arc-account-relationships>
           </div>
         </template>
       </div>

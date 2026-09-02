@@ -138,42 +138,4 @@ private class NotificationHouseholdResolverTest {
       'Task linked to Opportunity should resolve Opportunity Account household'
     );
   }
-
-  @IsTest
-  static void resolveHouseholdsFromCaseUsesFinancialAccountWhenAccountMissing() {
-    Account household = new Account(Name = 'Financial Account Household');
-    NotificationTestDataFactory.insertRecord(household);
-
-    List<SObject> financialAccounts = Database.query(
-      'SELECT Id FROM FinServ__FinancialAccount__c LIMIT 1'
-    );
-
-    if (financialAccounts.isEmpty()) {
-      System.assert(true, 'FinServ financial accounts unavailable in org.');
-      return;
-    }
-
-    Id financialAccountId = financialAccounts[0].Id;
-    SObject financialAccountUpdate = financialAccounts[0].getSObjectType()
-      .newSObject(financialAccountId);
-    financialAccountUpdate.put('FinServ__Household__c', household.Id);
-    NotificationTestDataFactory.updateRecord(financialAccountUpdate);
-
-    Case caseRecord = new Case(
-      Subject = 'Financial Account Case',
-      FinServ__FinancialAccount__c = financialAccountId
-    );
-    NotificationTestDataFactory.insertRecord(caseRecord);
-
-    NotificationHouseholdResolver resolver = new NotificationHouseholdResolver();
-    Map<Id, Id> recordIdToHouseholdId = resolver.resolveHouseholds(
-      new List<SObject>{ caseRecord },
-      NotificationConstants.OBJECT_TYPE_CASE
-    );
-
-    System.assertEquals(
-      household.Id,
-      recordIdToHouseholdId.get(caseRecord.Id)
-    );
-  }
 }

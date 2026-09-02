@@ -131,8 +131,7 @@ public class FscDataTestDataFactory {
     if (resolvedOptions.includeBusinessRelationship) {
       scenario.primaryAccountRelationship = createAccountRelationship(
         scenario.rootAccount,
-        scenario.relatedBusinessAccount,
-        resolveDefaultAarRoleValue()
+        scenario.relatedBusinessAccount
       );
     }
 
@@ -319,16 +318,14 @@ public class FscDataTestDataFactory {
 
   public static Account_Account_Relationship__c createAccountRelationship(
     Account rootAccount,
-    Account relatedAccount,
-    String role
+    Account relatedAccount
   ) {
-    return createAccountRelationship(rootAccount, relatedAccount, role, 'Business');
+    return createAccountRelationship(rootAccount, relatedAccount, 'Business');
   }
 
   public static Account_Account_Relationship__c createAccountRelationship(
     Account rootAccount,
     Account relatedAccount,
-    String role,
     String recordTypeDeveloperName
   ) {
     Id recordTypeId = FscRelRecordTypeUtils.selectAccountRelationRecordTypeId(
@@ -337,7 +334,7 @@ public class FscDataTestDataFactory {
     Account_Account_Relationship__c relationship = new Account_Account_Relationship__c(
       Account__c = rootAccount.Id,
       Related_Account__c = relatedAccount.Id,
-      Roles__c = String.isBlank(role) ? resolveDefaultAarRoleValue() : role
+      Active__c = true
     );
 
     if (recordTypeId != null) {
@@ -471,31 +468,6 @@ public class FscDataTestDataFactory {
 
     defaultRoleValue = 'Client';
     return defaultRoleValue;
-  }
-
-  public static String resolveDefaultAarRoleValue() {
-    if (defaultAarRoleValue != null) {
-      return defaultAarRoleValue;
-    }
-
-    defaultAarRoleValue = resolveFirstActivePicklistValue(
-      Account_Account_Relationship__c.Roles__c,
-      new List<String>{
-        'Employer',
-        'Business Partner',
-        'Co-worker / Colleague',
-        'Referrer',
-        'Client'
-      }
-    );
-    return defaultAarRoleValue;
-  }
-
-  public static List<String> resolveDefaultAarSelectedRoles() {
-    String defaultRole = resolveDefaultAarRoleValue();
-    return String.isBlank(defaultRole)
-      ? new List<String>()
-      : new List<String>{ defaultRole };
   }
 
   public static void assignActiveClientAccountType(List<Account> accounts) {
@@ -706,7 +678,7 @@ public class FscDataTestDataFactory {
     Id relatedAccountId
   ) {
     List<Account_Account_Relationship__c> relationships = [
-      SELECT Id, Account__c, Related_Account__c, Roles__c
+      SELECT Id, Account__c, Related_Account__c
       FROM Account_Account_Relationship__c
       WHERE Account__c = :rootAccountId AND Related_Account__c = :relatedAccountId
       LIMIT 1
@@ -727,36 +699,8 @@ public class FscDataTestDataFactory {
     return null;
   }
 
-  private static String resolveFirstActivePicklistValue(
-    Schema.SObjectField field,
-    List<String> preferredValues
-  ) {
-    Set<String> activeValues = new Set<String>();
-
-    for (Schema.PicklistEntry entry : field.getDescribe().getPicklistValues()) {
-      if (entry.isActive()) {
-        activeValues.add(entry.getValue());
-      }
-    }
-
-    if (preferredValues != null) {
-      for (String preferredValue : preferredValues) {
-        if (activeValues.contains(preferredValue)) {
-          return preferredValue;
-        }
-      }
-    }
-
-    for (String activeValue : activeValues) {
-      return activeValue;
-    }
-
-    return '';
-  }
-
   private static Id personAccountRecordTypeId;
   private static String defaultRoleValue;
-  private static String defaultAarRoleValue;
 
   private static Id resolvePersonAccountRecordTypeId() {
     if (personAccountRecordTypeId != null) {

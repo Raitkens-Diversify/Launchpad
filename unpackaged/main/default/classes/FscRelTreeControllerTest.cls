@@ -55,11 +55,8 @@ private class FscRelTreeControllerTest {
 
     update new Account(
       Id = scenario.relatedBusinessAccount.Id,
+      Household__c = scenario.rootAccount.Id,
       Classification__c = FscRelClassificationUtils.UNCLASSIFIED
-    );
-    FscDataTestDataFactory.assignClientHousehold(
-      new List<Account>{ scenario.relatedBusinessAccount },
-      scenario.rootAccount.Id
     );
 
     Test.startTest();
@@ -82,11 +79,8 @@ private class FscRelTreeControllerTest {
 
     update new Account(
       Id = scenario.relatedBusinessAccount.Id,
+      Household__c = scenario.rootAccount.Id,
       Classification__c = FscRelClassificationUtils.UNCLASSIFIED
-    );
-    FscDataTestDataFactory.assignClientHousehold(
-      new List<Account>{ scenario.relatedBusinessAccount },
-      scenario.rootAccount.Id
     );
 
     Test.startTest();
@@ -215,24 +209,26 @@ private class FscRelTreeControllerTest {
     );
     Test.stopTest();
 
-    System.assert(treeData.relatedAccounts.size() >= 1, 'Expected at least one related account');
-
-    FscRelHouseholdModels.TreeAccount relatedAccount;
-    for (FscRelHouseholdModels.TreeAccount candidate : treeData.relatedAccounts) {
-      if (candidate.accountId == String.valueOf(scenario.relatedBusinessAccount.Id)) {
-        relatedAccount = candidate;
+    FscRelHouseholdModels.TreeAccount relatedBusinessAccount;
+    for (FscRelHouseholdModels.TreeAccount relatedAccount : treeData.relatedAccounts) {
+      if (
+        relatedAccount.accountId ==
+        String.valueOf(scenario.relatedBusinessAccount.Id)
+      ) {
+        relatedBusinessAccount = relatedAccount;
         break;
       }
     }
 
-    System.assertNotEquals(null, relatedAccount, 'Expected related business account in tree');
-    System.assertEquals(
-      String.valueOf(scenario.relatedBusinessAccount.Id),
-      relatedAccount.accountId
+    System.assertNotEquals(
+      null,
+      relatedBusinessAccount,
+      'Expected the business related account on the household tree.'
     );
     System.assertEquals(
-      FscDataTestDataFactory.resolveDefaultAarSelectedRoles(),
-      relatedAccount.roles
+      new List<String>(),
+      relatedBusinessAccount.roles,
+      'Business relationships without reciprocal roles should expose an empty role list.'
     );
   }
 

@@ -58,6 +58,8 @@ public class FscRelHouseholdModels {
     public Boolean isPersonAccount;
     @AuraEnabled
     public List<String> classifications;
+    @AuraEnabled
+    public String associationType;
 
     public TreeAccount() {
       this.roles = new List<String>();
@@ -369,6 +371,18 @@ public class FscRelHouseholdModels {
 
     public MemberAccountRelationshipsSaveResult() {
       this(false, '', 0);
+    }
+  }
+
+  public class TreeAccountRelationshipInput {
+    @AuraEnabled
+    public String relationId;
+    @AuraEnabled
+    public String accountId;
+    @AuraEnabled
+    public String associationType;
+
+    public TreeAccountRelationshipInput() {
     }
   }
 }

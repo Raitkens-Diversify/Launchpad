@@ -519,8 +519,7 @@ private class FscRelAccountRepositoryTest {
 
     System.assertEquals(1, businessResults.size());
     System.assertEquals(scenario.relatedBusinessAccount.Id, businessResults[0].Id);
-    System.assertEquals(1, personResults.size());
-    System.assertEquals(scenario.relatedBusinessAccount.Id, personResults[0].Id);
+    System.assertEquals(0, personResults.size());
   }
 
   @IsTest

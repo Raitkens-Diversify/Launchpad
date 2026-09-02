@@ -48,13 +48,13 @@ private class FscRelHouseholdControllerTest {
 
     Test.startTest();
     List<FscRelHouseholdModels.LookupOption> scopedResults = FscRelHouseholdController.searchAccountsInScope(
-      FscDataTestDataFactory.LINKED_PERSON_LAST_NAME,
-      null,
+      'FscData',
+      true,
       new List<String>{ scenario.linkedPersonAccount.Id }
     );
     List<FscRelHouseholdModels.LookupOption> excludedResults = FscRelHouseholdController.searchAccountsInScope(
-      FscDataTestDataFactory.LINKED_PERSON_LAST_NAME,
-      null,
+      'FscData',
+      true,
       new List<String>{ scenario.rootAccount.Id }
     );
     Test.stopTest();
@@ -78,17 +78,6 @@ private class FscRelHouseholdControllerTest {
     System.assertEquals(1, results.size());
     System.assertEquals(scenario.linkedPersonAccount.Id, results[0].id);
     System.assertEquals(scenario.linkedPersonAccount.Name, results[0].label);
-  }
-
-  @IsTest
-  static void getCreateableRecordTypes_returnsAccountOptions() {
-    Test.startTest();
-    List<FscRelHouseholdModels.CreateRecordTypeOption> options = FscRelHouseholdController.getCreateableRecordTypes(
-      'Account'
-    );
-    Test.stopTest();
-
-    System.assert(!options.isEmpty(), 'Expected creatable Account record types.');
   }
 
   @IsTest
@@ -342,5 +331,47 @@ private class FscRelHouseholdControllerTest {
 
     System.assertEquals(2, counts.get(String.valueOf(scenario.rootAccount.Id)));
     System.assertEquals(0, counts.get(String.valueOf(scenario.secondRootAccount.Id)));
+  }
+
+  @IsTest
+  static void getAccountAccountRelationshipAssociationTypeOptions_returnsOptions() {
+    Test.startTest();
+    List<FscRelHouseholdModels.PicklistOption> options = FscRelHouseholdController.getAccountAccountRelationshipAssociationTypeOptions();
+    Test.stopTest();
+
+    System.assertNotEquals(null, options);
+  }
+
+  @IsTest
+  static void saveAccountRelationship_persistsBusinessRelationship() {
+    FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
+    Account additionalBusinessAccount = FscDataTestDataFactory.createRootAccount(
+      'Controller Related Business'
+    );
+    FscRelHouseholdModels.TreeAccountRelationshipInput input = new FscRelHouseholdModels.TreeAccountRelationshipInput();
+    input.accountId = String.valueOf(additionalBusinessAccount.Id);
+
+    Test.startTest();
+    FscRelHouseholdModels.TreeAccountResult result = FscRelHouseholdController.saveAccountRelationship(
+      scenario.rootAccount.Id,
+      JSON.serialize(input)
+    );
+    Test.stopTest();
+
+    System.assertEquals(true, result.success, result.message);
+    System.assertNotEquals(null, result.relationId);
+  }
+
+  @IsTest
+  static void deleteAccountRelationships_removesBusinessRelationship() {
+    FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
+
+    Test.startTest();
+    FscRelHouseholdModels.DeleteResult deleteResult = FscRelHouseholdController.deleteAccountRelationships(
+      new List<String>{ String.valueOf(scenario.primaryAccountRelationship.Id) }
+    );
+    Test.stopTest();
+
+    System.assertEquals(true, deleteResult.success, deleteResult.message);
   }
 }

@@ -8,8 +8,7 @@ OR(
 RecordType.DeveloperName = &quot;Business&quot;,
 RecordType.DeveloperName = &quot;Retirement_Plan&quot;,
 RecordType.DeveloperName = &quot;Trust&quot;,
-RecordType.DeveloperName = &quot;PersonAccount&quot;,
-RecordType.DeveloperName = &quot;Diversify_Related_Person&quot;
+RecordType.DeveloperName = &quot;PersonAccount&quot;
 ),
 (TEXT(Type)=&#39;&#39;),
 PICKLISTCOUNT(Classification__c)=0

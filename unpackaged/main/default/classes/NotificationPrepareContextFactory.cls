@@ -95,8 +95,7 @@ public without sharing class NotificationPrepareContextFactory {
           AccountId,
           OwnerId,
           CreatedById,
-          Financial_Advisor_Team__c,
-          FinServ__FinancialAccount__c
+          Financial_Advisor_Team__c
         FROM Case
         WHERE Id = :recordId
         LIMIT 1

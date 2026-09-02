@@ -1017,6 +1017,64 @@ private class FscRelHouseholdServiceTest {
   }
 
   @IsTest
+  static void getRelationshipTree_showsRelatedAccountRoleOnBusinessMap() {
+    FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
+    String recordTypeDeveloperName = FscRelRecordTypeUtils.BUSINESS_RECORD_TYPE;
+    Id recordTypeId = FscRelRecordTypeUtils.selectAccountRelationRecordTypeId(
+      recordTypeDeveloperName
+    );
+    if (recordTypeId == null) {
+      return;
+    }
+
+    Reciprocal_Role__c employeeRole = FscDataTestDataFactory.createReciprocalRoleForMemberRelationship(
+      recordTypeDeveloperName,
+      'Employee',
+      'Employer'
+    );
+    Reciprocal_Role__c employerRole = [
+      SELECT Id, Role__c
+      FROM Reciprocal_Role__c
+      WHERE Role__c = 'Employer'
+      LIMIT 1
+    ];
+    FscRelHouseholdModels.TreeMemberAccountRelationshipInput input = FscDataTestDataFactory.buildMemberAccountRelationshipInput(
+      scenario.relatedBusinessAccount,
+      employeeRole,
+      employerRole,
+      true,
+      'row-business-map'
+    );
+    FscRelHouseholdService service = new FscRelHouseholdService();
+    service.saveMemberAccountRelationships(
+      scenario.linkedPersonAccount.Id,
+      recordTypeDeveloperName,
+      new List<FscRelHouseholdModels.TreeMemberAccountRelationshipInput>{ input }
+    );
+
+    Test.startTest();
+    FscRelHouseholdModels.RelationshipTreeData treeData = service.getRelationshipTree(
+      scenario.relatedBusinessAccount.Id
+    );
+    Test.stopTest();
+
+    FscRelHouseholdModels.TreeAccount relatedPersonAccount;
+    for (FscRelHouseholdModels.TreeAccount relatedAccount : treeData.relatedAccounts) {
+      if (relatedAccount.accountId == String.valueOf(scenario.linkedPersonAccount.Id)) {
+        relatedPersonAccount = relatedAccount;
+        break;
+      }
+    }
+
+    System.assertNotEquals(null, relatedPersonAccount);
+    System.assertEquals(
+      new List<String>{ 'Employee' },
+      relatedPersonAccount.roles,
+      'Business map should label the related person with their role.'
+    );
+  }
+
+  @IsTest
   static void deleteMemberAccountRelationships_removesPrimaryAndMirrorRows() {
     FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
     String recordTypeDeveloperName = resolveFirstAccountRelationRecordTypeDeveloperName();
@@ -1078,6 +1136,126 @@ private class FscRelHouseholdServiceTest {
           OR Account__c = :scenario.secondPersonAccount.Id
       ]
     );
+  }
+
+  @IsTest
+  static void getAccountAccountRelationshipAssociationTypeOptions_returnsPicklistValues() {
+    FscRelHouseholdService service = new FscRelHouseholdService();
+
+    Test.startTest();
+    List<FscRelHouseholdModels.PicklistOption> options = service.getAccountAccountRelationshipAssociationTypeOptions();
+    Test.stopTest();
+
+    System.assertNotEquals(null, options);
+  }
+
+  @IsTest
+  static void saveAccountRelationship_createsAndUpdatesBusinessRelationship() {
+    FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
+    Account additionalBusinessAccount = FscDataTestDataFactory.createRootAccount(
+      'Additional Related Business'
+    );
+    FscRelHouseholdService service = new FscRelHouseholdService();
+    FscRelHouseholdModels.TreeAccountRelationshipInput createInput = new FscRelHouseholdModels.TreeAccountRelationshipInput();
+    createInput.accountId = String.valueOf(additionalBusinessAccount.Id);
+
+    Test.startTest();
+    FscRelHouseholdModels.TreeAccountResult createResult = service.saveAccountRelationship(
+      scenario.rootAccount.Id,
+      createInput
+    );
+    Test.stopTest();
+
+    System.assertEquals(true, createResult.success, createResult.message);
+    System.assertNotEquals(null, createResult.relationId);
+
+    Account_Account_Relationship__c createdRelation = [
+      SELECT Id, Association_Type__c, Active__c
+      FROM Account_Account_Relationship__c
+      WHERE Id = :createResult.relationId
+      LIMIT 1
+    ];
+    System.assertEquals(true, createdRelation.Active__c);
+
+    FscRelHouseholdModels.TreeAccountRelationshipInput updateInput = new FscRelHouseholdModels.TreeAccountRelationshipInput();
+    updateInput.relationId = createResult.relationId;
+    updateInput.accountId = String.valueOf(additionalBusinessAccount.Id);
+    updateInput.associationType = resolveFirstAssociationTypeValue(service);
+
+    if (String.isBlank(updateInput.associationType)) {
+      return;
+    }
+
+    FscRelHouseholdModels.TreeAccountResult updateResult = service.saveAccountRelationship(
+      scenario.rootAccount.Id,
+      updateInput
+    );
+    System.assertEquals(true, updateResult.success, updateResult.message);
+
+    createdRelation = [
+      SELECT Association_Type__c
+      FROM Account_Account_Relationship__c
+      WHERE Id = :createResult.relationId
+      LIMIT 1
+    ];
+    System.assertEquals(
+      updateInput.associationType,
+      createdRelation.Association_Type__c
+    );
+  }
+
+  @IsTest
+  static void saveAccountRelationship_rejectsRootAccountAsRelatedAccount() {
+    FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
+    FscRelHouseholdService service = new FscRelHouseholdService();
+    FscRelHouseholdModels.TreeAccountRelationshipInput input = new FscRelHouseholdModels.TreeAccountRelationshipInput();
+    input.accountId = String.valueOf(scenario.rootAccount.Id);
+
+    Test.startTest();
+    FscRelHouseholdModels.TreeAccountResult result = service.saveAccountRelationship(
+      scenario.rootAccount.Id,
+      input
+    );
+    Test.stopTest();
+
+    System.assertEquals(false, result.success);
+  }
+
+  @IsTest
+  static void deleteAccountRelationships_deletesBusinessRelationshipWithoutMirror() {
+    FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
+    Account_Account_Relationship__c relation = scenario.primaryAccountRelationship;
+    FscRelHouseholdService service = new FscRelHouseholdService();
+
+    Test.startTest();
+    FscRelHouseholdModels.DeleteResult deleteResult = service.deleteAccountRelationships(
+      new List<String>{ String.valueOf(relation.Id) }
+    );
+    Test.stopTest();
+
+    System.assertEquals(true, deleteResult.success, deleteResult.message);
+    System.assertEquals(
+      0,
+      [
+        SELECT COUNT()
+        FROM Account_Account_Relationship__c
+        WHERE Id = :relation.Id
+      ]
+    );
+  }
+
+  private static String resolveFirstAssociationTypeValue(
+    FscRelHouseholdService service
+  ) {
+    for (
+      FscRelHouseholdModels.PicklistOption option : service.getAccountAccountRelationshipAssociationTypeOptions()
+    ) {
+      if (!String.isBlank(option?.value)) {
+        return option.value;
+      }
+    }
+
+    return null;
   }
 
   private static String resolveFirstAccountRelationRecordTypeDeveloperName() {

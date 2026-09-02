@@ -2635,6 +2635,19 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     }
     this._appliedListViewPreference = true;
 
+    // An explicit ?c__tabId= deep link already picked a tab for this visit
+    // -- e.g. the Contacts submenu's Individuals/Clients/Households/etc.
+    // links all land on this same page but each name a specific tab (see
+    // STATIC_NAV_ITEMS in arcNavTrailState.js). That just-clicked, per-link
+    // intent has to win over whatever tab the user happened to have open
+    // last time, or every one of those links would open whichever tab was
+    // last visited instead of the one actually clicked. A nav link with no
+    // tab param at all (a plain single-tab-strip entry point like "Cases")
+    // never sets this, so it still falls back to the remembered tab below.
+    if (this._appliedTabParam) {
+      return;
+    }
+
     const preferredApiName = this._listViewPreference?.listViewApiName;
     if (!preferredApiName || this.selectedListViewApiName === preferredApiName) {
       return;

@@ -22,19 +22,36 @@ export const isValidSalesforceRecordId = (value) =>
 
 const isSalesforceId = isValidSalesforceRecordId;
 
+/**
+ * The record id out of a site path.
+ *
+ * Scans the segments instead of reading only the last one. This site's record
+ * pages are LWR detail routes — routeType detail-001 / detail-00T — whose URL
+ * is /{urlPrefix}/{Object}/{recordId}/{actionName}, e.g.
+ * /ARC/account/Account/001.../view. The id is second-to-last and the ACTION is
+ * last, so reading only the final segment returned null for every contact,
+ * case and task detail page: this fallback could never fire on the very URLs
+ * it exists to parse. isOffNavRoute treats "no record id" as "not a record
+ * page" and hides the breadcrumb, which is why detail pages had none.
+ *
+ * Walked from the end so the deepest id wins on a nested path, and so the site
+ * base can never be mistaken for one.
+ */
 const resolveRecordIdFromPath = (pathname) => {
   const segments = (pathname || "").split("/").filter(Boolean);
-  if (segments.length === 0) {
-    return null;
+
+  for (let index = segments.length - 1; index >= 0; index -= 1) {
+    if (isSalesforceId(segments[index])) {
+      return segments[index];
+    }
   }
 
-  const lastSegment = segments[segments.length - 1];
-  return isSalesforceId(lastSegment) ? lastSegment : null;
+  return null;
 };
 
 /**
  * Resolve the current record Id from the page context: Lightning record-page
- * attributes, LWR page state, URL query params, or the final URL path segment.
+ * attributes, LWR page state, URL query params, or a record id in the URL path.
  */
 export const resolveRecordIdFromPageReference = (pageRef, objectApiName) => {
   const attributeRecordId = pageRef?.attributes?.recordId;
@@ -117,6 +134,21 @@ export const shouldAllowNativeRecordNavigation = (event) => {
     event.ctrlKey ||
     event.shiftKey
   );
+};
+
+/**
+ * True while the user has real (non-collapsed) selected text on the page.
+ * A mousedown-drag-mouseup gesture to select/copy a cell's text still fires
+ * a plain click on mouseup -- indistinguishable from a genuine click by
+ * event type alone -- so a row/link click handler that doesn't want to hijack
+ * a copy gesture needs to check this too. A plain click (no drag) collapses
+ * any prior selection before the click event fires, so this is only ever
+ * true here because of the gesture that produced the current click.
+ */
+export const hasActiveTextSelection = () => {
+  const selection =
+    typeof window === "undefined" ? null : window.getSelection();
+  return Boolean(selection && selection.toString().length > 0);
 };
 
 const openRecordInBrowserTab = (navigationHost, recordId) =>

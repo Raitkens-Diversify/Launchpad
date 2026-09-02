@@ -3,6 +3,44 @@
  * Date: 2026-06-01
  */
 public class FscRelRoleUtils {
+  public static String resolveReciprocalRoleName(
+    Account_Account_Relationship__c relation
+  ) {
+    if (relation == null) {
+      return null;
+    }
+
+    if (relation.Reciprocal_Role__r != null) {
+      String roleName = FscRelReciprocalRoleRepository.resolveDisplayName(
+        relation.Reciprocal_Role__r
+      );
+      if (!String.isBlank(roleName)) {
+        return roleName;
+      }
+    }
+
+    return null;
+  }
+
+  public static String resolveRelatedAccountRoleName(
+    Account_Account_Relationship__c relation
+  ) {
+    if (relation == null) {
+      return null;
+    }
+
+    if (relation.Inverse_Reciprocal_Role__r != null) {
+      String inverseRoleName = FscRelReciprocalRoleRepository.resolveDisplayName(
+        relation.Inverse_Reciprocal_Role__r
+      );
+      if (!String.isBlank(inverseRoleName)) {
+        return inverseRoleName;
+      }
+    }
+
+    return resolveReciprocalRoleName(relation);
+  }
+
   public static List<String> parseRoles(String rolesString) {
     List<String> result = new List<String>();
     if (String.isBlank(rolesString)) {

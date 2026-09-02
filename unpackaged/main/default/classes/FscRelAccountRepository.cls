@@ -323,6 +323,10 @@ public with sharing class FscRelAccountRepository {
       ')';
     List<Account> accounts;
 
+    if (personAccountsOnly == true) {
+      whereClause = 'IsPersonAccount = TRUE AND ' + whereClause;
+    }
+
     if (allowedAccountIds != null && !allowedAccountIds.isEmpty()) {
       whereClause = 'Id IN :allowedAccountIds AND ' + whereClause;
       accounts = Database.query(

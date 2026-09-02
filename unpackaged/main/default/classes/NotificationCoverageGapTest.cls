@@ -538,35 +538,9 @@ private class NotificationCoverageGapTest {
   }
 
   @IsTest
-  static void householdResolver_createsFinancialAccountWhenMissing() {
-    Account household = new Account(Name = 'Coverage FA Household');
-    NotificationTestDataFactory.insertRecord(household);
-
-    FinServ__FinancialAccount__c financialAccount;
-    try {
-      financialAccount = new FinServ__FinancialAccount__c(
-        Name = 'Coverage FA',
-        FinServ__PrimaryOwner__c = household.Id,
-        FinServ__Household__c = household.Id
-      );
-      NotificationTestDataFactory.insertRecord(financialAccount);
-    } catch (DmlException expected) {
-      System.assert(true, 'Financial Account insert is org-dependent.');
-      return;
-    }
-
-    Case caseRecord = new Case(
-      Subject = 'Coverage FA Case',
-      FinServ__FinancialAccount__c = financialAccount.Id
-    );
+  static void householdResolver_returnsEmptyWhenCaseHasNoAccount() {
+    Case caseRecord = new Case(Subject = 'Coverage Case Without Account');
     NotificationTestDataFactory.insertRecord(caseRecord);
-
-    caseRecord = [
-      SELECT Id, AccountId, FinServ__FinancialAccount__c
-      FROM Case
-      WHERE Id = :caseRecord.Id
-      LIMIT 1
-    ];
 
     Map<Id, Id> recordIdToHouseholdId = new NotificationHouseholdResolver()
       .resolveHouseholds(
@@ -574,10 +548,10 @@ private class NotificationCoverageGapTest {
         NotificationConstants.OBJECT_TYPE_CASE
       );
 
-    System.assert(
-      recordIdToHouseholdId.containsKey(caseRecord.Id) ||
-        caseRecord.FinServ__FinancialAccount__c != null,
-      'Expected household resolution or a persisted financial account lookup.'
+    System.assertEquals(
+      0,
+      recordIdToHouseholdId.size(),
+      'Case without AccountId should not resolve a household'
     );
   }
 

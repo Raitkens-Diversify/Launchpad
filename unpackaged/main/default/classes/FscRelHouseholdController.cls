@@ -301,6 +301,52 @@ public with sharing class FscRelHouseholdController {
     return SERVICE.getAccountMemberCounts(accountIds);
   }
 
+  /**
+   * Returns Association_Type__c picklist options for business account relationships.
+   */
+  @AuraEnabled(cacheable=true)
+  public static List<FscRelHouseholdModels.PicklistOption> getAccountAccountRelationshipAssociationTypeOptions() {
+    return SERVICE.getAccountAccountRelationshipAssociationTypeOptions();
+  }
+
+  /**
+   * Creates or updates a business account relationship from the related accounts modal.
+   */
+  @AuraEnabled
+  public static FscRelHouseholdModels.TreeAccountResult saveAccountRelationship(
+    Id rootAccountId,
+    String accountJson
+  ) {
+    return SERVICE.saveAccountRelationship(
+      rootAccountId,
+      parseAccountRelationshipInput(accountJson)
+    );
+  }
+
+  /**
+   * Deletes business account relationships from the related accounts card.
+   */
+  @AuraEnabled
+  public static FscRelHouseholdModels.DeleteResult deleteAccountRelationships(
+    List<String> relationIds
+  ) {
+    return SERVICE.deleteAccountRelationships(relationIds);
+  }
+
+  @TestVisible
+  private static FscRelHouseholdModels.TreeAccountRelationshipInput parseAccountRelationshipInput(
+    String accountJson
+  ) {
+    if (String.isBlank(accountJson)) {
+      return new FscRelHouseholdModels.TreeAccountRelationshipInput();
+    }
+
+    return (FscRelHouseholdModels.TreeAccountRelationshipInput) JSON.deserialize(
+      accountJson,
+      FscRelHouseholdModels.TreeAccountRelationshipInput.class
+    );
+  }
+
   @TestVisible
   private static List<FscRelHouseholdModels.TreeMemberAccountRelationshipInput> parseMemberAccountRelationshipInputs(
     String relationshipsJson

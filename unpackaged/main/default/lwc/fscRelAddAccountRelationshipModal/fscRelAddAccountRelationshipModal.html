@@ -1,0 +1,144 @@
+<template>
+    <!-- Author: Hoang Long Vu To | Date: 2026-06-08 -->
+    <lightning-modal-header>
+        <div class="modal-header__group">
+            <div class="modal-header__breadcrumb">
+                <lightning-icon icon-name="standard:account" alternative-text="Account"></lightning-icon>
+                <h2 class="slds-text-heading_small">{rootAccountName}</h2>
+            </div>
+            <h3 class="slds-text-heading_medium">Add Related Accounts</h3>
+        </div>
+    </lightning-modal-header>
+
+    <lightning-modal-body class="modal-body" onclick={handleModalBodyClick}>
+        <template if:true={hasBanner}>
+            <div class={bannerClass} role="alert">
+                <span>{bannerMessage}</span>
+            </div>
+        </template>
+
+        <template if:true={isSaving}>
+            <div class="modal-loading-overlay">
+                <lightning-spinner alternative-text="Saving related accounts..." size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <div class="modal-body__scroll">
+        <section class="modal-table">
+            <div class="modal-table__header">
+                <div class="modal-table__col modal-table__col_account slds-text-title_caps">ACCOUNT</div>
+                <div class="modal-table__col slds-text-title_caps">ASSOCIATION TYPE</div>
+                <div class="modal-table__col" aria-hidden="true"></div>
+            </div>
+
+            <template for:each={rowViewModels} for:item="row">
+                <div key={row.id} class={row.rowWrapperClass}>
+                    <div class="modal-table__row">
+                        <div class="modal-table__col modal-table__col_account">
+                            <template if:false={row.isPendingDelete}>
+                                <c-fsc-rel-record-lookup
+                                    data-row-id={row.id}
+                                    object-api-name="Account"
+                                    variant="label-hidden"
+                                    label="Account"
+                                    value={row.accountId}
+                                    placeholder="Search Accounts..."
+                                    filter={accountFilter}
+                                    record-type-developer-name={businessAccountRecordTypeDeveloperName}
+                                    create-button-label="New Account"
+                                    create-modal-label="New Account"
+                                    disabled={row.isAccountDisabled}
+                                    onchange={handleAccountChange}
+                                    oncreaterequest={handleRecordCreateRequest}
+                                ></c-fsc-rel-record-lookup>
+                            </template>
+                            <template if:true={row.isPendingDelete}>
+                                <div class="row-pending">
+                                    <p class="row-pending__name slds-truncate" title={row.accountName}>{row.accountName}</p>
+                                    <p class="row-pending__hint slds-text-body_small">Pending removal</p>
+                                </div>
+                            </template>
+                        </div>
+
+                        <div class="modal-table__col">
+                            <template if:false={row.isPendingDelete}>
+                                <lightning-combobox
+                                    data-row-id={row.id}
+                                    variant="label-hidden"
+                                    label="Association Type"
+                                    value={row.associationType}
+                                    placeholder="Select type..."
+                                    options={associationTypeOptions}
+                                    disabled={row.isFieldDisabled}
+                                    onchange={handleAssociationTypeChange}>
+                                </lightning-combobox>
+                            </template>
+                            <template if:true={row.isPendingDelete}>
+                                <span class="row-pending__placeholder" aria-hidden="true">&mdash;</span>
+                            </template>
+                        </div>
+
+                        <div class="modal-table__col">
+                            <template if:true={row.canRemove}>
+                                <lightning-button-icon
+                                    data-row-id={row.id}
+                                    icon-name="utility:delete"
+                                    variant="bare"
+                                    size="small"
+                                    alternative-text="Remove account row"
+                                    aria-label="Remove account row"
+                                    title="Remove account row"
+                                    onclick={handleRemoveRow}>
+                                </lightning-button-icon>
+                            </template>
+                            <template if:true={row.isPendingDelete}>
+                                <lightning-button-icon
+                                    data-row-id={row.id}
+                                    icon-name="utility:undo"
+                                    variant="bare"
+                                    size="small"
+                                    alternative-text="Undo removal"
+                                    aria-label="Undo removal"
+                                    title="Undo removal"
+                                    onclick={handleUndoRemoveRow}>
+                                </lightning-button-icon>
+                            </template>
+                        </div>
+                    </div>
+
+                    <template if:true={row.hasError}>
+                        <p class="modal-table__row-error" role="alert">
+                            <lightning-icon icon-name="utility:error" size="xx-small" variant="error" alternative-text="Error"></lightning-icon>
+                            <span>{row.errorMessage}</span>
+                        </p>
+                    </template>
+                </div>
+            </template>
+
+            <div class="modal-table__add">
+                <lightning-button
+                    variant="neutral"
+                    label="Add Account"
+                    icon-name="utility:add"
+                    onclick={handleAddRow}>
+                </lightning-button>
+            </div>
+        </section>
+        </div>
+    </lightning-modal-body>
+
+    <lightning-modal-footer>
+        <lightning-button
+            label={cancelButtonLabel}
+            onclick={handleCancel}
+            disabled={isSaving}>
+        </lightning-button>
+        <lightning-button
+            class="slds-m-left_x-small"
+            variant="brand"
+            label={saveButtonLabel}
+            onclick={handleSave}
+            disabled={isSaveDisabled}>
+        </lightning-button>
+    </lightning-modal-footer>
+</template>
