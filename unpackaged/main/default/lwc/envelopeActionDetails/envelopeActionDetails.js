@@ -409,9 +409,16 @@ export default class EnvelopeActionDetails extends LightningElement {
       SOURCE_OF_FUNDS_AMOUNT_FIELDS.map((field) => draft[field]).find(
         (held) => held !== null && held !== undefined && held !== ""
       ) ?? null;
+    // Options are load-bearing here, not cosmetic. They used to control only how the footer
+    // itemized the ledger — the bottom line was identical either way, so this call omitted them.
+    // Exception sleeves changed that: without options an excluded row is priced as a model row, the
+    // model base collapses to the whole account value, and this dot reports complete on a table the
+    // section itself shows as unfinished. Same array identity the section gets, so the totals memo
+    // is shared rather than duplicated.
     const valid = strategyTotals(
       value.strategies,
-      resolveExpectedValue(value.expectedAccountValue, fallbackAccountValue)
+      resolveExpectedValue(value.expectedAccountValue, fallbackAccountValue),
+      this.strategyOptions
     ).isComplete;
     return {
       key: "sec-trade",

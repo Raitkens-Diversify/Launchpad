@@ -52,6 +52,19 @@ const NOTES = 'notes';
  * function of the bound value rather than a copy of it, which makes I2 unachievable by construction.
  * Formatted figures are read-outs and live in read-only text — the footer ledger below the input, and
  * the calculated cell of any row whose strategy is locked to one unit.
+ *
+ * I3 — the model base is computed HERE and handed down as one scalar (`allocationBase`), and it
+ * lags the table's uncommitted keystrokes by design. Exception sleeves reduce the base every other
+ * row's weight is a share of, so their dollars are the one input that legitimately moves other
+ * rows' figures. This section does not see the table's `_pending` buffer, so typing in an exception
+ * row's amount does NOT move the other rows until that amount commits — on blur, or after the
+ * short idle window. **That deferral is deliberate and load-bearing, not a rough edge.** Were the
+ * base live per keystroke, one character typed in one row would reassign a calculated cell on every
+ * other row, each reassignment answering back with a change event that I1 then has to swallow —
+ * N events per keystroke, which is precisely the shape that locked the browser twice on this
+ * surface. The base is also passed as a single prop rather than beside the raw account value, so
+ * two scalars can never be read in a half-updated pair (see the `allocationBase` prop on
+ * envelopeStrategyList).
  */
 export default class EnvelopeTradeInstructions extends LightningElement {
     /**
@@ -212,11 +225,19 @@ export default class EnvelopeTradeInstructions extends LightningElement {
         return strategyTotals(this._rows, this._expectedNumber, this._plainOptions);
     }
 
-    // The resolved account value the table derives every calculated cell from — the same resolver
-    // as everything else here (see _expectedNumber), so no derived figure can run on a different
-    // basis than the ledger.
-    get accountValue() {
-        return this._expectedNumber;
+    /**
+     * The model base the table derives every calculated cell from: the resolved account value less
+     * every exception sleeve's dollars. Read straight off the same `strategyTotals` call the footer
+     * ledger uses, so no derived cell can run on a different basis than the ledger it reconciles to.
+     *
+     * Computed HERE rather than in the table, and handed down as a single scalar, because a base the
+     * table derived itself would make every row's figures a function of every other row — one
+     * keystroke reassigning N calculated cells, which is the echo shape that locked the browser
+     * twice. The cost is documented as accepted behavior in the class header: an exception row's
+     * dollars do not move the other rows until they commit.
+     */
+    get allocationBase() {
+        return this.totals.allocationBase;
     }
 
     // --- Footer ------------------------------------------------------------------------------
@@ -245,6 +266,17 @@ export default class EnvelopeTradeInstructions extends LightningElement {
     // advertise the feature on every table.
     get showExcludedLine() {
         return this.showDollarMath && this.totals.excludedAmount > 0;
+    }
+
+    // The model base is a subtotal in the middle of the subtraction, so it earns a line only when
+    // something was actually subtracted to produce it. With no exception sleeve it equals the
+    // account value on the line above, and printing the same figure twice would read as an error.
+    get showModelBaseLine() {
+        return this.showExcludedLine;
+    }
+
+    get modelBaseDisplay() {
+        return this._currency(this.totals.allocationBase);
     }
 
     get showEnterValueHint() {
@@ -293,21 +325,33 @@ export default class EnvelopeTradeInstructions extends LightningElement {
             return null;
         }
         if (this._expectedKnown) {
-            const committed = totals.allocatedAmount + totals.excludedAmount;
+            // The exhausted-base state, judged before the ledger: with no model base left, every
+            // model weight prices to $0 and the remaining balance reconciles at zero, so the
+            // ledger reading would report success on a table where nothing is funded.
+            if (totals.hasModelRows && this._cents(totals.allocationBase) <= 0) {
+                return {
+                    text:
+                        'Excluded sleeves use the whole account value — nothing is left to ' +
+                        'allocate to the other strategies.',
+                    tone: 'warn'
+                };
+            }
             const balance = totals.remainingBalance;
-            const ofExpected = `${this._currency(committed)} of ${this._currency(this._expectedNumber)}`;
-            const balanceCents = Math.round(balance * 100);
+            // Measured against the model base, which is what the weights are shares of. With no
+            // exception sleeve the base IS the account value, so this reads exactly as it did.
+            const ofBase = `${this._currency(totals.allocatedAmount)} of ${this._currency(totals.allocationBase)}`;
+            const balanceCents = this._cents(balance);
             if (balanceCents === 0) {
-                return { text: `Allocated: ${ofExpected} ✓`, tone: 'ok' };
+                return { text: `Allocated: ${ofBase} ✓`, tone: 'ok' };
             }
             if (balanceCents > 0) {
                 return {
-                    text: `Allocated: ${ofExpected} — ${this._currency(balance)} remaining`,
+                    text: `Allocated: ${ofBase} — ${this._currency(balance)} remaining`,
                     tone: 'warn'
                 };
             }
             return {
-                text: `Allocated: ${ofExpected} — over by ${this._currency(-balance)}`,
+                text: `Allocated: ${ofBase} — over by ${this._currency(-balance)}`,
                 tone: 'warn'
             };
         }
@@ -345,17 +389,27 @@ export default class EnvelopeTradeInstructions extends LightningElement {
         return this.totals.isOverFunded;
     }
 
-    // Names the actual overrun: dollar carve-outs beyond the account value where that is the story
-    // (the ledger can still reconcile to zero around a negative pool), otherwise the ledger total.
+    // Names the actual overrun, and names it against the figure it actually overran: the excluded
+    // sleeves can exceed the account value, or the model rows can exceed what those sleeves left
+    // behind. Reporting the second against the account value would understate it.
     get overFundedMessage() {
         const totals = this.totals;
         const expected = this._expectedNumber;
-        const suffix = `, more than the ${this._currency(expected)} expected account value. You can still submit — the amounts are recorded as entered.`;
-        if (Math.round(totals.fixedDollarSum * 100) > Math.round(expected * 100)) {
-            return `Fixed-dollar sleeves total ${this._currency(totals.fixedDollarSum)}${suffix}`;
+        const tail = ' You can still submit — the amounts are recorded as entered.';
+        if (this._cents(totals.excludedAmount) > this._cents(expected)) {
+            return (
+                `Excluded sleeves total ${this._currency(totals.excludedAmount)}, more than the ` +
+                `${this._currency(expected)} expected account value.${tail}`
+            );
         }
-        const committed = totals.allocatedAmount + totals.excludedAmount;
-        return `Allocations total ${this._currency(committed)}${suffix}`;
+        const against =
+            totals.excludedAmount > 0
+                ? `${this._currency(totals.allocationBase)} left to allocate after excluded sleeves`
+                : `${this._currency(totals.allocationBase)} expected account value`;
+        return (
+            `Allocations total ${this._currency(totals.allocatedAmount)}, more than the ` +
+            `${against}.${tail}`
+        );
     }
 
     // --- Editing --------------------------------------------------------------------------------
@@ -488,6 +542,14 @@ export default class EnvelopeTradeInstructions extends LightningElement {
         }
         const parsed = Number(value);
         return Number.isFinite(parsed) ? parsed : null;
+    }
+
+    // Cent precision for every comparison the status line and the warning make, matching how
+    // strategyTotals judges completeness — so the section can never call a table finished that
+    // strategyTotals holds open, or the reverse, over a float artifact. Null reads as zero: an
+    // absent figure has not overrun anything.
+    _cents(value) {
+        return Number.isFinite(value) ? Math.round(value * 100) : 0;
     }
 
     // Up to four decimals with trailing zeros dropped, matching the table's derived-weight

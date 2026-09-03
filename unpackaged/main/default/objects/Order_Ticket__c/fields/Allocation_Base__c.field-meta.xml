@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Allocation_Base__c</fullName>
+    <description>The figure this ticket&#39;s target weights are percentages OF: the Expected Account Value less the dollars of every exception sleeve on it (an Order whose Excluded From Allocation is checked). Always stamped, so with no exception sleeves it simply equals Expected Account Value and no consumer has to handle a blank. Without it a stored Initial Funding Percentage of 100 is ambiguous — 100% of the account, or 100% of what was left after exclusions. Computed by TradeInstructionController.saveTradeInstructions.</description>
+    <inlineHelpText>What the target weights on this ticket are percentages of — the expected account value less any excluded sleeves.</inlineHelpText>
+    <label>Allocation Base</label>
+    <precision>18</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Currency</type>
+</CustomField>

@@ -2,10 +2,22 @@
  * TradeInstructionController — Apex for the envelope wizard's Trade Instructions section.
  *
  * Sleeve rows carry an advisor-chosen funding basis (Order__c.Funding_Basis__c): Dollar rows are
- * fixed carve-outs from the Expected Account Value; Percent rows describe the actively traded
- * remainder and total 100% across the ticket. Dollar rows also stamp
+ * fixed carve-outs; Percent rows are target weights. Dollar rows also stamp
  * Total_Initial_Funding_Amount__c, the marker legacy consumers (FlowCreateMultipleController et al.)
  * already read as "this row is dollar-based".
+ *
+ * EXCEPTION SLEEVES sit outside the model. A sleeve whose classification carries
+ * Sleeve_Basis_Rule__mdt.Excluded_From_Allocation__c has its dollars taken off the Expected Account
+ * Value first, and the remaining sleeves' target weights are percentages of what is left — the
+ * ticket's Allocation_Base__c. So a $50k sleeve beside a $50k exception sleeve on a $100k account is
+ * 100%, not 50%. Because its own dollars are what the other weights are a share of, an exception
+ * sleeve has no weight to record and is locked to dollars whatever its Allowed Funding Basis says
+ * (effectiveAllowedBasisFor); a percent-basis exception row is rejected on the way in.
+ *
+ * Three things are snapshotted onto the records rather than re-derived on read —
+ * Order__c.Funding_Basis__c, Order__c.Excluded_From_Allocation__c and
+ * Order_Ticket__c.Allocation_Base__c — so reclassifying a strategy can never change what an already
+ * filed ticket's weights meant.
  *
  * Transport is Map<String, Object>/List<Object> throughout — @AuraEnabled custom-type parameters
  * arrive null org-wide (see repo notes), so no wrapper classes.
@@ -86,6 +98,30 @@ public with sharing class TradeInstructionController {
     }
 
     /**
+     * The basis a strategy of this classification may ACTUALLY be funded on, which is what both the
+     * picker and the save-time check must obey.
+     *
+     * An exception sleeve (Excluded_From_Allocation__c) is locked to dollars whatever
+     * Allowed_Funding_Basis__c says. Its dollars are taken off the Expected Account Value to form
+     * the base every other sleeve's target weight is a share of, so it has no weight of its own to
+     * record — a weight for it would be a share of a base its own value defines.
+     *
+     * This override is not cosmetic. Both classifications flagged excluded in the org today (Model
+     * Exclusion, Billing Exclusion) are configured 'Either', so without it the permitted check
+     * below would wave a Percent row through for exactly the sleeves that cannot carry one. Making
+     * the checkbox sufficient on its own is also what lets the exception set be configured in the
+     * rule table later without a second field to keep in step.
+     *
+     * Mirror of c/envelopeFormSchema basisForOption.
+     */
+    private static String effectiveAllowedBasisFor(String classification) {
+        if (excludedFor(classification)) {
+            return ALLOWED_DOLLAR_ONLY;
+        }
+        return allowedBasisFor(classification);
+    }
+
+    /**
      * Whether sleeves of this classification sit outside the allocation. Same resolution order as
      * allowedBasisFor (classification rule, then the Default rule), defaulting to false — a sleeve
      * is excluded only where the metadata says so.
@@ -124,7 +160,9 @@ public with sharing class TradeInstructionController {
                 'name' => strategy.Name,
                 'strategyCode' => strategy.Strategy_Code__c,
                 'classification' => strategy.Sleeve_Classification__c,
-                'allowedBasis' => allowedBasisFor(strategy.Sleeve_Classification__c),
+                // The EFFECTIVE basis, so the client offers a sleeve only where it can really be
+                // funded: an exception sleeve reports Dollar Only even when its rule says Either.
+                'allowedBasis' => effectiveAllowedBasisFor(strategy.Sleeve_Classification__c),
                 'excluded' => excludedFor(strategy.Sleeve_Classification__c)
             });
         }
@@ -266,6 +304,11 @@ public with sharing class TradeInstructionController {
         Map<Id, Strategy__c> byId = new Map<Id, Strategy__c>([
             SELECT Id, Name, Sleeve_Classification__c FROM Strategy__c WHERE Id IN :strategyIds
         ]);
+        // Exception sleeves are summed as the rows are shaped, so the base the weights were computed
+        // against can be stamped on the ticket below. Exception sleeves are dollar-only (enforced
+        // just below), so their amounts are known without a base — nothing here needs a figure its
+        // own row helped define.
+        Decimal excludedTotal = 0;
         for (Map<String, Object> row : shaped) {
             Id strategyId = (Id) row.get('strategyId');
             String basis = (String) row.get('basis');
@@ -273,7 +316,11 @@ public with sharing class TradeInstructionController {
             if (strategy == null) {
                 throw new AuraHandledException('A selected strategy no longer exists.');
             }
-            String allowed = allowedBasisFor(strategy.Sleeve_Classification__c);
+            // The effective basis, so an exception sleeve posted as a percentage is rejected here
+            // even though its classification's Allowed Funding Basis says Either — which is how both
+            // live exception classifications are configured.
+            Boolean excluded = excludedFor(strategy.Sleeve_Classification__c);
+            String allowed = effectiveAllowedBasisFor(strategy.Sleeve_Classification__c);
             Boolean permitted = allowed == ALLOWED_EITHER ||
                 (basis == BASIS_DOLLAR && allowed == ALLOWED_DOLLAR_ONLY) ||
                 (basis == BASIS_PERCENT && allowed == ALLOWED_PERCENT_ONLY);
@@ -285,12 +332,18 @@ public with sharing class TradeInstructionController {
             }
             Order__c sleeve = new Order__c(
                 Strategy__c = strategyId,
-                Funding_Basis__c = basis
+                Funding_Basis__c = basis,
+                // Snapshotted like the basis, and for the same reason: reclassifying a strategy must
+                // never change what a historical ticket's weights were a share of.
+                Excluded_From_Allocation__c = excluded
             );
             Decimal value = (Decimal) row.get('value');
             if (basis == BASIS_DOLLAR) {
                 sleeve.Initial_Funding_Amount__c = value;
                 sleeve.Total_Initial_Funding_Amount__c = expected;
+                if (excluded) {
+                    excludedTotal += value;
+                }
             } else {
                 sleeve.Initial_Funding_Percentage__c = value;
             }
@@ -313,6 +366,11 @@ public with sharing class TradeInstructionController {
         ticket.Flow_Interview_ID__c = String.valueOf(envelopeId);
         ticket.Type_of_Request__c = typeOfRequest;
         ticket.Expected_Account_Value__c = expected;
+        // The figure the target weights on this ticket are percentages OF. Stamped
+        // unconditionally: with no exception sleeves it simply equals the expected account value, so
+        // no consumer has to coalesce a null or know whether exclusions were involved. Without it a
+        // stored Initial Funding Percentage of 100 cannot be told apart from 100% of the account.
+        ticket.Allocation_Base__c = expected == null ? null : expected - excludedTotal;
         ticket.Advisor_Notes__c = advisorNotes;
         ticket.Status__c = 'New';
         ticket.Incomplete_Record__c = false;

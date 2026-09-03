@@ -510,12 +510,21 @@ public with sharing class ArcRecordSearchController {
     // RecordTypeId column (never the input fieldApiName) since resolving
     // down to Ids either way -- comparing RecordType.Name to a List<Id>
     // would be a type mismatch.
+    //
+    // A filter the user types into the Filter menu's "Record Type" chip
+    // arrives the same way (fieldApiName RecordType.Name), but with whatever
+    // they typed and whichever operator they picked, so the labels are
+    // matched case-insensitively and per operator (see resolveRecordTypeIds).
+    // A value matching no record type used to drop the clause and hand back
+    // the unfiltered list, which read as "the filter does nothing"; an
+    // inclusive filter with no match now returns no rows, so the result
+    // reflects the filter. Excluding nothing is a genuine no-op.
     if (fieldApiName == 'RecordTypeId' || fieldApiName == 'RecordType.Name') {
-      List<Id> recordTypeIds = resolveRecordTypeIds(objectApiName, operandValue);
-      if (recordTypeIds.isEmpty()) {
+      Boolean isNegative = op == 'NotEqual' || op == 'Excludes' || op == 'NotIn' || op == 'NotContain';
+      List<Id> recordTypeIds = resolveRecordTypeIds(objectApiName, operandValue, op);
+      if (recordTypeIds.isEmpty() && isNegative) {
         return null;
       }
-      Boolean isNegative = op == 'NotEqual' || op == 'Excludes' || op == 'NotIn';
       binds.put(bindKey, recordTypeIds);
       return 'RecordTypeId' + (isNegative ? ' NOT IN :' : ' IN :') + bindKey;
     }
@@ -601,6 +610,37 @@ public with sharing class ArcRecordSearchController {
    *   type may be read/filtered on, which is all this method is for.
    */
   private static List<Id> resolveRecordTypeIds(String objectApiName, String operandValue) {
+    return resolveRecordTypeIds(objectApiName, operandValue, 'Equals');
+  }
+
+  /**
+   * Same, matched per operator and case-insensitively, the way the rest of
+   * the filter clauses treat text: Equals/NotEqual and the list operators
+   * match the whole label, StartsWith its start, Contains/NotContain (and any
+   * operator this pilot does not recognise, mirroring buildFilterClause's own
+   * LIKE fallback) anywhere in it. A whole-label match that finds nothing
+   * falls back to a contains match: the record types are a short fixed list
+   * and "Trust" typed against "Trusts & Estates" is far more likely a partial
+   * spelling than a request for no rows.
+   */
+  private static List<Id> resolveRecordTypeIds(
+    String objectApiName,
+    String operandValue,
+    String operatorKey
+  ) {
+    String op = String.isBlank(operatorKey) ? 'Contains' : operatorKey;
+    Boolean wholeLabel = op == 'Equals' || op == 'NotEqual' || op == 'Excludes' ||
+      op == 'NotIn' || op == 'In' || op == 'Includes';
+    String mode = wholeLabel ? 'equals' : (op == 'StartsWith' ? 'startsWith' : 'contains');
+
+    List<Id> ids = matchRecordTypeIds(objectApiName, operandValue, mode);
+    if (ids.isEmpty() && mode == 'equals') {
+      ids = matchRecordTypeIds(objectApiName, operandValue, 'contains');
+    }
+    return ids;
+  }
+
+  private static List<Id> matchRecordTypeIds(String objectApiName, String operandValue, String mode) {
     List<Id> ids = new List<Id>();
     if (String.isBlank(operandValue) || String.isBlank(objectApiName)) {
       return ids;
@@ -614,7 +654,7 @@ public with sharing class ArcRecordSearchController {
     // real Name value regardless of where operandValue originated.
     Set<String> labels = new Set<String>();
     for (String label : operandValue.split(';')) {
-      String trimmed = label.trim().unescapeHtml4();
+      String trimmed = label.trim().unescapeHtml4().toLowerCase();
       if (String.isNotBlank(trimmed)) {
         labels.add(trimmed);
       }
@@ -629,8 +669,15 @@ public with sharing class ArcRecordSearchController {
     }
 
     for (Schema.RecordTypeInfo info : objectType.getDescribe().getRecordTypeInfos()) {
-      if (labels.contains(info.getName())) {
-        ids.add(info.getRecordTypeId());
+      String name = info.getName() == null ? '' : info.getName().toLowerCase();
+      for (String label : labels) {
+        Boolean matches = mode == 'equals'
+          ? name == label
+          : (mode == 'startsWith' ? name.startsWith(label) : name.contains(label));
+        if (matches) {
+          ids.add(info.getRecordTypeId());
+          break;
+        }
       }
     }
     return ids;

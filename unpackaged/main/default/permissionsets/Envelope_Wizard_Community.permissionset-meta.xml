@@ -41,6 +41,11 @@
     </customMetadataTypeAccesses>
     <fieldPermissions>
         <editable>false</editable>
+        <field>Allocation_Strategy__c.Excluded_From_Allocation__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
         <field>Allocation_Strategy__c.Funding_Basis__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -86,6 +91,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Order_Ticket__c.Allocation_Base__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Order_Ticket__c.Case__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -117,6 +127,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Order_Ticket__c.Wizard_Financial_Account__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Order__c.Excluded_From_Allocation__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

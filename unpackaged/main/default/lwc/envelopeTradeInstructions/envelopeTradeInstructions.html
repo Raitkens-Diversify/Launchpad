@@ -27,7 +27,7 @@
                 lwc:ref="table"
                 strategies={rows}
                 options={pickerOptions}
-                account-value={accountValue}
+                allocation-base={allocationBase}
                 onstrategieschange={handleRowsChange}>
             </c-envelope-strategy-list>
 
@@ -48,17 +48,30 @@
                         <template lwc:if={usingFallback}>
                             <p class="trade__footer-hint">Inherited from Source of Funds.</p>
                         </template>
+                        <!-- The subtraction reads straight down the page, in the order it happens:
+                             excluded sleeves come off the account value first, leaving the base
+                             every target weight is a share of, and the model rows then draw that
+                             base down to nothing. The Excluded and "Left to allocate" lines appear
+                             only when something is actually excluded — with no exception sleeve the
+                             base equals the account value directly above it, and restating the same
+                             figure would read as an error rather than as a step. -->
                         <template lwc:if={showLedgerLines}>
-                            <template lwc:if={showAllocatedLine}>
-                                <div class="trade__footer-line">
-                                    <span>Allocated</span>
-                                    <span class="trade__footer-figure">{allocatedDisplay}</span>
-                                </div>
-                            </template>
                             <template lwc:if={showExcludedLine}>
                                 <div class="trade__footer-line">
                                     <span>Excluded</span>
                                     <span class="trade__footer-figure">{excludedDisplay}</span>
+                                </div>
+                            </template>
+                            <template lwc:if={showModelBaseLine}>
+                                <div class="trade__footer-line trade__footer-line_subtotal">
+                                    <span>Left to allocate</span>
+                                    <span class="trade__footer-figure">{modelBaseDisplay}</span>
+                                </div>
+                            </template>
+                            <template lwc:if={showAllocatedLine}>
+                                <div class="trade__footer-line">
+                                    <span>Allocated</span>
+                                    <span class="trade__footer-figure">{allocatedDisplay}</span>
                                 </div>
                             </template>
                             <div class="trade__footer-line trade__footer-line_total">

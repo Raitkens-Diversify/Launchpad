@@ -117,14 +117,12 @@
   align-self: start;
   margin-top: 4px;
 }
-
-/* Names a sleeve the metadata excludes from the allocation. Muted, and on the flag's grid line
-   under the strategy column — its own line inside the cell stretched the whole row. It describes
-   the strategy choice, not a problem with the row, so it must not read like a flag. */
-.strategy__excluded {
-  grid-column: 1 / 2;
-  margin: 0;
-  font-size: var(--slds-g-font-scale-neg-1, 12px);
-  line-height: 17px;
+/* An exception sleeve's weight cell holds the word "Excluded", not a figure. Tabular numerals and
+   the column's numeric rhythm are wrong for a word, and the muted tone keeps it from reading as a
+   value the advisor could change. This cell is the only marker that a sleeve is excluded — the
+   subtext tag that used to sit under the strategy name was removed as a restatement of it. */
+.strategy__readout_excluded {
+  font-variant-numeric: normal;
+  font-style: italic;
   color: var(--slds-g-color-on-surface-1, #4b5563);
 }

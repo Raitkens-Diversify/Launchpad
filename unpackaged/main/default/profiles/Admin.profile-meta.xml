@@ -3483,6 +3483,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>false</editable>
+        <field>Allocation_Strategy__c.Excluded_From_Allocation__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>true</editable>
         <field>Announcement__c.Body__c</field>
         <readable>true</readable>
@@ -5815,6 +5820,16 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>OrderItem.ServiceDate</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Order_Ticket__c.Allocation_Base__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Order__c.Excluded_From_Allocation__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

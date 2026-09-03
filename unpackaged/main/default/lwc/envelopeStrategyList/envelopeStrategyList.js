@@ -18,7 +18,7 @@ const CELL = { PERCENT: 'pct', DOLLAR: 'amt' };
 
 // A row whose strategy is not picked yet (or is no longer offered) has no rule to obey, so both
 // cells stay live and picking the strategy is what decides. Shaped like basisForOption's result.
-const NO_RULE = { unit: null, locked: false, allowed: ALLOWED_BASIS.EITHER };
+const NO_RULE = { unit: null, locked: false, allowed: ALLOWED_BASIS.EITHER, excluded: false };
 
 // Why a cell is greyed. There is deliberately no table-level sentence above the rows: the columns
 // are labelled, both boxes are live wherever the rule allows, and the only cell that needs
@@ -30,25 +30,45 @@ const NO_RULE = { unit: null, locked: false, allowed: ALLOWED_BASIS.EITHER };
 // very wizard, and the freeze was root-caused to LWC membrane proxy depth plus an un-memoized
 // getter — neither of which a static string prop can reproduce.
 //
-// Both calculated figures share ONE denominator — the resolved expected account value — so the
-// same weight always means the same dollars, whatever the other rows hold. (An earlier build
-// priced a weight's dollars off the pool left after the fixed-dollar carve-outs, which made two
-// identical weights show two different dollar figures; reversed 2026-08-30 by request.)
+// Both calculated figures share ONE denominator — the model base, supplied by the parent as
+// `allocationBase` — so within the model set the same weight always means the same dollars, and
+// weight × base = dollars for every row the advisor can see. (An earlier build priced a weight's
+// dollars off the pool left after the fixed-dollar carve-outs, which made two identical weights
+// show two different dollar figures; reversed 2026-08-30. The base moves now only when an EXCEPTION
+// row moves, which is the feature rather than a side effect of it.)
 const CELL_HELP = {
     [CELL.PERCENT]:
-        'This strategy is recorded in dollars. The weight shown is its share of the expected ' +
-        'account value.',
+        'This strategy is recorded in dollars. The weight shown is its share of the amount left ' +
+        'to model after excluded sleeves.',
     [CELL.DOLLAR]:
         'This strategy is recorded as a target weight. The dollars shown are its share of the ' +
-        'expected account value.'
+        'amount left to model after excluded sleeves.'
 };
+
+// An exception sleeve's weight cell. It holds no figure at all — not an em dash for "not yet
+// known", but a word, because there is no weight to know: this row's dollars are what the other
+// rows' weights are a share of, so a weight for it would be a share of a base it sets itself.
+const EXCLUDED_READOUT = 'Excluded';
+const EXCLUDED_HELP =
+    'This sleeve is excluded from the allocation. Its dollars come off the account value first, ' +
+    'and the other strategies are weighted against what is left, so it carries no target weight ' +
+    'of its own.';
 
 
 /**
  * envelopeStrategyList — the Allocations table. One list holds every sleeve; whether a row is a
  * fixed-dollar carve-out or a percentage model allocation is a per-row attribute, not a section.
  *
- * Every row shows BOTH a target weight and a dollar figure. Whichever cell the advisor types into is
+ * EXCEPTION SLEEVES are the one row kind that breaks the symmetry. A strategy whose classification
+ * carries Sleeve_Basis_Rule__mdt.Excluded_From_Allocation__c sits outside the model: it is locked to
+ * dollars whatever its configured basis says, its weight cell holds the word "Excluded" rather than
+ * any figure, and its dollars are what the OTHER rows' weights are a share of. The base those rows
+ * divide against arrives as the `allocationBase` prop, already computed by the parent — the table
+ * never sums other rows to find it. That is deliberate: a base computed here would make every
+ * derived cell a function of every other row, and one keystroke would reassign N cells, which is
+ * the loop shape that locked the browser twice (see the invariants below).
+ *
+ * Every model row shows BOTH a target weight and a dollar figure. Whichever cell the advisor types into is
  * the one that gets recorded, and the other is calculated from it — so choosing a unit costs no
  * extra click and needs no separate control. The strategy's configured Allowed Funding Basis decides
  * which cells are live: a Dollar Only or Percent Only strategy greys its forbidden cell out — a
@@ -95,11 +115,22 @@ export default class EnvelopeStrategyList extends LightningElement {
     // Strategy dropdown options: [{ label, value, allowedBasis }] with the Strategy__c Id as value.
     @api options = [];
 
-    // The resolved Expected Account Value (typed, or the Source of Funds fallback), supplied by
-    // the parent: the single denominator every calculated cell divides against, in both
-    // directions. Null until known, which renders the derived figures as an em dash rather than a
-    // fictional $0.
-    @api accountValue;
+    /**
+     * The model base, supplied by the parent (`strategyTotals.allocationBase`): the resolved
+     * Expected Account Value less every exception sleeve's dollars. The single denominator every
+     * calculated cell divides against, in both directions. Null until known, which renders the
+     * derived figures as an em dash rather than a fictional $0.
+     *
+     * ONE prop, not two. The raw account value is deliberately not passed alongside it: nothing here
+     * needs it now that exception rows derive nothing, and two scalars arriving from the same parent
+     * could be read in a state where one is fresh and the other stale — an echo computed against
+     * that pair would fail `_reportedIsBound` and be committed as an edit, silently flipping an
+     * Either row's basis. One number, no skew.
+     *
+     * Zero or negative is passed as-is; `_modelBase` is what turns an exhausted base into null so no
+     * cell divides by it.
+     */
+    @api allocationBase;
 
     // New-row id suffix, so rapidly added rows get distinct keys.
     _seq = 0;
@@ -132,12 +163,16 @@ export default class EnvelopeStrategyList extends LightningElement {
             return {
                 id: row.id,
                 strategy: row.strategy,
-                excluded: this._optionFor(row.strategy)?.excluded === true,
                 showRemove,
                 pctEditable: state.pctEditable,
                 pctValue: this._cellValue(row, CELL.PERCENT, state),
                 pctReadout: this._readout(row, CELL.PERCENT, state),
-                pctHelp: CELL_HELP[CELL.PERCENT],
+                // The greyed box holds a word rather than a figure for an exception sleeve, so it
+                // opts out of the tabular-numeral alignment the rest of the column uses.
+                pctReadoutClass: state.excluded
+                    ? 'strategy__readout strategy__readout_excluded'
+                    : 'strategy__readout',
+                pctHelp: state.excluded ? EXCLUDED_HELP : CELL_HELP[CELL.PERCENT],
                 pctShowsUnit: this._showsUnit(row, CELL.PERCENT, state),
                 amtEditable: state.amtEditable,
                 amtValue: this._cellValue(row, CELL.DOLLAR, state),
@@ -318,13 +353,27 @@ export default class EnvelopeStrategyList extends LightningElement {
         const rule = row.strategy && option ? basisForOption(option) : NO_RULE;
         const unit = rule.locked ? rule.unit : row.type;
         const isDollar = unit === STRATEGY_BASIS.DOLLAR;
+        // An exception sleeve needs no special editability handling: basisForOption already locks it
+        // to dollars, so the generic rules below grey its weight cell out. `excluded` is carried
+        // through only so the weight cell can show a word instead of a calculated figure.
         return {
             rule,
             unit,
             isDollar,
+            excluded: rule.excluded === true,
             pctEditable: !rule.locked || !isDollar,
             amtEditable: !rule.locked || isDollar
         };
+    }
+
+    // The base every calculated cell divides against. An exhausted base (zero or negative — the
+    // exception sleeves have taken the whole account value) is resolved to null so the derived
+    // helpers return null and the cells read as an em dash. Deliberately NOT handled by letting a
+    // zero through: `dollarsForPercentRow` treats a zero pool as a real answer and would print
+    // $0.00, which claims the row is funded at nothing rather than that there is nothing to state.
+    get _modelBase() {
+        const base = this._toNumber(this.allocationBase);
+        return base !== null && base > 0 ? base : null;
     }
 
     // Does this cell hold the row's own recorded number, rather than one calculated from the other?
@@ -337,20 +386,29 @@ export default class EnvelopeStrategyList extends LightningElement {
      * owns the basis, otherwise the figure calculated from the other cell. Null where there is
      * nothing to show, or nothing to divide by.
      *
-     * Both directions calculate against the SAME denominator, the resolved expected account value
-     * (see CELL_HELP), so the same weight always shows the same dollars. The derived side goes
-     * through `_recordedNumber` so it tracks the owning cell's keystrokes rather than jumping a
-     * commit later. The derived figure is display only — the row still records exactly one value,
-     * and `strategyTotals` still keeps dollar rows out of the percentage total.
+     * Both directions calculate against the SAME denominator, the model base (see CELL_HELP and
+     * `_modelBase`), so within the model set the same weight always shows the same dollars. An
+     * exception sleeve is the exception in both senses: it derives nothing, and its own dollars are
+     * what that base is net of. The derived side goes through `_recordedNumber` so it tracks the
+     * owning cell's keystrokes rather than jumping a commit later. The derived figure is display
+     * only — the row still records exactly one value, and `strategyTotals` still keeps dollar rows
+     * out of the percentage total.
      */
     _cellNumber(row, cell, state) {
         if (this._owns(cell, state)) {
             return this._toNumber(cell === CELL.PERCENT ? row.fundingPercent : row.fundingAmount);
         }
-        if (cell === CELL.PERCENT) {
-            return percentForDollarRow(this._recordedNumber(row, state), this.accountValue);
+        // An exception sleeve's weight is not "unknown", it does not exist: this row's dollars are
+        // the base the other rows' weights are shares of. Returning null here — before any division
+        // — is what keeps the table from ever stating a percentage for it, and the cell renders the
+        // word "Excluded" instead (see _readout).
+        if (state.excluded && cell === CELL.PERCENT) {
+            return null;
         }
-        return dollarsForPercentRow(this._recordedNumber(row, state), this.accountValue);
+        if (cell === CELL.PERCENT) {
+            return percentForDollarRow(this._recordedNumber(row, state), this._modelBase);
+        }
+        return dollarsForPercentRow(this._recordedNumber(row, state), this._modelBase);
     }
 
     // Whether to print the column's unit beside this cell. Suppressed where the cell has no figure
@@ -409,6 +467,10 @@ export default class EnvelopeStrategyList extends LightningElement {
     // it. Formatted rather than raw because this figure can never be typed into, so nothing has to
     // be able to hand it back unchanged.
     _readout(row, cell, state) {
+        // A word, not an em dash: there is no weight here to be missing (see _cellNumber).
+        if (state.excluded && cell === CELL.PERCENT) {
+            return EXCLUDED_READOUT;
+        }
         const number = this._cellNumber(row, cell, state);
         if (number === null) {
             return '—';

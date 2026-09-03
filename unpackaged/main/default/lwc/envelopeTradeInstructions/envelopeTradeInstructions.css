@@ -106,3 +106,11 @@
   line-height: 18px;
   color: var(--ds-warning-text, #b8860b);
 }
+/* "Left to allocate" is a subtotal partway down the subtraction, not its result: ruled above like
+   the total so the step reads as a step, but left at body weight so the remaining balance stays the
+   line the eye lands on. */
+.trade__footer-line_subtotal {
+  padding-top: var(--slds-g-spacing-1, 4px);
+  border-top: 1px solid var(--slds-g-color-border-1, #e5e7eb);
+  color: var(--slds-g-color-on-surface-2, #374151);
+}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Excluded_From_Allocation__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Snapshot of Order.Excluded From Allocation, copied when the allocation of record is created (Allocation_TriggerHandler.setAllocationStrategies). Checked when this sleeve sat outside the model: its dollars came off the account value before the other sleeves&#39; target weights were calculated. Carried forward so a completed allocation still says what it meant without re-resolving the strategy&#39;s current Sleeve Basis Rule.</description>
+    <label>Excluded From Allocation</label>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

@@ -2,9 +2,9 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Excluded_From_Allocation__c</fullName>
     <defaultValue>false</defaultValue>
-    <description>Sleeves of this classification sit outside the allocation: the Order Ticket wizard still records them, but its ledger itemizes their dollars as Excluded rather than Allocated and labels the row. Which classifications count as excluded lives here, never in code. See TradeInstructionController.excludedFor and c/envelopeFormSchema excludedStrategyIds.</description>
+    <description>Checked = sleeves of this classification are EXCEPTION SLEEVES: they sit outside the model. The Order Ticket wizard takes their dollars off the Expected Account Value first, and the remaining sleeves&#39; target weights are percentages of what is left — so a $50k sleeve beside a $50k exception sleeve on a $100k account is 100%, not 50%. An exception sleeve carries no target weight of its own (its own dollars are what the others are a share of) and is therefore recorded in dollars, which means Allowed Funding Basis is IGNORED for these classifications — this one checkbox is all that is needed to make a classification an exception sleeve. Which classifications count lives here, never in code. See TradeInstructionController.excludedFor / effectiveAllowedBasisFor and c/envelopeFormSchema basisForOption + strategyTotals.allocationBase.</description>
     <fieldManageability>DeveloperControlled</fieldManageability>
-    <inlineHelpText>Checked = the wizard shows sleeves of this classification as Excluded in the allocation ledger.</inlineHelpText>
+    <inlineHelpText>Checked = an exception sleeve: its dollars come off the account value first and the other strategies are weighted against what is left. Always recorded in dollars, whatever Allowed Funding Basis says.</inlineHelpText>
     <label>Excluded From Allocation</label>
     <type>Checkbox</type>
 </CustomField>

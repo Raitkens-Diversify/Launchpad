@@ -1211,7 +1211,13 @@ export default class EnvelopeShellV2 extends LightningElement {
             : record.name,
           value: record.id,
           allowedBasis: record.allowedBasis,
-          classification: record.classification
+          classification: record.classification,
+          // Sleeve_Basis_Rule__mdt.Excluded_From_Allocation__c. Load-bearing: the exception sleeve's
+          // dollars come off the account value to form the base every other row's target weight is a
+          // share of, and strategyTotals cannot find them without this flag. Dropping it here leaves
+          // the whole feature inert while Apex, the rule table and envelopeFormSchema all still
+          // carry it — which is exactly the state this org was in before this line was restored.
+          excluded: record.excluded === true
         }));
       })
       .catch(() => {
@@ -2659,9 +2665,24 @@ export default class EnvelopeShellV2 extends LightningElement {
         }
       }
     }
-    // Trade instructions enforce their own completeness rule (fixed-$ within the expected value,
-    // percentage rows covering 100% of the remainder) — actionCompletion only measures the
-    // metadata-driven fields, so the basis rules are checked here explicitly.
+    // Trade instructions enforce their own completeness rule (the ledger reconciling: the model
+    // base — account value less every exception sleeve — comes to zero or below at cent precision
+    // once the model rows are allocated, or — with no account value known — percentage rows
+    // covering 100%) — actionCompletion only measures the metadata-driven fields, so the basis
+    // rules are checked here explicitly.
+    //
+    // Options MUST be passed. This call used to omit them, on the then-true grounds that the
+    // excluded split only itemized the ledger and never moved its bottom line. Exception sleeves
+    // ended that: they reduce the base the model is weighed against, so without options an excluded
+    // row is priced as a model row and submit would wave through a table the section shows as
+    // unfinished.
+    //
+    // `strategyOptions` is `[]` until the prefetch resolves, which reads as "nothing is excluded"
+    // for that window. Deliberately not guarded: refusing to judge without options would leave a
+    // failed prefetch (a non-fatal catch — the array then stays empty for the session) permanently
+    // blocking submit on a seeded interview whose rows are fine. The server is the backstop that
+    // matters — saveTradeInstructions re-resolves every rule and recomputes the base itself — so an
+    // optimistic client here cannot file a wrongly-based ticket.
     const tradeIncomplete = this._collectTradeSources()
       // A submitted account's trade instructions are locked history, not an outstanding input
       // of this envelope, so they cannot block its submit.
@@ -2670,7 +2691,12 @@ export default class EnvelopeShellV2 extends LightningElement {
         (source) =>
           !strategyTotals(
             source.trade.strategies,
-            source.funded ? source.trade.expectedAccountValue : null
+            // Launchpad resolves the expected value from its own per-source `funded` flag
+            // rather than cosmosdev's _expectedValueFor / Source-of-Funds fallback. That
+            // difference is deliberate here and is left alone; only the options argument the
+            // exception-sleeve base needs is added.
+            source.funded ? source.trade.expectedAccountValue : null,
+            this.strategyOptions
           ).isComplete
       )
       .map((source) => source.entityName);

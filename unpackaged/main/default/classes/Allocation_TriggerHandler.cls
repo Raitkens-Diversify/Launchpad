@@ -105,7 +105,7 @@ public class Allocation_TriggerHandler {
         for(Allocation__c a : newMap.values()){
             orderTicketIds.add(a.Request_Allocation_Originated_From__c);
         }
-        Map<Id,Order__c> ordersMap = new Map<Id,Order__c>([SELECT Id, Funding_Basis__c, Initial_Funding_Amount__c, Initial_Funding_Percentage__c, Order_Ticket__c, Order_Type__c,
+        Map<Id,Order__c> ordersMap = new Map<Id,Order__c>([SELECT Id, Excluded_From_Allocation__c, Funding_Basis__c, Initial_Funding_Amount__c, Initial_Funding_Percentage__c, Order_Ticket__c, Order_Type__c,
                                                            Principal_Amount__c, Share_Price__c, Share_Quantity__c, Strategy_Code__c, Strategy__c,
                                                            Total_Initial_Funding_Amount__c FROM Order__c WHERE Order_Ticket__c in: orderTicketIds]);
         for(Order__c o : ordersMap.values()){
@@ -125,6 +125,11 @@ public class Allocation_TriggerHandler {
             for(Order__c o : orderList){
                 Allocation_Strategy__c astrat = new Allocation_Strategy__c();
                 astrat.Allocation__c = a.Id;
+                // Carried forward with the basis, and for the same reason: an exception sleeve's
+                // dollars were taken off the account value before the other sleeves' target weights
+                // were calculated, and the completed allocation has to keep saying so without
+                // re-resolving the strategy's current Sleeve Basis Rule.
+                astrat.Excluded_From_Allocation__c = o.Excluded_From_Allocation__c;
                 astrat.Funding_Basis__c = o.Funding_Basis__c;
                 astrat.Initial_Funding_Amount__c = o.Initial_Funding_Amount__c;
                 astrat.Initial_Funding_Percentage__c = o.Initial_Funding_Percentage__c;

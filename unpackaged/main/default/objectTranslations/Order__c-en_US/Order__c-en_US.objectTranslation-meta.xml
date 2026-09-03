@@ -8,18 +8,6 @@
         <plural>true</plural>
         <value>Orders</value>
     </caseValues>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     <layouts>
         <layout>Order Layout</layout>
         <sections>
@@ -32,4 +20,17 @@
         <errorMessage><!-- A Dollar sleeve needs an Initial Funding Amount and no percentage; a Percent sleeve needs an Initial Funding Percentage and no amount. --></errorMessage>
         <name>Funding_Basis_Matches_Value</name>
     </validationRules>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 </CustomObjectTranslation>

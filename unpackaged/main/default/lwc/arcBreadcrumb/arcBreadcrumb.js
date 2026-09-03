@@ -31,8 +31,14 @@ import {
   isOffNavRoute,
   resolveCurrentPath,
   resolveCurrentQueryParams,
-  serializeSearch
+  serializeSearch,
+  recordNavSelectionById,
+  resolveAccountNavItemId
 } from "c/arcNavTrailState";
+
+const ACCOUNT_OBJECT_API_NAME = "Account";
+/** Read alongside an Account's name so the list crumb can follow its type -- see syncTrailToRecordType. */
+const ACCOUNT_RECORD_TYPE_FIELD = "Account.RecordType.DeveloperName";
 
 const LIST_CRUMB_KEY = "list";
 const GROUP_CRUMB_KEY = "group";
@@ -140,12 +146,43 @@ export default class ArcBreadcrumb extends NavigationMixin(LightningElement) {
     this.syncRecordIdFromContext();
   }
 
+  _wiredRecord;
+
   @wire(getRecord, {
     recordId: "$_recordId",
     fields: "$recordFields",
     optionalFields: "$recordOptionalFields"
   })
-  wiredRecord;
+  wiredRecord(value) {
+    this._wiredRecord = value;
+    this.syncTrailToRecordType(value?.data);
+  }
+
+  /**
+   * Keeps the list crumb honest about what the record IS. The stored trail is
+   * whichever list was visited last, and syncNavTrailFromLocation keeps it for
+   * any record of the same object -- so opening a household's member from the
+   * household read "Contacts › Households › Clark Kent", and so did coming back
+   * to a contact from a household or arriving from search. Once the record's
+   * type is known, the trail is moved to the Contacts list that type belongs
+   * under (a person keeps All Contacts / Individuals / Clients when that is
+   * where it came from). Recorded through the nav module, so the sidebar and
+   * every other breadcrumb see the same trail; the trail-change event then
+   * brings it back in through adoptStoredNavTrail.
+   */
+  syncTrailToRecordType(record) {
+    if (!record || this.activeObjectApiName !== ACCOUNT_OBJECT_API_NAME) {
+      return;
+    }
+
+    const recordType = getFieldValue(record, ACCOUNT_RECORD_TYPE_FIELD);
+    const currentNavItemId = this.activeTrail?.navItemId || "";
+    const navItemId = resolveAccountNavItemId(recordType, currentNavItemId);
+
+    if (navItemId && navItemId !== currentNavItemId) {
+      recordNavSelectionById(navItemId);
+    }
+  }
 
   @wire(getRecord, { recordId: "$parentRecordId", fields: "$parentNameFields" })
   wiredParentRecord;
@@ -309,21 +346,36 @@ export default class ArcBreadcrumb extends NavigationMixin(LightningElement) {
     return PARENT_LOOKUP_FIELDS[this.activeObjectApiName] || "";
   }
 
-  get recordOptionalFields() {
+  /** Spanning path of the parent lookup on the current object, or "". */
+  get parentLookupFieldPath() {
     const field = this.parentLookupField;
-    if (!field || !this._recordId || !this.activeObjectApiName) {
+    return field && this.activeObjectApiName
+      ? `${this.activeObjectApiName}.${field}`
+      : "";
+  }
+
+  get recordOptionalFields() {
+    if (!this._recordId || !this.activeObjectApiName) {
       return [];
     }
-    return [`${this.activeObjectApiName}.${field}`];
+
+    const fields = [];
+    if (this.parentLookupFieldPath) {
+      fields.push(this.parentLookupFieldPath);
+    }
+    if (this.activeObjectApiName === ACCOUNT_OBJECT_API_NAME) {
+      fields.push(ACCOUNT_RECORD_TYPE_FIELD);
+    }
+    return fields;
   }
 
   get parentRecordId() {
-    const fields = this.recordOptionalFields;
-    if (!fields.length || !this.wiredRecord?.data) {
+    const fieldPath = this.parentLookupFieldPath;
+    if (!fieldPath || !this._wiredRecord?.data) {
       return null;
     }
 
-    const value = getFieldValue(this.wiredRecord.data, fields[0]);
+    const value = getFieldValue(this._wiredRecord.data, fieldPath);
     if (!value) {
       return null;
     }
@@ -364,11 +416,11 @@ export default class ArcBreadcrumb extends NavigationMixin(LightningElement) {
   }
 
   get recordDisplayName() {
-    if (!this.recordFields.length || !this.wiredRecord?.data) {
+    if (!this.recordFields.length || !this._wiredRecord?.data) {
       return "";
     }
 
-    return getFieldValue(this.wiredRecord.data, this.recordFields[0]) || "";
+    return getFieldValue(this._wiredRecord.data, this.recordFields[0]) || "";
   }
 
   get usesDynamicTrail() {
@@ -433,7 +485,7 @@ export default class ArcBreadcrumb extends NavigationMixin(LightningElement) {
     const listCrumb = { label: listLabel, key: LIST_CRUMB_KEY, muted: true };
     const crumbs = groupCrumb ? [groupCrumb, listCrumb] : [listCrumb];
 
-    if (this.wiredRecord?.loading && !recordName) {
+    if (this._wiredRecord?.loading && !recordName) {
       return [...crumbs, { label: "Loading…", current: true }];
     }
 

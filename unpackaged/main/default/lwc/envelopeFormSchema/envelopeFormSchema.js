@@ -2723,17 +2723,19 @@ function formatEnvelopeContentsLabel({ members = 0, isas = 0 } = {}) {
 
 /**
  * Basis tokens a strategy allocation row carries as `type`. A fixed-dollar row is a carve-out that
- * must not float as the account value changes; a fixed-percentage row describes the actively traded
- * remainder left once every fixed-dollar row is taken out of the Expected Account Value, so the
- * percentage rows total 100 across a complete allocation. Rows persisted before the basis existed
- * have no `type` — normalizeStrategyRows coalesces them to percentage, the legacy reading of every
- * pre-basis row.
+ * must not float as the account value changes; a fixed-percentage row is a weight against the model
+ * base, so the percentage rows total 100 across a complete allocation of that base. Rows persisted
+ * before the basis existed have no `type` — normalizeStrategyRows coalesces them to percentage, the
+ * legacy reading of every pre-basis row.
  *
  * A row's basis follows the strategy's configured Allowed Funding Basis (see ALLOWED_BASIS and
  * basisForOption): fixed by the rule for Dollar Only / Percent Only strategies, advisor-chosen only
- * where the rule allows either. It is snapshotted onto Order__c.Funding_Basis__c at submit.
- * Reclassifying a strategy therefore applies to new submissions only — a historical row's basis must
- * never be re-derived from the strategy's current setting.
+ * where the rule allows either, and forced to dollars for an exception sleeve whatever the rule
+ * says. It is snapshotted onto Order__c.Funding_Basis__c at submit, alongside
+ * Order__c.Excluded_From_Allocation__c and the Order_Ticket__c.Allocation_Base__c the weights were
+ * computed against. Reclassifying a strategy therefore applies to new submissions only — a
+ * historical row's basis, its exception status, and the base its weight was a share of must never
+ * be re-derived from the strategy's current setting.
  */
 const STRATEGY_BASIS = {
     DOLLAR: 'fixed-dollar',
@@ -2793,37 +2795,68 @@ const ALLOWED_BASIS = {
  * the advisor (`unit: null`, meaning keep whatever the row already carries) and makes both cells
  * live. An option with no resolved rule reads as Either: a missing rule is an absence of
  * configuration, not a restriction, so a sleeve is locked to one unit only where someone has
- * said so. Mirrors TradeInstructionController.allowedBasisFor.
+ * said so. Mirrors TradeInstructionController.effectiveAllowedBasisFor.
+ *
+ * An EXCEPTION SLEEVE overrides all of that. A strategy whose classification carries
+ * Sleeve_Basis_Rule__mdt.Excluded_From_Allocation__c sits outside the model: its dollars are carved
+ * off the expected account value to form the model base every other row divides against, so it has
+ * no target weight of its own to state — a weight would have to be a share of a base its own value
+ * defines. It is therefore locked to dollars whatever `Allowed_Funding_Basis__c` says, and the
+ * configured value is deliberately ignored rather than consulted. That is what lets the one
+ * checkbox make a classification an exception sleeve with no second field to keep in step: both
+ * live exception classifications (Model Exclusion, Billing Exclusion) are configured Either, and
+ * an Either exception row could otherwise be typed as a percentage the model cannot price.
  *
  * `allowed` is returned alongside so the allocation table can decide per-cell editability without
- * re-deriving the rule; callers that only need the unit read `unit`/`locked` as before.
- * @param {{allowedBasis}} [option]  a shaped strategy option from the shell
- * @returns {{unit: string|null, locked: boolean, allowed: string}}  unit is a STRATEGY_BASIS token
- *          when locked; allowed is an ALLOWED_BASIS value
+ * re-deriving the rule, and `excluded` so it can render the weight cell's static read-out without a
+ * second option lookup; callers that only need the unit read `unit`/`locked` as before.
+ * @param {{allowedBasis, excluded}} [option]  a shaped strategy option from the shell
+ * @returns {{unit: string|null, locked: boolean, allowed: string, excluded: boolean}}  unit is a
+ *          STRATEGY_BASIS token when locked; allowed is an ALLOWED_BASIS value
  */
 function basisForOption(option) {
+    // Checked before the configured basis, not merged with it: for an exception sleeve the
+    // configured value is not a weaker rule to fall back on, it is inapplicable.
+    if (option?.excluded === true) {
+        return {
+            unit: STRATEGY_BASIS.DOLLAR,
+            locked: true,
+            allowed: ALLOWED_BASIS.DOLLAR_ONLY,
+            excluded: true
+        };
+    }
     const allowed = option?.allowedBasis || ALLOWED_BASIS.EITHER;
     if (allowed === ALLOWED_BASIS.EITHER) {
-        return { unit: null, locked: false, allowed };
+        return { unit: null, locked: false, allowed, excluded: false };
     }
     return {
         unit: allowed === ALLOWED_BASIS.DOLLAR_ONLY ? STRATEGY_BASIS.DOLLAR : STRATEGY_BASIS.PERCENT,
         locked: true,
-        allowed
+        allowed,
+        excluded: false
     };
 }
 
 /**
- * The dollar equivalent of a percentage allocation row: its share of the **resolved Expected
- * Account Value** — the same denominator `percentForDollarRow` uses the other way, so the same
- * weight always means the same dollars regardless of what the other rows hold. (An earlier build
- * used the modeled pool — the account value less the fixed-dollar carve-outs — which made a
- * weight's dollars shift whenever another row's carve-out moved; reversed 2026-08-30 by request.)
+ * The dollar equivalent of a percentage allocation row: its share of the **model base** — the same
+ * denominator `percentForDollarRow` uses the other way, so within the model set the same weight
+ * always means the same dollars regardless of what the other model rows hold.
  *
- * Null — never a fictional $0 — whenever the denominator is unknown or the percentage is not a
- * positive number, so a row with nothing to say renders an em dash rather than an arithmetic claim.
+ * The model base is the resolved Expected Account Value less the dollars of every exception sleeve
+ * (`strategyTotals.allocationBase`). Exception rows are priced by neither helper — they record
+ * dollars and state no weight — so nothing here divides by a number its own row helped define.
+ * (Two earlier builds priced weights off the whole account value; before that, off the pool left
+ * after the fixed-dollar carve-outs, which made a weight's dollars shift whenever another row's
+ * carve-out moved. The base moves now only when an EXCEPTION row moves, which is the point of the
+ * feature rather than a side effect of it: an advisor-chosen fixed-dollar model row prices against
+ * the base and does not reduce it.)
+ *
+ * Null — never a fictional $0 — whenever the base is unknown or the percentage is not a positive
+ * number, so a row with nothing to say renders an em dash rather than an arithmetic claim. Callers
+ * pass null for a base that is zero or negative, so an exhausted model base reads as "nothing to
+ * state" rather than as $0.00 of a pool that isn't there.
  * @param {number|string} percent  percentage points
- * @param {number|string} pool     the resolved account value in dollars
+ * @param {number|string} pool     the model base in dollars
  * @returns {number|null}
  */
 function dollarsForPercentRow(percent, pool) {
@@ -2839,15 +2872,20 @@ function dollarsForPercentRow(percent, pool) {
 }
 
 /**
- * The percentage equivalent of a fixed-dollar allocation row — its share of the **resolved Expected
- * Account Value**, the same denominator `dollarsForPercentRow` uses the other way.
+ * The percentage equivalent of a fixed-dollar allocation row — its share of the **model base**, the
+ * same denominator `dollarsForPercentRow` uses the other way.
+ *
+ * Only MODEL rows reach here. An exception sleeve states no weight at all (see `basisForOption`):
+ * its dollars define the base, so a weight for it would be a share of a figure it sets itself. This
+ * is what makes the worked case come out right — a $50,000 model sleeve beside a $50,000 exception
+ * sleeve on a $100,000 account is 100% of the $50,000 model base, not 50% of the account.
  *
  * The derived weight is display-only: `strategyTotals` still keeps dollar rows out of the percentage
  * total, and `Order__c.Funding_Basis_Matches_Value` still forbids a Dollar sleeve from *storing* a
  * percentage. (An earlier build removed this helper on the grounds that a dollar row's weight is
  * "absent, not calculable" — showing the share back is the requested behavior now.)
  * @param {number|string} amount        dollars
- * @param {number|string} accountValue  the resolved Expected Account Value
+ * @param {number|string} accountValue  the model base
  * @returns {number|null}
  */
 function percentForDollarRow(amount, accountValue) {
@@ -2915,6 +2953,42 @@ function excludedStrategyIds(options) {
 }
 
 /**
+ * Each strategy id's resolved funding rule, keyed by option value — `basisForOption`'s answer for
+ * every offered strategy, worked out once.
+ *
+ * `strategyTotals` needs more than the excluded set (`excludedStrategyIds`): to judge a row on its
+ * EFFECTIVE basis it needs to know whether the strategy locks a unit and which one. Memoized per
+ * options-array identity, exactly like `excludedStrategyIds`, so the walk is paid once per real
+ * options change rather than once per totals call — and the totals themselves are memoized on the
+ * same identity, so in practice this runs once per (rows, options, expected) triple.
+ *
+ * Reads named fields only; `basisForOption` does the same. Object.keys over a membrane proxy walks
+ * its internals, which is the cost this whole layer exists to avoid.
+ * @param {Array<{value, excluded, allowedBasis}>} [options]  shaped strategy options
+ * @returns {Map<string, {unit, locked, allowed, excluded}>}
+ */
+const OPTION_RULES_MEMO = new WeakMap();
+const NO_OPTION_RULES = new Map();
+
+function optionRulesByValue(options) {
+    if (!options) {
+        return NO_OPTION_RULES;
+    }
+    const cached = OPTION_RULES_MEMO.get(options);
+    if (cached) {
+        return cached;
+    }
+    const rules = new Map();
+    for (const option of options) {
+        if (option) {
+            rules.set(option.value, basisForOption(option));
+        }
+    }
+    OPTION_RULES_MEMO.set(options, rules);
+    return rules;
+}
+
+/**
  * The account value the Trade Instructions section derives from: what the advisor typed, or — only
  * where nothing has been typed — a value captured elsewhere in the interview (the Financial
  * Account's Source of Funds Amount, or the current allocation seeded from Apex).
@@ -2952,40 +3026,61 @@ function resolveExpectedValue(typed, fallback) {
  * table, the Trade Instructions section, and the action page total — and judge completeness —
  * identically.
  *
- * The result is a ledger against the Expected Account Value:
+ * The result is a ledger in which EXCEPTION SLEEVES come off the top:
  *
- *     remainingBalance = expected − allocatedAmount − excludedAmount
+ *     allocationBase   = expected − excludedAmount        the "model base"
+ *     remainingBalance = allocationBase − allocatedAmount
  *
- * where each completed row's dollar figure is its amount (dollar rows) or its share of the whole
- * expected value, `expected × pct/100` (percentage rows) — ONE denominator, the same one both
- * derived-cell helpers use, so the same weight always means the same dollars. (`remainder`, the
- * old modeled-pool figure, is still published for reference but no longer prices anything.) Rows
- * whose strategy is flagged excluded (`options[].excluded`, mirroring
- * Sleeve_Basis_Rule__mdt.Excluded_From_Allocation__c) sum into `excludedAmount` instead of
- * `allocatedAmount`, so the footer can name them separately — the ledger's bottom line is the same
- * either way, which is why completeness needs no options.
+ * A row whose strategy is flagged excluded (`options[].excluded`, mirroring
+ * Sleeve_Basis_Rule__mdt.Excluded_From_Allocation__c) is an exception sleeve: it is locked to
+ * dollars (see basisForOption), its amount sums into `excludedAmount`, and it states no weight.
+ * Every other — MODEL — row prices against `allocationBase`: its amount (dollar rows) or
+ * `allocationBase × pct/100` (percentage rows). So the same weight always means the same dollars
+ * within the model set, and `weight × base = dollars` holds for every row the advisor can see. An
+ * advisor-chosen fixed-dollar model row prices against the base and does NOT reduce it — only
+ * exception rows do. (`remainder`, the old modeled-pool figure, is still published for reference but
+ * no longer prices anything.)
+ *
+ * **`options` is now load-bearing, not cosmetic.** It used to control only how the footer itemized
+ * the ledger, leaving the bottom line identical either way — so callers that only wanted
+ * completeness could omit it. That is no longer true: without options an exception row is treated
+ * as a model row, `allocationBase` collapses to the whole expected value, and completeness is
+ * judged against the wrong base. Every caller must pass options.
+ *
+ * Options also decide each row's EFFECTIVE basis. A row is judged on the basis its strategy's rule
+ * dictates, not merely on the `type` it happens to carry: a row recorded as a percentage whose
+ * strategy is now locked to dollars (a reclassified strategy, or an exception sleeve saved while its
+ * classification still allowed either) is reported through `incompleteRows` and kept out of both
+ * sums. That is exactly what the table's own red "re-enter the amount" flag already claims about
+ * such a row, and without it the totals and the screen disagree — the row would silently carve
+ * `expected × pct/100` out of the base while rendering as empty.
  *
  * Completeness, once an expected value is known, is that ledger reconciling: `remainingBalance ≤ 0`
  * at cent precision. Under-allocation blocks — including a dollar-only table that underfills the
- * account. Over-allocation is deliberately NOT a blocker: it surfaces as `isOverFunded`, a warning
+ * base. Over-allocation is deliberately NOT a blocker: it surfaces as `isOverFunded`, a warning
  * the section shows without refusing the entry, mirroring how the legacy screens ask for an
- * expected-value reason instead. With no expected value known there is nothing to reconcile
- * against, so the pre-ledger judgment stands: every row valid, and — only when percentage rows are
- * present — those rows totalling 100%, dollar sleeves excluded from that sum.
+ * expected-value reason instead. One extra guard: an exhausted base (`allocationBase ≤ 0`) while
+ * MODEL rows are present is never complete — every model weight would price to $0, the ledger would
+ * reconcile at zero, and a table with nothing funded would read as finished. With no expected value
+ * known there is nothing to reconcile against, so the pre-ledger judgment stands: every row valid,
+ * and — only when percentage rows are present — those rows totalling 100%, dollar sleeves excluded
+ * from that sum.
  *
  * `expectedValue` is optional. Every entry point captures one now (see resolveExpectedValue), but it
  * can still be unknown — nothing typed and no fallback to stand in — and nothing may be derived from
- * a number we don't have: `remainder`, `allocatedAmount`, `excludedAmount` and `remainingBalance`
- * come back null and `isOverFunded` false.
+ * a number we don't have: `remainder`, `allocationBase`, `allocatedAmount`, `excludedAmount` and
+ * `remainingBalance` come back null and `isOverFunded` false. Never NaN.
  *
  * @param {Array<{type, strategy, fundingAmount, fundingPercent}>} strategies
  * @param {number} [expectedValue]  the Expected Account Value, once one is known
- * @param {Array<{value, excluded}>} [options]  shaped strategy options, for the excluded split only
+ * @param {Array<{value, excluded, allowedBasis}>} [options]  shaped strategy options. Required for
+ *        a correct base; omitting them prices every row as a model row against the whole expected
+ *        value, which is the pre-exception-sleeve reading
  * @returns {{fixedDollarSum: number, percentSum: number, remainder: number|null,
- *            allocatedAmount: number|null, excludedAmount: number|null,
+ *            allocationBase: number|null, allocatedAmount: number|null, excludedAmount: number|null,
  *            remainingBalance: number|null, hasPercentRows: boolean, hasDollarRows: boolean,
- *            hasExcludedRows: boolean, isOverFunded: boolean, isComplete: boolean,
- *            incompleteRows: Array<object>}}
+ *            hasExcludedRows: boolean, hasModelRows: boolean, isOverFunded: boolean,
+ *            isComplete: boolean, incompleteRows: Array<object>}}
  */
 const TOTALS_MEMO = new WeakMap();
 // Stands in as the options branch key when no options are passed — WeakMap keys must be objects.
@@ -3016,7 +3111,7 @@ function strategyTotals(strategies, expectedValue, options) {
     if (cached) {
         return cached;
     }
-    const excludedIds = excludedStrategyIds(options);
+    const rules = optionRulesByValue(options);
     const incompleteRows = [];
     const completedRows = [];
     let fixedDollarSum = 0;
@@ -3024,6 +3119,7 @@ function strategyTotals(strategies, expectedValue, options) {
     let hasPercentRows = false;
     let hasDollarRows = false;
     let hasExcludedRows = false;
+    let hasModelRows = false;
     for (const row of rows) {
         const isDollar = row.type === STRATEGY_BASIS.DOLLAR;
         const value = Number(isDollar ? row.fundingAmount : row.fundingPercent);
@@ -3039,9 +3135,20 @@ function strategyTotals(strategies, expectedValue, options) {
             incompleteRows.push(row);
             continue;
         }
-        const excluded = excludedIds.has(row.strategy);
+        // Judged on the EFFECTIVE basis, not merely the recorded one. A row carrying a percentage
+        // whose strategy is now locked to dollars has a value in the wrong unit — the table already
+        // shows it empty behind a red "re-enter the amount" flag — so it is outstanding here too.
+        // Counting it would let it carve `expected × pct/100` out of the base while rendering blank.
+        const rule = rules.get(row.strategy);
+        if (rule && rule.locked && rule.unit !== row.type) {
+            incompleteRows.push(row);
+            continue;
+        }
+        const excluded = rule?.excluded === true;
         if (excluded) {
             hasExcludedRows = true;
+        } else {
+            hasModelRows = true;
         }
         completedRows.push({ isDollar, value, excluded });
         if (isDollar) {
@@ -3054,45 +3161,65 @@ function strategyTotals(strategies, expectedValue, options) {
     const hasExpected = Number.isFinite(expected) && expected > 0;
     const remainder = hasExpected ? expected - fixedDollarSum : null;
     const cents = (value) => Math.round(value * 100);
-    // The ledger split. Raw dollars all the way through the sums; each published figure rounds once
-    // at the end (roundCurrency), so the three lines and the comparisons cannot drift apart.
+    // The ledger. Raw dollars all the way through the sums; each published figure rounds once at the
+    // end (roundCurrency), so the lines and the comparisons cannot drift apart.
+    //
+    // Two passes, and the order matters: exception sleeves are locked to dollars, so their amounts
+    // are known without a base, and summing them first is what makes the base computable in one
+    // go. Nothing here divides by a figure its own row helped define.
+    let allocationBase = null;
     let allocatedAmount = null;
     let excludedAmount = null;
     let remainingBalance = null;
+    let allocated = 0;
+    let excludedSum = 0;
+    let base = 0;
     if (hasExpected) {
-        let allocated = 0;
-        let excludedSum = 0;
         for (const row of completedRows) {
-            const dollars = row.isDollar ? row.value : (expected * row.value) / 100;
             if (row.excluded) {
-                excludedSum += dollars;
-            } else {
-                allocated += dollars;
+                excludedSum += row.value;
             }
         }
+        base = expected - excludedSum;
+        for (const row of completedRows) {
+            if (row.excluded) {
+                continue;
+            }
+            allocated += row.isDollar ? row.value : (base * row.value) / 100;
+        }
+        allocationBase = roundCurrency(base);
         allocatedAmount = roundCurrency(allocated);
         excludedAmount = roundCurrency(excludedSum);
-        remainingBalance = roundCurrency(expected - allocated - excludedSum);
+        remainingBalance = roundCurrency(base - allocated);
     }
+    // Over-funded is either half of the ledger overflowing: the model rows claiming more than the
+    // base leaves them, or the exception sleeves alone claiming more than the account holds. Both
+    // warn; neither blocks.
     const isOverFunded =
         hasExpected &&
-        (cents(fixedDollarSum) > cents(expected) || cents(remainingBalance) < 0);
+        (cents(allocated) > cents(base) || cents(excludedSum) > cents(expected));
     const isComplete =
         rows.length > 0 &&
         incompleteRows.length === 0 &&
         (hasExpected
-            ? cents(remainingBalance) <= 0
+            ? // An exhausted base with model rows still on the table is never finished. Every model
+              // weight prices to $0 against it, so the ledger reconciles at zero and a table with
+              // nothing funded would otherwise read complete. Exception-only tables are unaffected:
+              // with no model rows there is nothing left to fund.
+              (hasModelRows && cents(base) <= 0 ? false : cents(remainingBalance) <= 0)
             : !hasPercentRows || cents(percentSum) === cents(100));
     const totals = {
         fixedDollarSum,
         percentSum,
         remainder,
+        allocationBase,
         allocatedAmount,
         excludedAmount,
         remainingBalance,
         hasPercentRows,
         hasDollarRows,
         hasExcludedRows,
+        hasModelRows,
         isOverFunded,
         isComplete,
         incompleteRows

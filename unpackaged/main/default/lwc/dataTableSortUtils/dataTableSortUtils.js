@@ -20,8 +20,19 @@ const getNestedValue = (record, fieldName) => {
     return null;
   }
 
-  if (!fieldName.includes(".")) {
+  // A row built from a flat field list keeps a relationship path as ONE key
+  // ("RecordType.Name": "Household") -- arcRecordListView's rows do, and so
+  // does anything else that copies UI API fields onto a row by API name -- so
+  // the literal key wins. Walking the dots on such a row found nothing, every
+  // value compared as blank, and sorting a Record Type or Financial Advisor
+  // Team column flipped the arrow without moving a row. Only a genuinely
+  // nested record (no literal key) is walked.
+  if (Object.prototype.hasOwnProperty.call(record, fieldName)) {
     return record[fieldName];
+  }
+
+  if (!fieldName.includes(".")) {
+    return undefined;
   }
 
   return fieldName.split(".").reduce((current, key) => current?.[key], record);

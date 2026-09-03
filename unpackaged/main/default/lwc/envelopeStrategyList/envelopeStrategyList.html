@@ -80,9 +80,14 @@
                                 </div>
                             </template>
                             <template lwc:else>
+                                <!-- An exception sleeve lands here too, and needs no branch of its
+                                     own: it is locked to dollars, so this is already the greyed
+                                     box, and the word "Excluded" arrives as its read-out with the
+                                     unit symbol suppressed (there is no weight for a `%` to
+                                     qualify) and its own helptext explaining why. -->
                                 <div class="strategy__calculated">
                                     <lightning-input
-                                        class="strategy__readout"
+                                        class={row.pctReadoutClass}
                                         type="text"
                                         variant="label-hidden"
                                         label="Target weight (calculated)"
@@ -163,17 +168,14 @@
                             </template>
                         </div>
 
-                        <!-- Both notes share one compact grid line under the row: the excluded tag
-                             under the strategy column, the flag under the value columns. Inside a
-                             cell the tag would stretch the whole first grid line instead
-                             (align-items: start leaves the other cells hanging in the extra
-                             height), which read as a large gap between rows. -->
-                        <template lwc:if={row.excluded}>
-                            <!-- Configured on the sleeve's classification rule: this strategy's
-                                 dollars sit outside the allocation, and the footer ledger names
-                                 them on their own line. -->
-                            <span class="strategy__excluded">Excluded from allocation</span>
-                        </template>
+                        <!-- The row's note sits on its own compact grid line under the value
+                             columns. Inside a cell it would stretch the whole first grid line
+                             instead (align-items: start leaves the other cells hanging in the extra
+                             height), which read as a large gap between rows.
+
+                             An exception sleeve carries no note here: its weight cell already says
+                             "Excluded" and explains itself through the help icon beside it, so a
+                             second label under the strategy name only repeated the screen. -->
                         <template lwc:if={row.flag}>
                             <p class={row.flagClass}>{row.flag}</p>
                         </template>

@@ -31,6 +31,62 @@ export const NAV_SELECT_REQUEST_EVENT = "arc-nav-select-request";
  *  › <household> rather than keeping the list the user happened to come from. */
 export const HOUSEHOLDS_NAV_ITEM_ID = "arc-nav-households";
 
+/** The other Contacts list entries, one per tab of the Account list page. */
+export const ALL_CONTACTS_NAV_ITEM_ID = "arc-nav-all-contacts";
+export const INDIVIDUALS_NAV_ITEM_ID = "arc-nav-individuals";
+export const CLIENTS_NAV_ITEM_ID = "arc-nav-clients";
+export const BUSINESSES_NAV_ITEM_ID = "arc-nav-businesses";
+export const RETIREMENT_PLANS_NAV_ITEM_ID = "arc-nav-retirement-plans";
+export const TRUSTS_ESTATES_NAV_ITEM_ID = "arc-nav-trusts-estates";
+
+/**
+ * Which Contacts list an Account belongs under, by record type. A person can
+ * legitimately sit under three of them (All Contacts, Individuals, Clients),
+ * so a person keeps whichever of those the trail already holds and otherwise
+ * falls back to All Contacts, the list's default. Every other type has exactly
+ * one list. Record types are this org's bare DeveloperNames (no FinServ__
+ * prefix) -- the same set ArcAccountRelationshipsController matches on.
+ */
+const PERSON_ACCOUNT_RECORD_TYPES = new Set([
+  "PersonAccount",
+  "Individual",
+  "IndustriesIndividual",
+  "Diversify_Related_Person",
+  "Prospect"
+]);
+const PERSON_LIST_NAV_ITEM_IDS = new Set([
+  ALL_CONTACTS_NAV_ITEM_ID,
+  INDIVIDUALS_NAV_ITEM_ID,
+  CLIENTS_NAV_ITEM_ID
+]);
+const NAV_ITEM_ID_BY_ACCOUNT_RECORD_TYPE = {
+  Household: HOUSEHOLDS_NAV_ITEM_ID,
+  IndustriesHousehold: HOUSEHOLDS_NAV_ITEM_ID,
+  Business: BUSINESSES_NAV_ITEM_ID,
+  IndustriesBusiness: BUSINESSES_NAV_ITEM_ID,
+  Trust: TRUSTS_ESTATES_NAV_ITEM_ID,
+  Retirement_Plan: RETIREMENT_PLANS_NAV_ITEM_ID
+};
+
+/**
+ * The Contacts list entry an Account record belongs under, given its record
+ * type and the entry the trail currently holds. Returns "" for a record type
+ * with no list of its own, so callers leave the trail alone for it.
+ */
+export function resolveAccountNavItemId(recordTypeDeveloperName, currentNavItemId) {
+  if (!recordTypeDeveloperName) {
+    return "";
+  }
+
+  if (PERSON_ACCOUNT_RECORD_TYPES.has(recordTypeDeveloperName)) {
+    return PERSON_LIST_NAV_ITEM_IDS.has(currentNavItemId)
+      ? currentNavItemId
+      : ALL_CONTACTS_NAV_ITEM_ID;
+  }
+
+  return NAV_ITEM_ID_BY_ACCOUNT_RECORD_TYPE[recordTypeDeveloperName] || "";
+}
+
 const HOME_LABEL = "Home";
 const ACCOUNT_LIST_PATH = "/account/Account/Default";
 const WORK_LIST_PATH = "/case/Case/Default";
@@ -111,21 +167,21 @@ const MANUAL_CONTACTS_GROUP = {
      * attribute on the Account_List page in Experience Builder.
      */
     {
-      id: "arc-nav-all-contacts",
+      id: ALL_CONTACTS_NAV_ITEM_ID,
       label: "All Contacts",
       type: "InternalLink",
       target: `${ACCOUNT_LIST_PATH}?c__tabId=tab1`,
       objectApiName: "Account"
     },
     {
-      id: "arc-nav-individuals",
+      id: INDIVIDUALS_NAV_ITEM_ID,
       label: "Individuals",
       type: "InternalLink",
       target: `${ACCOUNT_LIST_PATH}?c__tabId=tab2`,
       objectApiName: "Account"
     },
     {
-      id: "arc-nav-clients",
+      id: CLIENTS_NAV_ITEM_ID,
       label: "Clients",
       type: "InternalLink",
       target: `${ACCOUNT_LIST_PATH}?c__tabId=tab3`,
@@ -139,21 +195,21 @@ const MANUAL_CONTACTS_GROUP = {
       objectApiName: "Account"
     },
     {
-      id: "arc-nav-businesses",
+      id: BUSINESSES_NAV_ITEM_ID,
       label: "Businesses",
       type: "InternalLink",
       target: `${ACCOUNT_LIST_PATH}?c__tabId=tab5`,
       objectApiName: "Account"
     },
     {
-      id: "arc-nav-retirement-plans",
+      id: RETIREMENT_PLANS_NAV_ITEM_ID,
       label: "Retirement Plans",
       type: "InternalLink",
       target: `${ACCOUNT_LIST_PATH}?c__tabId=tab6`,
       objectApiName: "Account"
     },
     {
-      id: "arc-nav-trusts-estates",
+      id: TRUSTS_ESTATES_NAV_ITEM_ID,
       label: "Trusts & Estates",
       type: "InternalLink",
       target: `${ACCOUNT_LIST_PATH}?c__tabId=tab7`,

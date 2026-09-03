@@ -55,34 +55,65 @@ private class ArcRecordSearchControllerTest {
    * and label.
    */
   @IsTest
-  static void searchRecordsDropsRecordTypeFilterWithNoMatchingLabelAndReturnsEverythingElseInstead() {
-    insert new Account(Name = 'Unfiltered by anything', Type = 'Prospect');
-
-    ArcRecordSearchController.SearchFilter filter = new ArcRecordSearchController.SearchFilter();
-    filter.fieldApiName = 'RecordType.Name';
-    filter.operator = 'Equals';
-    filter.operandValue = 'No Such Record Type Label';
+  static void searchRecordsReturnsNoRowsForARecordTypeLabelMatchingNoRecordType() {
+    insert new Account(Name = 'Should not come back', Type = 'Prospect');
 
     Test.startTest();
-    ArcRecordSearchController.SearchResult result = ArcRecordSearchController.searchRecords(
-      'Account',
-      new List<String>{ 'Name' },
-      JSON.serialize(new List<ArcRecordSearchController.SearchFilter>{ filter }),
-      null,
-      null,
-      null,
-      null,
-      25,
-      null
+    ArcRecordSearchController.SearchResult included = searchWithFilter(
+      'RecordType.Name',
+      'Equals',
+      'No Such Record Type Label'
+    );
+    ArcRecordSearchController.SearchResult excluded = searchWithFilter(
+      'RecordType.Name',
+      'NotEqual',
+      'No Such Record Type Label'
     );
     Test.stopTest();
 
-    // Documented, pre-existing behavior (not something this fix changes): a
-    // label matching no record type drops the whole clause rather than
-    // failing the search, so the account comes back same as an unfiltered
-    // query would return it.
-    Assert.areEqual(1, result.rows.size());
-    Assert.areEqual('Unfiltered by anything', result.rows[0].cells[0]);
+    // An inclusive filter nothing matches means no rows -- the result has to
+    // reflect the filter rather than quietly showing the unfiltered list,
+    // which is what it used to do and read as "the filter does nothing".
+    Assert.isTrue(included.rows.isEmpty(), 'nothing matches, so nothing comes back');
+    // Excluding a record type that does not exist excludes nothing.
+    Assert.areEqual(1, excluded.rows.size());
+    Assert.areEqual('Should not come back', excluded.rows[0].cells[0]);
+  }
+
+  @IsTest
+  static void searchRecordsMatchesRecordTypeLabelsCaseInsensitivelyAndPerOperator() {
+    Id businessRecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
+      .get('Business')
+      .getRecordTypeId();
+    Id householdRecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
+      .get('Household')
+      .getRecordTypeId();
+    insert new List<Account>{
+      new Account(Name = 'Acme Business', RecordTypeId = businessRecordTypeId, Type = 'Prospect'),
+      new Account(Name = 'Acme Household', RecordTypeId = householdRecordTypeId)
+    };
+
+    Test.startTest();
+    ArcRecordSearchController.SearchResult lowerCaseEquals = searchWithFilter('RecordType.Name', 'Equals', 'household');
+    ArcRecordSearchController.SearchResult contains = searchWithFilter('RecordType.Name', 'Contains', 'house');
+    ArcRecordSearchController.SearchResult startsWith = searchWithFilter('RecordType.Name', 'StartsWith', 'Busi');
+    ArcRecordSearchController.SearchResult partialEquals = searchWithFilter('RecordType.Name', 'Equals', 'Busin');
+    ArcRecordSearchController.SearchResult notEqual = searchWithFilter('RecordType.Name', 'NotEqual', 'Household');
+    ArcRecordSearchController.SearchResult notContain = searchWithFilter('RecordType.Name', 'NotContain', 'house');
+    Test.stopTest();
+
+    Assert.areEqual(1, lowerCaseEquals.rows.size(), 'Equals ignores case');
+    Assert.areEqual('Acme Household', lowerCaseEquals.rows[0].cells[0]);
+    Assert.areEqual(1, contains.rows.size(), 'Contains matches part of the label');
+    Assert.areEqual('Acme Household', contains.rows[0].cells[0]);
+    Assert.areEqual(1, startsWith.rows.size(), 'StartsWith matches the start of the label');
+    Assert.areEqual('Acme Business', startsWith.rows[0].cells[0]);
+    Assert.areEqual(1, partialEquals.rows.size(), 'an Equals with no whole-label match falls back to contains');
+    Assert.areEqual('Acme Business', partialEquals.rows[0].cells[0]);
+    Assert.areEqual(1, notEqual.rows.size());
+    Assert.areEqual('Acme Business', notEqual.rows[0].cells[0]);
+    Assert.areEqual(1, notContain.rows.size());
+    Assert.areEqual('Acme Business', notContain.rows[0].cells[0]);
   }
 
   @IsTest
@@ -307,7 +338,7 @@ private class ArcRecordSearchControllerTest {
     Test.stopTest();
 
     // An unrecognised filter field is dropped rather than failing the whole
-    // search, same documented behavior as an unresolvable RecordType label.
+    // search.
     Assert.areEqual(1, unknownFieldFilterResult.rows.size());
     // No requested column survives validation, so no query is even attempted.
     Assert.isTrue(emptySelectionResult.rows.isEmpty());

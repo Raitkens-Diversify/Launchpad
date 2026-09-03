@@ -166,6 +166,26 @@ const relationshipFor = (fieldPath) => {
 };
 
 const TYPE_REFERENCE = "REFERENCE";
+const TYPE_CURRENCY = "CURRENCY";
+
+/**
+ * Currency the way the Lightning record page prints it: "$12,345.00", always
+ * two decimals. Deliberately not envelopeFormSchema's CURRENCY_DISPLAY, which
+ * drops the cents on a whole amount ("$12,345") -- this screen copies the
+ * Lightning page, and that is what the page shows.
+ */
+const CURRENCY_DISPLAY = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+});
+
+/** "$12,345.00" for a currency amount; anything non-numeric passes through as sent. */
+const formatCurrency = (raw) => {
+  const amount = Number(raw);
+  return Number.isFinite(amount) ? CURRENCY_DISPLAY.format(amount) : String(raw);
+};
 
 /**
  * Lookup targets that render as a link on the Details tab. Only objects with an
@@ -594,10 +614,18 @@ export default class ArcHouseholdDetail extends NavigationMixin(
 
           const isBlank = raw === null || raw === undefined || raw === "";
 
+          /*
+           * A currency renders as money, not as the bare number the server
+           * returns -- "$5,000,000.00" rather than "5000000", as the Lightning
+           * page shows it. Other types still render as the server sent them.
+           */
+          const displayValue =
+            type === TYPE_CURRENCY ? formatCurrency(raw) : String(raw);
+
           return {
             key: `${section.name}-${field.fieldPath}-${index}`,
             label: field.label || field.fieldPath,
-            value: isBlank ? "—" : String(raw),
+            value: isBlank ? "—" : displayValue,
             // Computed here, not in the template: LWC cannot build a class
             // string from an expression, and a getter per row is not possible
             // inside for:each.

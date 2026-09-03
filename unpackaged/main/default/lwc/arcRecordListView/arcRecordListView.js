@@ -359,6 +359,20 @@ const dateRowMatchesFilter = (row, fieldApiName, operator, operandDateKey) => {
   }
 };
 
+/**
+ * Operators a record-type filter chip offers. The platform's column metadata
+ * for RecordType.Name allows only Equals / Does not equal, because on the
+ * platform a record type is a reference. ArcRecordSearchController matches a
+ * typed record-type label per operator and case-insensitively, so the chip
+ * offers the same text operators every other text column gets.
+ */
+const RECORD_TYPE_OPERATOR_KEYS = [
+  "Equals",
+  "NotEqual",
+  "Contains",
+  "NotContain",
+  "StartsWith"
+];
 const DATE_OPERATOR_KEYS = [
   "Equals",
   "NotEqual",
@@ -2441,6 +2455,12 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   }
 
   buildOperatorOptions(fieldApiName) {
+    if (RECORD_TYPE_FIELD_NAMES.has(fieldApiName)) {
+      return RECORD_TYPE_OPERATOR_KEYS.map((operator) => ({
+        label: this.getOperatorLabel(operator),
+        value: operator
+      }));
+    }
     const meta = this.getColumnMeta(fieldApiName);
     if (meta?.supportedFilterOperators?.length) {
       return meta.supportedFilterOperators.map((operator) => ({

@@ -2,7 +2,8 @@
  * Tests for TradeInstructionController: the wizard's strategy-sleeve write-through
  * (Order_Ticket__c + basis-carrying Order__c rows), the current-instructions read-back that seeds
  * an Update DMS Instructions interview, and the active-strategy options query. Also exercises the
- * Allocation_TriggerHandler snapshot copy of Funding_Basis__c.
+ * Allocation_TriggerHandler snapshot copy of Funding_Basis__c, and the exception-sleeve rules
+ * (Excluded_From_Allocation__c + Order_Ticket__c.Allocation_Base__c).
  */
 @isTest
 private class TradeInstructionControllerTest {
@@ -32,7 +33,8 @@ private class TradeInstructionControllerTest {
         insert new Envelope__c(Name = 'Test Envelope', Status__c = 'In Progress');
         // Classifications drive which basis each strategy may be funded on, through the
         // Sleeve_Basis_Rule__mdt rule table: Model Allocation → Percent Only, Structured Note →
-        // Dollar Only, Model Exclusion → Either. 'Unclassified' is left blank on purpose to cover
+        // Dollar Only, Model Exclusion → Either but EXCLUDED (so effectively Dollar Only), Bond
+        // Ladder → Either and not excluded. 'Unclassified' is left blank on purpose to cover
         // the Default rule, and 'Blank Status' covers a live strategy that carries no Status at all —
         // several real ones don't, including the alternative sleeve this feature exists for.
         insert new List<Strategy__c>{
@@ -54,6 +56,12 @@ private class TradeInstructionControllerTest {
                 Status__c = 'Active',
                 Strategy_Code__c = 'EX',
                 Sleeve_Classification__c = 'Model Exclusion'
+            ),
+            new Strategy__c(
+                Name = 'Flexible Sleeve',
+                Status__c = 'Active',
+                Strategy_Code__c = 'FX',
+                Sleeve_Classification__c = 'Bond Ladder'
             ),
             new Strategy__c(Name = 'Unclassified Sleeve', Status__c = 'Active', Strategy_Code__c = 'UC'),
             new Strategy__c(Name = 'Blank Status Sleeve', Strategy_Code__c = 'BS'),
@@ -102,6 +110,7 @@ private class TradeInstructionControllerTest {
             'Model Allocation' => 'Percent Only',
             'Structured Note' => 'Dollar Only',
             'Model Exclusion' => 'Either',
+            'Bond Ladder' => 'Either',
             'Default' => 'Percent Only'
         };
         TradeInstructionController.exclusionRules = new Map<String, Boolean>{
@@ -130,7 +139,15 @@ private class TradeInstructionControllerTest {
         );
         Assert.areEqual('Percent Only', byName.get('Core Equity').get('allowedBasis'));
         Assert.areEqual('Dollar Only', byName.get('Structured Note A').get('allowedBasis'));
-        Assert.areEqual('Either', byName.get('Model Exclusion Sleeve').get('allowedBasis'));
+        // An exception sleeve reports Dollar Only even though its rule says Either: it carries no
+        // target weight, because its own dollars are what the other sleeves' weights are a share
+        // of. The one exclusion checkbox decides this, with no second field to keep in step —
+        // which matters because that is exactly how the live exception classifications are set up.
+        Assert.areEqual(
+            'Dollar Only',
+            byName.get('Model Exclusion Sleeve').get('allowedBasis'),
+            'The exclusion flag must override a configured Either.'
+        );
         Assert.areEqual(
             'Percent Only',
             byName.get('Unclassified Sleeve').get('allowedBasis'),
@@ -174,16 +191,161 @@ private class TradeInstructionControllerTest {
     static void acceptsEitherStrategyOnBothBases() {
         seedRules();
         Test.startTest();
-        Id dollarTicket = TradeInstructionController.saveTradeInstructions(payload(null, new List<Object>{
-            row(strategyId('EX'), 'fixed-dollar', 25000),
+        // Bond Ladder is Either and NOT excluded, so it is the only genuinely unrestricted sleeve
+        // here — Model Exclusion is configured Either but the exclusion flag locks it to dollars.
+        Id ticketId = TradeInstructionController.saveTradeInstructions(payload(null, new List<Object>{
+            row(strategyId('FX'), 'fixed-dollar', 25000),
+            row(strategyId('CE'), 'fixed-percentage', 100)
+        }));
+        // The same save is idempotent per (envelope, account, case), so this replaces the rows on
+        // that ticket rather than stacking a second one — which is all this needs to prove the
+        // other basis is accepted too.
+        Id resaved = TradeInstructionController.saveTradeInstructions(payload(null, new List<Object>{
+            row(strategyId('FX'), 'fixed-percentage', 100)
+        }));
+        Test.stopTest();
+
+        Assert.areEqual(ticketId, resaved, 'The re-save reuses the same New ticket.');
+        List<Order__c> sleeves = [
+            SELECT Funding_Basis__c FROM Order__c WHERE Order_Ticket__c = :resaved
+        ];
+        Assert.areEqual(1, sleeves.size());
+        Assert.areEqual(
+            'Percent',
+            sleeves[0].Funding_Basis__c,
+            'An Either strategy is accepted on either basis.'
+        );
+    }
+
+    /**
+     * D7: an exception sleeve posted as a percentage is refused, and nothing is persisted.
+     *
+     * This is the case a stale client can actually produce: Model Exclusion is configured 'Either',
+     * so a build that resolved the basis from Allowed_Funding_Basis__c alone would offer the weight
+     * cell and post a percentage. The server resolves the EFFECTIVE basis instead, so it refuses —
+     * and because every row is shaped before any DML, a bad payload persists nothing at all.
+     */
+    @isTest
+    static void rejectsAPercentBasisExceptionSleeve() {
+        seedRules();
+        Test.startTest();
+        try {
+            TradeInstructionController.saveTradeInstructions(payload(null, new List<Object>{
+                row(strategyId('CE'), 'fixed-percentage', 60),
+                row(strategyId('EX'), 'fixed-percentage', 40)
+            }));
+            Assert.fail('An excluded sleeve cannot carry a target weight.');
+        } catch (AuraHandledException expected) {
+            // Caught by type, so Assert.fail's own AssertException is not swallowed here.
+        }
+        Test.stopTest();
+
+        Assert.areEqual(
+            0,
+            [SELECT COUNT() FROM Order_Ticket__c],
+            'Rows are shaped before any DML, so a refused payload writes nothing.'
+        );
+        Assert.areEqual(0, [SELECT COUNT() FROM Order__c]);
+    }
+
+    /**
+     * The two snapshot fields, on a ticket that actually has an exception sleeve: the flag per row,
+     * and the base the weights were computed against on the ticket.
+     */
+    @isTest
+    static void stampsTheExceptionFlagAndTheAllocationBase() {
+        seedRules();
+        Test.startTest();
+        // $100k account. The exception sleeve takes $40k, leaving a $60k base; the model row's 100%
+        // is a weight against that base, not against the account.
+        Id ticketId = TradeInstructionController.saveTradeInstructions(payload(null, new List<Object>{
+            row(strategyId('EX'), 'fixed-dollar', 40000),
             row(strategyId('CE'), 'fixed-percentage', 100)
         }));
         Test.stopTest();
 
-        List<Order__c> sleeves = [
-            SELECT Funding_Basis__c FROM Order__c WHERE Order_Ticket__c = :dollarTicket
+        Order_Ticket__c ticket = [
+            SELECT Expected_Account_Value__c, Allocation_Base__c
+            FROM Order_Ticket__c
+            WHERE Id = :ticketId
         ];
-        Assert.areEqual(2, sleeves.size(), 'An Either strategy is accepted as a dollar sleeve.');
+        Assert.areEqual(100000, ticket.Expected_Account_Value__c);
+        Assert.areEqual(
+            60000,
+            ticket.Allocation_Base__c,
+            'The base is the account value less every exception sleeve.'
+        );
+
+        // Ordered by strategy name: Core Equity (model) then Model Exclusion Sleeve (exception).
+        List<Order__c> sleeves = [
+            SELECT Funding_Basis__c, Excluded_From_Allocation__c, Initial_Funding_Amount__c,
+                Initial_Funding_Percentage__c
+            FROM Order__c
+            WHERE Order_Ticket__c = :ticketId
+            ORDER BY Strategy__r.Name
+        ];
+        Assert.areEqual(2, sleeves.size());
+        Assert.isFalse(sleeves[0].Excluded_From_Allocation__c, 'Core Equity is a model sleeve.');
+        Assert.areEqual(100, sleeves[0].Initial_Funding_Percentage__c);
+        Assert.isTrue(sleeves[1].Excluded_From_Allocation__c);
+        Assert.areEqual('Dollar', sleeves[1].Funding_Basis__c);
+        Assert.areEqual(40000, sleeves[1].Initial_Funding_Amount__c);
+        Assert.isNull(
+            sleeves[1].Initial_Funding_Percentage__c,
+            'An exception sleeve never stores a weight.'
+        );
+    }
+
+    @isTest
+    static void allocationBaseNetsOffEveryExceptionSleeve() {
+        seedRules();
+        Test.startTest();
+        Id ticketId = TradeInstructionController.saveTradeInstructions(payload(null, new List<Object>{
+            row(strategyId('EX'), 'fixed-dollar', 40000),
+            row(strategyId('SN'), 'fixed-dollar', 25000),
+            row(strategyId('CE'), 'fixed-percentage', 100)
+        }));
+        Test.stopTest();
+
+        // Only the EXCEPTION sleeve reduces the base. Structured Note A is a fixed-dollar MODEL
+        // sleeve: it is priced against the base and does not come off it.
+        Assert.areEqual(
+            60000,
+            [SELECT Allocation_Base__c FROM Order_Ticket__c WHERE Id = :ticketId].Allocation_Base__c
+        );
+    }
+
+    /**
+     * The snapshot survives into the allocation of record, so a completed allocation still says what
+     * it meant without re-resolving the strategy's current rule.
+     */
+    @isTest
+    static void theSnapshotCarriesTheExceptionFlagToTheAllocation() {
+        seedRules();
+        Id ticketId = TradeInstructionController.saveTradeInstructions(payload(null, new List<Object>{
+            row(strategyId('EX'), 'fixed-dollar', 40000),
+            row(strategyId('CE'), 'fixed-percentage', 100)
+        }));
+
+        Test.startTest();
+        insert new Allocation__c(
+            Wizard_Financial_Account__c = faId(),
+            Request_Allocation_Originated_From__c = ticketId,
+            Current_Allocation__c = true
+        );
+        Test.stopTest();
+
+        Map<Boolean, Integer> byFlag = new Map<Boolean, Integer>{ true => 0, false => 0 };
+        for (Allocation_Strategy__c snap : [
+            SELECT Excluded_From_Allocation__c FROM Allocation_Strategy__c
+        ]) {
+            byFlag.put(
+                snap.Excluded_From_Allocation__c,
+                byFlag.get(snap.Excluded_From_Allocation__c) + 1
+            );
+        }
+        Assert.areEqual(1, byFlag.get(true), 'The exception sleeve is flagged in the snapshot.');
+        Assert.areEqual(1, byFlag.get(false), 'The model sleeve is not.');
     }
 
     @isTest
@@ -198,7 +360,8 @@ private class TradeInstructionControllerTest {
 
         Order_Ticket__c ticket = [
             SELECT Type_of_Request__c, Status__c, Incomplete_Record__c, Expected_Account_Value__c,
-                Advisor_Notes__c, Flow_Interview_ID__c, Wizard_Financial_Account__c, Case__c
+                Allocation_Base__c, Advisor_Notes__c, Flow_Interview_ID__c,
+                Wizard_Financial_Account__c, Case__c
             FROM Order_Ticket__c
             WHERE Id = :ticketId
         ];
@@ -206,20 +369,26 @@ private class TradeInstructionControllerTest {
         Assert.areEqual('New', ticket.Status__c);
         Assert.isFalse(ticket.Incomplete_Record__c);
         Assert.areEqual(100000, ticket.Expected_Account_Value__c);
+        // No exception sleeve on this ticket, so the base the weights are of IS the account value.
+        // Always stamped, so no consumer has to coalesce a null or know whether exclusions applied.
+        Assert.areEqual(100000, ticket.Allocation_Base__c);
         Assert.areEqual(String.valueOf(envelopeId()), ticket.Flow_Interview_ID__c);
         Assert.areEqual(faId(), ticket.Wizard_Financial_Account__c);
         Assert.isNull(ticket.Case__c);
 
         // Ordered by strategy name: Core Equity (percent) then Structured Note A (dollar).
         List<Order__c> sleeves = [
-            SELECT Strategy__c, Funding_Basis__c, Initial_Funding_Amount__c,
-                Initial_Funding_Percentage__c, Total_Initial_Funding_Amount__c
+            SELECT Strategy__c, Funding_Basis__c, Excluded_From_Allocation__c,
+                Initial_Funding_Amount__c, Initial_Funding_Percentage__c,
+                Total_Initial_Funding_Amount__c
             FROM Order__c
             WHERE Order_Ticket__c = :ticketId
             ORDER BY Strategy__r.Name
         ];
         Assert.areEqual(2, sleeves.size());
-        // Percent sleeve: percentage of the remainder only.
+        Assert.isFalse(sleeves[0].Excluded_From_Allocation__c);
+        Assert.isFalse(sleeves[1].Excluded_From_Allocation__c);
+        // Percent sleeve: a target weight only, no amount.
         Assert.areEqual('Percent', sleeves[0].Funding_Basis__c);
         Assert.areEqual(100, sleeves[0].Initial_Funding_Percentage__c);
         Assert.isNull(sleeves[0].Initial_Funding_Amount__c);
