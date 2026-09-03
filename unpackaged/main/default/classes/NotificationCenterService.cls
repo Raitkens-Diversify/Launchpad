@@ -530,7 +530,7 @@ public with sharing class NotificationCenterService {
   }
 
   private static Boolean hasAdminAccess() {
-    return NotificationConstants.isRunningUserSystemAdministrator();
+    return UserInfoUtils.isCurrentUserSystemAdministrator();
   }
 
   private static void assertAdminAccess() {

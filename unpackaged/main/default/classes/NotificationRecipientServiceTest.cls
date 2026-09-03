@@ -248,7 +248,7 @@ private class NotificationRecipientServiceTest {
       LIMIT 1
     ];
 
-    if (!NotificationConstants.isNotificationEligibleProfile(currentUser.Profile.Name)) {
+    if (!UserInfoUtils.isCurrentUserNotificationEligible()) {
       System.assert(true, 'Current user profile is outside notification scope.');
       return;
     }
@@ -448,13 +448,13 @@ private class NotificationRecipientServiceTest {
   private static User createBranchUserForRecipientTest(String aliasPrefix) {
     try {
       return NotificationTestDataFactory.createProfileUser(
-        NotificationConstants.PROFILE_NEXS,
+        UserInfoUtils.PROFILE_NEXS,
         aliasPrefix
       );
     } catch (DmlException ex) {
       try {
         return NotificationTestDataFactory.createProfileUser(
-          NotificationConstants.PROFILE_ADVISOR,
+          UserInfoUtils.PROFILE_ADVISOR,
           aliasPrefix
         );
       } catch (DmlException advisorException) {

@@ -184,13 +184,13 @@ private class NotificationPrepareContextFactoryTest {
   private static User createBranchUser(String aliasPrefix) {
     try {
       return NotificationTestDataFactory.createProfileUser(
-        NotificationConstants.PROFILE_NEXS,
+        UserInfoUtils.PROFILE_NEXS,
         aliasPrefix
       );
     } catch (DmlException ex) {
       try {
         return NotificationTestDataFactory.createProfileUser(
-          NotificationConstants.PROFILE_ADVISOR,
+          UserInfoUtils.PROFILE_ADVISOR,
           aliasPrefix
         );
       } catch (DmlException advisorException) {

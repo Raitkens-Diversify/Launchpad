@@ -1,0 +1,36 @@
+<template>
+  <div class="arc-account-cases-list">
+    <template lwc:if={isLoading}>
+      <c-arc-loading-spinner
+        alternative-text="Loading cases"
+        size="small"
+      ></c-arc-loading-spinner>
+    </template>
+
+    <template lwc:if={errorMessage}>
+      <p class="arc-account-cases-list__error" role="alert">{errorMessage}</p>
+    </template>
+
+    <template lwc:if={hasRows}>
+      <c-arc-data-table
+        key-field="id"
+        columns={columns}
+        data={rows}
+        enable-row-navigation
+        default-link-object-api-name="Case"
+        enable-pagination
+        page-size={pageSize}
+        has-more-rows={hasMoreRows}
+        is-loading-more={isLoadingMore}
+        empty-message="No cases found."
+        onloadmore={handleLoadMore}
+      ></c-arc-data-table>
+    </template>
+
+    <template lwc:if={showEmpty}>
+      <p class="arc-account-cases-list__empty">
+        No cases found for this record.
+      </p>
+    </template>
+  </div>
+</template>

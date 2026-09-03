@@ -253,9 +253,9 @@ private class NotificationCenterEventServiceTest {
   static void prepareCaseSourceRecordCreatesLogsFromOwnershipAndRuleSettings() {
     clearCaseRecipientTestOverrides();
 
-    Profile nexsProfile = selectProfile(NotificationConstants.PROFILE_NEXS);
+    Profile nexsProfile = selectProfile(UserInfoUtils.PROFILE_NEXS);
     Profile homeOfficeProfile = selectProfile(
-      NotificationConstants.PROFILE_HOME_OFFICE
+      UserInfoUtils.PROFILE_HOME_OFFICE
     );
     if (nexsProfile == null || homeOfficeProfile == null) {
       System.assert(true, 'Required NexS or Home Office profile is unavailable.');
@@ -356,9 +356,9 @@ private class NotificationCenterEventServiceTest {
   static void prepareCaseSourceRecordExcludesHomeOfficePrimaryAdvisorOnly() {
     clearCaseRecipientTestOverrides();
 
-    Profile nexsProfile = selectProfile(NotificationConstants.PROFILE_NEXS);
+    Profile nexsProfile = selectProfile(UserInfoUtils.PROFILE_NEXS);
     Profile homeOfficeProfile = selectProfile(
-      NotificationConstants.PROFILE_HOME_OFFICE
+      UserInfoUtils.PROFILE_HOME_OFFICE
     );
     if (nexsProfile == null || homeOfficeProfile == null) {
       System.assert(true, 'Required NexS or Home Office profile is unavailable.');
@@ -441,12 +441,12 @@ private class NotificationCenterEventServiceTest {
   static void prepareCaseSourceRecordIncludesSystemAdminPrimaryAdvisor() {
     clearCaseRecipientTestOverrides();
 
-    Profile nexsProfile = selectProfile(NotificationConstants.PROFILE_NEXS);
+    Profile nexsProfile = selectProfile(UserInfoUtils.PROFILE_NEXS);
     Profile homeOfficeProfile = selectProfile(
-      NotificationConstants.PROFILE_HOME_OFFICE
+      UserInfoUtils.PROFILE_HOME_OFFICE
     );
     Profile systemAdminProfile = selectProfile(
-      NotificationConstants.PROFILE_SYSTEM_ADMINISTRATOR
+      UserInfoUtils.PROFILE_SYSTEM_ADMINISTRATOR
     );
     if (nexsProfile == null || homeOfficeProfile == null || systemAdminProfile == null) {
       System.assert(true, 'Required profiles are unavailable.');
@@ -541,7 +541,7 @@ private class NotificationCenterEventServiceTest {
       LIMIT 1
     ];
 
-    if (!NotificationConstants.isNotificationEligibleProfile(currentUser.Profile.Name)) {
+    if (!UserInfoUtils.isCurrentUserNotificationEligible()) {
       System.assert(true, 'Current user profile is outside notification scope.');
       return;
     }
@@ -616,7 +616,7 @@ private class NotificationCenterEventServiceTest {
       LIMIT 1
     ];
 
-    if (!NotificationConstants.isNotificationEligibleProfile(currentUser.Profile.Name)) {
+    if (!UserInfoUtils.isCurrentUserNotificationEligible()) {
       System.assert(true, 'Current user profile is outside notification scope.');
       return;
     }

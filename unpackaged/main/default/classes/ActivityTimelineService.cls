@@ -327,10 +327,10 @@ public with sharing class ActivityTimelineService {
     Id recordId,
     Boolean includeExternalActivities
   ) {
-    Boolean canUseExternalToggle = canCurrentUserUseExternalToggle();
-    data.isHomeOfficeUser = NotificationConstants.isHomeOfficeProfile(
-      resolveCurrentUserProfileName()
-    );
+    Boolean isHomeOfficeUser = UserInfoUtils.isCurrentUserHomeOffice();
+    Boolean canUseExternalToggle =
+      isHomeOfficeUser || UserInfoUtils.isCurrentUserSystemAdministrator();
+    data.isHomeOfficeUser = isHomeOfficeUser;
     data.showExternalToggle =
       canUseExternalToggle && supportsExternalToggle(recordId);
     data.isHouseholdRecordContext = isHouseholdRecordContext(recordId);
@@ -391,24 +391,6 @@ public with sharing class ActivityTimelineService {
     return FscRelAccountRepository.isHouseholdRecordType(
       ACCOUNT_REPOSITORY.selectById(recordId)
     );
-  }
-
-  private static String resolveCurrentUserProfileName() {
-    User currentUser = [
-      SELECT Profile.Name
-      FROM User
-      WHERE Id = :UserInfo.getUserId()
-      LIMIT 1
-    ];
-
-    return currentUser.Profile.Name;
-  }
-
-  private static Boolean canCurrentUserUseExternalToggle() {
-    String profileName = resolveCurrentUserProfileName();
-
-    return NotificationConstants.isHomeOfficeProfile(profileName) ||
-      NotificationConstants.isSystemAdministratorProfile(profileName);
   }
 
   private Boolean supportsExternalToggle(Id recordId) {

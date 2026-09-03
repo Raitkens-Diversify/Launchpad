@@ -127,7 +127,7 @@ public without sharing class NotificationCaseRecipientService {
         AND Primary__c = TRUE
         AND Active__c = TRUE
         AND User__c != NULL
-        AND User__r.Profile.Name IN :NotificationConstants.notificationEligibleProfileNames()
+        AND User__r.Profile.Name IN :UserInfoUtils.notificationEligibleProfileNames()
     ]) {
       primaryAdvisorUserIds.add(teamMember.User__c);
     }
@@ -187,19 +187,19 @@ public without sharing class NotificationCaseRecipientService {
       context.primaryAdvisorUserIds.contains(userId) &&
       context.householdId != null;
 
-    if (NotificationConstants.isHomeOfficeProfile(profileName)) {
+    if (UserInfoUtils.isHomeOfficeProfile(profileName)) {
       return isOwner || isQueueMember;
     }
 
-    if (NotificationConstants.isNexSProfile(profileName)) {
+    if (UserInfoUtils.isNexSProfile(profileName)) {
       return isOwner || isQueueMember || isPrimaryAdvisor;
     }
 
-    if (NotificationConstants.isAdvisorProfile(profileName)) {
+    if (UserInfoUtils.isAdvisorProfile(profileName)) {
       return isOwner || isQueueMember || isPrimaryAdvisor;
     }
 
-    if (NotificationConstants.isSystemAdministratorProfile(profileName)) {
+    if (UserInfoUtils.isSystemAdministratorProfile(profileName)) {
       return isOwner || isQueueMember || isPrimaryAdvisor;
     }
 

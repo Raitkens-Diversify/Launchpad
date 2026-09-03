@@ -32,6 +32,13 @@
         default=""
         description="Optional heading above the sections. Blank renders none."
       />
+            <property
+        name="domain"
+        type="String"
+        label="Egnyte Domain"
+        default="https://arc-launchpad.diversify.com"
+        description="Published Experience site domain, forwarded to the Documents tab's Egnyte embed."
+      />
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>

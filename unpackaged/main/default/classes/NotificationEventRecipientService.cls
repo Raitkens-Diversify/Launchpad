@@ -141,23 +141,23 @@ public without sharing class NotificationEventRecipientService {
     Boolean hasNexSAssociation = hasNexSEligibleAssociation(context);
     Boolean hasAdvisorAssociation = hasAdvisorEligibleAssociation(context);
 
-    if (NotificationConstants.isHomeOfficeProfile(profileName)) {
+    if (UserInfoUtils.isHomeOfficeProfile(profileName)) {
       return isCreator || isAttendee;
     }
 
-    if (NotificationConstants.isNexSProfile(profileName)) {
+    if (UserInfoUtils.isNexSProfile(profileName)) {
       return isCreator ||
         isAttendee ||
         (isPrimaryAdvisor && hasNexSAssociation);
     }
 
-    if (NotificationConstants.isAdvisorProfile(profileName)) {
+    if (UserInfoUtils.isAdvisorProfile(profileName)) {
       return isCreator ||
         isAttendee ||
         (isPrimaryAdvisor && hasAdvisorAssociation);
     }
 
-    if (NotificationConstants.isSystemAdministratorProfile(profileName)) {
+    if (UserInfoUtils.isSystemAdministratorProfile(profileName)) {
       return isCreator ||
         isAttendee ||
         (isPrimaryAdvisor && hasNexSAssociation);
@@ -272,7 +272,7 @@ public without sharing class NotificationEventRecipientService {
         AND Primary__c = TRUE
         AND Active__c = TRUE
         AND User__c != NULL
-        AND User__r.Profile.Name IN :NotificationConstants.notificationEligibleProfileNames()
+        AND User__r.Profile.Name IN :UserInfoUtils.notificationEligibleProfileNames()
     ]) {
       primaryAdvisorUserIds.add(teamMember.User__c);
     }

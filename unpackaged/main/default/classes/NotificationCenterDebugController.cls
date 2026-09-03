@@ -24,7 +24,7 @@ public with sharing class NotificationCenterDebugController {
   }
 
   private static void assertAdminAccess() {
-    if (!NotificationConstants.isRunningUserSystemAdministrator()) {
+    if (!UserInfoUtils.isCurrentUserSystemAdministrator()) {
       throw new AuraHandledException(
         'Only System Administrators can use Notification Center debug tooling.'
       );

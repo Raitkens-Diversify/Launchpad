@@ -27,7 +27,7 @@ private class NotificationEventRecipientServiceTest {
       LIMIT 1
     ];
 
-    if (!NotificationConstants.isNotificationEligibleProfile(currentUser.Profile.Name)) {
+    if (!UserInfoUtils.isCurrentUserNotificationEligible()) {
       System.assert(true, 'Current user profile is outside notification scope.');
       return;
     }
@@ -65,7 +65,7 @@ private class NotificationEventRecipientServiceTest {
     Profile nexsProfile = [
       SELECT Id
       FROM Profile
-      WHERE Name = :NotificationConstants.PROFILE_NEXS
+      WHERE Name = :UserInfoUtils.PROFILE_NEXS
       LIMIT 1
     ];
 
@@ -208,7 +208,7 @@ private class NotificationEventRecipientServiceTest {
       LIMIT 1
     ];
 
-    if (!NotificationConstants.isNotificationEligibleProfile(currentUser.Profile.Name)) {
+    if (!UserInfoUtils.isCurrentUserNotificationEligible()) {
       System.assert(true, 'Current user profile is outside notification scope.');
       return;
     }
@@ -347,7 +347,7 @@ private class NotificationEventRecipientServiceTest {
     Profile nexsProfile = [
       SELECT Id
       FROM Profile
-      WHERE Name = :NotificationConstants.PROFILE_NEXS
+      WHERE Name = :UserInfoUtils.PROFILE_NEXS
       LIMIT 1
     ];
 
@@ -514,7 +514,7 @@ private class NotificationEventRecipientServiceTest {
       SELECT Id
       FROM User
       WHERE
-        Profile.Name = :NotificationConstants.PROFILE_HOME_OFFICE
+        Profile.Name = :UserInfoUtils.PROFILE_HOME_OFFICE
         AND IsActive = TRUE
       LIMIT 1
     ];

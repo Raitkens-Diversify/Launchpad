@@ -1,0 +1,9 @@
+.arc-account-investments-list__error {
+  color: var(--div-color-text-error, #ba0517);
+  padding: 0.5rem 0;
+}
+
+.arc-account-investments-list__empty {
+  color: var(--div-color-text-secondary, #5c5c5c);
+  padding: 0.5rem 0;
+}

@@ -358,13 +358,13 @@ public without sharing class NotificationPitStopUiTestSeeder {
   private static User resolveBranchAssignee(Id teamId) {
     User nexsAdvisor = selectPrimaryAdvisorForTeam(
       teamId,
-      NotificationConstants.PROFILE_NEXS
+      UserInfoUtils.PROFILE_NEXS
     );
     if (nexsAdvisor != null) {
       return nexsAdvisor;
     }
 
-    User advisor = selectActiveUserByProfile(NotificationConstants.PROFILE_ADVISOR);
+    User advisor = selectActiveUserByProfile(UserInfoUtils.PROFILE_ADVISOR);
     if (advisor != null) {
       return advisor;
     }
@@ -376,7 +376,7 @@ public without sharing class NotificationPitStopUiTestSeeder {
 
   private static User resolveHomeOfficeAssigneeOptional() {
     User homeOfficeUser = selectActiveUserByProfile(
-      NotificationConstants.PROFILE_HOME_OFFICE
+      UserInfoUtils.PROFILE_HOME_OFFICE
     );
     if (homeOfficeUser != null) {
       return homeOfficeUser;
@@ -390,7 +390,7 @@ public without sharing class NotificationPitStopUiTestSeeder {
 
   private static User resolveSystemAdminOwner(Id branchAssigneeId, Id hoAssigneeId) {
     User systemAdmin = selectActiveUserByProfile(
-      NotificationConstants.PROFILE_SYSTEM_ADMINISTRATOR
+      UserInfoUtils.PROFILE_SYSTEM_ADMINISTRATOR
     );
 
     if (
@@ -405,7 +405,7 @@ public without sharing class NotificationPitStopUiTestSeeder {
       SELECT Id, Name, Profile.Name
       FROM User
       WHERE
-        Profile.Name = :NotificationConstants.PROFILE_SYSTEM_ADMINISTRATOR
+        Profile.Name = :UserInfoUtils.PROFILE_SYSTEM_ADMINISTRATOR
         AND IsActive = TRUE
         AND Id NOT IN (:branchAssigneeId, :hoAssigneeId)
       ORDER BY Name

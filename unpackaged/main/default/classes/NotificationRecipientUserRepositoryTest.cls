@@ -23,7 +23,7 @@ private class NotificationRecipientUserRepositoryTest {
       userIdToProfileName.get(runningUser.Id)
     );
     System.assert(
-      NotificationConstants.notificationEligibleProfileNames()
+      UserInfoUtils.notificationEligibleProfileNames()
         .contains(runningUser.Profile.Name),
       'Running user profile should be notification eligible.'
     );
@@ -102,7 +102,7 @@ private class NotificationRecipientUserRepositoryTest {
       WHERE
         Id != :firstRecipient.Id
         AND IsActive = TRUE
-        AND Profile.Name IN :NotificationConstants.notificationEligibleProfileNames()
+        AND Profile.Name IN :UserInfoUtils.notificationEligibleProfileNames()
       LIMIT 1
     ];
     User secondRecipient = secondRecipients.isEmpty()

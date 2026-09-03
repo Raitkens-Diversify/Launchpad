@@ -98,8 +98,6 @@ public class NotificationConstants {
   public static final String SUPPRESSION_USER_IMMEDIATE_DISABLED =
     'User immediate delivery disabled for channel';
   public static final String SUPPRESSION_NO_PREFERENCE = 'No matching notification preference';
-  public static final String SUPPRESSION_STALE_QUEUED_CLEANUP =
-    'Stale queued notification cleared during monthly cleanup';
 
   /** Resolved scope label when pit stop tasks bypass user notification preferences. */
   public static final String PREFERENCE_SCOPE_PIT_STOP_BYPASS = 'PIT_STOP_BYPASS';
@@ -135,27 +133,6 @@ public class NotificationConstants {
   public static final Decimal CATEGORY_URGENT_MIN_PRIORITY = 40;
   public static final Decimal CATEGORY_SERVICE_MIN_PRIORITY = 10;
 
-  public static final String PROFILE_NEXS = 'Nexs';
-  public static final String PROFILE_ADVISOR = 'Advisor';
-  public static final String PROFILE_HOME_OFFICE = 'Home Office';
-  public static final String PROFILE_SYSTEM_ADMINISTRATOR = 'System Administrator';
-
-  public static Boolean isNexSProfile(String profileName) {
-    return profileName == PROFILE_NEXS;
-  }
-
-  public static Boolean isAdvisorProfile(String profileName) {
-    return profileName == PROFILE_ADVISOR;
-  }
-
-  public static Boolean isHomeOfficeProfile(String profileName) {
-    return profileName == PROFILE_HOME_OFFICE;
-  }
-
-  public static Boolean isBranchUserProfile(String profileName) {
-    return isNexSProfile(profileName) || isAdvisorProfile(profileName);
-  }
-
   /**
    * Profiles that may receive pit stop notifications for the given task flags.
    */
@@ -167,12 +144,12 @@ public class NotificationConstants {
     }
 
     if (taskRecord.Branch_Pit_Stop__c == true) {
-      profileNames.add(PROFILE_NEXS);
-      profileNames.add(PROFILE_ADVISOR);
+      profileNames.add(UserInfoUtils.PROFILE_NEXS);
+      profileNames.add(UserInfoUtils.PROFILE_ADVISOR);
     }
 
     if (taskRecord.Home_Office_Pit_Stop__c == true) {
-      profileNames.add(PROFILE_HOME_OFFICE);
+      profileNames.add(UserInfoUtils.PROFILE_HOME_OFFICE);
     }
 
     return profileNames;
@@ -186,12 +163,13 @@ public class NotificationConstants {
       return false;
     }
 
-    if (taskRecord.Branch_Pit_Stop__c == true && isBranchUserProfile(profileName)) {
+    if (taskRecord.Branch_Pit_Stop__c == true &&
+      UserInfoUtils.isBranchUserProfile(profileName)) {
       return true;
     }
 
     return taskRecord.Home_Office_Pit_Stop__c == true &&
-      isHomeOfficeProfile(profileName);
+      UserInfoUtils.isHomeOfficeProfile(profileName);
   }
 
   /**
@@ -221,11 +199,12 @@ public class NotificationConstants {
     }
 
     if (taskRecord.Home_Office_Pit_Stop__c == true) {
-      if (isHomeOfficeProfile(profileName)) {
+      if (UserInfoUtils.isHomeOfficeProfile(profileName)) {
         return false;
       }
 
-      if (isBranchUserProfile(profileName) && isCaseRelatedTask(taskRecord)) {
+      if (UserInfoUtils.isBranchUserProfile(profileName) &&
+        isCaseRelatedTask(taskRecord)) {
         return false;
       }
     }
@@ -237,28 +216,6 @@ public class NotificationConstants {
     return taskRecord != null &&
       taskRecord.WhatId != null &&
       String.valueOf(taskRecord.WhatId).startsWith('500');
-  }
-
-  public static Boolean isSystemAdministratorProfile(String profileName) {
-    return profileName == PROFILE_SYSTEM_ADMINISTRATOR;
-  }
-
-  public static Boolean isRunningUserSystemAdministrator() {
-    User runningUser = [
-      SELECT Profile.Name
-      FROM User
-      WHERE Id = :UserInfo.getUserId()
-      LIMIT 1
-    ];
-
-    return isSystemAdministratorProfile(runningUser.Profile.Name);
-  }
-
-  public static Boolean isNotificationEligibleProfile(String profileName) {
-    return isNexSProfile(profileName) ||
-      isAdvisorProfile(profileName) ||
-      isHomeOfficeProfile(profileName) ||
-      isSystemAdministratorProfile(profileName);
   }
 
   public static Boolean isFrequencyEnabledForChannel(
@@ -282,15 +239,6 @@ public class NotificationConstants {
 
   public static Boolean isImmediateEnabledForChannel(String channel) {
     return isFrequencyEnabledForChannel(channel, FREQUENCY_IMMEDIATE);
-  }
-
-  public static Set<String> notificationEligibleProfileNames() {
-    return new Set<String>{
-      PROFILE_NEXS,
-      PROFILE_ADVISOR,
-      PROFILE_HOME_OFFICE,
-      PROFILE_SYSTEM_ADMINISTRATOR
-    };
   }
 
   /**

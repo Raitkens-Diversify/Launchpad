@@ -150,11 +150,17 @@ const relationshipFor = (fieldPath) => {
 const TYPE_REFERENCE = "REFERENCE";
 
 /**
- * Tab key for the account's Relationships, which is not a schema section but a
- * component (c-arc-account-relationships) shown in its own tab. A sentinel that
- * cannot collide with a real Section_Name__c.
+ * Fixed top-level tabs. Details, Cases, Documents and Investments & Services
+ * always appear (in this order); Relationships is the only one gated by
+ * record type (see showRelationshipsTab) -- a Household, for instance, gets
+ * no Relationships tab, same as arcAccountRelationships itself already
+ * renders nothing for one.
  */
+const DETAILS_TAB_KEY = "__details__";
+const CASES_TAB_KEY = "__cases__";
 const RELATIONSHIPS_TAB_KEY = "__relationships__";
+const DOCUMENTS_TAB_KEY = "__documents__";
+const INVESTMENTS_TAB_KEY = "__investments__";
 
 export default class ArcHouseholdDetail extends LightningElement {
   /** Object whose record page this sits on. */
@@ -175,6 +181,10 @@ export default class ArcHouseholdDetail extends LightningElement {
 
   /** Optional heading above the sections. Blank renders none. */
   @api cardTitle = "";
+
+  /** Egnyte domain for the Documents tab -- forwarded to c-egnyte-vf-embed,
+   *  which moved here from its own page-level placement. */
+  @api domain = "";
 
   recordId;
   sectionsRaw = [];
@@ -485,6 +495,13 @@ export default class ArcHouseholdDetail extends LightningElement {
     return this.sections.length > 0;
   }
 
+  /** The tab strip itself no longer depends on Details having content --
+   *  Cases/Documents/Investments & Services can be real even when the
+   *  record's type carries no field sections at all. */
+  get showTabs() {
+    return Boolean(this.recordId);
+  }
+
   // ---- section tabs -------------------------------------------------------
 
   /**
@@ -511,21 +528,25 @@ export default class ArcHouseholdDetail extends LightningElement {
   }
 
   /**
-   * Every tab in strip order: the schema sections, then Relationships (the
-   * account's related-people card, moved off the right rail into its own tab).
-   * The single source the tablist, the selected-key fallback and the arrow-key
-   * navigation all read from, so they can never disagree on what the tabs are.
+   * Every tab in strip order, fixed regardless of record type except
+   * Relationships. The single source the tablist, the selected-key fallback
+   * and the arrow-key navigation all read from, so they can never disagree
+   * on what the tabs are.
    */
   get allTabs() {
-    const tabs = this.sections.map((section) => ({
-      key: section.key,
-      name: section.name
-    }));
+    const tabs = [
+      { key: DETAILS_TAB_KEY, name: 'Details' },
+      { key: CASES_TAB_KEY, name: 'Cases' }
+    ];
     // Only when the account's type actually carries relationships (see the
     // wire above) -- a Household and other uncovered types get no tab.
     if (this.showRelationshipsTab) {
       tabs.push({ key: RELATIONSHIPS_TAB_KEY, name: 'Relationships' });
     }
+    tabs.push(
+      { key: DOCUMENTS_TAB_KEY, name: 'Documents' },
+      { key: INVESTMENTS_TAB_KEY, name: 'Investments & Services' }
+    );
     return tabs;
   }
 
@@ -555,40 +576,31 @@ export default class ArcHouseholdDetail extends LightningElement {
     });
   }
 
+  /** True when the Details tab is the open one. All of `sections` render
+   *  together here -- stacked, each under its own heading -- rather than one
+   *  section at a time; there is no further tab beneath this one. */
+  get isDetailsActive() {
+    return this.selectedTabKey === DETAILS_TAB_KEY;
+  }
+
+  /** True when the Cases tab is the open one. */
+  get isCasesActive() {
+    return this.selectedTabKey === CASES_TAB_KEY;
+  }
+
   /** True when the Relationships tab is the open one. */
   get isRelationshipsActive() {
     return this.selectedTabKey === RELATIONSHIPS_TAB_KEY;
   }
 
-  /** True when a schema-section tab (the field grid) is the open one. */
-  get isFieldTabActive() {
-    return !this.isRelationshipsActive;
+  /** True when the Documents tab is the open one. */
+  get isDocumentsActive() {
+    return this.selectedTabKey === DOCUMENTS_TAB_KEY;
   }
 
-  /** The fields of the open section, or null while there is nothing to show. */
-  get activeSection() {
-    const key = this.selectedTabKey;
-    return this.sections.find((section) => section.key === key) || null;
-  }
-
-  /**
-   * Every section decorated with its visible/hidden state. All are rendered and
-   * stacked in one grid cell (see the CSS) so the card holds the height of the
-   * tallest section and never resizes between tabs; only the active panel is
-   * shown, the rest stay in layout but hidden.
-   */
-  get panelSections() {
-    const selected = this.selectedTabKey;
-    return this.sections.map((section) => {
-      const active = section.key === selected;
-      return {
-        ...section,
-        panelClass: active
-          ? 'arc-household-detail__panel arc-household-detail__panel--active'
-          : 'arc-household-detail__panel',
-        hiddenAttr: active ? 'false' : 'true'
-      };
-    });
+  /** True when the Investments & Services tab is the open one. */
+  get isInvestmentsActive() {
+    return this.selectedTabKey === INVESTMENTS_TAB_KEY;
   }
 
   handleTabClick(event) {
@@ -631,8 +643,13 @@ export default class ArcHouseholdDetail extends LightningElement {
     return Boolean(this.cardTitle);
   }
 
-  /** Genuinely empty, as opposed to still loading or failed. */
-  get showEmpty() {
+  /**
+   * Genuinely empty, as opposed to still loading or failed -- scoped to the
+   * Details tab specifically: an unmapped record type carries no field
+   * sections, but Cases/Documents/Investments & Services can still have
+   * real content, so this no longer blocks the whole component.
+   */
+  get showDetailsEmpty() {
     return (
       Boolean(this.recordId) &&
       !this.isLoading &&

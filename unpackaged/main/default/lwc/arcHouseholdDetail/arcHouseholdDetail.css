@@ -101,32 +101,33 @@
   border-bottom-color: var(--div-color-blue-900, #0f406f);
 }
 
-/* All section panels share one grid cell, so the card's height is that of the
-   tallest section and stays put as tabs change -- otherwise a short tab (Contact
-   Information) shrank the card and a tall one (Suitability) grew it, sliding the
-   Documents section beneath it up and down. */
-.arc-household-detail__panels {
-  display: grid;
-  padding-top: 0.875rem;
-}
-
+/* Each tab's panel is conditionally rendered (lwc:if), not stacked-and-hidden
+   -- only one is ever in the DOM at a time, so the card's height is simply
+   whichever panel is open, and switching tabs never leaves invisible
+   siblings behind. */
 .arc-household-detail__panel {
-  grid-area: 1 / 1;
-  /* Inactive panels keep their space (visibility, not display) so the shared
-     cell always measures the largest section; only the active one is seen. */
-  visibility: hidden;
-}
-
-.arc-household-detail__panel--active {
-  visibility: visible;
+  padding-top: 0.875rem;
 }
 
 /* Relationships renders its own card (heading + grouped lists), so the panel
-   only needs the same top gap the field panels sit under. Not grid-stacked with
-   them: its height is its own, so the card is only as tall as this content when
-   the tab is open. */
+   only needs the same top gap the other panels sit under. */
 .arc-household-detail__relationships-panel {
   padding-top: 0.875rem;
+}
+
+/* ---- Details: stacked sections ---- */
+
+.arc-household-detail__section + .arc-household-detail__section {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--div-color-border-subtle, #f3f2f2);
+}
+
+.arc-household-detail__section-heading {
+  margin: 0 0 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--div-color-text-primary, #181818);
 }
 
 @media (prefers-reduced-motion: reduce) {

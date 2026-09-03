@@ -4,36 +4,12 @@
       <h2 class="arc-household-detail__title">{cardTitle}</h2>
     </template>
 
-    <template lwc:if={isLoading}>
-      <div class="arc-household-detail__loading">
-        <c-arc-loading-spinner
-          alternative-text="Loading household details"
-          size="small"
-        ></c-arc-loading-spinner>
-      </div>
-    </template>
-
-    <template lwc:if={errorMessage}>
-      <p class="arc-household-detail__error" role="alert">{errorMessage}</p>
-    </template>
-
-    <template lwc:if={hasSections}>
-      <!-- The Details sections are shown as a tab bar rather than a stack of
-           cards, matching the Lightning record page: one section on screen at a
-           time instead of a long scroll. Which tabs appear is decided upstream
-           in `sections` -- a section is present only when it carries fields for
-           this account's record type, so the tab set differs per account
-           exactly as the Lightning page's component visibility makes it.
-
-           An inline tablist, not c-ds-tabs: these tabs can be many and their
-           names long (e.g. "Industry & Other Affiliations"), so the strip has
-           to scroll sideways when it overflows, which needs control over the
-           flex row that a shared component does not expose. -->
+    <template lwc:if={showTabs}>
       <div class="arc-household-detail__card">
         <div
           class="arc-household-detail__tabs"
           role="tablist"
-          aria-label="Details sections"
+          aria-label="Contact details"
         >
           <template for:each={tabItems} for:item="tab">
             <button
@@ -52,23 +28,26 @@
           </template>
         </div>
 
-        <!-- Field-section tabs. Every section's panel is rendered and stacked in
-             one grid cell (see the CSS): only the active one is visible, but the
-             inactive ones keep their space, so the card is always as tall as the
-             TALLEST section. Switching between these tabs therefore never resizes
-             the card, which had been nudging the Documents section below it up
-             and down. Relationships is a different kind of content and gets its
-             own panel below rather than being force-fit to the field height. -->
-        <template lwc:if={isFieldTabActive}>
-          <div class="arc-household-detail__panels">
-            <template for:each={panelSections} for:item="section">
-              <div
-                key={section.key}
-                class={section.panelClass}
-                role="tabpanel"
-                aria-label={section.name}
-                aria-hidden={section.hiddenAttr}
-              >
+        <!-- Details: every field section stacked together under one tab,
+             each with its own heading, rather than one section at a time. -->
+        <template lwc:if={isDetailsActive}>
+          <div class="arc-household-detail__panel" role="tabpanel" aria-label="Details">
+            <template lwc:if={isLoading}>
+              <div class="arc-household-detail__loading">
+                <c-arc-loading-spinner
+                  alternative-text="Loading details"
+                  size="small"
+                ></c-arc-loading-spinner>
+              </div>
+            </template>
+
+            <template lwc:if={errorMessage}>
+              <p class="arc-household-detail__error" role="alert">{errorMessage}</p>
+            </template>
+
+            <template for:each={sections} for:item="section">
+              <div key={section.key} class="arc-household-detail__section">
+                <h3 class="arc-household-detail__section-heading">{section.name}</h3>
                 <dl class="arc-household-detail__grid">
                   <template for:each={section.fields} for:item="field">
                     <div key={field.key} class="arc-household-detail__field">
@@ -79,11 +58,25 @@
                 </dl>
               </div>
             </template>
+
+            <template lwc:if={showDetailsEmpty}>
+              <p class="arc-household-detail__empty">
+                No details are configured for this record.
+              </p>
+            </template>
           </div>
         </template>
 
-        <!-- Relationships tab: the account's related-people card, moved off the
-             right rail into the strip. It brings its own heading and layout. -->
+        <!-- Cases: every Case linked to this record, directly or through its
+             household -- see arcAccountCasesList. -->
+        <template lwc:if={isCasesActive}>
+          <div class="arc-household-detail__panel" role="tabpanel" aria-label="Cases">
+            <c-arc-account-cases-list></c-arc-account-cases-list>
+          </div>
+        </template>
+
+        <!-- Relationships: the account's related-people card, unchanged --
+             just relocated under this tab. -->
         <template lwc:if={isRelationshipsActive}>
           <div
             class="arc-household-detail__relationships-panel"
@@ -95,13 +88,27 @@
             ></c-arc-account-relationships>
           </div>
         </template>
-      </div>
-    </template>
 
-    <template lwc:if={showEmpty}>
-      <p class="arc-household-detail__empty">
-        No details are configured for this record.
-      </p>
+        <!-- Documents: the Egnyte embed, unchanged -- moved here from its own
+             page-level placement below this component. -->
+        <template lwc:if={isDocumentsActive}>
+          <div class="arc-household-detail__panel" role="tabpanel" aria-label="Documents">
+            <c-egnyte-vf-embed domain={domain}></c-egnyte-vf-embed>
+          </div>
+        </template>
+
+        <!-- Investments & Services: every ISA, Service, and Approved Product
+             tied to this record -- see arcAccountInvestmentsList. -->
+        <template lwc:if={isInvestmentsActive}>
+          <div
+            class="arc-household-detail__panel"
+            role="tabpanel"
+            aria-label="Investments & Services"
+          >
+            <c-arc-account-investments-list></c-arc-account-investments-list>
+          </div>
+        </template>
+      </div>
     </template>
   </div>
 </template>

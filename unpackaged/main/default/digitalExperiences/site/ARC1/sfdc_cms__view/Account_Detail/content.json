@@ -51,19 +51,12 @@
                 }, {
                   "attributes" : {
                     "cardTitle" : "",
+                    "domain" : "https://arc-launchpad.diversify.com",
                     "dxpStyle" : { },
                     "objectApiName" : "Account"
                   },
                   "definition" : "c:arcHouseholdDetail",
                   "id" : "9c41e8b7-2d6a-4f35-8e12-7b60ad3f94c5",
-                  "type" : "component"
-                }, {
-                  "attributes" : {
-                    "domain" : "https://arc-launchpad.diversify.com",
-                    "dxpStyle" : { }
-                  },
-                  "definition" : "c:egnyteVfEmbed",
-                  "id" : "bf4a017c-1982-4fe0-9893-4e7acf24f468",
                   "type" : "component"
                 } ],
                 "id" : "afe3cae7-5cc2-4f2d-90bd-ab189a02e8ce",

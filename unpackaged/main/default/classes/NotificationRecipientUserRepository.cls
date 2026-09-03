@@ -18,7 +18,7 @@ public without sharing class NotificationRecipientUserRepository {
       WHERE
         Id IN :userIds
         AND IsActive = TRUE
-        AND Profile.Name IN :NotificationConstants.notificationEligibleProfileNames()
+        AND Profile.Name IN :UserInfoUtils.notificationEligibleProfileNames()
     ]) {
       userIdToProfileName.put(recipientUser.Id, recipientUser.Profile.Name);
     }
@@ -72,7 +72,7 @@ public without sharing class NotificationRecipientUserRepository {
         Financial_Advisor_Team__c = :teamId
         AND Active__c = TRUE
         AND User__c != NULL
-        AND User__r.Profile.Name IN :NotificationConstants.notificationEligibleProfileNames()
+        AND User__r.Profile.Name IN :UserInfoUtils.notificationEligibleProfileNames()
     ]) {
       activeMemberUserIds.add(teamMember.User__c);
     }
@@ -96,7 +96,7 @@ public without sharing class NotificationRecipientUserRepository {
         Financial_Advisor_Team__c IN :teamIds
         AND Active__c = TRUE
         AND User__c != NULL
-        AND User__r.Profile.Name IN :NotificationConstants.notificationEligibleProfileNames()
+        AND User__r.Profile.Name IN :UserInfoUtils.notificationEligibleProfileNames()
     ]) {
       addUserIdToTeamMap(
         teamIdToUserIds,

@@ -1,0 +1,32 @@
+<template>
+  <div class="arc-account-investments-list">
+    <template lwc:if={isLoading}>
+      <c-arc-loading-spinner
+        alternative-text="Loading investments and services"
+        size="small"
+      ></c-arc-loading-spinner>
+    </template>
+
+    <template lwc:if={errorMessage}>
+      <p class="arc-account-investments-list__error" role="alert">{errorMessage}</p>
+    </template>
+
+    <template lwc:if={hasRows}>
+      <c-arc-data-table
+        key-field="id"
+        columns={columns}
+        data={rows}
+        enable-row-navigation
+        enable-pagination
+        page-size={pageSize}
+        empty-message="No investments or services found."
+      ></c-arc-data-table>
+    </template>
+
+    <template lwc:if={showEmpty}>
+      <p class="arc-account-investments-list__empty">
+        No investments or services found for this record.
+      </p>
+    </template>
+  </div>
+</template>

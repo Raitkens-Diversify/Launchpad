@@ -168,26 +168,26 @@ public without sharing class NotificationTaskRecipientService {
       context.householdPrimaryAdvisorUserIds.contains(userId) &&
       context.hasHouseholdAssociation;
 
-    if (NotificationConstants.isHomeOfficeProfile(profileName)) {
+    if (UserInfoUtils.isHomeOfficeProfile(profileName)) {
       return isAssignee ||
         (context.hasCaseAssociation && (isCaseOwner || isCaseQueueMember));
     }
 
-    if (NotificationConstants.isNexSProfile(profileName)) {
+    if (UserInfoUtils.isNexSProfile(profileName)) {
       return isAssignee ||
         isPrimaryAdvisorOnHousehold ||
         (context.hasCaseAssociation &&
         (isCaseOwner || isCaseSubmitter || isCaseFaTeamMember || isCaseQueueMember));
     }
 
-    if (NotificationConstants.isAdvisorProfile(profileName)) {
+    if (UserInfoUtils.isAdvisorProfile(profileName)) {
       return isAssignee ||
         isPrimaryAdvisorOnHousehold ||
         (context.hasCaseAssociation &&
         (isCaseOwner || isCaseSubmitter || isCaseFaTeamMember || isCaseQueueMember));
     }
 
-    if (NotificationConstants.isSystemAdministratorProfile(profileName)) {
+    if (UserInfoUtils.isSystemAdministratorProfile(profileName)) {
       return isAssignee ||
         isPrimaryAdvisorOnHousehold ||
         (context.hasCaseAssociation &&
@@ -240,7 +240,7 @@ public without sharing class NotificationTaskRecipientService {
         AND Primary__c = TRUE
         AND Active__c = TRUE
         AND User__c != NULL
-        AND User__r.Profile.Name IN :NotificationConstants.notificationEligibleProfileNames()
+        AND User__r.Profile.Name IN :UserInfoUtils.notificationEligibleProfileNames()
     ]) {
       primaryAdvisorUserIds.add(teamMember.User__c);
     }

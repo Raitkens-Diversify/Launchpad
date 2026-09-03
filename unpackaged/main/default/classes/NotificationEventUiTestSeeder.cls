@@ -32,7 +32,7 @@ public without sharing class NotificationEventUiTestSeeder {
     User ac1Creator = resolveAc1Creator(homeOfficeCreator);
     User nexsPrimaryAdvisor = selectPrimaryAdvisorForTeam(
       household.Financial_Advisor_Team__c,
-      NotificationConstants.PROFILE_NEXS
+      UserInfoUtils.PROFILE_NEXS
     );
 
     String seedMarker = 'UI-' + String.valueOf(System.now().getTime()).right(6);
@@ -157,7 +157,7 @@ public without sharing class NotificationEventUiTestSeeder {
 
   private static User resolveHomeOfficeUser() {
     User homeOfficeUser = selectActiveUserByProfile(
-      NotificationConstants.PROFILE_HOME_OFFICE
+      UserInfoUtils.PROFILE_HOME_OFFICE
     );
     if (homeOfficeUser != null) {
       return homeOfficeUser;
@@ -179,7 +179,7 @@ public without sharing class NotificationEventUiTestSeeder {
 
   private static User resolveAc1Creator(User homeOfficeCreator) {
     User systemAdminCreator = selectActiveUserByProfile(
-      NotificationConstants.PROFILE_SYSTEM_ADMINISTRATOR
+      UserInfoUtils.PROFILE_SYSTEM_ADMINISTRATOR
     );
     if (systemAdminCreator != null && systemAdminCreator.Id != homeOfficeCreator.Id) {
       return systemAdminCreator;

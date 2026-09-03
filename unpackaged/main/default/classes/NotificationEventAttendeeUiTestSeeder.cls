@@ -151,20 +151,20 @@ public without sharing class NotificationEventAttendeeUiTestSeeder {
 
   private static User resolveEventCreator(User attendeeUser) {
     User homeOfficeCreator = selectActiveUserByProfile(
-      NotificationConstants.PROFILE_HOME_OFFICE
+      UserInfoUtils.PROFILE_HOME_OFFICE
     );
     if (homeOfficeCreator != null && homeOfficeCreator.Id != attendeeUser.Id) {
       return homeOfficeCreator;
     }
 
     User systemAdminCreator = selectActiveUserByProfile(
-      NotificationConstants.PROFILE_SYSTEM_ADMINISTRATOR
+      UserInfoUtils.PROFILE_SYSTEM_ADMINISTRATOR
     );
     if (systemAdminCreator != null && systemAdminCreator.Id != attendeeUser.Id) {
       return systemAdminCreator;
     }
 
-    User nexsCreator = selectActiveUserByProfile(NotificationConstants.PROFILE_NEXS);
+    User nexsCreator = selectActiveUserByProfile(UserInfoUtils.PROFILE_NEXS);
     if (nexsCreator != null && nexsCreator.Id != attendeeUser.Id) {
       return nexsCreator;
     }
