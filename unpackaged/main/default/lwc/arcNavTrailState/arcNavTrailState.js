@@ -19,6 +19,10 @@ const ACCOUNT_LIST_PATH = "/account/Account/Default";
 const WORK_LIST_PATH = "/case/Case/Default";
 const TASK_LIST_PATH = "/task/Task/Default";
 const CHECK_LOG_LIST_PATH = "/check-log/Check_Log__c/Default";
+/* The envelope wizard's own page -- the same place the home page's Envelope
+   Wizard button goes (arcHomeHeader's ENVELOPE_WIZARD_PATH), so the sidebar
+   entry and that button are two doors into one room. */
+const ENVELOPE_PATH = "/envelope";
 const ISA_LIST_PATH = "/financial-account/Financial_Account__c/Default";
 const SERVICE_LIST_PATH = "/service/Service__c/Default";
 const APPROVED_PRODUCTS_LIST_PATH = "/product/Product__c/Default";
@@ -53,6 +57,7 @@ const ROUTE_OBJECT_API_NAMES = Object.freeze({
   case: "Case",
   task: "Task",
   "check-log": "Check_Log__c",
+  envelope: "Envelope__c",
   "financial-account": "FinServ__FinancialAccount__c",
   service: "Service__c",
   product: "Product__c"
@@ -214,6 +219,13 @@ export const STATIC_NAV_ITEMS = [
         type: "InternalLink",
         target: CHECK_LOG_LIST_PATH,
         objectApiName: "Check_Log__c"
+      },
+      {
+        id: "arc-nav-work-envelopes",
+        label: "Envelopes",
+        type: "InternalLink",
+        target: ENVELOPE_PATH,
+        objectApiName: "Envelope__c"
       },
       {
         id: "arc-nav-work-cadences",

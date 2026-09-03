@@ -384,4 +384,8 @@
         <name>standard__ScaleTestApp</name>
         <type>CustomApplication</type>
     </appMenuItems>
+    <appMenuItems>
+        <name>Celigo_Integration</name>
+        <type>ExternalClientApplication</type>
+    </appMenuItems>
 </AppMenu>
