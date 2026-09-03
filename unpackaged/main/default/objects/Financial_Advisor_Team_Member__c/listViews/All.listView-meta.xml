@@ -7,5 +7,10 @@
     <columns>Group_Member_Id__c</columns>
     <columns>Active__c</columns>
     <filterScope>Everything</filterScope>
+    <filters>
+        <field>User_Name__c</field>
+        <operation>equals</operation>
+        <value>Mindie Emmertson</value>
+    </filters>
     <label>All</label>
 </ListView>

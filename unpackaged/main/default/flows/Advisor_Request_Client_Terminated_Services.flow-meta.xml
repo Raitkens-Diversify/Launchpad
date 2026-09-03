@@ -91,6 +91,13 @@
                 <elementReference>Additional_Case_Notes</elementReference>
             </value>
         </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varCase.null__NotFound</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Advisor_Request_Item_variable_id</elementReference>
+            </value>
+        </assignmentItems>
         <connector>
             <targetReference>Create_Case</targetReference>
         </connector>
@@ -212,7 +219,7 @@
             <label>AMS</label>
         </rules>
     </decisions>
-    <description>CCC: Removing Advisor Request Item field.</description>
+    <description>Replaced the FinServ Financial Account to DFPG Financial Account</description>
     <dynamicChoiceSets>
         <name>Account_Record_ChoiceSet</name>
         <dataType>String</dataType>
@@ -287,16 +294,11 @@
         </connector>
         <filterLogic>and</filterLogic>
         <filters>
-            <field>FinServ__Household__c</field>
+            <field>Household__c</field>
             <operator>EqualTo</operator>
-            <value>
-                <elementReference>varHousehold.Id</elementReference>
-            </value>
         </filters>
         <getFirstRecordOnly>false</getFirstRecordOnly>
-        <object>FinServ__FinancialAccount__c</object>
-        <sortField>Managed_Account_Platform__c</sortField>
-        <sortOrder>Asc</sortOrder>
+        <object>Financial_Account__c</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <screens>
@@ -365,6 +367,7 @@
                     <name>Reason_Client_is_Leaving</name>
                     <fieldText>Reason Client is Leaving:</fieldText>
                     <fieldType>LargeTextArea</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -380,6 +383,7 @@
                     <dataType>Date</dataType>
                     <fieldText>Termination Date:</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -394,6 +398,7 @@
                     <name>Additional_Case_Notes</name>
                     <fieldText>Additional Case Notes</fieldText>
                     <fieldType>LargeTextArea</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -478,7 +483,14 @@
             <targetReference>Client_Terminated_Services</targetReference>
         </connector>
     </start>
-    <status>Active</status>
+    <status>InvalidDraft</status>
+    <variables>
+        <name>Advisor_Request_Item_variable_id</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
     <variables>
         <name>varCase</name>
         <dataType>SObject</dataType>

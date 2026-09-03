@@ -18,7 +18,7 @@
             <assignToReference>varCase.ContactId</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>Get_Financial_Account.FinServ__PrimaryOwner__r.PersonContactId</elementReference>
+                <elementReference>Get_Financial_Account.Primary_Owner__r.PersonContactId</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
@@ -91,6 +91,13 @@
                 <elementReference>varHousehold.Id</elementReference>
             </value>
         </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varCase.Submitted__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </assignmentItems>
         <connector>
             <targetReference>Create_Case</targetReference>
         </connector>
@@ -152,7 +159,22 @@
             <label>HH</label>
         </rules>
     </decisions>
-    <description>CCC: Removing Advisor Request Item field.</description>
+    <description>Replaced the FinServ Financial Account to DFPG Financial Account</description>
+    <dynamicChoiceSets>
+        <name>Financial_Account_Record_ChoiceSet</name>
+        <dataType>String</dataType>
+        <displayField>Name</displayField>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Household__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>varHousehold.Id</elementReference>
+            </value>
+        </filters>
+        <object>Financial_Account__c</object>
+        <valueField>Id</valueField>
+    </dynamicChoiceSets>
     <dynamicChoiceSets>
         <name>FinancialAccount_Record_ChoiceSet</name>
         <dataType>String</dataType>
@@ -230,7 +252,7 @@
             </value>
         </filters>
         <getFirstRecordOnly>true</getFirstRecordOnly>
-        <object>FinServ__FinancialAccount__c</object>
+        <object>Financial_Account__c</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <screens>
@@ -266,6 +288,7 @@
                     <dataType>String</dataType>
                     <fieldText>Instructions to Cancel:</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -284,6 +307,7 @@
                     </defaultValue>
                     <fieldText>Cancel Effective Date</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -435,7 +459,7 @@
                 </fields>
                 <fields>
                     <name>FinancialAccount_Lookup</name>
-                    <choiceReferences>FinancialAccount_Record_ChoiceSet</choiceReferences>
+                    <choiceReferences>Financial_Account_Record_ChoiceSet</choiceReferences>
                     <extensionName>flowruntime:choiceLookup</extensionName>
                     <fieldText>Financial Account:</fieldText>
                     <fieldType>ComponentChoice</fieldType>
@@ -542,6 +566,20 @@
         </connector>
     </start>
     <status>Active</status>
+    <variables>
+        <name>Advisor_Request_Item_variable_id</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>varAdvisor_Request_Item_variable_id</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
     <variables>
         <name>varCase</name>
         <dataType>SObject</dataType>

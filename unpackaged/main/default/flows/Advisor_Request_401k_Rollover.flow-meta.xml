@@ -18,7 +18,7 @@
             <assignToReference>varCase.ContactId</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>Get_Financial_Account.FinServ__PrimaryOwner__r.PersonContactId</elementReference>
+                <elementReference>Get_Financial_Account.Primary_Owner__r.PersonContactId</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
@@ -126,6 +126,13 @@
                 <elementReference>Get_Financial_Account.Managed_Account_Platform__c</elementReference>
             </value>
         </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varCase.Submitted__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </assignmentItems>
         <connector>
             <targetReference>Create_Case</targetReference>
         </connector>
@@ -187,7 +194,7 @@
             <label>FA</label>
         </rules>
     </decisions>
-    <description>CCC: Removing Advisor Request Item field.</description>
+    <description>Removed FinServ Financial Account .</description>
     <dynamicChoiceSets>
         <name>ClientNeedsDrivingRollover_Picklist_ChoiceSet</name>
         <dataType>Multipicklist</dataType>
@@ -195,6 +202,21 @@
         <object xsi:nil="true" />
         <picklistField>Client_Needs_Driving_Rollover__c</picklistField>
         <picklistObject>Case</picklistObject>
+    </dynamicChoiceSets>
+    <dynamicChoiceSets>
+        <name>FinancialAccount_Record_Choice_Set</name>
+        <dataType>String</dataType>
+        <displayField>Name</displayField>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Household__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>varHousehold.Id</elementReference>
+            </value>
+        </filters>
+        <object>Financial_Account__c</object>
+        <valueField>Id</valueField>
     </dynamicChoiceSets>
     <dynamicChoiceSets>
         <name>FinancialAccount_Record_ChoiceSet</name>
@@ -280,7 +302,7 @@
             </value>
         </filters>
         <getFirstRecordOnly>true</getFirstRecordOnly>
-        <object>FinServ__FinancialAccount__c</object>
+        <object>Financial_Account__c</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <screens>
@@ -523,6 +545,7 @@
                     <dataType>String</dataType>
                     <fieldText>What Plan are you Transferring From?</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -582,6 +605,7 @@
                     </defaultValue>
                     <fieldText>Request Statement from Client at a later time</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -598,6 +622,7 @@
                     <dataType>String</dataType>
                     <fieldText>Reason for Rollover:</fieldText>
                     <fieldType>DropdownBox</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -612,6 +637,7 @@
                     <name>Explanation</name>
                     <fieldText>Explanation:</fieldText>
                     <fieldType>LargeTextArea</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -639,6 +665,7 @@
                     <fieldText>Client Needs Driving the Rollover:</fieldText>
                     <fieldType>MultiSelectPicklist</fieldType>
                     <helpText>&lt;p&gt;To select multiple values, hold the Ctrl or Command key while selecting values.&lt;/p&gt;</helpText>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -666,6 +693,7 @@
                     <name>Recommendation_Rationale</name>
                     <fieldText>Recommendation Rationale:</fieldText>
                     <fieldType>LargeTextArea</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -682,6 +710,7 @@
                     <dataType>String</dataType>
                     <fieldText>How will the Client Sign?</fieldText>
                     <fieldType>DropdownBox</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -767,6 +796,13 @@
         </connector>
     </start>
     <status>Active</status>
+    <variables>
+        <name>Advisor_Request_Item_variable_id</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
     <variables>
         <name>collContentDocumentIds</name>
         <dataType>String</dataType>
