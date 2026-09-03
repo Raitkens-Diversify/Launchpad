@@ -3,6 +3,7 @@ import { CurrentPageReference } from "lightning/navigation";
 import { resolveRecordIdFromPageReference } from "c/recordNavigationUtils";
 import { getRecord, getFieldValue } from "lightning/uiRecordApi";
 import getFormSchema from "@salesforce/apex/FieldDetailController.getFormSchema";
+import getSectionLayouts from "@salesforce/apex/FieldDetailController.getSectionLayouts";
 import getRecordValuesForType from "@salesforce/apex/FieldDetailController.getRecordValuesForType";
 import getRelationships from "@salesforce/apex/ArcAccountRelationshipsController.getRelationships";
 import { evaluateWhereStatement } from "c/envelopeFormSchema";
@@ -33,9 +34,17 @@ import { evaluateWhereStatement } from "c/envelopeFormSchema";
  * with a different field set each, because their Lightning pages show different
  * fields. The mapping is SCHEMA_BY_RECORD_TYPE below.
  *
- * EXISTING APEX ONLY. It calls FieldDetailController.getFormSchema and
- * .getRecordValuesForType, both already @AuraEnabled. No Apex was written or
- * modified.
+ * EXISTING APEX ONLY. It calls FieldDetailController.getFormSchema,
+ * .getSectionLayouts and .getRecordValuesForType, all already @AuraEnabled. No
+ * Apex was written or modified. getSectionLayouts reorders getFormSchema's
+ * sections by Section__mdt's parent/child order (see orderSectionsByLayout) --
+ * the same reorder arcRecordDetail.js's buildSectionCards already applies for
+ * every other object on the generic pipeline; this component skipped it only
+ * because it calls FieldDetailController directly instead of going through
+ * ArcRecordDetailController.load (see "WHY NOT ArcRecordDetailController.load"
+ * below). Only "Client - Individual" (PersonAccount) actually reorders in
+ * practice today -- the five *_Detail types' sections already happened to come
+ * back in Section__mdt order.
  *
  * WHY NOT ArcRecordDetailController.load. That was the first choice, but for
  * Account it ignores the schemaType it is passed and derives its own from a
@@ -148,6 +157,47 @@ const relationshipFor = (fieldPath) => {
 };
 
 const TYPE_REFERENCE = "REFERENCE";
+
+/**
+ * Orders a type's flat sections (as getFormSchema returns them -- first-seen order
+ * while iterating Order__c-sorted FIELD rows, which says nothing about section
+ * order) by Section__mdt's own parent/child layout, when one exists for that type.
+ * Mirrors the same reorder arcRecordDetail.js's buildSectionCards already does for
+ * every other object on this generic pipeline -- Account was the one type still
+ * skipping it, because this component calls FieldDetailController directly instead
+ * of going through ArcRecordDetailController.load.
+ *
+ * A section the layout doesn't mention -- an unconfigured extra, or a type with no
+ * Section__mdt rows at all -- keeps its incoming relative order, appended after
+ * every laid-out section. So this can only ever REORDER a section already being
+ * shown, never drop one.
+ */
+const orderSectionsByLayout = (sections, layoutGroups) => {
+  if (!layoutGroups || !layoutGroups.length) {
+    return sections;
+  }
+
+  const byName = new Map(sections.map((section) => [section.name, section]));
+  const ordered = [];
+
+  layoutGroups.forEach((group) => {
+    (group.childSections || []).forEach((childName) => {
+      const section = byName.get(childName);
+      if (section) {
+        ordered.push(section);
+        byName.delete(childName);
+      }
+    });
+  });
+
+  sections.forEach((section) => {
+    if (byName.has(section.name)) {
+      ordered.push(section);
+    }
+  });
+
+  return ordered;
+};
 
 /**
  * Fixed top-level tabs. Details, Cases, Documents and Investments & Services
@@ -315,14 +365,16 @@ export default class ArcHouseholdDetail extends LightningElement {
 
     Promise.all([
       getFormSchema({ objectName: this.objectApiName, type }),
+      getSectionLayouts(),
       getRecordValuesForType({
         objectName: this.objectApiName,
         type,
         recordIds: [this.recordId]
       })
     ])
-      .then(([schema, valuesById]) => {
-        this.sectionsRaw = schema || [];
+      .then(([schema, layouts, valuesById]) => {
+        const layoutGroups = (layouts && layouts[type]) || [];
+        this.sectionsRaw = orderSectionsByLayout(schema || [], layoutGroups);
         this.values = (valuesById && valuesById[this.recordId]) || {};
         this.errorMessage = undefined;
         this.collectLookupFields();

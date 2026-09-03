@@ -8,9 +8,12 @@
  * account-closure, DMS, registration-change...) because a single Case
  * object backs every envelope wizard type. Which handful actually apply to
  * a given Case is already solved by the Envelope_Field__mdt schema system
- * (see FieldDetailController / ArcRecordDetailController's
- * CASE_TYPE_TO_SCHEMA_TYPE) — getCaseFieldSections reuses that same
- * metadata (read-only) instead of hand-picking a subset of fields here.
+ * (see FieldDetailController and ARCConstants.CASE_TYPE_TO_SCHEMA_TYPE) —
+ * getCaseFieldSections reuses that same metadata (read-only) instead of
+ * hand-picking a subset of fields here. Reads ARCConstants' map directly
+ * rather than its own copy (a prior copy here had drifted out of sync with
+ * ARCConstants', silently missing the 'Financial Planning' -> 'Standard
+ * Case' entry the wizard side already had).
  */
 public with sharing class ArcCaseDetailController {
   public class CaseDetailResult {
@@ -156,22 +159,6 @@ public with sharing class ArcCaseDetailController {
     @AuraEnabled
     public List<FieldValue> fields;
   }
-
-  // Mirrors ArcRecordDetailController.CASE_TYPE_TO_SCHEMA_TYPE — the same
-  // envelope-wizard schema types the interview forms use, reused here to
-  // decide which Envelope_Field__mdt-defined field sections apply to this
-  // Case's Type. Kept as its own copy rather than exposing the private map
-  // on that class; both need to stay in sync if a new wizard type is added.
-  private static final Map<String, String> CASE_TYPE_TO_SCHEMA_TYPE = new Map<String, String>{
-    'Account Closure' => 'Account Closure',
-    'Update DMS Instructions' => 'Manage DMS Instructions',
-    'Change Management Style' => 'Change Management Style',
-    'Additional Funding' => 'Additional Funding',
-    'Edit Individual' => 'Client - Individual',
-    'Edit Business' => 'Client - Business',
-    'Edit Trust' => 'Client - Trust',
-    'Edit Retirement Plan' => 'Client - Retirement Plan'
-  };
 
   @AuraEnabled(cacheable=true)
   public static CaseDetailResult getCaseDetail(Id caseId) {
@@ -354,7 +341,7 @@ public with sharing class ArcCaseDetailController {
       return sections;
     }
 
-    String schemaType = CASE_TYPE_TO_SCHEMA_TYPE.get(matches[0].Type);
+    String schemaType = ARCConstants.CASE_TYPE_TO_SCHEMA_TYPE.get(matches[0].Type);
     if (String.isBlank(schemaType)) {
       // Only Account Servicing types have a wizard schema. Everything else — an
       // Account Opening case, for one — would otherwise show no fields at all,

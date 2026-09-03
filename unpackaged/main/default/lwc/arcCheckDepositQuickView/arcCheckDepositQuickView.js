@@ -87,13 +87,20 @@ export default class ArcCheckDepositQuickView extends LightningElement {
     return name ? `Check Deposit: ${name}` : "Check Deposit";
   }
 
-  /** Every popup row, resolved to display text; empty values show an em dash. */
+  /**
+   * Every popup row, resolved to display text; empty values show an em dash.
+   *
+   * Ordered per Envelope_Field__mdt (Object__c='Check_Deposit__c', Type__c='Check
+   * Deposit'): Deposit Details (Check, Financial Account, Amount), then
+   * Contributions (Employee Deferral Amount, Employer Contribution Amount).
+   * Account Number and the audit fields have no row in that metadata, so they
+   * keep their place at the end rather than being removed.
+   */
   get detailRows() {
     const detail = this._detail || {};
     return [
-      { label: "Financial Account", value: asText(detail.financialAccountName) },
-      { label: "Account Number", value: asText(detail.financialAccountNumber) },
       { label: "Check Log", value: asText(detail.checkLogName) },
+      { label: "Financial Account", value: asText(detail.financialAccountName) },
       { label: "Amount", value: asCurrency(detail.amount) },
       {
         label: "Employee Deferral Amount",
@@ -103,6 +110,7 @@ export default class ArcCheckDepositQuickView extends LightningElement {
         label: "Employer Contribution Amount",
         value: asCurrency(detail.employerContributionAmount)
       },
+      { label: "Account Number", value: asText(detail.financialAccountNumber) },
       { label: "Created By", value: asText(detail.createdByName) },
       { label: "Created Date", value: asDateTime(detail.createdDate) },
       { label: "Last Modified By", value: asText(detail.lastModifiedByName) },
