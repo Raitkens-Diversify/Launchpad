@@ -1357,9 +1357,9 @@
         </connector>
         <flowName>Advisor_Request_Move_Money_Recurring</flowName>
         <inputAssignments>
-            <name>varFinancialAccount</name>
+            <name>varFinancialAccountCustom</name>
             <value>
-                <elementReference>varFinancialAccount</elementReference>
+                <elementReference>varFinancialAccountCustom</elementReference>
             </value>
         </inputAssignments>
         <inputAssignments>
@@ -1659,6 +1659,14 @@
         <isInput>false</isInput>
         <isOutput>true</isOutput>
         <objectType>FinServ__FinancialAccount__c</objectType>
+    </variables>
+    <variables>
+        <name>varFinancialAccountCustom</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>true</isOutput>
+        <objectType>Financial_Account__c</objectType>
     </variables>
     <variables>
         <name>varHHSelectedRequest</name>

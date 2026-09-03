@@ -3,13 +3,13 @@
     <hasActivationRequired>false</hasActivationRequired>
     <label>GeneralUsers</label>
     <permissionSets>force__AbridgedEmailBuilder</permissionSets>
+    <permissionSets>force__AccessMerchantPayments</permissionSets>
     <permissionSets>force__CommerceStarterApp</permissionSets>
     <permissionSets>force__EasySuitesInvoicingUser</permissionSets>
     <permissionSets>force__EinsteinGPTPromptTemplateUser</permissionSets>
     <permissionSets>force__EinsteinServiceInnovations</permissionSets>
     <permissionSets>force__MacrosManager</permissionSets>
     <permissionSets>force__MessagingSessionAgent</permissionSets>
-    <permissionSets>force__PaymentsAdministrator</permissionSets>
     <permissionSets>force__SalesEngagementBasicUser</permissionSets>
     <permissionSets>force__SalesforceMeetings</permissionSets>
     <permissionSets>force__ServiceLightningKnowledgeManager</permissionSets>

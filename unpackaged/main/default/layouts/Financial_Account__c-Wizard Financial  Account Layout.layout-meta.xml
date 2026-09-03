@@ -95,6 +95,14 @@
                 <behavior>Edit</behavior>
                 <field>Push_Changes_to_FinSer_Financial_Account__c</field>
             </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>State_Withholding__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Federal_Withholding__c</field>
+            </layoutItems>
         </layoutColumns>
         <layoutColumns>
             <layoutItems>

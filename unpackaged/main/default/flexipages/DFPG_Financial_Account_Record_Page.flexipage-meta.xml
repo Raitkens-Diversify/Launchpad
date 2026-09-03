@@ -141,6 +141,18 @@
                 <identifier>RecordExternal_Source_System_Id__cField</identifier>
             </fieldInstance>
         </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldItem>Record.State_Withholding__c</fieldItem>
+                <identifier>RecordState_Withholding__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldItem>Record.Federal_Withholding__c</fieldItem>
+                <identifier>RecordFederal_Withholding__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
         <name>Facet-349fe69c-830f-4f47-9f6b-89d8a9020648</name>
         <type>Facet</type>
     </flexiPageRegions>
