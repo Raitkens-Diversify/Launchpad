@@ -66,6 +66,19 @@ public with sharing class ArcCaseFeedController {
     // One more than asked for, so hasMore is known without a second query.
     Integer fetchLimit = size + 1;
 
+    // Two reads, not one. The generic FeedItem object may only be filtered by
+    // Id unless the running user has View All Data -- anything else throws
+    // "Implementation restriction: FeedItem requires a filter by Id". A single
+    // ParentId query therefore worked for System Administrators and failed for
+    // every Advisor and Arc user, which the panel showed as "Unable to load the
+    // feed for this record." The per-object feed (CaseFeed, Foo__Feed) has no
+    // such rule, so the ids come from there and FeedItem is then read by Id.
+    List<Id> feedItemIds = feedItemIdsFor(recordId, fetchLimit);
+
+    if (feedItemIds.isEmpty()) {
+      return result;
+    }
+
     List<FeedItem> items = [
       SELECT
         Id,
@@ -82,10 +95,9 @@ public with sharing class ArcCaseFeedController {
           ORDER BY CreatedDate ASC
         )
       FROM FeedItem
-      WHERE ParentId = :recordId
+      WHERE Id IN :feedItemIds
       WITH USER_MODE
       ORDER BY CreatedDate DESC
-      LIMIT :fetchLimit
     ];
 
     result.hasMore = items.size() > size;
@@ -327,6 +339,50 @@ public with sharing class ArcCaseFeedController {
     }
 
     return byChange.values();
+  }
+
+  /**
+   * Ids of a record's newest posts, read from its per-object feed.
+   *
+   * The object is resolved through describe from the record id's own type,
+   * never from a caller string, and the id is bound -- same shape as
+   * queryRecordHistory. An object with no feed (feed tracking off, or one the
+   * platform gives no feed to) or a feed the user cannot read gives an empty
+   * list, which the caller turns into an empty feed rather than an error.
+   */
+  @TestVisible
+  private static List<Id> feedItemIdsFor(Id recordId, Integer fetchLimit) {
+    String feedObject = feedObjectFor(
+      recordId.getSObjectType().getDescribe().getName()
+    );
+    Schema.SObjectType feedType = Schema.getGlobalDescribe().get(feedObject);
+
+    if (feedType == null || !feedType.getDescribe().isAccessible()) {
+      return new List<Id>();
+    }
+
+    String soql =
+      'SELECT Id FROM ' +
+      feedType.getDescribe().getName() +
+      ' WHERE ParentId = :recordId' +
+      ' WITH USER_MODE' +
+      ' ORDER BY CreatedDate DESC' +
+      ' LIMIT ' +
+      fetchLimit;
+
+    List<Id> ids = new List<Id>();
+    for (SObject row : Database.query(soql)) {
+      ids.add((Id) row.get('Id'));
+    }
+    return ids;
+  }
+
+  /** CaseFeed for a standard object, Foo__Feed for a custom one. */
+  @TestVisible
+  private static String feedObjectFor(String objectApiName) {
+    return objectApiName.endsWith('__c')
+      ? objectApiName.removeEnd('__c') + '__Feed'
+      : objectApiName + 'Feed';
   }
 
   /** CaseHistory for a standard object, Foo__History for a custom one. */

@@ -316,21 +316,37 @@ const flattenNavItems = (items = STATIC_NAV_ITEMS) => {
     /*
      * Breadcrumbs need a 3rd, top-level "group" segment (e.g. "Work" above
      * "Cases"), which the flat list otherwise loses once children are
-     * spread in alongside their parent. Only tagged when the parent is an
-     * actual navigable/labelled group — not for the synthetic
-     * MANUAL_CONTACTS_GROUP MenuLabel, which has no target of its own.
+     * spread in alongside their parent. Every labelled group tags its
+     * children, including the Contacts MenuLabel: it used to be skipped for
+     * having no target of its own, so an account read "All Contacts › Reyes"
+     * while a case read "Work › Cases › …". The crumb links to the group's
+     * own target when it has one ("Work" → the Cases list) and otherwise to
+     * its first visible child ("Contacts" → All Contacts), so it is never
+     * dead text.
      */
+    const groupPath = resolveGroupPath(item);
+
     (item.subMenu || []).forEach((child) => {
       flattened.push(
-        item.target
-          ? { ...child, groupLabel: item.label, groupPath: item.target }
-          : child
+        item.label ? { ...child, groupLabel: item.label, groupPath } : child
       );
     });
   });
 
   return flattened;
 };
+
+function resolveGroupPath(item) {
+  if (item.target) {
+    return item.target;
+  }
+
+  const firstNavigableChild = (item.subMenu || []).find(
+    (child) => child.target && !child.hidden
+  );
+
+  return firstNavigableChild?.target || "";
+}
 
 const NAV_TARGETS = flattenNavItems();
 

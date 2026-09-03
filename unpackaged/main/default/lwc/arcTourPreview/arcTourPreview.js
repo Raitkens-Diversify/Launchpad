@@ -154,7 +154,7 @@ const SCREENS = {
 
   contacts: {
     kind: "list",
-    crumbs: ["All Contacts"],
+    crumbs: ["Contacts", "All Contacts"],
     title: "Contacts",
     contactTabs: true,
     columns: [

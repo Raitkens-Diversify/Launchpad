@@ -116,6 +116,99 @@ private class ArcCaseFeedControllerTest {
     Test.stopTest();
   }
 
+  // ---- Non-admin users ------------------------------------------------------
+
+  /**
+   * A user on the Advisor profile, which has neither View All Data nor Modify
+   * All Data -- the population the feed was failing for. Built but not
+   * inserted, so the caller can wrap the insert in its own runAs and keep the
+   * setup-object DML apart from the Case and FeedItem DML.
+   */
+  private static User makeAdvisor() {
+    Profile advisor = [SELECT Id FROM Profile WHERE Name = 'Advisor' LIMIT 1];
+    String uniq = 'feedadv' + Math.abs(Crypto.getRandomLong());
+    return new User(
+      Alias = 'feedadv',
+      Email = uniq + '@feed.test.invalid',
+      EmailEncodingKey = 'UTF-8',
+      LastName = 'FeedAdvisor',
+      LanguageLocaleKey = 'en_US',
+      LocaleSidKey = 'en_US',
+      ProfileId = advisor.Id,
+      TimeZoneSidKey = 'America/Denver',
+      Username = uniq + '@feed.test.invalid'
+    );
+  }
+
+  /**
+   * The bug this guards. FeedItem filtered by ParentId is only allowed for a
+   * user with View All Data, so the feed loaded for administrators -- and for
+   * every earlier test here, which ran as one -- while every Advisor and Arc
+   * user got "Implementation restriction: FeedItem requires a filter by Id".
+   * The read now goes through CaseFeed for the ids first; this runs it as an
+   * Advisor and expects the posts back.
+   */
+  @IsTest
+  static void advisorWithoutViewAllDataCanReadTheFeed() {
+    User advisor = makeAdvisor();
+    System.runAs(new User(Id = UserInfo.getUserId())) {
+      insert advisor;
+    }
+
+    // Owned by the advisor so record access, and with it feed visibility, does
+    // not depend on the org's Case sharing defaults.
+    Case record = new Case(
+      Subject = 'Feed Panel Advisor Case',
+      Status = 'New',
+      Origin = 'Phone',
+      OwnerId = advisor.Id
+    );
+    insert record;
+    insert new List<FeedItem>{
+      new FeedItem(ParentId = record.Id, Body = 'First advisor note'),
+      new FeedItem(ParentId = record.Id, Body = 'Second advisor note')
+    };
+
+    ArcCaseFeedController.FeedResult result;
+    System.runAs(advisor) {
+      Test.startTest();
+      result = ArcCaseFeedController.getRecordFeed(record.Id, 10);
+      Test.stopTest();
+    }
+
+    Assert.areEqual(
+      2,
+      result.entries.size(),
+      'An advisor without View All Data should see the record\'s posts.'
+    );
+    Assert.isFalse(result.hasMore, 'Two posts do not exceed a page of ten.');
+  }
+
+  @IsTest
+  static void emptyFeedForAnObjectWithoutAFeed() {
+    // Organization has no OrganizationFeed, so the id lookup finds no feed
+    // object. That is an empty feed, not an exception.
+    Test.startTest();
+    ArcCaseFeedController.FeedResult result = ArcCaseFeedController.getRecordFeed(
+      UserInfo.getOrganizationId(),
+      10
+    );
+    Test.stopTest();
+
+    Assert.areEqual(0, result.entries.size(), 'No feed object means no entries.');
+    Assert.isFalse(result.hasMore, 'No feed object means nothing more to load.');
+  }
+
+  @IsTest
+  static void feedObjectPerObjectKind() {
+    Assert.areEqual('CaseFeed', ArcCaseFeedController.feedObjectFor('Case'));
+    Assert.areEqual(
+      'Check_Log__Feed',
+      ArcCaseFeedController.feedObjectFor('Check_Log__c'),
+      'A custom object keeps its feed in <name>__Feed.'
+    );
+  }
+
   @IsTest
   static void resolvesLabelsTheWayLightningShowsThem() {
     // The whole reason resolveFieldLabel exists: a tracked change names the
