@@ -97,11 +97,29 @@ const ROW_ACTIONS = [
   { label: "Delete", name: "delete", iconName: "utility:delete" }
 ];
 
-const SCOPE_ALL = "All";
+/*
+ * Row menus are off for now, in step with the other ARC tables (see
+ * arcRecordListView and workTable): the three dots go away everywhere until
+ * real quick actions exist. Flip this to true to bring Rename/Delete back; the
+ * menu, its handler and the modals are all still here. The hideRowActions
+ * Builder property keeps working on top of it for pages that want them off
+ * for good. Done in code rather than in the home page's configuration because
+ * a view change needs a site publish to reach users and code does not.
+ */
+const SHOW_ROW_ACTIONS = false;
+
+/*
+ * "My" is the envelopes the user created; "My Team" is the envelopes whose
+ * household belongs to one of the user's financial advisor teams. The rows the
+ * server hands over are already only the user's teams' envelopes plus their own,
+ * so the old "My" (valued All, showing every row) narrowed nothing and the two
+ * options looked the same -- the toggle appeared not to work.
+ */
+const SCOPE_MY = "My";
 const SCOPE_TEAM = "Team";
 
 const SCOPE_OPTIONS = [
-  { value: SCOPE_ALL, label: "My" },
+  { value: SCOPE_MY, label: "My" },
   { value: SCOPE_TEAM, label: "My Team" }
 ];
 
@@ -224,7 +242,7 @@ export default class EnvelopeTable extends LightningElement {
   defaultSortField = "lastActivity";
   defaultSortDirection = "desc";
 
-  scopeFilter = SCOPE_ALL;
+  scopeFilter = SCOPE_MY;
   showFilterMenu = false;
   /** Column and contains-value behind the Filter popover. */
   filterField = "";
@@ -274,7 +292,7 @@ export default class EnvelopeTable extends LightningElement {
   }
 
   get effectiveRowActions() {
-    return this.hideRowActions ? [] : ROW_ACTIONS;
+    return this.hideRowActions || !SHOW_ROW_ACTIONS ? [] : ROW_ACTIONS;
   }
 
   get hasRowActions() {
@@ -354,6 +372,8 @@ export default class EnvelopeTable extends LightningElement {
         householdId: envelope.householdId || null,
         teamId: envelope.advisorTeamId || null,
         advisorTeam: envelope.advisorTeamName || "",
+        createdById: envelope.createdById || null,
+        ownerId: envelope.ownerId || null,
         created: envelope.createdDate
           ? `${this.formatDateTime(envelope.createdDate)} - ${
               envelope.createdByName || ""
@@ -441,8 +461,9 @@ export default class EnvelopeTable extends LightningElement {
         row.name.toLowerCase().includes(term) ||
         row.household.toLowerCase().includes(term);
       const matchesScope =
-        this.scopeFilter === SCOPE_ALL ||
-        (row.teamId && this._myTeamIds.has(row.teamId));
+        this.scopeFilter === SCOPE_MY
+          ? row.createdById === this.currentUserId
+          : Boolean(row.teamId && this._myTeamIds.has(row.teamId));
       const matchesDate =
         !this.enableLastActivityFilter ||
         !this.dateFilter ||
@@ -509,7 +530,7 @@ export default class EnvelopeTable extends LightningElement {
   }
 
   handleScopeChange(event) {
-    this.scopeFilter = event.detail?.value ?? SCOPE_ALL;
+    this.scopeFilter = event.detail?.value ?? SCOPE_MY;
   }
 
   handleSearchChange(event) {
@@ -518,7 +539,7 @@ export default class EnvelopeTable extends LightningElement {
 
   handleResetFilters() {
     this.searchTerm = "";
-    this.scopeFilter = SCOPE_ALL;
+    this.scopeFilter = SCOPE_MY;
     this.dateFilter = "";
   }
 

@@ -210,6 +210,11 @@ public with sharing class EnvelopeLandingApex {
         @AuraEnabled public Id advisorTeamId { get; set; }
         @AuraEnabled public Datetime createdDate { get; set; }
         @AuraEnabled public String createdByName { get; set; }
+        // Who created and who owns the envelope, so the list's "My" scope can mean "created by
+        // me" rather than "everything I am allowed to see" (the rows already come pre-filtered
+        // to the user's teams plus their own, so a client-side "all" narrowed nothing).
+        @AuraEnabled public Id createdById { get; set; }
+        @AuraEnabled public Id ownerId { get; set; }
         @AuraEnabled public Datetime lastModifiedDate { get; set; }
         @AuraEnabled public String lastModifiedByName { get; set; }
     }
@@ -298,7 +303,8 @@ public with sharing class EnvelopeLandingApex {
         Set<Id> teamEnvelopeIds = householdRowByEnvelope.keySet();
         List<Envelope__c> envelopes = [
             SELECT Id, Name, Household_Name__c, Household__c,
-                   CreatedDate, CreatedBy.Name, LastModifiedDate, LastModifiedBy.Name
+                   CreatedDate, CreatedById, CreatedBy.Name, OwnerId,
+                   LastModifiedDate, LastModifiedBy.Name
             FROM Envelope__c
             WHERE Status__c IN ('New', 'In Progress')
             AND (Id IN :teamEnvelopeIds OR OwnerId = :UserInfo.getUserId())
@@ -352,6 +358,8 @@ public with sharing class EnvelopeLandingApex {
                 : null;
             row.createdDate = env.CreatedDate;
             row.createdByName = env.CreatedBy != null ? env.CreatedBy.Name : null;
+            row.createdById = env.CreatedById;
+            row.ownerId = env.OwnerId;
             row.lastModifiedDate = env.LastModifiedDate;
             row.lastModifiedByName = env.LastModifiedBy != null ? env.LastModifiedBy.Name : null;
             data.envelopes.add(row);

@@ -1,0 +1,12 @@
+{
+  "type" : "sfdc_cms__route",
+  "title" : "Events",
+  "contentBody" : {
+    "activeViewId" : "Events",
+    "configurationTags" : [ ],
+    "pageAccess" : "UseParent",
+    "routeType" : "custom-events",
+    "urlPrefix" : "events"
+  },
+  "urlName" : "events"
+}

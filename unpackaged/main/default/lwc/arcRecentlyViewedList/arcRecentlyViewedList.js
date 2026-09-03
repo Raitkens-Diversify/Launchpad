@@ -123,6 +123,9 @@ export default class ArcRecentlyViewedList extends NavigationMixin(
   _activeListType = LIST_TYPE_CONTACT;
   _wiredRecentlyViewedResult;
   _onNavPathChange;
+  _onVisibilityChange;
+  // Whether this mount has already forced its one fresh fetch; see connectedCallback.
+  _refreshedOnMount = false;
 
   get infoIconStyle() {
     return `--icon-url: url('${buildIconUrl(INFO_ICON_FILE)}');`;
@@ -160,18 +163,34 @@ export default class ArcRecentlyViewedList extends NavigationMixin(
 
   connectedCallback() {
     /*
-     * getRecentlyViewedItems is cacheable, so returning to Home after
-     * viewing a record serves the stale wire-service cache rather than a
-     * fresh Apex call — a plain page reload is the only thing that used to
-     * fix it. patchHistoryForNavigation (already wired up by arcNavigation)
-     * dispatches this event right after any pushState/replaceState, which
-     * covers exactly that "navigated back to Home" moment.
+     * getRecentlyViewedItems is cacheable, so returning to Home after viewing
+     * a record serves the wire-service cache rather than a fresh Apex call,
+     * and the card read as if the visit never happened.
+     *
+     * The path-change events below are not enough on their own. The router
+     * pushes the new URL before it builds the Home page, so by the time this
+     * card exists the event has already fired and there is nobody to hear it.
+     * They still matter for URL changes while Home stays mounted. The case
+     * that actually bit -- a fresh mount handed a cached list -- is handled in
+     * wiredRecentlyViewedItems, which forces one refreshApex per mount as soon
+     * as the first (cached) result lands, so the stale list is on screen for a
+     * round trip and no longer.
+     *
+     * Returning to the browser tab refreshes too: the same user may have just
+     * viewed records in the core app in another tab.
      */
+    this._refreshedOnMount = false;
     this._onNavPathChange = () => {
       this.refreshRecentlyViewedItems();
     };
+    this._onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        this.refreshRecentlyViewedItems();
+      }
+    };
     window.addEventListener("popstate", this._onNavPathChange);
     window.addEventListener(NAV_PATH_CHANGE_EVENT, this._onNavPathChange);
+    document.addEventListener("visibilitychange", this._onVisibilityChange);
 
     if (this._stylesLoaded) {
       return;
@@ -190,6 +209,7 @@ export default class ArcRecentlyViewedList extends NavigationMixin(
   disconnectedCallback() {
     window.removeEventListener("popstate", this._onNavPathChange);
     window.removeEventListener(NAV_PATH_CHANGE_EVENT, this._onNavPathChange);
+    document.removeEventListener("visibilitychange", this._onVisibilityChange);
   }
 
   refreshRecentlyViewedItems() {
@@ -204,6 +224,13 @@ export default class ArcRecentlyViewedList extends NavigationMixin(
   })
   wiredRecentlyViewedItems(value) {
     this._wiredRecentlyViewedResult = value;
+
+    // The first result of a mount may be the cache; ask the server once. The
+    // flag keeps the refreshed result from asking again.
+    if (!this._refreshedOnMount) {
+      this._refreshedOnMount = true;
+      refreshApex(value);
+    }
     const { data, error } = value;
     this.isInitialLoading = false;
 

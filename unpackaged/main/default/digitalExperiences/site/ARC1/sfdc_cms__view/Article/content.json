@@ -1,0 +1,71 @@
+{
+  "type" : "sfdc_cms__view",
+  "title" : "Article",
+  "contentBody" : {
+    "component" : {
+      "children" : [ {
+        "children" : [ {
+          "attributes" : {
+            "backgroundImageConfig" : "",
+            "backgroundImageOverlay" : "rgba(0,0,0,0)",
+            "componentSpacerSize" : "",
+            "dxpStyle" : { },
+            "layoutDirectionDesktop" : "row",
+            "layoutDirectionMobile" : "column",
+            "layoutDirectionTablet" : "column",
+            "maxContentWidth" : "",
+            "sectionColumnGutterWidth" : "",
+            "sectionConfig" : "{\"UUID\":\"d5db5498-2c8c-4809-8f6e-be07638180db\",\"columns\":[{\"UUID\":\"818a898e-f42f-40ba-8560-e4deb7a83d6b\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":[]}]}",
+            "sectionMinHeight" : "",
+            "sectionVerticalAlign" : "flex-start"
+          },
+          "children" : [ {
+            "children" : [ {
+              "attributes" : {
+                "dxpStyle" : { },
+                "hideBranding" : true
+              },
+              "definition" : "c:helpArticlePage",
+              "id" : "ebc2dceb-90bd-4d19-bda7-1054ef46814b",
+              "type" : "component"
+            } ],
+            "id" : "818a898e-f42f-40ba-8560-e4deb7a83d6b",
+            "name" : "col1",
+            "title" : "Column 1",
+            "type" : "region"
+          } ],
+          "definition" : "community_layout:section",
+          "id" : "d5db5498-2c8c-4809-8f6e-be07638180db",
+          "type" : "component"
+        } ],
+        "id" : "0d44fb9e-62eb-47c8-a2f3-be7314e7add2",
+        "name" : "content",
+        "title" : "Content",
+        "type" : "region"
+      }, {
+        "children" : [ {
+          "attributes" : {
+            "customHeadTags" : "",
+            "description" : "",
+            "dxpStyle" : { },
+            "pageTitle" : "Help Center"
+          },
+          "definition" : "community_builder:seoAssistant",
+          "id" : "21bd9e54-88a2-4d34-874d-67e6b62d40dd",
+          "type" : "component"
+        } ],
+        "id" : "1503289d-355a-4ebf-8812-5c6af56f59ce",
+        "name" : "sfdcHiddenRegion",
+        "title" : "sfdcHiddenRegion",
+        "type" : "region"
+      } ],
+      "definition" : "community_layout:sldsFlexibleLayout",
+      "id" : "1cdfa2a9-ea77-46f2-b249-a8637b136ea1",
+      "type" : "component"
+    },
+    "dataProviders" : [ ],
+    "themeLayoutType" : "OHzbXAVux6mZ7VVDb7Pb8F2YUFBAXR",
+    "viewType" : "custom-article"
+  },
+  "urlName" : "article"
+}
