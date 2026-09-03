@@ -1,90 +1,88 @@
 <template>
-    <div class="nexs-chrome">
-        <!-- White brand header matching the new wizard's envelopeTopBarV2:
-             Diversify logo + divider + section label. Lives in the component so
-             it renders identically on the LWR site and the core app page. -->
-        <header class="nexs-chrome__header">
-            <template if:true={showBranding}>
-                <img class="nexs-chrome__logo" src={logoUrl} alt="Diversify" />
-                <span class="nexs-chrome__divider" aria-hidden="true"></span>
-                <button type="button" class="nexs-chrome__crumb" onclick={handleGoHome}>
-                    Help Center
-                </button>
-            </template>
-            <!-- Header search on inner pages (home has the hero search). -->
-            <template if:true={isBrowse}>
-                <div class="nexs-chrome__search">
-                    <c-nexs-search-bar
-                        onselect={handleHeaderSuggestionSelect}
-                        onsearch={handleHeaderSearch}
-                    ></c-nexs-search-bar>
-                </div>
-            </template>
-
-            <!-- Help menu: persistent entry point to (re)start the guided tour. -->
-            <div class="nexs-chrome__help">
-                <button
-                    type="button"
-                    class="nexs-chrome__help-btn"
-                    data-tour-id="nexus-help-btn"
-                    aria-label="Help and tips"
-                    aria-haspopup="true"
-                    aria-expanded={helpOpen}
-                    onclick={handleHelpToggle}
-                >?</button>
-                <template if:true={helpOpen}>
-                    <div class="nexs-chrome__help-menu">
-                        <p class="nexs-chrome__help-title">New here?</p>
-                        <p class="nexs-chrome__help-text">
-                            Take a quick tour of the help center — search, browsing by
-                            topic, and how to reach support.
-                        </p>
-                        <button
-                            type="button"
-                            class="nexs-chrome__help-cta"
-                            onclick={handleTourStart}
-                        >Start the tour</button>
-                    </div>
-                </template>
+    <!-- Shared brand shell (header / body / footer) — c-ds-chrome owns the
+         chrome markup + CSS; this root owns everything interactive. -->
+    <c-ds-chrome logo-url={logoUrl} hide-branding={hideBranding} brand-label="Help Center" onbrandclick={handleGoHome}>
+        <!-- Header search on inner pages (home has the hero search). The
+             conditional wraps the slotted element so the slot is empty on the
+             home view — dsChrome hides the empty search region. -->
+        <template if:true={isBrowse}>
+            <div slot="search">
+                <c-ds-search-bar
+                    placeholder="Search help articles…"
+                    header-label="Top suggestions:"
+                    empty-hint="No matching titles — press Enter to search everything."
+                    suggestions={headerSuggestions}
+                    onquerychange={handleHeaderQuery}
+                    onselect={handleHeaderSuggestionSelect}
+                    onsubmit={handleHeaderSearch}
+                ></c-ds-search-bar>
             </div>
-        </header>
+        </template>
 
-        <div class="nexs-chrome__body">
-            <template if:true={isLoading}>
-                <div class="landing__loading">
-                    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+        <!-- Help menu: persistent entry point to (re)start the guided tour.
+             Slotted into the chrome's actions region; handlers and styling
+             stay here (slotted elements are styled by the host's stylesheet). -->
+        <template if:true={resourceBase}>
+            <button type="button" slot="actions" class="nexs-chrome__rc-link"
+                onclick={handleResourcesLink}>
+                Resources
+            </button>
+        </template>
+        <div class="nexs-chrome__help" slot="actions">
+            <button
+                type="button"
+                class="nexs-chrome__help-btn"
+                data-tour-id="nexus-help-btn"
+                aria-label="Help and tips"
+                aria-haspopup="true"
+                aria-expanded={helpOpen}
+                onclick={handleHelpToggle}
+            >?</button>
+            <template if:true={helpOpen}>
+                <div class="nexs-chrome__help-menu">
+                    <p class="nexs-chrome__help-title">New here?</p>
+                    <p class="nexs-chrome__help-text">
+                        Take a quick tour of the help center — search, browsing by
+                        topic, and how to reach support.
+                    </p>
+                    <button
+                        type="button"
+                        class="nexs-chrome__help-cta"
+                        onclick={handleTourStart}
+                    >Start the tour</button>
                 </div>
-            </template>
-
-            <template if:true={isHome}>
-                <c-nexs-home
-                    show-welcome={showWelcomeBanner}
-                    ontopicselect={handleTopicSelect}
-                    onarticleselect={handleArticleSelect}
-                    onsearchsubmit={handleSearchSubmit}
-                    onwelcomedismiss={handleWelcomeDismiss}
-                ></c-nexs-home>
-            </template>
-
-            <template if:true={isBrowse}>
-                <c-nexs-article-browser
-                    initial-category={browseCategory}
-                    initial-article-id={browseArticleId}
-                    initial-article-url-name={browseArticleUrlName}
-                    initial-search-term={browseSearchTerm}
-                    onhome={handleGoHome}
-                ></c-nexs-article-browser>
             </template>
         </div>
+
+        <template if:true={isLoading}>
+            <div class="landing__loading">
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:true={isHome}>
+            <c-nexs-home
+                show-welcome={showWelcomeBanner}
+                ontopicselect={handleTopicSelect}
+                onarticleselect={handleArticleSelect}
+                onsearchsubmit={handleSearchSubmit}
+                onwelcomedismiss={handleWelcomeDismiss}
+            ></c-nexs-home>
+        </template>
+
+        <template if:true={isBrowse}>
+            <c-nexs-article-browser
+                initial-category={browseCategory}
+                initial-article-id={browseArticleId}
+                initial-article-url-name={browseArticleUrlName}
+                initial-search-term={browseSearchTerm}
+                onhome={handleGoHome}
+            ></c-nexs-article-browser>
+        </template>
 
         <!-- Guided tour for the help center. Embedded in the shell (not a
              builder region) so it ships on both surfaces — the core app tab
              renders this component directly with no region to drop it into. -->
         <c-tour-launcher tour-key="nexus_help"></c-tour-launcher>
-
-        <footer class="nexs-chrome__footer">
-            <span class="nexs-chrome__footer-brand">Help Center</span>
-            <span class="nexs-chrome__footer-meta">{copyrightLine}</span>
-        </footer>
-    </div>
+    </c-ds-chrome>
 </template>

@@ -287,15 +287,19 @@ private class ResourceCenterServiceTest {
     static void searchAllMergesResources() {
         Test.setFixedSearchResults(new List<Id>{ resourceId('brand-flyer') });
         Test.startTest();
-        List<ResourceCenterService.CombinedResult> combined = ResourceCenterService.searchAll('flyer');
+        ResourceCenterService.CombinedSearch combined = ResourceCenterService.searchAll('flyer');
         Test.stopTest();
         Boolean sawResource = false;
-        for (ResourceCenterService.CombinedResult r : combined) {
+        for (ResourceCenterService.CombinedResult r : combined.results) {
             if (r.type == 'resource' && r.slug == 'brand-flyer') {
                 sawResource = true;
             }
         }
         Assert.isTrue(sawResource, 'Combined results include the resource row.');
+        Assert.isFalse(combined.resourcesDegraded,
+            'Resource side succeeded — not degraded.');
+        Assert.isFalse(combined.articlesDegraded,
+            'Article side ran (empty is fine) — not degraded.');
     }
 
     @isTest
@@ -332,6 +336,39 @@ private class ResourceCenterServiceTest {
     }
 
     @isTest
+    static void linkContextIsInternalInTheCoreApp() {
+        // Apex tests run outside any Experience Cloud site, so
+        // Network.getNetworkId() is null — the core-app branch. Both bases must
+        // come back null: that is c/contextNav's signal to navigate with
+        // NavigationMixin instead of leaving for *.my.site.com.
+        Test.startTest();
+        ResourceCenterService.LinkContext ctx = ResourceCenterService.getLinkContext();
+        Test.stopTest();
+
+        Assert.isNotNull(ctx, 'getLinkContext never returns null');
+        Assert.areEqual('Internal', ctx.surface, 'No network in a test context');
+        Assert.isNull(ctx.helpBase, 'Internal surface carries no site base');
+        Assert.isNull(ctx.resourceBase, 'Internal surface carries no site base');
+    }
+
+    @isTest
+    static void linkContextAgreesWithTheStandaloneAccessors() {
+        // The two legacy accessors stay site-absolute on every surface (the
+        // Admin Console's Copy link depends on it). Wherever getLinkContext
+        // does return bases, they must be the same strings.
+        Test.startTest();
+        ResourceCenterService.LinkContext ctx = ResourceCenterService.getLinkContext();
+        String helpBase = ResourceCenterService.getHelpCenterLinkBase();
+        String resourceBase = ResourceCenterService.getResourceLinkBase();
+        Test.stopTest();
+
+        if (ctx.helpBase != null) {
+            Assert.areEqual(helpBase, ctx.helpBase, 'Same help base either way');
+            Assert.areEqual(resourceBase, ctx.resourceBase, 'Same resource base either way');
+        }
+    }
+
+    @isTest
     static void helpCenterLinkBaseIsSiteRootOrNull() {
         // Same contract as the resources base, minus the page path: the Help
         // Center base is the shared site's root (article deep links append
@@ -346,5 +383,252 @@ private class ResourceCenterServiceTest {
             Assert.areEqual(base + '/resources', resourcesBase,
                 'Resources base is the site root plus the page path');
         }
+    }
+
+    // ---- getWebinars() ---------------------------------------------------------
+
+    private static Resource__c webinar(String name, String slug, Id catId, Datetime eventAt,
+                                       String embedUrl, String registrationUrl) {
+        return new Resource__c(
+            Name = name, Slug__c = slug, Category__c = catId, Resource_Type__c = 'Webinar',
+            Event_Datetime__c = eventAt, Video_Embed_URL__c = embedUrl,
+            Registration_URL__c = registrationUrl, Is_Active__c = true);
+    }
+
+    private static void attachFile(Id resourceId, String title) {
+        ContentVersion cv = new ContentVersion(
+            Title = title, PathOnClient = title, VersionData = Blob.valueOf('fake bytes'));
+        insert cv;
+        Id cdId = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :cv.Id].ContentDocumentId;
+        insert new ContentDocumentLink(
+            LinkedEntityId = resourceId, ContentDocumentId = cdId, ShareType = 'V', Visibility = 'AllUsers');
+    }
+
+    @isTest
+    static void webinarAgendaSplitsSortsAndDerivesStatus() {
+        Id catId = [SELECT Id FROM Resource_Category__c WHERE Slug__c = 'marketing'].Id;
+        Datetime now = System.now();
+        Resource__c oldTalk = webinar('Old Talk', 'old-talk', catId, now.addDays(-10), null, null);
+        Resource__c fileTalk = webinar('File Talk', 'file-talk', catId, now.addDays(-5), null, null);
+        Resource__c embedTalk = webinar('Embed Talk', 'embed-talk', catId, now.addDays(-2),
+            'https://www.youtube.com/embed/x', null);
+        Resource__c later = webinar('Later Talk', 'later-talk', catId, now.addDays(7), null,
+            'https://example.com/register-later');
+        Resource__c soon = webinar('Soon Talk', 'soon-talk', catId, now.addDays(1), null,
+            'https://example.com/register-soon');
+        Resource__c hidden = webinar('Hidden Talk', 'hidden-talk', catId, now.addDays(3), null,
+            'https://example.com/register-hidden');
+        hidden.Is_Active__c = false;
+        insert new List<Resource__c>{ oldTalk, fileTalk, embedTalk, later, soon, hidden };
+        attachFile(fileTalk.Id, 'replay.mp4'); // recording via the newest attached file
+        ResourceCenterService.webinarAgendaEnabledOverride = true;
+
+        Test.startTest();
+        ResourceCenterService.WebinarAgenda agenda = ResourceCenterService.getWebinars();
+        Test.stopTest();
+
+        Assert.areEqual(2, agenda.upcoming.size(), 'Two active future webinars (inactive hidden).');
+        Assert.areEqual('soon-talk', agenda.upcoming[0].slug, 'Upcoming is soonest-first.');
+        Assert.areEqual('later-talk', agenda.upcoming[1].slug);
+        Assert.areEqual(WebinarLifecycle.UPCOMING, agenda.upcoming[0].status);
+        Assert.isFalse(agenda.upcoming[0].watchable, 'Upcoming is never watchable.');
+        Assert.areEqual('https://example.com/register-soon', agenda.upcoming[0].registrationUrl);
+
+        Assert.areEqual(3, agenda.recent.size(), 'Every past webinar is recent, recorded or not.');
+        Assert.areEqual('embed-talk', agenda.recent[0].slug, 'Recent is most-recent-first.');
+        Assert.areEqual('file-talk', agenda.recent[1].slug);
+        Assert.areEqual('old-talk', agenda.recent[2].slug);
+        Assert.areEqual(WebinarLifecycle.RECORDED, agenda.recent[0].status, 'Embed URL = recorded.');
+        Assert.areEqual(WebinarLifecycle.RECORDED, agenda.recent[1].status, 'Attached file = recorded.');
+        Assert.areEqual(WebinarLifecycle.PAST, agenda.recent[2].status, 'No recording yet.');
+        Assert.isTrue(agenda.recent[0].watchable);
+        Assert.isTrue(agenda.recent[1].watchable);
+        Assert.isFalse(agenda.recent[2].watchable);
+    }
+
+    @isTest
+    static void webinarAgendaCapsEachSection() {
+        Id catId = [SELECT Id FROM Resource_Category__c WHERE Slug__c = 'marketing'].Id;
+        Datetime now = System.now();
+        List<Resource__c> rows = new List<Resource__c>();
+        for (Integer i = 1; i <= 3; i++) {
+            rows.add(webinar('Up ' + i, 'up-' + i, catId, now.addDays(i), null, 'https://example.com/r' + i));
+            rows.add(webinar('Past ' + i, 'past-' + i, catId, now.addDays(-i), null, null));
+        }
+        insert rows;
+        ResourceCenterService.webinarAgendaEnabledOverride = true;
+        ResourceCenterService.webinarAgendaLimitOverride = 2;
+
+        Test.startTest();
+        ResourceCenterService.WebinarAgenda agenda = ResourceCenterService.getWebinars();
+        Test.stopTest();
+
+        Assert.areEqual(2, agenda.upcoming.size(), 'Capped by the configured limit.');
+        Assert.areEqual('up-1', agenda.upcoming[0].slug, 'The soonest survive the cap.');
+        Assert.areEqual('up-2', agenda.upcoming[1].slug);
+        Assert.areEqual(2, agenda.recent.size());
+        Assert.areEqual('past-1', agenda.recent[0].slug, 'The most recent survive the cap.');
+        Assert.areEqual('past-2', agenda.recent[1].slug);
+    }
+
+    @isTest
+    static void webinarAgendaHiddenWhenDisabledByConfig() {
+        Id catId = [SELECT Id FROM Resource_Category__c WHERE Slug__c = 'marketing'].Id;
+        insert webinar('Soon Talk', 'soon-talk', catId, System.now().addDays(1), null,
+            'https://example.com/register');
+        ResourceCenterService.webinarAgendaEnabledOverride = false;
+
+        Test.startTest();
+        ResourceCenterService.WebinarAgenda agenda = ResourceCenterService.getWebinars();
+        Test.stopTest();
+
+        Assert.areEqual(0, agenda.upcoming.size(), 'Disabled panel: nothing, even with data.');
+        Assert.areEqual(0, agenda.recent.size());
+    }
+
+    @isTest
+    static void webinarAgendaDegradesToEmptyForBareUser() {
+        Id catId = [SELECT Id FROM Resource_Category__c WHERE Slug__c = 'marketing'].Id;
+        insert webinar('Soon Talk', 'soon-talk', catId, System.now().addDays(1), null,
+            'https://example.com/register');
+        User bare;
+        System.runAs(UatTestDataFactory.currentUser()) {
+            // Standard User, auto-assigned permsets stripped: no Resource__c read.
+            bare = UatTestDataFactory.createUser('rcbare', null);
+        }
+        ResourceCenterService.webinarAgendaEnabledOverride = true;
+
+        Test.startTest();
+        ResourceCenterService.WebinarAgenda agenda;
+        System.runAs(bare) {
+            agenda = ResourceCenterService.getWebinars(); // must not throw
+        }
+        Test.stopTest();
+
+        Assert.areEqual(0, agenda.upcoming.size(), 'No access degrades to an empty agenda.');
+        Assert.areEqual(0, agenda.recent.size());
+    }
+
+    // ---- getEvents() -----------------------------------------------------------
+
+    @isTest
+    static void eventsFeedSplitsSortsAndFlagsRecordings() {
+        Id catId = [SELECT Id FROM Resource_Category__c WHERE Slug__c = 'marketing'].Id;
+        Datetime now = System.now();
+        Resource__c noReplay = webinar('No Replay', 'no-replay', catId, now.addDays(-10), null, null);
+        Resource__c fileTalk = webinar('File Talk', 'file-talk', catId, now.addDays(-5), null, null);
+        Resource__c embedTalk = webinar('Embed Talk', 'embed-talk', catId, now.addDays(-2),
+            'https://www.youtube.com/embed/x', null);
+        Resource__c later = webinar('Later Talk', 'later-talk', catId, now.addDays(7), null,
+            'https://example.com/register-later');
+        Resource__c soon = webinar('Soon Talk', 'soon-talk', catId, now.addDays(1), null,
+            'https://example.com/register-soon');
+        insert new List<Resource__c>{ noReplay, fileTalk, embedTalk, later, soon };
+        attachFile(fileTalk.Id, 'replay.mp4'); // recording via the newest attached file
+
+        Test.startTest();
+        ResourceCenterService.EventsFeed feed = ResourceCenterService.getEvents();
+        Test.stopTest();
+
+        Assert.areEqual(2, feed.upcoming.size());
+        Assert.areEqual('soon-talk', feed.upcoming[0].slug, 'Upcoming is soonest-first.');
+        Assert.areEqual('later-talk', feed.upcoming[1].slug);
+        Assert.areEqual(WebinarLifecycle.UPCOMING, feed.upcoming[0].status);
+
+        Assert.areEqual(3, feed.past.size(),
+            'Past keeps every past webinar (the calendar shows them all); watchable flags recordings.');
+        Assert.areEqual('embed-talk', feed.past[0].slug, 'Past is most-recent-first; embed URL counts.');
+        Assert.areEqual('file-talk', feed.past[1].slug, 'Attached file counts as a recording.');
+        Assert.areEqual('no-replay', feed.past[2].slug, 'Unrecorded past rows are kept, last.');
+        Assert.isTrue(feed.past[0].watchable);
+        Assert.isTrue(feed.past[1].watchable);
+        Assert.isFalse(feed.past[2].watchable, 'No recording: the list hides it, the calendar shows it.');
+        Assert.areEqual(WebinarLifecycle.RECORDED, feed.past[0].status);
+        Assert.areEqual(WebinarLifecycle.PAST, feed.past[2].status);
+    }
+
+    @isTest
+    static void eventsFeedIgnoresAgendaFlagAndCap() {
+        // The agenda flag/limit gate the landing panel only — the routed events
+        // page must not vanish or truncate with them.
+        Id catId = [SELECT Id FROM Resource_Category__c WHERE Slug__c = 'marketing'].Id;
+        Datetime now = System.now();
+        List<Resource__c> rows = new List<Resource__c>();
+        for (Integer i = 1; i <= 3; i++) {
+            rows.add(webinar('Up ' + i, 'up-' + i, catId, now.addDays(i), null, 'https://example.com/r' + i));
+        }
+        insert rows;
+        ResourceCenterService.webinarAgendaEnabledOverride = false;
+        ResourceCenterService.webinarAgendaLimitOverride = 2;
+
+        Test.startTest();
+        ResourceCenterService.EventsFeed feed = ResourceCenterService.getEvents();
+        Test.stopTest();
+
+        Assert.areEqual(3, feed.upcoming.size(),
+            'Disabled panel + agenda cap 2: the feed still returns all 3.');
+    }
+
+    @isTest
+    static void eventsFeedDegradesToEmptyForBareUser() {
+        Id catId = [SELECT Id FROM Resource_Category__c WHERE Slug__c = 'marketing'].Id;
+        insert webinar('Soon Talk', 'soon-talk', catId, System.now().addDays(1), null,
+            'https://example.com/register');
+        User bare;
+        System.runAs(UatTestDataFactory.currentUser()) {
+            // Standard User, auto-assigned permsets stripped: no Resource__c read.
+            bare = UatTestDataFactory.createUser('evbare', null);
+        }
+
+        Test.startTest();
+        ResourceCenterService.EventsFeed feed;
+        System.runAs(bare) {
+            feed = ResourceCenterService.getEvents(); // must not throw
+        }
+        Test.stopTest();
+
+        Assert.areEqual(0, feed.upcoming.size(), 'No access degrades to an empty feed.');
+        Assert.areEqual(0, feed.past.size());
+    }
+
+    @isTest
+    static void webinarDetailAndCardsCarryLifecycle() {
+        Id catId = [SELECT Id FROM Resource_Category__c WHERE Slug__c = 'marketing'].Id;
+        Datetime now = System.now();
+        Resource__c upcoming = webinar('Soon Talk', 'soon-talk', catId, now.addDays(1), null,
+            'https://example.com/register');
+        upcoming.Is_Featured__c = true;
+        upcoming.Event_Duration_Minutes__c = 45;
+        upcoming.Presenter__c = 'Jane Doe';
+        Resource__c recorded = webinar('Replay', 'replay', catId, now.addDays(-1), null, null);
+        insert new List<Resource__c>{ upcoming, recorded };
+        attachFile(recorded.Id, 'replay.mp4');
+
+        Test.startTest();
+        ResourceCenterService.ResourceDetail up = ResourceCenterService.getResourceBySlug('soon-talk');
+        ResourceCenterService.ResourceDetail rec = ResourceCenterService.getResourceBySlug('replay');
+        ResourceCenterService.ResourceDetail pdf = ResourceCenterService.getResourceBySlug('brand-flyer');
+        List<ResourceCenterService.ResourceCard> featured = ResourceCenterService.getFeaturedResources();
+        Test.stopTest();
+
+        Assert.areEqual(WebinarLifecycle.UPCOMING, up.webinarStatus);
+        Assert.areEqual('https://example.com/register', up.registrationUrl);
+        Assert.areEqual(45, up.durationMinutes);
+        Assert.areEqual('Jane Doe', up.presenter);
+        Assert.isNotNull(up.eventDatetime);
+        Assert.areEqual(WebinarLifecycle.RECORDED, rec.webinarStatus,
+            'The newest attached file is the recording.');
+        Assert.isNotNull(rec.file, 'The recording file rides the existing file path.');
+        Assert.isNull(pdf.webinarStatus, 'Non-webinars carry no lifecycle.');
+
+        ResourceCenterService.ResourceCard card;
+        for (ResourceCenterService.ResourceCard c : featured) {
+            if (c.slug == 'soon-talk') {
+                card = c;
+            }
+        }
+        Assert.isNotNull(card, 'Featured webinar appears in the featured strip.');
+        Assert.areEqual(WebinarLifecycle.UPCOMING, card.webinarStatus);
+        Assert.areEqual('https://example.com/register', card.registrationUrl);
     }
 }

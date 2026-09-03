@@ -1,0 +1,21 @@
+<template>
+    <div class="ds-agenda">
+        <c-ds-date-block value={safeItem.datetime} variant="sm"></c-ds-date-block>
+        <div class="ds-agenda__body">
+            <h4 class="ds-agenda__title">{safeItem.title}</h4>
+            <template if:true={safeItem.meta}>
+                <p class="ds-agenda__meta">{safeItem.meta}</p>
+            </template>
+            <template if:true={safeItem.note}>
+                <p class="ds-agenda__note">{safeItem.note}</p>
+            </template>
+            <template if:true={hasHref}>
+                <a class="ds-agenda__btn" href={ctaHref}
+                   target="_blank" rel="noopener noreferrer">{ctaLabel}</a>
+            </template>
+            <template if:true={isButton}>
+                <button type="button" class="ds-agenda__btn" onclick={handleSelect}>{ctaLabel}</button>
+            </template>
+        </div>
+    </div>
+</template>

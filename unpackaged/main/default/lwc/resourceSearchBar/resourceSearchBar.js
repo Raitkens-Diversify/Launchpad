@@ -234,7 +234,8 @@ export default class ResourceSearchBar extends LightningElement {
                 resultCount: this.suggestions.length,
                 topResultArticleId: null,
                 searchType: 'Typeahead',
-                sessionKey: getSessionKey()
+                sessionKey: getSessionKey(),
+                app: 'Resource Center'
             })
         }).catch(() => {});
     }
@@ -266,7 +267,8 @@ export default class ResourceSearchBar extends LightningElement {
                 resultCount: 0,
                 topResultArticleId: null,
                 searchType: 'Typeahead',
-                sessionKey: getSessionKey()
+                sessionKey: getSessionKey(),
+                app: 'Resource Center'
             })
         }).catch(() => {});
     }

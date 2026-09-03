@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Webinar_Agenda_Limit__c</fullName>
+    <description>Maximum rows in each agenda section (Upcoming and Recent) on the landing page. Blank or zero falls back to 5. Read through ResourceCenterService.getWebinars.</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Webinar Agenda Limit</label>
+    <precision>3</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

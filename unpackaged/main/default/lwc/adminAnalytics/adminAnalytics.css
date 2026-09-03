@@ -7,7 +7,7 @@
 .aan__hint {
     margin: 0;
     flex: 1 1 auto;
-    font-size: 0.8125rem;
+    font-size: var(--div-font-scale-base, 1rem);
     color: #4b5563;
 }
 .aan__loading {
@@ -85,12 +85,12 @@
     color: #374151;
 }
 .aan__comment-body {
-    font-size: 0.8125rem;
+    font-size: var(--div-font-scale-base, 1rem);
     color: #4b5563;
 }
 .aan__empty {
     margin: 0;
-    font-size: 0.8125rem;
+    font-size: var(--div-font-scale-base, 1rem);
     color: var(--slds-g-color-on-surface-1, #4b5563);
 }
 
@@ -106,7 +106,7 @@
     border: none;
     padding: 0;
     font: inherit;
-    font-size: 0.8125rem;
+    font-size: var(--div-font-scale-base, 1rem);
     color: #1a76bb;
     cursor: pointer;
     text-align: left;
@@ -149,7 +149,7 @@
 .aan__table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.8125rem;
+    font-size: var(--div-font-scale-base, 1rem);
 }
 .aan__table th,
 .aan__table td {

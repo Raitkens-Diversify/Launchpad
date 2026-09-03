@@ -26,7 +26,7 @@
     margin: 0.125rem 0 0;
     padding: 0 0 0 1rem;
     color: #4b5563;
-    font-size: 0.8125rem;
+    font-size: var(--div-font-scale-base, 1rem);
 }
 .acm__topic-row {
     display: flex;

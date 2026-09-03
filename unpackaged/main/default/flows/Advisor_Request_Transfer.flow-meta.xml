@@ -5,10 +5,10 @@
     <assignments>
         <name>Case_Assignment</name>
         <label>Case Assignment</label>
-        <locationX>578</locationX>
-        <locationY>1574</locationY>
+        <locationX>402</locationX>
+        <locationY>1382</locationY>
         <assignmentItems>
-            <assignToReference>varCase.FinServ__FinancialAccount__c</assignToReference>
+            <assignToReference>varCase.Wizard_Financial_Account__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>varSelectedFinancialAccount</elementReference>
@@ -141,13 +141,6 @@
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>varCase.isDAOEligible__c</assignToReference>
-            <operator>Assign</operator>
-            <value>
-                <elementReference>forIsDAOEligible</elementReference>
-            </value>
-        </assignmentItems>
-        <assignmentItems>
             <assignToReference>varCase.Management_Style__c</assignToReference>
             <operator>Assign</operator>
             <value>
@@ -175,6 +168,13 @@
                 <stringValue>Service Request</stringValue>
             </value>
         </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varCase.Submitted__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </assignmentItems>
         <connector>
             <targetReference>Create_Case</targetReference>
         </connector>
@@ -182,10 +182,10 @@
     <assignments>
         <name>Set_VarFinancialAccount</name>
         <label>Set VarFinancialAccount</label>
-        <locationX>182</locationX>
-        <locationY>758</locationY>
+        <locationX>226</locationX>
+        <locationY>650</locationY>
         <assignmentItems>
-            <assignToReference>varFinancialAccount_forCase</assignToReference>
+            <assignToReference>varFinAcctForCase</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>Get_Financial_Account</elementReference>
@@ -198,8 +198,8 @@
     <assignments>
         <name>Set_varSelectedFinancialAccountFromFA</name>
         <label>Set varSelectedFinancialAccount (from FA)</label>
-        <locationX>50</locationX>
-        <locationY>458</locationY>
+        <locationX>94</locationX>
+        <locationY>350</locationY>
         <assignmentItems>
             <assignToReference>varSelectedFinancialAccount</assignToReference>
             <operator>Assign</operator>
@@ -214,8 +214,8 @@
     <assignments>
         <name>Set_varSelectedFinancialAccountFromHH</name>
         <label>Set varSelectedFinancialAccount (from HH)</label>
-        <locationX>314</locationX>
-        <locationY>458</locationY>
+        <locationX>358</locationX>
+        <locationY>350</locationY>
         <assignmentItems>
             <assignToReference>varSelectedFinancialAccount</assignToReference>
             <operator>Assign</operator>
@@ -228,42 +228,10 @@
         </connector>
     </assignments>
     <decisions>
-        <name>FA_Provided</name>
-        <label>FA Provided?</label>
-        <locationX>380</locationX>
-        <locationY>242</locationY>
-        <defaultConnector>
-            <targetReference>Draft_and_Submit_New_Account_Directions</targetReference>
-        </defaultConnector>
-        <defaultConnectorLabel>No</defaultConnectorLabel>
-        <rules>
-            <name>Yes_FAProvided</name>
-            <conditionLogic>or</conditionLogic>
-            <conditions>
-                <leftValueReference>Financial_Account_Transferring_Into.selectedChoiceValues</leftValueReference>
-                <operator>IsNull</operator>
-                <rightValue>
-                    <booleanValue>false</booleanValue>
-                </rightValue>
-            </conditions>
-            <conditions>
-                <leftValueReference>varFinancialAccount.Id</leftValueReference>
-                <operator>IsNull</operator>
-                <rightValue>
-                    <booleanValue>false</booleanValue>
-                </rightValue>
-            </conditions>
-            <connector>
-                <targetReference>Launched_from_FA_or_HH</targetReference>
-            </connector>
-            <label>Yes</label>
-        </rules>
-    </decisions>
-    <decisions>
         <name>Launched_from_FA_or_HH</name>
         <label>Launched from FA or HH?</label>
-        <locationX>182</locationX>
-        <locationY>350</locationY>
+        <locationX>226</locationX>
+        <locationY>242</locationY>
         <defaultConnector>
             <targetReference>Set_varSelectedFinancialAccountFromHH</targetReference>
         </defaultConnector>
@@ -285,32 +253,10 @@
         </rules>
     </decisions>
     <decisions>
-        <name>Need_to_Change_Management_Style</name>
-        <label>Need to Change Management Style?</label>
-        <locationX>578</locationX>
-        <locationY>1790</locationY>
-        <defaultConnectorLabel>No</defaultConnectorLabel>
-        <rules>
-            <name>Yes_ChangeManagementStyle</name>
-            <conditionLogic>and</conditionLogic>
-            <conditions>
-                <leftValueReference>I_need_to_change_the_Management_Style</leftValueReference>
-                <operator>EqualTo</operator>
-                <rightValue>
-                    <booleanValue>true</booleanValue>
-                </rightValue>
-            </conditions>
-            <connector>
-                <targetReference>Change_Management_Style_Directions</targetReference>
-            </connector>
-            <label>Yes</label>
-        </rules>
-    </decisions>
-    <decisions>
         <name>Need_to_do_401k_Rollover</name>
         <label>Need to do 401k Rollover?</label>
-        <locationX>380</locationX>
-        <locationY>1058</locationY>
+        <locationX>226</locationX>
+        <locationY>866</locationY>
         <defaultConnector>
             <targetReference>Transfer</targetReference>
         </defaultConnector>
@@ -334,8 +280,8 @@
     <decisions>
         <name>Reg_Type_of_Account_Transferring_From_is_Qualified</name>
         <label>Reg Type of Account Transferring From is Qualified?</label>
-        <locationX>578</locationX>
-        <locationY>1274</locationY>
+        <locationX>402</locationX>
+        <locationY>1082</locationY>
         <defaultConnector>
             <targetReference>Cost_Basis</targetReference>
         </defaultConnector>
@@ -356,7 +302,7 @@
             <label>Yes</label>
         </rules>
     </decisions>
-    <description>CCC: Removing Advisor Request Item field.</description>
+    <description>Removing Dead Flows and FinServ references.</description>
     <dynamicChoiceSets>
         <name>AccountType_Picklist_ChoiceSet</name>
         <dataType>Picklist</dataType>
@@ -365,6 +311,21 @@
         <picklistField>Transfer_From_Account_Type__c</picklistField>
         <picklistObject>Case</picklistObject>
         <sortOrder>Asc</sortOrder>
+    </dynamicChoiceSets>
+    <dynamicChoiceSets>
+        <name>finAcctsRCS</name>
+        <dataType>String</dataType>
+        <displayField>Name</displayField>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Household__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>varHousehold.Id</elementReference>
+            </value>
+        </filters>
+        <object>Financial_Account__c</object>
+        <valueField>Id</valueField>
     </dynamicChoiceSets>
     <dynamicChoiceSets>
         <name>FinancialAccounts_Record_ChoiceSet</name>
@@ -399,33 +360,9 @@
     </dynamicChoiceSets>
     <environments>Default</environments>
     <formulas>
-        <name>forIsDAOEligible</name>
-        <dataType>Boolean</dataType>
-        <expression>IF((AND({!Get_Financial_Account.Custodian__c} = &#39;Fidelity&#39;,{!Account_Type_Transferring_From} = &#39;Traditional IRA&#39;)), true,
-IF((AND({!Get_Financial_Account.Custodian__c} = &#39;Schwab&#39;,{!Account_Type_Transferring_From} = &#39;Traditional IRA&#39;)), true,
-IF((AND({!Get_Financial_Account.Custodian__c} = &#39;Fidelity&#39;,{!Account_Type_Transferring_From} = &#39;Roth IRA&#39;)), true,
-IF((AND({!Get_Financial_Account.Custodian__c} = &#39;Schwab&#39;,{!Account_Type_Transferring_From} = &#39;Roth IRA&#39;)), true,
-IF((AND({!Get_Financial_Account.Custodian__c} = &#39;Fidelity&#39;,{!Account_Type_Transferring_From}= &#39;Individual&#39;)), true,
-IF((AND({!Get_Financial_Account.Custodian__c} = &#39;Schwab&#39;,{!Account_Type_Transferring_From} = &#39;Individual&#39;)), true,
-IF((AND({!Get_Financial_Account.Custodian__c}= &#39;Fidelity&#39;,{!Account_Type_Transferring_From} = &#39;Community Property&#39;)), true,
-IF((AND({!Get_Financial_Account.Custodian__c} = &#39;Schwab&#39;,{!Account_Type_Transferring_From} = &#39;Community Property&#39;)), true,
-IF((AND({!Get_Financial_Account.Custodian__c} = &#39;Fidelity&#39;,{!Account_Type_Transferring_From} = &#39;Tenants in Common&#39;)), true,
-IF((AND({!Get_Financial_Account.Custodian__c} = &#39;Schwab&#39;,{!Account_Type_Transferring_From} = &#39;Tenants in Common&#39;)), true,
-IF((AND({!Get_Financial_Account.Custodian__c} = &#39;Fidelity&#39;,{!Account_Type_Transferring_From}= &#39;Tenants in the Entirety&#39;)), true,
-IF((AND({!Get_Financial_Account.Custodian__c} = &#39;Fidelity&#39;,{!Account_Type_Transferring_From}= &#39;Conservatorship&#39;)), true,
-IF((AND({!Get_Financial_Account.Custodian__c}= &#39;Fidelity&#39;,{!Account_Type_Transferring_From} = &#39;UGMA/UTMA&#39;)), true,
-IF((AND({!Get_Financial_Account.Custodian__c} = &#39;Schwab&#39;,{!Account_Type_Transferring_From} = &#39;UGMA/UTMA&#39;)), true,
-IF((AND({!Get_Financial_Account.Custodian__c} = &#39;Fidelity&#39;,{!Account_Type_Transferring_From} = &#39;JTWROS&#39;)), true,
-IF((AND({!Get_Financial_Account.Custodian__c} = &#39;Schwab&#39;,{!Account_Type_Transferring_From} = &#39;JTWROS&#39;)), true,
-IF((AND({!Get_Financial_Account.Custodian__c} = &#39;Fidelity&#39;,{!Account_Type_Transferring_From}= &#39;Rollover IRA&#39;)), true,
-IF((AND({!Get_Financial_Account.Custodian__c} = &#39;Schwab&#39;,{!Account_Type_Transferring_From} = &#39;Rollover IRA&#39;)), true,
-false
-))))))))))))))))))</expression>
-    </formulas>
-    <formulas>
         <name>forNameOfHouseholdOrFA</name>
         <dataType>String</dataType>
-        <expression>IF({!I_need_to_create_a_new_Financial_Account_2} = true, {!varHousehold.Name}, {!Get_Financial_Account.Name})</expression>
+        <expression>{!Get_Financial_Account.Name}</expression>
     </formulas>
     <formulas>
         <name>forNeedCostBasisInformation</name>
@@ -444,7 +381,7 @@ false
         <description>Returns the ContactId of the Household&#39;s Primary Member or the FA&#39;s Primary Owner, depending on whether FA was passed in.</description>
         <name>forPrimaryMemberOrFAOwner</name>
         <dataType>String</dataType>
-        <expression>IF({!I_need_to_create_a_new_Financial_Account_2} = true, {!varHousehold.Head_of_Household__r.PersonContactId}, {!Get_Financial_Account.FinServ__PrimaryOwner__r.PersonContactId})</expression>
+        <expression>{!Get_Financial_Account.Primary_Owner__r.PersonContactId}</expression>
     </formulas>
     <formulas>
         <name>forSetOrChangeWithholdings</name>
@@ -493,18 +430,15 @@ false
     <recordCreates>
         <name>Create_Case</name>
         <label>Create Case</label>
-        <locationX>578</locationX>
-        <locationY>1682</locationY>
-        <connector>
-            <targetReference>Need_to_Change_Management_Style</targetReference>
-        </connector>
+        <locationX>402</locationX>
+        <locationY>1490</locationY>
         <inputReference>varCase</inputReference>
     </recordCreates>
     <recordLookups>
         <name>Get_Custom_Metadata_Reg_Type</name>
         <label>Get Custom Metadata (Reg Type)</label>
-        <locationX>380</locationX>
-        <locationY>950</locationY>
+        <locationX>226</locationX>
+        <locationY>758</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>Need_to_do_401k_Rollover</targetReference>
@@ -524,8 +458,8 @@ false
     <recordLookups>
         <name>Get_Financial_Account</name>
         <label>Get Financial Account</label>
-        <locationX>182</locationX>
-        <locationY>650</locationY>
+        <locationX>226</locationX>
+        <locationY>542</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>Set_VarFinancialAccount</targetReference>
@@ -535,126 +469,18 @@ false
             <field>Id</field>
             <operator>EqualTo</operator>
             <value>
-                <elementReference>varSelectedFinancialAccount</elementReference>
+                <elementReference>Financial_Account_Transferring_Into.selectedChoiceValues</elementReference>
             </value>
         </filters>
         <getFirstRecordOnly>true</getFirstRecordOnly>
-        <object>FinServ__FinancialAccount__c</object>
+        <object>Financial_Account__c</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <screens>
-        <name>Change_Management_Style_Directions</name>
-        <label>Change Management Style Directions</label>
-        <locationX>446</locationX>
-        <locationY>1898</locationY>
-        <allowBack>true</allowBack>
-        <allowFinish>true</allowFinish>
-        <allowPause>true</allowPause>
-        <connector>
-            <targetReference>Subflow_Advisor_Request_Change_Management_Style</targetReference>
-        </connector>
-        <fields>
-            <name>Change_Management_Style_Directions_Section1</name>
-            <fieldType>RegionContainer</fieldType>
-            <fields>
-                <name>Change_Management_Style_Directions_Section1_Column1</name>
-                <fieldType>Region</fieldType>
-                <inputParameters>
-                    <name>width</name>
-                    <value>
-                        <stringValue>1</stringValue>
-                    </value>
-                </inputParameters>
-                <isRequired>false</isRequired>
-            </fields>
-            <fields>
-                <name>Change_Management_Style_Directions_Section1_Column2</name>
-                <fieldType>Region</fieldType>
-                <fields>
-                    <name>Prompt_ChangeManagementDirections</name>
-                    <fieldText>&lt;p style=&quot;text-align: center;&quot;&gt;&lt;span style=&quot;font-family: verdana; font-size: 18px;&quot;&gt;Since you need to change the management style, you will now move over to the &lt;/span&gt;&lt;strong style=&quot;font-family: verdana; font-size: 18px;&quot;&gt;&lt;u&gt;Change Management Style&lt;/u&gt;&lt;/strong&gt;&lt;span style=&quot;font-family: verdana; font-size: 18px;&quot;&gt; workflow. &lt;/span&gt;&lt;/p&gt;</fieldText>
-                    <fieldType>DisplayText</fieldType>
-                    <styleProperties>
-                        <verticalAlignment>
-                            <stringValue>top</stringValue>
-                        </verticalAlignment>
-                        <width>
-                            <stringValue>12</stringValue>
-                        </width>
-                    </styleProperties>
-                </fields>
-                <inputParameters>
-                    <name>width</name>
-                    <value>
-                        <stringValue>10</stringValue>
-                    </value>
-                </inputParameters>
-                <isRequired>false</isRequired>
-            </fields>
-            <fields>
-                <name>Change_Management_Style_Directions_Section1_Column3</name>
-                <fieldType>Region</fieldType>
-                <inputParameters>
-                    <name>width</name>
-                    <value>
-                        <stringValue>1</stringValue>
-                    </value>
-                </inputParameters>
-                <isRequired>false</isRequired>
-            </fields>
-            <isRequired>false</isRequired>
-            <regionContainerType>SectionWithoutHeader</regionContainerType>
-            <styleProperties>
-                <verticalAlignment>
-                    <stringValue>top</stringValue>
-                </verticalAlignment>
-                <width>
-                    <stringValue>12</stringValue>
-                </width>
-            </styleProperties>
-        </fields>
-        <fields>
-            <name>Button_Transfer_Continue</name>
-            <extensionName>c:cmp_FlowStylizedButton</extensionName>
-            <fieldType>ComponentInstance</fieldType>
-            <inputParameters>
-                <name>Size</name>
-                <value>
-                    <stringValue>Medium</stringValue>
-                </value>
-            </inputParameters>
-            <inputParameters>
-                <name>ButtonType</name>
-                <value>
-                    <stringValue>Active Button</stringValue>
-                </value>
-            </inputParameters>
-            <inputParameters>
-                <name>ButtonText</name>
-                <value>
-                    <stringValue>Continue</stringValue>
-                </value>
-            </inputParameters>
-            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
-            <isRequired>true</isRequired>
-            <storeOutputAutomatically>true</storeOutputAutomatically>
-            <styleProperties>
-                <verticalAlignment>
-                    <stringValue>top</stringValue>
-                </verticalAlignment>
-                <width>
-                    <stringValue>12</stringValue>
-                </width>
-            </styleProperties>
-        </fields>
-        <showFooter>false</showFooter>
-        <showHeader>false</showHeader>
-    </screens>
-    <screens>
         <name>Cost_Basis</name>
         <label>Cost Basis</label>
-        <locationX>666</locationX>
-        <locationY>1382</locationY>
+        <locationX>490</locationX>
+        <locationY>1190</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
@@ -724,6 +550,7 @@ false
                     </defaultValue>
                     <fieldText>I have Cost Basis information</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -777,6 +604,7 @@ false
                     <dataType>Boolean</dataType>
                     <fieldText>Upload Cost Basis information later</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -865,123 +693,15 @@ false
         <showHeader>false</showHeader>
     </screens>
     <screens>
-        <name>Draft_and_Submit_New_Account_Directions</name>
-        <label>Draft and Submit - New Account Directions</label>
-        <locationX>578</locationX>
-        <locationY>350</locationY>
-        <allowBack>true</allowBack>
-        <allowFinish>true</allowFinish>
-        <allowPause>true</allowPause>
-        <connector>
-            <targetReference>Subflow_Draft_and_Submit_New_Account</targetReference>
-        </connector>
-        <fields>
-            <name>Draft_and_Submit_New_Account_Directions_Section1</name>
-            <fieldType>RegionContainer</fieldType>
-            <fields>
-                <name>Draft_and_Submit_New_Account_Directions_Section1_Column1</name>
-                <fieldType>Region</fieldType>
-                <inputParameters>
-                    <name>width</name>
-                    <value>
-                        <stringValue>1</stringValue>
-                    </value>
-                </inputParameters>
-                <isRequired>false</isRequired>
-            </fields>
-            <fields>
-                <name>Draft_and_Submit_New_Account_Directions_Section1_Column2</name>
-                <fieldType>Region</fieldType>
-                <fields>
-                    <name>Prompt_DraftSubmitNewAccount</name>
-                    <fieldText>&lt;p style=&quot;text-align: center;&quot;&gt;&lt;span style=&quot;font-family: verdana; font-size: 18px;&quot;&gt;Before we start transferring funds, let&#39;s open a new Financial Account. You will now be directed to the  &lt;/span&gt;&lt;strong style=&quot;font-family: verdana; font-size: 18px;&quot;&gt;&lt;u&gt;Draft and Submit - New Account&lt;/u&gt;&lt;/strong&gt;&lt;span style=&quot;font-family: verdana; font-size: 18px;&quot;&gt; workflow.&lt;/span&gt;&lt;/p&gt;</fieldText>
-                    <fieldType>DisplayText</fieldType>
-                    <styleProperties>
-                        <verticalAlignment>
-                            <stringValue>top</stringValue>
-                        </verticalAlignment>
-                        <width>
-                            <stringValue>12</stringValue>
-                        </width>
-                    </styleProperties>
-                </fields>
-                <inputParameters>
-                    <name>width</name>
-                    <value>
-                        <stringValue>10</stringValue>
-                    </value>
-                </inputParameters>
-                <isRequired>false</isRequired>
-            </fields>
-            <fields>
-                <name>Draft_and_Submit_New_Account_Directions_Section1_Column3</name>
-                <fieldType>Region</fieldType>
-                <inputParameters>
-                    <name>width</name>
-                    <value>
-                        <stringValue>1</stringValue>
-                    </value>
-                </inputParameters>
-                <isRequired>false</isRequired>
-            </fields>
-            <isRequired>false</isRequired>
-            <regionContainerType>SectionWithoutHeader</regionContainerType>
-            <styleProperties>
-                <verticalAlignment>
-                    <stringValue>top</stringValue>
-                </verticalAlignment>
-                <width>
-                    <stringValue>12</stringValue>
-                </width>
-            </styleProperties>
-        </fields>
-        <fields>
-            <name>Button_NewAccountInstructions_Continue</name>
-            <extensionName>c:cmp_FlowStylizedButton</extensionName>
-            <fieldType>ComponentInstance</fieldType>
-            <inputParameters>
-                <name>Size</name>
-                <value>
-                    <stringValue>Medium</stringValue>
-                </value>
-            </inputParameters>
-            <inputParameters>
-                <name>ButtonType</name>
-                <value>
-                    <stringValue>Active Button</stringValue>
-                </value>
-            </inputParameters>
-            <inputParameters>
-                <name>ButtonText</name>
-                <value>
-                    <stringValue>Continue</stringValue>
-                </value>
-            </inputParameters>
-            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
-            <isRequired>true</isRequired>
-            <storeOutputAutomatically>true</storeOutputAutomatically>
-            <styleProperties>
-                <verticalAlignment>
-                    <stringValue>top</stringValue>
-                </verticalAlignment>
-                <width>
-                    <stringValue>12</stringValue>
-                </width>
-            </styleProperties>
-        </fields>
-        <showFooter>false</showFooter>
-        <showHeader>false</showHeader>
-    </screens>
-    <screens>
         <name>FA_Selection</name>
         <label>FA Selection</label>
-        <locationX>380</locationX>
+        <locationX>226</locationX>
         <locationY>134</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
         <connector>
-            <targetReference>FA_Provided</targetReference>
+            <targetReference>Launched_from_FA_or_HH</targetReference>
         </connector>
         <fields>
             <name>FA_Selection_Section1</name>
@@ -1050,6 +770,7 @@ false
                     <dataType>String</dataType>
                     <fieldText>Account Type (Transferring From)</fieldText>
                     <fieldType>DropdownBox</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -1062,7 +783,7 @@ false
                 </fields>
                 <fields>
                     <name>Financial_Account_Transferring_Into</name>
-                    <choiceReferences>FinancialAccounts_Record_ChoiceSet</choiceReferences>
+                    <choiceReferences>finAcctsRCS</choiceReferences>
                     <extensionName>flowruntime:choiceLookup</extensionName>
                     <fieldText>Financial Account Transferring Into:</fieldText>
                     <fieldType>ComponentChoice</fieldType>
@@ -1084,42 +805,7 @@ false
                         </width>
                     </styleProperties>
                     <visibilityRule>
-                        <conditionLogic>1 AND 2</conditionLogic>
-                        <conditions>
-                            <leftValueReference>varFinancialAccount.Id</leftValueReference>
-                            <operator>IsNull</operator>
-                            <rightValue>
-                                <booleanValue>true</booleanValue>
-                            </rightValue>
-                        </conditions>
-                        <conditions>
-                            <leftValueReference>I_need_to_create_a_new_Financial_Account_2</leftValueReference>
-                            <operator>EqualTo</operator>
-                            <rightValue>
-                                <booleanValue>false</booleanValue>
-                            </rightValue>
-                        </conditions>
-                    </visibilityRule>
-                </fields>
-                <fields>
-                    <name>I_need_to_create_a_new_Financial_Account_2</name>
-                    <dataType>Boolean</dataType>
-                    <defaultValue>
-                        <booleanValue>false</booleanValue>
-                    </defaultValue>
-                    <fieldText>I need to create a new Financial Account</fieldText>
-                    <fieldType>InputField</fieldType>
-                    <isRequired>true</isRequired>
-                    <styleProperties>
-                        <verticalAlignment>
-                            <stringValue>top</stringValue>
-                        </verticalAlignment>
-                        <width>
-                            <stringValue>12</stringValue>
-                        </width>
-                    </styleProperties>
-                    <visibilityRule>
-                        <conditionLogic>and</conditionLogic>
+                        <conditionLogic>1</conditionLogic>
                         <conditions>
                             <leftValueReference>varFinancialAccount.Id</leftValueReference>
                             <operator>IsNull</operator>
@@ -1198,9 +884,9 @@ false
     </screens>
     <screens>
         <name>Transfer</name>
-        <label>Transferf</label>
-        <locationX>578</locationX>
-        <locationY>1166</locationY>
+        <label>Transfer</label>
+        <locationX>402</locationX>
+        <locationY>974</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
@@ -1269,42 +955,11 @@ false
                     </visibilityRule>
                 </fields>
                 <fields>
-                    <name>I_need_to_change_the_Management_Style</name>
-                    <dataType>Boolean</dataType>
-                    <fieldText>I need to change the Management Style</fieldText>
-                    <fieldType>InputField</fieldType>
-                    <isRequired>true</isRequired>
-                    <styleProperties>
-                        <verticalAlignment>
-                            <stringValue>top</stringValue>
-                        </verticalAlignment>
-                        <width>
-                            <stringValue>12</stringValue>
-                        </width>
-                    </styleProperties>
-                    <visibilityRule>
-                        <conditionLogic>or</conditionLogic>
-                        <conditions>
-                            <leftValueReference>I_need_to_create_a_new_Financial_Account_2</leftValueReference>
-                            <operator>EqualTo</operator>
-                            <rightValue>
-                                <booleanValue>false</booleanValue>
-                            </rightValue>
-                        </conditions>
-                        <conditions>
-                            <leftValueReference>varFinancialAccount.Id</leftValueReference>
-                            <operator>IsNull</operator>
-                            <rightValue>
-                                <booleanValue>false</booleanValue>
-                            </rightValue>
-                        </conditions>
-                    </visibilityRule>
-                </fields>
-                <fields>
                     <name>What_Custodian_are_you_Transferring_From</name>
                     <dataType>String</dataType>
                     <fieldText>What Custodian are you Transferring From?</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -1323,6 +978,7 @@ false
                     </defaultValue>
                     <fieldText>Do You Want to Set Up Withholdings?</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -1351,6 +1007,7 @@ false
                     </defaultValue>
                     <fieldText>Do Withholdings Need to Change?</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -1379,6 +1036,7 @@ false
                     </defaultValue>
                     <fieldText>State % Withholding:</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <scale>2</scale>
                     <styleProperties>
@@ -1415,6 +1073,7 @@ false
                     </defaultValue>
                     <fieldText>Federal % Withholding:</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <scale>2</scale>
                     <styleProperties>
@@ -1448,6 +1107,7 @@ false
                     <dataType>String</dataType>
                     <fieldText>Account Name (Transferring From):</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -1463,6 +1123,7 @@ false
                     <dataType>String</dataType>
                     <fieldText>Account Number (Transferring From):</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -1524,6 +1185,7 @@ false
                     </defaultValue>
                     <fieldText>I have no Account Statement to upload</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -1540,6 +1202,7 @@ false
                     <dataType>String</dataType>
                     <fieldText>How will the Client sign?</fieldText>
                     <fieldType>DropdownBox</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -1554,6 +1217,7 @@ false
                     <name>Additional_Case_Notes</name>
                     <fieldText>Additional Case Notes</fieldText>
                     <fieldType>LargeTextArea</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -1632,118 +1296,10 @@ false
         <showHeader>false</showHeader>
     </screens>
     <screens>
-        <name>Transfer_Directions</name>
-        <label>Transfer Directions</label>
-        <locationX>578</locationX>
-        <locationY>566</locationY>
-        <allowBack>true</allowBack>
-        <allowFinish>true</allowFinish>
-        <allowPause>true</allowPause>
-        <connector>
-            <targetReference>Get_Custom_Metadata_Reg_Type</targetReference>
-        </connector>
-        <fields>
-            <name>Transfer_Directions_Section1</name>
-            <fieldType>RegionContainer</fieldType>
-            <fields>
-                <name>Transfer_Directions_Section1_Column1</name>
-                <fieldType>Region</fieldType>
-                <inputParameters>
-                    <name>width</name>
-                    <value>
-                        <stringValue>1</stringValue>
-                    </value>
-                </inputParameters>
-                <isRequired>false</isRequired>
-            </fields>
-            <fields>
-                <name>Transfer_Directions_Section1_Column2</name>
-                <fieldType>Region</fieldType>
-                <fields>
-                    <name>Prompt_ResumeTransferFromNewAccount</name>
-                    <fieldText>&lt;p style=&quot;text-align: center;&quot;&gt;&lt;span style=&quot;color: rgb(68, 68, 68); background-color: rgb(255, 255, 255); font-size: 18px; font-family: verdana;&quot;&gt;Now that you&#39;ve made a request for a new Financial Account, let&#39;s   continue with the &lt;/span&gt;&lt;strong style=&quot;color: rgb(68, 68, 68); background-color: rgb(255, 255, 255); font-size: 18px; font-family: verdana;&quot;&gt;&lt;u&gt;Transfer&lt;/u&gt;&lt;/strong&gt;&lt;span style=&quot;color: rgb(68, 68, 68); background-color: rgb(255, 255, 255); font-size: 18px; font-family: verdana;&quot;&gt; workflow. &lt;/span&gt;&lt;/p&gt;</fieldText>
-                    <fieldType>DisplayText</fieldType>
-                    <styleProperties>
-                        <verticalAlignment>
-                            <stringValue>top</stringValue>
-                        </verticalAlignment>
-                        <width>
-                            <stringValue>12</stringValue>
-                        </width>
-                    </styleProperties>
-                </fields>
-                <inputParameters>
-                    <name>width</name>
-                    <value>
-                        <stringValue>10</stringValue>
-                    </value>
-                </inputParameters>
-                <isRequired>false</isRequired>
-            </fields>
-            <fields>
-                <name>Transfer_Directions_Section1_Column3</name>
-                <fieldType>Region</fieldType>
-                <inputParameters>
-                    <name>width</name>
-                    <value>
-                        <stringValue>1</stringValue>
-                    </value>
-                </inputParameters>
-                <isRequired>false</isRequired>
-            </fields>
-            <isRequired>false</isRequired>
-            <regionContainerType>SectionWithoutHeader</regionContainerType>
-            <styleProperties>
-                <verticalAlignment>
-                    <stringValue>top</stringValue>
-                </verticalAlignment>
-                <width>
-                    <stringValue>12</stringValue>
-                </width>
-            </styleProperties>
-        </fields>
-        <fields>
-            <name>Button_TransferDirections_Continue</name>
-            <extensionName>c:cmp_FlowStylizedButton</extensionName>
-            <fieldType>ComponentInstance</fieldType>
-            <inputParameters>
-                <name>Size</name>
-                <value>
-                    <stringValue>Medium</stringValue>
-                </value>
-            </inputParameters>
-            <inputParameters>
-                <name>ButtonType</name>
-                <value>
-                    <stringValue>Active Button</stringValue>
-                </value>
-            </inputParameters>
-            <inputParameters>
-                <name>ButtonText</name>
-                <value>
-                    <stringValue>Continue</stringValue>
-                </value>
-            </inputParameters>
-            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
-            <isRequired>true</isRequired>
-            <storeOutputAutomatically>true</storeOutputAutomatically>
-            <styleProperties>
-                <verticalAlignment>
-                    <stringValue>top</stringValue>
-                </verticalAlignment>
-                <width>
-                    <stringValue>12</stringValue>
-                </width>
-            </styleProperties>
-        </fields>
-        <showFooter>false</showFooter>
-        <showHeader>false</showHeader>
-    </screens>
-    <screens>
         <name>X401K_Rollover</name>
         <label>401K Rollover</label>
-        <locationX>182</locationX>
-        <locationY>1166</locationY>
+        <locationX>50</locationX>
+        <locationY>974</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
@@ -1848,7 +1404,7 @@ false
         <showHeader>false</showHeader>
     </screens>
     <start>
-        <locationX>254</locationX>
+        <locationX>100</locationX>
         <locationY>0</locationY>
         <connector>
             <targetReference>FA_Selection</targetReference>
@@ -1858,8 +1414,8 @@ false
     <subflows>
         <name>Subflow_Advisor_Request_401k_Rollover</name>
         <label>Subflow: Advisor Request - 401k Rollover</label>
-        <locationX>182</locationX>
-        <locationY>1274</locationY>
+        <locationX>50</locationX>
+        <locationY>1082</locationY>
         <flowName>Advisor_Request_401k_Rollover</flowName>
         <inputAssignments>
             <name>varFinancialAccount</name>
@@ -1880,57 +1436,6 @@ false
             </value>
         </inputAssignments>
     </subflows>
-    <subflows>
-        <name>Subflow_Advisor_Request_Change_Management_Style</name>
-        <label>Subflow: Advisor Request - Change Management Style</label>
-        <locationX>446</locationX>
-        <locationY>2006</locationY>
-        <flowName>Advisor_Request_Change_Management_Style</flowName>
-        <inputAssignments>
-            <name>varFinancialAccount</name>
-            <value>
-                <elementReference>varFinancialAccount</elementReference>
-            </value>
-        </inputAssignments>
-        <inputAssignments>
-            <name>varHousehold</name>
-            <value>
-                <elementReference>varHousehold</elementReference>
-            </value>
-        </inputAssignments>
-        <inputAssignments>
-            <name>varWizardFlowValues</name>
-            <value>
-                <elementReference>varWizardFlowValues</elementReference>
-            </value>
-        </inputAssignments>
-    </subflows>
-    <subflows>
-        <name>Subflow_Draft_and_Submit_New_Account</name>
-        <label>Subflow: Draft and Submit - New Account</label>
-        <locationX>578</locationX>
-        <locationY>458</locationY>
-        <connector>
-            <targetReference>Transfer_Directions</targetReference>
-        </connector>
-        <flowName>Advisor_Request_Draft_and_Submit_New_Account</flowName>
-        <inputAssignments>
-            <name>varHousehold</name>
-            <value>
-                <elementReference>varHousehold</elementReference>
-            </value>
-        </inputAssignments>
-        <inputAssignments>
-            <name>varWizardFlowValues</name>
-            <value>
-                <elementReference>varWizardFlowValues</elementReference>
-            </value>
-        </inputAssignments>
-        <outputAssignments>
-            <assignToReference>varFinancialAccount_forCase</assignToReference>
-            <name>varFinancialAccount</name>
-        </outputAssignments>
-    </subflows>
     <variables>
         <name>varCase</name>
         <dataType>SObject</dataType>
@@ -1938,6 +1443,14 @@ false
         <isInput>false</isInput>
         <isOutput>true</isOutput>
         <objectType>Case</objectType>
+    </variables>
+    <variables>
+        <name>varFinAcctForCase</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Financial_Account__c</objectType>
     </variables>
     <variables>
         <name>varFinancialAccount</name>

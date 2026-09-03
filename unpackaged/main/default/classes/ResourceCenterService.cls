@@ -23,16 +23,21 @@
 public with sharing class ResourceCenterService {
 
     private static final Integer MAX_SEARCH_RESULTS = 50;
-    // Same threshold as NexSKnowledgeController.MIN_PREFIX_LEN — the two search
-    // engines should treat short fragments identically; change both together.
-    private static final Integer MIN_PREFIX_LEN = 3;
+    // Same threshold as NexSKnowledgeController — the two search engines treat
+    // short fragments identically. Single source: SearchConstants.
+    private static final Integer MIN_PREFIX_LEN = SearchConstants.MIN_PREFIX_LEN;
     /** Trailing section order for direct-filed resources (mirrors the Help
         Center's FALLBACK_ORDER_BASE so fallback groups always sort last). */
-    // Same "sorts after all real taxonomy" sentinel as the Help Center's
-    // nexsArticleBrowser FALLBACK_ORDER_BASE (900) — keep them aligned.
-    private static final Integer GENERAL_SECTION_ORDER = 900;
+    // "Sorts after all real taxonomy" sentinel — single source:
+    // SearchConstants.ORDER_SENTINEL (also mirrored by the Help Center's
+    // nexsArticleBrowser FALLBACK_ORDER_BASE).
+    private static final Integer GENERAL_SECTION_ORDER = SearchConstants.ORDER_SENTINEL;
     /** URL name of the Experience Builder page hosting c:resourceCenter. */
     private static final String RESOURCES_PAGE_PATH = 'resources';
+
+    /** Mirror: NexSArticleEngagementController.resolveSurface() / c/contextNav
+        INTERNAL — the core-app sentinel. Change all three together. */
+    @TestVisible private static final String INTERNAL_SURFACE = 'Internal';
 
     // ---- Wrappers exposed to LWC --------------------------------------------
 
@@ -101,6 +106,12 @@ public with sharing class ResourceCenterService {
         @AuraEnabled public String videoEmbedUrl;
         @AuraEnabled public Id contentDocumentId;
         @AuraEnabled public String downloadUrl;
+        // Webinar-only (null for every other type) — derived by WebinarLifecycle.
+        @AuraEnabled public String webinarStatus;
+        @AuraEnabled public Datetime eventDatetime;
+        @AuraEnabled public Integer durationMinutes;
+        @AuraEnabled public String presenter;
+        @AuraEnabled public String registrationUrl;
     }
 
     public class ResourceDetail {
@@ -119,6 +130,54 @@ public with sharing class ResourceCenterService {
         @AuraEnabled public String categoryParentName;
         @AuraEnabled public FileInfo file;
         @AuraEnabled public List<RelatedArticle> relatedArticles;
+        // Webinar-only (null for every other type) — derived by WebinarLifecycle.
+        @AuraEnabled public String webinarStatus;
+        @AuraEnabled public Datetime eventDatetime;
+        @AuraEnabled public Integer durationMinutes;
+        @AuraEnabled public String presenter;
+        @AuraEnabled public String registrationUrl;
+    }
+
+    /** One agenda row (landing-page panel). Status is server-derived, never re-derived in LWC. */
+    public class WebinarItem {
+        @AuraEnabled public Id id;
+        @AuraEnabled public String slug;
+        @AuraEnabled public String name;
+        @AuraEnabled public String description;
+        /** WebinarLifecycle.UPCOMING | PAST | RECORDED. */
+        @AuraEnabled public String status;
+        @AuraEnabled public Datetime eventDatetime;
+        @AuraEnabled public Integer durationMinutes;
+        @AuraEnabled public String presenter;
+        @AuraEnabled public String registrationUrl;
+        /** True only when Recorded — the agenda's "Watch" CTA keys on this. */
+        @AuraEnabled public Boolean watchable;
+    }
+
+    /** getWebinars response: both lists empty = the panel hides. */
+    public class WebinarAgenda {
+        @AuraEnabled public List<WebinarItem> upcoming = new List<WebinarItem>();
+        @AuraEnabled public List<WebinarItem> recent = new List<WebinarItem>();
+    }
+
+    /** getEvents response: the /help/events feed (also feeds the landing
+        banner and nav badge). past holds EVERY past webinar, most recent
+        first; `watchable` marks the recorded ones (the events list hides the
+        rest, the calendar shows them all). */
+    public class EventsFeed {
+        @AuraEnabled public List<WebinarItem> upcoming = new List<WebinarItem>();
+        @AuraEnabled public List<WebinarItem> past = new List<WebinarItem>();
+    }
+
+    /**
+     * getLinkContext response — the surface the caller is running on plus the
+     * site link bases. Both bases are null in the core app, which is c/contextNav's
+     * signal to navigate in-Lightning instead of leaving for the site.
+     */
+    public class LinkContext {
+        @AuraEnabled public String surface;       // 'Internal' | the Network Name
+        @AuraEnabled public String helpBase;      // null when internal
+        @AuraEnabled public String resourceBase;  // null when internal
     }
 
     public class FileInfo {
@@ -150,6 +209,19 @@ public with sharing class ResourceCenterService {
         @AuraEnabled public String slug;         // resource slug (type=resource)
         @AuraEnabled public String urlName;      // article UrlName (type=article)
         @AuraEnabled public String resourceType; // PDF/Form/Video/... (type=resource)
+    }
+
+    /**
+     * searchAll response. Either side can fail independently (missing object
+     * access, a backend fault) — the other side's results still return, with
+     * the failed side flagged so the client can tell "no matches" from
+     * "couldn't look". Symmetric on purpose: no side is ever silently dropped
+     * while the other throws.
+     */
+    public class CombinedSearch {
+        @AuraEnabled public List<CombinedResult> results = new List<CombinedResult>();
+        @AuraEnabled public Boolean articlesDegraded = false;
+        @AuraEnabled public Boolean resourcesDegraded = false;
     }
 
     // ---- Public API: categories ---------------------------------------------
@@ -315,6 +387,7 @@ public with sharing class ResourceCenterService {
         List<Resource__c> resources = [
             SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Display_Order__c,
                    Is_Featured__c, External_URL__c, Video_Embed_URL__c,
+                   Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c,
                    Category__c, Category__r.Slug__c
             FROM Resource__c
             WHERE (Category__c = :cat.Id OR Category__r.Parent_Category__c = :cat.Id)
@@ -378,12 +451,189 @@ public with sharing class ResourceCenterService {
         assertResourcesReadable();
         return toCards([
             SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Display_Order__c,
-                   Is_Featured__c, External_URL__c, Video_Embed_URL__c, Category__r.Slug__c
+                   Is_Featured__c, External_URL__c, Video_Embed_URL__c, Category__r.Slug__c,
+                   Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c
             FROM Resource__c
             WHERE Is_Featured__c = true AND Is_Active__c = true
             ORDER BY Display_Order__c NULLS LAST, Name ASC
             LIMIT 12
         ]);
+    }
+
+    // ---- Public API: webinars -------------------------------------------------
+
+    /** Per-section cap when Webinar_Agenda_Limit__c is blank or non-positive. */
+    private static final Integer WEBINAR_AGENDA_DEFAULT_LIMIT = 5;
+    /** Test seams: custom metadata can't be written in tests. Null = read the record. */
+    @TestVisible private static Boolean webinarAgendaEnabledOverride;
+    @TestVisible private static Integer webinarAgendaLimitOverride;
+
+    /**
+     * Landing-page agenda: upcoming webinars soonest-first, and recent ones
+     * (past or recorded) most-recent-first, each capped by
+     * Resource_Center_Setting__mdt.Webinar_Agenda_Limit__c (default 5).
+     * Active webinars only.
+     *
+     * Graceful on every failure path — panel disabled by config, no object
+     * access, or a backend fault — all return an empty agenda so the panel
+     * hides, mirroring the unified search's per-side degrade: a side panel is
+     * never worth an error. The isAccessible pre-check lives INSIDE the try for
+     * the same reason as UnifiedSearchService.search.
+     */
+    @AuraEnabled(cacheable=true)
+    public static WebinarAgenda getWebinars() {
+        WebinarAgenda out = new WebinarAgenda();
+        try {
+            if (!webinarAgendaEnabled() || !Schema.sObjectType.Resource__c.isAccessible()) {
+                return out;
+            }
+            Integer cap = webinarAgendaLimit();
+            String webinarType = WebinarLifecycle.TYPE_WEBINAR;
+            // One instant for both queries and the derivation (see WebinarLifecycle).
+            Datetime now = System.now();
+            List<Resource__c> upcoming = [
+                SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Video_Embed_URL__c,
+                       Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c
+                FROM Resource__c
+                WHERE Resource_Type__c = :webinarType AND Is_Active__c = true
+                AND Event_Datetime__c > :now
+                ORDER BY Event_Datetime__c ASC
+                LIMIT :cap
+            ];
+            List<Resource__c> recent = [
+                SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Video_Embed_URL__c,
+                       Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c
+                FROM Resource__c
+                WHERE Resource_Type__c = :webinarType AND Is_Active__c = true
+                AND Event_Datetime__c <= :now
+                ORDER BY Event_Datetime__c DESC
+                LIMIT :cap
+            ];
+            // Recording presence only matters for the recent side.
+            Set<Id> recentIds = new Set<Id>();
+            for (Resource__c r : recent) {
+                recentIds.add(r.Id);
+            }
+            Map<Id, FileInfo> files = recentIds.isEmpty()
+                ? new Map<Id, FileInfo>() : fileInfoByResource(recentIds);
+            for (Resource__c r : upcoming) {
+                out.upcoming.add(toWebinarItem(r, false, now));
+            }
+            for (Resource__c r : recent) {
+                out.recent.add(toWebinarItem(r, files.containsKey(r.Id), now));
+            }
+            return out;
+        } catch (Exception e) {
+            return new WebinarAgenda();
+        }
+    }
+
+    private static Boolean webinarAgendaEnabled() {
+        if (webinarAgendaEnabledOverride != null) {
+            return webinarAgendaEnabledOverride;
+        }
+        Resource_Center_Setting__mdt setting = Resource_Center_Setting__mdt.getInstance('Default');
+        // Blank/unchecked hides — the house convention for every flag on this record.
+        return setting != null && setting.Webinar_Agenda_Enabled__c == true;
+    }
+
+    private static Integer webinarAgendaLimit() {
+        Decimal raw = webinarAgendaLimitOverride;
+        if (raw == null) {
+            Resource_Center_Setting__mdt setting = Resource_Center_Setting__mdt.getInstance('Default');
+            raw = setting == null ? null : setting.Webinar_Agenda_Limit__c;
+        }
+        return (raw == null || raw <= 0) ? WEBINAR_AGENDA_DEFAULT_LIMIT : Integer.valueOf(raw);
+    }
+
+    private static WebinarItem toWebinarItem(Resource__c r, Boolean hasFile, Datetime now) {
+        WebinarItem w = new WebinarItem();
+        w.id = r.Id;
+        w.slug = r.Slug__c;
+        w.name = r.Name;
+        w.description = r.Description__c;
+        w.status = WebinarLifecycle.statusFor(r, hasFile, now);
+        w.eventDatetime = r.Event_Datetime__c;
+        w.durationMinutes = r.Event_Duration_Minutes__c == null
+            ? null : Integer.valueOf(r.Event_Duration_Minutes__c);
+        w.presenter = r.Presenter__c;
+        w.registrationUrl = r.Registration_URL__c;
+        w.watchable = (w.status == WebinarLifecycle.RECORDED);
+        return w;
+    }
+
+    /** Per-side row cap for the events feed — a page, not a panel, so it is
+        deliberately independent of Webinar_Agenda_Limit__c. Generous because
+        the calendar view renders the whole active set client-side. */
+    private static final Integer EVENTS_FEED_LIMIT = 200;
+
+    /**
+     * Events-page feed — the ONE source for every events surface: every
+     * upcoming webinar soonest-first, and every past webinar most recent
+     * first with `watchable` flagging the recorded ones. Feeds /help/events
+     * (the Upcoming list hides unrecorded past rows client-side; the Calendar
+     * view shows them all) plus the landing banner (upcoming[0]) and nav
+     * badge (upcoming.size()).
+     *
+     * Deliberately NOT gated by Webinar_Agenda_Enabled__c — that flag hides
+     * the landing side panel; a routed destination page must not vanish with
+     * it. Same graceful degrade as getWebinars: any failure returns an empty
+     * feed and the page shows its empty state.
+     *
+     * Volume note: webinars number in the tens, so the client groups the
+     * whole feed by month. The upgrade path if that ever changes is a
+     * range-fetching overload — getEvents(Datetime fromDt, Datetime toDt)
+     * bound to the displayed month — keeping this DTO shape; not built yet
+     * on purpose. The two queries stay split by side (future ASC / past
+     * DESC) so each cap truncates the FAR end of its own side rather than a
+     * single ascending cap truncating the future first.
+     */
+    @AuraEnabled(cacheable=true)
+    public static EventsFeed getEvents() {
+        EventsFeed out = new EventsFeed();
+        try {
+            if (!Schema.sObjectType.Resource__c.isAccessible()) {
+                return out;
+            }
+            String webinarType = WebinarLifecycle.TYPE_WEBINAR;
+            // One instant for both queries and the derivation (see WebinarLifecycle).
+            Datetime now = System.now();
+            List<Resource__c> upcoming = [
+                SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Video_Embed_URL__c,
+                       Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c
+                FROM Resource__c
+                WHERE Resource_Type__c = :webinarType AND Is_Active__c = true
+                AND Event_Datetime__c > :now
+                ORDER BY Event_Datetime__c ASC
+                LIMIT :EVENTS_FEED_LIMIT
+            ];
+            List<Resource__c> past = [
+                SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Video_Embed_URL__c,
+                       Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c
+                FROM Resource__c
+                WHERE Resource_Type__c = :webinarType AND Is_Active__c = true
+                AND Event_Datetime__c <= :now
+                ORDER BY Event_Datetime__c DESC
+                LIMIT :EVENTS_FEED_LIMIT
+            ];
+            Set<Id> pastIds = new Set<Id>();
+            for (Resource__c r : past) {
+                pastIds.add(r.Id);
+            }
+            Map<Id, FileInfo> files = pastIds.isEmpty()
+                ? new Map<Id, FileInfo>() : fileInfoByResource(pastIds);
+            for (Resource__c r : upcoming) {
+                out.upcoming.add(toWebinarItem(r, false, now));
+            }
+            for (Resource__c r : past) {
+                // Unrecorded past rows are kept: `watchable` tells the client
+                // which ones have something to play.
+                out.past.add(toWebinarItem(r, files.containsKey(r.Id), now));
+            }
+            return out;
+        } catch (Exception e) {
+            return new EventsFeed();
+        }
     }
 
     /** Full resource detail incl. attached file info and related articles. */
@@ -396,6 +646,7 @@ public with sharing class ResourceCenterService {
         List<Resource__c> rows = [
             SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Video_Embed_URL__c,
                    External_URL__c, Download_Count__c, Category__r.Name, Category__r.Slug__c,
+                   Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c,
                    Category__r.Parent_Category__r.Name, Category__r.Parent_Category__r.Slug__c
             FROM Resource__c
             WHERE Slug__c = :slug AND Is_Active__c = true
@@ -423,6 +674,12 @@ public with sharing class ResourceCenterService {
         }
         d.file = fileInfoByResource(new Set<Id>{ r.Id }).get(r.Id);
         d.relatedArticles = getRelatedArticlesForResource(r.Id);
+        d.eventDatetime = r.Event_Datetime__c;
+        d.durationMinutes = r.Event_Duration_Minutes__c == null
+            ? null : Integer.valueOf(r.Event_Duration_Minutes__c);
+        d.presenter = r.Presenter__c;
+        d.registrationUrl = r.Registration_URL__c;
+        d.webinarStatus = WebinarLifecycle.statusFor(r, d.file != null, System.now());
         return d;
     }
 
@@ -438,28 +695,35 @@ public with sharing class ResourceCenterService {
         if (kaId == null) {
             return new List<ResourceCard>();
         }
+        // Junction order IS the curated order — resources render in this
+        // sequence, so keep it through the detail query below.
         List<Id> resourceIds = new List<Id>();
-        Map<Id, Decimal> orderById = new Map<Id, Decimal>();
         for (Article_Resource__c link : [
-            SELECT Resource__c, Display_Order__c
+            SELECT Resource__c
             FROM Article_Resource__c
             WHERE Knowledge_Article_Id__c = :kaId AND Resource__r.Is_Active__c = true
-            ORDER BY Display_Order__c NULLS LAST
+            ORDER BY Display_Order__c NULLS LAST, Resource__r.Name ASC
         ]) {
             resourceIds.add(link.Resource__c);
-            orderById.put(link.Resource__c, link.Display_Order__c);
         }
         if (resourceIds.isEmpty()) {
             return new List<ResourceCard>();
         }
-        List<Resource__c> resources = [
+        Map<Id, Resource__c> byId = new Map<Id, Resource__c>([
             SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Display_Order__c,
-                   Is_Featured__c, External_URL__c, Video_Embed_URL__c, Category__r.Slug__c
+                   Is_Featured__c, External_URL__c, Video_Embed_URL__c, Category__r.Slug__c,
+                   Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c
             FROM Resource__c
             WHERE Id IN :resourceIds AND Is_Active__c = true
-            ORDER BY Name ASC
-        ];
-        return toCards(resources);
+        ]);
+        List<Resource__c> ordered = new List<Resource__c>();
+        for (Id rid : resourceIds) {
+            Resource__c r = byId.remove(rid); // remove() also dedupes double-links
+            if (r != null) {
+                ordered.add(r);
+            }
+        }
+        return toCards(ordered);
     }
 
     /**
@@ -518,7 +782,8 @@ public with sharing class ResourceCenterService {
         String sosl =
             'FIND \'' + findExpr + '\' IN ALL FIELDS RETURNING Resource__c(' +
             'Id, Name, Slug__c, Resource_Type__c, Description__c, Display_Order__c, ' +
-            'Is_Featured__c, External_URL__c, Video_Embed_URL__c, Category__r.Slug__c ' +
+            'Is_Featured__c, External_URL__c, Video_Embed_URL__c, Category__r.Slug__c, ' +
+            'Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c ' +
             'WHERE Is_Active__c = true) LIMIT ' + MAX_SEARCH_RESULTS;
         List<List<SObject>> results = Search.query(sosl);
         List<Resource__c> rows = results.isEmpty()
@@ -558,23 +823,33 @@ public with sharing class ResourceCenterService {
     }
 
     /**
-     * Combined article + resource search for the Resource Center search bar.
-     * Resources open in-site; articles deep-link to the Help Center. If the
-     * running user has no Knowledge access, the article side is skipped quietly.
+     * DEPRECATED (2026-08-21, HC/RC unification): superseded by
+     * UnifiedSearchService.search, which returns grouped + scored sides. No
+     * LWC consumes this any more (resourceSearchResults repointed); kept one
+     * release for any org-side caller, then remove along with CombinedSearch/
+     * CombinedResult.
+     *
+     * Combined article + resource search. Each side degrades independently
+     * (see CombinedSearch) so a user with access to only one dataset still
+     * gets that dataset's results.
      */
     @AuraEnabled(cacheable=true)
-    public static List<CombinedResult> searchAll(String term) {
-        List<CombinedResult> out = new List<CombinedResult>();
+    public static CombinedSearch searchAll(String term) {
+        CombinedSearch out = new CombinedSearch();
 
-        for (ResourceCard card : searchResources(term)) {
-            CombinedResult cr = new CombinedResult();
-            cr.type = 'resource';
-            cr.id = card.id;
-            cr.title = card.name;
-            cr.subtitle = card.description;
-            cr.slug = card.slug;
-            cr.resourceType = card.resourceType;
-            out.add(cr);
+        try {
+            for (ResourceCard card : searchResources(term)) {
+                CombinedResult cr = new CombinedResult();
+                cr.type = 'resource';
+                cr.id = card.id;
+                cr.title = card.name;
+                cr.subtitle = card.description;
+                cr.slug = card.slug;
+                cr.resourceType = card.resourceType;
+                out.results.add(cr);
+            }
+        } catch (Exception e) {
+            out.resourcesDegraded = true;
         }
 
         try {
@@ -588,11 +863,11 @@ public with sharing class ResourceCenterService {
                     cr.title = a.title;
                     cr.subtitle = a.summary;
                     cr.urlName = a.urlName;
-                    out.add(cr);
+                    out.results.add(cr);
                 }
             }
         } catch (Exception e) {
-            // No Knowledge access on this surface — resources-only results.
+            out.articlesDegraded = true;
         }
         return out;
     }
@@ -647,12 +922,40 @@ public with sharing class ResourceCenterService {
 
     /**
      * Help Center deep-link base — the shared site's root (its home page
-     * renders the Help Center). Article links append /?article=<UrlName>;
-     * the site has no /article/ route, so nexsLanding resolves the param.
+     * renders the unified landing). Article links append /article?name=<UrlName>
+     * (c/rcLinkUtil.articleUrl); the legacy /?article= form still resolves via
+     * the home route's shim, but is never built for new links.
+     *
+     * Site-absolute on EVERY surface, deliberately: the Admin Console's
+     * "Copy link" actions share these with people who may be external. Callers
+     * that need surface-aware behavior use getLinkContext() instead.
      */
     @AuraEnabled(cacheable=true)
     public static String getHelpCenterLinkBase() {
         return getSiteBaseUrl();
+    }
+
+    /**
+     * Surface + link bases in one call, for c/contextNav.
+     *
+     * In the core app Network.getNetworkId() is null, so both bases come back
+     * null and contextNav routes with NavigationMixin instead of leaving for
+     * *.my.site.com. On an Experience Cloud site the bases are the same values
+     * the two accessors above return, so the site branch is unchanged.
+     *
+     * Never throws — an unresolvable site degrades to null bases, which the
+     * client already treats as "handle it in-app".
+     */
+    @AuraEnabled(cacheable=true)
+    public static LinkContext getLinkContext() {
+        LinkContext ctx = new LinkContext();
+        ctx.surface = NexSArticleEngagementController.resolveSurface();
+        if (ctx.surface == INTERNAL_SURFACE) {
+            return ctx; // bases stay null — navigate in-Lightning
+        }
+        ctx.helpBase = getHelpCenterLinkBase();
+        ctx.resourceBase = getResourceLinkBase();
+        return ctx;
     }
 
     /** Root SecureUrl of the shared LWR site, or null when unresolvable. */
@@ -723,6 +1026,7 @@ public with sharing class ResourceCenterService {
             ids.add(r.Id);
         }
         Map<Id, FileInfo> files = fileInfoByResource(ids);
+        Datetime now = System.now();
         for (Resource__c r : rows) {
             ResourceCard c = new ResourceCard();
             c.id = r.Id;
@@ -740,13 +1044,24 @@ public with sharing class ResourceCenterService {
                 c.contentDocumentId = fi.contentDocumentId;
                 c.downloadUrl = fi.downloadUrl;
             }
+            c.eventDatetime = r.Event_Datetime__c;
+            c.durationMinutes = r.Event_Duration_Minutes__c == null
+                ? null : Integer.valueOf(r.Event_Duration_Minutes__c);
+            c.presenter = r.Presenter__c;
+            c.registrationUrl = r.Registration_URL__c;
+            c.webinarStatus = WebinarLifecycle.statusFor(r, fi != null, now);
             cards.add(c);
         }
         return cards;
     }
 
-    /** Latest attached file per resource, keyed by resource Id. */
-    private static Map<Id, FileInfo> fileInfoByResource(Set<Id> resourceIds) {
+    /**
+     * Latest attached file per resource, keyed by resource Id — the ONE
+     * "newest file wins" lookup. Public so ResourceAdminController and
+     * UnifiedSearchService derive webinar recording presence from the same
+     * rule the public pages serve.
+     */
+    public static Map<Id, FileInfo> fileInfoByResource(Set<Id> resourceIds) {
         Map<Id, FileInfo> out = new Map<Id, FileInfo>();
         Map<Id, Datetime> latestByResource = new Map<Id, Datetime>();
         if (resourceIds == null || resourceIds.isEmpty()) {

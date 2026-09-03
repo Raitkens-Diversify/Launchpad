@@ -351,7 +351,7 @@ private class ArticleAdminControllerTest {
         System.assertEquals(1, s.zeroResultSearches[0].count);
 
         List<ArticleAdminController.SearchRow> log =
-            ArticleAdminController.listSearches(null, null, false, null);
+            ArticleAdminController.listSearches(null, null, false, null, null);
         System.assertEquals(3, log.size(),
             'The drill-down still shows every row, stamped or not');
     }
@@ -374,20 +374,20 @@ private class ArticleAdminControllerTest {
         };
 
         List<ArticleAdminController.SearchRow> all =
-            ArticleAdminController.listSearches(null, null, null, null);
+            ArticleAdminController.listSearches(null, null, null, null, null);
         System.assertEquals(2, all.size());
         System.assert(String.isNotBlank(all[0].userName), 'Search rows show who searched');
 
         System.assertEquals(1,
-            ArticleAdminController.listSearches(null, 'reset', null, null).size(),
+            ArticleAdminController.listSearches(null, 'reset', null, null, null).size(),
             'Term filter narrows the log');
         List<ArticleAdminController.SearchRow> zero =
-            ArticleAdminController.listSearches(null, null, true, null);
+            ArticleAdminController.listSearches(null, null, true, null, null);
         System.assertEquals(1, zero.size(), 'Zero-only filter');
         System.assertEquals('quantum flux', zero[0].term);
         System.assertEquals(0,
             ArticleAdminController.listSearches(null, null, null,
-                System.now().addDays(-1)).size(),
+                System.now().addDays(-1), null).size(),
             'Cursor excludes rows created after it');
 
         List<ArticleAdminController.ViewRow> views =

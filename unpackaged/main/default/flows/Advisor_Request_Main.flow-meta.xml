@@ -3,7 +3,7 @@
     <actionCalls>
         <name>Navigate_to_Case</name>
         <label>Navigate to Case</label>
-        <locationX>2954</locationX>
+        <locationX>2558</locationX>
         <locationY>1682</locationY>
         <actionName>c:cmp_NavigateToRecord</actionName>
         <actionType>component</actionType>
@@ -23,7 +23,7 @@
     <assignments>
         <name>Set_Financial_Account</name>
         <label>Set Financial Account</label>
-        <locationX>3086</locationX>
+        <locationX>2690</locationX>
         <locationY>458</locationY>
         <assignmentItems>
             <assignToReference>varFinancialAccount</assignToReference>
@@ -39,7 +39,7 @@
     <assignments>
         <name>Set_Household</name>
         <label>Set Household</label>
-        <locationX>2294</locationX>
+        <locationX>1898</locationX>
         <locationY>566</locationY>
         <assignmentItems>
             <assignToReference>varHousehold</assignToReference>
@@ -55,7 +55,7 @@
     <assignments>
         <name>Set_HouseholdofFA</name>
         <label>Set Household</label>
-        <locationX>3086</locationX>
+        <locationX>2690</locationX>
         <locationY>674</locationY>
         <assignmentItems>
             <assignToReference>varHousehold</assignToReference>
@@ -71,7 +71,7 @@
     <assignments>
         <name>Set_HouseholdofPA</name>
         <label>Set Household</label>
-        <locationX>2558</locationX>
+        <locationX>2162</locationX>
         <locationY>890</locationY>
         <assignmentItems>
             <assignToReference>varHousehold</assignToReference>
@@ -87,7 +87,7 @@
     <assignments>
         <name>Set_Person_Account</name>
         <label>Set Person Account</label>
-        <locationX>2558</locationX>
+        <locationX>2162</locationX>
         <locationY>566</locationY>
         <assignmentItems>
             <assignToReference>varPersonAccount.Id</assignToReference>
@@ -103,7 +103,7 @@
     <assignments>
         <name>Set_Selected_Case_Request</name>
         <label>Set Selected Case Request</label>
-        <locationX>2954</locationX>
+        <locationX>2558</locationX>
         <locationY>1274</locationY>
         <assignmentItems>
             <assignToReference>varFASelectedRequest</assignToReference>
@@ -133,7 +133,7 @@
     <decisions>
         <name>Account_or_Financial_Account</name>
         <label>Account or Financial Account?</label>
-        <locationX>2954</locationX>
+        <locationX>2558</locationX>
         <locationY>242</locationY>
         <defaultConnectorLabel>Neither Account or FA</defaultConnectorLabel>
         <rules>
@@ -170,7 +170,7 @@
     <decisions>
         <name>Household_or_Person_Account</name>
         <label>Household or Person Account?</label>
-        <locationX>2558</locationX>
+        <locationX>2162</locationX>
         <locationY>458</locationY>
         <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
         <rules>
@@ -207,7 +207,7 @@
     <decisions>
         <name>Which_Case_Request</name>
         <label>Which Case Request?</label>
-        <locationX>2954</locationX>
+        <locationX>2558</locationX>
         <locationY>1382</locationY>
         <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
         <rules>
@@ -239,21 +239,6 @@
                 <targetReference>Subflow_Cancel_Recurring_Move_Money</targetReference>
             </connector>
             <label>Cancel Move Money Recurring</label>
-        </rules>
-        <rules>
-            <name>Change_Management_Style</name>
-            <conditionLogic>and</conditionLogic>
-            <conditions>
-                <leftValueReference>forSelectedCaseRequest</leftValueReference>
-                <operator>EqualTo</operator>
-                <rightValue>
-                    <stringValue>Change Management Style</stringValue>
-                </rightValue>
-            </conditions>
-            <connector>
-                <targetReference>Subflow_Change_Management_Style</targetReference>
-            </connector>
-            <label>Change Management Style</label>
         </rules>
         <rules>
             <name>Client_Reimbursement</name>
@@ -301,21 +286,6 @@
             <label>Donation in Kind</label>
         </rules>
         <rules>
-            <name>Draft_and_Submit_Alt_Investment</name>
-            <conditionLogic>and</conditionLogic>
-            <conditions>
-                <leftValueReference>forSelectedCaseRequest</leftValueReference>
-                <operator>EqualTo</operator>
-                <rightValue>
-                    <stringValue>Draft and Submit - Alt Investment</stringValue>
-                </rightValue>
-            </conditions>
-            <connector>
-                <targetReference>Subflow_Advisor_Request_Draft_and_Submit_Alternative_Investments</targetReference>
-            </connector>
-            <label>Draft and Submit - Alt Investment</label>
-        </rules>
-        <rules>
             <name>Draft_and_Submit_Form</name>
             <conditionLogic>and</conditionLogic>
             <conditions>
@@ -329,21 +299,6 @@
                 <targetReference>Advisor_Request_Draft_and_Submit_Form</targetReference>
             </connector>
             <label>Draft and Submit - Form</label>
-        </rules>
-        <rules>
-            <name>Draft_and_Submit_New_Account</name>
-            <conditionLogic>and</conditionLogic>
-            <conditions>
-                <leftValueReference>forSelectedCaseRequest</leftValueReference>
-                <operator>EqualTo</operator>
-                <rightValue>
-                    <stringValue>Draft and Submit - New Account</stringValue>
-                </rightValue>
-            </conditions>
-            <connector>
-                <targetReference>Subflow_Draft_and_Submit_New_Account</targetReference>
-            </connector>
-            <label>Draft and Submit - New Account</label>
         </rules>
         <rules>
             <name>Grant_Donation</name>
@@ -631,7 +586,7 @@
     <recordLookups>
         <name>Get_Account</name>
         <label>Get Account</label>
-        <locationX>2558</locationX>
+        <locationX>2162</locationX>
         <locationY>350</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
@@ -652,7 +607,7 @@
     <recordLookups>
         <name>Get_ACR</name>
         <label>Get ACR</label>
-        <locationX>2558</locationX>
+        <locationX>2162</locationX>
         <locationY>674</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
@@ -673,7 +628,7 @@
     <recordLookups>
         <name>Get_Financial_Account</name>
         <label>Get Financial Account</label>
-        <locationX>3086</locationX>
+        <locationX>2690</locationX>
         <locationY>350</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
@@ -694,7 +649,7 @@
     <recordLookups>
         <name>Get_Household_of_FA</name>
         <label>Get Household</label>
-        <locationX>3086</locationX>
+        <locationX>2690</locationX>
         <locationY>566</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
@@ -715,7 +670,7 @@
     <recordLookups>
         <name>Get_Household_of_PA</name>
         <label>Get Household</label>
-        <locationX>2558</locationX>
+        <locationX>2162</locationX>
         <locationY>782</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
@@ -736,7 +691,7 @@
     <recordLookups>
         <name>Get_Wizard_Flow_Values</name>
         <label>Get Wizard Flow Values</label>
-        <locationX>2954</locationX>
+        <locationX>2558</locationX>
         <locationY>134</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
@@ -749,7 +704,7 @@
     <screens>
         <name>Case_Request_Selection</name>
         <label>Case Request Selection</label>
-        <locationX>2954</locationX>
+        <locationX>2558</locationX>
         <locationY>1166</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
@@ -936,7 +891,7 @@
         <showHeader>false</showHeader>
     </screens>
     <start>
-        <locationX>2828</locationX>
+        <locationX>2432</locationX>
         <locationY>0</locationY>
         <connector>
             <targetReference>Get_Wizard_Flow_Values</targetReference>
@@ -946,7 +901,7 @@
     <subflows>
         <name>Advisor_Request_Draft_and_Submit_Form</name>
         <label>Advisor Request - Draft and Submit - Form</label>
-        <locationX>1898</locationX>
+        <locationX>1370</locationX>
         <locationY>1490</locationY>
         <connector>
             <targetReference>Navigate_to_Case</targetReference>
@@ -978,38 +933,6 @@
             <targetReference>Navigate_to_Case</targetReference>
         </connector>
         <flowName>Advisor_Request_401k_Rollover</flowName>
-        <inputAssignments>
-            <name>varFinancialAccount</name>
-            <value>
-                <elementReference>varFinancialAccount</elementReference>
-            </value>
-        </inputAssignments>
-        <inputAssignments>
-            <name>varHousehold</name>
-            <value>
-                <elementReference>varHousehold</elementReference>
-            </value>
-        </inputAssignments>
-        <inputAssignments>
-            <name>varWizardFlowValues</name>
-            <value>
-                <elementReference>Get_Wizard_Flow_Values</elementReference>
-            </value>
-        </inputAssignments>
-        <outputAssignments>
-            <assignToReference>varCase</assignToReference>
-            <name>varCase</name>
-        </outputAssignments>
-    </subflows>
-    <subflows>
-        <name>Subflow_Advisor_Request_Draft_and_Submit_Alternative_Investments</name>
-        <label>Subflow: Advisor Request - Draft and Submit - Alternative Investments</label>
-        <locationX>1634</locationX>
-        <locationY>1490</locationY>
-        <connector>
-            <targetReference>Navigate_to_Case</targetReference>
-        </connector>
-        <flowName>Advisor_Request_Draft_and_Submit_Alternative_Investments</flowName>
         <inputAssignments>
             <name>varFinancialAccount</name>
             <value>
@@ -1066,41 +989,9 @@
         </outputAssignments>
     </subflows>
     <subflows>
-        <name>Subflow_Change_Management_Style</name>
-        <label>Subflow: Change Management Style</label>
-        <locationX>578</locationX>
-        <locationY>1490</locationY>
-        <connector>
-            <targetReference>Navigate_to_Case</targetReference>
-        </connector>
-        <flowName>Advisor_Request_Change_Management_Style</flowName>
-        <inputAssignments>
-            <name>varFinancialAccount</name>
-            <value>
-                <elementReference>varFinancialAccount</elementReference>
-            </value>
-        </inputAssignments>
-        <inputAssignments>
-            <name>varHousehold</name>
-            <value>
-                <elementReference>varHousehold</elementReference>
-            </value>
-        </inputAssignments>
-        <inputAssignments>
-            <name>varWizardFlowValues</name>
-            <value>
-                <elementReference>Get_Wizard_Flow_Values</elementReference>
-            </value>
-        </inputAssignments>
-        <outputAssignments>
-            <assignToReference>varCase</assignToReference>
-            <name>varCase</name>
-        </outputAssignments>
-    </subflows>
-    <subflows>
         <name>Subflow_Client_Passed_Away</name>
         <label>Subflow: Client Passed Away</label>
-        <locationX>5330</locationX>
+        <locationX>4538</locationX>
         <locationY>1490</locationY>
         <connector>
             <targetReference>Navigate_to_Case</targetReference>
@@ -1132,7 +1023,7 @@
     <subflows>
         <name>Subflow_Client_Reimbursement</name>
         <label>Subflow: Client Reimbursement</label>
-        <locationX>842</locationX>
+        <locationX>578</locationX>
         <locationY>1490</locationY>
         <connector>
             <targetReference>Navigate_to_Case</targetReference>
@@ -1164,7 +1055,7 @@
     <subflows>
         <name>Subflow_Client_Terminated_Services</name>
         <label>Subflow: Client Terminated Services</label>
-        <locationX>1106</locationX>
+        <locationX>842</locationX>
         <locationY>1490</locationY>
         <connector>
             <targetReference>Navigate_to_Case</targetReference>
@@ -1196,7 +1087,7 @@
     <subflows>
         <name>Subflow_Donation_in_Kind</name>
         <label>Subflow: Donation in Kind</label>
-        <locationX>1370</locationX>
+        <locationX>1106</locationX>
         <locationY>1490</locationY>
         <connector>
             <targetReference>Navigate_to_Case</targetReference>
@@ -1226,35 +1117,9 @@
         </outputAssignments>
     </subflows>
     <subflows>
-        <name>Subflow_Draft_and_Submit_New_Account</name>
-        <label>Subflow: Draft and Submit - New Account</label>
-        <locationX>2162</locationX>
-        <locationY>1490</locationY>
-        <connector>
-            <targetReference>Navigate_to_Case</targetReference>
-        </connector>
-        <flowName>Advisor_Request_Draft_and_Submit_New_Account</flowName>
-        <inputAssignments>
-            <name>varHousehold</name>
-            <value>
-                <elementReference>varHousehold</elementReference>
-            </value>
-        </inputAssignments>
-        <inputAssignments>
-            <name>varWizardFlowValues</name>
-            <value>
-                <elementReference>Get_Wizard_Flow_Values</elementReference>
-            </value>
-        </inputAssignments>
-        <outputAssignments>
-            <assignToReference>varCase</assignToReference>
-            <name>varCase</name>
-        </outputAssignments>
-    </subflows>
-    <subflows>
         <name>Subflow_Grant_Donation</name>
         <label>Subflow: Grant Donation</label>
-        <locationX>2426</locationX>
+        <locationX>1634</locationX>
         <locationY>1490</locationY>
         <connector>
             <targetReference>Navigate_to_Case</targetReference>
@@ -1286,7 +1151,7 @@
     <subflows>
         <name>Subflow_Journal_Between_Accounts</name>
         <label>Subflow: Journal Between Accounts</label>
-        <locationX>2690</locationX>
+        <locationX>1898</locationX>
         <locationY>1490</locationY>
         <connector>
             <targetReference>Navigate_to_Case</targetReference>
@@ -1318,16 +1183,16 @@
     <subflows>
         <name>Subflow_Move_Money_One_Time</name>
         <label>Subflow: Move Money - One Time</label>
-        <locationX>2954</locationX>
+        <locationX>2162</locationX>
         <locationY>1490</locationY>
         <connector>
             <targetReference>Navigate_to_Case</targetReference>
         </connector>
         <flowName>Advisor_Request_Move_Money_One_Time</flowName>
         <inputAssignments>
-            <name>varFinancialAccount</name>
+            <name>varFinancialAccountCustom</name>
             <value>
-                <elementReference>varFinancialAccount</elementReference>
+                <elementReference>varFinancialAccountCustom</elementReference>
             </value>
         </inputAssignments>
         <inputAssignments>
@@ -1350,7 +1215,7 @@
     <subflows>
         <name>Subflow_Move_Money_Recurring</name>
         <label>Subflow: Move Money - Recurring</label>
-        <locationX>3218</locationX>
+        <locationX>2426</locationX>
         <locationY>1490</locationY>
         <connector>
             <targetReference>Navigate_to_Case</targetReference>
@@ -1382,7 +1247,7 @@
     <subflows>
         <name>Subflow_Prepare_Trades</name>
         <label>Subflow: Prepare Trades</label>
-        <locationX>3482</locationX>
+        <locationX>2690</locationX>
         <locationY>1490</locationY>
         <connector>
             <targetReference>Navigate_to_Case</targetReference>
@@ -1414,16 +1279,16 @@
     <subflows>
         <name>Subflow_Qualified_Charitable_Distribution</name>
         <label>Subflow: Qualified Charitable Distribution</label>
-        <locationX>3746</locationX>
+        <locationX>2954</locationX>
         <locationY>1490</locationY>
         <connector>
             <targetReference>Navigate_to_Case</targetReference>
         </connector>
         <flowName>Advisor_Request_Qualified_Charitable_Distribution</flowName>
         <inputAssignments>
-            <name>varFinancialAccount</name>
+            <name>varFinancialAccountCustom</name>
             <value>
-                <elementReference>varFinancialAccount</elementReference>
+                <elementReference>varFinancialAccountCustom</elementReference>
             </value>
         </inputAssignments>
         <inputAssignments>
@@ -1446,7 +1311,7 @@
     <subflows>
         <name>Subflow_Review_Meeting</name>
         <label>Subflow: Review Meeting</label>
-        <locationX>4010</locationX>
+        <locationX>3218</locationX>
         <locationY>1490</locationY>
         <connector>
             <targetReference>Navigate_to_Case</targetReference>
@@ -1478,7 +1343,7 @@
     <subflows>
         <name>Subflow_Roth_Conversion</name>
         <label>Subflow: Roth Conversion</label>
-        <locationX>4274</locationX>
+        <locationX>3482</locationX>
         <locationY>1490</locationY>
         <connector>
             <targetReference>Navigate_to_Case</targetReference>
@@ -1510,7 +1375,7 @@
     <subflows>
         <name>Subflow_Tax_Return</name>
         <label>Subflow Tax Return</label>
-        <locationX>5594</locationX>
+        <locationX>4802</locationX>
         <locationY>1490</locationY>
         <connector>
             <targetReference>Navigate_to_Case</targetReference>
@@ -1536,7 +1401,7 @@
     <subflows>
         <name>Subflow_Transfer</name>
         <label>Subflow: Transfer</label>
-        <locationX>4802</locationX>
+        <locationX>4010</locationX>
         <locationY>1490</locationY>
         <connector>
             <targetReference>Navigate_to_Case</targetReference>
@@ -1568,7 +1433,7 @@
     <subflows>
         <name>Subflow_Update_IMA</name>
         <label>Subflow: Update IMA</label>
-        <locationX>5066</locationX>
+        <locationX>4274</locationX>
         <locationY>1490</locationY>
         <connector>
             <targetReference>Navigate_to_Case</targetReference>
@@ -1594,7 +1459,7 @@
     <subflows>
         <name>Trade_Error_Log</name>
         <label>Trade Error Log</label>
-        <locationX>4538</locationX>
+        <locationX>3746</locationX>
         <locationY>1490</locationY>
         <connector>
             <targetReference>Navigate_to_Case</targetReference>

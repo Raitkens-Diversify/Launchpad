@@ -12,8 +12,11 @@
     <isOmniPinnedViewEnabled>false</isOmniPinnedViewEnabled>
     <label>Help Center</label>
     <navType>Standard</navType>
+    <tabs>Unified_Support_Home</tabs>
     <tabs>NexS_Help_Center</tabs>
     <tabs>Tour_Builder</tabs>
+    <tabs>Help_Center_Article</tabs>
+    <tabs>Help_Center_Events</tabs>
     <tabs>Admin_Console</tabs>
     <uiType>Lightning</uiType>
 </CustomApplication>

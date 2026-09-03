@@ -3,14 +3,33 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { resourceDetailUrl, copyText } from 'c/rcLinkUtil';
 import listResources from '@salesforce/apex/ResourceAdminController.listResources';
 import getResourceLinkBase from '@salesforce/apex/ResourceCenterService.getResourceLinkBase';
-import { RESOURCE_TYPES, toOptions } from 'c/rcConstants';
+import {
+    RESOURCE_TYPES,
+    toOptions,
+    WEBINAR_STATUS_UPCOMING,
+    WEBINAR_STATUS_PAST,
+    WEBINAR_STATUS_RECORDED
+} from 'c/rcConstants';
 
 /**
  * adminResourceList — Admin Console resource overview with filters and quick
  * actions. Emits `edit` { resourceId } and `create`. Each row offers "Copy
  * link" — the shareable Resource Center URL, pasteable into article bodies.
+ *
+ * Webinars carry a lifecycle chip (server-derived `webinarStatus`, never
+ * re-derived here) and a "Webinar status" filter — "Needs recording" is the
+ * coordination view: past webinars still missing a recording, oldest first.
  */
 const TYPE_OPTIONS = [{ label: 'All types', value: '' }].concat(toOptions(RESOURCE_TYPES));
+/** webinarStatus → chip. Past reads as the admin's to-do, not a neutral fact. */
+const LIFECYCLE = {
+    [WEBINAR_STATUS_UPCOMING]: { label: 'Upcoming', variant: 'info' },
+    [WEBINAR_STATUS_PAST]: { label: 'Needs recording', variant: 'warning' },
+    [WEBINAR_STATUS_RECORDED]: { label: 'Recorded', variant: 'success' }
+};
+const LIFECYCLE_OPTIONS = [{ label: 'All webinar statuses', value: '' }].concat(
+    Object.keys(LIFECYCLE).map((status) => ({ label: LIFECYCLE[status].label, value: status }))
+);
 
 export default class AdminResourceList extends LightningElement {
     rows = [];
@@ -20,6 +39,7 @@ export default class AdminResourceList extends LightningElement {
     searchTerm = '';
     typeFilter = '';
     categoryFilter = '';
+    lifecycleFilter = '';
     activeOnly = false;
     categoryOptions = [{ label: 'All categories', value: '' }];
     linkBase = null;
@@ -39,13 +59,18 @@ export default class AdminResourceList extends LightningElement {
         this.loading = true;
         try {
             const data = await listResources();
-            this.rows = (data || []).map((r) => ({
-                ...r,
-                statusLabel: r.active ? 'Active' : 'Inactive',
-                statusClass: r.active
-                    ? 'arl-badge arl-badge--on'
-                    : 'arl-badge arl-badge--off'
-            }));
+            this.rows = (data || []).map((r) => {
+                const lifecycle = LIFECYCLE[r.webinarStatus];
+                return {
+                    ...r,
+                    statusLabel: r.active ? 'Active' : 'Inactive',
+                    statusClass: r.active
+                        ? 'arl-badge arl-badge--on'
+                        : 'arl-badge arl-badge--off',
+                    lifecycleLabel: lifecycle ? lifecycle.label : undefined,
+                    lifecycleVariant: lifecycle ? lifecycle.variant : undefined
+                };
+            });
             const cats = new Map();
             this.rows.forEach((r) => {
                 if (r.categoryName) {
@@ -68,11 +93,18 @@ export default class AdminResourceList extends LightningElement {
     get typeOptions() {
         return TYPE_OPTIONS;
     }
+    get lifecycleOptions() {
+        return LIFECYCLE_OPTIONS;
+    }
 
     get filteredRows() {
         const term = this.searchTerm.trim().toLowerCase();
-        return this.rows.filter((row) => {
+        const rows = this.rows.filter((row) => {
             if (this.typeFilter && row.resourceType !== this.typeFilter) {
+                return false;
+            }
+            // A lifecycle filter implies webinars only (other types have none).
+            if (this.lifecycleFilter && row.webinarStatus !== this.lifecycleFilter) {
                 return false;
             }
             if (this.categoryFilter && row.categoryName !== this.categoryFilter) {
@@ -93,6 +125,12 @@ export default class AdminResourceList extends LightningElement {
             ...row,
             copyUrl: resourceDetailUrl(this.linkBase, row.slug)
         }));
+        if (this.lifecycleFilter) {
+            // Upcoming: soonest first. Past/Recorded: most recent first.
+            const dir = this.lifecycleFilter === WEBINAR_STATUS_UPCOMING ? 1 : -1;
+            rows.sort((a, b) => dir * (Date.parse(a.eventDatetime || 0) - Date.parse(b.eventDatetime || 0)));
+        }
+        return rows;
     }
 
     get hasRows() {
@@ -107,6 +145,9 @@ export default class AdminResourceList extends LightningElement {
     }
     handleCategoryChange(event) {
         this.categoryFilter = event.detail.value;
+    }
+    handleLifecycleChange(event) {
+        this.lifecycleFilter = event.detail.value;
     }
     handleActiveChange(event) {
         this.activeOnly = event.target.checked;

@@ -229,11 +229,6 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Case.Current_Task__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
         <field>Case.Custodian_Transferring_From__c</field>
         <readable>true</readable>
     </fieldPermissions>

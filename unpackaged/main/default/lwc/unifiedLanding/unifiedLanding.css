@@ -1,0 +1,142 @@
+/* Self-declared tokens — unifiedLanding is a canonical declaring root (same
+   set as nexsLanding; ui-standards §1: platform-injected --slds-g-* hooks beat
+   inheritance, so roots declare their own). c-ds-chrome and every ds* child
+   inherit these. */
+:host {
+    display: block;
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+
+    /* --- V2 / SLDS2 tokens --- */
+    --slds-g-spacing-1: 4px;
+    --slds-g-spacing-2: 0.5rem;
+    --slds-g-spacing-3: 0.75rem;
+    --slds-g-spacing-4: 1rem;
+    --slds-g-spacing-5: 24px;
+    --slds-g-spacing-10: 48px;
+    --slds-g-radius-border-2: 0.5rem;
+    --slds-g-font-family-base: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    --slds-g-font-scale-1: 14px;
+    --slds-g-font-scale-2: 0.875rem;
+    --slds-g-font-scale-3: 1.25rem;
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-border-2: #b6bcc5;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-accent-3: #071c31;
+    --slds-g-color-on-accent-1: #ffffff;
+    --slds-g-color-accent-container-1: #0f406f;
+
+    /* --- V1 --ds-* set for the reused ds* components --- */
+    --ds-dark-blue: #0f406f;
+    --ds-medium-blue: #1a76bb;
+    --ds-light-blue: #14bef0;
+    --ds-lightest-blue: #e2f8ff;
+    --ds-white: #ffffff;
+    --ds-gray-1: #f3f4f6;
+    --ds-gray-2: #d1d5db;
+    --ds-gray-3: #b6bcc5;
+    --ds-gray-4: #9aa1ad;
+    --ds-gray-5: #4b5563;
+    --ds-gray-6: #374151;
+    --ds-font-heading: "Libre Baskerville", Georgia, serif;
+    --ds-font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    --ds-space-xs: 4px;
+    --ds-space-sm: 8px;
+    --ds-space-md: 12px;
+    --ds-space-lg: 16px;
+    --ds-space-xl: 24px;
+    --ds-space-2xl: 32px;
+    --ds-space-3xl: 48px;
+    --ds-radius-sm: 6px;
+    --ds-radius-md: 8px;
+    --ds-radius-lg: 10px;
+    --ds-radius-xl: 12px;
+    --ds-radius-pill: 20px;
+    --ds-border-light: 1px solid #e5e7eb;
+    --ds-border-default: 1px solid #d1d5db;
+    --ds-shadow-rest: 0 1px 2px rgba(15, 23, 42, 0.06);
+    --ds-shadow-hover: 0 4px 14px rgba(15, 64, 111, 0.08);
+    --ds-shadow-drop: 0 8px 24px rgba(9, 36, 63, 0.12);
+
+    --rc-content-max: 1040px;
+}
+
+/* Full-column, tall white bar — same dsSearchBar size-hook recipe as
+   arcHome/nexsHome (the pre-unification Help Center hero look). */
+.landing-hero__search {
+    margin-top: var(--ds-space-lg, 16px);
+    --ds-search-bar-bg: var(--ds-white, #ffffff);
+    --ds-search-bar-radius: var(--ds-radius-lg, 10px);
+    --ds-search-bar-padding: 14px 16px;
+    --ds-search-bar-font-size: 15px;
+}
+
+.landing-body {
+    max-width: var(--rc-content-max, 1040px);
+    margin: 0 auto;
+    padding: var(--ds-space-2xl, 32px) var(--ds-space-lg, 16px) var(--ds-space-3xl, 48px);
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-2xl, 32px);
+}
+
+/* "Upcoming Events" chrome action (slotted into c-ds-chrome, so styled here —
+   slotted content is light DOM; same recipe as helpArticlePage's link). */
+.landing__events-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-sm, 8px);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: 500;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.landing__events-link:hover {
+    color: var(--slds-g-color-accent-1, #0f406f);
+}
+/* Count pill: how many upcoming events; the markup omits it at zero. */
+.landing__events-count {
+    background: var(--slds-g-color-accent-1, #0f406f);
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+    border-radius: 999px;
+    font-size: 0.75rem;
+    line-height: 1;
+    padding: 3px 7px;
+    font-weight: 600;
+}
+
+.landing-section__title {
+    margin: 0 0 var(--ds-space-lg, 16px);
+    font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+    font-size: 1.25rem;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.landing-grid {
+    display: grid;
+    gap: var(--ds-space-lg, 16px);
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+/* Two side-by-side directories (help topics / resource categories) — the
+   taxonomies stay separate on purpose (see docs/unification-audit.md §2.4). */
+.landing-directories {
+    display: grid;
+    gap: var(--ds-space-xl, 24px);
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    align-items: start;
+}
+
+@media (max-width: 640px) {
+    .landing-grid { grid-template-columns: 1fr; }
+    .landing-directories { grid-template-columns: 1fr; }
+}

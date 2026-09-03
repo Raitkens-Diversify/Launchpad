@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Webinar_Requires_Event_Datetime</fullName>
+    <active>true</active>
+    <description>A webinar&#39;s lifecycle (Upcoming / Past / Recorded) is derived from its event date, so a Webinar without one can never be placed. Other resource types skip this rule. Mirrored server-side in ResourceAdminController.saveResource.</description>
+    <errorConditionFormula>AND(
+    ISPICKVAL(Resource_Type__c, &quot;Webinar&quot;),
+    ISBLANK(Event_Datetime__c)
+)</errorConditionFormula>
+    <errorDisplayField>Event_Datetime__c</errorDisplayField>
+    <errorMessage>Webinars need an event date and time.</errorMessage>
+</ValidationRule>

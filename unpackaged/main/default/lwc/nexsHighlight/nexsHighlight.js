@@ -11,15 +11,10 @@
  * never mid-word — so "to" never bolds inside "Stop".
  */
 
-// Intentionally mirrors NexSKnowledgeController.STOPWORDS. This is a client-side
-// presentation concern and the stoplist is stable (out of scope to change), so a
-// small duplication is preferred over a server round-trip just to highlight.
-const STOPWORDS = new Set([
-    'how', 'do', 'i', 'a', 'an', 'the', 'to', 'of', 'is', 'are', 'what',
-    'why', 'when', 'where', 'which', 'who', 'and', 'or', 'in', 'on', 'for',
-    'with', 'my', 'me', 'can', 'does', 'will', 'this', 'that', 'it', 'be',
-    'at', 'as', 'by', 'if', 'from', 'into', 'about', 'your', 'you'
-]);
+// Shared stoplist: c/searchConstants is the client-side mirror of the Apex
+// SearchConstants class, so highlighting skips exactly the words the search
+// engine never scored on.
+import { STOPWORDS } from 'c/searchConstants';
 
 // A match counts only at a word start: string start, or preceded by a non-
 // alphanumeric character.

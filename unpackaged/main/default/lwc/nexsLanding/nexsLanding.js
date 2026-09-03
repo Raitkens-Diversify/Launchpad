@@ -1,7 +1,11 @@
 import { LightningElement, api, wire, track } from 'lwc';
 import getWelcomeState from '@salesforce/apex/NexSWelcomeController.getWelcomeState';
+import typeahead from '@salesforce/apex/NexSKnowledgeController.typeahead';
+import getResourceLinkBase from '@salesforce/apex/ResourceCenterService.getResourceLinkBase';
 // Same brand logo the new wizard top bar (envelopeTopBarV2) uses.
 import diversifyLogo from '@salesforce/resourceUrl/DiversifyLogoV2';
+import { createSuggestionFetcher } from 'c/dsSearchBar';
+import { createSearchLogger, APP_HELP_CENTER } from 'c/searchLogUtil';
 
 /**
  * nexsLanding
@@ -23,24 +27,9 @@ import diversifyLogo from '@salesforce/resourceUrl/DiversifyLogoV2';
  * view handlers for a NavigationMixin redirect guarded by surface.
  */
 export default class NexsLanding extends LightningElement {
-    /** @api hideBranding — hides the Diversify logo + "Help Center" crumb in
-     *  the header (search bar and the "?" help menu still show) for
-     *  embeddings, like ARC, that already have their own site chrome. Same
-     *  coercion as resourceCenter's hideBranding: a checkbox in the Builder
-     *  property panel or a content.json attribute can hand this over as the
-     *  string "false" rather than a real boolean. */
-    _hideBranding = false;
-    @api
-    get hideBranding() {
-        return this._hideBranding;
-    }
-    set hideBranding(value) {
-        this._hideBranding = value !== false && value !== 'false';
-    }
-
-    get showBranding() {
-        return !this._hideBranding;
-    }
+    /** @api hideBranding — passed through to c-ds-chrome (ARC embeddings
+     *  carry their own site chrome); the chrome coerces string values. */
+    @api hideBranding = false;
 
     logoUrl = diversifyLogo;
     @track view = 'loading'; // 'loading' | 'home' | 'browse'
@@ -53,6 +42,29 @@ export default class NexsLanding extends LightningElement {
     browseArticleId;
     browseSearchTerm;
     browseArticleUrlName;
+
+    // Cross-app chrome link (the reverse of the RC's "Help Center" button —
+    // both directions existed only as deep paths before the unification).
+    resourceBase;
+
+    @wire(getResourceLinkBase)
+    wiredResourceBase({ data }) {
+        if (data) {
+            this.resourceBase = data;
+        }
+    }
+
+    handleResourcesLink() {
+        if (this.resourceBase) {
+            window.open(this.resourceBase, '_blank', 'noopener');
+        }
+    }
+
+    // Host-owned glue for the header c-ds-search-bar (browse view).
+    @track headerSuggestions = [];
+    _lastHeaderTerm;
+    _fetchHeaderSuggestions = createSuggestionFetcher((term) => typeahead({ term, category: null }));
+    _headerSearchLogger = createSearchLogger(APP_HELP_CENTER);
 
     connectedCallback() {
         // ?article=<UrlName> deep links (Related Articles on the Resource
@@ -80,10 +92,6 @@ export default class NexsLanding extends LightningElement {
             // eslint-disable-next-line no-console
             console.error('nexsLanding getWelcomeState error', error);
         }
-    }
-
-    get copyrightLine() {
-        return `© ${new Date().getFullYear()} Diversify Financial. Internal use only.`;
     }
 
     get isLoading() {
@@ -136,6 +144,7 @@ export default class NexsLanding extends LightningElement {
 
     disconnectedCallback() {
         this._closeHelp();
+        this._headerSearchLogger.dispose();
     }
 
     // "Start the tour": the tour targets live on the home view, so make sure
@@ -157,17 +166,50 @@ export default class NexsLanding extends LightningElement {
         return this.template.querySelector('c-nexs-article-browser');
     }
 
+    async handleHeaderQuery(event) {
+        const term = event.detail.value;
+        this._lastHeaderTerm = term;
+        try {
+            const results = await this._fetchHeaderSuggestions(term);
+            if (results === null) {
+                return; // stale response — a newer request already rendered
+            }
+            this.headerSuggestions = (results || []).map((r) => ({
+                id: r.id,
+                title: r.title,
+                kind: 'article',
+                routeKey: r.urlName
+            }));
+            this._headerSearchLogger.settleTypeahead({ term, count: this.headerSuggestions.length });
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error('nexsLanding header typeahead error', error);
+        }
+    }
+
     handleHeaderSuggestionSelect(event) {
+        const { suggestion, rank } = event.detail;
+        this._headerSearchLogger.logTypeaheadConversion({
+            term: this._lastHeaderTerm,
+            suggestions: this.headerSuggestions,
+            clickedArticleId: suggestion.id,
+            rank
+        });
         const browser = this.browserEl;
         if (browser) {
-            browser.openArticleById(event.detail.articleId);
+            browser.openArticleById(suggestion.id);
         }
     }
 
     handleHeaderSearch(event) {
+        const value = (event.detail && event.detail.value) || '';
+        if (value.trim()) {
+            // The browser's full search logs this term itself.
+            this._headerSearchLogger.cancelZeroLog();
+        }
         const browser = this.browserEl;
         if (browser) {
-            browser.searchFor((event.detail && event.detail.value) || '');
+            browser.searchFor(value);
         }
     }
 

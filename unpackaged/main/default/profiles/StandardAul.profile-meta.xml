@@ -167,11 +167,6 @@
         <default>false</default>
         <visible>false</visible>
     </applicationVisibilities>
-    <applicationVisibilities>
-        <application>standard__Platform</application>
-        <default>true</default>
-        <visible>true</visible>
-    </applicationVisibilities>
     <fieldPermissions>
         <editable>true</editable>
         <field>Account.Count_of_Accounts__c</field>
@@ -3070,11 +3065,6 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Case.Current_Task_Subject_Assignee__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Case.Current_Task__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -16684,6 +16674,14 @@
         <visibility>Hidden</visibility>
     </tabVisibilities>
     <tabVisibilities>
+        <tab>Help_Center_Article</tab>
+        <visibility>Hidden</visibility>
+    </tabVisibilities>
+    <tabVisibilities>
+        <tab>Help_Center_Events</tab>
+        <visibility>Hidden</visibility>
+    </tabVisibilities>
+    <tabVisibilities>
         <tab>Households</tab>
         <visibility>DefaultOn</visibility>
     </tabVisibilities>
@@ -16785,6 +16783,10 @@
     </tabVisibilities>
     <tabVisibilities>
         <tab>UAT_Testing</tab>
+        <visibility>Hidden</visibility>
+    </tabVisibilities>
+    <tabVisibilities>
+        <tab>Unified_Support_Home</tab>
         <visibility>Hidden</visibility>
     </tabVisibilities>
     <tabVisibilities>

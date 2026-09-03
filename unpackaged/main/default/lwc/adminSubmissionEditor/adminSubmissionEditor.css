@@ -85,7 +85,7 @@
 }
 .ase__help {
     margin: 0;
-    font-size: 0.8125rem;
+    font-size: var(--div-font-scale-base, 1rem);
     line-height: 1.45;
     color: #4b5563;
 }

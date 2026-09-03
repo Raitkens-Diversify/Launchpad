@@ -16,6 +16,20 @@ export function resourceDetailUrl(base, slug) {
 }
 
 /**
+ * Absolute URL of a Help Center article, or null when base/urlName is missing.
+ * Canonical since the /article route shipped (2026-08 unification):
+ * <siteRoot>/article?name=<UrlName>. The legacy <siteRoot>/?article= form
+ * still resolves via the home-route shim — never build it for new links.
+ * `base` is the SITE root (ResourceCenterService.getHelpCenterLinkBase()).
+ */
+export function articleUrl(base, urlName) {
+    if (!base || !urlName) {
+        return null;
+    }
+    return `${base.replace(/\/$/, '')}/article?name=${encodeURIComponent(urlName)}`;
+}
+
+/**
  * Copy text to the clipboard. Resolves on success, rejects on failure.
  * navigator.clipboard needs a secure context + user activation; the hidden
  * textarea + execCommand path covers environments where it's unavailable.

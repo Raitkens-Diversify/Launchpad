@@ -1,0 +1,88 @@
+/* Tokens inherit from the host page's :host block (docs/ui-standards.md §1);
+   every var() carries the canonical literal fallback — no :host redeclaration,
+   matching the other ds* presentational primitives (dsBadge, dsTopicNav). */
+:host {
+    display: block;
+    height: 100%;
+}
+
+.ds-content-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-sm, 8px);
+    height: 100%;
+    padding: var(--ds-space-lg, 16px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.ds-content-card:hover {
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+    box-shadow: var(--ds-shadow-hover, 0 4px 14px rgba(15, 64, 111, 0.08));
+}
+
+.ds-content-card__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+}
+.ds-content-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--ds-lightest-blue, #e2f8ff);
+    color: var(--ds-medium-blue, #1a76bb);
+}
+.ds-content-card__icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.ds-content-card__title {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    cursor: pointer;
+}
+.ds-content-card__title:hover {
+    color: var(--ds-medium-blue, #1a76bb);
+}
+
+.ds-content-card__desc {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.ds-content-card__action {
+    margin-top: auto;
+    padding-top: var(--ds-space-sm, 8px);
+}
+.ds-content-card__btn {
+    display: inline-block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+    background: var(--slds-g-color-accent-1, #0f406f);
+    border: none;
+    border-radius: var(--ds-radius-md, 8px);
+    padding: 8px 16px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+.ds-content-card__btn:hover {
+    background: var(--slds-g-color-accent-2, #0b2f51);
+}

@@ -2,17 +2,30 @@ import { LightningElement, api, wire } from 'lwc';
 import { iconPath } from 'c/rcIcons';
 import getResourceBySlug from '@salesforce/apex/ResourceCenterService.getResourceBySlug';
 import trackDownload from '@salesforce/apex/ResourceCenterService.trackDownload';
-import getHelpCenterLinkBase from '@salesforce/apex/ResourceCenterService.getHelpCenterLinkBase';
 import getResourceDownloadUrl from '@salesforce/apex/ResourceCenterService.getResourceDownloadUrl';
-import { TYPE_VIDEO, TYPE_EXTERNAL_LINK } from 'c/rcConstants';
+import {
+    TYPE_VIDEO,
+    TYPE_EXTERNAL_LINK,
+    TYPE_WEBINAR,
+    WEBINAR_STATUS_UPCOMING,
+    WEBINAR_STATUS_PAST,
+    WEBINAR_STATUS_RECORDED
+} from 'c/rcConstants';
+import { linkContext, articleHref } from 'c/contextNav';
+import { formatDateTime } from 'c/dsDateBlock';
+import { formatDurationMinutes } from 'c/uatCardUtil';
 
 /**
  * resourceDetail — full resource view. File-backed types (PDF/Form/Template):
  * inline paged preview from Salesforce's SVGZ renditions (the download servlet
  * is Content-Disposition: attachment, so it can never render in a frame) +
  * explicit Download. Video: responsive 16:9 embed. External Link: opens in a
- * new tab. Shows Related Articles (reverse junction), linking to the Help
- * Center when helpCenterBaseUrl is provided.
+ * new tab. Webinar: event metadata plus the status-specific action — Upcoming
+ * gets a "Sign up" link, Past says the recording is coming, Recorded plays the
+ * recording through the SAME embed path as Video (or a native <video> when the
+ * recording is the attached file). Status comes from the DTO (WebinarLifecycle)
+ * and is never derived here. Shows Related Articles (reverse junction), linking
+ * to the Help Center when helpCenterBaseUrl is provided.
  *
  * Preview paging: page count isn't queryable, so pages grow lazily — each
  * onload appends the next page until one errors (capped). A page-0 error falls
@@ -29,13 +42,13 @@ export default class ResourceDetail extends LightningElement {
     /** Optional override; defaults to the site root resolved server-side. */
     @api helpCenterBaseUrl;
 
-    resolvedHelpBase;
+    /** {surface, helpBase, resourceBase} from c/contextNav; null until resolved. */
+    linkCtx = null;
 
-    @wire(getHelpCenterLinkBase)
-    wiredHelpBase({ data }) {
-        if (data) {
-            this.resolvedHelpBase = data;
-        }
+    connectedCallback() {
+        linkContext().then((ctx) => {
+            this.linkCtx = ctx;
+        });
     }
 
     detail;
@@ -61,10 +74,39 @@ export default class ResourceDetail extends LightningElement {
     }
 
     get isFileBacked() {
-        return this.hasFile && !this.isVideo && !this.isExternal;
+        return this.hasFile && !this.showEmbed && !this.isExternal && !this.isWebinar;
     }
-    get isVideo() {
-        return this.detail && this.detail.resourceType === TYPE_VIDEO && !!this.detail.videoEmbedUrl;
+    /** Embedded player: a Video, or a Webinar whose recording is an embed URL. */
+    get showEmbed() {
+        return !!this.detail && !!this.detail.videoEmbedUrl
+            && (this.detail.resourceType === TYPE_VIDEO || this.isWebinar);
+    }
+    get isWebinar() {
+        return !!this.detail && this.detail.resourceType === TYPE_WEBINAR;
+    }
+    get isRecorded() {
+        return this.isWebinar && this.detail.webinarStatus === WEBINAR_STATUS_RECORDED;
+    }
+    /** Recorded webinar with no embed: the newest attached file is the recording. */
+    get showFileVideo() {
+        return this.isRecorded && !this.showEmbed && this.hasFile;
+    }
+    get showSignUp() {
+        return this.isWebinar && this.detail.webinarStatus === WEBINAR_STATUS_UPCOMING
+            && !!this.detail.registrationUrl;
+    }
+    get showRecordingPending() {
+        return this.isWebinar && this.detail.webinarStatus === WEBINAR_STATUS_PAST;
+    }
+    get webinarMeta() {
+        if (!this.isWebinar) {
+            return [];
+        }
+        return [
+            { label: 'When', value: formatDateTime(this.detail.eventDatetime) },
+            { label: 'Presenter', value: this.detail.presenter },
+            { label: 'Duration', value: formatDurationMinutes(this.detail.durationMinutes) }
+        ].filter((m) => Boolean(m.value));
     }
     get isExternal() {
         return this.detail && this.detail.resourceType === TYPE_EXTERNAL_LINK && !!this.detail.externalUrl;
@@ -88,12 +130,11 @@ export default class ResourceDetail extends LightningElement {
         if (!this.detail || !this.detail.relatedArticles) {
             return [];
         }
-        const raw = this.helpCenterBaseUrl || this.resolvedHelpBase;
-        const base = raw ? raw.replace(/\/$/, '') : null;
         return this.detail.relatedArticles.map((a) => ({
             ...a,
-            // Query-param deep link — the site has no /article/ route.
-            href: base && a.urlName ? `${base}/?article=${encodeURIComponent(a.urlName)}` : null
+            href: this.helpCenterBaseUrl
+                ? articleHref({ helpBase: this.helpCenterBaseUrl }, a.urlName)
+                : articleHref(this.linkCtx, a.urlName)
         }));
     }
     get hasRelated() {

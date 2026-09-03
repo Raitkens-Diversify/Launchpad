@@ -1,0 +1,34 @@
+/* Tokens inherit from unifiedLanding's :host block (docs/ui-standards.md §1);
+   every var() carries the canonical literal fallback — no :host redeclaration. */
+:host {
+    display: block;
+}
+.wa {
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+    padding: var(--ds-space-lg, 16px);
+}
+.wa__title {
+    margin: 0 0 var(--ds-space-md, 12px);
+    font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+    font-size: 1.25rem;
+    line-height: 1.2;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.wa__section {
+    margin: var(--ds-space-md, 12px) 0 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.wa__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.wa__item + .wa__item {
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}

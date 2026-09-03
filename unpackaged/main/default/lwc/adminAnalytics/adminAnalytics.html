@@ -10,6 +10,11 @@
                                 value={surface}
                                 options={surfaceOptions}
                                 onchange={handleSurfaceChange}></lightning-combobox>
+            <lightning-combobox variant="label-hidden"
+                                label="App"
+                                value={app}
+                                options={appOptions}
+                                onchange={handleAppChange}></lightning-combobox>
             <lightning-button-icon icon-name="utility:refresh"
                                    alternative-text="Refresh"
                                    onclick={handleRefresh}></lightning-button-icon>

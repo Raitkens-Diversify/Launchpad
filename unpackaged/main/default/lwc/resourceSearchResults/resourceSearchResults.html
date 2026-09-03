@@ -1,50 +1,43 @@
 <template>
     <div class="rsr">
-        <h1 class="rsr__title">Results for “{term}”</h1>
+        <h1 class="rsr__title">Results for &ldquo;{term}&rdquo;</h1>
+
+        <template if:true={showFuzzy}>
+            <p class="rsr__notice">Showing results for &ldquo;{meta.corrected}&rdquo;.</p>
+        </template>
 
         <template if:true={loading}>
             <div class="rsr__status">
-                <c-arc-loading-spinner alternative-text="Searching" size="small"></c-arc-loading-spinner>
+                <lightning-spinner alternative-text="Searching" size="small"></lightning-spinner>
             </div>
-        </template>
-
-        <template if:true={hasResources}>
-            <section class="rsr__section">
-                <p class="rsr__label">Resources</p>
-                <ul class="rsr__list">
-                    <template for:each={resources} for:item="r">
-                        <li key={r.id} class="rsr__row" data-slug={r.slug} role="button"
-                            tabindex="0" onclick={handleResource}>
-                            <span class="rsr__row-title">{r.title}</span>
-                            <template if:true={r.subtitle}>
-                                <span class="rsr__row-sub">{r.subtitle}</span>
-                            </template>
-                        </li>
-                    </template>
-                </ul>
-            </section>
         </template>
 
         <template if:true={hasArticles}>
             <section class="rsr__section">
                 <p class="rsr__label">Help Center Articles</p>
-                <ul class="rsr__list">
-                    <template for:each={articles} for:item="a">
-                        <li key={a.id} class="rsr__row">
-                            <template if:true={a.href}>
-                                <a class="rsr__row-link" href={a.href} target="_blank"
-                                   rel="noopener noreferrer">{a.title}</a>
-                            </template>
-                            <template if:false={a.href}>
-                                <span class="rsr__row-title">{a.title}</span>
-                            </template>
-                            <template if:true={a.subtitle}>
-                                <span class="rsr__row-sub">{a.subtitle}</span>
-                            </template>
-                        </li>
+                <div class="rsr__grid" oncontentselect={handleContentSelect}>
+                    <template for:each={articleItems} for:item="item">
+                        <c-ds-content-card key={item.id} item={item}></c-ds-content-card>
                     </template>
-                </ul>
+                </div>
             </section>
+        </template>
+        <template if:true={articlesDegraded}>
+            <p class="rsr__status">Help Center articles couldn&rsquo;t be searched right now.</p>
+        </template>
+
+        <template if:true={hasResources}>
+            <section class="rsr__section">
+                <p class="rsr__label">Resources</p>
+                <div class="rsr__grid" oncontentselect={handleContentSelect}>
+                    <template for:each={resourceItems} for:item="item">
+                        <c-ds-content-card key={item.id} item={item}></c-ds-content-card>
+                    </template>
+                </div>
+            </section>
+        </template>
+        <template if:true={resourcesDegraded}>
+            <p class="rsr__status">Resources couldn&rsquo;t be searched right now.</p>
         </template>
 
         <template if:true={isEmpty}>

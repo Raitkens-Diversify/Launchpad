@@ -1,7 +1,10 @@
-import { LightningElement, api, wire } from 'lwc';
+import { LightningElement, api, wire, track } from 'lwc';
 import getCategories from '@salesforce/apex/NexSKnowledgeController.getCategories';
 import getArticlesByCategory from '@salesforce/apex/NexSKnowledgeController.getArticlesByCategory';
 import getArticle from '@salesforce/apex/NexSKnowledgeController.getArticle';
+import typeahead from '@salesforce/apex/NexSKnowledgeController.typeahead';
+import { createSuggestionFetcher } from 'c/dsSearchBar';
+import { createSearchLogger, APP_HELP_CENTER } from 'c/searchLogUtil';
 // Shared Help_Topics icon paths (rendered with stroke=currentColor).
 import { topicIconPath } from 'c/nexsTopicIcons';
 // This component owns the guided tour's data-tour-id targets; registering the
@@ -36,8 +39,12 @@ export default class NexsHome extends LightningElement {
 
     categories = [];
     articles = [];
+    @track searchSuggestions = [];
     _prefetched = new Set(); // article ids whose bodies we've warmed on hover
     _unregisterTourScope = null;
+    // Host-owned search glue for c-ds-search-bar (the bar is Apex-free).
+    _fetchSuggestions = createSuggestionFetcher((term) => typeahead({ term, category: null }));
+    _searchLogger = createSearchLogger(APP_HELP_CENTER);
 
     connectedCallback() {
         this._unregisterTourScope = registerTourScope(this.template);
@@ -48,6 +55,7 @@ export default class NexsHome extends LightningElement {
             this._unregisterTourScope();
             this._unregisterTourScope = null;
         }
+        this._searchLogger.dispose();
     }
 
     @wire(getCategories)
@@ -138,10 +146,38 @@ export default class NexsHome extends LightningElement {
     }
 
     // A suggestion was picked in the hero search bar.
+    async handleSearchQuery(event) {
+        const term = event.detail.value;
+        this._lastSearchTerm = term;
+        try {
+            const results = await this._fetchSuggestions(term);
+            if (results === null) {
+                return; // stale response — a newer request already rendered
+            }
+            this.searchSuggestions = (results || []).map((r) => ({
+                id: r.id,
+                title: r.title,
+                kind: 'article',
+                routeKey: r.urlName
+            }));
+            this._searchLogger.settleTypeahead({ term, count: this.searchSuggestions.length });
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error('nexsHome typeahead error', error);
+        }
+    }
+
     handleSuggestionSelect(event) {
+        const { suggestion, rank } = event.detail;
+        this._searchLogger.logTypeaheadConversion({
+            term: this._lastSearchTerm,
+            suggestions: this.searchSuggestions,
+            clickedArticleId: suggestion.id,
+            rank
+        });
         this.dispatchEvent(
             new CustomEvent('articleselect', {
-                detail: { articleId: event.detail.articleId, urlName: event.detail.urlName }
+                detail: { articleId: suggestion.id, urlName: suggestion.routeKey }
             })
         );
     }
@@ -157,6 +193,9 @@ export default class NexsHome extends LightningElement {
         if (!value.trim()) {
             return; // clearing the box on home is a no-op
         }
+        // The full-results page logs this term itself — a pending typeahead
+        // gap log for it would dupe.
+        this._searchLogger.cancelZeroLog();
         this.dispatchEvent(new CustomEvent('searchsubmit', { detail: { value } }));
     }
 }

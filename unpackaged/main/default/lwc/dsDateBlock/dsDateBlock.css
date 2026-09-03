@@ -1,0 +1,38 @@
+/* Tokens inherit from the host page's :host block (docs/ui-standards.md §1);
+   every var() carries the canonical literal fallback — no :host redeclaration. */
+:host {
+    display: inline-block;
+}
+.ds-date {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 56px;
+    padding: var(--ds-space-xs, 4px) var(--ds-space-sm, 8px);
+    background: var(--ds-lightest-blue, #e2f8ff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-md, 8px);
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    line-height: 1.1;
+    text-align: center;
+}
+.ds-date__weekday,
+.ds-date__month {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ds-medium-blue, #1a76bb);
+}
+.ds-date__day {
+    font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+.ds-date--sm {
+    min-width: 48px;
+}
+.ds-date--sm .ds-date__day {
+    font-size: 1.25rem;
+}

@@ -1,7 +1,8 @@
 import { LightningElement, api, wire } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
 import getGuide from '@salesforce/apex/HelpGuideController.getGuide';
 import getSupportSettings from '@salesforce/apex/NexSKnowledgeController.getSupportSettings';
-import getHelpCenterLinkBase from '@salesforce/apex/ResourceCenterService.getHelpCenterLinkBase';
+import { linkContext, goToArticle } from 'c/contextNav';
 
 /**
  * helpGuide — config-driven "Get Help" decision tree. Loads a published guide
@@ -14,21 +15,23 @@ import getHelpCenterLinkBase from '@salesforce/apex/ResourceCenterService.getHel
  *
  * @api guideKey             — which guide to run (default 'get_help')
  * @api helpCenterBaseUrl    — absolute Help Center base, for article targets
- *                              (article deep links use /?article=<urlName> —
- *                              the site has no /article/ route)
+ *                              (article deep links are /article?name=<urlName>;
+ *                              c/contextNav picks the site URL or the
+ *                              core-app tab per surface)
  * @api caseUrl              — contact/case target; defaults to the
  *                              Resource_Center_Setting__mdt support mailbox
  * @api resourceCenterBaseUrl — optional; when set, category/resource targets
  *                              open the RC site by URL instead of firing events
  */
-export default class HelpGuide extends LightningElement {
+export default class HelpGuide extends NavigationMixin(LightningElement) {
     @api guideKey = 'get_help';
     @api helpCenterBaseUrl;
     @api caseUrl;
     @api resourceCenterBaseUrl;
 
     supportSettings;
-    resolvedHelpBase;
+    /** {surface, helpBase, resourceBase} from c/contextNav; null until resolved. */
+    linkCtx = null;
 
     @wire(getSupportSettings)
     wiredSupportSettings({ data }) {
@@ -37,15 +40,8 @@ export default class HelpGuide extends LightningElement {
         }
     }
 
-    @wire(getHelpCenterLinkBase)
-    wiredHelpBase({ data }) {
-        if (data) {
-            this.resolvedHelpBase = data;
-        }
-    }
-
     get effectiveHelpCenterBaseUrl() {
-        return this.helpCenterBaseUrl || this.resolvedHelpBase;
+        return this.helpCenterBaseUrl || (this.linkCtx && this.linkCtx.helpBase);
     }
 
     get effectiveCaseUrl() {
@@ -64,6 +60,9 @@ export default class HelpGuide extends LightningElement {
     error;
 
     connectedCallback() {
+        linkContext().then((ctx) => {
+            this.linkCtx = ctx;
+        });
         getGuide({ guideKey: this.guideKey })
             .then((data) => {
                 this.loading = false;
@@ -112,20 +111,23 @@ export default class HelpGuide extends LightningElement {
 
     navigateTerminal(type, value) {
         if (type === 'category' || type === 'resource') {
+            // Unchanged: a Builder-supplied base is an explicit external
+            // override; otherwise the guide is embedded (the only deployment
+            // today) and the host swaps the view in place. This is an
+            // embedded-vs-standalone question, not a surface one, so it does
+            // NOT go through contextNav — routing it there would turn the
+            // Resource Center's inline swap into a full page load.
             if (this.resourceCenterBaseUrl) {
                 const base = this.resourceCenterBaseUrl.replace(/\/$/, '');
                 window.open(`${base}?rcview=${type}&rcslug=${encodeURIComponent(value)}`, '_self');
-            } else {
-                const name = type === 'category' ? 'categoryselect' : 'resourceselect';
-                this.dispatchEvent(new CustomEvent(name, {
-                    detail: { slug: value }, bubbles: true, composed: true
-                }));
+                return;
             }
-        } else if (type === 'article' && this.effectiveHelpCenterBaseUrl) {
-            // Query-param deep link handled by nexsLanding — the LWR site has
-            // no /article/ route.
-            const base = this.effectiveHelpCenterBaseUrl.replace(/\/$/, '');
-            window.open(`${base}/?article=${encodeURIComponent(value)}`, '_blank', 'noopener');
+            const name = type === 'category' ? 'categoryselect' : 'resourceselect';
+            this.dispatchEvent(new CustomEvent(name, {
+                detail: { slug: value }, bubbles: true, composed: true
+            }));
+        } else if (type === 'article') {
+            goToArticle(this, this.linkCtx, { urlName: value });
         } else if (type === 'case' && this.effectiveCaseUrl) {
             window.open(this.effectiveCaseUrl, '_self');
         }

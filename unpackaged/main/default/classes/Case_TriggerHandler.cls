@@ -551,7 +551,7 @@ setOfTypeToName.add('Account Servicing - Approval Required');
         // Match templates for each Case
         for (Case caseRecord : newList) {
             
-            if ((caseRecord.Donotcalc__c != true && caseRecord.submitted__c == true) || caseRecord.origin == 'Service Request') {
+            if ((caseRecord.Donotcalc__c != true && caseRecord.submitted__c == true)) {
                 
                 caseTemplateMatchFields = '';
                 
@@ -1391,7 +1391,7 @@ record.OwnerId = queuePRId;
         for(Case c : newMap.values()){
             Case oldCase = oldMap.get(c.Id);
             System.debug('submitted: ' + c.Submitted__c + oldCase.submitted__c);
-            if(c.Recalculate_Case_Template__c || (c.Submitted__c && !oldCase.submitted__c || c.origin == 'Service Request')){
+            if(c.Recalculate_Case_Template__c || (c.Submitted__c && !oldCase.submitted__c)){
                 //if(c.Origin == 'Wizard'){
                     casesWizardToRecalc.put(c.Id, c);
                 /*} else {

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Webinar_Upcoming_Requires_Registration</fullName>
+    <active>true</active>
+    <description>An upcoming webinar is advertised with a Sign up action, which needs a registration link. Save-time only: once the event date passes the link is optional. Mirrored server-side in ResourceAdminController.saveResource.</description>
+    <errorConditionFormula>AND(
+    ISPICKVAL(Resource_Type__c, &quot;Webinar&quot;),
+    NOT(ISBLANK(Event_Datetime__c)),
+    Event_Datetime__c &gt; NOW(),
+    ISBLANK(Registration_URL__c)
+)</errorConditionFormula>
+    <errorDisplayField>Registration_URL__c</errorDisplayField>
+    <errorMessage>Upcoming webinars need a registration URL so people can sign up.</errorMessage>
+</ValidationRule>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Unified Help Center + Resource Center landing (LWC tab; the component renders its own chrome). The same component the /help/ site home renders.</description>
+    <label>Home</label>
+    <lwcComponent>unifiedLanding</lwcComponent>
+    <motif>Custom54: Boat</motif>
+</CustomTab>

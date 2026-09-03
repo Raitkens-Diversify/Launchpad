@@ -1,0 +1,292 @@
+/* Self-declared tokens — eventsPage is a route root (ui-standards §1:
+   platform-injected --slds-g-* hooks beat inheritance, so roots declare their
+   own; copied from unifiedLanding, the canonical set). c-ds-chrome and the
+   ds* children inherit these. */
+:host {
+    display: block;
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+
+    /* --- V2 / SLDS2 tokens --- */
+    --slds-g-spacing-1: 4px;
+    --slds-g-spacing-2: 0.5rem;
+    --slds-g-spacing-3: 0.75rem;
+    --slds-g-spacing-4: 1rem;
+    --slds-g-spacing-5: 24px;
+    --slds-g-spacing-10: 48px;
+    --slds-g-radius-border-2: 0.5rem;
+    --slds-g-font-family-base: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    --slds-g-font-scale-1: 14px;
+    --slds-g-font-scale-2: 0.875rem;
+    --slds-g-font-scale-3: 1.25rem;
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-border-2: #b6bcc5;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-accent-3: #071c31;
+    --slds-g-color-on-accent-1: #ffffff;
+    --slds-g-color-accent-container-1: #0f406f;
+
+    /* --- V1 --ds-* set for the reused ds* components --- */
+    --ds-dark-blue: #0f406f;
+    --ds-medium-blue: #1a76bb;
+    --ds-light-blue: #14bef0;
+    --ds-lightest-blue: #e2f8ff;
+    --ds-white: #ffffff;
+    --ds-gray-1: #f3f4f6;
+    --ds-gray-2: #d1d5db;
+    --ds-gray-3: #b6bcc5;
+    --ds-gray-4: #9aa1ad;
+    --ds-gray-5: #4b5563;
+    --ds-gray-6: #374151;
+    --ds-font-heading: "Libre Baskerville", Georgia, serif;
+    --ds-font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    --ds-space-xs: 4px;
+    --ds-space-sm: 8px;
+    --ds-space-md: 12px;
+    --ds-space-lg: 16px;
+    --ds-space-xl: 24px;
+    --ds-space-2xl: 32px;
+    --ds-space-3xl: 48px;
+    --ds-radius-sm: 6px;
+    --ds-radius-md: 8px;
+    --ds-radius-lg: 10px;
+    --ds-radius-xl: 12px;
+    --ds-radius-pill: 20px;
+    --ds-border-light: 1px solid #e5e7eb;
+    --ds-border-default: 1px solid #d1d5db;
+    --ds-shadow-rest: 0 1px 2px rgba(15, 23, 42, 0.06);
+    --ds-shadow-hover: 0 4px 14px rgba(15, 64, 111, 0.08);
+    --ds-shadow-drop: 0 8px 24px rgba(9, 36, 63, 0.12);
+    --ds-shadow-raised: 0 -4px 12px rgba(9, 36, 63, 0.08);
+
+    /* Agenda lists read better narrower than the landing's 1040px column. */
+    --ev-content-max: 840px;
+}
+
+/* Seven columns are cramped at agenda width; the calendar view opens up. */
+.ev--calendar {
+    --ev-content-max: 960px;
+}
+
+.ev {
+    max-width: var(--ev-content-max, 840px);
+    margin: 0 auto;
+    padding: var(--ds-space-2xl, 32px) var(--ds-space-lg, 16px) var(--ds-space-3xl, 48px);
+}
+
+.ev__head {
+    margin-bottom: var(--ds-space-xl, 24px);
+}
+
+.ev__heading {
+    margin: 0;
+    font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+    font-size: 1.75rem;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.ev__sub {
+    margin: var(--ds-space-sm, 8px) 0 0;
+    color: var(--ds-gray-5, #4b5563);
+}
+
+.ev__tabs {
+    display: block;
+    margin-top: var(--ds-space-xl, 24px);
+}
+
+.ev__calendar {
+    margin-top: var(--ds-space-xl, 24px);
+}
+
+.ev__month {
+    margin-top: var(--ds-space-2xl, 32px);
+}
+
+.ev__month-title {
+    margin: 0 0 var(--ds-space-md, 12px);
+    font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+    font-size: 1.25rem;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+/* Cards stack with a gap (the resourceCategoryPage .rc-sections idiom) —
+   the grey page is the gutter, so no hairline dividers. */
+.ev__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-md, 12px);
+}
+
+/* One event = one card: the family recipe (dsContentCard / uatPool) —
+   white on the grey page, border at rest, accent border + lift on hover. */
+.ev__row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: start;
+    gap: var(--ds-space-lg, 16px);
+    padding: var(--ds-space-lg, 16px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.ev__row:hover,
+.ev__row:focus-within {
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+    box-shadow: var(--ds-shadow-hover, 0 4px 14px rgba(15, 64, 111, 0.08));
+}
+
+/* Past cards mute the date tile through the tokens c-ds-date-block consumes
+   (a token hook, not cross-shadow styling). */
+.ev__row--past {
+    --ds-lightest-blue: var(--slds-g-color-surface-container-2, #f3f4f6);
+    --ds-medium-blue: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.ev__main {
+    min-width: 0;
+}
+
+.ev__title-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ds-space-sm, 8px);
+}
+
+.ev__title {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.ev__meta {
+    margin: var(--ds-space-xs, 4px) 0 0;
+    font-size: var(--slds-g-font-scale-2, 0.875rem);
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.ev__desc {
+    margin: var(--ds-space-sm, 8px) 0 0;
+    color: var(--slds-g-color-on-surface-2, #374151);
+    line-height: 1.5;
+    /* Long descriptions must not dwarf the card; the popover shows the full text. */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.ev__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ds-space-lg, 16px);
+    margin-top: var(--ds-space-md, 12px);
+}
+
+/* Primary action: the family button (ds-content-card__btn / ds-agenda__btn
+   radius), shared by the Sign up anchor and the Watch recording button. */
+.ev__cta {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--ds-space-sm, 8px) var(--ds-space-lg, 16px);
+    border-radius: var(--ds-radius-md, 8px);
+    background: var(--slds-g-color-accent-1, #0f406f);
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: 600;
+    line-height: 1.25;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+}
+.ev__cta:hover {
+    background: var(--slds-g-color-accent-2, #0b2f51);
+}
+.ev__cta:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+.ev__cta--button {
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+/* No action yet (past, unrecorded) — a note, never a dead button. */
+.ev__note {
+    margin: 0;
+    font-size: var(--slds-g-font-scale-1, 14px);
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* Secondary action: quiet text button, sized to the primary's hit height. */
+.ev__link {
+    background: none;
+    border: none;
+    padding: var(--ds-space-sm, 8px) 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: 500;
+    color: var(--ds-medium-blue, #1a76bb);
+}
+.ev__link:hover {
+    text-decoration: underline;
+}
+.ev__link:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+    border-radius: var(--ds-radius-sm, 6px);
+}
+
+/* Empty state is a card too — a grey fill would vanish into the page. */
+.ev__empty {
+    margin: var(--ds-space-2xl, 32px) 0 0;
+    padding: var(--ds-space-xl, 24px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    text-align: center;
+}
+
+/* Calendar detail popover body (rendered into c-ds-popover's slot). */
+.ev__pop-title {
+    margin: 0 var(--ds-space-xl, 24px) 0 0; /* clears the popover's close button */
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.ev__pop-when {
+    font-weight: 500;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+/* The popover is where the full description lives — no clamp here. */
+.ev__pop .ev__desc {
+    display: block;
+    -webkit-line-clamp: unset;
+    overflow: visible;
+}
+
+@media (max-width: 640px) {
+    .ev__row {
+        padding: var(--ds-space-md, 12px);
+        gap: var(--ds-space-md, 12px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ev__row,
+    .ev__cta {
+        transition-duration: 0.01ms;
+    }
+}

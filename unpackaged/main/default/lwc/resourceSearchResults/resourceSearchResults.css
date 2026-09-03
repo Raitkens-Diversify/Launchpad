@@ -23,57 +23,28 @@
     text-transform: uppercase;
     color: var(--slds-g-color-on-surface-1, #4b5563);
 }
-.rsr__list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
-    border-radius: var(--ds-radius-lg, 10px);
-    background: var(--slds-g-color-surface-container-1, #ffffff);
+.rsr__grid {
+    display: grid;
+    gap: var(--ds-space-lg, 16px);
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
 }
-.rsr__row {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: var(--ds-space-md, 12px) var(--ds-space-lg, 16px);
-    cursor: pointer;
+@media (max-width: 640px) {
+    .rsr__grid { grid-template-columns: 1fr; }
 }
-.rsr__row + .rsr__row {
-    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
-}
-.rsr__row:hover {
-    background: var(--ds-lightest-blue, #e2f8ff);
-}
-.rsr__row-title {
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--slds-g-color-on-surface-3, #09243f);
-}
-.rsr__row-link {
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--ds-medium-blue, #1a76bb);
-    text-decoration: none;
-}
-.rsr__row-link:hover { text-decoration: underline; }
-.rsr__row-sub {
-    font-size: 0.8125rem;
+.rsr__notice {
+    margin: 0 0 var(--ds-space-md, 12px);
+    font-size: 0.875rem;
+    font-style: italic;
     color: var(--slds-g-color-on-surface-1, #4b5563);
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
 }
 .rsr__status {
     padding: var(--ds-space-xl, 24px);
     text-align: center;
     color: var(--slds-g-color-on-surface-1, #4b5563);
-  /* c-arc-loading-spinner is position:absolute and centres on the nearest
-     POSITIONED ancestor. Without this it escapes past this container to
-     whatever ancestor happens to be positioned -- on the ARC shell that is
-     .theme-layout__main, so the spinner floated in the middle of the page
-     instead of sitting where it belongs. min-height gives it room, since an
-     absolutely positioned child contributes no height. */
-  position: relative;
-  min-height: 4rem;
+    /* The spinner is position:absolute and centres on the nearest POSITIONED
+       ancestor; without this it escapes to whatever ancestor happens to be
+       positioned (on the ARC shell, .theme-layout__main — mid-page). min-height
+       gives it room, since an absolutely positioned child adds no height. */
+    position: relative;
+    min-height: 4rem;
 }

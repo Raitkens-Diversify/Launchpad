@@ -324,12 +324,6 @@
         </columns>
         <columns>
             <checkedByDefault>false</checkedByDefault>
-            <displayNameOverride>Current Task</displayNameOverride>
-            <field>Current_Task__c</field>
-            <table>Case</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
             <displayNameOverride>Current Task Id</displayNameOverride>
             <field>Current_Task_Id__c</field>
             <table>Case</table>

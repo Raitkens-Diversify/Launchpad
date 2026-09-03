@@ -1,0 +1,71 @@
+{
+  "type" : "sfdc_cms__view",
+  "title" : "Article",
+  "contentBody" : {
+    "component" : {
+      "children" : [ {
+        "children" : [ {
+          "attributes" : {
+            "backgroundImageConfig" : "",
+            "backgroundImageOverlay" : "rgba(0,0,0,0)",
+            "componentSpacerSize" : "",
+            "dxpStyle" : { },
+            "layoutDirectionDesktop" : "row",
+            "layoutDirectionMobile" : "column",
+            "layoutDirectionTablet" : "column",
+            "maxContentWidth" : "",
+            "sectionColumnGutterWidth" : "",
+            "sectionConfig" : "{\"UUID\":\"3d5365e7-f55b-4d4e-a734-4f664de5e195\",\"columns\":[{\"UUID\":\"5ff15fe4-4f3e-4624-b86d-d839fec21c99\",\"columnName\":\"Column 1\",\"columnKey\":\"col1\",\"columnWidth\":\"12\",\"seedComponents\":null}]}",
+            "sectionMinHeight" : "",
+            "sectionVerticalAlign" : "flex-start"
+          },
+          "children" : [ {
+            "children" : [ {
+              "attributes" : {
+                "dxpStyle" : { }
+              },
+              "definition" : "c:helpArticlePage",
+              "id" : "6290f325-4410-47bf-baca-0ee7675a35cb",
+              "type" : "component"
+            } ],
+            "id" : "5ff15fe4-4f3e-4624-b86d-d839fec21c99",
+            "name" : "col1",
+            "title" : "Column 1",
+            "type" : "region"
+          } ],
+          "definition" : "community_layout:section",
+          "id" : "3d5365e7-f55b-4d4e-a734-4f664de5e195",
+          "type" : "component"
+        } ],
+        "id" : "39e902c4-21f5-4674-bc0f-6572b3aa3cc3",
+        "name" : "content",
+        "title" : "Content",
+        "type" : "region"
+      }, {
+        "children" : [ {
+          "attributes" : {
+            "customHeadTags" : "",
+            "description" : "",
+            "dxpStyle" : { },
+            "pageTitle" : "Article",
+            "recordId" : "{!recordId}"
+          },
+          "definition" : "community_builder:seoAssistant",
+          "id" : "91650d22-cb46-4453-959e-d71bbd44f145",
+          "type" : "component"
+        } ],
+        "id" : "b8f0a2d6-4c1e-49a3-9d57-2e6b81c4f0aa",
+        "name" : "sfdcHiddenRegion",
+        "title" : "sfdcHiddenRegion",
+        "type" : "region"
+      } ],
+      "definition" : "community_layout:sldsFlexibleLayout",
+      "id" : "c2d94e17-8b60-4f2a-a1c8-53e7d90b6f21",
+      "type" : "component"
+    },
+    "dataProviders" : [ ],
+    "themeLayoutType" : "Inner",
+    "viewType" : "custom-article"
+  },
+  "urlName" : "article"
+}

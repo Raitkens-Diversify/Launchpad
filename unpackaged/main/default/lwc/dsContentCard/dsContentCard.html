@@ -1,0 +1,32 @@
+<template>
+    <article class="ds-content-card">
+        <div class="ds-content-card__head" role="button" tabindex="0"
+             onclick={handleSelect} onkeydown={handleKey}>
+            <span class="ds-content-card__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     focusable="false">
+                    <path d={iconPath}></path>
+                </svg>
+            </span>
+            <c-ds-badge label={badge} variant="info"></c-ds-badge>
+        </div>
+
+        <h3 class="ds-content-card__title" onclick={handleSelect}>{item.title}</h3>
+        <template if:true={item.subtitle}>
+            <p class="ds-content-card__desc">{item.subtitle}</p>
+        </template>
+
+        <div class="ds-content-card__action">
+            <template if:true={hasHref}>
+                <a class="ds-content-card__btn" href={item.href}
+                   target="_blank" rel="noopener noreferrer">{primaryLabel}</a>
+            </template>
+            <template if:true={isButtonAction}>
+                <button class="ds-content-card__btn" type="button" onclick={handleSelect}>
+                    {primaryLabel}
+                </button>
+            </template>
+        </div>
+    </article>
+</template>

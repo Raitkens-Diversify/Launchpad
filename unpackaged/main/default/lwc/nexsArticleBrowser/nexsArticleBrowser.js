@@ -6,14 +6,13 @@ import getFallbackArticles from '@salesforce/apex/NexSKnowledgeController.getFal
 import getArticle from '@salesforce/apex/NexSKnowledgeController.getArticle';
 import getSupportSettings from '@salesforce/apex/NexSKnowledgeController.getSupportSettings';
 import getArticleByUrlName from '@salesforce/apex/NexSKnowledgeController.getArticleByUrlName';
-import logSearch from '@salesforce/apex/NexSArticleEngagementController.logSearch';
-import logClick from '@salesforce/apex/NexSArticleEngagementController.logClick';
 // Shared Help_Topics icon paths (rendered with stroke=currentColor).
 import { topicIconPath } from 'c/nexsTopicIcons';
-// Anonymous per-tab key stitching a search to the clicks that follow it.
-import { getSessionKey } from 'c/nexsSession';
 // Escaped match-highlight segments (no innerHTML — injection-safe).
 import { highlightSegments } from 'c/nexsHighlight';
+// One shared analytics path (dedup + App__c tagging live there).
+import { createSearchLogger, logResultClick, APP_HELP_CENTER } from 'c/searchLogUtil';
+import { ORDER_SENTINEL } from 'c/searchConstants';
 
 // Fallback section order for articles filed on the topic itself (no subtopic):
 // grouped by article-type label, always after the named subtopic sections.
@@ -21,9 +20,9 @@ import { highlightSegments } from 'c/nexsHighlight';
 // in Setup and silently broke this ordering when used as keys.
 const TYPE_ORDER = { FAQ: 1, How_To: 2, Troubleshooting: 3 };
 const FALLBACK_SECTION = 'Articles';
-// Subtopics use their taxonomy index (0..n); 900 matches ResourceCenterService.
-// GENERAL_SECTION_ORDER — both mean "sorts after all real taxonomy".
-const FALLBACK_ORDER_BASE = 900;
+// Subtopics use their taxonomy index (0..n); the shared sentinel means "sorts
+// after all real taxonomy" (same value ResourceCenterService uses).
+const FALLBACK_ORDER_BASE = ORDER_SENTINEL;
 
 /**
  * nexsArticleBrowser
@@ -105,6 +104,7 @@ export default class NexsArticleBrowser extends LightningElement {
     _pendingScrollTop = false; // scroll back to the top when an article opens
     _prefetched = new Set(); // article ids whose bodies we've warmed on hover
     _lastSearchLogId = null; // Article_Search__c Id of the current search, for click correlation
+    _searchLogger = createSearchLogger(APP_HELP_CENTER);
 
     @wire(getCategories)
     wiredCategories({ data, error }) {
@@ -310,6 +310,24 @@ export default class NexsArticleBrowser extends LightningElement {
         this.openArticle(articleId);
     }
 
+    /** Open an article by UrlName after mount (routed host drives this on
+        popstate; unknown/unpublished names stay on the current view). */
+    @api
+    openArticleByUrlName(urlName) {
+        if (!urlName) {
+            return;
+        }
+        getArticleByUrlName({ urlName })
+            .then((detail) => {
+                if (detail && detail.id) {
+                    this.openArticle(detail.id);
+                }
+            })
+            .catch(() => {
+                // Unknown/unpublished UrlName: stay put.
+            });
+    }
+
     /** Run a full search (blank term returns to the category list). */
     @api
     searchFor(term) {
@@ -362,20 +380,17 @@ export default class NexsArticleBrowser extends LightningElement {
             // Fire-and-forget search analytics: submitted searches only; capture
             // the returned log Id so a following result click correlates to it.
             this._lastSearchLogId = null;
-            // JSON-string transport (org gotcha: custom-type params arrive null).
-            logSearch({
-                entryJson: JSON.stringify({
-                    term: this.searchTerm,
-                    resultCount: this.articles.length,
-                    topResultArticleId: this.articles.length ? this.articles[0].id : null,
-                    searchType: 'Full',
-                    sessionKey: getSessionKey()
-                })
-            })
-                .then((logId) => {
-                    this._lastSearchLogId = logId;
-                })
-                .catch(() => {});
+            this._searchLogger.logFull({
+                term: this.searchTerm,
+                resultCount: this.articles.length,
+                topResultArticleId: this.articles.length ? this.articles[0].id : null,
+                // Fuzzy = the typo pass produced these results; Fallback = zero
+                // results, the fallback rail is what the user actually saw.
+                searchType: this.fuzzy ? 'Fuzzy'
+                    : (this.articles.length === 0 ? 'Fallback' : 'Full')
+            }).then((logId) => {
+                this._lastSearchLogId = logId;
+            });
 
             // Never a blank results page — load fallback articles for zero results.
             if (this.articles.length === 0) {
@@ -483,11 +498,7 @@ export default class NexsArticleBrowser extends LightningElement {
             return;
         }
         const idx = (this.articles || []).findIndex((a) => a.id === articleId);
-        logClick({
-            searchLogId: this._lastSearchLogId,
-            clickedArticleId: articleId,
-            rank: idx >= 0 ? idx + 1 : null
-        }).catch(() => {});
+        logResultClick(this._lastSearchLogId, articleId, idx >= 0 ? idx + 1 : null);
     }
 
     // Warm the article body cache on hover/focus so the click feels instant.
@@ -529,6 +540,12 @@ export default class NexsArticleBrowser extends LightningElement {
         this.articleTitle = event.detail.title;
         this.suggestedArticles = event.detail.suggestions || [];
         this.articleHasEmbed = !!event.detail.hasEmbed;
+        // Notify routed hosts on EVERY viewer navigation (search click, rail
+        // suggestion, deep link) so they can sync the URL. Non-routed hosts
+        // simply don't listen.
+        this.dispatchEvent(new CustomEvent('articleopen', {
+            detail: { articleId: this.selectedArticleId, urlName: event.detail.urlName || null }
+        }));
     }
 
     handleResourcesLoad(event) {
@@ -539,11 +556,16 @@ export default class NexsArticleBrowser extends LightningElement {
         if (event) {
             event.preventDefault(); // crumbs are anchors; don't jump the page
         }
+        const wasViewing = Boolean(this.selectedArticleId);
         this.selectedArticleId = null;
         this.articleTitle = '';
         this.suggestedArticles = [];
         this.articleHasEmbed = false;
         this.articleHasResources = false;
+        if (wasViewing) {
+            // Mirror of articleopen — routed hosts clear the ?name= param.
+            this.dispatchEvent(new CustomEvent('articleclose'));
+        }
     }
 
     // "Help Center" crumb: let a hosting home view take over; the internal

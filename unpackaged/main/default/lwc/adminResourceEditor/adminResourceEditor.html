@@ -61,12 +61,12 @@
                                             field-level-help="Shown on the resource card and detail page."
                                             value={description}
                                             onchange={handleDescriptionChange}></lightning-textarea>
-                        <template if:true={isVideo}>
-                            <lightning-input label="Video Embed URL"
-                                             field-level-help="The embeddable player URL (e.g. a YouTube or Vimeo embed link)."
+                        <template if:true={showEmbedInput}>
+                            <lightning-input label={embedLabel}
+                                             field-level-help={embedHelp}
                                              value={videoEmbedUrl}
                                              type="url"
-                                             required
+                                             required={embedRequired}
                                              onchange={handleVideoUrlChange}></lightning-input>
                         </template>
                         <template if:true={isExternal}>
@@ -79,10 +79,41 @@
                         </template>
                     </section>
 
+                    <template if:true={isWebinar}>
+                        <section class="are__card">
+                            <h3 class="are__card-title">Webinar</h3>
+                            <p class="are__help">
+                                Status is derived, never set: Upcoming until the event date passes,
+                                then Past until a recording is attached (embed URL above or an
+                                uploaded file below), then Recorded. The type and link never change.
+                            </p>
+                            <lightning-input label="Event date and time"
+                                             type="datetime"
+                                             value={eventDatetime}
+                                             required
+                                             onchange={handleEventDatetimeChange}></lightning-input>
+                            <lightning-input label="Registration URL"
+                                             field-level-help="Where people sign up — required while the event is upcoming. Opens in a new tab."
+                                             type="url"
+                                             value={registrationUrl}
+                                             onchange={handleRegistrationUrlChange}></lightning-input>
+                            <lightning-input label="Duration (minutes)"
+                                             type="number"
+                                             min="1"
+                                             max="999"
+                                             value={durationMinutes}
+                                             onchange={handleDurationChange}></lightning-input>
+                            <lightning-input label="Presenter"
+                                             max-length="120"
+                                             value={presenter}
+                                             onchange={handlePresenterChange}></lightning-input>
+                        </section>
+                    </template>
+
                     <template if:true={showUpload}>
                         <section class="are__card">
-                            <h3 class="are__card-title">File</h3>
-                            <lightning-file-upload label="Upload the file users download"
+                            <h3 class="are__card-title">{uploadTitle}</h3>
+                            <lightning-file-upload label={uploadLabel}
                                                    record-id={recordId}
                                                    accept={acceptedFormats}
                                                    onuploadfinished={handleUploadFinished}></lightning-file-upload>

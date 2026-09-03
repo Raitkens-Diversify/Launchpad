@@ -1,8 +1,10 @@
 /* Self-declared tokens (mirrors envelopeListV2): V2 --slds-g-* drives our
    palette; V1 --ds-* stays for the reused ds* components inside the browser /
-   welcome video. No dsTokensV2 provider (absent in the org). */
+   welcome video. No dsTokensV2 provider (absent in the org). The chrome shell
+   itself (header/body/footer) is c-ds-chrome, which inherits these tokens. */
 :host {
     display: block;
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
 
     /* --- V2 / SLDS2 tokens --- */
     --slds-g-spacing-2: 0.5rem;
@@ -79,50 +81,27 @@
     padding: var(--slds-g-spacing-10, 48px);
 }
 
-/* ---- Branded chrome (header / body / footer) ---- */
-.nexs-chrome {
-    display: flex;
-    flex-direction: column;
-    min-height: 100%;
-    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+/* ---- Header help menu (tour entry point) ----
+   Slotted into c-ds-chrome's actions region; placement is the chrome's job,
+   the menu/button styling stays here (slotted elements are styled by the
+   host's stylesheet). */
+/* Cross-app link to the Resource Center (chrome actions slot). */
+.nexs-chrome__rc-link {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: 500;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.nexs-chrome__rc-link:hover {
+    color: var(--slds-g-color-accent-1, #0f406f);
 }
 
-.nexs-chrome__header {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--slds-g-spacing-5, 24px);
-    min-height: 64px;
-    box-sizing: border-box;
-    padding: var(--slds-g-spacing-4, 16px) var(--slds-g-spacing-5, 24px);
-    background: var(--slds-g-color-surface-container-1, #ffffff);
-    border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
-    /* Pin the brand header to the top so it stays visible while the page
-       scrolls (identical behavior on the LWR site and the core app tab). */
-    position: sticky;
-    top: 0;
-    z-index: 20;
-}
-
-/* Right-aligned header search (browse view), Hulu-style. */
-.nexs-chrome__search {
-    margin-left: auto;
-    flex: 1 1 320px;
-    max-width: 420px;
-    min-width: 200px;
-}
-
-/* ---- Header help menu (tour entry point) ---- */
 .nexs-chrome__help {
     position: relative;
-    /* Far right on the home view (no header search)… */
-    margin-left: auto;
-}
-
-/* …and directly after the search when it's present (browse view), so the two
-   auto margins don't split the free space. */
-.nexs-chrome__search ~ .nexs-chrome__help {
-    margin-left: 0;
 }
 
 .nexs-chrome__help-btn {
@@ -172,7 +151,7 @@
 
 .nexs-chrome__help-text {
     margin: var(--ds-space-sm, 8px) 0 0;
-    font-size: 0.8125rem;
+    font-size: var(--div-font-scale-base, 1rem);
     line-height: 1.5;
     color: var(--slds-g-color-on-surface-1, #4b5563);
 }
@@ -194,55 +173,4 @@
 
 .nexs-chrome__help-cta:hover {
     background: var(--slds-g-color-accent-2, #0b2f51);
-}
-
-.nexs-chrome__logo {
-    height: 24px;
-    width: auto;
-    display: block;
-}
-
-.nexs-chrome__divider {
-    flex: none;
-    width: 1px;
-    height: 24px;
-    background: var(--slds-g-color-border-1, #d1d5db);
-}
-
-/* Text button so "Help Center" can return to the home view. */
-.nexs-chrome__crumb {
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: var(--slds-g-font-scale-1, 14px);
-    font-weight: 500;
-    color: var(--slds-g-color-on-surface-3, #09243f);
-}
-
-.nexs-chrome__crumb:hover {
-    color: var(--slds-g-color-accent-1, #0f406f);
-}
-
-.nexs-chrome__body {
-    flex: 1 1 auto;
-}
-
-.nexs-chrome__footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: var(--slds-g-spacing-1, 4px);
-    padding: var(--slds-g-spacing-3, 12px) var(--slds-g-spacing-5, 24px);
-    background: var(--slds-g-color-surface-container-1, #ffffff);
-    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
-    color: var(--slds-g-color-on-surface-1, #4b5563);
-    font-size: 0.75rem;
-}
-
-.nexs-chrome__footer-brand {
-    font-weight: 600;
-    color: var(--slds-g-color-accent-1, #0f406f);
 }

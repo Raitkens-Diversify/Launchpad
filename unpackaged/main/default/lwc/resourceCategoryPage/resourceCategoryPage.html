@@ -40,8 +40,9 @@
                                 </button>
                                 <div class={sec.bodyClass}>
                                     <div class="rc-grid">
-                                        <template for:each={sec.resources} for:item="r">
-                                            <c-resource-card key={r.id} resource={r}></c-resource-card>
+                                        <template for:each={sec.items} for:item="r">
+                                            <c-ds-content-card key={r.id} item={r}
+                                                oncontentselect={handleContentSelect}></c-ds-content-card>
                                         </template>
                                     </div>
                                 </div>
@@ -53,8 +54,9 @@
                 <template if:false={useSections}>
                     <template if:true={hasGridResources}>
                         <div class="rc-grid">
-                            <template for:each={gridResources} for:item="r">
-                                <c-resource-card key={r.id} resource={r}></c-resource-card>
+                            <template for:each={gridItems} for:item="r">
+                                <c-ds-content-card key={r.id} item={r}
+                                    oncontentselect={handleContentSelect}></c-ds-content-card>
                             </template>
                         </div>
                     </template>

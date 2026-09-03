@@ -1,0 +1,28 @@
+<template>
+    <div class="ds-chrome">
+        <header class="ds-chrome__header">
+            <template if:true={showBranding}>
+                <img class="ds-chrome__logo" src={logoUrl} alt="Diversify" />
+                <span class="ds-chrome__divider" aria-hidden="true"></span>
+                <button type="button" class="ds-chrome__crumb" onclick={handleBrandClick}>
+                    {brandLabel}
+                </button>
+            </template>
+            <div class={searchClass}>
+                <slot name="search" onslotchange={handleSearchSlotChange}></slot>
+            </div>
+            <div class={actionsClass}>
+                <slot name="actions" onslotchange={handleActionsSlotChange}></slot>
+            </div>
+        </header>
+
+        <div class="ds-chrome__body">
+            <slot></slot>
+        </div>
+
+        <footer class="ds-chrome__footer">
+            <span class="ds-chrome__footer-brand">{brandLabel}</span>
+            <span class="ds-chrome__footer-meta">{copyrightLine}</span>
+        </footer>
+    </div>
+</template>

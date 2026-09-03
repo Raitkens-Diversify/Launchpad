@@ -1,0 +1,98 @@
+<template>
+    <div class="ds-cal">
+        <div class="ds-cal__head">
+            <h2 class="ds-cal__title" aria-live="polite">{monthTitle}</h2>
+            <div class="ds-cal__nav">
+                <button type="button" class="ds-cal__nav-btn ds-cal__nav-btn--prev"
+                        aria-label={prevLabel} onclick={handlePrev}>
+                    <lightning-icon icon-name="utility:chevronleft" size="x-small"
+                                    alternative-text=""></lightning-icon>
+                </button>
+                <button type="button" class="ds-cal__nav-btn ds-cal__nav-btn--today"
+                        onclick={handleToday}>Today</button>
+                <button type="button" class="ds-cal__nav-btn ds-cal__nav-btn--next"
+                        aria-label={nextLabel} onclick={handleNext}>
+                    <lightning-icon icon-name="utility:chevronright" size="x-small"
+                                    alternative-text=""></lightning-icon>
+                </button>
+            </div>
+        </div>
+
+        <template if:false={isList}>
+            <div class="ds-cal__grid" role="grid" aria-label={label} aria-roledescription="calendar">
+                <div class="ds-cal__row ds-cal__row--head" role="row">
+                    <template for:each={weekdays} for:item="wd">
+                        <div key={wd.key} class="ds-cal__weekday" role="columnheader"
+                             aria-label={wd.long}>{wd.short}</div>
+                    </template>
+                </div>
+                <template for:each={rows} for:item="row">
+                    <div key={row.key} class="ds-cal__row" role="row">
+                        <template for:each={row.cells} for:item="cell">
+                            <div key={cell.key}
+                                 class={cell.cssClass}
+                                 role="gridcell"
+                                 tabindex={cell.tabIndex}
+                                 aria-selected={cell.ariaSelected}
+                                 aria-current={cell.ariaCurrent}
+                                 aria-label={cell.ariaLabel}
+                                 data-key={cell.key}
+                                 onkeydown={handleCellKeydown}
+                                 onclick={handleCellClick}>
+                                <span class="ds-cal__num" aria-hidden="true">{cell.dayNumber}</span>
+                                <div class="ds-cal__chips">
+                                    <template for:each={cell.events} for:item="chip">
+                                        <button key={chip.id}
+                                                type="button"
+                                                class={chip.cssClass}
+                                                data-id={chip.id}
+                                                data-key={cell.key}
+                                                data-status={chip.status}
+                                                tabindex={chip.tabIndex}
+                                                title={chip.title}
+                                                aria-label={chip.ariaLabel}
+                                                onclick={handleChipClick}>{chip.title}</button>
+                                    </template>
+                                    <template if:true={cell.hasHidden}>
+                                        <button type="button" class="ds-cal__more"
+                                                data-key={cell.key}
+                                                tabindex={cell.tabIndex}
+                                                aria-label={cell.moreAriaLabel}
+                                                onclick={handleMoreClick}>{cell.moreLabel}</button>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+        </template>
+
+        <template if:true={isList}>
+            <div class="ds-cal__list" aria-label={label}>
+                <template if:true={hasDayGroups}>
+                    <template for:each={dayGroups} for:item="group">
+                        <section key={group.key} class="ds-cal__day-group" aria-label={group.label}>
+                            <c-ds-date-block value={group.dateIso} variant="sm"></c-ds-date-block>
+                            <div class="ds-cal__day-group-body">
+                                <template for:each={group.events} for:item="chip">
+                                    <button key={chip.id}
+                                            type="button"
+                                            class={chip.cssClass}
+                                            data-id={chip.id}
+                                            data-key={group.key}
+                                            data-status={chip.status}
+                                            aria-label={chip.ariaLabel}
+                                            onclick={handleChipClick}>{chip.title}</button>
+                                </template>
+                            </div>
+                        </section>
+                    </template>
+                </template>
+                <template if:false={hasDayGroups}>
+                    <p class="ds-cal__empty">No events this month.</p>
+                </template>
+            </div>
+        </template>
+    </div>
+</template>

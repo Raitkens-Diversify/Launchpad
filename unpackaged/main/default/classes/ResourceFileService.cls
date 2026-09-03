@@ -8,9 +8,9 @@
  *
  *  - Shepherd (default): /sfc/servlet.shepherd/document/download/{ContentDocumentId}
  *    — works for authenticated Experience/internal users who can see the file.
- *  - ContentDistribution: public, no-login URLs. STUBBED — wiring it up requires
- *    creating ContentDistribution records (a DML step, so it cannot live in a
- *    cacheable read path) and is out of scope until guest access is enabled.
+ *  - ContentDistribution: public, no-login URLs. The cacheable read path still
+ *    hands out the Shepherd URL (creating a ContentDistribution is DML);
+ *    resolvePublicDownloadUrl mints/reuses the public link at click time.
  */
 public with sharing class ResourceFileService {
 
@@ -52,7 +52,13 @@ public with sharing class ResourceFileService {
             : (UrlStrategy) new ShepherdUrlStrategy();
     }
 
+    /** Test seam: force a delivery mode without touching the CMDT setting. */
+    @TestVisible private static String deliveryModeOverride;
+
     private static String deliveryMode() {
+        if (deliveryModeOverride != null) {
+            return deliveryModeOverride;
+        }
         Resource_Center_Setting__mdt setting = Resource_Center_Setting__mdt.getInstance('Default');
         return (setting != null && String.isNotBlank(setting.File_Delivery_Mode__c))
             ? setting.File_Delivery_Mode__c

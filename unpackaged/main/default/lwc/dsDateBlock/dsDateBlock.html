@@ -1,0 +1,9 @@
+<template>
+    <template if:true={parts}>
+        <time class={blockClass} datetime={value} aria-label={parts.full}>
+            <span class="ds-date__weekday" aria-hidden="true">{parts.weekday}</span>
+            <span class="ds-date__day" aria-hidden="true">{parts.day}</span>
+            <span class="ds-date__month" aria-hidden="true">{parts.month}</span>
+        </time>
+    </template>
+</template>

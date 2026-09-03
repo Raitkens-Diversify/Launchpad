@@ -7,7 +7,7 @@ import { LightningElement, api } from 'lwc';
  * UAT dashboard: cycle progress bar + summary).
  *
  * Extracted from nexsHome's inline .home-hero markup (which
- * resourceCenterHome and uatDashboard had each re-implemented) so all three
+ * unifiedLanding and uatDashboard had each re-implemented) so all three
  * surfaces render the identical component. Colors are self-declared on
  * :host — see the comment in dsHero.css — which is what guarantees the same
  * navy in both LWR sites and the core Lightning app.

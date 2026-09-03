@@ -65,7 +65,7 @@
     padding: 0;
 }
 .acm-icons__legend {
-    font-size: 0.8125rem;
+    font-size: var(--div-font-scale-base, 1rem);
     color: var(--slds-g-color-on-surface-1, #4b5563);
     margin-bottom: 6px;
     padding: 0;

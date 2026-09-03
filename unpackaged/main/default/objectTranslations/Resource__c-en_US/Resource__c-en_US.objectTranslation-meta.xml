@@ -18,5 +18,17 @@
     
     
     
+    
+    
+    
+    
     <startsWith>Consonant</startsWith>
+    <validationRules>
+        <errorMessage><!-- Webinars need an event date and time. --></errorMessage>
+        <name>Webinar_Requires_Event_Datetime</name>
+    </validationRules>
+    <validationRules>
+        <errorMessage><!-- Upcoming webinars need a registration URL so people can sign up. --></errorMessage>
+        <name>Webinar_Upcoming_Requires_Registration</name>
+    </validationRules>
 </CustomObjectTranslation>

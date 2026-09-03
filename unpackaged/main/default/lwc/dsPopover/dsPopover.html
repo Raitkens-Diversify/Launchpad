@@ -1,0 +1,21 @@
+<template>
+    <template if:true={isOpen}>
+        <div class="ds-pop__backdrop" aria-hidden="true"></div>
+        <section class={panelClass}
+                 role="dialog"
+                 aria-label={label}
+                 tabindex="-1"
+                 style={panelStyle}
+                 onclick={stopProp}>
+            <button type="button" class="ds-pop__close" aria-label="Close" onclick={handleClose}>
+                <lightning-icon icon-name="utility:close" size="x-small" alternative-text=""></lightning-icon>
+            </button>
+            <template if:true={hasHeading}>
+                <h2 class="ds-pop__heading">{heading}</h2>
+            </template>
+            <div class="ds-pop__body">
+                <slot></slot>
+            </div>
+        </section>
+    </template>
+</template>

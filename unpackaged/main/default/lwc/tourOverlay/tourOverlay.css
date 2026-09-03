@@ -207,7 +207,7 @@
 
 .tour-overlay__hint {
     margin: var(--tour-space-sm) 0 0;
-    font-size: 0.8125rem;
+    font-size: var(--div-font-scale-base, 1rem);
     color: var(--tour-color-link);
 }
 
@@ -220,7 +220,7 @@
 }
 
 .tour-overlay__count {
-    font-size: 0.8125rem;
+    font-size: var(--div-font-scale-base, 1rem);
     font-weight: 500;
     letter-spacing: 0.02em;
     color: var(--tour-color-muted);
@@ -271,7 +271,7 @@
 }
 
 .tour-overlay__skip {
-    font-size: 0.8125rem;
+    font-size: var(--div-font-scale-base, 1rem);
     font-weight: 500;
     color: var(--tour-color-muted);
     text-decoration: underline;

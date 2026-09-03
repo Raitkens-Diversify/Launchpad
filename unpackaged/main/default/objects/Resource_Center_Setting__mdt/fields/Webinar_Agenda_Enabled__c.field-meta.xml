@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Webinar_Agenda_Enabled__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Shows the webinar agenda panel on the unified landing page (/help/). Blank or unchecked hides the panel entirely and the landing keeps its single-column layout; webinars stay reachable through search, categories, and their detail pages. Read through ResourceCenterService.getWebinars.</description>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Webinar Agenda Enabled</label>
+    <type>Checkbox</type>
+</CustomField>

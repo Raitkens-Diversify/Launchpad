@@ -4,15 +4,18 @@
         <headerColor>#0F406F</headerColor>
         <shouldOverrideOrgTheme>false</shouldOverrideOrgTheme>
     </brand>
-    <description>Nexus Resource Center — internal downloadable-resource library and Get Help guide authoring.</description>
+    <description>Help &amp; Resources — the internal home for help articles, the downloadable-resource library, events, and the Get Help guide. The same components serve the /help Experience Cloud site; c/contextNav routes per surface.</description>
     <formFactors>Large</formFactors>
     <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
     <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
     <isNavTabPersistenceDisabled>false</isNavTabPersistenceDisabled>
     <isOmniPinnedViewEnabled>false</isOmniPinnedViewEnabled>
-    <label>Resource Center</label>
+    <label>Help &amp; Resources</label>
     <navType>Standard</navType>
+    <tabs>Unified_Support_Home</tabs>
+    <tabs>Help_Center_Article</tabs>
     <tabs>Resource_Center</tabs>
+    <tabs>Help_Center_Events</tabs>
     <tabs>Admin_Console</tabs>
     <uiType>Lightning</uiType>
 </CustomApplication>

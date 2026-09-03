@@ -1,0 +1,26 @@
+<template>
+    <c-ds-chrome logo-url={logoUrl} hide-branding={hideBranding} brand-label="Help Center" onbrandclick={handleBrandHome}>
+        <button type="button" slot="actions" class="hap__rc-link" onclick={handleResourcesLink}>
+            Resources
+        </button>
+        <div slot="search">
+            <c-ds-search-bar
+                placeholder="Search help articles…"
+                header-label="Top suggestions:"
+                empty-hint="No matching titles — press Enter to search everything."
+                suggestions={headerSuggestions}
+                onquerychange={handleHeaderQuery}
+                onselect={handleHeaderSuggestionSelect}
+                onsubmit={handleHeaderSearch}
+            ></c-ds-search-bar>
+        </div>
+
+        <c-nexs-article-browser
+            initial-article-url-name={initialUrlName}
+            initial-category={initialCategory}
+            onarticleopen={handleArticleOpen}
+            onarticleclose={handleArticleClose}
+            onhome={handleBrandHome}
+        ></c-nexs-article-browser>
+    </c-ds-chrome>
+</template>

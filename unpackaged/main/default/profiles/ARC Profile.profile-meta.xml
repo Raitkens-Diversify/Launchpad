@@ -247,11 +247,6 @@
         <default>false</default>
         <visible>false</visible>
     </applicationVisibilities>
-    <applicationVisibilities>
-        <application>standard__Platform</application>
-        <default>true</default>
-        <visible>true</visible>
-    </applicationVisibilities>
     <fieldPermissions>
         <editable>true</editable>
         <field>AccountContactRelation.EndDate</field>
@@ -8163,6 +8158,14 @@
         <visibility>Hidden</visibility>
     </tabVisibilities>
     <tabVisibilities>
+        <tab>Help_Center_Article</tab>
+        <visibility>Hidden</visibility>
+    </tabVisibilities>
+    <tabVisibilities>
+        <tab>Help_Center_Events</tab>
+        <visibility>Hidden</visibility>
+    </tabVisibilities>
+    <tabVisibilities>
         <tab>Households</tab>
         <visibility>Hidden</visibility>
     </tabVisibilities>
@@ -8264,6 +8267,10 @@
     </tabVisibilities>
     <tabVisibilities>
         <tab>UAT_Testing</tab>
+        <visibility>Hidden</visibility>
+    </tabVisibilities>
+    <tabVisibilities>
+        <tab>Unified_Support_Home</tab>
         <visibility>Hidden</visibility>
     </tabVisibilities>
     <tabVisibilities>

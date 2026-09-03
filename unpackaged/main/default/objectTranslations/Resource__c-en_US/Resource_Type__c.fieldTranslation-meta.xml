@@ -22,4 +22,8 @@
             <masterLabel>Video</masterLabel>
             <translation><!-- Video --></translation>
         </picklistValues>
+        <picklistValues>
+            <masterLabel>Webinar</masterLabel>
+            <translation><!-- Webinar --></translation>
+        </picklistValues>
     </CustomFieldTranslation>

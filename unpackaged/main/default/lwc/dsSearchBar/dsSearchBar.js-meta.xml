@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>63.0</apiVersion>
+    <isExposed>false</isExposed>
+    <description>Shared ARIA-combobox typeahead search box. Controlled and Apex-free: hosts own fetching and analytics; the bar owns debounce, keyboard nav, and highlighting.</description>
+</LightningComponentBundle>

@@ -1,0 +1,136 @@
+:host {
+    display: block;
+    position: relative;
+}
+
+/* Shared primitive: inherits the --slds-g-* tokens from its declaring root
+   (nexsLanding / resourceCenter / adminConsole per ui-standards §1) with
+   literal fallbacks so it stays safe standalone. Deliberately NO self-declared
+   token block — same rationale as dsTopicNav. */
+
+.ds-search {
+    position: relative;
+}
+
+/* Size/surface hooks (--ds-search-bar-*) let hosts opt into a larger variant
+   (e.g. the hero bars on unifiedLanding/arcHome/nexsHome); the fallbacks
+   preserve the default look. All box padding lives on the field, not the
+   input, so a host's padding hook sets the real height. */
+.ds-search__field {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 8px);
+    padding: var(--ds-search-bar-padding, var(--slds-g-spacing-3, 12px));
+    background: var(--ds-search-bar-bg, var(--slds-g-color-surface-container-1, #ffffff));
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-search-bar-radius, var(--slds-g-radius-border-2, 0.5rem));
+}
+
+.ds-search__field:focus-within {
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+    box-shadow: 0 0 0 1px var(--slds-g-color-accent-1, #0f406f);
+}
+
+.ds-search__icon {
+    --sds-c-icon-color-foreground-default: var(--slds-g-color-on-surface-1, #4b5563);
+    flex: none;
+}
+
+.ds-search__input {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    padding: 0;
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+    font-size: var(--ds-search-bar-font-size, var(--slds-g-font-scale-2, 0.875rem));
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.ds-search__clear {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: var(--slds-g-spacing-1, 4px);
+}
+
+.ds-search__menu {
+    position: absolute;
+    z-index: 20;
+    left: 0;
+    right: 0;
+    margin: var(--slds-g-spacing-1, 4px) 0 0;
+    padding: var(--slds-g-spacing-1, 4px);
+    list-style: none;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--slds-g-radius-border-2, 0.5rem);
+    box-shadow: var(--ds-shadow-drop, 0 8px 24px rgba(9, 36, 63, 0.12));
+}
+
+.ds-search__menu-header {
+    padding: var(--slds-g-spacing-2, 8px) var(--slds-g-spacing-3, 12px) var(--slds-g-spacing-1, 4px);
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: 700;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.ds-search__item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--slds-g-spacing-2, 8px) var(--slds-g-spacing-3, 12px);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.ds-search__item:hover,
+.ds-search__item--active {
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+
+.ds-search__item-title strong {
+    font-weight: 800;
+    color: var(--slds-g-color-accent-1, #0f406f);
+}
+
+.ds-search__item-title {
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+    font-size: var(--slds-g-font-scale-2, 0.875rem);
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.ds-search__item-subtitle {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ds-search__view-all {
+    padding: var(--slds-g-spacing-2, 8px) var(--slds-g-spacing-3, 12px);
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: 600;
+    color: var(--slds-g-color-accent-1, #0f406f);
+    cursor: pointer;
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    margin-top: var(--slds-g-spacing-1, 4px);
+}
+
+.ds-search__view-all:hover {
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+
+.ds-search__empty {
+    padding: var(--slds-g-spacing-3, 12px);
+    font-size: var(--slds-g-font-scale-1, 14px);
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}

@@ -87,21 +87,6 @@
         <default>false</default>
         <visible>false</visible>
     </applicationVisibilities>
-    <applicationVisibilities>
-        <application>standard__AgentforceStudio</application>
-        <default>false</default>
-        <visible>true</visible>
-    </applicationVisibilities>
-    <applicationVisibilities>
-        <application>standard__FlowsApp</application>
-        <default>false</default>
-        <visible>true</visible>
-    </applicationVisibilities>
-    <applicationVisibilities>
-        <application>standard__ScaleTestApp</application>
-        <default>false</default>
-        <visible>true</visible>
-    </applicationVisibilities>
     <fieldPermissions>
         <editable>false</editable>
         <field>AccountContactRelation.Account_RecordType_Name__c</field>
@@ -2725,11 +2710,6 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Case.Current_Task_Id__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Case.Current_Task__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -16346,6 +16326,14 @@
         <visibility>Hidden</visibility>
     </tabVisibilities>
     <tabVisibilities>
+        <tab>Help_Center_Article</tab>
+        <visibility>Hidden</visibility>
+    </tabVisibilities>
+    <tabVisibilities>
+        <tab>Help_Center_Events</tab>
+        <visibility>Hidden</visibility>
+    </tabVisibilities>
+    <tabVisibilities>
         <tab>Households</tab>
         <visibility>Hidden</visibility>
     </tabVisibilities>
@@ -16447,6 +16435,10 @@
     </tabVisibilities>
     <tabVisibilities>
         <tab>UAT_Testing</tab>
+        <visibility>Hidden</visibility>
+    </tabVisibilities>
+    <tabVisibilities>
+        <tab>Unified_Support_Home</tab>
         <visibility>Hidden</visibility>
     </tabVisibilities>
     <tabVisibilities>

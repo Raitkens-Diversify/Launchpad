@@ -13,11 +13,11 @@
     <targetConfigs>
         <targetConfig targets="lightningCommunity__Default">
             <property name="hideBranding" type="Boolean" label="Hide Diversify Branding"
-                      description="Hides the Diversify logo and 'Help Center' crumb in the header for sites that already have their own header/branding."/>
+                      description="Hides the Diversify logo and brand crumb in the header for sites or pages that already have their own header/branding."/>
         </targetConfig>
         <targetConfig targets="lightning__AppPage">
             <property name="hideBranding" type="Boolean" label="Hide Diversify Branding"
-                      description="Hides the Diversify logo and 'Help Center' crumb in the header for pages that already have their own header/branding."/>
+                      description="Hides the Diversify logo and brand crumb in the header for sites or pages that already have their own header/branding."/>
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>

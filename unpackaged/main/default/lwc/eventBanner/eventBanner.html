@@ -1,0 +1,21 @@
+<template>
+    <template if:true={visible}>
+        <div class="eb" role="status">
+            <span class="eb__date">{dateChip}</span>
+            <span class="eb__title">{event.name}</span>
+            <span class="eb__meta">{meta}</span>
+            <template if:true={hasSignup}>
+                <a class="eb__cta" href={event.registrationUrl}
+                   target="_blank" rel="noopener noreferrer">Sign up</a>
+            </template>
+            <button type="button" class="eb__close" aria-label="Dismiss event banner"
+                    onclick={handleDismiss}>
+                <svg class="eb__close-icon" viewBox="0 0 16 16" aria-hidden="true"
+                     xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6"
+                          stroke-linecap="round" fill="none"/>
+                </svg>
+            </button>
+        </div>
+    </template>
+</template>

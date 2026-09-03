@@ -32,14 +32,16 @@ public with sharing class NexSKnowledgeController {
     private static final Integer FUZZY_TRIGGER = 5;   // run the typo pass when exact recall is below this
     private static final Integer POOL_SIZE = 300;     // max published articles pulled for the typo pass
     private static final Double  MIN_SCORE = 4;        // drop anything less relevant than one prefix title hit
-    private static final Integer MIN_PREFIX_LEN = 3;  // fragments shorter than this must match exactly (no prefix/fuzzy)
+    // Shared with ResourceCenterService via SearchConstants: fragments shorter
+    // than this must match exactly (no prefix/fuzzy).
+    private static final Integer MIN_PREFIX_LEN = SearchConstants.MIN_PREFIX_LEN;
     private static final Integer FUZZY_PREFIX = 2;    // a typo-match must share this many leading chars (keeps corrections anchored)
 
     // Field boosts — a term in the Title matters far more than one in the body.
-    private static final Double W_TITLE    = 10;
+    public static final Double W_TITLE    = 10;
     private static final Double W_KEYWORDS = 7;
     private static final Double W_QUESTION = 6;
-    private static final Double W_SUMMARY  = 4;
+    public static final Double W_SUMMARY  = 4;
     private static final Double W_ANSWER   = 2;
     private static final Double W_BODY     = 1;   // matched via SOSL body index only
 
@@ -47,7 +49,7 @@ public with sharing class NexSKnowledgeController {
     // fraction of the same match by the original term. Must stay < 1.0 so an
     // original term always outranks its synonym for an identical match — a
     // constant, not a CMDT, precisely to keep that invariant un-editable.
-    private static final Double SYN_MULTIPLIER = 0.8;
+    public static final Double SYN_MULTIPLIER = 0.8;
 
     // Phrase-proximity boosts (Phase 4), following the same constant pattern as
     // the field weights. Verbatim = the full query phrase appears literally;
@@ -77,6 +79,10 @@ public with sharing class NexSKnowledgeController {
         @AuraEnabled public String section;
         /** Subtopic position in the taxonomy, for section ordering. */
         @AuraEnabled public Integer sectionOrder;
+        /** Relevance score (searchRanked results only; null on browse paths).
+            Exposed so cross-app aggregators can rank articles against other
+            content types on one scale. */
+        @AuraEnabled public Double score;
     }
 
     public class ArticleDetail {
@@ -249,8 +255,10 @@ public with sharing class NexSKnowledgeController {
         scored.sort();
 
         List<Knowledge__kav> ranked = new List<Knowledge__kav>();
+        Map<Id, Double> scoreById = new Map<Id, Double>();
         for (Integer i = 0; i < scored.size() && i < MAX_RESULTS; i++) {
             ranked.add(scored[i].kav);
+            scoreById.put(scored[i].kav.Id, scored[i].score);
         }
 
         // Flag fuzzy provenance: true when a typo-pass article survived ranking,
@@ -265,6 +273,9 @@ public with sharing class NexSKnowledgeController {
             res.corrected = correctionPhrase(qTokens, ranked);
         }
         res.articles = toSummaries(ranked);
+        for (ArticleSummary s : res.articles) {
+            s.score = scoreById.get(s.id);
+        }
         return res;
     }
 
@@ -774,6 +785,8 @@ public with sharing class NexSKnowledgeController {
     public class SupportSettings {
         @AuraEnabled public String supportEmail;
         @AuraEnabled public String supportRequestUrl;
+        /** Rollout gate for the unified landing search (default true). */
+        @AuraEnabled public Boolean unifiedSearchEnabled;
     }
 
     /**
@@ -788,9 +801,16 @@ public with sharing class NexSKnowledgeController {
     public static SupportSettings getSupportSettings() {
         Resource_Center_Setting__mdt setting = Resource_Center_Setting__mdt.getInstance('Default');
         SupportSettings dto = new SupportSettings();
+        dto.unifiedSearchEnabled = true;
         if (setting != null) {
             dto.supportEmail = setting.Support_Email__c;
             dto.supportRequestUrl = setting.Support_Request_URL__c;
+            // Field ships with this feature — read defensively so the class
+            // still compiles/behaves if the record predates the field.
+            Object gate = setting.getPopulatedFieldsAsMap().get('Unified_Search_Enabled__c');
+            if (gate instanceof Boolean) {
+                dto.unifiedSearchEnabled = (Boolean) gate;
+            }
         }
         return dto;
     }
@@ -941,30 +961,24 @@ public with sharing class NexSKnowledgeController {
      * everything except alphanumerics and spaces. This removes SOSL reserved
      * characters (and quotes) entirely, so there's nothing to inject with.
      */
-    private static String sanitizeSearch(String input) {
+    public static String sanitizeSearch(String input) {
         if (input == null) {
             return '';
         }
         return input.replaceAll('[^a-zA-Z0-9 ]', ' ').trim();
     }
 
-    // Common English + question words that carry no search signal. Kept small
-    // and obvious — the goal is to stop "how"/"make"/"do" from matching the
-    // whole knowledge base, not to build a full linguistic stoplist.
-    // Client-side mirror: lwc/nexsHighlight — change both together.
-    private static final Set<String> STOPWORDS = new Set<String>{
-        'how', 'do', 'i', 'a', 'an', 'the', 'to', 'of', 'is', 'are', 'what',
-        'why', 'when', 'where', 'which', 'who', 'and', 'or', 'in', 'on', 'for',
-        'with', 'my', 'me', 'can', 'does', 'will', 'this', 'that', 'it', 'be',
-        'at', 'as', 'by', 'if', 'from', 'into', 'about', 'your', 'you'
-    };
+    // Common English + question words that carry no search signal. Single
+    // source: SearchConstants.STOPWORDS (client-side mirror lives in
+    // lwc/searchConstants).
+    private static final Set<String> STOPWORDS = SearchConstants.STOPWORDS;
 
     /**
      * Reduce a sanitized term to its significant search words (lowercased): drop
      * stopwords and single-character tokens. These bare words drive both the
      * SOSL FIND (with wildcards, via buildFind) and the Apex relevance scoring.
      */
-    private static List<String> significantTokens(String cleanTerm) {
+    public static List<String> significantTokens(String cleanTerm) {
         List<String> tokens = new List<String>();
         if (String.isBlank(cleanTerm)) {
             return tokens;
@@ -1009,7 +1023,7 @@ public with sharing class NexSKnowledgeController {
      * {term tokens} ∪ {synonym tokens}: the term always expands to the rest of
      * the group; when Bidirectional__c, every synonym does too.
      */
-    private static Map<String, Set<String>> synonymMap() {
+    public static Map<String, Set<String>> synonymMap() {
         if (synonymCache != null) {
             return synonymCache;
         }

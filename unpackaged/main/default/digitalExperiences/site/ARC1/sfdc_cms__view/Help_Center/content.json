@@ -25,7 +25,7 @@
                 "dxpStyle" : { },
                 "hideBranding" : true
               },
-              "definition" : "c:nexsLanding",
+              "definition" : "c:unifiedLanding",
               "id" : "3f4a5b6c-7d8e-4f9a-8b0c-2d3e4f5a6b7c",
               "type" : "component"
             } ],

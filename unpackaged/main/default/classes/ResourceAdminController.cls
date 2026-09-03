@@ -20,8 +20,11 @@ public with sharing class ResourceAdminController {
     private static final Integer LIST_LIMIT = 500;
     private static final Integer PICKER_LIMIT = 10;
     // Client-side mirror: lwc/rcConstants FILE_TYPES — change both together.
+    // Webinar is NOT file-backed for download purposes; its recording may be an
+    // attached file, but that is lifecycle (WebinarLifecycle), not delivery.
     private static final Set<String> FILE_TYPES =
         new Set<String>{ 'PDF', 'Form', 'Template' };
+    private static final Integer MAX_DURATION_MINUTES = 999;
 
     // ---- DTOs -------------------------------------------------------------------
 
@@ -37,6 +40,9 @@ public with sharing class ResourceAdminController {
         @AuraEnabled public Decimal displayOrder;
         @AuraEnabled public Decimal downloadCount;
         @AuraEnabled public Datetime lastModified;
+        // Webinar-only (null otherwise) — WebinarLifecycle status for the list chip/filter.
+        @AuraEnabled public String webinarStatus;
+        @AuraEnabled public Datetime eventDatetime;
     }
 
     public class ArticleLink {
@@ -65,6 +71,11 @@ public with sharing class ResourceAdminController {
         @AuraEnabled public Boolean featured;
         @AuraEnabled public Boolean active;
         @AuraEnabled public Decimal displayOrder;
+        // Webinar-only fields (null for other types).
+        @AuraEnabled public Datetime eventDatetime;
+        @AuraEnabled public String registrationUrl;
+        @AuraEnabled public Decimal durationMinutes;
+        @AuraEnabled public String presenter;
         @AuraEnabled public List<ArticleLink> relatedArticles = new List<ArticleLink>();
         @AuraEnabled public List<FileInfo> files = new List<FileInfo>();
     }
@@ -81,6 +92,11 @@ public with sharing class ResourceAdminController {
         @AuraEnabled public Boolean featured;
         @AuraEnabled public Boolean active;
         @AuraEnabled public Decimal displayOrder;
+        // Webinar-only; ignored (and cleared on the record) for other types.
+        @AuraEnabled public Datetime eventDatetime;      // ISO-8601 string from the LWC
+        @AuraEnabled public String registrationUrl;
+        @AuraEnabled public Decimal durationMinutes;
+        @AuraEnabled public String presenter;
         @AuraEnabled public List<String> relatedArticleKaIds;
     }
 
@@ -125,14 +141,28 @@ public with sharing class ResourceAdminController {
     public static List<ResourceRow> listResources() {
         assertResourceAdmin();
         List<ResourceRow> out = new List<ResourceRow>();
-        for (Resource__c r : [
+        List<Resource__c> rows = [
             SELECT Id, Name, Slug__c, Resource_Type__c, Category__c, Category__r.Name,
                    Is_Featured__c, Is_Active__c, Display_Order__c, Download_Count__c,
-                   LastModifiedDate
+                   LastModifiedDate, Video_Embed_URL__c, Event_Datetime__c
             FROM Resource__c
             ORDER BY Name ASC
             LIMIT :LIST_LIMIT
-        ]) {
+        ];
+        // Lifecycle chips need recording presence: one bulk file lookup over
+        // the webinar rows only, using the same "newest file wins" rule the
+        // public pages serve.
+        Set<Id> webinarIds = new Set<Id>();
+        for (Resource__c r : rows) {
+            if (WebinarLifecycle.isWebinar(r.Resource_Type__c)) {
+                webinarIds.add(r.Id);
+            }
+        }
+        Map<Id, ResourceCenterService.FileInfo> files = webinarIds.isEmpty()
+            ? new Map<Id, ResourceCenterService.FileInfo>()
+            : ResourceCenterService.fileInfoByResource(webinarIds);
+        Datetime now = System.now();
+        for (Resource__c r : rows) {
             ResourceRow row = new ResourceRow();
             row.id = r.Id;
             row.name = r.Name;
@@ -145,6 +175,8 @@ public with sharing class ResourceAdminController {
             row.displayOrder = r.Display_Order__c;
             row.downloadCount = r.Download_Count__c;
             row.lastModified = r.LastModifiedDate;
+            row.eventDatetime = r.Event_Datetime__c;
+            row.webinarStatus = WebinarLifecycle.statusFor(r, files.containsKey(r.Id), now);
             out.add(row);
         }
         return out;
@@ -156,7 +188,8 @@ public with sharing class ResourceAdminController {
         List<Resource__c> rows = [
             SELECT Id, Name, Slug__c, Description__c, Resource_Type__c, Category__c,
                    External_URL__c, Video_Embed_URL__c, Is_Featured__c, Is_Active__c,
-                   Display_Order__c
+                   Display_Order__c, Event_Datetime__c, Registration_URL__c,
+                   Event_Duration_Minutes__c, Presenter__c
             FROM Resource__c
             WHERE Id = :resourceId
             LIMIT 1
@@ -177,6 +210,10 @@ public with sharing class ResourceAdminController {
         detail.featured = r.Is_Featured__c == true;
         detail.active = r.Is_Active__c == true;
         detail.displayOrder = r.Display_Order__c;
+        detail.eventDatetime = r.Event_Datetime__c;
+        detail.registrationUrl = r.Registration_URL__c;
+        detail.durationMinutes = r.Event_Duration_Minutes__c;
+        detail.presenter = r.Presenter__c;
         detail.relatedArticles = relatedArticlesFor(resourceId);
         detail.files = filesFor(resourceId);
         return detail;
@@ -246,6 +283,21 @@ public with sharing class ResourceAdminController {
         if (input.categoryId == null) {
             throw auraError('Pick a category — resources always live in one.');
         }
+        // Webinar rules mirror the two validation rules on Resource__c
+        // (Webinar_Requires_Event_Datetime, Webinar_Upcoming_Requires_Registration)
+        // so the admin sees a friendly message instead of a DML error.
+        Boolean isWebinar = WebinarLifecycle.isWebinar(input.resourceType);
+        if (isWebinar && input.eventDatetime == null) {
+            throw auraError('Webinars need an event date and time.');
+        }
+        if (isWebinar && input.eventDatetime > System.now()
+            && String.isBlank(input.registrationUrl)) {
+            throw auraError('Upcoming webinars need a registration URL so people can sign up.');
+        }
+        if (isWebinar && input.durationMinutes != null
+            && (input.durationMinutes < 1 || input.durationMinutes > MAX_DURATION_MINUTES)) {
+            throw auraError('Duration must be between 1 and ' + MAX_DURATION_MINUTES + ' minutes.');
+        }
 
         Resource__c record = new Resource__c(
             Name = input.name.trim(),
@@ -257,7 +309,12 @@ public with sharing class ResourceAdminController {
             Video_Embed_URL__c = normalizeVideoUrl(input.videoEmbedUrl),
             Is_Featured__c = input.featured == true,
             Is_Active__c = input.active != false,
-            Display_Order__c = input.displayOrder
+            Display_Order__c = input.displayOrder,
+            // Cleared for non-webinars so a type switch never carries stale event data.
+            Event_Datetime__c = isWebinar ? input.eventDatetime : null,
+            Registration_URL__c = isWebinar ? requireHttps(input.registrationUrl, 'Registration URL') : null,
+            Event_Duration_Minutes__c = isWebinar ? input.durationMinutes : null,
+            Presenter__c = isWebinar ? input.presenter : null
         );
 
         Savepoint sp = Database.setSavepoint();
@@ -676,6 +733,19 @@ public with sharing class ResourceAdminController {
         }
         if (!clean.startsWithIgnoreCase('https://')) {
             throw auraError('Video Embed URL must start with https://.');
+        }
+        return clean;
+    }
+
+    /** Trimmed https URL, null when blank; anything else is rejected by name. */
+    @TestVisible
+    private static String requireHttps(String url, String label) {
+        if (String.isBlank(url)) {
+            return null;
+        }
+        String clean = url.trim();
+        if (!clean.startsWithIgnoreCase('https://')) {
+            throw auraError(label + ' must start with https://.');
         }
         return clean;
     }

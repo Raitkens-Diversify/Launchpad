@@ -27,8 +27,6 @@ const ZERO_LOG_IDLE_MS = 1200;
  */
 export default class NexsSearchBar extends LightningElement {
     @api placeholder = 'Search help articles…';
-    /** Optional Data Category API name to scope suggestions to. */
-    @api category;
 
     @track suggestions = [];
     term = '';
@@ -98,7 +96,7 @@ export default class NexsSearchBar extends LightningElement {
     async fetchSuggestions() {
         const seq = ++this._seq;
         try {
-            const results = await typeahead({ term: this.term, category: this.category });
+            const results = await typeahead({ term: this.term, category: null });
             // Stale-response guard: never let an earlier request overwrite a later
             // one. Only render if this response is newer than the last rendered.
             if (seq <= this._rendered) {
@@ -240,7 +238,8 @@ export default class NexsSearchBar extends LightningElement {
             resultCount: this.suggestions.length,
             topResultArticleId: this.suggestions.length ? this.suggestions[0].id : null,
             searchType: 'Typeahead',
-            sessionKey: getSessionKey()
+            sessionKey: getSessionKey(),
+            app: 'Help Center'
         };
         // JSON-string transport (org gotcha: custom-type params arrive null).
         logSearch({ entryJson: JSON.stringify(entry) })
@@ -280,7 +279,8 @@ export default class NexsSearchBar extends LightningElement {
                 resultCount: 0,
                 topResultArticleId: null,
                 searchType: 'Typeahead',
-                sessionKey: getSessionKey()
+                sessionKey: getSessionKey(),
+                app: 'Help Center'
             })
         }).catch(() => {});
     }

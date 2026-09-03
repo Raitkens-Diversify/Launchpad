@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <description>The /help/events route host in two views: a month-grid Calendar of every webinar with an anchored detail popover (default; ?month=YYYY-MM) and the Upcoming agenda list (?view=upcoming; Sign up, .ics download, recorded past webinars).</description>
+    <targets>
+        <target>lightning__Tab</target>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property name="hideBranding" type="Boolean" label="Hide Diversify Branding"
+                      description="Hides the Diversify logo and brand crumb in the header for sites or pages that already have their own header/branding."/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

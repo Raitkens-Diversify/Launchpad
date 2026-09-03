@@ -1,0 +1,135 @@
+<template>
+    <c-ds-chrome logo-url={logoUrl} hide-branding={hideBranding} brand-label="Help Center" onbrandclick={handleBrandHome}>
+        <div class={pageClass}>
+            <header class="ev__head">
+                <h1 class="ev__heading">Events</h1>
+                <p class="ev__sub">Live webinars and recordings from the Diversify team.</p>
+            </header>
+
+            <c-ds-tabs class="ev__tabs" tabs={tabs} selected={view} label="Events views"
+                       ontabchange={handleTabChange}></c-ds-tabs>
+
+            <template if:true={isUpcomingView}>
+                <div role="tabpanel" aria-label="Upcoming">
+                    <template for:each={monthGroups} for:item="group">
+                        <section key={group.key} class="ev__month">
+                            <h2 class="ev__month-title">{group.label}</h2>
+                            <div class="ev__list">
+                            <template for:each={group.items} for:item="ev">
+                                <article key={ev.id} class="ev__row">
+                                    <c-ds-date-block value={ev.eventDatetime}></c-ds-date-block>
+                                    <div class="ev__main">
+                                        <div class="ev__title-row">
+                                            <h3 class="ev__title">{ev.name}</h3>
+                                        </div>
+                                        <template if:true={ev.meta}>
+                                            <p class="ev__meta">{ev.meta}</p>
+                                        </template>
+                                        <template if:true={ev.description}>
+                                            <p class="ev__desc">{ev.description}</p>
+                                        </template>
+                                        <div class="ev__actions">
+                                            <template if:true={ev.cta.isSignup}>
+                                                <a class="ev__cta" href={ev.cta.primaryHref}
+                                                   target="_blank" rel="noopener noreferrer">{ev.cta.primaryLabel}</a>
+                                            </template>
+                                            <template if:true={ev.cta.canAddToCalendar}>
+                                                <button type="button" class="ev__link" data-id={ev.id}
+                                                        onclick={handleAddToCalendar}>Add to calendar</button>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </article>
+                            </template>
+                            </div>
+                        </section>
+                    </template>
+
+                    <template if:true={showEmptyUpcoming}>
+                        <p class="ev__empty">No upcoming events right now — check back soon.</p>
+                    </template>
+
+                    <template if:true={hasPast}>
+                        <section class="ev__month ev__past">
+                            <h2 class="ev__month-title">Past events</h2>
+                            <div class="ev__list">
+                            <template for:each={pastItems} for:item="ev">
+                                <article key={ev.id} class="ev__row ev__row--past">
+                                    <c-ds-date-block value={ev.eventDatetime}></c-ds-date-block>
+                                    <div class="ev__main">
+                                        <div class="ev__title-row">
+                                            <h3 class="ev__title">{ev.name}</h3>
+                                            <c-ds-badge label="Recording" variant="info" size="sm"></c-ds-badge>
+                                        </div>
+                                        <template if:true={ev.meta}>
+                                            <p class="ev__meta">{ev.meta}</p>
+                                        </template>
+                                        <template if:true={ev.description}>
+                                            <p class="ev__desc">{ev.description}</p>
+                                        </template>
+                                        <div class="ev__actions">
+                                            <template if:true={ev.cta.isWatch}>
+                                                <button type="button" class="ev__cta ev__cta--button"
+                                                        data-slug={ev.slug}
+                                                        onclick={handleWatch}>{ev.cta.primaryLabel}</button>
+                                            </template>
+                                            <template if:true={ev.cta.note}>
+                                                <p class="ev__note">{ev.cta.note}</p>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </article>
+                            </template>
+                            </div>
+                        </section>
+                    </template>
+                </div>
+            </template>
+
+            <template if:true={isCalendarView}>
+                <div role="tabpanel" aria-label="Calendar" class="ev__calendar">
+                    <c-ds-calendar events={calendarEvents}
+                                   month={currentMonth}
+                                   layout="auto"
+                                   label="Events calendar"
+                                   onmonthchange={handleMonthChange}
+                                   oneventselect={handleEventSelect}></c-ds-calendar>
+                </div>
+            </template>
+        </div>
+
+        <c-ds-popover is-open={popoverOpen} anchor-rect={anchorRect} label="Event details"
+                      onclose={handlePopoverClose}>
+            <template if:true={selectedEvent}>
+                <div class="ev__pop">
+                    <h3 class="ev__pop-title">{selectedEvent.name}</h3>
+                    <p class="ev__meta ev__pop-when">{selectedEvent.when}</p>
+                    <template if:true={selectedEvent.meta}>
+                        <p class="ev__meta">{selectedEvent.meta}</p>
+                    </template>
+                    <template if:true={selectedEvent.description}>
+                        <p class="ev__desc">{selectedEvent.description}</p>
+                    </template>
+                    <div class="ev__actions">
+                        <template if:true={selectedEvent.cta.isSignup}>
+                            <a class="ev__cta" href={selectedEvent.cta.primaryHref}
+                               target="_blank" rel="noopener noreferrer">{selectedEvent.cta.primaryLabel}</a>
+                        </template>
+                        <template if:true={selectedEvent.cta.isWatch}>
+                            <button type="button" class="ev__cta ev__cta--button"
+                                    data-slug={selectedEvent.slug}
+                                    onclick={handleWatch}>{selectedEvent.cta.primaryLabel}</button>
+                        </template>
+                        <template if:true={selectedEvent.cta.note}>
+                            <p class="ev__note">{selectedEvent.cta.note}</p>
+                        </template>
+                        <template if:true={selectedEvent.cta.canAddToCalendar}>
+                            <button type="button" class="ev__link" data-id={selectedEvent.id}
+                                    onclick={handleAddToCalendar}>Add to calendar</button>
+                        </template>
+                    </div>
+                </div>
+            </template>
+        </c-ds-popover>
+    </c-ds-chrome>
+</template>

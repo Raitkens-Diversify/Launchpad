@@ -11,7 +11,8 @@
         <inputParameters>
             <name>recordId</name>
             <value>
-                <elementReference>Get_Case.FinServ__Household__c</elementReference>
+                <elementReference>Get_Case.Household__c</elementReference>
+                <inputConfiguratorMode>Resource</inputConfiguratorMode>
             </value>
         </inputParameters>
         <nameSegment>c:cmp_NavigateToRecord</nameSegment>
@@ -691,6 +692,7 @@
             <label>Yes, Structured Note</label>
         </rules>
     </decisions>
+    <description>Removing FinServ</description>
     <dynamicChoiceSets>
         <name>varCaseCashWithdrawalSelection</name>
         <dataType>Picklist</dataType>

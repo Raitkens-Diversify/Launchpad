@@ -69,6 +69,9 @@ export default class NexsArticleViewer extends LightningElement {
                 new CustomEvent('articleload', {
                     detail: {
                         title: detail.title,
+                        // UrlName lets a routed host (helpArticlePage) keep the
+                        // ?name= URL param honest on every in-browser navigation.
+                        urlName: detail.urlName,
                         suggestions: detail.suggestions || [],
                         // Lets the host drop the Suggested rail and go full width
                         // for embed articles (Scribe etc.) — see nexsArticleBrowser.

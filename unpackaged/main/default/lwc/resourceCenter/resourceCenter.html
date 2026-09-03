@@ -1,72 +1,76 @@
 <template>
+    <!-- .rc-shell stays outermost: it carries the template listeners that
+         catch composed events bubbling from the (slotted) child views —
+         slotted content stays in this host's light DOM, so they still pass
+         through here on their way up. -->
     <div class="rc-shell"
          oncategoryselect={handleCategorySelect}
          onresourceselect={handleResourceSelect}
+         onarticleselect={handleArticleSelect}
          onrcsearch={handleSearch}
          onrchome={handleHome}
          onguideopen={handleGuideOpen}
          onresourcedownload={handleDownload}>
 
-        <template if:true={showHeaderChrome}>
-            <header class="rc-chrome__header">
-                <template if:true={showBranding}>
-                    <img class="rc-chrome__logo" src={logoUrl} alt="Diversify" />
-                    <span class="rc-chrome__divider" aria-hidden="true"></span>
-                    <button type="button" class="rc-chrome__crumb" onclick={handleHome}>
-                        Resource Center
-                    </button>
-                </template>
-                <template if:true={showHeaderSearch}>
-                    <div class="rc-chrome__search">
-                        <c-resource-search-bar placeholder="Search resources…"
-                                               onselect={handleHeaderSelect}
-                                               onsearch={handleHeaderSearch}></c-resource-search-bar>
-                    </div>
-                </template>
-                <template if:true={helpCenterBaseUrl}>
-                    <button type="button" class="rc-chrome__link" onclick={handleHelpCenter}>
-                        Help Center
-                    </button>
-                </template>
-            </header>
-        </template>
+        <!-- Shared brand shell — c-ds-chrome owns the chrome markup + CSS. -->
+        <c-ds-chrome logo-url={logoUrl} hide-branding={hideBranding} brand-label="Resource Center" onbrandclick={handleHome}>
+            <!-- Search lives in the header on every view, matching the Help
+                 Center's article browser (the hero that used to own it on the
+                 landing went with resourceCenterHome). -->
+            <div slot="search">
+                <c-ds-search-bar placeholder="Search resources…"
+                                 header-label="Top suggestions:"
+                                 empty-hint="No matching resources — press Enter to search everything."
+                                 suggestions={headerSuggestions}
+                                 onquerychange={handleHeaderQuery}
+                                 onselect={handleHeaderSelect}
+                                 onsubmit={handleHeaderSearch}></c-ds-search-bar>
+            </div>
 
-        <main class="rc-main">
-            <template if:true={isHome}>
-                <c-resource-center-home></c-resource-center-home>
+            <!-- Get Help + the Help Center cross-link (styling stays here —
+                 slotted elements are styled by the host's stylesheet). Get Help
+                 used to live on the deleted landing hero, so it is now reachable
+                 from every view rather than only the front door. -->
+            <button type="button" class="rc-chrome__link" slot="actions" onclick={handleGuideOpen}>
+                Get Help
+            </button>
+            <template if:true={showHelpCenterLink}>
+                <button type="button" class="rc-chrome__link" slot="actions" onclick={handleHelpCenter}>
+                    Help Center
+                </button>
             </template>
-            <template if:true={isCategory}>
-                <c-resource-category-page slug={slug}></c-resource-category-page>
-            </template>
-            <template if:true={isDetail}>
-                <c-resource-detail slug={slug} help-center-base-url={helpCenterBaseUrl}></c-resource-detail>
-            </template>
-            <template if:true={isSearch}>
-                <c-resource-search-results term={term}
-                    help-center-base-url={helpCenterBaseUrl}></c-resource-search-results>
-            </template>
-            <template if:true={isGuide}>
-                <section class="rc-guide">
-                    <nav class="rc-guide__crumbs" aria-label="Breadcrumb">
-                        <a class="rc-guide__crumb-link" href="#" onclick={handleGuideBack}>Resource Center</a>
-                        <span class="rc-guide__crumb-sep" aria-hidden="true">›</span>
-                        <span class="rc-guide__crumb-current">Get Help</span>
-                    </nav>
-                    <h1 class="rc-guide__title">Get Help</h1>
-                    <p class="rc-guide__sub">Answer a couple of questions and we&rsquo;ll point you to the right place.</p>
-                    <!-- Embedded mode: category/resource terminals fire events the
-                         shell already routes; no helpCenterBaseUrl because the
-                         starter guide has no article terminals (and the Help
-                         Center has no /article/ route). -->
-                    <!-- case target defaults from Resource_Center_Setting__mdt -->
-                    <c-help-guide guide-key="get_help"></c-help-guide>
-                </section>
-            </template>
-        </main>
 
-        <footer class="rc-chrome__footer">
-            <span class="rc-chrome__footer-brand">Resource Center</span>
-            <span class="rc-chrome__footer-meta">{copyrightLine}</span>
-        </footer>
+            <main class="rc-main">
+                <!-- Landing and routed category are one surface: with no slug
+                     the page falls back to its first sidebar topic. -->
+                <template if:true={isBrowse}>
+                    <c-resource-category-page slug={slug}></c-resource-category-page>
+                </template>
+                <template if:true={isDetail}>
+                    <c-resource-detail slug={slug} help-center-base-url={helpCenterBaseUrl}></c-resource-detail>
+                </template>
+                <template if:true={isSearch}>
+                    <c-resource-search-results term={term}
+                        help-center-base-url={helpCenterBaseUrl}></c-resource-search-results>
+                </template>
+                <template if:true={isGuide}>
+                    <section class="rc-guide">
+                        <nav class="rc-guide__crumbs" aria-label="Breadcrumb">
+                            <a class="rc-guide__crumb-link" href="#" onclick={handleGuideBack}>Resource Center</a>
+                            <span class="rc-guide__crumb-sep" aria-hidden="true">›</span>
+                            <span class="rc-guide__crumb-current">Get Help</span>
+                        </nav>
+                        <h1 class="rc-guide__title">Get Help</h1>
+                        <p class="rc-guide__sub">Answer a couple of questions and we&rsquo;ll point you to the right place.</p>
+                        <!-- Embedded mode: category/resource terminals fire events the
+                             shell already routes; no helpCenterBaseUrl because the
+                             starter guide has no article terminals (and the Help
+                             Center has no /article/ route). -->
+                        <!-- case target defaults from Resource_Center_Setting__mdt -->
+                        <c-help-guide guide-key="get_help"></c-help-guide>
+                    </section>
+                </template>
+            </main>
+        </c-ds-chrome>
     </div>
 </template>

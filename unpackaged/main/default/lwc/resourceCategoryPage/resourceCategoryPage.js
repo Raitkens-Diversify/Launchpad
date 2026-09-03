@@ -1,5 +1,6 @@
 import { LightningElement, api, wire } from 'lwc';
 import { iconPath } from 'c/rcIcons';
+import { toContentItem } from 'c/rcConstants';
 import getCategoryBySlug from '@salesforce/apex/ResourceCenterService.getCategoryBySlug';
 import getCategoryNav from '@salesforce/apex/ResourceCenterService.getCategoryNav';
 
@@ -14,6 +15,12 @@ import getCategoryNav from '@salesforce/apex/ResourceCenterService.getCategoryNa
  * derived from the routed slug, so clicking another topic collapses the
  * previous branch for free.
  *
+ * Landing: with no routed slug the page falls back to the FIRST topic in
+ * the sidebar, exactly as the Help Center's browser falls back to
+ * categories[0] (nexsArticleBrowser.applyInitialState). That is what makes
+ * the Resources tab land on the same browse shape as Help Articles instead
+ * of a bespoke landing page.
+ *
  * Pages:
  *  - Main topic (slug has no parent): collapsible subtopic sections (first
  *    open), direct-filed resources trailing in "General resources"; topics
@@ -22,11 +29,26 @@ import getCategoryNav from '@salesforce/apex/ResourceCenterService.getCategoryNa
  *    a Resource Center › Parent › Subtopic crumb. Subtopic slugs are their
  *    own pages — deep links land here directly.
  *
- * Emits (composed) `categoryselect { slug }`, `rchome`. Resource card events
- * bubble to the orchestrator.
+ * Emits (composed) `categoryselect { slug }`, `rchome`, and
+ * `resourceselect { slug }` — translated from c-ds-content-card's
+ * `contentselect { kind, routeKey, id }` so the orchestrator's contract is
+ * unchanged.
  */
 export default class ResourceCategoryPage extends LightningElement {
-    @api slug;
+    /** Routed slug. Undefined on the Resource Center landing, where
+        effectiveSlug falls back to the first sidebar topic. */
+    @api
+    get slug() {
+        return this._slug;
+    }
+    set slug(value) {
+        this._slug = value;
+        this.resolveEffectiveSlug();
+    }
+
+    _slug;
+    /** What the detail wire actually keys off — routed slug or the default. */
+    effectiveSlug;
 
     detail;
     error;
@@ -38,10 +60,20 @@ export default class ResourceCategoryPage extends LightningElement {
     wiredNav({ data }) {
         if (data) {
             this.navTopics = data;
+            this.resolveEffectiveSlug();
         }
     }
 
-    @wire(getCategoryBySlug, { slug: '$slug' })
+    /** A routed slug always wins; otherwise land on the first topic. The
+        nav wire is unparameterised, so it resolves even with no slug —
+        without this the detail wire would never fire and the page would
+        spin forever. */
+    resolveEffectiveSlug() {
+        const first = this.navTopics.length ? this.navTopics[0].slug : undefined;
+        this.effectiveSlug = this._slug || first;
+    }
+
+    @wire(getCategoryBySlug, { slug: '$effectiveSlug' })
     wiredCategory({ data, error }) {
         if (data) {
             this.applyDetail(data);
@@ -86,6 +118,10 @@ export default class ResourceCategoryPage extends LightningElement {
 
     get hasGridResources() {
         return this.gridResources.length > 0;
+    }
+
+    get gridItems() {
+        return this.gridResources.map(toContentItem);
     }
 
     get isEmpty() {
@@ -133,6 +169,7 @@ export default class ResourceCategoryPage extends LightningElement {
             const count = s.resources.length;
             return {
                 ...s,
+                items: s.resources.map(toContentItem),
                 ariaExpanded: open ? 'true' : 'false',
                 iconName: open ? 'utility:chevrondown' : 'utility:chevronright',
                 bodyClass: open
@@ -172,6 +209,15 @@ export default class ResourceCategoryPage extends LightningElement {
     fireCategorySelect(slug) {
         this.dispatchEvent(new CustomEvent('categoryselect', {
             detail: { slug }, bubbles: true, composed: true
+        }));
+    }
+
+    /** c-ds-content-card `contentselect` → the orchestrator's `resourceselect
+        { slug }` contract (routeKey IS the slug for kind:'resource' items). */
+    handleContentSelect(event) {
+        event.stopPropagation();
+        this.dispatchEvent(new CustomEvent('resourceselect', {
+            detail: { slug: event.detail.routeKey }, bubbles: true, composed: true
         }));
     }
 

@@ -18,4 +18,16 @@
         <field>Support_Request_URL__c</field>
         <value xsi:nil="true"/>
     </values>
+    <values>
+        <field>Unified_Search_Enabled__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Webinar_Agenda_Enabled__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Webinar_Agenda_Limit__c</field>
+        <value xsi:type="xsd:double">5.0</value>
+    </values>
 </CustomMetadata>

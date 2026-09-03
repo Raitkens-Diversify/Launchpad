@@ -18,6 +18,7 @@ const PAGE_SIZE = 50;
 export default class AdminAnalytics extends LightningElement {
     view = 'summary'; // summary | searches | views | article
     surface = '';
+    app = '';
 
     summary;
     loading = true;
@@ -78,7 +79,8 @@ export default class AdminAnalytics extends LightningElement {
                 surface: this.surface || null,
                 termFilter: this.searchTerm || null,
                 zeroOnly: this.zeroOnly,
-                beforeCursor: reset || !last ? null : last.createdDate
+                beforeCursor: reset || !last ? null : last.createdDate,
+                app: this.app || null
             });
             this.searchRows = [...this.searchRows, ...rows];
             this.searchesExhausted = rows.length < PAGE_SIZE;
@@ -156,6 +158,18 @@ export default class AdminAnalytics extends LightningElement {
             options.push({ label: s, value: s })
         );
         return options;
+    }
+
+    /** App__c cut (Surface__c only names the network — both apps share one
+        site). Values mirror the restricted picklist; blank = all rows,
+        including legacy untagged ones. Applies to the searches list. */
+    get appOptions() {
+        return [
+            { label: 'All apps', value: '' },
+            { label: 'Help Center', value: 'Help Center' },
+            { label: 'Resource Center', value: 'Resource Center' },
+            { label: 'Landing', value: 'Landing' }
+        ];
     }
 
     // ---- Summary getters ------------------------------------------------------
@@ -315,6 +329,13 @@ export default class AdminAnalytics extends LightningElement {
             this.loadSearches(true);
         } else if (this.isViewsView) {
             this.loadViews(true);
+        }
+    }
+
+    handleAppChange(event) {
+        this.app = event.detail.value;
+        if (this.isSearchesView) {
+            this.loadSearches(true);
         }
     }
 

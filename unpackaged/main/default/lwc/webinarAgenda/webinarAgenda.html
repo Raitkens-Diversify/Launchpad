@@ -1,0 +1,27 @@
+<template>
+    <template if:true={showPanel}>
+        <section class="wa" aria-labelledby="wa-title">
+            <h2 class="wa__title" id="wa-title">Webinars</h2>
+            <template if:true={hasUpcoming}>
+                <h3 class="wa__section">Upcoming</h3>
+                <ul class="wa__list">
+                    <template for:each={upcomingRows} for:item="row">
+                        <li key={row.id} class="wa__item">
+                            <c-ds-agenda-row item={row} onrowselect={handleRowSelect}></c-ds-agenda-row>
+                        </li>
+                    </template>
+                </ul>
+            </template>
+            <template if:true={hasRecent}>
+                <h3 class="wa__section">Recent</h3>
+                <ul class="wa__list">
+                    <template for:each={recentRows} for:item="row">
+                        <li key={row.id} class="wa__item">
+                            <c-ds-agenda-row item={row} onrowselect={handleRowSelect}></c-ds-agenda-row>
+                        </li>
+                    </template>
+                </ul>
+            </template>
+        </section>
+    </template>
+</template>

@@ -56,6 +56,11 @@
 .arsl__copy {
     margin-right: 0.25rem;
 }
+.arsl__lifecycle-chip {
+    display: inline-block;
+    margin-left: 0.375rem;
+    vertical-align: middle;
+}
 .arl-badge {
     display: inline-block;
     padding: 0.125rem 0.5rem;

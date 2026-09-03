@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>61.0</apiVersion>
+    <isExposed>false</isExposed>
+    <description>Design-system non-modal popover anchored to a viewport rect (Escape / outside click / close button; focus in and restore), a bottom sheet at phone widths. Embedded by eventsPage for the calendar event detail.</description>
+</LightningComponentBundle>

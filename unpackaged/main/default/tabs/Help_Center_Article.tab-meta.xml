@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Help Center article route in the core app (LWC tab; the component renders its own chrome, so there is no backing App Page). Deep-linked by c/contextNav with c__name / c__topic state; mirrors the /help/article site route.</description>
+    <label>Help Articles</label>
+    <lwcComponent>helpArticlePage</lwcComponent>
+    <motif>Custom55: Books</motif>
+</CustomTab>

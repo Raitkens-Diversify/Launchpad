@@ -78,60 +78,10 @@
     min-height: 100%;
 }
 
-/* --- Chrome header (full-bleed, sticky), replicated from .nexs-chrome__* --- */
-.rc-chrome__header {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--slds-g-spacing-5, 24px);
-    min-height: 64px;
-    box-sizing: border-box;
-    padding: var(--slds-g-spacing-4, 16px) var(--slds-g-spacing-5, 24px);
-    background: var(--slds-g-color-surface-container-1, #ffffff);
-    border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
-    position: sticky;
-    top: 0;
-    z-index: 20;
-}
-.rc-chrome__logo {
-    height: 24px;
-    width: auto;
-    display: block;
-}
-.rc-chrome__divider {
-    flex: none;
-    width: 1px;
-    height: 24px;
-    background: var(--slds-g-color-border-1, #d1d5db);
-}
-.rc-chrome__crumb {
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: var(--slds-g-font-scale-1, 14px);
-    font-weight: 500;
-    color: var(--slds-g-color-on-surface-3, #09243f);
-}
-.rc-chrome__crumb:hover {
-    color: var(--slds-g-color-accent-1, #0f406f);
-}
-/* Right-aligned header search (inner views), Hulu-style — port of
-   nexsLanding's .nexs-chrome__search. */
-.rc-chrome__search {
-    margin-left: auto;
-    flex: 1 1 320px;
-    max-width: 420px;
-    min-width: 200px;
-}
-/* When the search is present it takes the auto margin; the Help Center link
-   follows directly after it (same trick as nexsLanding's help button). */
-.rc-chrome__search ~ .rc-chrome__link {
-    margin-left: 0;
-}
+/* Cross-link to the Help Center, slotted into c-ds-chrome's actions region
+   (placement is the chrome's job; styling stays here — slotted elements are
+   styled by the host's stylesheet). */
 .rc-chrome__link {
-    margin-left: auto;
     background: none;
     border: none;
     padding: 0;
@@ -186,22 +136,4 @@
     margin: var(--ds-space-sm, 8px) 0 var(--ds-space-lg, 16px);
     font-size: 1rem;
     color: var(--slds-g-color-on-surface-1, #4b5563);
-}
-
-/* --- Footer (full-bleed), replicated from .nexs-chrome__footer --- */
-.rc-chrome__footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: var(--ds-space-xs, 4px);
-    padding: var(--slds-g-spacing-3, 12px) var(--slds-g-spacing-5, 24px);
-    background: var(--slds-g-color-surface-container-1, #ffffff);
-    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
-    color: var(--slds-g-color-on-surface-1, #4b5563);
-    font-size: 0.75rem;
-}
-.rc-chrome__footer-brand {
-    font-weight: 600;
-    color: var(--slds-g-color-accent-1, #0f406f);
 }

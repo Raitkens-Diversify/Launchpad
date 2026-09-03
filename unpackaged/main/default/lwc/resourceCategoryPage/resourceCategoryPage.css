@@ -82,7 +82,7 @@
     gap: var(--ds-space-sm, 8px);
 }
 .rc-section__count {
-    font-size: 0.8125rem;
+    font-size: var(--div-font-scale-base, 1rem);
     color: var(--slds-g-color-on-surface-1, #4b5563);
     white-space: nowrap;
 }

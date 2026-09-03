@@ -15,6 +15,28 @@
                 <p class="rd__desc">{detail.description}</p>
             </template>
 
+            <!-- Webinar: event metadata, then the status-specific action -->
+            <template if:true={isWebinar}>
+                <div class="rd__event">
+                    <c-ds-date-block value={detail.eventDatetime}></c-ds-date-block>
+                    <dl class="rd__event-meta">
+                        <template for:each={webinarMeta} for:item="m">
+                            <div key={m.label} class="rd__event-item">
+                                <dt class="rd__event-label">{m.label}</dt>
+                                <dd class="rd__event-value">{m.value}</dd>
+                            </div>
+                        </template>
+                    </dl>
+                </div>
+                <template if:true={showSignUp}>
+                    <a class="rd__btn" href={detail.registrationUrl} target="_blank"
+                       rel="noopener noreferrer">Sign up</a>
+                </template>
+                <template if:true={showRecordingPending}>
+                    <p class="rd__pending">Recording coming soon — check back after the session.</p>
+                </template>
+            </template>
+
             <!-- File-backed (PDF/Form/Template): paged rendition preview + download -->
             <template if:true={isFileBacked}>
                 <template if:true={showPreview}>
@@ -51,13 +73,24 @@
                 </a>
             </template>
 
-            <!-- Video: responsive 16:9 embed -->
-            <template if:true={isVideo}>
+            <!-- Video, or a recorded webinar with an embed URL: responsive 16:9 embed -->
+            <template if:true={showEmbed}>
                 <div class="rd__video">
                     <iframe class="rd__video-frame" src={detail.videoEmbedUrl}
                             title={detail.name} allow="fullscreen"
                             allowfullscreen></iframe>
                 </div>
+            </template>
+
+            <!-- Recorded webinar whose recording is the attached file: native player + download -->
+            <template if:true={showFileVideo}>
+                <div class="rd__video">
+                    <video class="rd__video-frame" controls preload="metadata"
+                           src={detail.file.downloadUrl} title={detail.name}></video>
+                </div>
+                <a class="rd__btn" href={detail.file.downloadUrl} download onclick={handleDownload}>
+                    {downloadLabel}
+                </a>
             </template>
 
             <!-- External link -->

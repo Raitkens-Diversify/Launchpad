@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Resource_Type__c</fullName>
-    <description>Governs how the resource is presented and which URL/file is required.</description>
+    <description>Governs how the resource is presented and which URL/file is required. Webinar: an event with a derived lifecycle (Upcoming / Past / Recorded — see WebinarLifecycle); the type never changes after the event, the recording attaches via Video_Embed_URL__c or an uploaded file.</description>
     <label>Resource Type</label>
     <required>true</required>
     <trackTrending>false</trackTrending>
@@ -34,6 +34,11 @@
                 <fullName>External Link</fullName>
                 <default>false</default>
                 <label>External Link</label>
+            </value>
+            <value>
+                <fullName>Webinar</fullName>
+                <default>false</default>
+                <label>Webinar</label>
             </value>
         </valueSetDefinition>
     </valueSet>

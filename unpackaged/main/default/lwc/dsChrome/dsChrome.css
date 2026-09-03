@@ -1,0 +1,105 @@
+:host {
+    display: block;
+}
+
+/* Shared shell: inherits the --slds-g-* tokens from its declaring root with
+   literal fallbacks (ds* convention — no self-declared token block). */
+
+.ds-chrome {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+}
+
+.ds-chrome__header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--slds-g-spacing-5, 24px);
+    min-height: 64px;
+    box-sizing: border-box;
+    padding: var(--slds-g-spacing-4, 16px) var(--slds-g-spacing-5, 24px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    /* Pinned so the brand header stays visible while the page scrolls
+       (identical on the LWR site and the core app tab). */
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+.ds-chrome__logo {
+    height: 24px;
+    width: auto;
+    display: block;
+}
+
+.ds-chrome__divider {
+    flex: none;
+    width: 1px;
+    height: 24px;
+    background: var(--slds-g-color-border-1, #d1d5db);
+}
+
+/* Text button so the brand label can route back home. */
+.ds-chrome__crumb {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: 500;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.ds-chrome__crumb:hover {
+    color: var(--slds-g-color-accent-1, #0f406f);
+}
+
+/* Right-aligned header search (inner views), Hulu-style. */
+.ds-chrome__search {
+    margin-left: auto;
+    flex: 1 1 320px;
+    max-width: 420px;
+    min-width: 200px;
+}
+.ds-chrome__search--empty {
+    display: none;
+}
+
+/* Actions sit after the search when it's present; far right when it isn't
+   (so two auto margins never split the free space). */
+.ds-chrome__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-3, 12px);
+}
+.ds-chrome__actions--solo {
+    margin-left: auto;
+}
+.ds-chrome__actions--empty {
+    display: none;
+}
+
+.ds-chrome__body {
+    flex: 1 1 auto;
+}
+
+.ds-chrome__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--slds-g-spacing-1, 4px);
+    padding: var(--slds-g-spacing-3, 12px) var(--slds-g-spacing-5, 24px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    font-size: 0.75rem;
+}
+
+.ds-chrome__footer-brand {
+    font-weight: 600;
+    color: var(--slds-g-color-accent-1, #0f406f);
+}

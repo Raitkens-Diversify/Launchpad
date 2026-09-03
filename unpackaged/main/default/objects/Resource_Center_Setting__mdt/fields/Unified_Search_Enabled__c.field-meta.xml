@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Unified_Search_Enabled__c</fullName>
+    <defaultValue>true</defaultValue>
+    <description>Rollout gate for the unified cross-app search on the landing page. Unchecked hides the landing&#39;s search bars (the topic directories and featured strip keep working); the per-app searches inside the Help Center and Resource Center are unaffected. Read through NexSKnowledgeController.getSupportSettings.</description>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Unified Search Enabled</label>
+    <type>Checkbox</type>
+</CustomField>

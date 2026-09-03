@@ -9,24 +9,33 @@ import getResourceCategoryTree from '@salesforce/apex/ResourceAdminController.ge
 import getFiles from '@salesforce/apex/ResourceAdminController.getFiles';
 import removeFile from '@salesforce/apex/ResourceAdminController.removeFile';
 import { messageFrom, toast } from 'c/messageUtil';
-import { FILE_TYPES, DEFAULT_TYPE } from 'c/rcConstants';
+import { FILE_TYPES, DEFAULT_TYPE, TYPE_VIDEO, TYPE_EXTERNAL_LINK, TYPE_WEBINAR } from 'c/rcConstants';
 
 /**
  * adminResourceEditor — guided Resource__c form replacing addResourceAction:
  * type-first conditional fields, auto-suggested slug, single-select category
  * tree, explicit file management (the newest file is what downloads), and a
  * related-articles linker writing stable KA Ids. Emits `back`.
+ *
+ * Webinar: a conditional section (event date/time, registration URL, duration,
+ * presenter); the recording reuses the embed-URL input and the file card
+ * (labelled "Recording"). Lifecycle validation mirrors the server
+ * (ResourceAdminController.saveResource ↔ the two Resource__c validation
+ * rules) so the admin sees a friendly toast, but the server stays authoritative.
  */
 const TYPE_OPTIONS = [
     { label: 'PDF (uploaded file)', value: 'PDF' },
     { label: 'Form (uploaded file)', value: 'Form' },
     { label: 'Template (uploaded file)', value: 'Template' },
     { label: 'Video (embedded)', value: 'Video' },
-    { label: 'External Link', value: 'External Link' }
+    { label: 'External Link', value: 'External Link' },
+    { label: 'Webinar (event, then recording)', value: 'Webinar' }
 ];
 const ACCEPTED_FORMATS = [
     '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.png', '.jpg', '.zip'
 ];
+/** Webinar recordings: the file card serves a video, not a document. */
+const RECORDING_FORMATS = ['.mp4', '.m4v', '.mov', '.webm'];
 
 export default class AdminResourceEditor extends LightningElement {
     /** Resource__c Id to edit; null/undefined = create. */
@@ -45,6 +54,10 @@ export default class AdminResourceEditor extends LightningElement {
     categorySelection = [];
     externalUrl = '';
     videoEmbedUrl = '';
+    eventDatetime = null; // ISO-8601 string (lightning-input type=datetime)
+    registrationUrl = '';
+    durationMinutes = null;
+    presenter = '';
     featured = false;
     active = true;
     displayOrder;
@@ -85,6 +98,11 @@ export default class AdminResourceEditor extends LightningElement {
         this.categorySelection = r.categoryId ? [r.categoryId] : [];
         this.externalUrl = r.externalUrl || '';
         this.videoEmbedUrl = r.videoEmbedUrl || '';
+        this.eventDatetime = r.eventDatetime || null;
+        this.registrationUrl = r.registrationUrl || '';
+        this.durationMinutes = r.durationMinutes === null || r.durationMinutes === undefined
+            ? null : Number(r.durationMinutes);
+        this.presenter = r.presenter || '';
         this.featured = r.featured === true;
         this.active = r.active !== false;
         this.displayOrder = r.displayOrder;
@@ -117,7 +135,12 @@ export default class AdminResourceEditor extends LightningElement {
 
     get statusNote() {
         if (this.isNew) {
-            return 'Save first, then upload the file (for file-backed types).';
+            return this.isWebinar
+                ? 'Save first; attach the recording (embed URL or upload) once the session has run.'
+                : 'Save first, then upload the file (for file-backed types).';
+        }
+        if (this.isWebinar) {
+            return 'Status is derived from the event date and whether a recording is attached — the newest uploaded file or the embed URL is what plays.';
         }
         return this.needsFile
             ? 'The newest uploaded file is what users download — remove older ones to be safe.'
@@ -133,19 +156,46 @@ export default class AdminResourceEditor extends LightningElement {
     }
 
     get isVideo() {
-        return this.resourceType === 'Video';
+        return this.resourceType === TYPE_VIDEO;
     }
 
     get isExternal() {
-        return this.resourceType === 'External Link';
+        return this.resourceType === TYPE_EXTERNAL_LINK;
     }
 
+    get isWebinar() {
+        return this.resourceType === TYPE_WEBINAR;
+    }
+
+    /** The embed input serves Video (required) and Webinar recordings (optional). */
+    get showEmbedInput() {
+        return this.isVideo || this.isWebinar;
+    }
+    get embedRequired() {
+        return this.isVideo;
+    }
+    get embedLabel() {
+        return this.isWebinar ? 'Recording embed URL' : 'Video Embed URL';
+    }
+    get embedHelp() {
+        return this.isWebinar
+            ? 'Optional. Paste the recording’s YouTube/Vimeo link after the session; uploading a video file below works too. Either one marks the webinar Recorded.'
+            : 'The embeddable player URL (e.g. a YouTube or Vimeo embed link).';
+    }
+
+    /** Saved file-backed types upload their file; saved webinars upload their recording. */
     get showUpload() {
-        return !this.isNew && this.needsFile;
+        return !this.isNew && (this.needsFile || this.isWebinar);
+    }
+    get uploadTitle() {
+        return this.isWebinar ? 'Recording' : 'File';
+    }
+    get uploadLabel() {
+        return this.isWebinar ? 'Upload the recording users watch' : 'Upload the file users download';
     }
 
     get acceptedFormats() {
-        return ACCEPTED_FORMATS;
+        return this.isWebinar ? RECORDING_FORMATS : ACCEPTED_FORMATS;
     }
 
     get hasFiles() {
@@ -212,6 +262,18 @@ export default class AdminResourceEditor extends LightningElement {
     handleVideoUrlChange(event) {
         this.videoEmbedUrl = event.target.value;
     }
+    handleEventDatetimeChange(event) {
+        this.eventDatetime = event.target.value || null;
+    }
+    handleRegistrationUrlChange(event) {
+        this.registrationUrl = event.target.value;
+    }
+    handleDurationChange(event) {
+        this.durationMinutes = event.target.value ? Number(event.target.value) : null;
+    }
+    handlePresenterChange(event) {
+        this.presenter = event.target.value;
+    }
     handleFeaturedChange(event) {
         this.featured = event.target.checked;
     }
@@ -268,6 +330,23 @@ export default class AdminResourceEditor extends LightningElement {
             toast(this, 'error', 'External Link resources need an External URL.');
             return false;
         }
+        if (this.isWebinar) {
+            // Pre-validation only — the server (and the validation rules) decide.
+            if (!this.eventDatetime) {
+                toast(this, 'error', 'Webinars need an event date and time.');
+                return false;
+            }
+            const upcoming = new Date(this.eventDatetime).getTime() > Date.now();
+            if (upcoming && !this.registrationUrl.trim()) {
+                toast(this, 'error', 'Upcoming webinars need a registration URL so people can sign up.');
+                return false;
+            }
+            if (this.durationMinutes !== null
+                && (this.durationMinutes < 1 || this.durationMinutes > 999)) {
+                toast(this, 'error', 'Duration must be between 1 and 999 minutes.');
+                return false;
+            }
+        }
         return true;
     }
 
@@ -290,6 +369,11 @@ export default class AdminResourceEditor extends LightningElement {
                     categoryId: this.categorySelection[0],
                     externalUrl: this.externalUrl || null,
                     videoEmbedUrl: this.videoEmbedUrl || null,
+                    // Webinar-only; the server clears these for other types.
+                    eventDatetime: this.isWebinar ? this.eventDatetime || null : null,
+                    registrationUrl: this.isWebinar ? this.registrationUrl || null : null,
+                    durationMinutes: this.isWebinar ? this.durationMinutes : null,
+                    presenter: this.isWebinar ? this.presenter || null : null,
                     featured: this.featured,
                     active: this.active,
                     displayOrder: this.displayOrder,
@@ -297,12 +381,13 @@ export default class AdminResourceEditor extends LightningElement {
                 })
             });
             this.recordId = id;
-            toast(this, 
-                'success',
-                wasNew && this.needsFile
-                    ? 'Saved — now upload the file below.'
-                    : 'Resource saved.'
-            );
+            let saved = 'Resource saved.';
+            if (wasNew && this.needsFile) {
+                saved = 'Saved — now upload the file below.';
+            } else if (wasNew && this.isWebinar) {
+                saved = 'Saved — after the session, attach the recording below.';
+            }
+            toast(this, 'success', saved);
         } catch (e) {
             toast(this, 'error', messageFrom(e));
         } finally {
@@ -322,7 +407,9 @@ export default class AdminResourceEditor extends LightningElement {
     }
 
     handleUploadFinished() {
-        toast(this, 'success', 'File uploaded — it is now what users download.');
+        toast(this, 'success', this.isWebinar
+            ? 'Recording uploaded — the webinar is now Recorded and watchable.'
+            : 'File uploaded — it is now what users download.');
         this.refreshFiles();
     }
 

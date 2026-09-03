@@ -1121,11 +1121,6 @@
         </columns>
         <columns>
             <checkedByDefault>false</checkedByDefault>
-            <field>Current_Task__c</field>
-            <table>Case</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
             <field>No_Template_Found_Completed_Fields__c</field>
             <table>Case</table>
         </columns>

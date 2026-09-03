@@ -1,0 +1,89 @@
+<template>
+    <c-ds-chrome logo-url={logoUrl} hide-branding={hideBranding} brand-label="Help Center" onbrandclick={handleBrandHome}>
+        <template if:true={showHeaderSearch}>
+            <div slot="search">
+                <c-ds-search-bar
+                    placeholder="Search articles and resources…"
+                    header-label="Top suggestions:"
+                    empty-hint="No matches — press Enter to search everything."
+                    suggestions={suggestions}
+                    onquerychange={handleSearchQuery}
+                    onselect={handleSuggestionSelect}
+                    onsubmit={handleSearchSubmit}
+                ></c-ds-search-bar>
+            </div>
+        </template>
+
+        <button type="button" slot="actions" class="landing__events-link" onclick={handleEventsLink}>
+            Upcoming Events
+            <template if:true={hasUpcomingCount}>
+                <span class="landing__events-count">{upcomingCount}</span>
+            </template>
+        </button>
+
+        <template if:true={isHome}>
+            <c-ds-hero eyebrow="Help &amp; resources, one place." headline="What do you need help with?">
+                <template if:true={showHeroSearch}>
+                    <div class="landing-hero__search" data-tour-id="landing-search">
+                        <c-ds-search-bar
+                            placeholder="Search articles and resources…"
+                            header-label="Top suggestions:"
+                            empty-hint="No matches — press Enter to search everything."
+                            suggestions={suggestions}
+                            onquerychange={handleSearchQuery}
+                            onselect={handleSuggestionSelect}
+                            onsubmit={handleSearchSubmit}
+                        ></c-ds-search-bar>
+                    </div>
+                </template>
+            </c-ds-hero>
+
+            <c-event-banner event={nextEvent}></c-event-banner>
+
+            <div class="landing-body">
+                <template if:true={hasFeatured}>
+                    <section class="landing-section" data-tour-id="landing-featured">
+                        <h2 class="landing-section__title">Featured</h2>
+                        <div class="landing-grid" oncontentselect={handleFeaturedSelect}>
+                            <template for:each={featuredItems} for:item="item">
+                                <c-ds-content-card key={item.id} item={item}></c-ds-content-card>
+                            </template>
+                        </div>
+                    </section>
+                </template>
+
+                <div class="landing-directories">
+                    <template if:true={hasHelpTopics}>
+                        <section class="landing-section" data-tour-id="landing-topics">
+                            <c-ds-topic-nav heading="Browse help topics"
+                                items={helpTopicItems}
+                                onnavselect={handleTopicNav}></c-ds-topic-nav>
+                        </section>
+                    </template>
+                    <template if:true={hasResourceCategories}>
+                        <section class="landing-section" data-tour-id="landing-resources">
+                            <c-ds-topic-nav heading="Browse resources"
+                                items={resourceCategoryItems}
+                                onnavselect={handleTopicNav}></c-ds-topic-nav>
+                        </section>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Outside .landing-body on purpose: the band paints its own
+                 full-bleed gray background. -->
+            <div data-tour-id="landing-help">
+                <c-resource-help-band></c-resource-help-band>
+            </div>
+        </template>
+
+        <template if:true={isResults}>
+            <div class="landing-body" onresourceselect={handleResourceSelect}
+                 onarticleselect={handleArticleSelect}>
+                <c-resource-search-results term={term}></c-resource-search-results>
+            </div>
+        </template>
+
+        <c-tour-launcher tour-key="unified_landing"></c-tour-launcher>
+    </c-ds-chrome>
+</template>

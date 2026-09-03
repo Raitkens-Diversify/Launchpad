@@ -1,0 +1,120 @@
+/* Self-declared --slds-g-* block (canonical values, ui-standards §1):
+   injected SLDS2 hooks beat :host inheritance, so consumers of these names
+   declare their own. */
+:host {
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-accent-3: #071c31;
+    --slds-g-color-on-accent-1: #ffffff;
+}
+
+/* Anchored card. z-index sits above c-ds-chrome's sticky header (20). */
+.ds-pop__panel {
+    position: fixed;
+    top: var(--ds-pop-top, 0);
+    left: var(--ds-pop-left, 0);
+    z-index: 30;
+    box-sizing: border-box;
+    width: min(360px, calc(100vw - 16px));
+    max-height: min(70vh, 520px);
+    overflow: auto;
+    padding: var(--ds-space-lg, 16px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+    box-shadow: var(--ds-shadow-drop, 0 8px 24px rgba(9, 36, 63, 0.12));
+    color: var(--slds-g-color-on-surface-2, #374151);
+    font-family: var(--ds-font-body, "Inter", -apple-system, BlinkMacSystemFont, sans-serif);
+    /* Measured after first paint; invisible until placed so it never flashes at 0,0. */
+    visibility: hidden;
+}
+.ds-pop__panel--placed {
+    visibility: visible;
+}
+.ds-pop__panel:focus {
+    outline: none;
+}
+
+.ds-pop__close {
+    position: absolute;
+    top: var(--ds-space-sm, 8px);
+    right: var(--ds-space-sm, 8px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    cursor: pointer;
+}
+.ds-pop__close:hover {
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+.ds-pop__close:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+
+.ds-pop__heading {
+    margin: 0 var(--ds-space-xl, 24px) var(--ds-space-sm, 8px) 0; /* clears the close button */
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.ds-pop__body {
+    min-width: 0;
+}
+
+/* The backdrop only exists at phone widths (the sheet dims the page); on
+   desktop the popover is a light, non-modal card. */
+.ds-pop__backdrop {
+    display: none;
+}
+
+@media (max-width: 640px) {
+    .ds-pop__backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 29;
+        background: rgba(9, 36, 63, 0.35);
+        pointer-events: none;
+    }
+    .ds-pop__panel {
+        top: auto;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        max-height: 80vh;
+        border-radius: var(--ds-radius-xl, 12px) var(--ds-radius-xl, 12px) 0 0;
+        border-bottom: none;
+        box-shadow: var(--ds-shadow-raised, 0 -4px 12px rgba(9, 36, 63, 0.08));
+        animation: ds-pop-up 0.2s ease-out;
+    }
+}
+
+@keyframes ds-pop-up {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ds-pop__panel {
+        animation: none;
+    }
+}

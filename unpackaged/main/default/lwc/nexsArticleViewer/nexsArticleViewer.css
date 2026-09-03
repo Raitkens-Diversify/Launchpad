@@ -55,7 +55,7 @@
     max-width: var(--nexs-article-measure, 72ch);
     padding-bottom: var(--slds-g-spacing-5, 24px);
     border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
-    font-size: var(--slds-g-font-scale-3, 1.25rem);
+    font-size: var(--div-font-scale-3, 1.5rem);
     line-height: 1.5;
     color: var(--slds-g-color-on-surface-1, #4b5563);
 }

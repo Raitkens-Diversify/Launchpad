@@ -7,7 +7,7 @@
 .arq__hint {
     margin: 0;
     flex: 1 1 auto;
-    font-size: 0.8125rem;
+    font-size: var(--div-font-scale-base, 1rem);
     color: #4b5563;
 }
 .arq__loading {
@@ -105,7 +105,7 @@
     grid-template-columns: auto 1fr;
     gap: 0.25rem 0.75rem;
     margin: 0;
-    font-size: 0.8125rem;
+    font-size: var(--div-font-scale-base, 1rem);
 }
 .arq-modal__meta dt {
     font-weight: 600;

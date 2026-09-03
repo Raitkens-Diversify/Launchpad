@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Upcoming and recorded events in the core app (LWC tab; the component renders its own chrome, so there is no backing App Page). Deep-linked by c/contextNav; mirrors the /help/events site route.</description>
+    <label>Events</label>
+    <lwcComponent>eventsPage</lwcComponent>
+    <motif>Custom84: Presenter</motif>
+</CustomTab>

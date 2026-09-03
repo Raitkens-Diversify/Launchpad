@@ -1,13 +1,17 @@
 <template>
-    <!-- Navy hero: shared c-ds-hero (also used by resourceCenterHome and
+    <!-- Navy hero: shared c-ds-hero (also used by unifiedLanding and
          the UAT dashboard), extracted from this file's former inline markup. -->
     <c-ds-hero eyebrow="Let’s get you answers." headline="How can we help?">
         <div class="home-hero__search" data-tour-id="nexus-search">
-            <c-nexs-search-bar
+            <c-ds-search-bar
                 placeholder="Enter a question or topic…"
+                header-label="Top suggestions:"
+                empty-hint="No matching titles — press Enter to search everything."
+                suggestions={searchSuggestions}
+                onquerychange={handleSearchQuery}
                 onselect={handleSuggestionSelect}
-                onsearch={handleSearch}
-            ></c-nexs-search-bar>
+                onsubmit={handleSearch}
+            ></c-ds-search-bar>
         </div>
     </c-ds-hero>
 

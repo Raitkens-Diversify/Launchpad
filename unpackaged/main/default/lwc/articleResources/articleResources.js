@@ -1,9 +1,8 @@
 import { LightningElement, api, wire } from 'lwc';
 import { typeMeta } from 'c/resourceTypeIcons';
-import { resourceDetailUrl } from 'c/rcLinkUtil';
-import { isFileType, TYPE_EXTERNAL_LINK } from 'c/rcConstants';
+import { linkContext, resourceHref } from 'c/contextNav';
+import { isFileType, resourceAction } from 'c/rcConstants';
 import getResourcesForArticle from '@salesforce/apex/ResourceCenterService.getResourcesForArticle';
-import getResourceLinkBase from '@salesforce/apex/ResourceCenterService.getResourceLinkBase';
 import trackDownload from '@salesforce/apex/ResourceCenterService.trackDownload';
 import getResourceDownloadUrl from '@salesforce/apex/ResourceCenterService.getResourceDownloadUrl';
 
@@ -24,17 +23,14 @@ export default class ArticleResources extends LightningElement {
     @api articleId;
 
     resources = [];
-    linkBase = null;
+    /** {surface, helpBase, resourceBase} from c/contextNav; null until resolved. */
+    linkCtx = null;
     loading = true;
 
     connectedCallback() {
-        getResourceLinkBase()
-            .then((base) => {
-                this.linkBase = base || null;
-            })
-            .catch(() => {
-                this.linkBase = null;
-            });
+        linkContext().then((ctx) => {
+            this.linkCtx = ctx;
+        });
     }
 
     @wire(getResourcesForArticle, { knowledgeArticleVersionId: '$articleId' })
@@ -57,15 +53,17 @@ export default class ArticleResources extends LightningElement {
     get rows() {
         return this.resources.map((r) => {
             const meta = typeMeta(r.resourceType);
-            const detailUrl = resourceDetailUrl(this.linkBase, r.slug);
-            const isExternal = r.resourceType === TYPE_EXTERNAL_LINK && !!r.externalUrl;
+            const detailUrl = resourceHref(this.linkCtx, r.slug);
+            // One CTA rule with the card grids: an off-site href (External
+            // Link, an upcoming webinar's sign-up) wins over the detail page.
+            const cta = resourceAction(r);
             const isFile = !!r.downloadUrl && isFileType(r.resourceType);
             let href = null;
             let target = null;
             let download = false;
             let trackClick = false;
-            if (isExternal) {
-                href = r.externalUrl;
+            if (cta.href) {
+                href = cta.href;
                 target = '_blank';
             } else if (detailUrl) {
                 href = detailUrl;
@@ -81,7 +79,7 @@ export default class ArticleResources extends LightningElement {
                 name: r.name,
                 iconPath: meta.iconPath,
                 badge: meta.badge,
-                action: meta.action,
+                action: cta.action,
                 href,
                 target,
                 download,

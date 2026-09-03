@@ -18,6 +18,12 @@
                                 value={categoryFilter}
                                 options={categoryOptions}
                                 onchange={handleCategoryChange}></lightning-combobox>
+            <lightning-combobox variant="label-hidden"
+                                label="Webinar status"
+                                value={lifecycleFilter}
+                                options={lifecycleOptions}
+                                class="arsl__lifecycle"
+                                onchange={handleLifecycleChange}></lightning-combobox>
             <lightning-input type="checkbox"
                              label="Active only"
                              checked={activeOnly}
@@ -63,7 +69,16 @@
                                 </td>
                                 <td>{row.resourceType}</td>
                                 <td>{row.categoryName}</td>
-                                <td><span class={row.statusClass}>{row.statusLabel}</span></td>
+                                <td>
+                                    <span class={row.statusClass}>{row.statusLabel}</span>
+                                    <template if:true={row.lifecycleLabel}>
+                                        <span class="arsl__lifecycle-chip">
+                                            <c-ds-badge label={row.lifecycleLabel}
+                                                        variant={row.lifecycleVariant}
+                                                        size="sm"></c-ds-badge>
+                                        </span>
+                                    </template>
+                                </td>
                                 <td>
                                     <template if:true={row.featured}>
                                         <lightning-icon icon-name="utility:favorite"

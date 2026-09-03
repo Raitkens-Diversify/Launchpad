@@ -96,7 +96,7 @@
 .ds-modal-v2__title {
   margin: 0;
   font-family: var(--ds-modal-font-family, var(--slds-g-font-family-base));
-  font-size: var(--ds-modal-title-size, var(--slds-g-font-scale-3, 1.25rem));
+  font-size: var(--ds-modal-title-size, var(--div-font-scale-3, 1.5rem));
   font-weight: 600;
   line-height: var(--ds-modal-title-line-height, 1.4);
   color: var(--ds-modal-title-color, var(--slds-g-color-on-surface-3));

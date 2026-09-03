@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>63.0</apiVersion>
+    <isExposed>false</isExposed>
+    <description>Shared page shell (sticky brand header + body + footer) for the Help Center, Resource Center, and unified landing surfaces. Presentational; hosts own search and actions via slots.</description>
+</LightningComponentBundle>

@@ -1,0 +1,59 @@
+/* Tokens inherit from the host page's :host block (docs/ui-standards.md §1);
+   every var() carries the canonical literal fallback — no :host redeclaration. */
+:host {
+    display: block;
+}
+.ds-agenda {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ds-space-md, 12px);
+    padding: var(--ds-space-md, 12px) 0;
+}
+.ds-agenda__body {
+    min-width: 0;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-xs, 4px);
+}
+.ds-agenda__title {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.ds-agenda__meta {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ds-agenda__note {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-style: italic;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ds-agenda__btn {
+    align-self: flex-start;
+    margin-top: var(--ds-space-xs, 4px);
+    display: inline-block;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+    background: var(--slds-g-color-accent-1, #0f406f);
+    border: none;
+    border-radius: var(--ds-radius-md, 8px);
+    padding: 6px 14px;
+    text-decoration: none;
+    cursor: pointer;
+}
+.ds-agenda__btn:hover {
+    background: var(--slds-g-color-accent-2, #0b2f51);
+}
+.ds-agenda__btn:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}

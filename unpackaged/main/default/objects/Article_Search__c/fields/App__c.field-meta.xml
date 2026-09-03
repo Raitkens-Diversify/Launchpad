@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>App__c</fullName>
+    <description>Which app surface fired the search. Surface__c only records the network (&#39;Internal&#39; or the Experience site), and the Help Center and Resource Center share one site — this field is the app-level discriminator so analytics can tell them apart. Set by the client logger; no default on purpose so legacy rows stay visibly untagged.</description>
+    <label>App</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Help Center</fullName>
+                <default>false</default>
+                <label>Help Center</label>
+            </value>
+            <value>
+                <fullName>Resource Center</fullName>
+                <default>false</default>
+                <label>Resource Center</label>
+            </value>
+            <value>
+                <fullName>Landing</fullName>
+                <default>false</default>
+                <label>Landing</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

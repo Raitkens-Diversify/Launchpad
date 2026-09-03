@@ -420,4 +420,151 @@ private class ResourceAdminControllerTest {
             }
         }
     }
+
+    // ---- Webinars ------------------------------------------------------------------
+
+    @IsTest
+    static void webinarSaveValidatesLifecycleFieldsAndRoundTrips() {
+        Id catId = makeCategory('Web Cat', 'web-cat', null);
+        ResourceAdminController.ResourceInput w = input('A Webinar', 'a-webinar', catId);
+        w.resourceType = 'Webinar';
+        try {
+            ResourceAdminController.saveResource(JSON.serialize(w));
+            System.assert(false, 'Webinar without an event date must fail');
+        } catch (AuraHandledException e) {
+            System.assert(e.getMessage().contains('event date'), e.getMessage());
+        }
+
+        w.eventDatetime = System.now().addDays(3);
+        try {
+            ResourceAdminController.saveResource(JSON.serialize(w));
+            System.assert(false, 'Upcoming webinar without a registration URL must fail');
+        } catch (AuraHandledException e) {
+            System.assert(e.getMessage().contains('registration URL'), e.getMessage());
+        }
+
+        w.registrationUrl = 'http://insecure.example.com/register';
+        try {
+            ResourceAdminController.saveResource(JSON.serialize(w));
+            System.assert(false, 'Non-https registration URL must fail');
+        } catch (AuraHandledException e) {
+            System.assert(e.getMessage().contains('https://'), e.getMessage());
+        }
+
+        w.registrationUrl = 'https://example.com/register';
+        w.durationMinutes = 1000;
+        try {
+            ResourceAdminController.saveResource(JSON.serialize(w));
+            System.assert(false, 'Out-of-range duration must fail');
+        } catch (AuraHandledException e) {
+            System.assert(e.getMessage().contains('Duration'), e.getMessage());
+        }
+
+        w.durationMinutes = 45;
+        w.presenter = 'Jane Doe';
+        Id upId = ResourceAdminController.saveResource(JSON.serialize(w));
+        Resource__c saved = [
+            SELECT Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c
+            FROM Resource__c WHERE Id = :upId
+        ];
+        System.assertEquals('https://example.com/register', saved.Registration_URL__c);
+        System.assertEquals(45, saved.Event_Duration_Minutes__c.intValue());
+        System.assertEquals('Jane Doe', saved.Presenter__c);
+        System.assertNotEquals(null, saved.Event_Datetime__c);
+
+        // A past webinar needs no registration URL (it is Past until a recording lands).
+        ResourceAdminController.ResourceInput past = input('Past Webinar', 'past-webinar', catId);
+        past.resourceType = 'Webinar';
+        past.eventDatetime = System.now().addDays(-1);
+        Id pastId = ResourceAdminController.saveResource(JSON.serialize(past));
+
+        ResourceAdminController.ResourceDetail detail = ResourceAdminController.getResource(upId);
+        System.assertEquals('https://example.com/register', detail.registrationUrl);
+        System.assertEquals(45, detail.durationMinutes.intValue());
+        System.assertEquals('Jane Doe', detail.presenter);
+        System.assertNotEquals(null, detail.eventDatetime);
+
+        Map<String, ResourceAdminController.ResourceRow> bySlug =
+            new Map<String, ResourceAdminController.ResourceRow>();
+        for (ResourceAdminController.ResourceRow row : ResourceAdminController.listResources()) {
+            bySlug.put(row.slug, row);
+        }
+        System.assertEquals('Upcoming', bySlug.get('a-webinar').webinarStatus,
+            'List rows carry the lifecycle chip value');
+        System.assertEquals('Past', bySlug.get('past-webinar').webinarStatus,
+            'A past webinar without a recording needs one');
+        System.assertNotEquals(null, bySlug.get('past-webinar').eventDatetime);
+
+        // Attaching a recording flips the list chip — no type or slug change.
+        ContentVersion cv = new ContentVersion(
+            Title = 'replay.mp4', PathOnClient = 'replay.mp4', VersionData = Blob.valueOf('bytes'));
+        insert cv;
+        Id cdId = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :cv.Id].ContentDocumentId;
+        insert new ContentDocumentLink(
+            LinkedEntityId = pastId, ContentDocumentId = cdId, ShareType = 'V', Visibility = 'AllUsers');
+        for (ResourceAdminController.ResourceRow row : ResourceAdminController.listResources()) {
+            if (row.slug == 'past-webinar') {
+                System.assertEquals('Recorded', row.webinarStatus, 'Recording attached');
+                System.assertEquals('Webinar', row.resourceType, 'Type never flips');
+            }
+        }
+    }
+
+    @IsTest
+    static void typeSwitchClearsWebinarFields() {
+        Id catId = makeCategory('Switch Cat', 'switch-cat', null);
+        ResourceAdminController.ResourceInput w = input('Was Webinar', 'was-webinar', catId);
+        w.resourceType = 'Webinar';
+        w.eventDatetime = System.now().addDays(-2);
+        w.presenter = 'Jane Doe';
+        w.durationMinutes = 30;
+        Id id = ResourceAdminController.saveResource(JSON.serialize(w));
+
+        w.id = id;
+        w.resourceType = 'PDF';
+        ResourceAdminController.saveResource(JSON.serialize(w));
+        Resource__c saved = [
+            SELECT Resource_Type__c, Event_Datetime__c, Registration_URL__c,
+                   Event_Duration_Minutes__c, Presenter__c
+            FROM Resource__c WHERE Id = :id
+        ];
+        System.assertEquals('PDF', saved.Resource_Type__c);
+        System.assertEquals(null, saved.Event_Datetime__c, 'Stale event data never survives a type switch');
+        System.assertEquals(null, saved.Presenter__c);
+        System.assertEquals(null, saved.Event_Duration_Minutes__c);
+    }
+
+    @IsTest
+    static void webinarValidationRulesGuardDirectDml() {
+        Id catId = makeCategory('VR Cat', 'vr-cat', null);
+        Resource__c noDate = new Resource__c(
+            Name = 'No Date', Slug__c = 'no-date', Category__c = catId, Resource_Type__c = 'Webinar');
+        try {
+            insert noDate;
+            System.assert(false, 'Webinar_Requires_Event_Datetime must block');
+        } catch (DmlException e) {
+            System.assert(e.getMessage().contains('event date'), e.getMessage());
+        }
+
+        Resource__c upcomingNoReg = new Resource__c(
+            Name = 'No Reg', Slug__c = 'no-reg', Category__c = catId, Resource_Type__c = 'Webinar',
+            Event_Datetime__c = System.now().addDays(1));
+        try {
+            insert upcomingNoReg;
+            System.assert(false, 'Webinar_Upcoming_Requires_Registration must block');
+        } catch (DmlException e) {
+            System.assert(e.getMessage().contains('registration'), e.getMessage());
+        }
+
+        Resource__c pastNoReg = new Resource__c(
+            Name = 'Past No Reg', Slug__c = 'past-no-reg', Category__c = catId,
+            Resource_Type__c = 'Webinar', Event_Datetime__c = System.now().addDays(-1));
+        insert pastNoReg; // past webinars do not need a registration link
+        System.assertNotEquals(null, pastNoReg.Id);
+
+        Resource__c pdf = new Resource__c(
+            Name = 'Plain PDF', Slug__c = 'plain-pdf', Category__c = catId, Resource_Type__c = 'PDF');
+        insert pdf; // rules are webinar-only
+        System.assertNotEquals(null, pdf.Id);
+    }
 }

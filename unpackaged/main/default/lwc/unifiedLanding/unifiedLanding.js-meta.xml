@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <description>Unified Help Center + Resource Center landing: cross-app search, side-by-side topic directories, featured strip, support band. Replaces nexsLanding on the site home; also a core-app tab.</description>
+    <targets>
+        <target>lightning__AppPage</target>
+        <target>lightning__Tab</target>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property name="hideBranding" type="Boolean" label="Hide Diversify Branding"
+                      description="Hides the Diversify logo and brand crumb in the header for sites or pages that already have their own header/branding."/>
+        </targetConfig>
+        <targetConfig targets="lightning__AppPage">
+            <property name="hideBranding" type="Boolean" label="Hide Diversify Branding"
+                      description="Hides the Diversify logo and brand crumb in the header for sites or pages that already have their own header/branding."/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

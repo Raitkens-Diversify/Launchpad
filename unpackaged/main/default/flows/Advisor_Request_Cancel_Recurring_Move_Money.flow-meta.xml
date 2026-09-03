@@ -176,21 +176,6 @@
         <valueField>Id</valueField>
     </dynamicChoiceSets>
     <dynamicChoiceSets>
-        <name>FinancialAccount_Record_ChoiceSet</name>
-        <dataType>String</dataType>
-        <displayField>Name</displayField>
-        <filterLogic>and</filterLogic>
-        <filters>
-            <field>FinServ__Household__c</field>
-            <operator>EqualTo</operator>
-            <value>
-                <elementReference>varHousehold.Id</elementReference>
-            </value>
-        </filters>
-        <object>FinServ__FinancialAccount__c</object>
-        <valueField>Id</valueField>
-    </dynamicChoiceSets>
-    <dynamicChoiceSets>
         <name>Instruction_Record_ChoiceSet</name>
         <dataType>String</dataType>
         <displayField>Extended_Name__c</displayField>

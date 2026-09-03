@@ -1,91 +1,109 @@
 import { LightningElement, api, wire } from 'lwc';
-import searchAll from '@salesforce/apex/ResourceCenterService.searchAll';
-import getHelpCenterLinkBase from '@salesforce/apex/ResourceCenterService.getHelpCenterLinkBase';
-import logSearch from '@salesforce/apex/NexSArticleEngagementController.logSearch';
-import { getSessionKey } from 'c/nexsSession';
+import search from '@salesforce/apex/UnifiedSearchService.search';
+import { createSearchLogger, APP_RESOURCE_CENTER } from 'c/searchLogUtil';
+import { linkContext, goToArticle } from 'c/contextNav';
+import { toContentItem } from 'c/rcConstants';
 
 /**
- * resourceSearchResults — combined article + resource results, sectioned by
- * type. Resources open in-site (emits `resourceselect { slug }`); articles
- * deep-link to the Help Center when helpCenterBaseUrl is set.
+ * resourceSearchResults — the shared cross-app results view: grouped Articles /
+ * Resources sections (ranked within each by UnifiedSearchService), rendered as
+ * c-ds-content-card tiles. Resources open in-site (emits `resourceselect
+ * { slug }`) unless their action leaves the site (External Link, an upcoming
+ * webinar's "Sign up") — rcConstants.toContentItem decides, same as every other
+ * card grid. Articles carry an href deep link into the Help Center. Either side
+ * can be degraded (no access / backend fault) — the other still renders, with a
+ * quiet notice instead of a hard error.
  */
 export default class ResourceSearchResults extends LightningElement {
     @api term;
     /** Optional override; defaults to the site root resolved server-side. */
     @api helpCenterBaseUrl;
 
-    resolvedHelpBase;
+    /** {surface, helpBase, resourceBase} from c/contextNav; null until resolved. */
+    linkCtx = null;
 
-    @wire(getHelpCenterLinkBase)
-    wiredHelpBase({ data }) {
-        if (data) {
-            this.resolvedHelpBase = data;
-        }
+    connectedCallback() {
+        linkContext().then((ctx) => {
+            this.linkCtx = ctx;
+        });
     }
 
-    results;
+    articleHits = [];
+    resourceHits = [];
+    meta = {};
     loading = true;
-    _lastLoggedTerm; // wire can re-emit for the same term — log each search once
+    // Fire-and-forget analytics: one row per submitted term (the wire can
+    // re-emit the same term; searchLogUtil dedupes consecutive repeats).
+    // search is cacheable Apex, so it can't log server-side.
+    _searchLogger = createSearchLogger(APP_RESOURCE_CENTER);
 
-    @wire(searchAll, { term: '$term' })
-    wiredResults({ data }) {
-        this.results = data || [];
-        this.loading = false;
-        if (data) {
-            this.logSubmittedSearch(data);
-        }
+    disconnectedCallback() {
+        this._searchLogger.dispose();
     }
 
-    // Fire-and-forget search analytics: one row per submitted term (the term
-    // only changes on Enter / "See all"), zero-result included. searchAll is
-    // cacheable Apex, so it can't log server-side.
-    logSubmittedSearch(results) {
-        const term = (this.term || '').trim();
-        if (!term || term === this._lastLoggedTerm) {
+    @wire(search, { term: '$term' })
+    wiredResults({ data }) {
+        if (!data) {
             return;
         }
-        this._lastLoggedTerm = term;
-        const top = results.length ? results[0] : null;
-        // JSON-string transport (org gotcha: custom-type params arrive null).
-        logSearch({
-            entryJson: JSON.stringify({
-                term,
-                resultCount: results.length,
-                topResultArticleId: top && top.type === 'article' ? top.id : null,
-                searchType: 'Full',
-                sessionKey: getSessionKey()
-            })
-        }).catch(() => {});
+        this.articleHits = data.articles || [];
+        this.resourceHits = data.resources || [];
+        this.meta = data.meta || {};
+        this.loading = false;
+        this._searchLogger.logFull({
+            term: this.term,
+            resultCount: this.articleHits.length + this.resourceHits.length,
+            topResultArticleId: this.articleHits.length ? this.articleHits[0].id : null,
+            searchType: this.meta.fuzzy ? 'Fuzzy' : 'Full'
+        });
     }
 
-    get resources() {
-        return (this.results || []).filter((r) => r.type === 'resource');
+    get resourceItems() {
+        return this.resourceHits.map(toContentItem);
     }
-    get articles() {
-        const raw = this.helpCenterBaseUrl || this.resolvedHelpBase;
-        const base = raw ? raw.replace(/\/$/, '') : null;
-        return (this.results || [])
-            .filter((r) => r.type === 'article')
-            .map((a) => ({
-                ...a,
-                // Query-param deep link — the site has no /article/ route.
-                href: base && a.urlName ? `${base}/?article=${encodeURIComponent(a.urlName)}` : null
-            }));
+
+    /** Articles carry NO href on purpose — dsContentCard reserves that for
+        links that truly leave the site. See handleContentSelect. */
+    get articleItems() {
+        return this.articleHits.map((a) => ({
+            kind: 'article',
+            id: a.id,
+            title: a.title,
+            subtitle: a.summary,
+            routeKey: a.urlName
+        }));
     }
+
     get hasResources() {
-        return this.resources.length > 0;
+        return this.resourceHits.length > 0;
     }
     get hasArticles() {
-        return this.articles.length > 0;
+        return this.articleHits.length > 0;
     }
     get isEmpty() {
         return !this.loading && !this.hasResources && !this.hasArticles;
     }
+    get articlesDegraded() {
+        return this.meta.articlesDegraded === true;
+    }
+    get resourcesDegraded() {
+        return this.meta.resourcesDegraded === true;
+    }
+    get showFuzzy() {
+        return this.meta.fuzzy === true && Boolean(this.meta.corrected);
+    }
 
-    handleResource(event) {
-        const slug = event.currentTarget.dataset.slug;
+    handleContentSelect(event) {
+        event.stopPropagation();
+        if (event.detail.kind === 'article') {
+            // No mixin here, so contextNav takes its event rung and the
+            // host routes. Previously this branch returned early and the
+            // click was simply dropped.
+            goToArticle(this, this.linkCtx, { urlName: event.detail.routeKey });
+            return;
+        }
         this.dispatchEvent(new CustomEvent('resourceselect', {
-            detail: { slug }, bubbles: true, composed: true
+            detail: { slug: event.detail.routeKey }, bubbles: true, composed: true
         }));
     }
 }

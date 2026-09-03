@@ -29,7 +29,7 @@
     align-items: center;
     gap: var(--ds-space-sm, 8px);
     margin-bottom: var(--ds-space-lg, 16px);
-    font-size: 0.8125rem;
+    font-size: var(--div-font-scale-base, 1rem);
 }
 .hg__crumb {
     background: none;

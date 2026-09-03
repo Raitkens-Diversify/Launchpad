@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Registration_URL__c</fullName>
+    <description>Sign-up link for an upcoming webinar. Required while Resource_Type__c = Webinar and Event_Datetime__c is in the future (Webinar_Upcoming_Requires_Registration); the &quot;Sign up&quot; CTA on the landing agenda, cards, and detail page opens it in a new tab.</description>
+    <label>Registration URL</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Url</type>
+</CustomField>

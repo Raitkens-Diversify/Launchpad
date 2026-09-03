@@ -161,6 +161,9 @@ public with sharing class ArticleAdminController {
         @AuraEnabled public String clickedTitle;
         @AuraEnabled public String topResultTitle;
         @AuraEnabled public String surface;
+        /** App__c — which app fired the search (Help Center / Resource Center /
+            Landing); null on legacy rows. */
+        @AuraEnabled public String app;
         @AuraEnabled public String userName;
         @AuraEnabled public Datetime createdDate;
     }
@@ -475,7 +478,7 @@ public with sharing class ArticleAdminController {
      */
     @AuraEnabled
     public static List<SearchRow> listSearches(String surface, String termFilter,
-            Boolean zeroOnly, Datetime beforeCursor) {
+            Boolean zeroOnly, Datetime beforeCursor, String app) {
         assertAnalyticsReadable();
         List<String> clauses = new List<String>();
         String likeTerm;
@@ -489,12 +492,18 @@ public with sharing class ArticleAdminController {
         if (String.isNotBlank(surface)) {
             clauses.add('Surface__c = :surface');
         }
+        if (String.isNotBlank(app)) {
+            // App__c — Surface__c only names the network, and both apps share
+            // one site, so this is the per-app cut (blank = all, incl. legacy
+            // untagged rows).
+            clauses.add('App__c = :app');
+        }
         if (beforeCursor != null) {
             clauses.add('CreatedDate < :beforeCursor');
         }
         String query = 'SELECT Id, Term__c, Normalized_Query__c, Result_Count__c, Search_Type__c,'
             + ' Clicked_Article_Id__c, Clicked_Article_Title__c, Top_Result_Title__c,'
-            + ' Surface__c, CreatedBy.Name, CreatedDate'
+            + ' Surface__c, App__c, CreatedBy.Name, CreatedDate'
             + ' FROM Article_Search__c'
             + (clauses.isEmpty() ? '' : ' WHERE ' + String.join(clauses, ' AND '))
             + ' ORDER BY CreatedDate DESC LIMIT ' + PAGE_SIZE;
@@ -583,7 +592,7 @@ public with sharing class ArticleAdminController {
         for (Article_Search__c row : [
             SELECT Id, Term__c, Normalized_Query__c, Result_Count__c, Search_Type__c,
                 Clicked_Article_Id__c, Clicked_Article_Title__c, Clicked_Rank__c,
-                Top_Result_Title__c, Surface__c, CreatedBy.Name, CreatedDate
+                Top_Result_Title__c, Surface__c, App__c, CreatedBy.Name, CreatedDate
             FROM Article_Search__c
             WHERE Clicked_Article_Id__c = :articleId
             ORDER BY CreatedDate DESC
@@ -624,6 +633,7 @@ public with sharing class ArticleAdminController {
         sr.clickedTitle = row.Clicked_Article_Title__c;
         sr.topResultTitle = row.Top_Result_Title__c;
         sr.surface = row.Surface__c;
+        sr.app = row.App__c;
         sr.userName = row.CreatedBy == null ? null : row.CreatedBy.Name;
         sr.createdDate = row.CreatedDate;
         return sr;

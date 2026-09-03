@@ -34,6 +34,12 @@ public with sharing class NexSArticleEngagementController {
     private static final Set<String> SEARCH_TYPES = new Set<String>{
         'Full', 'Typeahead', 'Fallback', 'Fuzzy'
     };
+    // Allowed App__c values (mirrors the restricted picklist). Unknown or blank
+    // leaves the field null rather than dropping the row — legacy callers that
+    // don't send an app must keep logging.
+    private static final Set<String> APPS = new Set<String>{
+        'Help Center', 'Resource Center', 'Landing'
+    };
 
     public class EngagementState {
         /** 'Up', 'Down', or null when the user hasn't voted on the article. */
@@ -56,6 +62,10 @@ public with sharing class NexSArticleEngagementController {
         @AuraEnabled public String searchType;
         /** Anonymous per-tab correlation key (never a user id). */
         @AuraEnabled public String sessionKey;
+        /** 'Help Center' | 'Resource Center' | 'Landing'; unknown -> null.
+            App-level discriminator — Surface__c only carries the network, and
+            both apps share one site. */
+        @AuraEnabled public String app;
     }
 
     // ---- Public API ----------------------------------------------------------
@@ -242,7 +252,8 @@ public with sharing class NexSArticleEngagementController {
                 Session_Key__c = String.isBlank(entry.sessionKey) ? null : entry.sessionKey.abbreviate(MAX_SESSION_KEY),
                 Top_Result_Article_Id__c = (top == null) ? null : top.KnowledgeArticleId,
                 Top_Result_Title__c = (top == null) ? null : top.Title,
-                Surface__c = resolveSurface()
+                Surface__c = resolveSurface(),
+                App__c = APPS.contains(entry.app) ? entry.app : null
             );
             insert row;
             return row.Id;
@@ -349,8 +360,14 @@ public with sharing class NexSArticleEngagementController {
         return rows.isEmpty() ? null : rows[0];
     }
 
-    /** 'Internal' in the core app; the network (site) name in Experience Cloud. */
-    private static String resolveSurface() {
+    /**
+     * 'Internal' in the core app; the network (site) name in Experience Cloud.
+     * Public because ResourceCenterService.getLinkContext() resolves the same
+     * surface for c/contextNav — one detector, not a third copy.
+     * (ArcArticleEngagementController still carries its own clone; converging
+     * that belongs with the arc* fork decision, not here.)
+     */
+    public static String resolveSurface() {
         Id networkId = Network.getNetworkId();
         if (networkId == null) {
             return 'Internal';

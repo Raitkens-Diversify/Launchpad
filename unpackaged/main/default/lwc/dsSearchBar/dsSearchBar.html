@@ -1,0 +1,69 @@
+<template>
+    <div class="ds-search">
+        <div class="ds-search__field" role="combobox" aria-haspopup="listbox"
+             aria-expanded={ariaExpanded} aria-owns={listboxId} aria-busy={ariaBusy}>
+            <lightning-icon icon-name="utility:search" size="x-small"
+                alternative-text="Search" class="ds-search__icon"></lightning-icon>
+            <input
+                type="text"
+                class="ds-search__input"
+                placeholder={placeholder}
+                value={term}
+                role="combobox"
+                autocomplete="off"
+                aria-autocomplete="list"
+                aria-controls={listboxId}
+                aria-expanded={ariaExpanded}
+                aria-activedescendant={activeDescendant}
+                oninput={handleInput}
+                onkeydown={handleKeydown}
+                onblur={handleBlur}
+                onfocus={handleFocus} />
+            <template if:true={showClear}>
+                <button type="button" class="ds-search__clear" onclick={handleClear}
+                    aria-label="Clear search">
+                    <lightning-icon icon-name="utility:close" size="xx-small"
+                        alternative-text="Clear"></lightning-icon>
+                </button>
+            </template>
+        </div>
+
+        <ul class="ds-search__menu" role="listbox" id={listboxId}
+            aria-label="Search suggestions" if:true={showMenu}>
+            <template if:true={hasSuggestions}>
+                <li class="ds-search__menu-header" role="presentation">{headerLabel}</li>
+                <template for:each={suggestionsView} for:item="s">
+                    <li
+                        key={s.id}
+                        id={s.optionId}
+                        class={s.cssClass}
+                        role="option"
+                        aria-selected={s.ariaSelected}
+                        data-id={s.id}
+                        onclick={handleOptionClick}
+                        onmousedown={handleOptionMousedown}
+                    >
+                        <span class="ds-search__item-title">
+                            <template for:each={s.titleSegments} for:item="seg">
+                                <template if:true={seg.match}
+                                    ><strong key={seg.key}>{seg.text}</strong></template>
+                                <template if:false={seg.match}
+                                    ><span key={seg.key}>{seg.text}</span></template>
+                            </template>
+                        </span>
+                        <template if:true={s.subtitle}>
+                            <span class="ds-search__item-subtitle">{s.subtitle}</span>
+                        </template>
+                    </li>
+                </template>
+            </template>
+            <template if:false={hasSuggestions}>
+                <li class="ds-search__empty" role="presentation">{emptyHint}</li>
+            </template>
+            <li class="ds-search__view-all" role="option" aria-selected="false"
+                onclick={handleSeeAll} onmousedown={handleOptionMousedown}>
+                See all results for &ldquo;{term}&rdquo;
+            </li>
+        </ul>
+    </div>
+</template>
