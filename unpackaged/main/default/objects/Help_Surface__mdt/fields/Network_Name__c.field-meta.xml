@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Network_Name__c</fullName>
+    <description>Name of the Experience Cloud Network (Digital Experience) this row describes, e.g. &quot;ARC&quot; or &quot;Diversify Help Center&quot; — the lookup key (NexSArticleEngagementController.resolveSurface() returns it).</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Network Name</label>
+    <length>80</length>
+    <required>false</required>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

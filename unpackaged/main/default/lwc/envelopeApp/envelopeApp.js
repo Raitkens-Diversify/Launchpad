@@ -1,4 +1,5 @@
 import { LightningElement, api, wire, track } from "lwc";
+import { CurrentPageReference } from "lightning/navigation";
 import { EnclosingTabId, setTabLabel } from "lightning/platformWorkspaceApi";
 import { loadStyle } from "lightning/platformResourceLoader";
 import ToastContainer from "lightning/toastContainer";
@@ -42,6 +43,24 @@ export default class EnvelopeApp extends LightningElement {
   // announced by the shell via `reviewablechange` and drives the top bar's "Review and
   // Submit" enablement.
   shellReviewable = false;
+
+  /**
+   * True inside an Experience Cloud site, false in the core app. LWR page references are typed
+   * comm__*, the same test resourceCenter uses; not @salesforce/community/basePath, which
+   * throws in the core app (see nexsLanding).
+   *
+   * On the ARC site the theme layout already draws the page breadcrumb ("Work > Envelopes"),
+   * so the wizard's own single "Envelopes" crumb on the list screen showed the same thing
+   * twice. Only the list screen is affected: in the shell the wizard's crumb names the open
+   * envelope and is the way back to the list, and in the core app the wizard is the whole
+   * page and keeps its crumb everywhere.
+   */
+  isSite = false;
+
+  @wire(CurrentPageReference)
+  wiredPageRef(pageRef) {
+    this.isSite = Boolean(pageRef?.type?.startsWith("comm__"));
+  }
 
   connectedCallback() {
     // LWR sites ship no default toast container, so lightning/toast calls render
@@ -144,9 +163,19 @@ export default class EnvelopeApp extends LightningElement {
       : "env-layout__body";
   }
 
+  // On a site the list's top bar would show nothing: no crumb (see isSite), no logo
+  // (hideBranding), no Review button. Rather than a 64px empty band, drop the bar there.
+  get showTopBar() {
+    return !this.isSite || this.isShellV2;
+  }
+
   // Breadcrumb for the shared top bar, derived from the active v2 view. In the
   // shell, "Envelopes" stays a link so clicking it swaps the body back to the list.
+  // On a site the list screen passes no crumb -- the theme breadcrumb is that trail.
   get topBreadcrumb() {
+    if (this.isSite && !this.isShellV2) {
+      return [];
+    }
     if (this.isShellV2) {
       const crumbs = [
         { label: "Envelopes", key: "envelopes" },

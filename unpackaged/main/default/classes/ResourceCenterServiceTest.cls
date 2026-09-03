@@ -352,6 +352,72 @@ private class ResourceCenterServiceTest {
     }
 
     @isTest
+    static void linkContextMapsTheCurrentNetworkToItsOwnPages() {
+        // A network with a Help_Surface__mdt row gets ITS site's pages — the
+        // reason the table exists: ARC embeds the components on its own pages,
+        // and a link to the shared /help site is a different login.
+        ResourceCenterService.surfaceOverride = 'ARC';
+        ResourceCenterService.surfaceRows = new Map<String, Help_Surface__mdt>{
+            'ARC' => new Help_Surface__mdt(
+                Network_Name__c = 'ARC', Home_Path__c = 'help-center', Article_Path__c = 'article',
+                Resources_Path__c = 'learning', Events_Path__c = 'events')
+        };
+        ResourceCenterService.siteBaseOverride.put('ARC', 'https://x.my.site.com/ARC');
+
+        Test.startTest();
+        ResourceCenterService.LinkContext ctx = ResourceCenterService.getLinkContext();
+        Test.stopTest();
+
+        Assert.areEqual('ARC', ctx.surface);
+        Assert.areEqual('https://x.my.site.com/ARC', ctx.helpBase, 'The CURRENT site root, not /help');
+        Assert.areEqual('https://x.my.site.com/ARC/help-center', ctx.homeBase);
+        Assert.areEqual('https://x.my.site.com/ARC/article', ctx.articleBase);
+        Assert.areEqual('https://x.my.site.com/ARC/learning', ctx.resourceBase);
+        Assert.areEqual('https://x.my.site.com/ARC/events', ctx.eventsBase);
+    }
+
+    @isTest
+    static void linkContextBlankPathsMeanRootAndDefaults() {
+        ResourceCenterService.surfaceOverride = 'Diversify Help Center';
+        ResourceCenterService.surfaceRows = new Map<String, Help_Surface__mdt>{
+            'Diversify Help Center' => new Help_Surface__mdt(Network_Name__c = 'Diversify Help Center')
+        };
+        ResourceCenterService.siteBaseOverride.put('Diversify Help Center', 'https://x.my.site.com/help');
+
+        ResourceCenterService.LinkContext ctx = ResourceCenterService.getLinkContext();
+
+        Assert.areEqual('https://x.my.site.com/help', ctx.homeBase, 'Blank home = the site root');
+        Assert.areEqual('https://x.my.site.com/help/article', ctx.articleBase);
+        Assert.areEqual('https://x.my.site.com/help/resources', ctx.resourceBase);
+        Assert.areEqual('https://x.my.site.com/help/events', ctx.eventsBase);
+    }
+
+    @isTest
+    static void linkContextFallsBackToTheSharedSiteForUnmappedNetworks() {
+        // No row for this network: the pre-table behavior — the shared Help
+        // Center site with the default page names (or null bases when even
+        // that can't be resolved; Site/SiteDetail can't be created in tests).
+        ResourceCenterService.surfaceOverride = 'Some Other Site';
+        ResourceCenterService.surfaceRows = new Map<String, Help_Surface__mdt>();
+
+        Test.startTest();
+        ResourceCenterService.LinkContext ctx = ResourceCenterService.getLinkContext();
+        String shared = ResourceCenterService.getHelpCenterLinkBase();
+        Test.stopTest();
+
+        Assert.areEqual('Some Other Site', ctx.surface);
+        Assert.areEqual(shared, ctx.helpBase, 'Unmapped network → the shared site root');
+        if (ctx.helpBase != null) {
+            Assert.areEqual(ctx.helpBase, ctx.homeBase);
+            Assert.areEqual(ctx.helpBase + '/article', ctx.articleBase);
+            Assert.areEqual(ctx.helpBase + '/resources', ctx.resourceBase);
+            Assert.areEqual(ctx.helpBase + '/events', ctx.eventsBase);
+        } else {
+            Assert.isNull(ctx.resourceBase, 'No site, no bases');
+        }
+    }
+
+    @isTest
     static void linkContextAgreesWithTheStandaloneAccessors() {
         // The two legacy accessors stay site-absolute on every surface (the
         // Admin Console's Copy link depends on it). Wherever getLinkContext

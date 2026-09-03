@@ -18,6 +18,13 @@ import {
 } from "c/recordNavigationCommunityUtils";
 import { NAV_PATH_CHANGE_EVENT } from "c/arcNavTrailState";
 
+
+/*
+ * The card header's three-dot button is hidden for now: it has no menu and no
+ * handler behind it, so it promised actions that do not exist yet. Flip this
+ * to true once quick actions are built; the markup is still in the template.
+ */
+const SHOW_OVERFLOW_MENU = false;
 const LIST_TYPE_CONTACT = "Contact";
 const LIST_TYPE_ISA = "ISA";
 const ACCOUNT_OBJECT_API_NAME = "Account";
@@ -319,6 +326,10 @@ export default class ArcRecentlyViewedList extends NavigationMixin(
 
   get showViewAll() {
     return this.totalCount > this.listItems.length;
+  }
+
+  get showOverflowMenu() {
+    return SHOW_OVERFLOW_MENU;
   }
 
   handleRowClick(event) {

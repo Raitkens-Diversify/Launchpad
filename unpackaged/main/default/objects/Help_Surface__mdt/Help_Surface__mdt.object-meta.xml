@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>One record per Experience Cloud site that hosts the Help Center / Resource Center components (unifiedLanding, helpArticlePage, resourceCenter, eventsPage). Keyed by the site&#39;s Network name; the paths are that site&#39;s page URL segments. ResourceCenterService.getLinkContext() reads it so c/contextNav keeps every link inside the site the user is on instead of jumping to the shared /help site (a separate login). A network with no row falls back to the shared site.</description>
+    <label>Help Surface</label>
+    <pluralLabel>Help Surfaces</pluralLabel>
+    <visibility>Public</visibility>
+</CustomObject>

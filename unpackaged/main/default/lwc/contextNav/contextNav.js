@@ -9,8 +9,13 @@
  * per surface, whether a target is a site URL or a Lightning PageReference.
  *
  * Surface contract (mirrors ResourceCenterService.getLinkContext):
- *   site      → helpBase / resourceBase are absolute URLs; navigate by URL.
- *   internal  → both bases are null; navigate with NavigationMixin.
+ *   site      → helpBase is the CURRENT site's root and homeBase /
+ *               articleBase / resourceBase / eventsBase are that site's page
+ *               URLs (Help_Surface__mdt, keyed by Network name) — so a user
+ *               inside ARC stays inside ARC. Navigate by URL. A ctx that only
+ *               carries helpBase (older shapes, host-synthesized literals)
+ *               derives the pages from the root with the default names.
+ *   internal  → every base is null; navigate with NavigationMixin.
  * "No base" already meant "handle it in-app" in this codebase (see
  * articleResources' CTA ladder) — that semantic is what the internal branch
  * hangs off, so nothing had to be re-taught.
@@ -134,6 +139,11 @@ function trimEnd(base) {
     return base.replace(/\/$/, '');
 }
 
+/** The site page URL for `key`, or the default page under the site root. */
+function pageBase(ctx, key, defaultPath) {
+    return ctx[key] ? trimEnd(ctx[key]) : trimEnd(ctx.helpBase) + defaultPath;
+}
+
 function internalHref(tab, state) {
     const query = Object.keys(state)
         .filter((key) => state[key])
@@ -149,7 +159,7 @@ export function articleHref(ctx, urlName) {
     }
     return isInternal(ctx)
         ? internalHref(TABS.article, { name: urlName })
-        : trimEnd(ctx.helpBase) + '/article?name=' + encodeURIComponent(urlName);
+        : pageBase(ctx, 'articleBase', '/article') + '?name=' + encodeURIComponent(urlName);
 }
 
 /** Topic-browse deep link (no article named). */
@@ -159,7 +169,7 @@ export function topicHref(ctx, topicApiName) {
     }
     return isInternal(ctx)
         ? internalHref(TABS.article, { topic: topicApiName })
-        : trimEnd(ctx.helpBase) + '/article?topic=' + encodeURIComponent(topicApiName);
+        : pageBase(ctx, 'articleBase', '/article') + '?topic=' + encodeURIComponent(topicApiName);
 }
 
 /**
@@ -201,11 +211,15 @@ function resourceSearchHref(ctx, term) {
 export function eventsHref(ctx) {
     return isInternal(ctx)
         ? internalHref(TABS.events, {})
-        : trimEnd(ctx.helpBase) + '/events';
+        : pageBase(ctx, 'eventsBase', '/events');
 }
 
 export function homeHref(ctx) {
-    return isInternal(ctx) ? internalHref(TABS.home, {}) : trimEnd(ctx.helpBase) + '/';
+    if (isInternal(ctx)) {
+        return internalHref(TABS.home, {});
+    }
+    // A named home page is a page URL; the bare site root keeps its slash.
+    return ctx.homeBase ? trimEnd(ctx.homeBase) : trimEnd(ctx.helpBase) + '/';
 }
 
 // ---- imperative navigation ----------------------------------------------

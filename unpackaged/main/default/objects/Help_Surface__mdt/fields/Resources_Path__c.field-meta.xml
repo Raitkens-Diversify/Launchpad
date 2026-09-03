@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Resources_Path__c</fullName>
+    <description>URL segment of the page that hosts c:resourceCenter (?rcview= / &amp;rcslug= append), e.g. &quot;learning&quot; on ARC. Blank falls back to &quot;resources&quot;.</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Resources Path</label>
+    <length>80</length>
+    <required>false</required>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

@@ -78,6 +78,15 @@ const ROW_ACTIONS = [
   { name: "view", label: "View Record", iconName: "utility:preview" }
 ];
 
+/*
+ * Row menus are off for now. The only action left in them, View Record, does
+ * what clicking the row already does, so the three dots promised more than
+ * they delivered. Flip this to true once real quick actions exist; the menu,
+ * its handler and ROW_ACTIONS are all still here. arcDataTable drops the
+ * button (but keeps the column-chooser gear) when it is handed no actions.
+ */
+const SHOW_ROW_ACTIONS = false;
+
 const LIST_VIEW_FETCH_SIZE = 2000;
 const TABLE_PAGE_SIZE = 25;
 const TABLE_PAGE_SIZE_OPTIONS = [10, 25, 50];
@@ -1135,7 +1144,7 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   }
 
   get rowActions() {
-    return ROW_ACTIONS;
+    return SHOW_ROW_ACTIONS ? ROW_ACTIONS : [];
   }
 
   /**

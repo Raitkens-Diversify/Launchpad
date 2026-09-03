@@ -16,17 +16,19 @@
             aria-hidden="true"
           ></span>
         </div>
-        <button
-          type="button"
-          class="arc-recently-viewed__overflow-button"
-          aria-label="More actions"
-        >
-          <span
-            class="arc-recently-viewed__overflow-icon"
-            style={overflowIconStyle}
-            aria-hidden="true"
-          ></span>
-        </button>
+        <template lwc:if={showOverflowMenu}>
+          <button
+            type="button"
+            class="arc-recently-viewed__overflow-button"
+            aria-label="More actions"
+          >
+            <span
+              class="arc-recently-viewed__overflow-icon"
+              style={overflowIconStyle}
+              aria-hidden="true"
+            ></span>
+          </button>
+        </template>
       </header>
 
       <template lwc:if={errorMessage}>

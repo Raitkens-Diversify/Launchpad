@@ -171,13 +171,19 @@ public with sharing class ResourceCenterService {
 
     /**
      * getLinkContext response — the surface the caller is running on plus the
-     * site link bases. Both bases are null in the core app, which is c/contextNav's
-     * signal to navigate in-Lightning instead of leaving for the site.
+     * link bases of the pages on THAT site (Help_Surface__mdt). Every base is
+     * null in the core app, which is c/contextNav's signal to navigate
+     * in-Lightning instead of leaving for a site. helpBase is the site root
+     * (contextNav derives the page URLs from it when the page bases are
+     * missing); the other four are full page URLs.
      */
     public class LinkContext {
         @AuraEnabled public String surface;       // 'Internal' | the Network Name
-        @AuraEnabled public String helpBase;      // null when internal
-        @AuraEnabled public String resourceBase;  // null when internal
+        @AuraEnabled public String helpBase;      // site root; null when internal
+        @AuraEnabled public String homeBase;      // unifiedLanding page
+        @AuraEnabled public String articleBase;   // helpArticlePage page (?name= / ?topic=)
+        @AuraEnabled public String resourceBase;  // resourceCenter page (?rcview= …)
+        @AuraEnabled public String eventsBase;    // eventsPage page
     }
 
     public class FileInfo {
@@ -938,10 +944,16 @@ public with sharing class ResourceCenterService {
     /**
      * Surface + link bases in one call, for c/contextNav.
      *
-     * In the core app Network.getNetworkId() is null, so both bases come back
+     * In the core app Network.getNetworkId() is null, so every base comes back
      * null and contextNav routes with NavigationMixin instead of leaving for
-     * *.my.site.com. On an Experience Cloud site the bases are the same values
-     * the two accessors above return, so the site branch is unchanged.
+     * *.my.site.com.
+     *
+     * On an Experience Cloud site the bases are the CURRENT site's pages: the
+     * network's Help_Surface__mdt row names the page segments and the site's
+     * own SecureUrl is the root — so a user on ARC stays on ARC (another site
+     * means another login). A network with no row, or whose site can't be
+     * resolved, gets the shared Help Center site with the default page names,
+     * exactly what every caller received before the table existed.
      *
      * Never throws — an unresolvable site degrades to null bases, which the
      * client already treats as "handle it in-app".
@@ -949,13 +961,78 @@ public with sharing class ResourceCenterService {
     @AuraEnabled(cacheable=true)
     public static LinkContext getLinkContext() {
         LinkContext ctx = new LinkContext();
-        ctx.surface = NexSArticleEngagementController.resolveSurface();
+        ctx.surface = surfaceOverride != null
+            ? surfaceOverride
+            : NexSArticleEngagementController.resolveSurface();
         if (ctx.surface == INTERNAL_SURFACE) {
             return ctx; // bases stay null — navigate in-Lightning
         }
-        ctx.helpBase = getHelpCenterLinkBase();
-        ctx.resourceBase = getResourceLinkBase();
+        Help_Surface__mdt route = surfaceRoutes().get(ctx.surface);
+        String base = route == null ? null : currentSiteBaseUrl(ctx.surface);
+        if (base == null) {
+            route = null;               // shared site, default page names
+            base = getSiteBaseUrl();
+        }
+        if (base == null) {
+            return ctx;                 // unresolvable everywhere — in-app
+        }
+        ctx.helpBase = base;
+        ctx.homeBase = pageUrl(base, route == null ? null : route.Home_Path__c, '');
+        ctx.articleBase = pageUrl(base, route == null ? null : route.Article_Path__c, 'article');
+        ctx.resourceBase = pageUrl(base, route == null ? null : route.Resources_Path__c, RESOURCES_PAGE_PATH);
+        ctx.eventsBase = pageUrl(base, route == null ? null : route.Events_Path__c, 'events');
         return ctx;
+    }
+
+    /** Test seams: force the surface / a site root without a real Network. */
+    @TestVisible private static String surfaceOverride;
+    @TestVisible private static Map<String, String> siteBaseOverride = new Map<String, String>();
+    /** Help_Surface__mdt by Network name; @TestVisible so tests can seed it. */
+    @TestVisible private static Map<String, Help_Surface__mdt> surfaceRows;
+
+    private static Map<String, Help_Surface__mdt> surfaceRoutes() {
+        if (surfaceRows == null) {
+            surfaceRows = new Map<String, Help_Surface__mdt>();
+            for (Help_Surface__mdt row : [
+                SELECT Network_Name__c, Home_Path__c, Article_Path__c, Resources_Path__c, Events_Path__c
+                FROM Help_Surface__mdt
+            ]) {
+                if (String.isNotBlank(row.Network_Name__c)) {
+                    surfaceRows.put(row.Network_Name__c.trim(), row);
+                }
+            }
+        }
+        return surfaceRows;
+    }
+
+    /** base + '/' + segment; a blank segment means the given default, and a
+        blank default means the root itself. */
+    private static String pageUrl(String base, String segment, String dflt) {
+        String p = String.isBlank(segment) ? dflt : segment.trim();
+        p = p.removeStart('/').removeEnd('/');
+        return String.isBlank(p) ? base : base + '/' + p;
+    }
+
+    /**
+     * Root SecureUrl of the LWR site behind the CURRENT network, or null.
+     * Network.Name equals the site's MasterLabel; the LWR row is the
+     * ChatterNetworkPicasso one (the ChatterNetwork sibling is the legacy
+     * vforcesite shell).
+     */
+    private static String currentSiteBaseUrl(String networkName) {
+        if (siteBaseOverride.containsKey(networkName)) {
+            return siteBaseOverride.get(networkName);
+        }
+        try {
+            List<Site> sites = [
+                SELECT Id FROM Site
+                WHERE MasterLabel = :networkName AND SiteType = 'ChatterNetworkPicasso'
+                LIMIT 1
+            ];
+            return sites.isEmpty() ? null : secureUrlOf(sites[0].Id);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /** Root SecureUrl of the shared LWR site, or null when unresolvable. */
@@ -972,19 +1049,20 @@ public with sharing class ResourceCenterService {
                 WHERE UrlPathPrefix = :prefix AND SiteType = 'ChatterNetworkPicasso'
                 LIMIT 1
             ];
-            if (sites.isEmpty()) {
-                return null;
-            }
-            List<SiteDetail> details = [
-                SELECT SecureUrl FROM SiteDetail WHERE DurableId = :sites[0].Id LIMIT 1
-            ];
-            if (details.isEmpty() || String.isBlank(details[0].SecureUrl)) {
-                return null;
-            }
-            return details[0].SecureUrl.removeEnd('/');
+            return sites.isEmpty() ? null : secureUrlOf(sites[0].Id);
         } catch (Exception e) {
             return null;
         }
+    }
+
+    private static String secureUrlOf(Id siteId) {
+        List<SiteDetail> details = [
+            SELECT SecureUrl FROM SiteDetail WHERE DurableId = :siteId LIMIT 1
+        ];
+        if (details.isEmpty() || String.isBlank(details[0].SecureUrl)) {
+            return null;
+        }
+        return details[0].SecureUrl.removeEnd('/');
     }
 
     // ---- Internals -----------------------------------------------------------

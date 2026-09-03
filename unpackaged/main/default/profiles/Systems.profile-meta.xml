@@ -16254,6 +16254,9 @@
         <layout>Help_Guide_Option_Draft__c-Help Guide Option Draft Layout</layout>
     </layoutAssignments>
     <layoutAssignments>
+        <layout>Help_Surface__mdt-Help Surface Layout</layout>
+    </layoutAssignments>
+    <layoutAssignments>
         <layout>Idea-Idea Layout</layout>
     </layoutAssignments>
     <layoutAssignments>

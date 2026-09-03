@@ -16,6 +16,8 @@ import envelopeWizardStyles from "@salesforce/resourceUrl/envelopeWizardStyles";
 import NEXS_ICONS from "@salesforce/resourceUrl/arcicon";
 import { SORT_DESC } from "c/dataTableSortUtils";
 
+/* Row menus hidden until quick actions exist; see arcRecordListView. */
+const SHOW_ROW_ACTIONS = false;
 const SCOPE_MY = "My";
 const SCOPE_TEAM = "Team";
 
@@ -166,10 +168,12 @@ export default class WorkTable extends NavigationMixin(LightningElement) {
   @track columns = [...COLUMNS];
 
   /* Matches the list pages: the row menu opens the record, same as clicking
-     the row. Rows here are Cases. */
-  rowActions = [
-    { name: "view", label: "View Record", iconName: "utility:preview" }
-  ];
+     the row. Rows here are Cases. Off for now, same as arcRecordListView --
+     View Record duplicates the row click, so the three dots are hidden until
+     real quick actions exist. Flip SHOW_ROW_ACTIONS to bring them back. */
+  rowActions = SHOW_ROW_ACTIONS
+    ? [{ name: "view", label: "View Record", iconName: "utility:preview" }]
+    : [];
 
   handleRowAction(event) {
     const { action, row } = event.detail || {};
