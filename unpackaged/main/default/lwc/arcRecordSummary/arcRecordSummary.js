@@ -5,10 +5,14 @@
  * Read-only Record summary card for Experience Cloud account pages.
  */
 import { LightningElement, api, wire } from 'lwc';
-import { CurrentPageReference } from 'lightning/navigation';
+import { CurrentPageReference, NavigationMixin } from 'lightning/navigation';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import diversifyStyles from '@salesforce/resourceUrl/diversifyStyles';
-import { resolveRecordIdFromPageReference } from 'c/recordNavigationUtils';
+import {
+  buildRecordPageReference,
+  resolveRecordIdFromPageReference,
+  resolveRecordUrl
+} from 'c/recordNavigationUtils';
 import {
   buildAccountHeaderViewModel,
   resolveAccountTypeDisplayLabel
@@ -16,19 +20,35 @@ import {
 import { CLIENT_ROLE_VALUE } from 'c/fscRelUtils';
 import loadRecordSummary from '@salesforce/apex/ArcRecordSummaryController.load';
 
+/*
+ * Literals, not imports, on purpose. Both are defined in c/arcNavTrailState,
+ * but that module imports @salesforce/community/basePath, which throws outside
+ * an Experience site -- and this card is also allowed on a Lightning record
+ * page. Keep them in step with the constants of the same name there.
+ *
+ * The Household link records Contacts › Households as the nav trail before it
+ * navigates (via the request event the sidebar listens for), so the breadcrumb
+ * on the household reads "Contacts › Households › <household>" rather than
+ * keeping whichever contact list the user came from.
+ */
+const NAV_SELECT_REQUEST_EVENT = 'arc-nav-select-request';
+const HOUSEHOLDS_NAV_ITEM_ID = 'arc-nav-households';
+
 const DATE_DISPLAY = new Intl.DateTimeFormat('en-US', {
   month: 'short',
   day: 'numeric',
   year: 'numeric'
 });
 
-export default class ArcRecordSummary extends LightningElement {
+export default class ArcRecordSummary extends NavigationMixin(LightningElement) {
   _recordId;
   _contextRecordId;
   _pageRef;
   _lastLoadedRecordId;
 
   summary = null;
+  /** Href for the Household row; see resolveHouseholdUrl. */
+  householdUrl = '';
   isLoading = true;
   errorMessage = '';
 
@@ -115,6 +135,8 @@ export default class ArcRecordSummary extends LightningElement {
       }
 
       this.summary = context;
+      this.householdUrl = '';
+      this.resolveHouseholdUrl(recordId, context?.householdId);
     } catch (error) {
       if (recordId === this.recordId) {
         this.errorMessage =
@@ -130,6 +152,46 @@ export default class ArcRecordSummary extends LightningElement {
 
   get hasSummary() {
     return Boolean(this.summary);
+  }
+
+  /**
+   * The Household row links to the household's own page. The href comes from
+   * NavigationMixin.GenerateUrl so it is right wherever this card is placed --
+   * an ARC site route or a Lightning record page -- and is resolved after the
+   * card has painted, so the summary is never held up waiting for it. Until it
+   * arrives (or if the platform cannot generate one) the row still links via
+   * "#", and handleFieldLinkClick navigates by record id.
+   */
+  async resolveHouseholdUrl(recordId, householdId) {
+    if (!householdId) {
+      return;
+    }
+
+    const url = await resolveRecordUrl(this, householdId, 'Account');
+
+    if (url && recordId === this.recordId) {
+      this.householdUrl = url;
+    }
+  }
+
+  handleFieldLinkClick(event) {
+    const { linkRecordId, linkObjectApiName, linkNavItemId } =
+      event.detail || {};
+    if (!linkRecordId) {
+      return;
+    }
+
+    if (linkNavItemId) {
+      window.dispatchEvent(
+        new CustomEvent(NAV_SELECT_REQUEST_EVENT, {
+          detail: { navItemId: linkNavItemId }
+        })
+      );
+    }
+
+    this[NavigationMixin.Navigate](
+      buildRecordPageReference(linkRecordId, linkObjectApiName)
+    );
   }
 
   get section() {
@@ -160,7 +222,12 @@ export default class ArcRecordSummary extends LightningElement {
     return [
       this.buildField('contact-type', 'Contact Type', this.contactTypeLabel),
       this.buildField('classification', 'Classification', classificationLabel),
-      this.buildField('household', 'Household', this.summary.householdName),
+      this.buildLinkField('household', 'Household', this.summary.householdName, {
+        recordId: this.summary.householdId,
+        objectApiName: 'Account',
+        href: this.householdUrl,
+        navItemId: HOUSEHOLDS_NAV_ITEM_ID
+      }),
       this.buildField('primary-advisor', 'Primary Advisor', this.summary.primaryAdvisorName),
       this.buildField('date-created', 'Date Created', this.createdDateLabel),
       this.buildField('status', 'Status', this.statusLabel)
@@ -201,6 +268,26 @@ export default class ArcRecordSummary extends LightningElement {
       label,
       value: value || null,
       type: 'STRING'
+    };
+  }
+
+  /**
+   * A field whose value opens another record. Without an id or a name (a
+   * contact with no household) it falls back to a plain value, so the row still
+   * renders its em dash rather than an empty link.
+   */
+  buildLinkField(key, label, value, link) {
+    const field = this.buildField(key, label, value);
+    if (!link?.recordId || !value) {
+      return field;
+    }
+
+    return {
+      ...field,
+      href: link.href || '#',
+      linkRecordId: link.recordId,
+      linkObjectApiName: link.objectApiName,
+      linkNavItemId: link.navItemId || ''
     };
   }
 

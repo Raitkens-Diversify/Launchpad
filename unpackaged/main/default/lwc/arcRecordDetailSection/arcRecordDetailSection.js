@@ -6,6 +6,7 @@
  */
 import { LightningElement, api } from "lwc";
 import { formatFieldDisplayValue } from "c/envelopeFormSchema";
+import { shouldAllowNativeRecordNavigation } from "c/recordNavigationUtils";
 import ARC_ICONS from "@salesforce/resourceUrl/arcicon";
 
 /**
@@ -162,6 +163,12 @@ export default class ArcRecordDetailSection extends LightningElement {
         // section is editable.
         showControl,
         showValue: !showControl,
+        // A read-mode value whose field carries an href (the Record card's
+        // Household, which opens the household's own page) renders as a link;
+        // every other value stays plain text. The form never links -- a
+        // control is what belongs there.
+        showLink: !showControl && Boolean(field.href),
+        showPlainValue: !showControl && !field.href,
         valueClass:
           isRegulated && editing
             ? "field-row__value field-row__value--locked"
@@ -251,6 +258,37 @@ export default class ArcRecordDetailSection extends LightningElement {
     this.dispatchEvent(
       new CustomEvent("save", {
         detail: { sectionKey: this.sectionKey }
+      })
+    );
+  }
+
+  /**
+   * A linked value (see showLink) is an ordinary anchor, so middle-click and
+   * cmd/ctrl-click open it in a new tab the way the browser normally would. A
+   * plain click is handed to the parent as fieldlinkclick, which navigates in
+   * place -- the parent knows which site or app it sits on; this section does
+   * not.
+   */
+  handleLinkClick(event) {
+    if (shouldAllowNativeRecordNavigation(event)) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const { fieldKey } = event.currentTarget.dataset;
+    const field = this.fields.find((candidate) => candidate.key === fieldKey);
+
+    this.dispatchEvent(
+      new CustomEvent("fieldlinkclick", {
+        detail: {
+          sectionKey: this.sectionKey,
+          fieldKey,
+          href: field?.href || "",
+          linkRecordId: field?.linkRecordId || "",
+          linkObjectApiName: field?.linkObjectApiName || "",
+          linkNavItemId: field?.linkNavItemId || ""
+        }
       })
     );
   }

@@ -429,3 +429,37 @@
   display: block;
   overflow-wrap: anywhere;
 }
+
+/* A read-mode value that opens another record (the Record card's Household).
+   Same link treatment as a record link in ARC's tables (styledDataTable's
+   .div-table__link): accent-2 blue, underline on hover/focus, focus ring.
+   Weight and size are inherited from the value so the link lines up with the
+   rows around it.
+
+   Qualified by the value wrapper on purpose. The site theme's own anchor rule
+   (dxp-slds-extensions: `a:link:not(.slds-button, .slds-dropdown__item > a)`)
+   paints every anchor the brand navy and carries specificity (0,2,2), which a
+   lone class cannot beat -- the first cut of this rule lost to it and the
+   link came out navy. The tables win the same fight with `tbody td a`. */
+.field-row__value .field-row__link {
+  color: var(--div-color-accent-2, #0250d9);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.field-row__value .field-row__link:hover,
+.field-row__value .field-row__link:focus-visible {
+  color: var(--div-color-accent-2, #0250d9);
+  text-decoration: underline;
+}
+
+.field-row__value .field-row__link:visited {
+  color: var(--div-color-accent-2, #0250d9);
+}
+
+.field-row__value .field-row__link:focus-visible {
+  outline: 2px solid var(--div-color-focus, #1a76bb);
+  outline-offset: 2px;
+  border-radius: 2px;
+}

@@ -1,15 +1,17 @@
 /**
- * Relationships section for an Account (Individual/Trust/Estate/Business),
- * grouped by role -- Trusted Contact, Trustee, Grantor, Executor, Control
- * Person, Beneficial Owner, Authorized Person -- via
- * ArcAccountRelationshipsController, which is not scoped to any one
- * household. Renders nothing (not even an empty card) for account types
- * this tab doesn't cover, e.g. Household -- Apex signals that with an
+ * Relationships section for an Account, via ArcAccountRelationshipsController.
+ * Individual/Trust/Estate/Business are grouped by role -- Trusted Contact,
+ * Trustee, Grantor, Executor, Control Person, Beneficial Owner, Authorized
+ * Person -- not scoped to any one household. A Household is grouped by its
+ * members' types instead: Members, Businesses, Trusts & Estates, Retirement
+ * Plans. Renders nothing (not even an empty section) for account types the
+ * controller doesn't cover, e.g. Retirement Plan -- Apex signals that with an
  * empty `category`.
  *
- * Same visual language as c/arcHouseholdDetail (Manoj's Details section) --
- * a collapsible <details> card -- but its own component and its own CSS,
- * since shadow DOM means nothing can be shared across the two directly.
+ * Rendered by arcHouseholdDetail inside its Details tab, as one of that tab's
+ * sections (it used to be its own tab). Same visual language as the host's
+ * field sections, but its own component and its own CSS, since shadow DOM
+ * means nothing can be shared across the two directly.
  */
 import { LightningElement, api, wire } from "lwc";
 import { CurrentPageReference, NavigationMixin } from "lightning/navigation";

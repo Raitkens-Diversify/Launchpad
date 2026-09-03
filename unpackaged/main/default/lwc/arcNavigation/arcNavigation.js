@@ -13,12 +13,14 @@ import {
   STATIC_NAV_ITEMS,
   NAV_PATH_CHANGE_EVENT,
   UPGRADE_REQUESTED_EVENT,
+  NAV_SELECT_REQUEST_EVENT,
   UAT_TESTING_PATH,
   patchHistoryForNavigation,
   resolveCurrentPath,
   resolveCurrentQueryParams,
   serializeSearch,
   recordNavSelection,
+  recordNavSelectionById,
   findNavTargetById,
   syncNavTrailFromLocation,
   isNavItemActive,
@@ -108,6 +110,15 @@ export default class ArcNavigation extends NavigationMixin(LightningElement) {
     window.addEventListener("popstate", this._onPathChange);
     window.addEventListener(NAV_PATH_CHANGE_EVENT, this._onPathChange);
     window.addEventListener("hashchange", this._onPathChange);
+    // A record link that leads under a different sidebar entry (a contact's
+    // Household link -> Contacts › Households) records that entry here, the
+    // same as a click on the entry itself; see NAV_SELECT_REQUEST_EVENT.
+    this._onNavSelectRequest = (event) => {
+      if (recordNavSelectionById(event?.detail?.navItemId)) {
+        this.scheduleLocationSync();
+      }
+    };
+    window.addEventListener(NAV_SELECT_REQUEST_EVENT, this._onNavSelectRequest);
     // eslint-disable-next-line @lwc/lwc/no-async-operation
     this._locationPollId = window.setInterval(this._onPathChange, 250);
     this._onDocumentClick = (event) => {
@@ -135,6 +146,10 @@ export default class ArcNavigation extends NavigationMixin(LightningElement) {
     window.removeEventListener("popstate", this._onPathChange);
     window.removeEventListener(NAV_PATH_CHANGE_EVENT, this._onPathChange);
     window.removeEventListener("hashchange", this._onPathChange);
+    window.removeEventListener(
+      NAV_SELECT_REQUEST_EVENT,
+      this._onNavSelectRequest
+    );
     window.removeEventListener(
       SIDEBAR_COLLAPSE_CHANGE_EVENT,
       this._onSidebarCollapseChange

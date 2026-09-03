@@ -1,6 +1,15 @@
 import { LightningElement, api, wire } from "lwc";
-import { CurrentPageReference } from "lightning/navigation";
+import { CurrentPageReference, NavigationMixin } from "lightning/navigation";
 import { resolveRecordIdFromPageReference } from "c/recordNavigationUtils";
+import {
+  buildExperienceRecordPath,
+  buildRecordNavigationReference,
+  shouldAllowNativeRecordNavigation
+} from "c/recordNavigationCommunityUtils";
+import {
+  HOUSEHOLDS_NAV_ITEM_ID,
+  recordNavSelectionById
+} from "c/arcNavTrailState";
 import { getRecord, getFieldValue } from "lightning/uiRecordApi";
 import getFormSchema from "@salesforce/apex/FieldDetailController.getFormSchema";
 import getSectionLayouts from "@salesforce/apex/FieldDetailController.getSectionLayouts";
@@ -159,6 +168,52 @@ const relationshipFor = (fieldPath) => {
 const TYPE_REFERENCE = "REFERENCE";
 
 /**
+ * Lookup targets that render as a link on the Details tab. Only objects with an
+ * ARC detail route of their own belong here: a Household lookup (Household__c ->
+ * Account) can open the household's ARC page, but Created By (User) and
+ * Financial Advisor Team have no ARC page, so those stay plain text rather than
+ * linking to a page that does not exist.
+ */
+const LINKED_LOOKUP_OBJECTS = new Set(["Account"]);
+
+/**
+ * The sidebar entry a linked lookup's target lives under, recorded as the nav
+ * trail before navigating so the breadcrumb on the target reads that list
+ * (Contacts › Households › <household>) rather than the list this record was
+ * reached from. A lookup not listed here leaves the trail alone.
+ */
+const NAV_ITEM_BY_LOOKUP_FIELD = {
+  Household__c: HOUSEHOLDS_NAV_ITEM_ID
+};
+
+/**
+ * Sections the ARC page leaves out of a type's field set even though the
+ * Lightning page it copies still shows them, keyed by schema type. Dropped
+ * here rather than by deleting their Envelope_Field__mdt rows, so the rows
+ * stay the faithful copy of the Lightning page and this stays the one place
+ * ARC deviates from it.
+ *
+ * Household: Financial Summary, Financial Statement and Suitability Information
+ * were removed at the business's request (2026-09-03); the household's
+ * Relationships (its members) fill the Details tab in their place.
+ */
+const HIDDEN_SECTIONS_BY_SCHEMA_TYPE = {
+  "Household Detail": new Set([
+    "Financial Summary",
+    "Financial Statement",
+    "Suitability Information"
+  ])
+};
+
+/**
+ * Sections that stay at the bottom of the Details tab, below Relationships --
+ * on the Lightning page the audit fields sit under everything else, and a
+ * household's members reading after Created By / Last Modified By would be
+ * backwards.
+ */
+const TRAILING_SECTION_NAMES = new Set(["System Information"]);
+
+/**
  * Orders a type's flat sections (as getFormSchema returns them -- first-seen order
  * while iterating Order__c-sorted FIELD rows, which says nothing about section
  * order) by Section__mdt's own parent/child layout, when one exists for that type.
@@ -200,19 +255,24 @@ const orderSectionsByLayout = (sections, layoutGroups) => {
 };
 
 /**
- * Fixed top-level tabs. Details, Cases, Documents and Investments & Services
- * always appear (in this order); Relationships is the only one gated by
- * record type (see showRelationshipsTab) -- a Household, for instance, gets
- * no Relationships tab, same as arcAccountRelationships itself already
- * renders nothing for one.
+ * Fixed top-level tabs: Details, Cases, Documents and Investments & Services,
+ * in this order, for every record type. Relationships used to be a fifth tab
+ * (gated by record type); it now renders inside Details as one of its
+ * sections -- see detailBlocks -- so a household's members and a contact's
+ * Trusted Contact sit with the record's fields rather than behind another
+ * click.
  */
 const DETAILS_TAB_KEY = "__details__";
 const CASES_TAB_KEY = "__cases__";
-const RELATIONSHIPS_TAB_KEY = "__relationships__";
 const DOCUMENTS_TAB_KEY = "__documents__";
 const INVESTMENTS_TAB_KEY = "__investments__";
 
-export default class ArcHouseholdDetail extends LightningElement {
+/** Key of the Relationships block inside the Details tab (see detailBlocks). */
+const RELATIONSHIPS_BLOCK_KEY = "__relationships__";
+
+export default class ArcHouseholdDetail extends NavigationMixin(
+  LightningElement
+) {
   /** Object whose record page this sits on. */
   @api objectApiName = "Account";
 
@@ -308,12 +368,13 @@ export default class ArcHouseholdDetail extends LightningElement {
   recordTypeName;
 
   /**
-   * The Relationships tab's own gate. ArcAccountRelationshipsController returns
-   * a blank category for account types the Relationships card does not cover
-   * (Household, ...) -- the same signal arcAccountRelationships uses to render
-   * nothing -- so the tab only appears when this is non-blank. Wiring the same
-   * cacheable method the card wires means one shared server call, not two, and
-   * the account-type rule stays in Apex rather than being copied here.
+   * The Relationships section's own gate. ArcAccountRelationshipsController
+   * returns a blank category for account types the Relationships section does
+   * not cover (Retirement Plan) -- the same signal arcAccountRelationships uses
+   * to render nothing -- so the section, and the separator above it, only
+   * appear when this is non-blank. Wiring the same cacheable method the section
+   * wires means one shared server call, not two, and the account-type rule
+   * stays in Apex rather than being copied here.
    */
   _relationshipsCategory = "";
 
@@ -374,7 +435,10 @@ export default class ArcHouseholdDetail extends LightningElement {
     ])
       .then(([schema, layouts, valuesById]) => {
         const layoutGroups = (layouts && layouts[type]) || [];
-        this.sectionsRaw = orderSectionsByLayout(schema || [], layoutGroups);
+        const hiddenSections = HIDDEN_SECTIONS_BY_SCHEMA_TYPE[type];
+        this.sectionsRaw = orderSectionsByLayout(schema || [], layoutGroups).filter(
+          (section) => !hiddenSections || !hiddenSections.has(section.name)
+        );
         this.values = (valuesById && valuesById[this.recordId]) || {};
         this.errorMessage = undefined;
         this.collectLookupFields();
@@ -505,13 +569,23 @@ export default class ArcHouseholdDetail extends LightningElement {
            * returned. If the name has not arrived -- still in flight, or the user
            * cannot read the related record -- it renders as blank rather than as
            * a raw id, because an id on screen is worse than an empty row.
+           *
+           * A lookup whose related object has an ARC page of its own (the
+           * Household) renders that name as a link to the page -- see
+           * lookupHrefFor. The raw value is the related record's id.
            */
           if (type === TYPE_REFERENCE) {
             const name = this.lookupNames[field.fieldPath];
+            const href = name ? this.lookupHrefFor(field, raw) : "";
             return {
               key: `${section.name}-${field.fieldPath}-${index}`,
               label: field.label || field.fieldPath,
               value: name || "\u2014",
+              isLink: Boolean(href),
+              href,
+              recordId: raw,
+              objectApiName: field.referenceTo,
+              navItemId: NAV_ITEM_BY_LOOKUP_FIELD[field.fieldPath] || "",
               valueClass: name
                 ? "arc-household-detail__value"
                 : "arc-household-detail__value arc-household-detail__value--blank"
@@ -547,11 +621,80 @@ export default class ArcHouseholdDetail extends LightningElement {
     return this.sections.length > 0;
   }
 
+  /**
+   * Everything the Details tab stacks, in order: the field sections, then the
+   * Relationships section (when this account's type has one), then any
+   * trailing section (System Information) that belongs at the very bottom.
+   * One list so the template renders them in a single loop and every block
+   * gets the same separator; the Relationships entry is flagged so the loop
+   * renders the card instead of a field grid.
+   */
+  get detailBlocks() {
+    const sections = this.sections;
+    const leading = sections.filter(
+      (section) => !TRAILING_SECTION_NAMES.has(section.name)
+    );
+    const trailing = sections.filter((section) =>
+      TRAILING_SECTION_NAMES.has(section.name)
+    );
+    const relationships = this.showRelationships
+      ? [{ key: RELATIONSHIPS_BLOCK_KEY, isRelationships: true }]
+      : [];
+
+    return [...leading, ...relationships, ...trailing];
+  }
+
+  /** Whether the Relationships section applies to this account's type. */
+  get showRelationships() {
+    return Boolean(this._relationshipsCategory);
+  }
+
   /** The tab strip itself no longer depends on Details having content --
    *  Cases/Documents/Investments & Services can be real even when the
    *  record's type carries no field sections at all. */
   get showTabs() {
     return Boolean(this.recordId);
+  }
+
+  // ---- lookup links -------------------------------------------------------
+
+  /**
+   * The ARC record URL for a lookup's related record, or "" when that object
+   * has no ARC page (see LINKED_LOOKUP_OBJECTS). A real href rather than "#",
+   * so middle-click and cmd/ctrl-click open the household in a new tab the way
+   * the browser normally would; a plain click is routed through NavigationMixin
+   * in handleLookupClick so it stays an in-site navigation.
+   */
+  lookupHrefFor(field, relatedId) {
+    if (!relatedId || !LINKED_LOOKUP_OBJECTS.has(field.referenceTo)) {
+      return "";
+    }
+    return buildExperienceRecordPath(relatedId, field.referenceTo);
+  }
+
+  handleLookupClick(event) {
+    if (shouldAllowNativeRecordNavigation(event)) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const { recordId, objectApiName, navItemId } =
+      event.currentTarget.dataset;
+    const pageReference = buildRecordNavigationReference(
+      recordId,
+      objectApiName
+    );
+
+    if (!pageReference) {
+      return;
+    }
+
+    if (navItemId) {
+      recordNavSelectionById(navItemId);
+    }
+
+    this[NavigationMixin.Navigate](pageReference);
   }
 
   // ---- section tabs -------------------------------------------------------
@@ -580,31 +723,17 @@ export default class ArcHouseholdDetail extends LightningElement {
   }
 
   /**
-   * Every tab in strip order, fixed regardless of record type except
-   * Relationships. The single source the tablist, the selected-key fallback
-   * and the arrow-key navigation all read from, so they can never disagree
-   * on what the tabs are.
+   * Every tab in strip order, fixed regardless of record type. The single
+   * source the tablist, the selected-key fallback and the arrow-key navigation
+   * all read from, so they can never disagree on what the tabs are.
    */
   get allTabs() {
-    const tabs = [
+    return [
       { key: DETAILS_TAB_KEY, name: 'Details' },
-      { key: CASES_TAB_KEY, name: 'Cases' }
-    ];
-    // Only when the account's type actually carries relationships (see the
-    // wire above) -- a Household and other uncovered types get no tab.
-    if (this.showRelationshipsTab) {
-      tabs.push({ key: RELATIONSHIPS_TAB_KEY, name: 'Relationships' });
-    }
-    tabs.push(
+      { key: CASES_TAB_KEY, name: 'Cases' },
       { key: DOCUMENTS_TAB_KEY, name: 'Documents' },
       { key: INVESTMENTS_TAB_KEY, name: 'Investments & Services' }
-    );
-    return tabs;
-  }
-
-  /** Whether the Relationships tab applies to this account's type. */
-  get showRelationshipsTab() {
-    return Boolean(this._relationshipsCategory);
+    ];
   }
 
   /** One entry per tab for the tablist, pre-decorated with its ARIA and class
@@ -638,11 +767,6 @@ export default class ArcHouseholdDetail extends LightningElement {
   /** True when the Cases tab is the open one. */
   get isCasesActive() {
     return this.selectedTabKey === CASES_TAB_KEY;
-  }
-
-  /** True when the Relationships tab is the open one. */
-  get isRelationshipsActive() {
-    return this.selectedTabKey === RELATIONSHIPS_TAB_KEY;
   }
 
   /** True when the Documents tab is the open one. */
@@ -706,7 +830,8 @@ export default class ArcHouseholdDetail extends LightningElement {
       Boolean(this.recordId) &&
       !this.isLoading &&
       !this.errorMessage &&
-      !this.hasSections
+      !this.hasSections &&
+      !this.showRelationships
     );
   }
 }

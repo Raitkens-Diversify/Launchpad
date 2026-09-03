@@ -109,12 +109,6 @@
   padding-top: 0.875rem;
 }
 
-/* Relationships renders its own card (heading + grouped lists), so the panel
-   only needs the same top gap the other panels sit under. */
-.arc-household-detail__relationships-panel {
-  padding-top: 0.875rem;
-}
-
 /* ---- Details: stacked sections ---- */
 
 .arc-household-detail__section + .arc-household-detail__section {
@@ -182,4 +176,35 @@
    stacks street / city, state postcode / country. */
 .arc-household-detail__value--address {
   white-space: pre-line;
+}
+
+/* A lookup whose related record has an ARC page of its own (the Household)
+   renders as a link with the same treatment as a record link in ARC's tables
+   (styledDataTable's .div-table__link): accent-2 blue, underline on
+   hover/focus, focus ring.
+
+   Qualified by the value cell on purpose. The site theme's own anchor rule
+   (dxp-slds-extensions: `a:link:not(.slds-button, .slds-dropdown__item > a)`)
+   paints every anchor the brand navy at specificity (0,2,2), which a lone
+   class cannot beat; the tables win the same fight with `tbody td a`. */
+.arc-household-detail__value .arc-household-detail__link {
+  color: var(--div-color-accent-2, #0250d9);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.arc-household-detail__value .arc-household-detail__link:hover,
+.arc-household-detail__value .arc-household-detail__link:focus-visible {
+  color: var(--div-color-accent-2, #0250d9);
+  text-decoration: underline;
+}
+
+.arc-household-detail__value .arc-household-detail__link:visited {
+  color: var(--div-color-accent-2, #0250d9);
+}
+
+.arc-household-detail__value .arc-household-detail__link:focus-visible {
+  outline: 2px solid var(--div-color-focus, #1a76bb);
+  outline-offset: 2px;
+  border-radius: 2px;
 }

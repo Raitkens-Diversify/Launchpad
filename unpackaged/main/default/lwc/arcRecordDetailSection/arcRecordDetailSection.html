@@ -89,8 +89,19 @@
             </template>
           </div>
           <div class="field-row__control">
-            <template lwc:if={field.showValue}>
+            <template lwc:if={field.showPlainValue}>
               <span class={field.valueClass}>{field.displayValue}</span>
+            </template>
+            <template lwc:if={field.showLink}>
+              <span class={field.valueClass}>
+                <a
+                  class="field-row__link"
+                  href={field.href}
+                  data-field-key={field.key}
+                  onclick={handleLinkClick}
+                  >{field.displayValue}</a
+                >
+              </span>
             </template>
             <template lwc:if={field.showControl}>
               <c-arc-record-detail-field

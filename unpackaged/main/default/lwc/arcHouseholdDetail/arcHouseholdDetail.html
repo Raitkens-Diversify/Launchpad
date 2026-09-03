@@ -29,7 +29,8 @@
         </div>
 
         <!-- Details: every field section stacked together under one tab,
-             each with its own heading, rather than one section at a time. -->
+             each with its own heading, rather than one section at a time --
+             with the Relationships section among them (see detailBlocks). -->
         <template lwc:if={isDetailsActive}>
           <div class="arc-household-detail__panel" role="tabpanel" aria-label="Details">
             <template lwc:if={isLoading}>
@@ -45,17 +46,37 @@
               <p class="arc-household-detail__error" role="alert">{errorMessage}</p>
             </template>
 
-            <template for:each={sections} for:item="section">
+            <template for:each={detailBlocks} for:item="section">
               <div key={section.key} class="arc-household-detail__section">
+                <template lwc:if={section.isRelationships}>
+                  <c-arc-account-relationships
+                    card-title="Relationships"
+                  ></c-arc-account-relationships>
+                </template>
+                <template lwc:else>
                 <h3 class="arc-household-detail__section-heading">{section.name}</h3>
                 <dl class="arc-household-detail__grid">
                   <template for:each={section.fields} for:item="field">
                     <div key={field.key} class="arc-household-detail__field">
                       <dt class="arc-household-detail__label">{field.label}</dt>
-                      <dd class={field.valueClass}>{field.value}</dd>
+                      <dd class={field.valueClass}>
+                        <template lwc:if={field.isLink}>
+                          <a
+                            class="arc-household-detail__link"
+                            href={field.href}
+                            data-record-id={field.recordId}
+                            data-object-api-name={field.objectApiName}
+                            data-nav-item-id={field.navItemId}
+                            onclick={handleLookupClick}
+                            >{field.value}</a
+                          >
+                        </template>
+                        <template lwc:else>{field.value}</template>
+                      </dd>
                     </div>
                   </template>
                 </dl>
+                </template>
               </div>
             </template>
 
@@ -72,20 +93,6 @@
         <template lwc:if={isCasesActive}>
           <div class="arc-household-detail__panel" role="tabpanel" aria-label="Cases">
             <c-arc-account-cases-list></c-arc-account-cases-list>
-          </div>
-        </template>
-
-        <!-- Relationships: the account's related-people card, unchanged --
-             just relocated under this tab. -->
-        <template lwc:if={isRelationshipsActive}>
-          <div
-            class="arc-household-detail__relationships-panel"
-            role="tabpanel"
-            aria-label="Relationships"
-          >
-            <c-arc-account-relationships
-              card-title="Relationships"
-            ></c-arc-account-relationships>
           </div>
         </template>
 

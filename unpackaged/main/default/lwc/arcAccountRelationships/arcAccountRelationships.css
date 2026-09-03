@@ -1,33 +1,27 @@
 /*
  * Same tokens as c/arcHouseholdDetail (Manoj's Details section), so the two
- * cards read as one visual family even though shadow DOM means no class or
- * rule can actually be shared between them.
+ * read as one visual family even though shadow DOM means no class or rule can
+ * actually be shared between them.
+ *
+ * This renders INSIDE the Details tab as one of its sections (it was its own
+ * bordered card under a Relationships tab before), so it draws no box of its
+ * own: the title matches arcHouseholdDetail's section heading, and the
+ * separator above it comes from the host's section rule.
  */
 
 .arc-account-relationships {
-  background: var(--lwc-colorBackgroundAlt, #ffffff);
-  border: 1px solid var(--lwc-colorBorder, #c9c9c9);
-  border-radius: var(--lwc-borderRadiusMedium, 4px);
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
-  margin-bottom: 0.75rem;
+  margin: 0;
 }
 
-.arc-account-relationships__summary {
-  cursor: pointer;
-  padding: 0.75rem 1rem;
+.arc-account-relationships__title {
+  margin: 0 0 0.5rem;
   font-size: 0.9375rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--div-color-text-primary, #181818);
-  list-style-position: outside;
-}
-
-.arc-account-relationships__summary:focus-visible {
-  outline: 2px solid var(--div-color-accent-blue, #0176d3);
-  outline-offset: -2px;
 }
 
 .arc-account-relationships__body {
-  padding: 0 1rem 1rem;
+  padding: 0;
 }
 
 .arc-account-relationships__loading {

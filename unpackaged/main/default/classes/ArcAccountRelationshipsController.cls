@@ -21,9 +21,24 @@
  * either can be the only place a given relationship was actually entered --
  * the Envelope wizard in particular has no Estate/Executor option at all
  * today, so Executor rows only ever come from the Relationship Map side.
+ *
+ * A HOUSEHOLD is different: its relationships are its MEMBERS. The wizard and
+ * the Relationship Map write one Account_Account_Relationship__c of record
+ * type Household from the household to each member account, with no role on
+ * it (Roles__c is blank on those rows by design), so a household's groups are
+ * by the member's own record type -- Members (individuals), Businesses,
+ * Trusts & Estates, Retirement Plans -- rather than by role. The fiduciary and
+ * "Other" rows a household can also carry are not membership and are left out.
  */
 public with sharing class ArcAccountRelationshipsController {
   private static final String FIDUCIARY_RECORD_TYPE = 'Fiduciary_Legal';
+  private static final String HOUSEHOLD_RELATIONSHIP_RECORD_TYPE = 'Household';
+  private static final String HOUSEHOLD_CATEGORY = 'Household';
+
+  private static final String MEMBERS_BUCKET = 'Members';
+  private static final String BUSINESSES_BUCKET = 'Businesses';
+  private static final String TRUSTS_BUCKET = 'Trusts & Estates';
+  private static final String RETIREMENT_PLANS_BUCKET = 'Retirement Plans';
 
   /** Bucket label -> the Roles__c / Reciprocal_Role__r.Role__c strings that count as that bucket, matched case-insensitively. */
   private static final Map<String, Set<String>> BUCKET_SYNONYMS = new Map<String, Set<String>>{
@@ -47,7 +62,10 @@ public with sharing class ArcAccountRelationshipsController {
     'Individual' => new List<String>{ 'Trusted Contact' },
     'Trust' => new List<String>{ 'Trustee', 'Grantor' },
     'Estate' => new List<String>{ 'Executor' },
-    'Business' => new List<String>{ 'Control Person', 'Beneficial Owner', 'Authorized Person' }
+    'Business' => new List<String>{ 'Control Person', 'Beneficial Owner', 'Authorized Person' },
+    // A household's groups are member types, not roles -- see the class comment
+    // and buildHouseholdGroups. Same fixed shape: every group, even when empty.
+    'Household' => new List<String>{ MEMBERS_BUCKET, BUSINESSES_BUCKET, TRUSTS_BUCKET, RETIREMENT_PLANS_BUCKET }
   };
 
   /**
@@ -65,6 +83,11 @@ public with sharing class ArcAccountRelationshipsController {
   private static final Set<String> BUSINESS_RECORD_TYPES = new Set<String>{
     'Business', 'IndustriesBusiness'
   };
+  private static final Set<String> HOUSEHOLD_RECORD_TYPES = new Set<String>{
+    'Household', 'IndustriesHousehold'
+  };
+  private static final String TRUST_RECORD_TYPE = 'Trust';
+  private static final String RETIREMENT_PLAN_RECORD_TYPE = 'Retirement_Plan';
 
   @AuraEnabled(cacheable=true)
   public static RelationshipsResult getRelationships(Id accountId) {
@@ -105,6 +128,12 @@ public with sharing class ArcAccountRelationshipsController {
     }
 
     List<String> bucketOrder = BUCKETS_BY_CATEGORY.get(category);
+
+    if (category == HOUSEHOLD_CATEGORY) {
+      result.groups = buildHouseholdGroups(accountId, bucketOrder);
+      return result;
+    }
+
     Map<String, List<RelationshipRow>> rowsByBucket = new Map<String, List<RelationshipRow>>();
     for (String bucket : bucketOrder) {
       rowsByBucket.put(bucket, new List<RelationshipRow>());
@@ -156,13 +185,93 @@ public with sharing class ArcAccountRelationshipsController {
     return result;
   }
 
+  /**
+   * A household's members, one group per member type, every group present even
+   * when it is empty -- the same fixed-shape rule the role buckets follow, so a
+   * household always reads Members / Businesses / Trusts & Estates / Retirement
+   * Plans. Reads the household -> member rows only (record type Household,
+   * active); a member whose record type has no group (a nested household, say)
+   * is left out rather than guessed at.
+   */
+  private static List<RelationshipGroup> buildHouseholdGroups(Id accountId, List<String> bucketOrder) {
+    Map<String, List<RelationshipRow>> rowsByBucket = new Map<String, List<RelationshipRow>>();
+    for (String bucket : bucketOrder) {
+      rowsByBucket.put(bucket, new List<RelationshipRow>());
+    }
+
+    List<Account_Account_Relationship__c> relations;
+    try {
+      relations = [
+        SELECT Related_Account__c, Related_Account__r.Name, Related_Account__r.RecordType.DeveloperName
+        FROM Account_Account_Relationship__c
+        WHERE
+          Account__c = :accountId
+          AND RecordType.DeveloperName = :HOUSEHOLD_RELATIONSHIP_RECORD_TYPE
+          AND Active__c = TRUE
+          AND Related_Account__c != NULL
+        WITH USER_MODE
+        ORDER BY Related_Account__r.Name
+        LIMIT 500
+      ];
+    } catch (Exception e) {
+      System.debug(
+        LoggingLevel.ERROR,
+        'ArcAccountRelationshipsController: failed to read household members for ' + accountId + ': ' + e
+      );
+      relations = new List<Account_Account_Relationship__c>();
+    }
+
+    for (Account_Account_Relationship__c relation : relations) {
+      String memberRecordType = relation.Related_Account__r.RecordType != null
+        ? relation.Related_Account__r.RecordType.DeveloperName
+        : null;
+      String bucket = resolveMemberBucket(memberRecordType);
+      if (bucket == null || !rowsByBucket.containsKey(bucket)) {
+        continue;
+      }
+      RelationshipRow row = new RelationshipRow();
+      row.relatedAccountId = relation.Related_Account__c;
+      row.relatedAccountName = relation.Related_Account__r.Name;
+      rowsByBucket.get(bucket).add(row);
+    }
+
+    List<RelationshipGroup> groups = new List<RelationshipGroup>();
+    for (String bucket : bucketOrder) {
+      RelationshipGroup relationshipGroup = new RelationshipGroup();
+      relationshipGroup.label = bucket;
+      relationshipGroup.rows = rowsByBucket.get(bucket);
+      groups.add(relationshipGroup);
+    }
+    return groups;
+  }
+
+  /** The member group an account's record type belongs in, or null for a type with no group. */
+  private static String resolveMemberBucket(String recordType) {
+    if (String.isBlank(recordType)) {
+      return null;
+    }
+    if (INDIVIDUAL_RECORD_TYPES.contains(recordType)) {
+      return MEMBERS_BUCKET;
+    }
+    if (BUSINESS_RECORD_TYPES.contains(recordType)) {
+      return BUSINESSES_BUCKET;
+    }
+    if (recordType == TRUST_RECORD_TYPE) {
+      return TRUSTS_BUCKET;
+    }
+    if (recordType == RETIREMENT_PLAN_RECORD_TYPE) {
+      return RETIREMENT_PLANS_BUCKET;
+    }
+    return null;
+  }
+
   private static String resolveCategory(Account acct) {
     String recordType = acct.RecordType != null ? acct.RecordType.DeveloperName : null;
     if (String.isBlank(recordType)) {
       return '';
     }
 
-    if (recordType == 'Trust') {
+    if (recordType == TRUST_RECORD_TYPE) {
       return acct.Trust_Type__c == 'Estate' ? 'Estate' : 'Trust';
     }
     if (INDIVIDUAL_RECORD_TYPES.contains(recordType)) {
@@ -170,6 +279,9 @@ public with sharing class ArcAccountRelationshipsController {
     }
     if (BUSINESS_RECORD_TYPES.contains(recordType)) {
       return 'Business';
+    }
+    if (HOUSEHOLD_RECORD_TYPES.contains(recordType)) {
+      return HOUSEHOLD_CATEGORY;
     }
     return '';
   }
@@ -211,7 +323,7 @@ public with sharing class ArcAccountRelationshipsController {
   }
 
   public class RelationshipsResult {
-    /** '' when the account's record type isn't one this tab supports (e.g. Household, Retirement Plan). */
+    /** '' when the account's record type isn't one this section supports (e.g. Retirement Plan). */
     @AuraEnabled
     public String category;
 

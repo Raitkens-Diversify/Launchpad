@@ -1,7 +1,7 @@
 <template>
   <template lwc:if={showSection}>
-    <details class="arc-account-relationships" open>
-      <summary class="arc-account-relationships__summary">{cardTitle}</summary>
+    <section class="arc-account-relationships">
+      <h3 class="arc-account-relationships__title">{cardTitle}</h3>
 
       <div class="arc-account-relationships__body">
         <template lwc:if={isLoading}>
@@ -65,6 +65,6 @@
           </template>
         </template>
       </div>
-    </details>
+    </section>
   </template>
 </template>

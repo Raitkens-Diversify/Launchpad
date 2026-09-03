@@ -14,6 +14,23 @@ export const NAV_TRAIL_CHANGE_EVENT = "arc-nav-trail-change";
 export const NAV_TRAIL_STORAGE_KEY = "arc-nav-trail";
 export const UPGRADE_REQUESTED_EVENT = "arc-upgrade-requested";
 
+/**
+ * Asks the sidebar to record a nav selection on behalf of a component that
+ * cannot import this module. This module imports @salesforce/community/basePath,
+ * which throws outside an Experience site, so a component that is also allowed
+ * on a Lightning record page (arcRecordSummary) cannot call recordNavSelection
+ * directly. It dispatches this event on window with { navItemId } instead;
+ * arcNavigation listens and records the selection. Off the site nothing
+ * listens and the event is harmless.
+ */
+export const NAV_SELECT_REQUEST_EVENT = "arc-nav-select-request";
+
+/** The Contacts › Households list entry. Named because record links that lead
+ *  to a household (the Household lookup on a contact or business) record it as
+ *  the trail before navigating, so the breadcrumb reads Contacts › Households
+ *  › <household> rather than keeping the list the user happened to come from. */
+export const HOUSEHOLDS_NAV_ITEM_ID = "arc-nav-households";
+
 const HOME_LABEL = "Home";
 const ACCOUNT_LIST_PATH = "/account/Account/Default";
 const WORK_LIST_PATH = "/case/Case/Default";
@@ -115,7 +132,7 @@ const MANUAL_CONTACTS_GROUP = {
       objectApiName: "Account"
     },
     {
-      id: "arc-nav-households",
+      id: HOUSEHOLDS_NAV_ITEM_ID,
       label: "Households",
       type: "InternalLink",
       target: `${ACCOUNT_LIST_PATH}?c__tabId=tab4`,
@@ -439,6 +456,30 @@ export function recordNavSelection({
     groupLabel,
     groupPath
   });
+}
+
+/**
+ * Records the trail for a nav entry by id -- what a click on that sidebar item
+ * records before it navigates -- so a record link can set the trail its target
+ * belongs under. Returns false for an unknown id, and records nothing.
+ */
+export function recordNavSelectionById(navItemId) {
+  const navTarget = findNavTargetById(navItemId);
+
+  if (!navTarget) {
+    return false;
+  }
+
+  recordNavSelection({
+    id: navTarget.id,
+    label: navTarget.label,
+    path: navTarget.target,
+    objectApiName: navTarget.objectApiName,
+    groupLabel: navTarget.groupLabel,
+    groupPath: navTarget.groupPath
+  });
+
+  return true;
 }
 
 export function findNavTargetById(navItemId) {
