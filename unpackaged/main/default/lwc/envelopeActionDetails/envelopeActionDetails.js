@@ -179,14 +179,24 @@ export default class EnvelopeActionDetails extends LightningElement {
     return [action.entityName, action.actionTitle].filter(Boolean).join(" - ");
   }
 
+  // Complete once the metadata inputs are answered and, on a trade-carrying interview, the Trade
+  // Instructions ledger reconciles. actionCompletion only measures the metadata-driven fields; the
+  // trade verdict is read off the memoized group tree (_tradeGroup), so the header badge and the
+  // TOC dot are one computation and can never disagree on the same screen — they used to, with the
+  // header reading "Completed" over an orange Trade Instructions dot.
   get isComplete() {
-    return actionCompletion(
+    const inputsComplete = actionCompletion(
       this.sections,
       { groupId: this.action?.entityGroupId, type: this.action?.entityType },
       this.draft,
       this.userContext,
       this.registrationAttributes
     ).isComplete;
+    if (!inputsComplete) {
+      return false;
+    }
+    const tradeGroup = this.groups.find((group) => group.key === "grp-trade");
+    return !tradeGroup || tradeGroup.status !== "incomplete";
   }
 
   // Whether this request has moved anything off the value it started from. Only ever true for an

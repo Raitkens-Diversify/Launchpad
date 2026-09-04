@@ -3000,6 +3000,83 @@ function optionRulesByValue(options) {
  * @param {number|string} fallback  the value to stand in when nothing was entered
  * @returns {number|null}  null when neither is a positive number
  */
+/**
+ * Trade-draft side-store for the envelope-state blob.
+ *
+ * A DMS account persists to Financial_Account__c the moment it is added, so it always carries a record
+ * id and is always stripped from the blob by the shell's withoutRecordBackedEntities — together with
+ * the one interview value that has no record of its own until submit: `tradeInstructions`. Before this
+ * store existed that value lived only in browser memory; a reload, a next-day return or another user
+ * picking the envelope up lost it silently, and submit then filed nothing.
+ *
+ * The blob now carries `tradeDrafts`: entity record id -> the tradeInstructions value, for every
+ * unsubmitted (isNew) account, DPI and case that holds one. collectTradeDrafts reads it off the model on
+ * the way out; withTradeDraft puts it back on the entity the household fetch returns on the way in.
+ */
+const TRADE_DRAFTS_KEY = 'tradeDrafts';
+const TRADE_INSTRUCTIONS_KEY = 'tradeInstructions';
+// The groups whose interviews can carry Trade Instructions: the account-like groups (New Account
+// setup on a DMS platform) and the cases group (Update DMS Instructions / Update Management Style).
+const TRADE_DRAFT_GROUP_IDS = new Set([...ACCOUNT_GROUP_IDS, 'cases']);
+
+function tradeDraftOf(entity) {
+    return (entity?.actions || [])[0]?.formData?.[TRADE_INSTRUCTIONS_KEY] || null;
+}
+
+/**
+ * The trade drafts the model currently holds, keyed by entity record id. Only record-backed (real id),
+ * unsubmitted entities in a trade-carrying group contribute: a submitted entity's instructions are
+ * locked history, and a locally-added entity with a synthetic id is still in the blob whole.
+ * @param {object} model  the shell's envelope model
+ * @param {(id) => boolean} isRecordId
+ * @returns {object} entityId -> tradeInstructions value
+ */
+function collectTradeDrafts(model, isRecordId) {
+    const drafts = {};
+    TRADE_DRAFT_GROUP_IDS.forEach((groupId) => {
+        (Array.isArray(model?.[groupId]) ? model[groupId] : []).forEach((entity) => {
+            if (!entity || !entity.isNew || !isRecordId(entity.id)) {
+                return;
+            }
+            const trade = tradeDraftOf(entity);
+            if (trade) {
+                drafts[entity.id] = trade;
+            }
+        });
+    });
+    return drafts;
+}
+
+/**
+ * The entity with its stored trade draft re-attached to its first action's form data, or the same
+ * reference when there is nothing to restore: no draft stored for it, not a trade-carrying group,
+ * submitted (locked), no action to hang it on, or the action already holds a value (the in-memory
+ * draft is fresher than the blob's and wins).
+ * @param {object} entity
+ * @param {object} drafts  entityId -> tradeInstructions value (see collectTradeDrafts)
+ * @returns {object}
+ */
+function withTradeDraft(entity, drafts) {
+    const draft = drafts?.[entity?.id];
+    if (
+        !draft ||
+        !TRADE_DRAFT_GROUP_IDS.has(entity.groupId) ||
+        !entity.isNew ||
+        !(entity.actions || []).length ||
+        tradeDraftOf(entity)
+    ) {
+        return entity;
+    }
+    const [first, ...rest] = entity.actions;
+    return {
+        ...entity,
+        actions: [
+            { ...first, formData: { ...(first.formData || {}), [TRADE_INSTRUCTIONS_KEY]: draft } },
+            ...rest
+        ]
+    };
+}
+
 function resolveExpectedValue(typed, fallback) {
     const entered = Number(typed);
     if (typed !== null && typed !== undefined && typed !== '' && Number.isFinite(entered) && entered > 0) {
@@ -3364,5 +3441,8 @@ export {
     roundCurrency,
     formatMoney,
     resolveExpectedValue,
+    TRADE_DRAFTS_KEY,
+    collectTradeDrafts,
+    withTradeDraft,
     formatFieldDisplayValue
 };

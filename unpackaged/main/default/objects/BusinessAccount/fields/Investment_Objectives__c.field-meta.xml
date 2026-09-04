@@ -7,7 +7,6 @@
     <trackHistory>false</trackHistory>
     <type>MultiselectPicklist</type>
     <valueSet>
-        <restricted>true</restricted>
         <valueSetDefinition>
             <sorted>false</sorted>
             <value>
@@ -39,18 +38,6 @@
                 <fullName>Legacy Investing</fullName>
                 <default>false</default>
                 <label>Legacy Investing</label>
-            </value>
-            <value>
-                <fullName>Preserve Wealth</fullName>
-                <default>false</default>
-                <isActive>false</isActive>
-                <label>Preserve Wealth</label>
-            </value>
-            <value>
-                <fullName>Wealth Accumulation</fullName>
-                <default>false</default>
-                <isActive>false</isActive>
-                <label>Wealth Accumulation</label>
             </value>
         </valueSetDefinition>
     </valueSet>

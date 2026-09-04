@@ -55,6 +55,9 @@ import {
   MEMBER_ACTION_TYPES,
   PROPOSED_CHANGES_MDT,
   isDmsPlatform,
+  TRADE_DRAFTS_KEY,
+  collectTradeDrafts,
+  withTradeDraft,
   resolveSchemaKey,
   resolveActionCatalog,
   accountActionTypeFor,
@@ -92,7 +95,8 @@ import {
   formatFieldDisplayValue,
   strategyTotals,
   normalizeStrategyRows,
-  STRATEGY_BASIS
+  STRATEGY_BASIS,
+  resolveExpectedValue
 } from "c/envelopeFormSchema";
 
 // The cases-group action types that carry Trade Instructions, and what each files. Change Management
@@ -109,6 +113,16 @@ const TRADE_CASE_REQUEST_TYPES = {
     funded: true
   }
 };
+
+// What a trade-carrying interview holds before the advisor has touched its Trade Instructions
+// section (or after a reload lost the draft): no rows, no account value. It reads as incomplete to
+// strategyTotals and files nothing, so an untouched section is a submit blocker rather than a
+// silent pass — the gap that let an envelope submit Complete with no Order_Ticket__c.
+const EMPTY_TRADE = Object.freeze({
+  expectedAccountValue: null,
+  strategies: [],
+  advisorNotes: ""
+});
 
 // Autosave timing. A named constant per phase so each is tuned in one place.
 const AUTO_SAVE_INACTIVITY_MS = 6000; // idle window (no field edits) before a save fires
@@ -675,13 +689,22 @@ const RECORD_BACKED_GROUP_IDS = [
 // list outright would lose it. A removed entity always held a record id, so filtering this way
 // still strips it.
 //
-// One interview value on accounts/DPIs is carried only by the blob and is therefore lost on a reload
-// before submit, which is accepted: `tradeInstructions`, written to Order_Ticket__c only by the
-// submit handler and never read back (getCurrentTradeInstructions returns the account's existing
-// allocation, not the draft). The Case-targeted fields of a mixed account interview are not in that
-// category — they are written to the wizard Case and read back from it (_fetchAccountRecordValues).
+// One interview value on accounts/DPIs/cases has no record of its own until submit:
+// `tradeInstructions`, written to Order_Ticket__c only by the submit handler and never read back
+// (getCurrentTradeInstructions returns the account's existing allocation, not the draft). Stripping
+// the entity used to strip it too, so a reload before submit lost the draft and submit then filed
+// nothing. It now rides in the blob's `tradeDrafts` side-store, keyed by entity record id (see
+// collectTradeDrafts), and _mergeServerEntities hangs it back on the entity the household fetch
+// returns. The store is unioned with what the model already carries so a save that runs before that
+// fetch has restored the drafts cannot drop them; a fresh draft on the entity wins over a stored
+// one. The Case-targeted fields of a mixed account interview are not in this category — they are
+// written to the wizard Case and read back from it (_fetchAccountRecordValues).
 function withoutRecordBackedEntities(model) {
   const stripped = { ...model };
+  stripped[TRADE_DRAFTS_KEY] = {
+    ...(model?.[TRADE_DRAFTS_KEY] || {}),
+    ...collectTradeDrafts(model, isRecordId)
+  };
   RECORD_BACKED_GROUP_IDS.forEach((groupId) => {
     stripped[groupId] = (
       Array.isArray(stripped[groupId]) ? stripped[groupId] : []
@@ -2039,18 +2062,32 @@ export default class EnvelopeShellV2 extends LightningElement {
     caseValues = {}
   ) {
     const next = { ...this.model };
+    // The trade drafts the blob carried for record-backed entities (see withoutRecordBackedEntities).
+    // Each is consumed as it lands back on its entity, so a later fetch cannot re-apply a stale copy
+    // over an edit made since; what is left over belongs to entities this response no longer returns.
+    const tradeDrafts = { ...(this.model[TRADE_DRAFTS_KEY] || {}) };
+    const withRestoredTradeDraft = (entity) => {
+      const restored = withTradeDraft(entity, tradeDrafts);
+      if (restored !== entity) {
+        delete tradeDrafts[entity.id];
+      }
+      return restored;
+    };
     // The record-driven overlays, composed; each is group-guarded, so applying all to every entity
-    // is safe (a no-op for the groups it doesn't own).
+    // is safe (a no-op for the groups it doesn't own). The trade draft goes on last: it is blob-only,
+    // so no record overlay can carry it, and an entity that already holds one keeps it.
     const withRecordValues = (entity) =>
-      this._applyCaseRecordValues(
-        this._applyServiceRecordValues(
-          this._applyAccountRecordValues(
-            this._applyMemberRecordValues(entity, memberValues),
-            accountValues
+      withRestoredTradeDraft(
+        this._applyCaseRecordValues(
+          this._applyServiceRecordValues(
+            this._applyAccountRecordValues(
+              this._applyMemberRecordValues(entity, memberValues),
+              accountValues
+            ),
+            serviceValues
           ),
-          serviceValues
-        ),
-        caseValues
+          caseValues
+        )
       );
     GROUP_IDS.forEach((groupId) => {
       const current = this.model[groupId];
@@ -2118,6 +2155,7 @@ export default class EnvelopeShellV2 extends LightningElement {
         .map((entity) => withRecordValues(entity));
       next[groupId] = [...reconciled, ...additions];
     });
+    next[TRADE_DRAFTS_KEY] = tradeDrafts;
     this.model = next;
   }
 
@@ -2249,19 +2287,35 @@ export default class EnvelopeShellV2 extends LightningElement {
         // before it can be submitted. The same completion measure flips the card's status badge
         // to Completed once nothing is outstanding.
         const schema = this._schemaForEntity(entity);
-        const actions = entity.actions.map((action) => {
+        // Trade Instructions live outside the metadata schema, on the entity's first action, so the
+        // ledger's verdict is folded in here rather than inside actionCompletion — the same verdict
+        // the TOC dot and the submit blocker reach (_tradeCompleteFor). Without it a DMS account
+        // read "Completed" with an empty sleeve table.
+        const tradeComplete = this._tradeCompleteFor(entity);
+        const actions = entity.actions.map((action, index) => {
           const formData = action.formData || {};
-          const { count, hasPlus, isComplete } = actionCompletion(
+          const {
+            count,
+            hasPlus,
+            isComplete: inputsComplete
+          } = actionCompletion(
             schema,
             entity,
             formData,
             this._contextForAction(formData),
             this._registrationAttributes
           );
+          const isComplete = inputsComplete && (index > 0 || tradeComplete);
+          const inputsLabel = schema ? missingInputsLabel(count, hasPlus) : "";
           return {
             ...action,
             removeMenuLabel,
-            missingLabel: schema ? missingInputsLabel(count, hasPlus) : "",
+            // Names the trade section when it is the only thing outstanding, so the card does not
+            // sit at "In Progress" with no count and nothing for Review Missing Items to show.
+            missingLabel:
+              schema && !inputsLabel && !isComplete
+                ? "Trade Instructions incomplete"
+                : inputsLabel,
             isComplete,
             statusLabel: isComplete ? "Completed" : action.statusLabel
           };
@@ -2660,7 +2714,7 @@ export default class EnvelopeShellV2 extends LightningElement {
         }
         // An invalid value also holds the entity short of complete, so name it under "missing"
         // only when nothing of its own is invalid — the invalid list already names the exact field.
-        if (!invalidCount && !this._entityActionsComplete(entity)) {
+        if (!invalidCount && !this._entityInputsComplete(entity)) {
           incomplete.push(entity.name);
         }
       }
@@ -2691,11 +2745,7 @@ export default class EnvelopeShellV2 extends LightningElement {
         (source) =>
           !strategyTotals(
             source.trade.strategies,
-            // Launchpad resolves the expected value from its own per-source `funded` flag
-            // rather than cosmosdev's _expectedValueFor / Source-of-Funds fallback. That
-            // difference is deliberate here and is left alone; only the options argument the
-            // exception-sleeve base needs is added.
-            source.funded ? source.trade.expectedAccountValue : null,
+            this._expectedValueFor(source),
             this.strategyOptions
           ).isComplete
       )
@@ -2715,53 +2765,102 @@ export default class EnvelopeShellV2 extends LightningElement {
     return blockers;
   }
 
-  // Every interview carrying trade instructions to persist: DMS accounts/DPIs file a New DMS
-  // Instructions ticket against the account; Update DMS Instructions cases file an Update ticket
-  // against their Case. Entities without a persisted record id are skipped — their trade value
-  // can't anchor to a ticket (and, accounts persisting at add time, shouldn't reach submit).
+  // Every interview carrying trade instructions, across the whole model: DMS accounts/DPIs file a
+  // New DMS Instructions ticket against the account; Update DMS Instructions / Update Management
+  // Style cases file against their Case. See _tradeSourceFor for what one source is.
   _collectTradeSources() {
     const sources = [];
-    for (const groupId of ACCOUNT_GROUP_IDS) {
+    for (const groupId of [...ACCOUNT_GROUP_IDS, "cases"]) {
       for (const entity of this.model[groupId] || []) {
-        const formData = (entity.actions || [])[0]?.formData || {};
-        const trade = formData.tradeInstructions;
-        if (
-          !trade ||
-          !isDmsPlatform(formData.Managed_Account_Platform__c) ||
-          !this._isRecordId(entity.id)
-        ) {
-          continue;
+        const source = this._tradeSourceFor(entity);
+        if (source) {
+          sources.push(source);
         }
-        sources.push({
-          entityName: entity.name,
-          // Carried so submit validation can ignore rows that are not this envelope's action
-          // items; persistence deliberately still writes every source it finds.
-          isActionItem: Boolean(entity.isNew),
-          trade,
-          financialAccountId: entity.id,
-          caseId: null,
-          typeOfRequest: "New DMS Instructions",
-          funded: true
-        });
       }
-    }
-    for (const entity of this.model.cases || []) {
-      const trade = (entity.actions || [])[0]?.formData?.tradeInstructions;
-      const caseType = TRADE_CASE_REQUEST_TYPES[entity.type];
-      if (!caseType || !trade || !this._isRecordId(entity.financialAccountId)) {
-        continue;
-      }
-      sources.push({
-        entityName: entity.name,
-        isActionItem: Boolean(entity.isNew),
-        trade,
-        financialAccountId: entity.financialAccountId,
-        caseId: this._isRecordId(entity.id) ? entity.id : null,
-        typeOfRequest: caseType.typeOfRequest,
-        funded: caseType.funded
-      });
     }
     return sources;
+  }
+
+  // The trade-instruction source one entity presents, or null when its interview carries none: an
+  // account/DPI on a non-DMS platform, a case of a type without Trade Instructions, or an entity
+  // without a persisted record id — its trade value can't anchor to a ticket (and, accounts
+  // persisting at add time, shouldn't reach submit).
+  //
+  // An interview the advisor has not touched (or whose draft a reload lost) is still a source, with
+  // EMPTY_TRADE as its value: it reads incomplete to every consumer — card badge, sidebar dot,
+  // submit blocker — and persists nothing. It used to be skipped outright, which is how an envelope
+  // submitted Complete with no ticket and no error.
+  _tradeSourceFor(entity) {
+    const formData = (entity.actions || [])[0]?.formData || {};
+    if (ACCOUNT_GROUP_IDS.has(entity.groupId)) {
+      if (
+        !isDmsPlatform(formData.Managed_Account_Platform__c) ||
+        !this._isRecordId(entity.id)
+      ) {
+        return null;
+      }
+      return {
+        entityName: entity.name,
+        // Carried so submit validation can ignore rows that are not this envelope's action
+        // items; persistence deliberately still writes every source it finds.
+        isActionItem: Boolean(entity.isNew),
+        trade: formData.tradeInstructions || EMPTY_TRADE,
+        // What the section falls back to when no Expected Account Value was typed, read from the
+        // same flat draft as the platform field above. The org's live form captures the amount as
+        // Case Amount__c in the Source of Funds section (Envelope_Field ISA_SOF_Amount); the
+        // Source_of_Funds_Amount__c form field exists only in the repo — both tried, matching
+        // envelopeActionDetails. Cases have no equivalent field, so theirs is null and their
+        // seeded expected value is the only source.
+        fallbackAccountValue:
+          formData.Source_of_Funds_Amount__c ?? formData.Amount__c ?? null,
+        financialAccountId: entity.id,
+        caseId: null,
+        typeOfRequest: "New DMS Instructions"
+      };
+    }
+    if (entity.groupId === "cases") {
+      const caseType = TRADE_CASE_REQUEST_TYPES[entity.type];
+      if (!caseType || !this._isRecordId(entity.financialAccountId)) {
+        return null;
+      }
+      return {
+        entityName: entity.name,
+        isActionItem: Boolean(entity.isNew),
+        trade: formData.tradeInstructions || EMPTY_TRADE,
+        fallbackAccountValue: null,
+        financialAccountId: entity.financialAccountId,
+        caseId: this._isRecordId(entity.id) ? entity.id : null,
+        typeOfRequest: caseType.typeOfRequest
+      };
+    }
+    return null;
+  }
+
+  // Whether the entity's Trade Instructions reconcile — true for an entity that carries none. The
+  // one ledger verdict shared by the card badge (sortedItems), the sidebar dot
+  // (_entityActionsComplete) and the submit blocker, so none of them can disagree with the section.
+  // Options are passed for the reason _collectSubmitBlockers gives: exception sleeves shrink the
+  // base, so without them an excluded row is priced as a model row.
+  _tradeCompleteFor(entity) {
+    const source = this._tradeSourceFor(entity);
+    if (!source) {
+      return true;
+    }
+    return strategyTotals(
+      source.trade.strategies,
+      this._expectedValueFor(source),
+      this.strategyOptions
+    ).isComplete;
+  }
+
+  // The account value a collected interview's arithmetic runs on: what the advisor typed, else the
+  // fallback the section itself falls back to. Resolved through the same helper the section uses, so
+  // the figure that judged completeness on screen is the figure that gets filed.
+  _expectedValueFor(source) {
+    return resolveExpectedValue(
+      source.trade.expectedAccountValue,
+      source.fallbackAccountValue
+    );
   }
 
   // Write every collected trade-instruction interview through to Order_Ticket__c/Order__c.
@@ -2788,7 +2887,7 @@ export default class EnvelopeShellV2 extends LightningElement {
           financialAccountId: source.financialAccountId,
           caseId: source.caseId,
           typeOfRequest: source.typeOfRequest,
-          expectedAccountValue: source.trade.expectedAccountValue,
+          expectedAccountValue: this._expectedValueFor(source),
           advisorNotes: source.trade.advisorNotes || "",
           strategies: rows
         }
@@ -2812,12 +2911,12 @@ export default class EnvelopeShellV2 extends LightningElement {
         ...row,
         id: `seed-${index + 1}`
       }));
-      return strategies.length
-        ? {
-            expectedAccountValue: current.expectedAccountValue ?? null,
-            strategies,
-            advisorNotes: ""
-          }
+      const expectedAccountValue = current?.expectedAccountValue ?? null;
+      // Seeded on either half. An account with an expected value but no allocation rows yet still
+      // has the one number the section cannot calculate anything without, so throwing the whole seed
+      // away for want of rows would leave the advisor re-keying a figure the org already holds.
+      return strategies.length || expectedAccountValue !== null
+        ? { expectedAccountValue, strategies, advisorNotes: "" }
         : null;
     } catch (error) {
       // Non-fatal: the interview opens unseeded.
@@ -5347,10 +5446,20 @@ export default class EnvelopeShellV2 extends LightningElement {
     return [...newSection, ...existingSection];
   }
 
-  // True when the entity carries action items and none of them still owes inputs — the same
-  // completion measure the action cards use (actionCompletion), so the sidebar indicator and the
-  // workspace badges always agree. False for entities without actions.
+  // True when the entity carries action items and none of them still owes anything — the metadata
+  // inputs (actionCompletion) and, on a trade-carrying interview, the Trade Instructions ledger
+  // (_tradeCompleteFor) — the same two measures the action cards use, so the sidebar indicator and
+  // the workspace badges always agree. False for entities without actions.
   _entityActionsComplete(entity) {
+    return (
+      this._entityInputsComplete(entity) && this._tradeCompleteFor(entity)
+    );
+  }
+
+  // The metadata-inputs half of _entityActionsComplete alone. The submit blocker reads this one so
+  // an entity short on trade instructions is named once, under its own message, rather than under
+  // "Inputs are still missing" as well.
+  _entityInputsComplete(entity) {
     const actions = entity.actions || [];
     if (!actions.length) {
       return false;
