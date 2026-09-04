@@ -423,6 +423,18 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
    */
   @api defaultColumns = "";
   /**
+   * Which columns link to a RELATED record, and which one links to the row
+   * itself. Comma-separated entries: `displayField=idField` or
+   * `displayField=idField:ObjectApiName` make the display column a link to
+   * the record whose id sits in idField (What.Name=WhatId links a task's
+   * Case Number to its case; Client__r.Name=Client__c:Account links a check
+   * log's Client to the contact page). The object may be omitted for a
+   * polymorphic lookup, where it comes from the id's key prefix. A bare
+   * `displayField` names the column that links to the row's own record; by
+   * default that is the first column that isn't a related link.
+   */
+  @api linkColumns = "";
+  /**
    * Field the Chart view counts by when neither the active tab's own
    * chartField (viewTabs JSON) nor a live Group By choice picks one --
    * see chartFieldApiName. Blank falls back to auto-picking the first
@@ -1144,17 +1156,66 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
 
   get tableColumns() {
     const pillFieldNames = this.pillFieldNames;
+    const { related, rowLinkFieldApiName } = this.linkColumnConfig;
+    const visible = this.visibleColumnDefs;
+    // The row's own link: the configured column, else the first column that
+    // isn't itself a link to some other record.
+    const rowLinkIndex = rowLinkFieldApiName
+      ? visible.findIndex((col) => col.fieldApiName === rowLinkFieldApiName)
+      : visible.findIndex((col) => !related.has(col.fieldApiName));
 
-    return this.visibleColumnDefs.map((col, index) => ({
-      label: col.label,
-      fieldName: col.fieldApiName,
-      type: pillFieldNames.includes(col.fieldApiName)
-        ? "pill"
-        : this.resolveColumnType(col.fieldApiName),
-      sortable: true,
-      sortType: "text",
-      isLink: index === 0
-    }));
+    return visible.map((col, index) => {
+      const relatedLink = related.get(col.fieldApiName);
+      return {
+        label: col.label,
+        fieldName: col.fieldApiName,
+        type: pillFieldNames.includes(col.fieldApiName)
+          ? "pill"
+          : this.resolveColumnType(col.fieldApiName),
+        sortable: true,
+        sortType: "text",
+        isLink: index === rowLinkIndex,
+        ...(relatedLink
+          ? {
+              linkRecordIdField: relatedLink.idFieldApiName,
+              linkObjectApiName: relatedLink.objectApiName
+            }
+          : {})
+      };
+    });
+  }
+
+  /**
+   * Parsed `linkColumns`: related-link columns keyed by display field, plus
+   * the column (if any) named as the row's own link. See the attribute's
+   * comment for the entry syntax.
+   */
+  get linkColumnConfig() {
+    const related = new Map();
+    let rowLinkFieldApiName = "";
+
+    String(this.linkColumns || "")
+      .split(",")
+      .map((entry) => entry.trim())
+      .filter(Boolean)
+      .forEach((entry) => {
+        const [displayField, target = ""] = entry.split("=").map((part) => part.trim());
+        if (!displayField) {
+          return;
+        }
+        if (!target) {
+          rowLinkFieldApiName = displayField;
+          return;
+        }
+        const [idFieldApiName, objectApiName = ""] = target
+          .split(":")
+          .map((part) => part.trim());
+        if (idFieldApiName) {
+          related.set(displayField, { idFieldApiName, objectApiName });
+        }
+      });
+
+    return { related, rowLinkFieldApiName };
   }
 
   get rowActions() {
@@ -1239,6 +1300,14 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     this.activeFilters.forEach((filter) => {
       if (filter.fieldApiName && !displayed.has(filter.fieldApiName)) {
         extras.add(filter.fieldApiName);
+      }
+    });
+
+    // The id behind each related-link column (see linkColumns), so the row
+    // can carry it for the cell to link to.
+    this.linkColumnConfig.related.forEach((link, displayField) => {
+      if (displayed.has(displayField) && !displayed.has(link.idFieldApiName)) {
+        extras.add(link.idFieldApiName);
       }
     });
 

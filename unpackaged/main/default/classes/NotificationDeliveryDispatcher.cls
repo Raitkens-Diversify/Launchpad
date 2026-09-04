@@ -10,6 +10,9 @@ public without sharing class NotificationDeliveryDispatcher {
   @TestVisible
   public static Integer testChainExecutionCount = 0;
 
+  @TestVisible
+  private static Boolean testAllowChainInlineEnqueueContinuation = false;
+
   public static void enqueueLogIdStrings(List<String> logIdStrings) {
     NotificationDeliveryEnqueueService.enqueueLogIdStrings(logIdStrings);
   }
@@ -178,6 +181,7 @@ public without sharing class NotificationDeliveryDispatcher {
     return NotificationGovernorLimitService.resolveMaxDeliveryEnqueueJobs();
   }
 
+  @TestVisible
   private static void enqueueViaChain(
     List<NotificationDeliveryModels.DeliveryRequest> requests
   ) {
@@ -198,6 +202,7 @@ public without sharing class NotificationDeliveryDispatcher {
     }
   }
 
+  @TestVisible
   private static void deliverOverflowInline(
     List<NotificationDeliveryModels.DeliveryRequest> requests
   ) {
@@ -228,6 +233,7 @@ public without sharing class NotificationDeliveryDispatcher {
     }
   }
 
+  @TestVisible
   private static void chainDeliverInline(
     List<NotificationDeliveryModels.DeliveryRequest> requests,
     Integer startIndex
@@ -254,7 +260,7 @@ public without sharing class NotificationDeliveryDispatcher {
           break;
         }
 
-        if (Test.isRunningTest()) {
+        if (Test.isRunningTest() && !testAllowChainInlineEnqueueContinuation) {
           continue;
         }
 

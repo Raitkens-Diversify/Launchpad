@@ -24,6 +24,7 @@
               "attributes" : {
                 "defaultColumns" : "",
                 "defaultListViewApiName" : "All",
+                "linkColumns" : "Client__r.Name=Client__c:Account,Name",
                 "dxpStyle" : { },
                 "objectApiName" : "Check_Log__c",
                 "pillFields" : "Status__c",

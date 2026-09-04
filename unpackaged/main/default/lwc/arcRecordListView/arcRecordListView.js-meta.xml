@@ -54,6 +54,12 @@
         description="Ordered, comma-separated field API names to show by default, e.g. Name,Check__r.Name,Amount__c. Can name fields the list view's own Setup config doesn't carry at all. Blank leaves the view's own columns/order alone."
       />
             <property
+        name="linkColumns"
+        type="String"
+        label="Link Columns"
+        description="Columns that link to a related record: comma-separated displayField=idField or displayField=idField:ObjectApiName, e.g. What.Name=WhatId,Client__r.Name=Client__c:Account. A bare displayField names the column that links to the row itself (default: the first column that is not a related link)."
+      />
+            <property
         name="serverSearchListViews"
         type="String"
         label="Server Search List Views (pilot)"

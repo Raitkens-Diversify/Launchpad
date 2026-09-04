@@ -35,6 +35,28 @@ const EXPERIENCE_RECORD_ROUTE_PREFIX = Object.freeze({
 
 const QUERY_PARAM_OBJECT_API_NAMES = new Set(["Envelope__c"]);
 
+/**
+ * Standard objects by record-id key prefix, for a polymorphic lookup (a
+ * task's WhatId can hold a Case or an Account) whose target object is only
+ * knowable from the id itself. Standard prefixes are fixed across orgs;
+ * custom-object prefixes are not, so a custom target must be named by the
+ * caller rather than looked up here.
+ */
+const OBJECT_API_NAME_BY_KEY_PREFIX = Object.freeze({
+  "001": "Account",
+  "003": "Contact",
+  "005": "User",
+  "500": "Case",
+  "00T": "Task"
+});
+
+export const resolveObjectApiNameFromRecordId = (recordId) => {
+  if (!isSalesforceId(recordId)) {
+    return "";
+  }
+  return OBJECT_API_NAME_BY_KEY_PREFIX[String(recordId).slice(0, 3)] || "";
+};
+
 const isSalesforceId = isValidSalesforceRecordId;
 
 export const deriveExperienceRoutePrefix = (objectApiName) => {

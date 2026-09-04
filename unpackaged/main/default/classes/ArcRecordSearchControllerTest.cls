@@ -502,22 +502,39 @@ private class ArcRecordSearchControllerTest {
   }
 
   @IsTest
-  static void searchRecordsMyTeamsOpenTasksExcludesClosedAndSystemOwnedTasks() {
-    User normalOwner = createTestUser('TaskNormalOwner');
-    User unassignedOwner = createTestUser('Unassigned');
-    User maestroOwner = createTestUser('Maestro');
-    User dmsOwner = createTestUser('DMS');
-    User systemsOwner = createTestUser('Systems Bot');
+  static void searchRecordsMyTeamsOpenTasksReturnsOpenTasksOwnedByActiveTeammatesOnly() {
+    User teammate = createTestUser('TaskTeammate');
+    User inactiveTeammate = createTestUser('TaskInactiveTeammate');
+    User outsider = createTestUser('TaskOutsider');
+    // A system user CAN sit on a team roster; its tasks still are not a
+    // teammate's work, so the owner-name exclusions must hold inside the team.
+    User systemTeammate = createTestUser('Maestro');
 
-    List<Task> tasks = new List<Task>{
-      new Task(Subject = 'Open, normal owner', Status = 'Not Started', OwnerId = normalOwner.Id),
-      new Task(Subject = 'Closed, normal owner', Status = 'Completed', OwnerId = normalOwner.Id),
-      new Task(Subject = 'Open, Unassigned', Status = 'Not Started', OwnerId = unassignedOwner.Id),
-      new Task(Subject = 'Open, Maestro', Status = 'Not Started', OwnerId = maestroOwner.Id),
-      new Task(Subject = 'Open, DMS', Status = 'Not Started', OwnerId = dmsOwner.Id),
-      new Task(Subject = 'Open, Systems Bot', Status = 'Not Started', OwnerId = systemsOwner.Id)
+    // Financial_Advisor_Team_TriggerHandler.updateRepCode (unrelated,
+    // pre-existing automation described on the My Team's Open Cases test
+    // above) needs a team literally named 'Default Team' to exist.
+    insert new Financial_Advisor_Team__c(Name = 'Default Team');
+
+    Financial_Advisor_Team__c myTeam = new Financial_Advisor_Team__c(Name = 'My Task Team');
+    Financial_Advisor_Team__c otherTeam = new Financial_Advisor_Team__c(Name = 'Other Task Team');
+    insert new List<Financial_Advisor_Team__c>{ myTeam, otherTeam };
+
+    insert new List<Financial_Advisor_Team_Member__c>{
+      teamMember(myTeam.Id, UserInfo.getUserId(), true),
+      teamMember(myTeam.Id, teammate.Id, true),
+      teamMember(myTeam.Id, inactiveTeammate.Id, false),
+      teamMember(myTeam.Id, systemTeammate.Id, true),
+      teamMember(otherTeam.Id, outsider.Id, true)
     };
-    insert tasks;
+
+    insert new List<Task>{
+      new Task(Subject = 'Mine, open', Status = 'Not Started'),
+      new Task(Subject = 'Teammate, open', Status = 'Not Started', OwnerId = teammate.Id),
+      new Task(Subject = 'Teammate, closed', Status = 'Completed', OwnerId = teammate.Id),
+      new Task(Subject = 'Inactive teammate, open', Status = 'Not Started', OwnerId = inactiveTeammate.Id),
+      new Task(Subject = 'Outsider, open', Status = 'Not Started', OwnerId = outsider.Id),
+      new Task(Subject = 'Maestro on my team, open', Status = 'Not Started', OwnerId = systemTeammate.Id)
+    };
 
     Test.startTest();
     ArcRecordSearchController.SearchResult result = ArcRecordSearchController.searchRecords(
@@ -533,8 +550,17 @@ private class ArcRecordSearchControllerTest {
     );
     Test.stopTest();
 
-    Assert.areEqual(1, result.rows.size());
-    Assert.areEqual('Open, normal owner', result.rows[0].cells[0]);
+    Set<String> subjects = new Set<String>();
+    for (ArcRecordSearchController.SearchRow row : result.rows) {
+      subjects.add(row.cells[0]);
+    }
+    Assert.areEqual(2, result.rows.size(), 'only open tasks owned by me or an active, non-system teammate; got ' + subjects);
+    Assert.isTrue(subjects.contains('Mine, open'));
+    Assert.isTrue(subjects.contains('Teammate, open'));
+    Assert.isFalse(subjects.contains('Teammate, closed'), 'closed tasks are excluded');
+    Assert.isFalse(subjects.contains('Inactive teammate, open'), 'inactive membership does not count');
+    Assert.isFalse(subjects.contains('Outsider, open'), 'another team is not my team');
+    Assert.isFalse(subjects.contains('Maestro on my team, open'), 'system owners are excluded even on the roster');
   }
 
   @IsTest
@@ -662,6 +688,15 @@ private class ArcRecordSearchControllerTest {
     Assert.areEqual(1, result.rows.size());
     Assert.areEqual(teamCase.Id, result.rows[0].id);
     Assert.areEqual('Zenith Advisors', result.rows[0].cells[1]);
+  }
+
+  private static Financial_Advisor_Team_Member__c teamMember(Id teamId, Id userId, Boolean active) {
+    return new Financial_Advisor_Team_Member__c(
+      Financial_Advisor_Team__c = teamId,
+      User__c = userId,
+      Role__c = 'Financial Advisor',
+      Active__c = active
+    );
   }
 
   private static Integer testUserCounter = 0;

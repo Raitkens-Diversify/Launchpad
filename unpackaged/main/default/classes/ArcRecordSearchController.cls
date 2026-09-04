@@ -399,22 +399,28 @@ public with sharing class ArcRecordSearchController {
         clauses.add('IsClosed = :mandatoryClosed');
         clauses.add('OwnerId = :mandatoryOwnerId');
       } else if (listViewApiName == 'My_Team_s_Open_Tasks') {
-        // The platform ListView this replaces had the same intent but a
-        // real bug alongside the inert-filterScope one: one of its four
-        // "assignee" exclusions targeted Subject instead of the owner
-        // (notContain 'maestro' on SUBJECT, not CORE.USERS.FULL_NAME) --
-        // confirmed by reading the deployed ListView metadata directly.
-        // All four here target the owner, as intended.
+        // "My team's" means owned by someone on a Financial Advisor Team the
+        // running user is an active member of -- the same rule
+        // My_teams_open_cases applies above -- not every open task in the
+        // org. The platform ListView this replaces was scoped to Everything
+        // and only narrowed that with owner exclusions, so it (and this
+        // clause until now) showed the whole firm's open tasks.
+        //
+        // The system-owner exclusions stay: a placeholder user (Unassigned,
+        // Maestro, DMS, *systems*) can legitimately sit on a team roster,
+        // and its tasks are still not a teammate's work. They are applied
+        // by taking those users OUT of the team id set rather than as
+        // Owner.Name clauses -- a name clause silently drops any row whose
+        // Owner.Name does not resolve, which is exactly what happened to the
+        // running user's own tasks under test. (The platform ListView this
+        // replaces had a real bug of its own here: one of its four
+        // "assignee" exclusions targeted Subject instead of the owner.)
+        Set<Id> teamUserIds = resolveFinancialAdvisorTeamUserIds();
+        teamUserIds.removeAll(resolveSystemTaskOwnerIds());
         binds.put('mandatoryClosed', false);
-        binds.put('excludedOwnerUnassigned', 'Unassigned');
-        binds.put('excludedOwnerMaestro', 'Maestro');
-        binds.put('excludedOwnerDms', 'DMS');
-        binds.put('excludedOwnerSystemsPattern', '%systems%');
+        binds.put('mandatoryTeamUserIds', teamUserIds);
         clauses.add('IsClosed = :mandatoryClosed');
-        clauses.add('Owner.Name != :excludedOwnerUnassigned');
-        clauses.add('Owner.Name != :excludedOwnerMaestro');
-        clauses.add('Owner.Name != :excludedOwnerDms');
-        clauses.add('(NOT Owner.Name LIKE :excludedOwnerSystemsPattern)');
+        clauses.add('OwnerId IN :mandatoryTeamUserIds');
       }
       return;
     }
@@ -441,6 +447,25 @@ public with sharing class ArcRecordSearchController {
    * :emptySet matches zero rows rather than throwing, which is exactly
    * the right outcome for someone on no team.
    */
+  /** Placeholder owners whose tasks are never a person's own work; see My_Team_s_Open_Tasks. */
+  private static final Set<String> SYSTEM_TASK_OWNER_NAMES = new Set<String>{
+    'Unassigned', 'Maestro', 'DMS'
+  };
+
+  /** Ids of the placeholder / system users a team task list leaves out. */
+  private static Set<Id> resolveSystemTaskOwnerIds() {
+    Set<Id> ids = new Set<Id>();
+    for (User systemUser : [
+      SELECT Id
+      FROM User
+      WHERE Name IN :SYSTEM_TASK_OWNER_NAMES OR Name LIKE '%systems%'
+      WITH USER_MODE
+    ]) {
+      ids.add(systemUser.Id);
+    }
+    return ids;
+  }
+
   private static Set<Id> resolveFinancialAdvisorTeamUserIds() {
     Set<Id> teamIds = new Set<Id>();
     for (Financial_Advisor_Team_Member__c membership : [

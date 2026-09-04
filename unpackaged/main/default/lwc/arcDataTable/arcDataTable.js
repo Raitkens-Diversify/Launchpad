@@ -19,6 +19,7 @@ import {
   buildExperienceRecordPath,
   buildRecordNavigationReference,
   hasActiveTextSelection,
+  resolveObjectApiNameFromRecordId,
   resolveRecordUrl,
   shouldAllowNativeRecordNavigation,
   usesQueryParamRecordRoute
@@ -873,8 +874,12 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
   }
 
   get primaryColumnIndex() {
+    // A related-record link column (linkRecordIdField) links somewhere
+    // else, so it can never be the row's own link.
     const flagged = this._columns.findIndex(
-      (column) => column.primary === true || column.isLink === true
+      (column) =>
+        !column.linkRecordIdField &&
+        (column.primary === true || column.isLink === true)
     );
     if (flagged !== -1) {
       return flagged;
@@ -1017,18 +1022,42 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
             !isExpandColumn &&
             canExpandRow &&
             column.showExpandChevron === true;
+          /*
+           * A column can link to a RELATED record instead of the row's own:
+           * `linkRecordIdField` names the row field holding that record's id
+           * (a task's Case Number -> WhatId, a check log's Client -> Client__c),
+           * and `linkObjectApiName` its object -- or, for a polymorphic lookup,
+           * the object is read off the id's key prefix. The cell is a link only
+           * when the row actually carries an id; a blank lookup stays plain
+           * text rather than pointing at nothing.
+           */
+          const relatedLinkField = column.linkRecordIdField || "";
+          const relatedRecordId = relatedLinkField
+            ? record[relatedLinkField] || ""
+            : "";
+          const isRelatedLinkColumn = Boolean(relatedLinkField);
           const isLinkColumn =
             !isExpandColumn &&
+            !isRelatedLinkColumn &&
             (column.isLink === true ||
               column.primary === true ||
               index === primaryIndex);
-          const objectApiName = isLinkColumn
-            ? this.resolveObjectApiName(column, record)
-            : "";
+          const objectApiName = isRelatedLinkColumn
+            ? column.linkObjectApiName ||
+              resolveObjectApiNameFromRecordId(relatedRecordId)
+            : isLinkColumn
+              ? this.resolveObjectApiName(column, record)
+              : "";
           const linkPathOptions = this.buildLinkPathOptions(objectApiName);
-          const recordUrl =
-            this.recordUrlById[rowKey] ||
-            buildExperienceRecordPath(rowKey, objectApiName, linkPathOptions);
+          const linkRecordId = isRelatedLinkColumn ? relatedRecordId : rowKey;
+          const recordUrl = isRelatedLinkColumn
+            ? buildExperienceRecordPath(
+                relatedRecordId,
+                objectApiName,
+                linkPathOptions
+              )
+            : this.recordUrlById[rowKey] ||
+              buildExperienceRecordPath(rowKey, objectApiName, linkPathOptions);
           const rawValue = record[column.fieldName];
           const isPill = column.type === "pill";
           const pillClassField =
@@ -1046,7 +1075,9 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
               isLinkColumn,
               isExpandColumn
             ),
-            isLink: Boolean(isLinkColumn && rowKey),
+            isLink: isRelatedLinkColumn
+              ? Boolean(relatedRecordId && objectApiName)
+              : Boolean(isLinkColumn && rowKey),
             // The avatar stands for the record, so it belongs to the column
             // that names it. isLinkColumn is also true of any other column
             // marked as a link, which would have repeated the glyph mid-row.
@@ -1069,7 +1100,7 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
               : "utility:chevronright",
             expandAriaLabel: isExpanded ? "Collapse row" : "Expand row",
             pillClass: record[pillClassField] || "div-work-pill",
-            recordId: rowKey,
+            recordId: linkRecordId,
             objectApiName,
             recordUrl,
             linkAriaLabel: displayValue ? `Open ${displayValue}` : "Open record"
@@ -1369,7 +1400,9 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
     }
 
     const linkColumns = this._columns.filter(
-      (column) => column.isLink === true || column.primary === true
+      (column) =>
+        !column.linkRecordIdField &&
+        (column.isLink === true || column.primary === true)
     );
 
     if (!linkColumns.length && this.primaryColumnIndex === 0) {
