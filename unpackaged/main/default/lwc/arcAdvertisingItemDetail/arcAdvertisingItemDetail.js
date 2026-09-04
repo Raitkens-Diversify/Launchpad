@@ -72,7 +72,7 @@ const HISTORY_COLUMNS = [
   { label: "Original Value", fieldName: "oldValue" },
   { label: "New Value", fieldName: "newValue" }
 ];
-const HISTORY_PAGE_SIZE = 25;
+const HISTORY_PAGE_SIZE = 10;
 
 const mapHistoryEntries = (entries) =>
   (entries || []).map((entry) => ({

@@ -53,7 +53,7 @@ import {
 } from 'c/uatReportExport';
 
 const STANDALONE = 'standalone';
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 10;
 const DASH = '—';
 /** Past this, a "session" is almost certainly a browser tab left open, not
  *  testing. The duration still shows — muted, with the doubt in the tooltip —

@@ -25,7 +25,7 @@
                 "dxpStyle" : { },
                 "enablePagination" : true,
                 "enableSearch" : true,
-                "pageSize" : 25,
+                "pageSize" : 10,
                 "searchPlaceholder" : "Search work...",
                 "title" : "Work"
               },

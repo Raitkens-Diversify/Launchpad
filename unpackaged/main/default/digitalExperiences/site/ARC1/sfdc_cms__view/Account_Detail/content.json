@@ -71,15 +71,6 @@
                   "definition" : "c:arcRecordSummary",
                   "id" : "5ad7f3d5-78f8-499b-8460-9bc69b5c2992",
                   "type" : "component"
-                }, {
-                  "attributes" : {
-                    "calendarUrl" : "/lightning/o/Event/home",
-                    "dxpStyle" : { },
-                    "objectApiName" : "Account"
-                  },
-                  "definition" : "c:arcActivityPanel",
-                  "id" : "3a7c1f92-64bd-4d1e-9c07-5f8ab2e6d411",
-                  "type" : "component"
                 } ],
                 "id" : "baf1d6ec-f2e2-40cf-bca5-8857df9dbd36",
                 "name" : "col2",

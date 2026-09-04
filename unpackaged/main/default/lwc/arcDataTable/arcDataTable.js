@@ -367,13 +367,13 @@ export default class ArcDataTable extends NavigationMixin(LightningElement) {
   // instead of /{route}/{recordId}. Example: "Envelope__c".
   @api linkQueryParamObjectApiNames = "";
 
-  _pageSize = 25;
+  _pageSize = 10;
   @api
   get pageSize() {
     return this._pageSize;
   }
   set pageSize(value) {
-    this._pageSize = Math.max(1, Number(value) || 25);
+    this._pageSize = Math.max(1, Number(value) || 10);
     this.page = 1;
   }
 

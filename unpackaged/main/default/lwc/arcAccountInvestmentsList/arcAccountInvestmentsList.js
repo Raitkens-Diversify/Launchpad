@@ -14,7 +14,7 @@ import { resolveRecordIdFromPageReference } from "c/recordNavigationCommunityUti
 import getInvestmentsAndServices from "@salesforce/apex/ArcAccountInvestmentsController.getInvestmentsAndServices";
 
 const OBJECT_API_NAME = "Account";
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 10;
 
 const COLUMNS = [
   { label: "Name", fieldName: "name", type: "text", sortable: true, sortType: "text", isLink: true },

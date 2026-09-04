@@ -388,7 +388,9 @@ public with sharing class ArcRecentlyViewedListController {
     if (normalizedListType.equalsIgnoreCase(LIST_TYPE_ISA)) {
       ListTypeConfig config = new ListTypeConfig();
       config.objectApiName = ISA_OBJECT_API_NAME;
-      config.title = 'Recently Viewed ISAs';
+      // The site calls this area Investments & Services (its nav group and list
+      // page); the card reads the same way rather than the internal "ISA".
+      config.title = 'Recently Viewed Investments & Services';
       return config;
     }
 

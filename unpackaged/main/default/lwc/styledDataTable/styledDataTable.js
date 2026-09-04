@@ -23,7 +23,7 @@ import {
   sortRecords,
 } from "c/dataTableSortUtils";
 
-const DEFAULT_PAGE_SIZE = 25;
+const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_PAGE_SIZE_OPTIONS = [10, 25, 50];
 const DEFAULT_SCROLL_COLUMN_MIN_WIDTH = "8rem";
 

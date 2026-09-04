@@ -73,7 +73,7 @@ private class ArcRecentlyViewedListControllerTest {
       ArcRecentlyViewedListController.ISA_OBJECT_API_NAME,
       isaConfig.objectApiName
     );
-    System.assertEquals('Recently Viewed ISAs', isaConfig.title);
+    System.assertEquals('Recently Viewed Investments & Services', isaConfig.title);
   }
 
   @IsTest
@@ -337,7 +337,7 @@ private class ArcRecentlyViewedListControllerTest {
       ArcRecentlyViewedListController.ISA_OBJECT_API_NAME,
       result.objectApiName
     );
-    System.assertEquals('Recently Viewed ISAs', result.title);
+    System.assertEquals('Recently Viewed Investments & Services', result.title);
     System.assertNotEquals(null, result.items);
     System.assert(result.totalCount >= 0);
     System.assert(result.items.size() <= 5);

@@ -88,7 +88,7 @@ const ROW_ACTIONS = [
 const SHOW_ROW_ACTIONS = false;
 
 const LIST_VIEW_FETCH_SIZE = 2000;
-const TABLE_PAGE_SIZE = 25;
+const TABLE_PAGE_SIZE = 10;
 const TABLE_PAGE_SIZE_OPTIONS = [10, 25, 50];
 const SEARCH_DEBOUNCE_MS = 275;
 /**
@@ -1852,6 +1852,30 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
       this.columns = this.applyDefaultColumns(
         this.baseDisplayColumns(this._listInfoWire.data)
       );
+      this.rerunServerSearchIfColumnsGrew();
+    }
+  }
+
+  /** The field set the most recent server search asked for. */
+  _lastSearchedFieldApiNames = [];
+
+  /**
+   * A column that only became known after this view's first server search
+   * (an unlabelled extra whose describe label arrived second) has no data
+   * in the rows already loaded; rather than show a heading over blanks, run
+   * the search again with the full field set. A no-op when nothing new is
+   * displayed, so the common case costs no second request.
+   */
+  rerunServerSearchIfColumnsGrew() {
+    if (
+      !this.enableServerSearch ||
+      this._serverSearchedListViewApiName !== this.selectedListViewApiName
+    ) {
+      return;
+    }
+    const requested = new Set(this._lastSearchedFieldApiNames);
+    if (this.searchFieldApiNames.some((name) => !requested.has(name))) {
+      this.runServerSearch();
     }
   }
 
@@ -1984,17 +2008,31 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
    * value is there for the asking; only the label has to come from somewhere,
    * and the object field describe already has every field.
    *
-   * A name that is neither in the view nor on the object (a typo, or a
-   * relationship path the object info does not describe) still drops out
-   * rather than rendering a column of blanks under a guessed heading.
+   * An entry that carries its own label ("Household__r.Name=Household") needs
+   * nothing from the describe and is kept from the very first pass. That
+   * matters: the list-info wire (which triggers the first server search) and
+   * the object-info wire settle in either order, and an extra that waited on
+   * the describe for its label was missing from that first search whenever
+   * the describe came second -- the Case list's Household column rendered a
+   * heading over blank cells. A name that is neither in the view nor on the
+   * object and has no configured label (a typo, or a relationship path the
+   * object info does not describe) still drops out rather than rendering a
+   * column of blanks under a guessed heading.
    */
   buildExtraConfiguredColumns(existing) {
     const known = new Set(existing.map((col) => col.fieldApiName));
-    return [...new Set(this.configuredDefaultColumns)]
-      .filter((name) => !known.has(name))
-      .map((name) => {
-        const label = this.resolveFieldLabel(name);
-        return label ? { fieldApiName: name, label } : null;
+    const seen = new Set();
+    return this.configuredColumnEntries
+      .filter((entry) => {
+        if (known.has(entry.fieldApiName) || seen.has(entry.fieldApiName)) {
+          return false;
+        }
+        seen.add(entry.fieldApiName);
+        return true;
+      })
+      .map((entry) => {
+        const label = entry.label || this.resolveFieldLabel(entry.fieldApiName);
+        return label ? { fieldApiName: entry.fieldApiName, label } : null;
       })
       .filter(Boolean);
   }
@@ -2355,6 +2393,7 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
       }));
     const searchTerm = this.searchTerm.trim();
     const searchableFields = this.columns.map((col) => col.fieldApiName);
+    this._lastSearchedFieldApiNames = this.searchFieldApiNames;
 
     const requestParams = {
       objectApiName: this.objectApiName,

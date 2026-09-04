@@ -38,7 +38,6 @@ const ROW_GAP_PX = 16;
 const ALL_CONTACTS_LIST_PATH = "/account/Account/Default?c__tabId=tab1";
 const ALL_ISAS_LIST_PATH = "/financial-account/Financial_Account__c/Default";
 
-const INFO_ICON_FILE = "info.svg";
 const OVERFLOW_ICON_FILE = "dots-three-vertical.svg";
 const CARET_RIGHT_ICON_FILE = "caret-right.svg";
 const DEFAULT_ICON_FILE = "user.svg";
@@ -126,10 +125,6 @@ export default class ArcRecentlyViewedList extends NavigationMixin(
   _onVisibilityChange;
   // Whether this mount has already forced its one fresh fetch; see connectedCallback.
   _refreshedOnMount = false;
-
-  get infoIconStyle() {
-    return `--icon-url: url('${buildIconUrl(INFO_ICON_FILE)}');`;
-  }
 
   get overflowIconStyle() {
     return `--icon-url: url('${buildIconUrl(OVERFLOW_ICON_FILE)}');`;

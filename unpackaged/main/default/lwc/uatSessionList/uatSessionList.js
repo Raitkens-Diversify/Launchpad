@@ -7,7 +7,7 @@ import { messageFrom, toast } from 'c/messageUtil';
 import { SESSION_STATUS_VARIANT } from 'c/uatConstants';
 import { relativeTime, joinMeta } from 'c/uatCardUtil';
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 10;
 
 // Combobox value for a cycle-less session — same literal uatQueue keys its
 // standalone execution group with. Maps to cycleId: null in the payload.

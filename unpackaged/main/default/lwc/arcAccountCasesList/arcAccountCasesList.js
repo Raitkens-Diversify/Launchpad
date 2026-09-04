@@ -17,7 +17,7 @@ import { resolveRecordIdFromPageReference } from "c/recordNavigationCommunityUti
 import getCasesForAccount from "@salesforce/apex/ArcAccountCasesController.getCasesForAccount";
 
 const OBJECT_API_NAME = "Account";
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 10;
 
 /** Same field set/order/labels as Case_List's standardized viewTabs columns. */
 const COLUMNS = [

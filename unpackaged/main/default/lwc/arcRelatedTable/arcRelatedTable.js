@@ -18,7 +18,7 @@ const SCOPE_OPTIONS = [
   { value: SCOPE_TEAM, label: "My Team" }
 ];
 
-const PAGE_SIZE_DEFAULT = 25;
+const PAGE_SIZE_DEFAULT = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 const ENVELOPE_COLUMNS = [
