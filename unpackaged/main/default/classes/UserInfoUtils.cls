@@ -5,7 +5,7 @@
  * User profile and branch helpers for the running user and arbitrary user context.
  */
 public with sharing class UserInfoUtils {
-  public static final String PROFILE_NEXS = 'Nexs';
+  public static final String PROFILE_NEXS = 'Arc';
   public static final String PROFILE_ADVISOR = 'Advisor';
   public static final String PROFILE_HOME_OFFICE = 'Home Office';
   public static final String PROFILE_SYSTEM_ADMINISTRATOR = 'System Administrator';
