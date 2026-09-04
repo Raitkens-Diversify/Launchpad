@@ -40,7 +40,7 @@ public class Case_TriggerHandlerTest {
         Id accOpeningRecTypeId = Schema.sObjectType.Case.getRecordTypeInfosByName().get('Account Opening').getRecordTypeId(); 
         
         //Advisor_Group__c ag = new Advisor_Group__c( Name = 'Test Advisor Group' );
-		//Insert ag;
+        //Insert ag;
         
         Financial_Advisor_Team__c fat = new Financial_Advisor_Team__c(Name = 'Default Team'/*, Advisor_Group__c = ag.Id*/);
         
@@ -185,7 +185,7 @@ public class Case_TriggerHandlerTest {
         AccountContactRelation acr = new AccountContactRelation();
         acr.Accountid= act.Id;
         acr.ContactId= act1.PersonContactId;
-        acr.FinServ__Primary__c=true;
+        //acr.FinServ__Primary__c=true;
         acr.FinServ__Rollups__c='Tasks;Events;Financial Accounts;Assets and Liabilities;Financial Goals;All;Referrals;Opportunities';
         acr.FinServ__IncludeInGroup__c=false;
         //acr.FinServ__PrimaryGroup__c=true;
