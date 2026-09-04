@@ -11,6 +11,15 @@ private class UserInfoUtilsTest {
 
     System.assertEquals(
       true,
+      UserInfoUtils.isArcLoginProfile(UserInfoUtils.PROFILE_ARC_LOGIN)
+    );
+    System.assertEquals(
+      true,
+      UserInfoUtils.isBranchCrmProfile(UserInfoUtils.PROFILE_BRANCH_CRM)
+    );
+
+    System.assertEquals(
+      true,
       UserInfoUtils.isAdvisorProfile(UserInfoUtils.PROFILE_ADVISOR)
     );
     System.assertEquals(false, UserInfoUtils.isAdvisorProfile(null));
@@ -57,6 +66,14 @@ private class UserInfoUtilsTest {
     System.assertEquals(true, UserInfoUtils.isBranchUserProfile(UserInfoUtils.PROFILE_NEXS));
     System.assertEquals(
       true,
+      UserInfoUtils.isBranchUserProfile(UserInfoUtils.PROFILE_ARC_LOGIN)
+    );
+    System.assertEquals(
+      true,
+      UserInfoUtils.isBranchUserProfile(UserInfoUtils.PROFILE_BRANCH_CRM)
+    );
+    System.assertEquals(
+      true,
       UserInfoUtils.isBranchUserProfile(UserInfoUtils.PROFILE_ADVISOR)
     );
     System.assertEquals(
@@ -70,6 +87,14 @@ private class UserInfoUtilsTest {
     System.assertEquals(
       true,
       UserInfoUtils.isNotificationEligibleProfile(UserInfoUtils.PROFILE_NEXS)
+    );
+    System.assertEquals(
+      true,
+      UserInfoUtils.isNotificationEligibleProfile(UserInfoUtils.PROFILE_ARC_LOGIN)
+    );
+    System.assertEquals(
+      true,
+      UserInfoUtils.isNotificationEligibleProfile(UserInfoUtils.PROFILE_BRANCH_CRM)
     );
     System.assertEquals(
       true,
@@ -92,8 +117,10 @@ private class UserInfoUtilsTest {
   static void notificationEligibleProfileNames_returnsAllEligibleProfiles() {
     Set<String> profileNames = UserInfoUtils.notificationEligibleProfileNames();
 
-    System.assertEquals(4, profileNames.size());
+    System.assertEquals(6, profileNames.size());
     System.assert(profileNames.contains(UserInfoUtils.PROFILE_NEXS));
+    System.assert(profileNames.contains(UserInfoUtils.PROFILE_ARC_LOGIN));
+    System.assert(profileNames.contains(UserInfoUtils.PROFILE_BRANCH_CRM));
     System.assert(profileNames.contains(UserInfoUtils.PROFILE_ADVISOR));
     System.assert(profileNames.contains(UserInfoUtils.PROFILE_HOME_OFFICE));
     System.assert(profileNames.contains(UserInfoUtils.PROFILE_SYSTEM_ADMINISTRATOR));

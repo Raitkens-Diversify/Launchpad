@@ -4,14 +4,14 @@
  *
  * Resolves Task notification recipients by profile-specific eligibility rules.
  *
- * NexS, Advisor, and System Administrator users may qualify when a Task is assigned to them,
+ * NexS (Arc), Arc Login, Branch CRM, Advisor, and System Administrator users may qualify when a Task is assigned to them,
  * linked to a Case they own or submitted, linked to a Case on their FA team,
  * or linked to a Household where they are the primary advisor.
  *
  * Home Office users qualify when a Task is assigned to them or linked to a Case
  * they own or that is owned by a queue they belong to.
  *
- * NexS, Advisor, and System Administrator users also qualify when linked to a
+ * NexS (Arc), Arc Login, Branch CRM, Advisor, and System Administrator users also qualify when linked to a
  * Case they own, submitted, FA team serves, or a queue they belong to owns.
  *
  * Notification_Rule__c records control delivery settings after eligibility passes.
@@ -173,21 +173,10 @@ public without sharing class NotificationTaskRecipientService {
         (context.hasCaseAssociation && (isCaseOwner || isCaseQueueMember));
     }
 
-    if (UserInfoUtils.isNexSProfile(profileName)) {
-      return isAssignee ||
-        isPrimaryAdvisorOnHousehold ||
-        (context.hasCaseAssociation &&
-        (isCaseOwner || isCaseSubmitter || isCaseFaTeamMember || isCaseQueueMember));
-    }
-
-    if (UserInfoUtils.isAdvisorProfile(profileName)) {
-      return isAssignee ||
-        isPrimaryAdvisorOnHousehold ||
-        (context.hasCaseAssociation &&
-        (isCaseOwner || isCaseSubmitter || isCaseFaTeamMember || isCaseQueueMember));
-    }
-
-    if (UserInfoUtils.isSystemAdministratorProfile(profileName)) {
+    if (
+      UserInfoUtils.isBranchNotificationProfile(profileName) ||
+      UserInfoUtils.isSystemAdministratorProfile(profileName)
+    ) {
       return isAssignee ||
         isPrimaryAdvisorOnHousehold ||
         (context.hasCaseAssociation &&

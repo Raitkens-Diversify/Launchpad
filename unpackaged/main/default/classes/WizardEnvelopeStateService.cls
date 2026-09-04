@@ -1270,6 +1270,7 @@ return result;
     // current Account values become the comparison point in place of the frozen case snapshot.
     // The client already sends it, so the call contract is final ahead of that rewrite.
     @AuraEnabled
+    @TestVisible
     public static void saveProposedCaseFields(
         Id caseId,
         Id accountId,

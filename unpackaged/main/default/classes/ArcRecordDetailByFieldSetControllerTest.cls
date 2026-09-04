@@ -73,7 +73,8 @@ private class ArcRecordDetailByFieldSetControllerTest {
     Account account = new Account(
       Name = 'Field Set Test Account',
       Description = 'Loaded description',
-      Phone = '5555555555'
+      Phone = '5555555555',
+      Classification__c = 'Unclassified'
     );
     insert account;
 
@@ -92,7 +93,7 @@ private class ArcRecordDetailByFieldSetControllerTest {
 
   @IsTest
   static void saveRecordFieldsUpdatesDescription() {
-    Account account = new Account(Name = 'Direct Save');
+    Account account = new Account(Name = 'Direct Save', Classification__c = 'Unclassified');
     insert account;
 
     Test.startTest();
@@ -115,7 +116,7 @@ private class ArcRecordDetailByFieldSetControllerTest {
       .getDescribe()
       .fieldSets.getMap();
 
-    Account account = new Account(Name = 'Before Save');
+    Account account = new Account(Name = 'Before Save', Classification__c = 'Unclassified');
     insert account;
 
     Boolean saved = false;
@@ -234,12 +235,20 @@ private class ArcRecordDetailByFieldSetControllerTest {
 
   @IsTest
   static void loadResolvesReferenceFieldToRelatedName() {
-    Account parentAccount = new Account(Name = 'Parent Lookup Account');
+    Account parentAccount = new Account(
+      Name = 'Parent Lookup Account',
+      Classification__c = 'Unclassified',
+      RecordTypeId = Schema.SObjectType.Account
+        .getRecordTypeInfosByDeveloperName()
+        .get('Household')
+        .getRecordTypeId()
+    );
     insert parentAccount;
 
     Account childAccount = new Account(
       Name = 'Child Lookup Account',
-      ParentId = parentAccount.Id
+      ParentId = parentAccount.Id,
+      Classification__c = 'Unclassified'
     );
     insert childAccount;
 
@@ -288,7 +297,8 @@ private class ArcRecordDetailByFieldSetControllerTest {
 
     Account account = new Account(
       Name = 'Lookup Account',
-      Description = 'Loaded from test'
+      Description = 'Loaded from test',
+      Classification__c = 'Unclassified'
     );
     insert account;
 
@@ -302,7 +312,7 @@ private class ArcRecordDetailByFieldSetControllerTest {
 
   @IsTest
   static void saveRejectsUnknownObject() {
-    Account account = new Account(Name = 'Validation Account');
+    Account account = new Account(Name = 'Validation Account', Classification__c = 'Unclassified');
     insert account;
 
     Boolean threw = false;
@@ -326,7 +336,7 @@ private class ArcRecordDetailByFieldSetControllerTest {
       return;
     }
 
-    Account account = new Account(Name = 'No Op Save');
+    Account account = new Account(Name = 'No Op Save', Classification__c = 'Unclassified');
     insert account;
 
     Test.startTest();
@@ -351,7 +361,7 @@ private class ArcRecordDetailByFieldSetControllerTest {
       return;
     }
 
-    Account account = new Account(Name = 'Disallowed Save');
+    Account account = new Account(Name = 'Disallowed Save', Classification__c = 'Unclassified');
     insert account;
 
     Boolean threw = false;
@@ -387,7 +397,7 @@ private class ArcRecordDetailByFieldSetControllerTest {
 
   @IsTest
   static void saveRejectsMissingObjectApiName() {
-    Account account = new Account(Name = 'Validation Account');
+    Account account = new Account(Name = 'Validation Account', Classification__c = 'Unclassified');
     insert account;
 
     Boolean threw = false;
@@ -406,7 +416,7 @@ private class ArcRecordDetailByFieldSetControllerTest {
 
   @IsTest
   static void saveRejectsMissingFieldSetApiName() {
-    Account account = new Account(Name = 'Validation Account');
+    Account account = new Account(Name = 'Validation Account', Classification__c = 'Unclassified');
     insert account;
 
     Boolean threw = false;
@@ -436,7 +446,7 @@ private class ArcRecordDetailByFieldSetControllerTest {
 
   @IsTest
   static void loadRejectsMissingObjectApiName() {
-    Account account = new Account(Name = 'Validation Account');
+    Account account = new Account(Name = 'Validation Account', Classification__c = 'Unclassified');
     insert account;
 
     Boolean threw = false;
@@ -450,7 +460,7 @@ private class ArcRecordDetailByFieldSetControllerTest {
 
   @IsTest
   static void loadRejectsMissingFieldSetApiName() {
-    Account account = new Account(Name = 'Validation Account');
+    Account account = new Account(Name = 'Validation Account', Classification__c = 'Unclassified');
     insert account;
 
     Boolean threw = false;
@@ -464,7 +474,7 @@ private class ArcRecordDetailByFieldSetControllerTest {
 
   @IsTest
   static void loadRejectsUnknownFieldSet() {
-    Account account = new Account(Name = 'Validation Account');
+    Account account = new Account(Name = 'Validation Account', Classification__c = 'Unclassified');
     insert account;
 
     Boolean threw = false;
@@ -482,7 +492,7 @@ private class ArcRecordDetailByFieldSetControllerTest {
 
   @IsTest
   static void loadRejectsUnknownObject() {
-    Account account = new Account(Name = 'Validation Account');
+    Account account = new Account(Name = 'Validation Account', Classification__c = 'Unclassified');
     insert account;
 
     Boolean threw = false;

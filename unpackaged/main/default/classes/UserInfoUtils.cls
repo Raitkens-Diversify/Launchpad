@@ -6,6 +6,8 @@
  */
 public with sharing class UserInfoUtils {
   public static final String PROFILE_NEXS = 'Arc';
+  public static final String PROFILE_ARC_LOGIN = 'Arc Login';
+  public static final String PROFILE_BRANCH_CRM = 'Branch CRM';
   public static final String PROFILE_ADVISOR = 'Advisor';
   public static final String PROFILE_HOME_OFFICE = 'Home Office';
   public static final String PROFILE_SYSTEM_ADMINISTRATOR = 'System Administrator';
@@ -35,6 +37,14 @@ public with sharing class UserInfoUtils {
     return profileName == PROFILE_NEXS;
   }
 
+  public static Boolean isArcLoginProfile(String profileName) {
+    return profileName == PROFILE_ARC_LOGIN;
+  }
+
+  public static Boolean isBranchCrmProfile(String profileName) {
+    return profileName == PROFILE_BRANCH_CRM;
+  }
+
   public static Boolean isAdvisorProfile(String profileName) {
     return profileName == PROFILE_ADVISOR;
   }
@@ -52,7 +62,14 @@ public with sharing class UserInfoUtils {
   }
 
   public static Boolean isBranchUserProfile(String profileName) {
-    return isNexSProfile(profileName) || isAdvisorProfile(profileName);
+    return isBranchNotificationProfile(profileName);
+  }
+
+  public static Boolean isBranchNotificationProfile(String profileName) {
+    return isNexSProfile(profileName) ||
+      isArcLoginProfile(profileName) ||
+      isBranchCrmProfile(profileName) ||
+      isAdvisorProfile(profileName);
   }
 
   public static Boolean isSystemAdministratorProfile(String profileName) {
@@ -60,8 +77,7 @@ public with sharing class UserInfoUtils {
   }
 
   public static Boolean isNotificationEligibleProfile(String profileName) {
-    return isNexSProfile(profileName) ||
-      isAdvisorProfile(profileName) ||
+    return isBranchNotificationProfile(profileName) ||
       isHomeOfficeProfile(profileName) ||
       isSystemAdministratorProfile(profileName);
   }
@@ -69,6 +85,8 @@ public with sharing class UserInfoUtils {
   public static Set<String> notificationEligibleProfileNames() {
     return new Set<String>{
       PROFILE_NEXS,
+      PROFILE_ARC_LOGIN,
+      PROFILE_BRANCH_CRM,
       PROFILE_ADVISOR,
       PROFILE_HOME_OFFICE,
       PROFILE_SYSTEM_ADMINISTRATOR

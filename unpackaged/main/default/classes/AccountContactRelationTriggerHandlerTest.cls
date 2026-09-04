@@ -7,8 +7,8 @@ public class AccountContactRelationTriggerHandlerTest {
             fatList.add(new Financial_Advisor_Team__c(Name = 'Test FAT 2'));
             insert fatList;
         // Create Accounts
-        Account account1 = new Account(Name = 'Account 1', Financial_Advisor_Team__c = fatList[0].Id);
-        Account account2 = new Account(Name = 'Account 2');
+        Account account1 = new Account(Name = 'Account 1', Financial_Advisor_Team__c = fatList[0].Id, Classification__c = 'Unclassified');
+        Account account2 = new Account(Name = 'Account 2', Classification__c = 'Unclassified');
         insert new List<Account>{account1, account2};
         
         // Create Contacts
