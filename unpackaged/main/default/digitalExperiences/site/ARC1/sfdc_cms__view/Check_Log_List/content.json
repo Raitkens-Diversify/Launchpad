@@ -24,8 +24,8 @@
               "attributes" : {
                 "defaultColumns" : "",
                 "defaultListViewApiName" : "All",
-                "linkColumns" : "Client__r.Name=Client__c:Account,Name",
                 "dxpStyle" : { },
+                "linkColumns" : "Client__r.Name=Client__c:Account,Name",
                 "objectApiName" : "Check_Log__c",
                 "pillFields" : "Status__c",
                 "serverSearchListViews" : "All,Sent_and_Received_Check_Logs,checking_in_ops",

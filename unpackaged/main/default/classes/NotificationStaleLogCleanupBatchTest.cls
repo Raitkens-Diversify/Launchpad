@@ -98,4 +98,34 @@ private class NotificationStaleLogCleanupBatchTest {
         AND Recipient__c = :context.recipientUser.Id
     ]);
   }
+
+  @IsTest
+  static void batchConstructorUsesStartOfMonthWhenCutoffNull() {
+    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+    Notification_Log__c staleLog = NotificationTestDataFactory.createLogNotification(
+      context.recipientUser.Id,
+      context.household.Id,
+      NotificationConstants.OBJECT_TYPE_TASK,
+      NotificationConstants.STATUS_QUEUED,
+      NotificationConstants.CHANNEL_IN_APP,
+      NotificationConstants.FREQUENCY_IMMEDIATE,
+      'Null cutoff stale log',
+      null,
+      null
+    );
+
+    Test.startTest();
+    NotificationStaleLogCleanupBatch batch = new NotificationStaleLogCleanupBatch(null);
+    Database.executeBatch(batch, 200);
+    Test.stopTest();
+
+    Notification_Log__c updatedLog = [
+      SELECT Status__c
+      FROM Notification_Log__c
+      WHERE Id = :staleLog.Id
+    ];
+
+    System.assertEquals(NotificationConstants.STATUS_QUEUED, updatedLog.Status__c);
+    System.assertEquals(0, batch.getSuppressedCountForTest());
+  }
 }

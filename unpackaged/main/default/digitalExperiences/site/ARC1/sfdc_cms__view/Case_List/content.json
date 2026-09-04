@@ -23,8 +23,8 @@
             "children" : [ {
               "attributes" : {
                 "defaultListViewApiName" : "All_Cases",
-                "linkColumns" : "Household__r.Name=Household__c:Account",
                 "dxpStyle" : { },
+                "linkColumns" : "Household__r.Name=Household__c:Account",
                 "objectApiName" : "Case",
                 "pillFields" : "Status,Priority",
                 "serverSearchListViews" : "All_Cases,MyOpenCases,My_teams_open_cases",

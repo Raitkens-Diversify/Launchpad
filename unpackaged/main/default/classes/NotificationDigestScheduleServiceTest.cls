@@ -278,4 +278,89 @@ private class NotificationDigestScheduleServiceTest {
 
     System.assertNotEquals(null, nextRun);
   }
+
+  @IsTest
+  static void resolveNextRunForScheduleReturnsNullForInvalidSchedule() {
+    System.assertEquals(
+      null,
+      NotificationDigestScheduleService.resolveNextRunForSchedule(null)
+    );
+
+    NotificationDigestScheduleService.QueuedDigestSchedule blankCadenceSchedule = new NotificationDigestScheduleService.QueuedDigestSchedule(
+      '',
+      '8'
+    );
+    System.assertEquals(
+      null,
+      NotificationDigestScheduleService.resolveNextRunForSchedule(blankCadenceSchedule)
+    );
+  }
+
+  @IsTest
+  static void resolveNextRunForCadenceReturnsNullForUnknownCadence() {
+    System.assertEquals(
+      null,
+      NotificationDigestScheduleService.resolveNextRunForCadence('Unsupported')
+    );
+  }
+
+  @IsTest
+  static void resolveNextRunForCadenceUsesScheduledJobWhenRegistered() {
+    Test.startTest();
+    NotificationDigestSchedulerBootstrap.ensureSchedulers();
+    Test.stopTest();
+
+    Datetime nextRun = NotificationDigestScheduleService.resolveNextRunForCadence(
+      NotificationConstants.DIGEST_FREQUENCY_HOURLY
+    );
+
+    System.assertNotEquals(null, nextRun);
+    System.assert(nextRun > Datetime.now().addMinutes(-1));
+  }
+
+  @IsTest
+  static void resolveNextRunForScheduleUsesDailyRuleHour() {
+    NotificationDigestScheduleService.QueuedDigestSchedule dailySchedule = new NotificationDigestScheduleService.QueuedDigestSchedule(
+      NotificationConstants.DIGEST_FREQUENCY_DAILY,
+      String.valueOf(NotificationDigestTimezoneService.getOrgLocalHour())
+    );
+
+    Datetime nextRun = NotificationDigestScheduleService.resolveNextRunForSchedule(
+      dailySchedule
+    );
+
+    System.assertNotEquals(null, nextRun);
+    System.assert(nextRun > Datetime.now().addMinutes(-1));
+  }
+
+  @IsTest
+  static void computeFallbackNextRunReturnsNullForUnknownCadence() {
+    System.assertEquals(
+      null,
+      NotificationDigestScheduleService.computeFallbackNextRun('Unsupported')
+    );
+  }
+
+  @IsTest
+  static void computeNextOrgTopOfHourRunReturnsFutureRun() {
+    Datetime nextRun = NotificationDigestScheduleService.computeNextOrgTopOfHourRun();
+
+    System.assertNotEquals(null, nextRun);
+    System.assert(nextRun > Datetime.now().addMinutes(-1));
+  }
+
+  @IsTest
+  static void parseDigestHourRejectsNonNumericValues() {
+    System.assertEquals(null, NotificationDigestScheduleService.parseDigestHour('abc'));
+  }
+
+  @IsTest
+  static void formatTimeLabelReturnsFormattedValue() {
+    Datetime sampleRun = Datetime.now().addHours(2);
+
+    System.assertNotEquals(
+      null,
+      NotificationDigestScheduleService.formatTimeLabel(sampleRun)
+    );
+  }
 }

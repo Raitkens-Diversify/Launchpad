@@ -60,38 +60,16 @@ private class SignificantEventActionControllerTest {
     Account household,
     SignificantEventTestDataFactory.Scenario scenario
   ) {
-    String clientType = FscRelClientAccountUtils.resolveAssignableClientAccountType();
-    if (String.isBlank(clientType)) {
+    if (String.isBlank(FscRelClientAccountUtils.resolveAssignableClientAccountType())) {
       return;
     }
 
-    FscDataTestDataFactory.createMembership(
-      household,
+    List<Account> memberAccounts = new List<Account>{
       scenario.treeScenario.linkedPersonAccount,
-      true,
-      true,
-      FscDataTestDataFactory.resolveDefaultRoleValue()
-    );
-    FscDataTestDataFactory.createMembership(
-      household,
-      scenario.treeScenario.secondPersonAccount,
-      false,
-      false,
-      FscDataTestDataFactory.resolveDefaultRoleValue()
-    );
-
-    update new List<Account>{
-      new Account(
-        Id = scenario.treeScenario.linkedPersonAccount.Id,
-        Household__c = household.Id,
-        Type = clientType
-      ),
-      new Account(
-        Id = scenario.treeScenario.secondPersonAccount.Id,
-        Household__c = household.Id,
-        Type = clientType
-      )
+      scenario.treeScenario.secondPersonAccount
     };
+    FscDataTestDataFactory.assignActiveClientAccountType(memberAccounts);
+    FscDataTestDataFactory.assignClientHousehold(memberAccounts, household.Id);
   }
 
   @IsTest
@@ -768,8 +746,10 @@ private class SignificantEventActionControllerTest {
 
   @IsTest
   static void getLinkedContactsForAccount_emptyScope_returnsEmptyList() {
-    Account standaloneAccount = new Account(Name = 'Standalone Account');
-    insert standaloneAccount;
+    Account standaloneAccount = FscDataTestDataFactory.createClassifiedBusinessAccount(
+      'Standalone Account',
+      FscRelClassificationUtils.UNCLASSIFIED
+    );
 
     Test.startTest();
     List<SignificantEventActionModels.LinkedContactRow> rows = SignificantEventActionController.getLinkedContactsForAccount(
@@ -947,8 +927,10 @@ private class SignificantEventActionControllerTest {
 
   @IsTest
   static void getSignificantEventsForAccount_emptyScope_returnsEmptyList() {
-    Account standaloneAccount = new Account(Name = 'Standalone Events Account');
-    insert standaloneAccount;
+    Account standaloneAccount = FscDataTestDataFactory.createClassifiedBusinessAccount(
+      'Standalone Events Account',
+      FscRelClassificationUtils.UNCLASSIFIED
+    );
 
     Test.startTest();
     List<SignificantEventActionModels.SignificantEventRow> rows = SignificantEventActionController.getSignificantEventsForAccount(

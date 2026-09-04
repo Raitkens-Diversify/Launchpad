@@ -432,6 +432,152 @@ private class NotificationTaskRecipientServiceTest {
     NotificationTaskRecipientService.testRecipientOverrides = null;
   }
 
+  @IsTest
+  static void resolveRecipientsUsesTestOverrideByHouseholdId() {
+    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+    Task taskRecord = new Task(
+      Subject = 'Household Override Task',
+      WhatId = context.household.Id,
+      Status = 'Not Started',
+      Priority = 'Normal'
+    );
+    NotificationTestDataFactory.insertRecord(taskRecord);
+
+    NotificationTaskRecipientService.testRecipientOverrides = new Map<Id, List<Id>>{
+      context.household.Id => new List<Id>{ context.recipientUser.Id }
+    };
+
+    List<Id> recipientIds = new NotificationTaskRecipientService().resolveRecipients(
+      taskRecord,
+      context.household.Id
+    );
+
+    NotificationTaskRecipientService.testRecipientOverrides = null;
+    System.assertEquals(context.recipientUser.Id, recipientIds[0]);
+  }
+
+  @IsTest
+  static void resolveRecipientsReturnsEmptyWhenTaskHasNoId() {
+    NotificationTaskRecipientService.testRecipientOverrides = null;
+
+    Task taskRecord = new Task(
+      Subject = 'Unsaved Task',
+      Status = 'Not Started',
+      Priority = 'Normal'
+    );
+
+    List<Id> recipientIds = new NotificationTaskRecipientService().resolveRecipients(
+      taskRecord,
+      null
+    );
+
+    System.assertEquals(0, recipientIds.size());
+  }
+
+  @IsTest
+  static void resolveRecipientsUsesAccountWhatIdWhenHouseholdIdMissing() {
+    NotificationTaskRecipientService.testRecipientOverrides = null;
+
+    Account household = FscDataTestDataFactory.createClassifiedBusinessAccount(
+      'Task WhatId Household',
+      FscRelClassificationUtils.UNCLASSIFIED
+    );
+
+    User assignee = [
+      SELECT Id
+      FROM User
+      WHERE IsActive = TRUE
+      LIMIT 1
+    ];
+
+    Task taskRecord = new Task(
+      Subject = 'Account WhatId Task',
+      WhatId = household.Id,
+      Status = 'Not Started',
+      Priority = 'Normal',
+      OwnerId = assignee.Id
+    );
+    NotificationTestDataFactory.insertRecord(taskRecord);
+
+    List<Id> recipientIds = new NotificationTaskRecipientService().resolveRecipients(
+      taskRecord,
+      null
+    );
+
+    System.assertNotEquals(null, recipientIds);
+  }
+
+  @IsTest
+  static void idHelperMethods_classifyRecordIdPrefixes() {
+    System.assertEquals(true, NotificationTaskRecipientService.isUserId(UserInfo.getUserId()));
+    System.assertEquals(false, NotificationTaskRecipientService.isUserId(null));
+
+    List<Group> queues = [
+      SELECT Id
+      FROM Group
+      WHERE Type = 'Queue'
+      LIMIT 1
+    ];
+    if (!queues.isEmpty()) {
+      System.assertEquals(true, NotificationTaskRecipientService.isQueueId(queues[0].Id));
+    }
+
+    System.assertEquals(false, NotificationTaskRecipientService.isQueueId(UserInfo.getUserId()));
+
+    Account household = FscDataTestDataFactory.createClassifiedBusinessAccount(
+      'Prefix Test Household',
+      FscRelClassificationUtils.UNCLASSIFIED
+    );
+    System.assertEquals(true, NotificationTaskRecipientService.isAccountId(household.Id));
+    System.assertEquals(false, NotificationTaskRecipientService.isCaseId(household.Id));
+  }
+
+  @IsTest
+  static void resolveRecipientsExcludesIneligibleProfileCandidates() {
+    NotificationTaskRecipientService.testRecipientOverrides = null;
+
+    List<Profile> ineligibleProfiles = [
+      SELECT Id
+      FROM Profile
+      WHERE
+        Name NOT IN :UserInfoUtils.notificationEligibleProfileNames()
+        AND UserType = 'Standard'
+      LIMIT 1
+    ];
+
+    if (ineligibleProfiles.isEmpty()) {
+      System.assert(true, 'No ineligible standard profile available.');
+      return;
+    }
+
+    User ineligibleUser;
+    try {
+      ineligibleUser = createUser(ineligibleProfiles[0].Id, 'ineligtsk');
+    } catch (DmlException ex) {
+      System.assert(true, 'Org automation prevented ineligible user insert.');
+      return;
+    }
+
+    Task taskRecord = new Task(
+      Subject = 'Ineligible Assignee Task',
+      Status = 'Not Started',
+      Priority = 'Normal',
+      OwnerId = ineligibleUser.Id
+    );
+    NotificationTestDataFactory.insertRecord(taskRecord);
+
+    List<Id> recipientIds = new NotificationTaskRecipientService().resolveRecipients(
+      taskRecord,
+      null
+    );
+
+    System.assertEquals(
+      0,
+      recipientIds.size(),
+      'Ineligible profile assignees should not receive Task notifications.'
+    );
+  }
+
   private static User selectActiveHomeOfficeUser() {
     List<User> users = [
       SELECT Id

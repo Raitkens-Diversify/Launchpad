@@ -24,8 +24,8 @@
               "attributes" : {
                 "defaultColumns" : "Subject=Subject,What.Name=Case Number,FinServ__Household__r.Name=Household,Account.Name=Client,ActivityDate=Due Date,LastModifiedDate=Last Modified,Owner.Name=Assigned To,Financial_Advisor_Team__r.Name=Financial Advisor Team,Priority=Priority,Status=Status,LastModifiedBy.Alias=Last Modified By Alias,CreatedBy.Name=Created By",
                 "defaultListViewApiName" : "All",
-                "linkColumns" : "What.Name=WhatId,FinServ__Household__r.Name=FinServ__Household__c:Account,Account.Name=AccountId:Account",
                 "dxpStyle" : { },
+                "linkColumns" : "What.Name=WhatId,FinServ__Household__r.Name=FinServ__Household__c:Account,Account.Name=AccountId:Account",
                 "objectApiName" : "Task",
                 "pillFields" : "Status",
                 "serverSearchListViews" : "All,My_Open_Tasks,My_Team_s_Open_Tasks",

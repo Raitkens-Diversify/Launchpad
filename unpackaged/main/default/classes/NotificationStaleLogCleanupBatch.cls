@@ -24,6 +24,8 @@ public without sharing class NotificationStaleLogCleanupBatch implements Databas
   public Database.QueryLocator start(Database.BatchableContext context) {
     // QueryLocator bind variables must be local; instance fields resolve as tmpVar1 and fail.
     Datetime cutoffDatetime = cutoff;
+    String queuedStatus = NotificationConstants.STATUS_QUEUED;
+    String pendingStatus = NotificationConstants.STATUS_PENDING;
 
     return Database.getQueryLocator(
       [
@@ -32,8 +34,8 @@ public without sharing class NotificationStaleLogCleanupBatch implements Databas
         WHERE
           CreatedDate < :cutoffDatetime
           AND (
-            Status__c = :NotificationConstants.STATUS_QUEUED
-            OR Status__c = :NotificationConstants.STATUS_PENDING
+            Status__c = :queuedStatus
+            OR Status__c = :pendingStatus
           )
           AND (
             Delivery_Attempt_Count__c = NULL

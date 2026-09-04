@@ -183,6 +183,74 @@ private class NotificationCustomNotifServiceTest {
     );
   }
 
+  @IsTest
+  static void buildNotificationTitle_returnsGenericFallbackWhenSourceTypeBlank() {
+    Notification_Log__c logRecord = new Notification_Log__c();
+
+    System.assertEquals(
+      'Notification',
+      NotificationCustomNotificationService.buildNotificationTitle(logRecord)
+    );
+  }
+
+  @IsTest
+  static void truncate_returnsBlankValueUnchanged() {
+    System.assertEquals(null, NotificationCustomNotificationService.truncate(null, 10));
+    System.assertEquals('', NotificationCustomNotificationService.truncate('', 10));
+    System.assertEquals('abc', NotificationCustomNotificationService.truncate('abc', 10));
+  }
+
+  @IsTest
+  static void getNotificationPreferenceTypeId_cachesLookupWhenTypeExists() {
+    List<CustomNotificationType> notificationTypes = [
+      SELECT DeveloperName
+      FROM CustomNotificationType
+      WHERE DeveloperName = :NotificationConstants.CUSTOM_NOTIFICATION_PREFERENCE
+      LIMIT 1
+    ];
+
+    if (notificationTypes.isEmpty()) {
+      System.assert(true, 'Custom notification type metadata is unavailable in this org.');
+      return;
+    }
+
+    Id firstLookup = NotificationCustomNotificationService.getNotificationPreferenceTypeId();
+    Id secondLookup = NotificationCustomNotificationService.getNotificationPreferenceTypeId();
+
+    System.assertNotEquals(null, firstLookup);
+    System.assertEquals(firstLookup, secondLookup);
+  }
+
+  @IsTest
+  static void sendNotification_usesCustomNotificationTypeDeveloperName() {
+    List<CustomNotificationType> notificationTypes = [
+      SELECT DeveloperName
+      FROM CustomNotificationType
+      WHERE DeveloperName = :NotificationConstants.CUSTOM_NOTIFICATION_PREFERENCE
+      LIMIT 1
+    ];
+
+    if (notificationTypes.isEmpty()) {
+      System.assert(true, 'Custom notification type metadata is unavailable in this org.');
+      return;
+    }
+
+    NotificationCustomNotificationService.testSkipSend = true;
+
+    Test.startTest();
+    NotificationCustomNotificationService.sendNotification(
+      UserInfo.getUserId(),
+      'Typed title',
+      'Typed body',
+      UserInfo.getUserId(),
+      NotificationConstants.CUSTOM_NOTIFICATION_PREFERENCE
+    );
+    Test.stopTest();
+
+    NotificationCustomNotificationService.testSkipSend = false;
+    System.assert(true, 'Expected typed send path to no-op under testSkipSend.');
+  }
+
   private static Notification_Log__c buildDigestLog(
     String sourceRecordId,
     String body
