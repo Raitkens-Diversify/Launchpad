@@ -33,6 +33,18 @@ private class CaseTaskSlaAutomationTest {
         return defaultBh.isEmpty() ? null : defaultBh[0];
     }
 
+    /** Start time that guarantees non-zero BusinessHours.diff even outside wall-clock hours. */
+    private static Datetime pitstopStartWithBusinessMinutes(
+        Id businessHoursId,
+        Integer businessMinutes
+    ) {
+        return BusinessHours.add(
+            businessHoursId,
+            System.now(),
+            -businessMinutes * 60L * 1000L
+        );
+    }
+
     private static SlaProcess resolveSlaProcess() {
         List<Case_Entitlement_Values__mdt> cmdt = [
             SELECT SLA_Policy__c
@@ -79,10 +91,16 @@ private class CaseTaskSlaAutomationTest {
         return caseRecord;
     }
 
+    /** Satisfies Type_OR_Classification_Required validation on Account. */
+    private static Account createAccount(String name) {
+        Account acc = new Account(Name = name, Type = 'Other');
+        insert acc;
+        return acc;
+    }
+
     @IsTest
     static void test_NoEntitlementOnCaseInsert() {
-        Account acc = new Account(Name = 'Entitlement Assign Account');
-        insert acc;
+        Account acc = createAccount('Entitlement Assign Account');
 
         Entitlement entitlementRecord = createActiveEntitlement(acc.Id);
         if (entitlementRecord == null) {
@@ -122,8 +140,7 @@ private class CaseTaskSlaAutomationTest {
 
     @IsTest
     static void test_ClearEntitlementOnCaseDelete() {
-        Account acc = new Account(Name = 'Entitlement Delete Account');
-        insert acc;
+        Account acc = createAccount('Entitlement Delete Account');
 
         Entitlement entitlementRecord = createActiveEntitlement(acc.Id);
         if (entitlementRecord == null) {
@@ -156,8 +173,7 @@ private class CaseTaskSlaAutomationTest {
 
     @IsTest
     static void test_BranchPitStopStartAndComplete() {
-        Account acc = new Account(Name = 'Pit Stop Account');
-        insert acc;
+        Account acc = createAccount('Pit Stop Account');
         Case caseRecord = createCase(acc.Id);
 
         BusinessHours bh = resolveBusinessHours();
@@ -207,8 +223,7 @@ private class CaseTaskSlaAutomationTest {
 
     @IsTest
     static void test_BranchPitStopOverlapErrors() {
-        Account acc = new Account(Name = 'Pit Stop Overlap Account');
-        insert acc;
+        Account acc = createAccount('Pit Stop Overlap Account');
         Case caseRecord = createCase(acc.Id);
 
         Task first = new Task(
@@ -246,8 +261,7 @@ private class CaseTaskSlaAutomationTest {
 
     @IsTest
     static void test_BranchPitStopCompleteOnInsert() {
-        Account acc = new Account(Name = 'Pit Stop Complete Insert');
-        insert acc;
+        Account acc = createAccount('Pit Stop Complete Insert');
         Case caseRecord = createCase(acc.Id);
         caseRecord.Pitstop_Start__c = System.now().addHours(-1);
         caseRecord.IsStopped = true;
@@ -280,8 +294,7 @@ private class CaseTaskSlaAutomationTest {
 
     @IsTest
     static void test_HomeOfficeMilestonesOnTaskComplete() {
-        Account acc = new Account(Name = 'Milestone Account');
-        insert acc;
+        Account acc = createAccount('Milestone Account');
         Entitlement entitlementRecord = createActiveEntitlement(acc.Id);
         Case caseRecord = createCase(acc.Id);
 
@@ -386,8 +399,7 @@ private class CaseTaskSlaAutomationTest {
 
     @IsTest
     static void test_MinutesServiceDirect() {
-        Account acc = new Account(Name = 'Minutes Account');
-        insert acc;
+        Account acc = createAccount('Minutes Account');
         Case caseRecord = createCase(acc.Id);
 
         BusinessHours bh = resolveBusinessHours();
@@ -397,7 +409,7 @@ private class CaseTaskSlaAutomationTest {
         }
 
         CasePitStopMinutesService.resetCachesForTest();
-        Datetime startDt = System.now().addHours(-2);
+        Datetime startDt = pitstopStartWithBusinessMinutes(bh.Id, 120);
         caseRecord.Pitstop_Start__c = startDt;
         caseRecord.Pitstop_Total_Minutes__c = 10;
         caseRecord.BusinessHoursId = bh.Id;
@@ -435,11 +447,12 @@ private class CaseTaskSlaAutomationTest {
             null
         );
 
-        Account acc = new Account(Name = 'Minutes Branches Account');
-        insert acc;
+        Account acc = createAccount('Minutes Branches Account');
         Case caseRecord = createCase(acc.Id);
-        Datetime startDt = System.now().addHours(-1);
-        caseRecord.Pitstop_Start__c = startDt;
+        BusinessHours bh = resolveBusinessHours();
+        Assert.isNotNull(bh, 'Org must have Business Hours for minutes coverage');
+
+        caseRecord.Pitstop_Start__c = pitstopStartWithBusinessMinutes(bh.Id, 60);
         caseRecord.Pitstop_Total_Minutes__c = null;
         update caseRecord;
 
@@ -457,9 +470,6 @@ private class CaseTaskSlaAutomationTest {
             new List<Case>{ clearedNoOld },
             new Map<Id, Case>()
         );
-
-        BusinessHours bh = resolveBusinessHours();
-        Assert.isNotNull(bh, 'Org must have Business Hours for minutes coverage');
 
         // oldCase.BusinessHoursId when newCase.BusinessHoursId is null
         CasePitStopMinutesService.resetCachesForTest();
@@ -486,8 +496,7 @@ private class CaseTaskSlaAutomationTest {
 
     @IsTest
     static void test_MinutesServiceEntitlementAndCmdtFallback() {
-        Account acc = new Account(Name = 'Minutes Entitlement Account');
-        insert acc;
+        Account acc = createAccount('Minutes Entitlement Account');
         Entitlement entitlementRecord = createActiveEntitlement(acc.Id);
         Case caseRecord = createCase(acc.Id);
 
@@ -540,8 +549,7 @@ private class CaseTaskSlaAutomationTest {
 
     @IsTest
     static void test_MinutesServiceNoBusinessHoursSkips() {
-        Account acc = new Account(Name = 'Minutes No BH Account');
-        insert acc;
+        Account acc = createAccount('Minutes No BH Account');
         Case caseRecord = createCase(acc.Id);
         caseRecord.Pitstop_Start__c = System.now().addHours(-1);
         caseRecord.Pitstop_Total_Minutes__c = 3;
@@ -572,8 +580,7 @@ private class CaseTaskSlaAutomationTest {
 
     @IsTest
     static void test_MinutesServiceCmdtBusinessHoursPath() {
-        Account acc = new Account(Name = 'Minutes CMDT Account');
-        insert acc;
+        Account acc = createAccount('Minutes CMDT Account');
         Case caseRecord = createCase(acc.Id);
         caseRecord.Pitstop_Start__c = System.now().addHours(-1);
         caseRecord.Pitstop_Total_Minutes__c = 2;
@@ -619,8 +626,7 @@ private class CaseTaskSlaAutomationTest {
 
     @IsTest
     static void test_MinutesServiceNewCaseEntitlementId() {
-        Account acc = new Account(Name = 'Minutes New Entitlement Account');
-        insert acc;
+        Account acc = createAccount('Minutes New Entitlement Account');
         Entitlement entitlementRecord = createActiveEntitlement(acc.Id);
         if (entitlementRecord == null) {
             System.assert(true, 'Skipped: cannot create entitlement');
@@ -628,7 +634,12 @@ private class CaseTaskSlaAutomationTest {
         }
 
         Case caseRecord = createCase(acc.Id);
-        caseRecord.Pitstop_Start__c = System.now().addHours(-1);
+        BusinessHours bh = resolveBusinessHours();
+        if (bh == null) {
+            System.assert(true, 'Skipped: no Business Hours available');
+            return;
+        }
+        caseRecord.Pitstop_Start__c = pitstopStartWithBusinessMinutes(bh.Id, 60);
         caseRecord.Pitstop_Total_Minutes__c = 1;
         caseRecord.BusinessHoursId = null;
         caseRecord.EntitlementId = entitlementRecord.Id;
@@ -659,8 +670,7 @@ private class CaseTaskSlaAutomationTest {
 
     @IsTest
     static void test_MinutesServiceBlankCmdtBusinessHoursName() {
-        Account acc = new Account(Name = 'Minutes Blank CMDT');
-        insert acc;
+        Account acc = createAccount('Minutes Blank CMDT');
         Case caseRecord = createCase(acc.Id);
         caseRecord.Pitstop_Start__c = System.now().addHours(-1);
         caseRecord.Pitstop_Total_Minutes__c = 4;

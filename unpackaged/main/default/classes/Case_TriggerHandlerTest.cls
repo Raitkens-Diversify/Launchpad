@@ -206,7 +206,7 @@ public class Case_TriggerHandlerTest {
         Account account = [SELECT Id, Account_Funding_Next_Service_Date__c, Account_Funding_Client__c,
                            Donation_in_Kind_Client__c, Donation_in_Kind_Next_Service_Date__c, QCD_Client__c,
                            QCD_Next_Service_Date__c, Roth_Conversion_Client__c, Roth_Conversion_Next_Service_Date__c
-                           FROM Account WHERE Id =: updatedCs.FinServ__Household__c ];
+                           FROM Account WHERE Id =: act.Id ];
         
         /*Assert.areEqual(false, account.Account_Funding_Client__c);
         Assert.areEqual(false, account.Donation_in_Kind_Client__c);
