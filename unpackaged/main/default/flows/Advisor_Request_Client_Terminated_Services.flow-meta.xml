@@ -92,10 +92,10 @@
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>varCase.null__NotFound</assignToReference>
+            <assignToReference>varCase.Submitted__c</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>Advisor_Request_Item_variable_id</elementReference>
+                <booleanValue>true</booleanValue>
             </value>
         </assignmentItems>
         <connector>
@@ -483,7 +483,7 @@
             <targetReference>Client_Terminated_Services</targetReference>
         </connector>
     </start>
-    <status>InvalidDraft</status>
+    <status>Active</status>
     <variables>
         <name>Advisor_Request_Item_variable_id</name>
         <dataType>String</dataType>

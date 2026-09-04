@@ -814,6 +814,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Event.Branch_Internal_Task__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Event.Envelope__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -2170,6 +2175,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Strategy__c.Structured_Note__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Task.Branch_Internal_Task__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

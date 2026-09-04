@@ -3,7 +3,7 @@
     <fullName>MoveMoneyOneTime</fullName>
     <description>Move Money One Time Tasks</description>
     <displayedFields>
-        <field>FinServ__FinancialAccount__c</field>
+        <field>Wizard_Financial_Account__c</field>
         <isFieldManaged>false</isFieldManaged>
         <isRequired>false</isRequired>
     </displayedFields>

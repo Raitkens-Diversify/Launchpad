@@ -46,6 +46,10 @@
         <name>Add_Comment</name>
     </quickActions>
     <quickActions>
+        <label><!-- Create Branch Internal Task --></label>
+        <name>Branch_Internal_Task_Create</name>
+    </quickActions>
+    <quickActions>
         <label><!-- CancelMoveMoneyRecurring --></label>
         <name>CancelMoveMoneyRecurring</name>
     </quickActions>

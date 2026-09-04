@@ -980,6 +980,12 @@
                 <identifier>c_fscRelMap</identifier>
             </componentInstance>
         </itemInstances>
+        <itemInstances>
+            <componentInstance>
+                <componentName>groupMembers</componentName>
+                <identifier>c_groupMembers</identifier>
+            </componentInstance>
+        </itemInstances>
         <name>facet-61578197-7a87-496c-a1df-b95baf1c4409</name>
         <type>Facet</type>
     </flexiPageRegions>

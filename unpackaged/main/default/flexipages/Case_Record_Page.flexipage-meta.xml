@@ -86,6 +86,16 @@
                             </visibilityRule>
                         </valueListItems>
                         <valueListItems>
+                            <value>Case.Branch_Internal_Task_Create</value>
+                            <visibilityRule>
+                                <criteria>
+                                    <leftValue>{!$User.Profile.UserType}</leftValue>
+                                    <operator>EQUAL</operator>
+                                    <rightValue>Standard</rightValue>
+                                </criteria>
+                            </visibilityRule>
+                        </valueListItems>
+                        <valueListItems>
                             <value>Case.Create_Home_Office_Task</value>
                             <visibilityRule>
                                 <booleanFilter>1 AND 2 AND 3</booleanFilter>

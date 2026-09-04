@@ -1,0 +1,51 @@
+<template>
+    <lightning-card title="Branch Internal Tasks">
+        <template lwc:if={hasTasks}>
+            <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                <thead>
+                    <tr class="slds-line-height_reset">
+                        <th scope="col" style="width: 40%;">
+                            <div class="slds-truncate">Subject</div>
+                        </th>
+                        <th scope="col">
+                            <div class="slds-truncate">Status</div>
+                        </th>
+                        <th scope="col">
+                            <div class="slds-truncate">Owner</div>
+                        </th>
+                        <th scope="col">
+                            <div class="slds-truncate">Completed Date</div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                   
+                    <template for:each={tasks} for:item="row">
+                        <tr key={row.Id}>
+                            <!-- Task row -->
+                                <td class="slds-truncate">
+                                    <div class="slds-grid" style="width:250px">
+                                        <div class="slds-grid slds-has-flexi-truncate">
+                                            <a  class="slds-truncate"
+                                                href="javascript:void(0);"
+                                                data-taskid={row.Id}
+                                                data-tasksub={row.Subject}
+                                                onclick={navigateToTask}>
+                                                {row.Subject}
+                                            </a>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{row.Status}</td>
+                                <td>{row.Owner.Name}</td>
+                                <td>{row.Completed_Date__c}</td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </template>
+        <template lwc:else>
+            <div class="slds-p-around_medium">No Tasks Found.</div>
+        </template>
+    </lightning-card>
+</template>

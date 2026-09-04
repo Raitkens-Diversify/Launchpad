@@ -3,9 +3,9 @@
     <fullName>Maestro_Display_Name1__c</fullName>
     <externalId>false</externalId>
     <formula>UPPER(LEFT(
-FinServ__FinancialAccount__r.FinServ__PrimaryOwner__r.FirstName + &quot; &quot; +
-IF(NOT(ISNULL(FinServ__FinancialAccount__r.FinServ__PrimaryOwner__r.MiddleName)), &quot; &quot; + FinServ__FinancialAccount__r.FinServ__PrimaryOwner__r.MiddleName + &quot; &quot;, &quot; &quot;) +
-FinServ__FinancialAccount__r.FinServ__PrimaryOwner__r.LastName,
+Wizard_Financial_Account__r.Primary_Owner__r.FirstName + &quot; &quot; +
+IF(NOT(ISNULL(Wizard_Financial_Account__r.Primary_Owner__r.MiddleName)), &quot; &quot; + Wizard_Financial_Account__r.Primary_Owner__r.MiddleName + &quot; &quot;, &quot; &quot;) +
+Wizard_Financial_Account__r.Primary_Owner__r.LastName,
 40
 ))</formula>
     <label>Maestro Display Name1</label>

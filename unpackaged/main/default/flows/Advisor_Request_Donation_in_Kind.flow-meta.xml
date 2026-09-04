@@ -134,10 +134,10 @@
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>varCase.null__NotFound</assignToReference>
+            <assignToReference>varCase.Submitted__c</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>Advisor_Request_Item_variable_id</elementReference>
+                <booleanValue>true</booleanValue>
             </value>
         </assignmentItems>
         <connector>
@@ -276,17 +276,17 @@
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>varCase.null__NotFound</assignToReference>
-            <operator>Assign</operator>
-            <value>
-                <elementReference>Advisor_Request_Item_variable_id</elementReference>
-            </value>
-        </assignmentItems>
-        <assignmentItems>
             <assignToReference>varCase.FinServ__Household__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>varHousehold.Id</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varCase.Submitted__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <booleanValue>true</booleanValue>
             </value>
         </assignmentItems>
         <connector>
@@ -1050,7 +1050,7 @@
             <targetReference>FA_Selection</targetReference>
         </connector>
     </start>
-    <status>InvalidDraft</status>
+    <status>Active</status>
     <variables>
         <name>Advisor_Request_Item_variable_id</name>
         <dataType>String</dataType>

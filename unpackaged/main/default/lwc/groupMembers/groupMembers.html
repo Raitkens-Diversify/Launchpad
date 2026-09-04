@@ -1,0 +1,115 @@
+<template>
+    <lightning-card>
+        <!-- Header -->
+        <div slot="title" class="slds-media slds-media_center">
+            <div class="slds-media__figure">
+                <lightning-icon icon-name="standard:household" size="small"></lightning-icon>
+            </div>
+            <div class="slds-media__body">
+                <h2 class="slds-card__header-link slds-text-heading_small slds-truncate font-bold">
+                    Group Members and Details ({memberCount})
+                </h2>
+            </div>
+        </div>
+        <div class="slds-p-horizontal_medium">
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </template>
+
+            <!-- Member Cards Grid -->
+            <div class="slds-grid slds-wrap slds-gutters">
+                <template for:each={members} for:item="member">
+                    <div key={member.id} class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_medium">
+                        <div class="member-card slds-box slds-p-around_none">
+                            
+                            <!-- Card Header -->
+                            <div class="slds-p-around_small slds-grid slds-grid_align-spread slds-grid_vertical-align-center border-bottom">
+                                <div class="slds-grid slds-grid_vertical-align-center">
+                                    <lightning-icon icon-name="standard:person_account" size="small" class="slds-m-right_x-small"></lightning-icon>
+                                    <a href="javascript:void(0);" data-id={member.accountId} onclick={navigateToRecord} class="slds-text-heading_small slds-m-right_x-small member-name">
+                                        {member.name}
+                                    </a>
+                                    <template if:true={member.isPrimary}>
+                                        <span class="slds-badge slds-badge_lightest badge-pill">Primary</span>
+                                    </template>
+                                </div>
+                                <lightning-button-menu alternative-text="Show menu" menu-alignment="right" icon-size="x-small">
+                                    <lightning-menu-item value="edit" label="Edit"></lightning-menu-item>
+                                    <lightning-menu-item value="remove" label="Remove"></lightning-menu-item>
+                                </lightning-button-menu>
+                            </div>
+
+                            <!-- Member Details -->
+                            <template if:true={isPersonAccount}>
+                            <div class="slds-p-around_small member-details">
+                                <div class="slds-grid slds-m-bottom_xx-small">
+                                    <div class="slds-size_1-of-3 slds-text-color_weak">Roles:</div>
+                                    <div class="slds-size_2-of-3">{member.role}</div>
+                                </div>
+                                <div class="slds-grid slds-m-bottom_xx-small">
+                                    <div class="slds-size_1-of-3 slds-text-color_weak">Tax ID:</div>
+                                    <div class="slds-size_2-of-3">{member.taxId}</div>
+                                </div>
+                                <div class="slds-grid slds-m-bottom_xx-small">
+                                    <div class="slds-size_1-of-3 slds-text-color_weak">Age:</div>
+                                    <div class="slds-size_2-of-3">{member.age}</div>
+                                </div>
+                                <div class="slds-grid slds-m-bottom_xx-small">
+                                    <div class="slds-size_1-of-3 slds-text-color_weak">Birthdate:</div>
+                                    <div class="slds-size_2-of-3">{member.birthdate}</div>
+                                </div>
+                                <div class="slds-grid slds-m-bottom_xx-small">
+                                    <div class="slds-size_1-of-3 slds-text-color_weak">Mobile:</div>
+                                    <div class="slds-size_2-of-3">{member.mobile}</div>
+                                </div>
+                                <div class="slds-grid slds-m-bottom_xx-small">
+                                    <div class="slds-size_1-of-3 slds-text-color_weak">Email:</div>
+                                    <div class="slds-size_2-of-3">
+                                        <a href={member.emailMailto}>{member.email}</a>
+                                    </div>
+                                </div>
+                            </div>
+                            </template>
+                            <template if:false={isPersonAccount}>
+                            <div class="slds-p-around_small member-details">
+                                <div class="slds-grid slds-m-bottom_xx-small">
+                                    <div class="slds-size_1-of-3 slds-text-color_weak">Roles:</div>
+                                    <div class="slds-size_2-of-3">{member.role}</div>
+                                </div>
+                                <div class="slds-grid slds-m-bottom_xx-small">
+                                    <div class="slds-size_1-of-3 slds-text-color_weak">Tax ID:</div>
+                                    <div class="slds-size_2-of-3">{member.taxId}</div>
+                                </div>
+                                <div class="slds-grid slds-m-bottom_xx-small">
+                                    <div class="slds-size_1-of-3 slds-text-color_weak">Date of Formation:</div>
+                                    <div class="slds-size_2-of-3">{member.dateFormation}</div>
+                                </div>
+                                </div>
+                            </template>
+                            <!-- Activity Footer Bar -->
+                            <div class="slds-p-around_x-small card-footer slds-grid slds-grid_align-space">
+                                <div class="slds-grid slds-grid_vertical-align-center">
+                                    <lightning-icon icon-name="utility:event" size="xx-small" class="slds-m-right_xx-small footer-icon"></lightning-icon>
+                                    <span class="slds-text-body_small">{member.events} Events</span>
+                                </div>
+                                <div class="slds-grid slds-grid_vertical-align-center">
+                                    <lightning-icon icon-name="utility:task" size="xx-small" class="slds-m-right_xx-small footer-icon"></lightning-icon>
+                                    <span class="slds-text-body_small">{member.tasks} Tasks</span>
+                                </div>
+                                <div class="slds-grid slds-grid_vertical-align-center">
+                                    <lightning-icon icon-name="utility:call" size="xx-small" class="slds-m-right_xx-small footer-icon"></lightning-icon>
+                                    <span class="slds-text-body_small">{member.calls} Calls</span>
+                                </div>
+                                <div class="slds-grid slds-grid_vertical-align-center">
+                                    <lightning-icon icon-name="utility:email" size="xx-small" class="slds-m-right_xx-small footer-icon"></lightning-icon>
+                                    <span class="slds-text-body_small">{member.emails} Emails</span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </lightning-card>
+</template>
