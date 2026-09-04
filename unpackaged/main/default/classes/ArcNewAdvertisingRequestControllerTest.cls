@@ -10,7 +10,7 @@ private class ArcNewAdvertisingRequestControllerTest {
 
   @IsTest
   static void searchAccountsReturnsMatchingAccountsByName() {
-    insert new Account(Name = 'ARCQA Advertising Household');
+    insert new Account(Name = 'ARCQA Advertising Household', Classification__c = 'Unclassified');
 
     Test.startTest();
     List<ArcNewAdvertisingRequestController.AccountOption> results = ArcNewAdvertisingRequestController.searchAccounts(
@@ -40,7 +40,7 @@ private class ArcNewAdvertisingRequestControllerTest {
 
   @IsTest
   static void createAdvertisingRequestCreatesCaseFromAccount() {
-    Account household = new Account(Name = 'ARCQA Advertising Household 2');
+    Account household = new Account(Name = 'ARCQA Advertising Household 2', Classification__c = 'Unclassified');
     insert household;
 
     Test.startTest();

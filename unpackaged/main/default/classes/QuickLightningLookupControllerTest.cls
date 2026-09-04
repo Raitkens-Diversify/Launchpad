@@ -18,7 +18,7 @@ public class QuickLightningLookupControllerTest {
 
 	static testMethod void myTest1() {
 
-		Account acct = new Account(Name = 'Test Account');
+		Account acct = new Account(Name = 'Test Account', Classification__c = 'Unclassified');
 		insert acct;
 		QuickLightningLookupController.LookupRecords res = QuickLightningLookupController.getRecords('Account', '', 'Name', '', 'Name like \'test%\'','','');
 		System.assertEquals(null,res);

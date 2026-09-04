@@ -4,7 +4,7 @@ private class MainTrackTasksControllerTest {
     @isTest
     static void testGetTasks() {
         // Create parent record (e.g., Account)
-        Account acc = new Account(Name = 'Test Account');
+        Account acc = new Account(Name = 'Test Account', Classification__c = 'Unclassified');
         insert acc;
 		
         //Create Task Template

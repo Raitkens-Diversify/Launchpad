@@ -31,7 +31,7 @@ private class ArcWelcomeControllerTest {
 
         // Grant FLS on Has_Seen_Welcome__c via the shipped permission set, the
         // same way a real Arc user is provisioned.
-        PermissionSet ps = [SELECT Id FROM PermissionSet WHERE Name = 'ArcHelpCenter' LIMIT 1];
+        PermissionSet ps = [SELECT Id FROM PermissionSet WHERE Name = 'NexSHelpCenter' LIMIT 1];
         insert new PermissionSetAssignment(AssigneeId = u.Id, PermissionSetId = ps.Id);
 
         Test.startTest();

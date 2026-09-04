@@ -40,7 +40,7 @@ private class TaskSlaTriggerHandlerTest {
 
     @IsTest
     static void test_AfterInsertStartsPitStop() {
-        Account acc = new Account(Name = 'Task SLA Pit Stop Account');
+        Account acc = new Account(Name = 'Task SLA Pit Stop Account', Classification__c = 'Unclassified');
         insert acc;
         Case caseRecord = new Case(
             Subject = 'Task SLA Pit Stop',
@@ -76,7 +76,7 @@ private class TaskSlaTriggerHandlerTest {
 
     @IsTest
     static void test_AfterUpdateCompletesPitStopAndSetsSubmissionStart() {
-        Account acc = new Account(Name = 'Task SLA Update Account');
+        Account acc = new Account(Name = 'Task SLA Update Account', Classification__c = 'Unclassified');
         insert acc;
         Case caseRecord = new Case(
             Subject = 'Task SLA Update',

@@ -74,19 +74,6 @@ Advisor_Group__c = aGrp.Id*/);
     }
     
     @isTest
-    private static void testOnUpdate_changeRelatedOwner() {
-        Id faTeamId = [SELECT Id FROM Financial_Advisor_Team__c WHERE Name = 'Test Fin Advisor Team'][0].Id;
-        Id grpId = [SELECT Id FROM Group WHERE Name = 'Test Group'][0].Id;
-        Financial_Advisor_Team_Member__c fatmember = [SELECT Id, Active__c FROM Financial_Advisor_Team_Member__c][0];
-        fatmember.Active__c = false;
-        Test.startTest();
-        update fatmember;
-        Test.stopTest();
-        System.AssertEquals(false, fatmember.Active__c);
-        
-    }
-    
-    @isTest
     private static void testOnInsert_manageGroupMember(){ 
         Id faTeamId = [SELECT Id, Public_Group_Id__c FROM Financial_Advisor_Team__c WHERE Name='Test Fin Advisor Team'][0].Id;
         Id grpId = [SELECT Id, Public_Group_Id__c FROM Financial_Advisor_Team__c WHERE Name='Test Fin Advisor Team'][0].Public_Group_Id__c;

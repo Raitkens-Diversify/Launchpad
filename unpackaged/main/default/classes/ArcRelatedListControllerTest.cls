@@ -19,7 +19,7 @@ private class ArcRelatedListControllerTest {
   static void setup() {
     // Check_Deposit__c.Financial_Account__c is required, and a financial
     // account in turn requires a primary owner, so the fixture starts there.
-    Account owner = new Account(Name = 'Related List Owner');
+    Account owner = new Account(Name = 'Related List Owner', Classification__c = 'Unclassified');
     insert owner;
 
     FinServ__FinancialAccount__c account = new FinServ__FinancialAccount__c(

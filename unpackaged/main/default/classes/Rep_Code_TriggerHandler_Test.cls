@@ -14,8 +14,8 @@ public class Rep_Code_TriggerHandler_Test {
             .getRecordTypeId();
         
         Id personAccountRecordTypeId = Schema.SObjectType.Account
-            .getRecordTypeInfosByName()
-            .get('Person Account')
+            .getRecordTypeInfosByDeveloperName()
+            .get('PersonAccount')
             .getRecordTypeId();
         
         /*

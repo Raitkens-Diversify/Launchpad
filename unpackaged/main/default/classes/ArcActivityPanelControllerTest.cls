@@ -31,7 +31,7 @@ private class ArcActivityPanelControllerTest {
 
   /** The same bare-Account recipe FscDataTestDataFactory.createRootAccount uses. */
   private static Account makeAccount() {
-    Account record = new Account(Name = 'Activity Panel Test Account');
+    Account record = new Account(Name = 'Activity Panel Test Account', Classification__c = 'Unclassified');
     insert record;
     return record;
   }

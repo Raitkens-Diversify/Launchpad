@@ -38,7 +38,7 @@ public with sharing class LightningSelfRegisterControllerTest {
  /* Verifies SelfRegistration flow with an accounId that is created within the test */
  @IsTest
  static void testSelfRegisterWithCreatedAccount() {
-  Account acc = new Account(name = 'test acc');
+  Account acc = new Account(name = 'test acc', Classification__c = 'Unclassified');
   insert acc;
   List < Account > accounts = [SELECT Id FROM Account LIMIT 1];
   System.assert(!accounts.isEmpty(), 'There must be at least one account in this environment!');

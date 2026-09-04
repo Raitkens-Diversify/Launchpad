@@ -17,7 +17,7 @@ public class DocuSign_OppEnvelopesTest {
         System.runAs(testuser){
             
             String householdRecTypeId = Schema.SObjectType.Account.getRecordTypeInfosByName().get('Household').getRecordTypeId();
-            String paRecTypeId = Schema.SObjectType.Account.getRecordTypeInfosByName().get('Person Account').getRecordTypeId();
+            String paRecTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName().get('PersonAccount').getRecordTypeId();
             List<Account> accList = new List<Account>();
             accList.add(new Account(Name = 'Test Account', RecordTypeId = householdRecTypeId, Type ='Other', Classification__c = 'Vendor;'));
             accList.add(new Account(FirstName = 'Test', LastName = 'Person Account 1', PersonEmail = 'test@test1.com', RecordTypeId = paRecTypeId, Type ='Other', Classification__c = 'Vendor;'));

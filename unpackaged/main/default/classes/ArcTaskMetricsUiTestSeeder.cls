@@ -166,7 +166,8 @@ public with sharing class ArcTaskMetricsUiTestSeeder {
 
     Account teamAccount = new Account(
       Name = SEED_MARKER + 'Household',
-      Financial_Advisor_Team__c = team.Id
+      Financial_Advisor_Team__c = team.Id,
+      Classification__c = 'Unclassified'
     );
     insert teamAccount;
     result.accountId = teamAccount.Id;

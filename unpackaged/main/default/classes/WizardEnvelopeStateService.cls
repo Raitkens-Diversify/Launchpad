@@ -1127,6 +1127,7 @@ return result;
                 WHERE Household__c = :householdId OR Id IN :envelopeFinAccountIds
                 WITH USER_MODE
             ];
+            System.debug('finAccts from WizardEnvelopeStateService: ' + finAccounts);
             
             List<Service__c> services = [
                 SELECT Id, Name, Type__c, Submitted__c

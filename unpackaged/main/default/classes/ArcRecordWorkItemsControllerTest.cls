@@ -35,6 +35,7 @@ private class ArcRecordWorkItemsControllerTest {
       FirstName = 'Work',
       LastName = 'Member',
       Household__c = household.Id,
+      Classification__c = 'Unclassified',
       RecordTypeId = personRecordTypeId()
     );
     insert member;

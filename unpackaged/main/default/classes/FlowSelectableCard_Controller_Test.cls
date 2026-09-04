@@ -2,8 +2,8 @@
 public class FlowSelectableCard_Controller_Test{
 	@testSetup
 	public static void makeData(){
-	Account accs1 = new Account(FirstName='Account',LastName='Test1');
-    Account accs2 = new Account(FirstName='Account',LastName='Test2');
+	Account accs1 = new Account(FirstName='Account',LastName='Test1',Classification__c='Unclassified');
+    Account accs2 = new Account(FirstName='Account',LastName='Test2',Classification__c='Unclassified');
 	insert accs1;
     insert accs2;																																												
 	}

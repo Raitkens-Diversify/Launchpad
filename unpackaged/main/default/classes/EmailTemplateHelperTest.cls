@@ -6,7 +6,7 @@ public class EmailTemplateHelperTest {
         
         List<User> users  = [Select Id from User];
         
-        Account finservHousehold = new Account(Name = 'Finserv Account');
+        Account finservHousehold = new Account(Name = 'Finserv Account', Classification__c = 'Unclassified');
         insert finservHousehold;
         
         Contact con = new Contact(FirstName = 'John' , LastName = 'Kovlan');

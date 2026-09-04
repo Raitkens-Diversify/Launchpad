@@ -3,7 +3,7 @@ private class BranchPitStopControllerTest {
     @IsTest
     static void testGetTasks_FiltersByRecordAndFlagAndOrdersByCreatedDateDesc() {
         // Parent record as WhatId (using Account as in reference)
-        Account acc = new Account(Name = 'Test Account');
+        Account acc = new Account(Name = 'Test Account', Classification__c = 'Unclassified');
         insert acc;
 
         // Minimal related setup to allow relationship fields in query
@@ -66,7 +66,7 @@ private class BranchPitStopControllerTest {
         );
         insert t3;
 
-        Account otherAcc = new Account(Name = 'Other');
+        Account otherAcc = new Account(Name = 'Other', Classification__c = 'Unclassified');
         insert otherAcc;
 
         Task t4 = new Task(

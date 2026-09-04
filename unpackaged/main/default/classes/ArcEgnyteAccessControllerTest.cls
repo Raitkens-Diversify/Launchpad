@@ -26,7 +26,7 @@ private class ArcEgnyteAccessControllerTest {
 
   @IsTest
   static void carriesTheRecordId() {
-    Account record = new Account(Name = 'Egnyte Access Test Account');
+    Account record = new Account(Name = 'Egnyte Access Test Account', Classification__c = 'Unclassified');
     insert record;
 
     Test.startTest();

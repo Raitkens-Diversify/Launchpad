@@ -192,7 +192,7 @@ private class ArcGlobalSearchControllerTest {
   static void capsPreviewRowsPerCategoryButKeepsFullCount() {
     List<Account> extras = new List<Account>();
     for (Integer i = 0; i < 5; i++) {
-      extras.add(new Account(Name = 'Extra Test Account ' + i));
+      extras.add(new Account(Name = 'Extra Test Account ' + i, Classification__c = 'Unclassified'));
     }
     insert extras;
 
@@ -232,7 +232,7 @@ private class ArcGlobalSearchControllerTest {
   static void fullSearchReturnsEveryRowNotJustAPreview() {
     List<Account> extras = new List<Account>();
     for (Integer i = 0; i < 5; i++) {
-      extras.add(new Account(Name = 'Extra Test Account ' + i));
+      extras.add(new Account(Name = 'Extra Test Account ' + i, Classification__c = 'Unclassified'));
     }
     insert extras;
 

@@ -14,9 +14,9 @@ public class FinServ_ContactContact_TriggerTest {
         insert advisorTeam;
         
         // Create Accounts
-        Account acc1 = new Account(Name = 'Test Account 1');
+        Account acc1 = new Account(Name = 'Test Account 1', Classification__c = 'Unclassified');
         insert acc1;
-        Account acc2 = new Account(Name = 'Test Account 2', Financial_Advisor_Team__c = advisorTeam.Id);
+        Account acc2 = new Account(Name = 'Test Account 2', Financial_Advisor_Team__c = advisorTeam.Id, Classification__c = 'Unclassified');
         insert acc2;
         
         // Create Related Contacts

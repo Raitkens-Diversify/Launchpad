@@ -12,7 +12,7 @@ private class CaseSlaTriggerHandlerTest {
 
     @IsTest
     static void test_BeforeUpdateAccumulatesPitstopMinutes() {
-        Account acc = new Account(Name = 'Case SLA Minutes Account');
+        Account acc = new Account(Name = 'Case SLA Minutes Account', Classification__c = 'Unclassified');
         insert acc;
         Case caseRecord = new Case(
             Subject = 'Case SLA Minutes',
@@ -54,7 +54,7 @@ private class CaseSlaTriggerHandlerTest {
 
     @IsTest
     static void test_BeforeDeleteClearsEntitlement() {
-        Account acc = new Account(Name = 'Case SLA Delete Account');
+        Account acc = new Account(Name = 'Case SLA Delete Account', Classification__c = 'Unclassified');
         insert acc;
 
         Entitlement entitlementRecord = createActiveEntitlement(acc.Id);

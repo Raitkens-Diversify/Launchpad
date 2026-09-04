@@ -9,6 +9,7 @@ private class ArcRecordDetailControllerTest {
     Account member = new Account(
       FirstName = 'Jane',
       LastName = 'Doe',
+      Classification__c = 'Unclassified',
       RecordTypeId = Schema.SObjectType.Account
         .getRecordTypeInfosByDeveloperName()
         .get('PersonAccount')
@@ -61,6 +62,7 @@ private class ArcRecordDetailControllerTest {
 
     Account business = new Account(
       Name = 'Acme Corp',
+      Classification__c = 'Unclassified',
       RecordTypeId = businessRecordTypeId
     );
     insert business;
@@ -208,6 +210,7 @@ private class ArcRecordDetailControllerTest {
       FirstName = 'Regulated',
       LastName = 'Member',
       Household__c = household.Id,
+      Classification__c = 'Unclassified',
       RecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
         .get('PersonAccount')
         .getRecordTypeId()
@@ -283,6 +286,7 @@ private class ArcRecordDetailControllerTest {
       FirstName = 'Submitted',
       LastName = 'Member',
       Submitted__c = true,
+      Classification__c = 'Unclassified',
       RecordTypeId = Schema.SObjectType.Account
         .getRecordTypeInfosByDeveloperName()
         .get('PersonAccount')
@@ -506,6 +510,7 @@ private class ArcRecordDetailControllerTest {
     Account member = new Account(
       FirstName = 'Before',
       LastName = 'Save',
+      Classification__c = 'Unclassified',
       RecordTypeId = Schema.SObjectType.Account
         .getRecordTypeInfosByDeveloperName()
         .get('PersonAccount')
@@ -538,6 +543,7 @@ private class ArcRecordDetailControllerTest {
   static void saveNoOpWhenFieldsEmpty() {
     Account member = new Account(
       LastName = 'Empty',
+      Classification__c = 'Unclassified',
       RecordTypeId = Schema.SObjectType.Account
         .getRecordTypeInfosByDeveloperName()
         .get('PersonAccount')
@@ -568,6 +574,7 @@ private class ArcRecordDetailControllerTest {
 
     Account business = new Account(
       Name = 'Acme Corp',
+      Classification__c = 'Unclassified',
       RecordTypeId = businessRecordTypeId
     );
     insert business;
@@ -605,6 +612,7 @@ private class ArcRecordDetailControllerTest {
 
     Account business = new Account(
       Name = 'Birthdate Corp',
+      Classification__c = 'Unclassified',
       RecordTypeId = businessRecordTypeId
     );
     insert business;
@@ -636,6 +644,7 @@ private class ArcRecordDetailControllerTest {
     Account member = new Account(
       FirstName = 'Keep',
       LastName = 'Name',
+      Classification__c = 'Unclassified',
       RecordTypeId = Schema.SObjectType.Account
         .getRecordTypeInfosByDeveloperName()
         .get('PersonAccount')
@@ -670,6 +679,7 @@ private class ArcRecordDetailControllerTest {
   static void saveThrowsWhenNoEditableFieldsRemain() {
     Account member = new Account(
       LastName = 'NoFields',
+      Classification__c = 'Unclassified',
       RecordTypeId = Schema.SObjectType.Account
         .getRecordTypeInfosByDeveloperName()
         .get('PersonAccount')
@@ -702,6 +712,7 @@ private class ArcRecordDetailControllerTest {
 
     Account trust = new Account(
       Name = 'Family Trust',
+      Classification__c = 'Unclassified',
       RecordTypeId = trustRecordTypeId
     );
     insert trust;
@@ -727,6 +738,7 @@ private class ArcRecordDetailControllerTest {
 
     Account trust = new Account(
       Name = 'Trust Before',
+      Classification__c = 'Unclassified',
       RecordTypeId = trustRecordTypeId
     );
     insert trust;

@@ -9,7 +9,6 @@ public without sharing class FATMember_TriggerHandler {
     
     public void isBeforeUpdate(Map<Id, Financial_Advisor_Team_Member__c> newMap, Map<Id, Financial_Advisor_Team_Member__c> oldMap){
         setPermissionOnRule(newMap.values(), oldMap);
-        changeRelatedOwner(newMap.values(), oldMap);
         handleErrorCondition(newMap, oldMap);
     }
     
@@ -58,70 +57,6 @@ public without sharing class FATMember_TriggerHandler {
             }
             else if(fatm.Role__c == 'Associate Advisor' && (oldMap == null || fatm.Role__c != oldMap.get(fatm.Id).Role__c)) {
                 fatm.Associate_Advisor__c = true;
-            }
-        }
-    }
-    
-    private void changeRelatedOwner(List<Financial_Advisor_Team_Member__c> newList, Map<Id, Financial_Advisor_Team_Member__c> oldMap){
-        Set<Id> finAdvisorTeamIdSet = new Set<Id>();
-        Set<Id> userIdSet = new Set<Id>();
-        for(Financial_Advisor_Team_Member__c record : newList){
-            if(oldMap != null && !record.Active__c && record.Active__c != oldMap.get(record.id).Active__c
-               && oldMap.get(record.id).Role__c == 'Financial Advisor' && oldMap.get(record.id).User__c != null) {
-                   finAdvisorTeamIdSet.add(record.Financial_Advisor_Team__c);
-                   userIdSet.add(oldMap.get(record.id).User__c);
-               }
-        }
-        if(!finAdvisorTeamIdSet.isEmpty()){            
-            List<Financial_Advisor_Team__c> finAdTeamList = [SELECT Id, (SELECT ID, User__c FROM Financial_Advisor_Team_Members__r WHERE Active__c = true AND Role__c = 'Financial Advisor' AND Id NOT IN : oldMap.keySet()) FROM Financial_Advisor_Team__c WHERE Id IN : finAdvisorTeamIdSet];
-            List<Finserv__FinancialAccount__c> finAccountList = [SELECT Id, OwnerId, Financial_Advisor_Team__c FROM Finserv__FinancialAccount__c WHERE OwnerId IN: userIdSet];
-            List<Account> accountList = [SELECT Id, OwnerId, Financial_Advisor_Team__c FROM Account WHERE OwnerId IN: userIdSet];
-            List<Finserv__FinancialAccount__c> updateFinAccList = new List<Finserv__FinancialAccount__c>();
-            List<Account> updateAccList = new List<Account>();
-            if(!finAdTeamList.isEmpty()){
-                Map<Id, Id> finAdTeamIdWithUserIdMap = new Map<Id, Id>();
-                for(Financial_Advisor_Team__c finAdTeamRecord : finAdTeamList) {
-                    List<Financial_Advisor_Team_Member__c> finAdTeamMemberList = finAdTeamRecord.Financial_Advisor_Team_Members__r;
-                    if(!finAdTeamMemberList.isEmpty()) {
-                        if(finAdTeamMemberList[0].User__c != null) {
-                            finAdTeamIdWithUserIdMap.put(finAdTeamRecord.Id, finAdTeamMemberList[0].User__c);
-                        }
-                    }
-                }
-                
-                for(Financial_Advisor_Team_Member__c record : newList){
-                    if(oldMap != null && !record.Active__c && record.Active__c != oldMap.get(record.id).Active__c
-                       && oldMap.get(record.id).Role__c == 'Financial Advisor') {
-                           if(!finAccountList.isEmpty()){
-                               for(Finserv__FinancialAccount__c finAccount : finAccountList){
-                                   if(finAccount.Financial_Advisor_Team__c == record.Financial_Advisor_Team__c
-                                      && oldMap.get(record.id).User__c == finAccount.OwnerId){
-                                          if(finAdTeamIdWithUserIdMap.get(record.Financial_Advisor_Team__c) != null){
-                                              finAccount.OwnerId = finAdTeamIdWithUserIdMap.get(record.Financial_Advisor_Team__c);
-                                              updateFinAccList.add(finAccount);
-                                          }
-                                      }
-                               }
-                           }
-                           if(!accountList.isEmpty()){
-                               for(Account account : accountList){
-                                   if(account.Financial_Advisor_Team__c == record.Financial_Advisor_Team__c
-                                      && oldMap.get(record.id).User__c == account.OwnerId){
-                                          if(finAdTeamIdWithUserIdMap.get(record.Financial_Advisor_Team__c) != null){
-                                              account.OwnerId = finAdTeamIdWithUserIdMap.get(record.Financial_Advisor_Team__c);
-                                              updateAccList.add(account);
-                                          }
-                                      }
-                               }
-                           }
-                       }
-                }
-                if(!updateFinAccList.isEmpty()){
-                    update updateFinAccList;
-                }
-                if(!updateAccList.isEmpty()){
-                    update updateAccList;
-                }
             }
         }
     }

@@ -42,8 +42,8 @@ public class ContactContactRel_TriggerHandlerTest {
         
         System.runAs(usrList[1]){
             List<Account> contacts = new List<Account>();
-            contacts.add(new Account(LastName = 'Test Contact1', PersonEmail = 'test.test@dfpg.com')) ;
-            contacts.add(new Account(LastName = 'Test Contact2', PersonEmail = 'test2.test@dfpg.com')) ;
+            contacts.add(new Account(LastName = 'Test Contact1', PersonEmail = 'test.test@dfpg.com', Classification__c = 'Unclassified')) ;
+            contacts.add(new Account(LastName = 'Test Contact2', PersonEmail = 'test2.test@dfpg.com', Classification__c = 'Unclassified')) ;
             insert contacts;
         }
     }

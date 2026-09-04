@@ -10,7 +10,7 @@
 private class ArcCheckLogControllerTest {
   @TestSetup
   static void setup() {
-    Account client = new Account(Name = 'Kelby Test Client');
+    Account client = new Account(Name = 'Kelby Test Client', Classification__c = 'Unclassified');
     insert client;
 
     FinServ__FinancialAccount__c account = new FinServ__FinancialAccount__c(

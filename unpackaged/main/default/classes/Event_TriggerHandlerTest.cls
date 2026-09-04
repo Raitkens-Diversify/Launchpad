@@ -6,7 +6,7 @@
 private class Event_TriggerHandlerTest {
   @IsTest
   static void afterInsertPublishesEventChangeContext() {
-    Account household = new Account(Name = 'Trigger Event Household');
+    Account household = new Account(Name = 'Trigger Event Household', Classification__c = 'Unclassified');
     insert household;
 
     Test.startTest();
@@ -25,7 +25,7 @@ private class Event_TriggerHandlerTest {
 
   @IsTest
   static void afterUpdatePublishesTrackedFieldChanges() {
-    Account household = new Account(Name = 'Trigger Update Household');
+    Account household = new Account(Name = 'Trigger Update Household', Classification__c = 'Unclassified');
     insert household;
 
     Event eventRecord = new Event(
