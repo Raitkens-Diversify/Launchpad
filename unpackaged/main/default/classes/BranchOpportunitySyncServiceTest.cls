@@ -34,7 +34,7 @@ private class BranchOpportunitySyncServiceTest {
             Number_of_Staff__c = 10,
             Office_Team_Structure__c = 'Solo advisor plus staff',
             Pain_Points__c = 'Technology',
-            Potential_Service__c = 'RIA 1099',
+            Potential_Service__c = 'Financial Planning', // 'RIA 1099' was deactivated on this picklist
             Required_to_Make_a_Move__c = 'Better economics',
             Specialties__c = 'Planning'
         );
@@ -86,7 +86,7 @@ private class BranchOpportunitySyncServiceTest {
         ag.Notes__c = 'Updated during nurture';
         ag.Number_of_Advisors__c = 7;
         ag.Total_AUM__c = 125000000;
-        ag.Potential_Service__c = 'RIA W2'; // restricted-picklist path, Branch-RT-valid value
+        ag.Potential_Service__c = 'Diversify Asset Management'; // restricted-picklist path, active value ('RIA W2' was deactivated)
         update ag;
         Test.stopTest();
 
@@ -97,7 +97,7 @@ private class BranchOpportunitySyncServiceTest {
         Assert.areEqual('Updated during nurture', result.Notes__c, 'AG -> Opp Notes');
         Assert.areEqual(7, result.Number_of_Advisors__c, 'AG -> Opp Number of Advisors');
         Assert.areEqual(125000000, result.Total_AUM__c, 'AG -> Opp Total AUM');
-        Assert.areEqual('RIA W2', result.Potential_Service__c, 'AG -> Opp restricted picklist');
+        Assert.areEqual('Diversify Asset Management', result.Potential_Service__c, 'AG -> Opp restricted picklist');
     }
 
     @isTest

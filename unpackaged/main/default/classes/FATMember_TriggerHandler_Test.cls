@@ -31,7 +31,7 @@ Advisor_Group__c = aGrp.Id*/);
             Group grp = new Group(Name='Test Group');
             insert grp;
             
-            Id recTypeId = Schema.SObjectType.Account.getRecordTypeInfosByName().get('Individual').getRecordTypeId();
+            Id recTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName().get('IndustriesIndividual').getRecordTypeId();
             List<Account> accList = new List<Account>();
             Account acc = new Account(Name = 'Primary Owner', recordTypeId = recTypeId, Type ='Other');
             Account acc1 = new Account(Name = 'Joint Owner', recordTypeId = recTypeId, Type ='Other');

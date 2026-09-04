@@ -7,7 +7,7 @@ public class Batch_UpdateFATeam_Test {
         List<Financial_Advisor_Team__c> fatTeam=new List<Financial_Advisor_Team__c>();
         List<Rep_Code__c> repCodeList=new List<Rep_Code__c>();
         List<FinServ__FinancialAccount__c> finAccountList=new List<FinServ__FinancialAccount__c>();
-       	Id recTypeId=Schema.SObjectType.Account.getRecordTypeInfosByName().get('Individual').getRecordTypeId();
+       	Id recTypeId=Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName().get('IndustriesIndividual').getRecordTypeId();
         
         Account acc=new Account(Name='Primary Owner',RecordTypeId=recTypeId, Type = 'Other');
         Account acct=new Account(Name='Joint Owner',RecordTypeId=recTypeId, Type = 'Other');

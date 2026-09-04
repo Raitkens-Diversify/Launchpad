@@ -15,7 +15,7 @@ private class EnvelopeActionCaseControllerTest {
         insert new Financial_Account__c(Name = 'Wizard FA', Managed_Account_Platform__c = 'AMS');
         insert new Envelope__c(Name = 'Test Envelope', Status__c = 'In Progress');
         // A member carrying values the original snapshot can pick up.
-        insert new Account(Name = 'Wizard Member', BillingCity = 'Old Town');
+        insert new Account(Name = 'Wizard Member', BillingCity = 'Old Town', Classification__c = 'Unclassified');
     }
 
     private static Id faId() {
@@ -106,30 +106,20 @@ private class EnvelopeActionCaseControllerTest {
         Assert.areEqual(envelopeId(), links[0].Envelope__c);
     }
 
+    // Third Party Money Movement was removed from ACTION_CASE_SPECS (it is no longer one of the
+    // four registered account action types), so it now falls through the same unrouted path as any
+    // other unrecognized sourceId. This replaces the old assertion that a Case was created for it,
+    // which stopped being true once the spec was retired and started failing with a
+    // "List has no rows for assignment to SObject" query error on the now-empty caseId.
     @isTest
-    static void thirdPartyMoneyMovementCaseIsAttributedAndLinked() {
+    static void thirdPartyMoneyMovementIsNoLongerARoutableAction() {
         Test.startTest();
         String caseId = EnvelopeActionCaseController.saveAccountActionCase(
             faId(), new Map<String, Object>(), envelopeId(), 'Third Party Money Movement');
         Test.stopTest();
 
-        Case created = [
-            SELECT Type, Subject, Origin, Status, Needs_Principal_Review__c,
-                Wizard_Financial_Account__c, RecordTypeId
-            FROM Case
-            WHERE Id = :caseId
-        ];
-        Assert.areEqual('Third Party Money Movement', created.Type);
-        Assert.areEqual('Third Party Money Movement', created.Subject);
-        Assert.areEqual('Wizard', created.Origin);
-        Assert.areEqual('New', created.Status);
-        Assert.isTrue(created.Needs_Principal_Review__c,
-            'Third party money movement always needs a principal review.');
-        Assert.areEqual(faId(), created.Wizard_Financial_Account__c);
-        Assert.isNotNull(created.RecordTypeId, 'Record type comes from Wizard_Flow_Values__mdt.');
-
-        Assert.areEqual(1, [SELECT COUNT() FROM Envelope_Content__c WHERE Case__c = :caseId],
-            'The case joins the envelope through Envelope_Content__c.');
+        Assert.areEqual('', caseId,
+            'Third Party Money Movement is no longer a registered action case spec.');
     }
 
     // The closure reason is an interview answer, not create-time input. The create path used to read
@@ -351,6 +341,7 @@ private class EnvelopeActionCaseControllerTest {
         Test.startTest();
         WizardEnvelopeStateService.saveProposedCaseFields(
             caseId,
+            memberId(),
             new Map<String, Object>{ 'BillingCity' => 'Old Town' }
         );
         Test.stopTest();

@@ -4,7 +4,7 @@
  * Org prerequisites: custom metadata records cannot be inserted from tests,
  * but deployed records ARE visible to tests without SeeAllData. The getTour
  * tests therefore depend on the source-deployed `nexus_help` sample tour
- * (Tutorial_Tour.nexus_help + Tutorial_Step.nexus_help_1..4). If those records
+ * (Tutorial_Tour.nexus_help + Tutorial_Step.nexus_help_1..5). If those records
  * are removed from the org, update or remove those tests.
  */
 @isTest
@@ -22,7 +22,7 @@ private class TutorialTourControllerTest {
         System.assertEquals(SAMPLE_KEY, tour.tourKey);
         System.assertEquals(true, tour.active);
         System.assertNotEquals(null, tour.version);
-        System.assertEquals(4, tour.steps.size(), 'nexus_help ships with 4 active steps');
+        System.assertEquals(5, tour.steps.size(), 'nexus_help ships with 5 active steps');
 
         Integer previousOrder = 0;
         for (TutorialTourController.StepDTO step : tour.steps) {

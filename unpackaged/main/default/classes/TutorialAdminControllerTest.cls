@@ -205,14 +205,14 @@ private class TutorialAdminControllerTest {
 
     @isTest
     static void publishDeactivatesOrphanedSteps() {
-        // Import the deployed 4-step nexus_help tour, trim it to 2 steps, then
-        // republish: steps _3 and _4 must be re-emitted deactivated.
+        // Import the deployed 5-step nexus_help tour, trim it to 2 steps, then
+        // republish: steps _3, _4, and _5 must be re-emitted deactivated.
         Id tourId = TutorialAdminController.importFromPublished('nexus_help');
         List<Tutorial_Step_Draft__c> steps = [
             SELECT Id FROM Tutorial_Step_Draft__c WHERE Tour__c = :tourId ORDER BY Order__c ASC
         ];
-        System.assertEquals(4, steps.size());
-        delete new List<Tutorial_Step_Draft__c>{ steps[2], steps[3] };
+        System.assertEquals(5, steps.size());
+        delete new List<Tutorial_Step_Draft__c>{ steps[2], steps[3], steps[4] };
 
         MockDeployer mock = new MockDeployer();
         TutorialAdminController.deployer = mock;
@@ -222,11 +222,12 @@ private class TutorialAdminControllerTest {
         Test.stopTest();
 
         Map<String, Metadata.CustomMetadata> byName = indexContainer(mock.captured);
-        System.assertEquals(5, byName.size(), 'Tour + 2 live steps + 2 orphan deactivations');
+        System.assertEquals(6, byName.size(), 'Tour + 2 live steps + 3 orphan deactivations');
         System.assertEquals(true, valueOf(byName.get('Tutorial_Step.nexus_help_1'), 'Active__c'));
         System.assertEquals(true, valueOf(byName.get('Tutorial_Step.nexus_help_2'), 'Active__c'));
         System.assertEquals(false, valueOf(byName.get('Tutorial_Step.nexus_help_3'), 'Active__c'));
         System.assertEquals(false, valueOf(byName.get('Tutorial_Step.nexus_help_4'), 'Active__c'));
+        System.assertEquals(false, valueOf(byName.get('Tutorial_Step.nexus_help_5'), 'Active__c'));
         System.assertNotEquals(null, valueOf(byName.get('Tutorial_Step.nexus_help_3'), 'Target_Selector__c'),
             'Orphan re-emits its existing field values (record deploy is full-replace)');
     }
@@ -266,7 +267,7 @@ private class TutorialAdminControllerTest {
         TutorialAdminController.TourDraftDTO dto = TutorialAdminController.getDraftTour(tourId);
         System.assertEquals('nexus_help', dto.tourKey);
         System.assertEquals(true, dto.published, 'Imported drafts mirror published state');
-        System.assertEquals(4, dto.steps.size());
+        System.assertEquals(5, dto.steps.size());
         System.assertEquals('[data-tour-id="nexus-search"]', dto.steps[0].targetSelector);
 
         try {
