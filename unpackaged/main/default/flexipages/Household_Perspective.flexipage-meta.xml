@@ -1112,6 +1112,12 @@
                 <identifier>c_fscRelMap</identifier>
             </componentInstance>
         </itemInstances>
+        <itemInstances>
+            <componentInstance>
+                <componentName>groupMembers</componentName>
+                <identifier>c_groupMembers</identifier>
+            </componentInstance>
+        </itemInstances>
         <name>Facet-49cbd90d-f10b-4fd2-8455-b18ddbd0bd89</name>
         <type>Facet</type>
     </flexiPageRegions>

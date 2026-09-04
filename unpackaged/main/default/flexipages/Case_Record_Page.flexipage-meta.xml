@@ -4520,6 +4520,25 @@
         </itemInstances>
         <itemInstances>
             <componentInstance>
+                <componentName>branchInternalTasks</componentName>
+                <identifier>c_branchInternalTasks</identifier>
+                <visibilityRule>
+                    <booleanFilter>1 AND 2</booleanFilter>
+                    <criteria>
+                        <leftValue>{!Record.Submitted__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>true</rightValue>
+                    </criteria>
+                    <criteria>
+                        <leftValue>{!Record.Use_Old_Case_Layout__c}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>false</rightValue>
+                    </criteria>
+                </visibilityRule>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
                 <componentName>cmp_BranchPitStopComponent</componentName>
                 <identifier>c_cmp_BranchPitStopComponent</identifier>
                 <visibilityRule>

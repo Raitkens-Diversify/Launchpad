@@ -8,10 +8,5 @@
     <columns>Entity_Type__c</columns>
     <columns>CORE.USERS.ALIAS</columns>
     <filterScope>Everything</filterScope>
-    <filters>
-        <field>ACCOUNT.RECORDTYPE</field>
-        <operation>equals</operation>
-        <value>Account.FinServ__IndustriesHousehold</value>
-    </filters>
     <label>All Households</label>
 </ListView>

@@ -818,7 +818,7 @@ return result;
                 FROM Account_Account_Relationship__c
                 WHERE Related_Account__c IN :ids
                 AND Account__c IN :entityIds
-                AND (Roles__c != NULL OR Reciprocal_Role__c != NULL)
+                AND (Reciprocal_Role__c != NULL)
             ]) {
                 stillUsed.add(relation.Related_Account__c);
             }
@@ -974,7 +974,7 @@ return result;
             FROM Account_Account_Relationship__c
             WHERE
                 Related_Account__c IN :ids
-                AND (Roles__c != NULL OR Reciprocal_Role__c != NULL)
+                AND (Reciprocal_Role__c != NULL)
         ]) {
             inUse.add(relation.Related_Account__c);
         }
