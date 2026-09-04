@@ -454,6 +454,21 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Case.Account_Number_for_Report__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Case.Maestro_Duplicate_Created__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Case.Maestro_Duplicate_of_Case__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Case.Post_Case_Template__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -935,6 +950,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Financial_Account_Related_Product__c.Wizard_Financial_Account__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Financial_Account__c.Maestro_Trade_Loader_Case__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

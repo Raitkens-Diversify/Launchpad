@@ -6,7 +6,20 @@ public class Case_TriggerHandler {
     private String caseTemplateMatchFields;
     private Map< String, String> caseFieldAndTypeMap = new Map< String, String>();
     
+    // Origin value used to mark Maestro Trade Loader duplicate cases.
+    public static final String MAESTRO_ORIGIN = 'Maestro Trade Loader';
+
+    // When TRUE, all Case automation is suppressed. Set while inserting Maestro Trade Loader
+    // duplicate cases (and while flipping the source case's guard flag) so the duplicates do
+    // not re-run downstream automation.
+    public static Boolean bypassAutomation = false;
+    
     public void isBeforeInsert(List<Case> newList){
+        if(bypassAutomation){
+            return;
+        }
+        // TEMPORARY: remove applyMaestroClientLoaderDefaults when Maestro Client/Trade Loader is retired
+        applyMaestroClientLoaderDefaults(newList);
         setProjectManager(newList);
         setRepCode(newList, null);
         setCustodian(newList, null);
@@ -19,6 +32,9 @@ public class Case_TriggerHandler {
     }
     
     public void isBeforeUpdate(Map<Id, Case> newMap, Map<Id, Case> oldMap){
+        if(bypassAutomation){
+            return;
+        }
         setCustodian(newMap.values(), oldMap);
         setRepCode(newMap.values(), oldMap);
         createTask(newMap, oldMap);
@@ -36,14 +52,22 @@ public class Case_TriggerHandler {
     }
     
     public void isAfterInsert(Map<Id, Case> newMap){
+        if(bypassAutomation){
+            return;
+        }
         createShareRecord(newMap, null);
         //createAdvisorRequestTask(newMap);
         createWizardTask(newMap);
         createCDLforCase(newMap, null);
         populateJointOwner(newMap, null);
+        setAccountNumberForReport(newMap, null);
+        createMaestroDuplicateCase(newMap, null);
     }
     
     public void isAfterUpdate(Map<Id, Case> newMap, Map<Id, Case> oldMap){
+        if(bypassAutomation){
+            return;
+        }
         createShareRecord(newMap, oldMap);
         createCDLonAccount(newMap, oldMap);
         //createCDLforCase(newMap, oldMap);
@@ -52,6 +76,8 @@ public class Case_TriggerHandler {
         setDateOfDeathOnAccount(newMap.values(), oldMap);
         populateJointOwner(newMap, oldMap);
         updateMainTrackCounts(newMap.values(), oldMap);
+        setAccountNumberForReport(newMap, oldMap);
+        createMaestroDuplicateCase(newMap, oldMap);
     }
     
     public void isAfterDelete(Map<Id, Case> oldMap){
@@ -60,6 +86,31 @@ public class Case_TriggerHandler {
     
     public void isAfterUnDelete(Map<Id, Case> newMap){
         
+    }
+    
+    /**
+     * TEMPORARY: Maestro Client / Trade Loader defaults. Delete this method, its isBeforeInsert
+     * call, Custom Label Maestro_Client_Loader_Owner, and related tests when the loaders are retired.
+     * Also invoked explicitly for Trade Loader duplicates (inserted with bypassAutomation = true).
+     */
+    public static void applyMaestroClientLoaderDefaults(List<Case> newList){
+        Id ownerId;
+        String ownerConfig = Label.Maestro_Client_Loader_Owner;
+        if(String.isNotBlank(ownerConfig)){
+            String trimmedOwner = ownerConfig.trim();
+            if(trimmedOwner.startsWith('005') && (trimmedOwner.length() == 15 || trimmedOwner.length() == 18)){
+                ownerId = Id.valueOf(trimmedOwner);
+            }
+        }
+        for(Case c : newList){
+            if(c.Origin == 'Maestro Client Loader' || c.Origin == MAESTRO_ORIGIN){
+                c.Financial_Advisor_Team__c = null;
+                c.Status = 'Closed';
+                if(ownerId != null){
+                    c.OwnerId = ownerId;
+                }
+            }
+        }
     }
     
     private static void populateBranchAndHomeNames(List<Case> newList, Map<Id, Case> oldMap) {
@@ -1704,6 +1755,172 @@ record.OwnerId = queuePRId;
                 return 0;
             }
             return aOrder > bOrder ? 1 : -1;
+        }
+    }
+    
+        /*
+     * Populates Case.Account_Number_for_Report__c from the related FinServ FinancialAccount for
+     * every (non-duplicate) case, once the FinServ__FinancialAccount__c lookup is present. Runs
+     * on after insert (lookup already set) and after update (lookup backfilled null -> set by the
+     * async Find_Related_Record__e platform event). Maestro duplicate cases are skipped - they
+     * carry the contrived 'NX' number set at creation instead of the real account number.
+     */
+    public void setAccountNumberForReport(Map<Id, Case> newMap, Map<Id, Case> oldMap){
+        Set<Id> finAcctIds = new Set<Id>();
+        List<Case> casesToProcess = new List<Case>();
+
+        for(Case c : newMap.values()){
+            if(c.Origin == MAESTRO_ORIGIN || c.FinServ__FinancialAccount__c == null){
+                continue;
+            }
+            Boolean justLinked = (oldMap == null)
+                || (oldMap.get(c.Id).FinServ__FinancialAccount__c != c.FinServ__FinancialAccount__c);
+            if(justLinked){
+                finAcctIds.add(c.FinServ__FinancialAccount__c);
+                casesToProcess.add(c);
+            }
+        }
+
+        if(finAcctIds.isEmpty()){
+            return;
+        }
+
+        Map<Id, FinServ__FinancialAccount__c> finAccts = new Map<Id, FinServ__FinancialAccount__c>(
+            [SELECT Id, Account_Number_for_Report__c FROM FinServ__FinancialAccount__c WHERE Id IN :finAcctIds]
+        );
+
+        List<Case> casesToUpdate = new List<Case>();
+        for(Case c : casesToProcess){
+            FinServ__FinancialAccount__c fa = finAccts.get(c.FinServ__FinancialAccount__c);
+            if(fa == null){
+                continue;
+            }
+            casesToUpdate.add(new Case(
+                Id = c.Id,
+                Account_Number_for_Report__c = fa.Account_Number_for_Report__c
+            ));
+        }
+
+        if(!casesToUpdate.isEmpty()){
+            update casesToUpdate;
+        }
+    }
+
+    /*
+     * Creates a Maestro Trade Loader duplicate case (and a cloned FARP) for every new case tied to
+     * a Wizard Financial Account flagged Maestro_Trade_Loader_Case__c = TRUE. Runs on after insert
+     * (Wizard FA lookup already set) and after update (lookup backfilled null -> set). The
+     * duplicate is identical to the original except: Custodian = 'Direct', Origin = 'Maestro Trade
+     * Loader', Account_Number_for_Report = 'NX' + middle 8 chars of the Wizard FA Id, Status =
+     * Closed, Owner from Maestro_Client_Loader_Owner, and Financial_Advisor_Team__c = null.
+     * Downstream automation is suppressed on the duplicate and its cloned FARP.
+     *
+     * Service flows (Additional Funding, Change Management Platform, etc.) only stamp
+     * Wizard_Financial_Account__c on the case. Resolve FinServ FA from the Wizard FA here
+     * when it already exists so the duplicate is not left without it.
+     */
+    public void createMaestroDuplicateCase(Map<Id, Case> newMap, Map<Id, Case> oldMap){
+        Set<Id> wfaIds = new Set<Id>();
+        List<Case> candidates = new List<Case>();
+
+        for(Case c : newMap.values()){
+            if(c.Origin == MAESTRO_ORIGIN || c.Maestro_Duplicate_Created__c == true || c.Wizard_Financial_Account__c == null){
+                continue;
+            }
+            Boolean justLinked = (oldMap == null)
+                || (oldMap.get(c.Id).Wizard_Financial_Account__c != c.Wizard_Financial_Account__c);
+            if(justLinked){
+                wfaIds.add(c.Wizard_Financial_Account__c);
+                candidates.add(c);
+            }
+        }
+
+        if(candidates.isEmpty()){
+            return;
+        }
+
+        Map<Id, Financial_Account__c> flaggedWfas = new Map<Id, Financial_Account__c>(
+            [SELECT Id FROM Financial_Account__c
+             WHERE Id IN :wfaIds AND Maestro_Trade_Loader_Case__c = true]
+        );
+
+        List<Case> duplicates = new List<Case>();
+        // Parallel list of source original Ids, aligned by index with duplicates.
+        List<Id> duplicateSourceIds = new List<Id>();
+        // In an after trigger the records in newMap already carry every field, so cloning from
+        // them produces a faithful copy without a re-query.
+        for(Case orig : candidates){
+            if(!flaggedWfas.containsKey(orig.Wizard_Financial_Account__c)){
+                continue;
+            }
+            Case dup = orig.clone(false, false, false, false);
+            dup.Custodian__c = 'Direct';
+            dup.Origin = MAESTRO_ORIGIN;
+            dup.Account_Number_for_Report__c = 'NX' + String.valueOf(orig.Wizard_Financial_Account__c).mid(7, 8);
+            dup.Maestro_Duplicate_Created__c = false;
+            dup.Maestro_Duplicate_of_Case__c = orig.Id;
+            duplicates.add(dup);
+            duplicateSourceIds.add(orig.Id);
+        }
+
+        if(duplicates.isEmpty()){
+            return;
+        }
+
+        // Bypass skips before-insert, so apply Closed / owner / null FAT here explicitly.
+        applyMaestroClientLoaderDefaults(duplicates);
+
+        Boolean priorCaseBypass = bypassAutomation;
+        try{
+            bypassAutomation = true;
+
+            insert duplicates;
+
+            // Map original case Id -> new duplicate case Id.
+            Map<Id, Id> originalToDuplicate = new Map<Id, Id>();
+            for(Integer i = 0; i < duplicates.size(); i++){
+                originalToDuplicate.put(duplicateSourceIds[i], duplicates[i].Id);
+            }
+
+            cloneFarpsForDuplicates(originalToDuplicate);
+
+            // Flip the guard flag on the originals so they are never duplicated again.
+            List<Case> guardUpdates = new List<Case>();
+            for(Id origId : originalToDuplicate.keySet()){
+                guardUpdates.add(new Case(Id = origId, Maestro_Duplicate_Created__c = true));
+            }
+            update guardUpdates;
+        } finally {
+            bypassAutomation = priorCaseBypass;
+        }
+    }
+
+    // Clones each original case's FARP(s) and points them at the corresponding duplicate case.
+    private void cloneFarpsForDuplicates(Map<Id, Id> originalToDuplicate){
+        if(originalToDuplicate.isEmpty()){
+            return;
+        }
+        // Amount__c must be in the SELECT — Apex clone() only copies fields present in memory.
+        List<Financial_Account_Related_Product__c> sourceFarps = [
+            SELECT Id, Case__c, Product__c, Wizard_Financial_Account__c,
+                   Amount__c
+            FROM Financial_Account_Related_Product__c
+            WHERE Case__c IN :originalToDuplicate.keySet()
+        ];
+
+        if(sourceFarps.isEmpty()){
+            return;
+        }
+
+        List<Financial_Account_Related_Product__c> farpClones = new List<Financial_Account_Related_Product__c>();
+        for(Financial_Account_Related_Product__c f : sourceFarps){
+            Financial_Account_Related_Product__c farpClone = f.clone(false, false, false, false);
+            farpClone.Case__c = originalToDuplicate.get(f.Case__c);
+            farpClones.add(farpClone);
+        }
+
+        if(!farpClones.isEmpty()){
+            insert farpClones;
         }
     }
 }

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Maestro_Duplicate_Created__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Set TRUE on an original case once its Maestro Trade Loader duplicate case has been created. Guards against duplicating the same case more than once.</description>
+    <label>Maestro Duplicate Created</label>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>
