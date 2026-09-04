@@ -70,8 +70,13 @@ public class ArcRelatedTableTestData {
     );
     insert teamCase;
 
+    // Type satisfies Type_OR_Classification_Required (activated 2026-09-02),
+    // which rejects an Account of several record types -- including whichever
+    // one is the running user's default -- that has neither a Type nor a
+    // Classification.
     Account teamAccount = new Account(
       Name = 'Task Metrics Seed Household',
+      Type = 'Prospect',
       Financial_Advisor_Team__c = team.Id
     );
     insert teamAccount;

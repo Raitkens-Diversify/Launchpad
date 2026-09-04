@@ -74,14 +74,14 @@ const SCREENS = {
         key: "d1",
         title: "My Cases",
         sub: "By milestone",
-        legend: "Not set",
+        legend: "Started",
         value: "10"
       },
       {
         key: "d2",
         title: "My Team Cases",
         sub: "By milestone",
-        legend: "Not set",
+        legend: "Started",
         value: "20"
       }
     ],

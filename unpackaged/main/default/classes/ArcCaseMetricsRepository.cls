@@ -7,7 +7,7 @@
  * Milestone__c, NOT the standard MilestoneStatus. MilestoneStatus is derived
  * from Entitlement Management's CaseMilestone records and this org creates
  * none at all, so it is blank on every open Case and grouping by it dropped
- * all of them into 'Not set' — a donut captioned "By milestone" that never
+ * all of them into the no-milestone bucket — a donut captioned "By milestone" that never
  * showed a milestone. The milestone this org actually tracks is written to
  * Case.Milestone__c by Case_TriggerHandler.populateMilestoneOnCase, which sets
  * it to the last completed milestone task in MILESTONE_RANK order below.
@@ -16,14 +16,20 @@
  * was the only thing pointing at the wrong field.
  */
 public with sharing class ArcCaseMetricsRepository {
-  private static final String UNASSIGNED_LABEL = 'Not set';
+  /**
+   * Cases that have not completed a milestone task yet. Labelled "Started"
+   * (renamed from "Not set" on 2026-09-04 at the business's request): the case
+   * exists and work is under way, it just has not reached a milestone. The
+   * segment key stays 'not-set' -- arcCaseMetrics pins its colour on that key.
+   */
+  private static final String UNASSIGNED_LABEL = 'Started';
 
   /**
    * Milestone progression, so the donut steps through the stages in the order
    * cases actually move through them instead of reshuffling whenever a count
    * changes. Mirrors the order Case_TriggerHandler.populateMilestoneOnCase
    * walks its milestone fields. An unrecognised value sorts after these but
-   * ahead of 'Not set', which is always last: it is the absence of a
+   * ahead of 'Started', which is always last: it is the absence of a
    * milestone, not a stage of one.
    */
   private static final Map<String, Integer> MILESTONE_RANK = new Map<String, Integer>{
@@ -124,7 +130,9 @@ public with sharing class ArcCaseMetricsRepository {
   }
 
   private static String normalizeSegmentKey(String label) {
-    return label == null
+    // The no-milestone segment keeps its 'not-set' key whatever it is labelled
+    // (see UNASSIGNED_LABEL): arcCaseMetrics pins the segment's colour on it.
+    return label == null || UNASSIGNED_LABEL.equals(label)
       ? 'not-set'
       : label.trim().toLowerCase().replaceAll('[^a-z0-9]+', '-');
   }

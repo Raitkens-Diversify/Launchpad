@@ -133,7 +133,11 @@ const ROUTE_OBJECT_API_NAMES = Object.freeze({
   envelope: "Envelope__c",
   "financial-account": "FinServ__FinancialAccount__c",
   service: "Service__c",
-  product: "Product__c"
+  product: "Product__c",
+  // The Advertising Reviews list and its detail pages are Advertising_Item__c
+  // records under /advertising-item; without this entry the breadcrumb took
+  // the detail page for an off-nav route and rendered nothing.
+  "advertising-item": "Advertising_Item__c"
 });
 
 const ROUTE_STATE_IGNORED_KEYS = new Set([
@@ -366,7 +370,9 @@ export const STATIC_NAV_ITEMS = [
         label: "Advertising Reviews",
         type: "InternalLink",
         target: ADVERTISING_REVIEWS_PATH,
-        objectApiName: "Case"
+        // The list page shows Advertising_Item__c records (each carries its
+        // review Case), so an advertising item's breadcrumb leads back here.
+        objectApiName: "Advertising_Item__c"
       }
     ]
   },

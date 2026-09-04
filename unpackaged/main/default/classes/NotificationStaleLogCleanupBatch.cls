@@ -7,6 +7,7 @@
  */
 public without sharing class NotificationStaleLogCleanupBatch implements Database.Batchable<SObject>, Database.Stateful {
   private final Datetime cutoff;
+  private final String queryLocatorSoql;
   private Integer suppressedCount = 0;
 
   public NotificationStaleLogCleanupBatch() {
@@ -19,31 +20,12 @@ public without sharing class NotificationStaleLogCleanupBatch implements Databas
     }
 
     this.cutoff = Datetime.newInstance(cutoffDate, Time.newInstance(0, 0, 0, 0));
+    this.queryLocatorSoql = buildQueryLocatorSoql(this.cutoff);
   }
 
   public Database.QueryLocator start(Database.BatchableContext context) {
-    // QueryLocator bind variables must be local; instance fields resolve as tmpVar1 and fail.
-    Datetime cutoffDatetime = cutoff;
-    String queuedStatus = NotificationConstants.STATUS_QUEUED;
-    String pendingStatus = NotificationConstants.STATUS_PENDING;
-
-    return Database.getQueryLocator(
-      [
-        SELECT Id, Status__c, Delivery_Attempt_Count__c
-        FROM Notification_Log__c
-        WHERE
-          CreatedDate < :cutoffDatetime
-          AND (
-            Status__c = :queuedStatus
-            OR Status__c = :pendingStatus
-          )
-          AND (
-            Delivery_Attempt_Count__c = NULL
-            OR Delivery_Attempt_Count__c = 0
-          )
-        ORDER BY CreatedDate ASC
-      ]
-    );
+    // QueryLocator cannot bind instance fields (tmpVar1). Use a pre-built dynamic query.
+    return Database.getQueryLocator(queryLocatorSoql);
   }
 
   public void execute(Database.BatchableContext context, List<Notification_Log__c> scope) {
@@ -66,6 +48,29 @@ public without sharing class NotificationStaleLogCleanupBatch implements Databas
         ' stale notification logs created before ' +
         cutoff
     );
+  }
+
+  private static String buildQueryLocatorSoql(Datetime cutoffDatetime) {
+    String cutoffLiteral = cutoffDatetime.formatGmt('yyyy-MM-dd\'T\'HH:mm:ss\'Z\'');
+    String queuedStatus = String.escapeSingleQuotes(
+      NotificationConstants.STATUS_QUEUED
+    );
+    String pendingStatus = String.escapeSingleQuotes(
+      NotificationConstants.STATUS_PENDING
+    );
+
+    return 'SELECT Id, Status__c, Delivery_Attempt_Count__c ' +
+      'FROM Notification_Log__c ' +
+      'WHERE CreatedDate < ' +
+      cutoffLiteral +
+      ' ' +
+      'AND (Status__c = \'' +
+      queuedStatus +
+      '\' OR Status__c = \'' +
+      pendingStatus +
+      '\') ' +
+      'AND (Delivery_Attempt_Count__c = NULL OR Delivery_Attempt_Count__c = 0) ' +
+      'ORDER BY CreatedDate ASC';
   }
 
   @TestVisible

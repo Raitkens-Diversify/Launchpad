@@ -42,7 +42,7 @@ private class ArcCaseMetricsControllerTest {
 
     System.assertEquals(2, result.totalCount);
     System.assertEquals(1, result.segments.size());
-    System.assertEquals('Not set', result.segments[0].label);
+    System.assertEquals('Started', result.segments[0].label);
     System.assertEquals(2, result.segments[0].count);
   }
 
@@ -79,14 +79,14 @@ private class ArcCaseMetricsControllerTest {
   /**
    * The regression that forced the move off MilestoneStatus. With milestones
    * present the donut has to split by them and only cases that have not
-   * reached one may fall into 'Not set'; grouping by the standard
-   * MilestoneStatus put every case in 'Not set', because this org creates no
+   * reached one may fall into 'Started'; grouping by the standard
+   * MilestoneStatus put every case in 'Started', because this org creates no
    * CaseMilestone records for that field to derive from.
    *
-   * Counts are deliberately lopsided — 'Not set' is the largest bucket — so
-   * the assertion also pins the ordering. Sorted by count alone 'Not set'
+   * Counts are deliberately lopsided — 'Started' is the largest bucket — so
+   * the assertion also pins the ordering. Sorted by count alone 'Started'
    * would lead and the stages would come out 3-2-1-1; sorted by milestone
-   * progression they read as the pipeline, with 'Not set' last.
+   * progression they read as the pipeline, with 'Started' last.
    */
   @IsTest
   static void getCaseMetricsGroupsByMilestoneField() {
@@ -111,7 +111,7 @@ private class ArcCaseMetricsControllerTest {
         );
       }
     }
-    // Cases that have not completed a milestone task yet -> genuinely 'Not set'.
+    // Cases that have not completed a milestone task yet -> genuinely 'Started'.
     for (Integer i = 0; i < 5; i++) {
       seeds.add(
         new Case(
@@ -133,7 +133,7 @@ private class ArcCaseMetricsControllerTest {
     System.assertEquals(
       5,
       result.segments.size(),
-      'four milestones plus Not set'
+      'four milestones plus Started'
     );
 
     List<String> actualOrder = new List<String>();
@@ -151,24 +151,24 @@ private class ArcCaseMetricsControllerTest {
         'HO Approval',
         'Branch Goal',
         'HO Goal',
-        'Not set'
+        'Started'
       },
       actualOrder,
-      'segments follow milestone progression, Not set last'
+      'segments follow milestone progression, Started last'
     );
 
     System.assertEquals(2, countByLabel.get('HO Submission'));
     System.assertEquals(1, countByLabel.get('HO Approval'));
     System.assertEquals(3, countByLabel.get('Branch Goal'));
     System.assertEquals(1, countByLabel.get('HO Goal'));
-    System.assertEquals(5, countByLabel.get('Not set'));
+    System.assertEquals(5, countByLabel.get('Started'));
 
     // Keys are what arcCaseMetrics.MILESTONE_COLORS is keyed on.
     System.assertEquals('ho-submission', keyByLabel.get('HO Submission'));
     System.assertEquals('ho-approval', keyByLabel.get('HO Approval'));
     System.assertEquals('branch-goal', keyByLabel.get('Branch Goal'));
     System.assertEquals('ho-goal', keyByLabel.get('HO Goal'));
-    System.assertEquals('not-set', keyByLabel.get('Not set'));
+    System.assertEquals('not-set', keyByLabel.get('Started'));
   }
 
   @IsTest
