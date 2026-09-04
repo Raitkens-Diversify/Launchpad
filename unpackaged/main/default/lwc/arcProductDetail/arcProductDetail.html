@@ -17,12 +17,13 @@
 
     <template lwc:elseif={hasDetail}>
       <!--
-        Structure follows ProductRecordPageAdvisors.flexipage's own field
-        sections, rearranged per explicit request: Related Products leads as
-        a full-width collapsible table (not a rail tab), General/Sponsor
-        Information sit below it as the main column, and History closes the
-        page as its own card in a right rail -- the same right-rail pattern
-        Case Detail uses, just a single card instead of several.
+        Structure follows the internal Product record page
+        (ProductRecordPageDueDiligence.flexipage): the Details tab's sections
+        top to bottom in the main column, gated exactly as the flexipage gates
+        them (see rebuildSections in the JS), then its Monitoring Updates and
+        Related Properties tabs as trailing cards; Sponsor Information, Notes
+        and History in the right rail, as there. Related Products (ARC's own
+        addition) leads as a full-width table. Everything is read-only.
       -->
       <header class="arc-product-detail__header">
         <div class="arc-product-detail__header-top">
@@ -77,12 +78,10 @@
         </dl>
       </header>
 
-      <!-- Full-width, collapsible table -- not a rail tab. The same
-           c-arc-data-table every other ARC table uses (its own numbered
-           pager, cell styling, scroll-edge cues), fed by one batched fetch
-           through ArcRelatedListController.getRelatedRecordsPage rather than
-           the fixed 10-row c/arcRelatedList card: a product can be held
-           across many financial accounts. -->
+      <!-- Full-width, collapsible table -- the same c-arc-data-table every
+           other ARC table uses, fed by one batched fetch through
+           ArcRelatedListController.getRelatedRecordsPage: a product can be
+           held across many financial accounts. -->
       <details class="product-section arc-product-detail__related-products" open>
         <summary class="product-section__summary">Related Products</summary>
         <div class="product-section__body">
@@ -121,19 +120,108 @@
 
       <div class="arc-product-detail__body">
         <div class="arc-product-detail__main">
-          <details class="product-section" open>
-            <summary class="product-section__summary">General Information</summary>
-            <div class="product-section__body">
-              <lightning-record-form
-                record-id={recordId}
-                object-api-name={objectApiName}
-                fields={generalInfoFields}
-                columns="2"
-                mode="view"
-              ></lightning-record-form>
-            </div>
-          </details>
+          <!--
+            One entry per section the flexipage would show for THIS record, in
+            its order. Each entry carries exactly one kind flag; the record forms
+            are mode="readonly" so no inline-edit pencil ever appears.
+          -->
+          <template for:each={sections} for:item="section">
+            <template lwc:if={section.isFields}>
+              <details key={section.key} class="product-section" open>
+                <summary class="product-section__summary">{section.label}</summary>
+                <div class="product-section__body">
+                  <lightning-record-form
+                    record-id={recordId}
+                    object-api-name={objectApiName}
+                    fields={section.fields}
+                    columns="2"
+                    mode="readonly"
+                  ></lightning-record-form>
+                </div>
+              </details>
+            </template>
 
+            <template lwc:elseif={section.isRelatedList}>
+              <!-- Share Classes / Monitoring Updates / Related Properties: none
+                   of these objects has a page of its own in this site, so rows
+                   do not link. -->
+              <div key={section.key} class="arc-product-detail__related-list">
+                <c-arc-related-list
+                  record-id={recordId}
+                  card-label={section.label}
+                  related-object-api-name={section.objectApiName}
+                  parent-field-api-name={section.parentFieldApiName}
+                  columns={section.columns}
+                  disable-row-links
+                  collapsible
+                ></c-arc-related-list>
+              </div>
+            </template>
+
+            <template lwc:elseif={section.isTargetedAssetClass}>
+              <!-- Eighteen checkboxes internally; only the checked ones are
+                   listed here, the way the Advisors page shows them. -->
+              <details key={section.key} class="product-section" open>
+                <summary class="product-section__summary">{section.label}</summary>
+                <div class="product-section__body">
+                  <template lwc:if={section.hasItems}>
+                    <ul class="arc-product-detail__chips">
+                      <template for:each={section.items} for:item="item">
+                        <li key={item.key} class="arc-product-detail__chip">
+                          {item.label}
+                        </li>
+                      </template>
+                    </ul>
+                  </template>
+                  <template lwc:else>
+                    <p class="arc-product-detail__panel-empty">
+                      No targeted asset classes selected.
+                    </p>
+                  </template>
+                </div>
+              </details>
+            </template>
+
+            <template lwc:elseif={section.isWaterfall}>
+              <!-- The internal page edits the order through a flow; this page
+                   shows the order that flow saved, ranked, next to the
+                   description. -->
+              <details key={section.key} class="product-section" open>
+                <summary class="product-section__summary">{section.label}</summary>
+                <div class="product-section__body">
+                  <div class="arc-product-detail__waterfall">
+                    <div class="arc-product-detail__waterfall-order">
+                      <span class="arc-product-detail__field-label"
+                        >Waterfall Order</span
+                      >
+                      <template lwc:if={section.hasSteps}>
+                        <ol class="arc-product-detail__waterfall-steps">
+                          <template for:each={section.steps} for:item="step">
+                            <li key={step.key}>{step.label}</li>
+                          </template>
+                        </ol>
+                      </template>
+                      <template lwc:else>
+                        <p class="arc-product-detail__panel-empty">
+                          No waterfall order recorded.
+                        </p>
+                      </template>
+                    </div>
+                    <lightning-record-form
+                      record-id={recordId}
+                      object-api-name={objectApiName}
+                      fields={section.fields}
+                      columns="1"
+                      mode="readonly"
+                    ></lightning-record-form>
+                  </div>
+                </div>
+              </details>
+            </template>
+          </template>
+        </div>
+
+        <div class="arc-product-detail__side">
           <details class="product-section" open>
             <summary class="product-section__summary">Sponsor Information</summary>
             <div class="product-section__body">
@@ -141,14 +229,28 @@
                 record-id={recordId}
                 object-api-name={objectApiName}
                 fields={sponsorInfoFields}
-                columns="2"
-                mode="view"
+                columns="1"
+                mode="readonly"
               ></lightning-record-form>
             </div>
           </details>
-        </div>
 
-        <div class="arc-product-detail__side">
+          <!-- Analyst Notes only -- Internal Notes is gated to the Due
+               Diligence permission on the internal page and is not
+               advisor-facing. -->
+          <details class="product-section" open>
+            <summary class="product-section__summary">Notes</summary>
+            <div class="product-section__body">
+              <lightning-record-form
+                record-id={recordId}
+                object-api-name={objectApiName}
+                fields={notesFields}
+                columns="1"
+                mode="readonly"
+              ></lightning-record-form>
+            </div>
+          </details>
+
           <article class="arc-product-detail__history-card">
             <header class="arc-product-detail__history-card-header">
               <h2 class="arc-product-detail__history-card-title">History</h2>

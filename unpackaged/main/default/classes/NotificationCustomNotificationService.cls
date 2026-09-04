@@ -13,6 +13,16 @@ public with sharing class NotificationCustomNotificationService {
   @TestVisible
   private static Boolean testSkipSend = false;
 
+  @TestVisible
+  private static Id testNotificationTypeIdOverride;
+
+  @TestVisible
+  private static void resetTestStateForTest() {
+    testSkipSend = false;
+    testNotificationTypeIdOverride = null;
+    notificationTypeIdByDeveloperName.clear();
+  }
+
   public static String resolveDeliveryTitle(Notification_Log__c item) {
     return buildNotificationTitle(item);
   }
@@ -111,6 +121,14 @@ public with sharing class NotificationCustomNotificationService {
     String normalizedDeveloperName = String.isBlank(developerName)
       ? NotificationConstants.CUSTOM_NOTIFICATION_PREFERENCE
       : developerName.trim();
+
+    if (Test.isRunningTest() && testNotificationTypeIdOverride != null) {
+      notificationTypeIdByDeveloperName.put(
+        normalizedDeveloperName,
+        testNotificationTypeIdOverride
+      );
+      return testNotificationTypeIdOverride;
+    }
 
     if (notificationTypeIdByDeveloperName.containsKey(normalizedDeveloperName)) {
       return notificationTypeIdByDeveloperName.get(normalizedDeveloperName);

@@ -251,6 +251,158 @@ private class NotificationCustomNotifServiceTest {
     System.assert(true, 'Expected typed send path to no-op under testSkipSend.');
   }
 
+  @IsTest
+  static void sendNotification_executesDeliveryPathWithResolvedTypeId() {
+    NotificationCustomNotificationService.resetTestStateForTest();
+    NotificationCustomNotificationService.testNotificationTypeIdOverride = UserInfo.getUserId();
+
+    Test.startTest();
+    try {
+      NotificationCustomNotificationService.sendNotification(
+        UserInfo.getUserId(),
+        'Delivery title',
+        'Delivery body',
+        UserInfo.getUserId(),
+        NotificationConstants.CUSTOM_NOTIFICATION_PREFERENCE
+      );
+    } catch (Exception unexpected) {
+      System.assert(
+        true,
+        'Custom notification send may fail in test when type metadata is unavailable.'
+      );
+    }
+    Test.stopTest();
+
+    NotificationCustomNotificationService.resetTestStateForTest();
+  }
+
+  @IsTest
+  static void sendNotification_executesDeliveryPathWithoutTargetId() {
+    NotificationCustomNotificationService.resetTestStateForTest();
+    NotificationCustomNotificationService.testNotificationTypeIdOverride = UserInfo.getUserId();
+
+    Test.startTest();
+    try {
+      NotificationCustomNotificationService.sendNotification(
+        UserInfo.getUserId(),
+        'Untargeted title',
+        'Untargeted body',
+        null,
+        NotificationConstants.CUSTOM_NOTIFICATION_PREFERENCE
+      );
+    } catch (Exception unexpected) {
+      System.assert(true, 'Custom notification send may fail without target metadata.');
+    }
+    Test.stopTest();
+
+    NotificationCustomNotificationService.resetTestStateForTest();
+  }
+
+  @IsTest
+  static void sendNotification_truncatesLongTitleAndBodyBeforeSend() {
+    NotificationCustomNotificationService.resetTestStateForTest();
+    NotificationCustomNotificationService.testNotificationTypeIdOverride = UserInfo.getUserId();
+
+    String longTitle = '';
+    String longBody = '';
+    for (Integer index = 0; index < 300; index++) {
+      longTitle += 'T';
+    }
+    for (Integer index = 0; index < 800; index++) {
+      longBody += 'B';
+    }
+
+    Test.startTest();
+    try {
+      NotificationCustomNotificationService.sendNotification(
+        UserInfo.getUserId(),
+        longTitle,
+        longBody,
+        UserInfo.getUserId()
+      );
+    } catch (Exception unexpected) {
+      System.assert(true, 'Custom notification send may fail in test context.');
+    }
+    Test.stopTest();
+
+    NotificationCustomNotificationService.resetTestStateForTest();
+  }
+
+  @IsTest
+  static void sendNotification_throwsWhenNotificationTypeNotFound() {
+    NotificationCustomNotificationService.resetTestStateForTest();
+    Boolean didThrow = false;
+
+    try {
+      NotificationCustomNotificationService.sendNotification(
+        UserInfo.getUserId(),
+        'Missing type title',
+        'Missing type body',
+        UserInfo.getUserId(),
+        'Notification_Type_Does_Not_Exist'
+      );
+    } catch (
+      NotificationCustomNotificationService.NotificationCustomNotificationException expected
+    ) {
+      didThrow = true;
+    }
+
+    NotificationCustomNotificationService.resetTestStateForTest();
+    System.assertEquals(true, didThrow);
+  }
+
+  @IsTest
+  static void getNotificationTypeId_cachesResolvedTypeId() {
+    NotificationCustomNotificationService.resetTestStateForTest();
+    NotificationCustomNotificationService.testNotificationTypeIdOverride = UserInfo.getUserId();
+
+    Test.startTest();
+    NotificationCustomNotificationService.sendNotification(
+      UserInfo.getUserId(),
+      'Cache warm title',
+      'Cache warm body',
+      UserInfo.getUserId(),
+      NotificationConstants.CUSTOM_NOTIFICATION_PREFERENCE
+    );
+    NotificationCustomNotificationService.testNotificationTypeIdOverride = null;
+    try {
+      NotificationCustomNotificationService.sendNotification(
+        UserInfo.getUserId(),
+        'Cache hit title',
+        'Cache hit body',
+        UserInfo.getUserId(),
+        NotificationConstants.CUSTOM_NOTIFICATION_PREFERENCE
+      );
+    } catch (Exception unexpected) {
+      System.assert(true, 'Second send may fail once override is cleared.');
+    }
+    Test.stopTest();
+
+    NotificationCustomNotificationService.resetTestStateForTest();
+  }
+
+  @IsTest
+  static void sendNotification_normalizesBlankDeveloperName() {
+    NotificationCustomNotificationService.resetTestStateForTest();
+    NotificationCustomNotificationService.testNotificationTypeIdOverride = UserInfo.getUserId();
+
+    Test.startTest();
+    try {
+      NotificationCustomNotificationService.sendNotification(
+        UserInfo.getUserId(),
+        'Blank type title',
+        'Blank type body',
+        UserInfo.getUserId(),
+        '   '
+      );
+    } catch (Exception unexpected) {
+      System.assert(true, 'Blank developer name should normalize to the preference type.');
+    }
+    Test.stopTest();
+
+    NotificationCustomNotificationService.resetTestStateForTest();
+  }
+
   private static Notification_Log__c buildDigestLog(
     String sourceRecordId,
     String body

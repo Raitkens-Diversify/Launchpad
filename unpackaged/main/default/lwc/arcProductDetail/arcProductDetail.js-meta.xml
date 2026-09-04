@@ -4,7 +4,7 @@
     <isExposed>true</isExposed>
     <masterLabel>Arc Product Detail</masterLabel>
     <description
-  >Rich Approved Product detail page for Experience sites: highlights, general/sponsor information, related financial-account holdings, and field history.</description>
+  >Read-only Approved Product detail for Experience sites, mirroring the internal Product record page: every Details section with its visibility rules, Share Classes, Monitoring Updates, Related Properties, holdings, Sponsor Information, Notes and History.</description>
     <targets>
         <target>lightningCommunity__Page</target>
         <target>lightningCommunity__Default</target>

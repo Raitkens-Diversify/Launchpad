@@ -139,9 +139,8 @@
 
 /* ── Body layout ────────────────────────────────────────────────────────── */
 
-/* Same left-main/right-side direction as Case Detail's own rail -- History
-   is the page's only rail card now that Related Products moved to a
-   full-width table above. */
+/* Same left-main/right-side direction as Case Detail's own rail. The rail
+   holds Sponsor Information, Notes and History, as on the internal page. */
 .arc-product-detail__body {
   display: flex;
   align-items: flex-start;
@@ -152,6 +151,9 @@
 .arc-product-detail__side {
   flex: 0 0 340px;
   width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .arc-product-detail__main {
@@ -311,4 +313,74 @@
 
 .product-section__body {
   padding: 0 16px 16px;
+}
+/* ── Related-list cards in the main column ──────────────────────────────── */
+
+/* c-arc-related-list draws its own card; this wrapper only keeps it in the
+   main column's 12px rhythm. */
+.arc-product-detail__related-list {
+  min-width: 0;
+}
+
+/* ── Targeted Asset Class ───────────────────────────────────────────────── */
+
+/* The checked boxes, as a row of pills -- eighteen mostly-unchecked
+   checkboxes say nothing on a read-only page. */
+.arc-product-detail__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.arc-product-detail__chip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--lwc-colorBorder, #e5e5e5);
+  background: #f3f3f3;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--lwc-colorTextDefault, #181818);
+}
+
+/* ── Waterfall ──────────────────────────────────────────────────────────── */
+
+/* Order on the left, description on the right -- the flexipage's own two
+   columns for this section. */
+.arc-product-detail__waterfall {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0 24px;
+  align-items: start;
+}
+
+@media (max-width: 48rem) {
+  .arc-product-detail__waterfall {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Matches lightning-record-form's own read-only label (12px, weak text) so
+   the hand-rendered Waterfall Order sits level with the form beside it. */
+.arc-product-detail__field-label {
+  display: block;
+  margin: 10px 0 2px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--lwc-colorTextWeak, #444444);
+}
+
+.arc-product-detail__waterfall-steps {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 13px;
+  line-height: 19.5px;
+  color: var(--lwc-colorTextDefault, #181818);
+}
+
+.arc-product-detail__waterfall-steps li {
+  padding: 2px 0;
 }
