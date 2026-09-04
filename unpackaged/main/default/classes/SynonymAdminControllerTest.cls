@@ -1,6 +1,12 @@
 @IsTest
 private class SynonymAdminControllerTest {
 
+    /** The deployer's own access is not enough in production; see HelpCenterTestDataFactory. */
+    @TestSetup
+    static void grantAccess() {
+        HelpCenterTestDataFactory.grantAdminToRunningUser();
+    }
+
     /** Captures the deploy container instead of enqueueing (which throws in tests). */
     private class FakeDeployer implements SynonymAdminController.MetadataDeployer {
         Metadata.DeployContainer lastContainer;

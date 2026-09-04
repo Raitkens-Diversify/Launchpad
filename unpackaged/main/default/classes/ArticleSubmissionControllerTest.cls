@@ -8,6 +8,12 @@
 @IsTest
 private class ArticleSubmissionControllerTest {
 
+    /** The deployer's own access is not enough in production; see HelpCenterTestDataFactory. */
+    @TestSetup
+    static void grantAccess() {
+        HelpCenterTestDataFactory.grantAdminToRunningUser();
+    }
+
     private static ArticleSubmissionController.SubmissionInput input(String title) {
         ArticleSubmissionController.SubmissionInput s =
             new ArticleSubmissionController.SubmissionInput();
@@ -161,21 +167,13 @@ private class ArticleSubmissionControllerTest {
         AdminAccessService.knowledgeUserOverride = false;
         Id subId = ArticleSubmissionController.saveSubmission(JSON.serialize(input('Owned Article')));
 
-        Profile p = [SELECT Id FROM Profile WHERE Name = 'Minimum Access - Salesforce' LIMIT 1];
-        User other = new User(
-            Alias = 'subown',
-            Email = 'sub.owner@example.com',
-            EmailEncodingKey = 'UTF-8',
-            LastName = 'SubOther',
-            LanguageLocaleKey = 'en_US',
-            LocaleSidKey = 'en_US',
-            ProfileId = p.Id,
-            TimeZoneSidKey = 'America/Denver',
-            UserName = 'sub.other.' + System.currentTimeMillis() + '@example.com.cosmosdev'
-        );
-        insert other;
-        PermissionSet ps = [SELECT Id FROM PermissionSet WHERE Name = 'Resource_Center_Admin' LIMIT 1];
-        insert new PermissionSetAssignment(AssigneeId = other.Id, PermissionSetId = ps.Id);
+        // Setup-object DML after the submission insert above: runAs keeps it
+        // out of the MIXED_DML trap.
+        User other;
+        System.runAs(HelpCenterTestDataFactory.currentUser()) {
+            other = HelpCenterTestDataFactory.createUser('subown',
+                new List<String>{ HelpCenterTestDataFactory.ADMIN_PERMISSION_SET });
+        }
 
         System.runAs(other) {
             AdminAccessService.knowledgeUserOverride = false;

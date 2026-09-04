@@ -613,21 +613,9 @@
         <notificationType>suites_agent_enablement</notificationType>
     </notificationTypeSettings>
     <notificationTypeSettings>
-        <appSettings>
-            <connectedAppName>sf_chttr_apps__Chatter_for_Android</connectedAppName>
-            <enabled>true</enabled>
-        </appSettings>
-        <appSettings>
-            <connectedAppName>sf_chttr_apps__Chatter_for_iOS</connectedAppName>
-            <enabled>true</enabled>
-        </appSettings>
-        <appSettings>
-            <connectedAppName>sf_chttr_apps__Salesforce1_for_Windows</connectedAppName>
-            <enabled>true</enabled>
-        </appSettings>
         <notificationChannels>
-            <desktopEnabled>true</desktopEnabled>
-            <mobileEnabled>true</mobileEnabled>
+            <desktopEnabled>false</desktopEnabled>
+            <mobileEnabled>false</mobileEnabled>
         </notificationChannels>
         <notificationType>task_delegated_to</notificationType>
     </notificationTypeSettings>

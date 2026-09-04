@@ -1,6 +1,12 @@
 @IsTest
 private class ResourceAdminControllerTest {
 
+    /** The deployer's own access is not enough in production; see HelpCenterTestDataFactory. */
+    @TestSetup
+    static void grantAccess() {
+        HelpCenterTestDataFactory.grantAdminToRunningUser();
+    }
+
     private static Id makeCategory(String name, String slug, Id parentId) {
         Resource_Category__c c = new Resource_Category__c(
             Name = name, Slug__c = slug, Parent_Category__c = parentId, Is_Active__c = true);

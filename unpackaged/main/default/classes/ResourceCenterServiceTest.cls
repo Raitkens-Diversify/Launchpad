@@ -9,6 +9,7 @@ private class ResourceCenterServiceTest {
 
     @TestSetup
     static void setup() {
+        HelpCenterTestDataFactory.grantAdminToRunningUser();
         Resource_Category__c marketing = new Resource_Category__c(
             Name = 'Marketing', Slug__c = 'marketing', Description__c = 'Marketing assets',
             Icon_Name__c = 'utility:campaign', Display_Order__c = 1, Is_Active__c = true);
@@ -558,9 +559,9 @@ private class ResourceCenterServiceTest {
         insert webinar('Soon Talk', 'soon-talk', catId, System.now().addDays(1), null,
             'https://example.com/register');
         User bare;
-        System.runAs(UatTestDataFactory.currentUser()) {
+        System.runAs(HelpCenterTestDataFactory.currentUser()) {
             // Standard User, auto-assigned permsets stripped: no Resource__c read.
-            bare = UatTestDataFactory.createUser('rcbare', null);
+            bare = HelpCenterTestDataFactory.createUser('rcbare', null);
         }
         ResourceCenterService.webinarAgendaEnabledOverride = true;
 
@@ -641,9 +642,9 @@ private class ResourceCenterServiceTest {
         insert webinar('Soon Talk', 'soon-talk', catId, System.now().addDays(1), null,
             'https://example.com/register');
         User bare;
-        System.runAs(UatTestDataFactory.currentUser()) {
+        System.runAs(HelpCenterTestDataFactory.currentUser()) {
             // Standard User, auto-assigned permsets stripped: no Resource__c read.
-            bare = UatTestDataFactory.createUser('evbare', null);
+            bare = HelpCenterTestDataFactory.createUser('evbare', null);
         }
 
         Test.startTest();

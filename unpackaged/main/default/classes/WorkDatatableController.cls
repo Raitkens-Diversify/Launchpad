@@ -97,6 +97,69 @@ public with sharing class WorkDatatableController {
     );
   }
 
+  /**
+   * Server-side search for the Work table: an ArcSoslSearchHelper id lookup, then the same
+   * Mine/Team scoping and CASE_FIELDS list selectCases already uses, so a search can surface
+   * cases beyond ROW_LIMIT's initial load. Row data always comes from this SOQL, never from
+   * SOSL's own RETURNING clause, since that is not a reliable source for values like the formula
+   * field Case_Branch_Name_DisplayName__c.
+   */
+  @AuraEnabled
+  public static WorkDatatableModels.WorkDatatableData searchWorkCases(String scope, String term) {
+    WorkDatatableModels.WorkDatatableData data = new WorkDatatableModels.WorkDatatableData();
+
+    List<Id> matchedIds = ArcSoslSearchHelper.findMatchingIds('Case', term);
+    if (matchedIds.isEmpty()) {
+      return data;
+    }
+
+    ARCConstants.RelatedTableScope resolvedScope = ARCUtil.relatedTableScopeFromValue(scope);
+    Id currentUserId = UserInfo.getUserId();
+    FinancialAdvisorTeamAccessService.TeamAccessContext teamAccess = new FinancialAdvisorTeamAccessService()
+      .getCurrentUserTeamAccess();
+
+    List<Case> caseRecords = searchCases(resolvedScope, currentUserId, teamAccess, matchedIds);
+    Map<Id, List<Task>> tasksByCaseId = selectTasksByCaseId(caseRecords);
+
+    for (Case caseRecord : caseRecords) {
+      List<Task> caseTasks = tasksByCaseId.get(caseRecord.Id);
+      data.cases.add(mapCaseRow(caseRecord, caseTasks));
+    }
+    data.totalCount = data.cases.size();
+    return data;
+  }
+
+  private static List<Case> searchCases(
+    ARCConstants.RelatedTableScope scope,
+    Id currentUserId,
+    FinancialAdvisorTeamAccessService.TeamAccessContext teamAccess,
+    List<Id> matchedIds
+  ) {
+    String caseFields = String.join(new List<String>(CASE_FIELDS), ', ');
+
+    if (scope == ARCConstants.RelatedTableScope.MINE) {
+      return Database.query(
+        'SELECT ' +
+          caseFields +
+          ' FROM Case WHERE Id IN :matchedIds AND OwnerId = :currentUserId AND IsClosed = FALSE' +
+          ' WITH USER_MODE ORDER BY LastModifiedDate DESC LIMIT :ROW_LIMIT'
+      );
+    }
+
+    if (teamAccess.teamIds.isEmpty()) {
+      return new List<Case>();
+    }
+
+    Set<Id> teamIds = teamAccess.teamIds;
+    return Database.query(
+      'SELECT ' +
+        caseFields +
+        ' FROM Case WHERE Id IN :matchedIds AND Financial_Advisor_Team__c IN :teamIds' +
+        ' AND IsClosed = FALSE WITH USER_MODE' +
+        ' ORDER BY LastModifiedDate DESC LIMIT :ROW_LIMIT'
+    );
+  }
+
   private static Map<Id, List<Task>> selectTasksByCaseId(List<Case> caseRecords) {
     if (caseRecords.isEmpty()) {
       return new Map<Id, List<Task>>();

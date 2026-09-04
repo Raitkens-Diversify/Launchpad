@@ -1,6 +1,12 @@
 @isTest
 private class HelpGuidePublishCallbackTest {
 
+    /** The deployer's own access is not enough in production; see HelpCenterTestDataFactory. */
+    @TestSetup
+    static void grantAccess() {
+        HelpCenterTestDataFactory.grantAdminToRunningUser();
+    }
+
     private static Id draft() {
         Help_Guide_Draft__c g = new Help_Guide_Draft__c(
             Name = 'Get Help', Guide_Key__c = 'get_help', Label__c = 'Get Help',

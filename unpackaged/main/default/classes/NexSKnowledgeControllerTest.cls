@@ -16,6 +16,7 @@ private class NexSKnowledgeControllerTest {
 
     @TestSetup
     static void setup() {
+        HelpCenterTestDataFactory.grantAdminToRunningUser();
         // Three published articles across two categories; one featured.
         publishArticle('Getting Started With NexS', 'getting-started-with-nexs',
             'How to get going.', 'onboarding setup welcome', true, 'Getting_Started');

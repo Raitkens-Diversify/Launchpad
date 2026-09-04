@@ -1106,15 +1106,31 @@ public with sharing class ArticleAdminController {
         return e;
     }
 
+    // A user with no Knowledge access at all makes the Knowledge__kav describe
+    // itself throw NoAccessException rather than answer false (same seam as
+    // AdminAccessService.canWriteKnowledge); that user gets the friendly
+    // message, not a system exception.
     private static void assertReadable() {
-        if (!Schema.sObjectType.Knowledge__kav.isAccessible()) {
+        Boolean readable;
+        try {
+            readable = Schema.sObjectType.Knowledge__kav.isAccessible();
+        } catch (Exception e) {
+            readable = false;
+        }
+        if (!readable) {
             throw auraError('You do not have access to Knowledge articles.');
         }
     }
 
     private static void assertWritable() {
-        if (!Schema.sObjectType.Knowledge__kav.isCreateable()
-            || !Schema.sObjectType.Knowledge__kav.isUpdateable()) {
+        Boolean writable;
+        try {
+            writable = Schema.sObjectType.Knowledge__kav.isCreateable()
+                && Schema.sObjectType.Knowledge__kav.isUpdateable();
+        } catch (Exception e) {
+            writable = false;
+        }
+        if (!writable) {
             throw auraError(
                 'You need Knowledge authoring permissions (and the Knowledge User license) to do this.');
         }

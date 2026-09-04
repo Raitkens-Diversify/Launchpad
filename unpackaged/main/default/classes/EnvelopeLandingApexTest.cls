@@ -306,6 +306,48 @@ private class EnvelopeLandingApexTest {
     }
 
     @IsTest
+    static void searchListDataFindsTeamEnvelopeByFixedSearchResult() {
+        Financial_Advisor_Team__c team = makeTeamForRunningUser('Search List Data Team');
+        List<Account> households = makeHouseholds(
+            team.Id,
+            new List<String>{ 'Search List Data Household' }
+        );
+
+        Envelope__c teamEnvelope = new Envelope__c(
+            Name = 'Zephyr Team Envelope',
+            Status__c = 'New',
+            Household_Name__c = 'Search List Data Household'
+        );
+        insert teamEnvelope;
+        insert new Envelope_Content__c(Envelope__c = teamEnvelope.Id, Account__c = households[0].Id);
+
+        Test.setFixedSearchResults(new List<Id>{ teamEnvelope.Id });
+
+        Test.startTest();
+        EnvelopeLandingApex.EnvelopeListData data = EnvelopeLandingApex.searchEnvelopeListData(
+            'Zephyr'
+        );
+        Test.stopTest();
+
+        System.assertEquals(1, data.envelopes.size(),
+            'Search should return the matching envelope.');
+        EnvelopeLandingApex.EnvelopeRow row = data.envelopes[0];
+        System.assertEquals(teamEnvelope.Id, row.id);
+        System.assertEquals('Search List Data Team', row.advisorTeamName,
+            'Search results should resolve the advisor team the same way getEnvelopeListData does.');
+    }
+
+    @IsTest
+    static void searchListDataBelowMinLengthReturnsNoEnvelopes() {
+        Test.startTest();
+        EnvelopeLandingApex.EnvelopeListData data = EnvelopeLandingApex.searchEnvelopeListData('a');
+        Test.stopTest();
+
+        System.assertEquals(0, data.envelopes.size(),
+            'A term below the minimum length should not reach the server search.');
+    }
+
+    @IsTest
     static void searchHouseholdsMatchesTermWithinUsersTeams() {
         Financial_Advisor_Team__c mine = makeTeamForRunningUser('Search Team');
         makeHouseholds(mine.Id, new List<String>{

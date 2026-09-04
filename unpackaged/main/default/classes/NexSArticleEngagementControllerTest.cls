@@ -13,6 +13,7 @@ private class NexSArticleEngagementControllerTest {
 
     @TestSetup
     static void setup() {
+        HelpCenterTestDataFactory.grantAdminToRunningUser();
         Knowledge__kav kav = new Knowledge__kav(
             Title = 'Engagement Target',
             UrlName = 'engagement-target',

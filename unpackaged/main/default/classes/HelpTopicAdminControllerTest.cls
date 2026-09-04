@@ -1,6 +1,12 @@
 @IsTest
 private class HelpTopicAdminControllerTest {
 
+    /** The deployer's own access is not enough in production; see HelpCenterTestDataFactory. */
+    @TestSetup
+    static void grantAccess() {
+        HelpCenterTestDataFactory.grantAdminToRunningUser();
+    }
+
     /** Queue of canned SOAP responses; captures every request body sent. */
     private class SoapMock implements HttpCalloutMock {
         List<String> responses = new List<String>();

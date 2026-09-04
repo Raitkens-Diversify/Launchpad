@@ -1,6 +1,12 @@
 @isTest
 private class ResourceDownloadTrackerTest {
 
+    /** The deployer's own access is not enough in production; see HelpCenterTestDataFactory. */
+    @TestSetup
+    static void grantAccess() {
+        HelpCenterTestDataFactory.grantAdminToRunningUser();
+    }
+
     @isTest
     static void incrementsFromNull() {
         Resource_Category__c cat = new Resource_Category__c(Name = 'C', Slug__c = 'c', Is_Active__c = true);

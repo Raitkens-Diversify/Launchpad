@@ -10,6 +10,7 @@ import { LightningElement, api, track } from "lwc";
 import { loadStyle } from "lightning/platformResourceLoader";
 import LightningToast from "lightning/toast";
 import getEnvelopeListData from "@salesforce/apex/EnvelopeLandingApex.getEnvelopeListData";
+import searchEnvelopeListData from "@salesforce/apex/EnvelopeLandingApex.searchEnvelopeListData";
 import getAllFormSchemas from "@salesforce/apex/FieldDetailController.getAllFormSchemas";
 import getRegistrationTypeAttributes from "@salesforce/apex/EnvelopeISAController.getRegistrationTypeAttributes";
 import getUserPreferences from "@salesforce/apex/WizardEnvelopeStateService.getUserPreferences";
@@ -124,6 +125,10 @@ const SCOPE_OPTIONS = [
 ];
 
 const DEFAULT_PAGE_SIZE_OPTIONS = [10, 25, 50];
+
+/** Below this, a confirmed search just clears back to the full loaded list rather than
+ *  hitting the server — matches ArcSoslSearchHelper.MIN_TERM_LENGTH. */
+const SEARCH_MIN_CHARS = 2;
 
 export default class EnvelopeTable extends LightningElement {
   @api title = "Envelopes";
@@ -252,6 +257,12 @@ export default class EnvelopeTable extends LightningElement {
   scopeOptions = SCOPE_OPTIONS;
   currentUserId = userId;
   _myTeamIds = new Set();
+
+  /** Last search term actually sent to the server (Enter or click-out), so a confirm
+   *  that repeats the same term skips a redundant round trip. */
+  _lastConfirmedSearchTerm = "";
+  _searchRequestToken = 0;
+  isSearching = false;
 
   get filterIconStyle() {
     return `--icon-url: url('${NEXS_ICONS}/${FILTER_ICON}');`;
@@ -537,10 +548,79 @@ export default class EnvelopeTable extends LightningElement {
     this.searchTerm = event.detail.value || "";
   }
 
+  /** Enter confirms a server-side search immediately, same term the box already holds. */
+  handleSearchKeyDown(event) {
+    if (event.key !== "Enter") {
+      return;
+    }
+    event.target.blur();
+    this.confirmSearch(event.target.value);
+  }
+
+  /** Leaving the search box confirms it too, same as Enter — clicking away from an
+   *  unconfirmed search used to just leave it never sent to the server. */
+  handleSearchBlur(event) {
+    this.confirmSearch(event.target.value);
+  }
+
+  get hasUnconfirmedSearch() {
+    const term = this.searchTerm.trim();
+    return Boolean(term) && term !== this._lastConfirmedSearchTerm;
+  }
+
+  confirmSearch(rawValue) {
+    const value = rawValue ?? this.searchTerm ?? "";
+    this.searchTerm = value;
+    const term = value.trim();
+
+    if (term === this._lastConfirmedSearchTerm) {
+      return;
+    }
+    const wasSearchActive = Boolean(this._lastConfirmedSearchTerm);
+    this._lastConfirmedSearchTerm = term;
+
+    if (term.length < SEARCH_MIN_CHARS) {
+      if (wasSearchActive) {
+        this.loadData();
+      }
+      return;
+    }
+
+    this.runServerSearch(term);
+  }
+
+  async runServerSearch(term) {
+    const requestToken = ++this._searchRequestToken;
+    this.isSearching = true;
+
+    try {
+      const result = await searchEnvelopeListData({ term });
+      if (requestToken !== this._searchRequestToken) {
+        return; // a newer confirm superseded this request
+      }
+      this.envelopes = result.envelopes || [];
+      this._metricsById = {};
+      (result.envelopeMetrics || []).forEach((metric) => {
+        this._metricsById[metric.envelopeId] = metric;
+      });
+      this.buildRows();
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("[envelopeTable] Server search failed", error);
+      this.showToast("Error", "Search failed", "error");
+    } finally {
+      if (requestToken === this._searchRequestToken) {
+        this.isSearching = false;
+      }
+    }
+  }
+
   handleResetFilters() {
     this.searchTerm = "";
+    this._lastConfirmedSearchTerm = "";
     this.scopeFilter = SCOPE_MY;
     this.dateFilter = "";
+    this.loadData();
   }
 
   handleDateChange(event) {

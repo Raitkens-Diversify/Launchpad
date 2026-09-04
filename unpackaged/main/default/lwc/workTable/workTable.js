@@ -8,6 +8,7 @@ import { LightningElement, api, wire, track } from "lwc";
 import { loadStyle } from "lightning/platformResourceLoader";
 import { NavigationMixin } from "lightning/navigation";
 import getWorkData from "@salesforce/apex/WorkDatatableController.getWorkData";
+import searchWorkCases from "@salesforce/apex/WorkDatatableController.searchWorkCases";
 import {
   buildRecordNavigationReference
 } from "c/recordNavigationCommunityUtils";
@@ -102,6 +103,10 @@ const COLUMNS = [
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_PAGE_SIZE_OPTIONS = [10, 25, 50];
+
+/** Below this, a confirmed search just clears back to the wired scope load rather than
+ *  hitting the server — matches ArcSoslSearchHelper.MIN_TERM_LENGTH. */
+const SEARCH_MIN_CHARS = 2;
 
 export default class WorkTable extends NavigationMixin(LightningElement) {
   @api title = "Work";
@@ -206,10 +211,19 @@ export default class WorkTable extends NavigationMixin(LightningElement) {
   defaultSortDirection = SORT_DESC;
 
   searchTerm = "";
-  sourceCases = [];
+  _wireCases = [];
+  _searchCases = [];
+  _isSearchActive = false;
+  _lastConfirmedSearchTerm = "";
+  _searchRequestToken = 0;
+  isSearching = false;
   @track expandedCaseIds = [];
   errorMessage = "";
   isLoading = true;
+
+  get sourceCases() {
+    return this._isSearchActive ? this._searchCases : this._wireCases;
+  }
 
   _stylesLoaded = false;
 
@@ -231,14 +245,14 @@ export default class WorkTable extends NavigationMixin(LightningElement) {
     this.isLoading = false;
 
     if (data) {
-      this.sourceCases = data.cases || [];
+      this._wireCases = data.cases || [];
       this.errorMessage = "";
       this.pruneExpandedCaseIds();
       return;
     }
 
     if (error) {
-      this.sourceCases = [];
+      this._wireCases = [];
       this.expandedCaseIds = [];
       this.errorMessage = this.reduceError(error);
       // eslint-disable-next-line no-console
@@ -312,11 +326,81 @@ export default class WorkTable extends NavigationMixin(LightningElement) {
   handleScopeChange(event) {
     this.scopeFilter = event.detail?.value ?? SCOPE_MY;
     this.expandedCaseIds = [];
+    // A confirmed search is scoped to whichever My/Team was active when it ran — switching
+    // scope without re-confirming would show search results from the other scope's cases.
+    this._isSearchActive = false;
+    this.searchTerm = "";
+    this._lastConfirmedSearchTerm = "";
   }
 
   handleSearchChange(event) {
     this.searchTerm = event.detail?.value ?? event.target?.value ?? "";
     this.pruneExpandedCaseIds();
+  }
+
+  /** Enter confirms a server-side search immediately, same term the box already holds. */
+  handleSearchKeyDown(event) {
+    if (event.key !== "Enter") {
+      return;
+    }
+    event.target.blur();
+    this.confirmSearch(event.target.value);
+  }
+
+  /** Leaving the search box confirms it too, same as Enter — clicking away from an
+   *  unconfirmed search used to just leave it never sent to the server. */
+  handleSearchBlur(event) {
+    this.confirmSearch(event.target.value);
+  }
+
+  get hasUnconfirmedSearch() {
+    const term = this.searchTerm.trim();
+    return Boolean(term) && term !== this._lastConfirmedSearchTerm;
+  }
+
+  confirmSearch(rawValue) {
+    const value = rawValue ?? this.searchTerm ?? "";
+    this.searchTerm = value;
+    const term = value.trim();
+
+    if (term === this._lastConfirmedSearchTerm) {
+      return;
+    }
+    this._lastConfirmedSearchTerm = term;
+
+    if (term.length < SEARCH_MIN_CHARS) {
+      this._isSearchActive = false;
+      this.pruneExpandedCaseIds();
+      return;
+    }
+
+    this.runServerSearch(term);
+  }
+
+  async runServerSearch(term) {
+    const requestToken = ++this._searchRequestToken;
+    this.isSearching = true;
+
+    try {
+      const result = await searchWorkCases({
+        scope: this.wireScope,
+        term
+      });
+      if (requestToken !== this._searchRequestToken) {
+        return; // a newer confirm superseded this request
+      }
+      this._searchCases = result.cases || [];
+      this._isSearchActive = true;
+      this.pruneExpandedCaseIds();
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("[workTable] Server search failed", error);
+      this.errorMessage = this.reduceError(error);
+    } finally {
+      if (requestToken === this._searchRequestToken) {
+        this.isSearching = false;
+      }
+    }
   }
 
   handleRowClick(event) {

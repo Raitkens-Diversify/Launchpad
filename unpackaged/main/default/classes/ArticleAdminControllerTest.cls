@@ -1,6 +1,12 @@
 @IsTest
 private class ArticleAdminControllerTest {
 
+    /** The deployer's own access is not enough in production; see HelpCenterTestDataFactory. */
+    @TestSetup
+    static void grantAccess() {
+        HelpCenterTestDataFactory.grantAdminToRunningUser();
+    }
+
     // ---- Builders ---------------------------------------------------------------
 
     private static ArticleAdminController.ArticleInput input(String title, String urlName) {

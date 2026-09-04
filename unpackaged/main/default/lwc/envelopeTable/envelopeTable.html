@@ -37,7 +37,14 @@
               placeholder={searchPlaceholder}
               value={searchTerm}
               onchange={handleSearchChange}
+              onkeydown={handleSearchKeyDown}
+              onblur={handleSearchBlur}
             ></lightning-input>
+            <template lwc:if={hasUnconfirmedSearch}>
+              <span class="envelope-table__search-hint">
+                Press Enter or click away to search all envelopes
+              </span>
+            </template>
           </div>
         </template>
 

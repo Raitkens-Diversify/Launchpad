@@ -17,7 +17,7 @@
  *    while Test.isRunningTest() and reads the @TestVisible testSynonymRows
  *    seam, so the synonym test seeds the seam with a copy of the shipped
  *    Search_Synonym.Password row (password -> passcode,credentials).
- *  - runAs users come from UatTestDataFactory.createUser, which strips the
+ *  - runAs users come from HelpCenterTestDataFactory.createUser, which strips the
  *    permission sets the org's new-user flow auto-assigns (NexSHelpCenter
  *    et al.) so "no access" actually means no access. User/PSA DML is wrapped
  *    in System.runAs(currentUser()) to avoid MIXED_DML with the data setup.
@@ -27,6 +27,7 @@ private class UnifiedSearchServiceTest {
 
     @TestSetup
     static void setup() {
+        HelpCenterTestDataFactory.grantAdminToRunningUser();
         Resource_Category__c lib = new Resource_Category__c(
             Name = 'Library', Slug__c = 'library', Display_Order__c = 1, Is_Active__c = true);
         insert lib;
@@ -229,9 +230,9 @@ private class UnifiedSearchServiceTest {
     @isTest
     static void articlesSideDegradesForResourceOnlyUser() {
         User rcOnly;
-        System.runAs(UatTestDataFactory.currentUser()) {
+        System.runAs(HelpCenterTestDataFactory.currentUser()) {
             // Auto-assigned permsets stripped; only resource read granted.
-            rcOnly = UatTestDataFactory.createUser(
+            rcOnly = HelpCenterTestDataFactory.createUser(
                 'rconly', new List<String>{ 'Resource_Center_User' });
         }
         Test.setFixedSearchResults(new List<Id>{ resourceId('rollover-checklist') });
@@ -255,10 +256,10 @@ private class UnifiedSearchServiceTest {
     @isTest
     static void bothSidesDegradeForBareUser() {
         User bare;
-        System.runAs(UatTestDataFactory.currentUser()) {
+        System.runAs(HelpCenterTestDataFactory.currentUser()) {
             // Standard User profile, every permission set stripped: no Knowledge
             // read, no Resource__c read.
-            bare = UatTestDataFactory.createUser('bare', null);
+            bare = HelpCenterTestDataFactory.createUser('bare', null);
         }
 
         Test.startTest();
@@ -328,8 +329,8 @@ private class UnifiedSearchServiceTest {
     @isTest
     static void typeaheadReturnsEmptyForBareUser() {
         User bare;
-        System.runAs(UatTestDataFactory.currentUser()) {
-            bare = UatTestDataFactory.createUser('bareta', null);
+        System.runAs(HelpCenterTestDataFactory.currentUser()) {
+            bare = HelpCenterTestDataFactory.createUser('bareta', null);
         }
 
         Test.startTest();

@@ -261,6 +261,105 @@ public with sharing class EnvelopeLandingApex {
         return teamIds;
     }
 
+    // The junction row carrying each envelope's household + team name, for the user's own teams'
+    // households — a relationship filter, so the households themselves are never loaded. Each
+    // envelope keeps its first household row.
+    private static Map<Id, Envelope_Content__c> householdRowByTeamEnvelope(Set<Id> teamIds) {
+        Map<Id, Envelope_Content__c> householdRowByEnvelope = new Map<Id, Envelope_Content__c>();
+        if (!teamIds.isEmpty()) {
+            for (Envelope_Content__c row : [
+                SELECT Envelope__c, Account__c,
+                       Account__r.Financial_Advisor_Team__r.Name
+                FROM Envelope_Content__c
+                WHERE Envelope__c != null
+                AND Account__r.RecordType.DeveloperName = :HOUSEHOLD_RECORD_TYPE_DEVELOPER_NAME
+                AND Account__r.Financial_Advisor_Team__c IN :teamIds
+                WITH SECURITY_ENFORCED
+            ]) {
+                if (!householdRowByEnvelope.containsKey(row.Envelope__c)) {
+                    householdRowByEnvelope.put(row.Envelope__c, row);
+                }
+            }
+        }
+        return householdRowByEnvelope;
+    }
+
+    // Owned envelopes outside the user's teams still need a household row for the column; one
+    // more query for just those, rather than widening the relationship filter above.
+    private static void resolveUnresolvedHouseholdRows(
+        Map<Id, Envelope_Content__c> householdRowByEnvelope,
+        List<Envelope__c> envelopes
+    ) {
+        Set<Id> unresolved = new Set<Id>();
+        for (Envelope__c env : envelopes) {
+            if (!householdRowByEnvelope.containsKey(env.Id)) {
+                unresolved.add(env.Id);
+            }
+        }
+        if (unresolved.isEmpty()) {
+            return;
+        }
+        for (Envelope_Content__c row : [
+            SELECT Envelope__c, Account__c,
+                   Account__r.Financial_Advisor_Team__r.Name
+            FROM Envelope_Content__c
+            WHERE Envelope__c IN :unresolved
+            AND Account__r.RecordType.DeveloperName = :HOUSEHOLD_RECORD_TYPE_DEVELOPER_NAME
+            WITH SECURITY_ENFORCED
+        ]) {
+            if (!householdRowByEnvelope.containsKey(row.Envelope__c)) {
+                householdRowByEnvelope.put(row.Envelope__c, row);
+            }
+        }
+    }
+
+    private static EnvelopeRow buildEnvelopeRow(Envelope__c env, Envelope_Content__c householdRow) {
+        EnvelopeRow row = new EnvelopeRow();
+        row.id = env.Id;
+        row.name = env.Name;
+        row.householdName = env.Household_Name__c;
+        row.householdId = householdRow != null ? householdRow.Account__c : env.Household__c;
+        row.advisorTeamName = householdRow != null
+            && householdRow.Account__r != null
+            && householdRow.Account__r.Financial_Advisor_Team__r != null
+            ? householdRow.Account__r.Financial_Advisor_Team__r.Name
+            : null;
+        row.advisorTeamId = householdRow != null
+            && householdRow.Account__r != null
+            && householdRow.Account__r.Financial_Advisor_Team__r != null
+            ? householdRow.Account__r.Financial_Advisor_Team__r.Id
+            : null;
+        row.createdDate = env.CreatedDate;
+        row.createdByName = env.CreatedBy != null ? env.CreatedBy.Name : null;
+        row.createdById = env.CreatedById;
+        row.ownerId = env.OwnerId;
+        row.lastModifiedDate = env.LastModifiedDate;
+        row.lastModifiedByName = env.LastModifiedBy != null ? env.LastModifiedBy.Name : null;
+        return row;
+    }
+
+    // Same metrics, same caveats, as getWizEnvelopes (see the comment there).
+    private static void populateEnvelopeMetrics(EnvelopeListData data, List<Envelope__c> envelopes) {
+        if (envelopes.isEmpty()) {
+            return;
+        }
+        Set<Id> envelopeIds = new Map<Id, Envelope__c>(envelopes).keySet();
+        Map<Id, EntityCounts> countsByEnvelope;
+        try {
+            countsByEnvelope = buildEntityCounts(envelopeIds);
+        } catch (Exception e) {
+            System.debug(LoggingLevel.ERROR, 'Envelope entity counts failed: ' + e);
+            countsByEnvelope = new Map<Id, EntityCounts>();
+        }
+        for (Envelope__c state : [
+            SELECT Id, Envelope_JSON__c, Missing_Items_Count__c, Missing_Items_Has_Plus__c
+            FROM Envelope__c
+            WHERE Id IN :envelopeIds
+        ]) {
+            data.envelopeMetrics.add(buildEnvelopeMetrics(state, countsByEnvelope.get(state.Id)));
+        }
+    }
+
     @AuraEnabled
     public static EnvelopeListData getEnvelopeListData() {
         EnvelopeListData data = new EnvelopeListData();
@@ -280,26 +379,7 @@ public with sharing class EnvelopeLandingApex {
             data.advisorTeamOptions.add(new Option(team.Name, team.Id));
         }
 
-        // The envelopes of the user's teams, reached through the junction rows of the teams'
-        // households — a relationship filter, so the households themselves are never loaded. Each
-        // envelope keeps its first household row; that row carries the team name for the column.
-        Map<Id, Envelope_Content__c> householdRowByEnvelope = new Map<Id, Envelope_Content__c>();
-        if (!teamIds.isEmpty()) {
-            for (Envelope_Content__c row : [
-                SELECT Envelope__c, Account__c,
-                       Account__r.Financial_Advisor_Team__r.Name
-                FROM Envelope_Content__c
-                WHERE Envelope__c != null
-                AND Account__r.RecordType.DeveloperName = :HOUSEHOLD_RECORD_TYPE_DEVELOPER_NAME
-                AND Account__r.Financial_Advisor_Team__c IN :teamIds
-                WITH SECURITY_ENFORCED
-            ]) {
-                if (!householdRowByEnvelope.containsKey(row.Envelope__c)) {
-                    householdRowByEnvelope.put(row.Envelope__c, row);
-                }
-            }
-        }
-
+        Map<Id, Envelope_Content__c> householdRowByEnvelope = householdRowByTeamEnvelope(teamIds);
         Set<Id> teamEnvelopeIds = householdRowByEnvelope.keySet();
         List<Envelope__c> envelopes = [
             SELECT Id, Name, Household_Name__c, Household__c,
@@ -316,71 +396,56 @@ public with sharing class EnvelopeLandingApex {
             return data;
         }
 
-        // Owned envelopes outside the user's teams still need a household row for the column; one
-        // more query for just those, rather than widening the relationship filter above.
-        Set<Id> unresolved = new Set<Id>();
+        resolveUnresolvedHouseholdRows(householdRowByEnvelope, envelopes);
         for (Envelope__c env : envelopes) {
-            if (!householdRowByEnvelope.containsKey(env.Id)) {
-                unresolved.add(env.Id);
-            }
+            data.envelopes.add(buildEnvelopeRow(env, householdRowByEnvelope.get(env.Id)));
         }
-        if (!unresolved.isEmpty()) {
-            for (Envelope_Content__c row : [
-                SELECT Envelope__c, Account__c,
-                       Account__r.Financial_Advisor_Team__r.Name
-                FROM Envelope_Content__c
-                WHERE Envelope__c IN :unresolved
-                AND Account__r.RecordType.DeveloperName = :HOUSEHOLD_RECORD_TYPE_DEVELOPER_NAME
-                WITH SECURITY_ENFORCED
-            ]) {
-                if (!householdRowByEnvelope.containsKey(row.Envelope__c)) {
-                    householdRowByEnvelope.put(row.Envelope__c, row);
-                }
-            }
+        populateEnvelopeMetrics(data, envelopes);
+        return data;
+    }
+
+    /**
+     * Server-side search for the Envelopes table (Home dashboard and Work page): a SOSL pass via
+     * ArcSoslSearchHelper (ids only, since SOSL's RETURNING clause is not a reliable field
+     * source), then the same household/team scoping and row-building getEnvelopeListData uses, so
+     * a search can surface envelopes beyond ENVELOPE_LIST_LIMIT's initial load.
+     */
+    @AuraEnabled
+    public static EnvelopeListData searchEnvelopeListData(String term) {
+        EnvelopeListData data = new EnvelopeListData();
+        data.envelopes = new List<EnvelopeRow>();
+        data.advisorTeamOptions = new List<Option>();
+        data.envelopeMetrics = new List<EnvelopeMetrics>();
+
+        List<Id> matchedIds = ArcSoslSearchHelper.findMatchingIds('Envelope__c', term);
+        if (matchedIds.isEmpty()) {
+            return data;
         }
 
-        for (Envelope__c env : envelopes) {
-            Envelope_Content__c householdRow = householdRowByEnvelope.get(env.Id);
-            EnvelopeRow row = new EnvelopeRow();
-            row.id = env.Id;
-            row.name = env.Name;
-            row.householdName = env.Household_Name__c;
-            row.householdId = householdRow != null ? householdRow.Account__c : env.Household__c;
-            row.advisorTeamName = householdRow != null
-                && householdRow.Account__r != null
-                && householdRow.Account__r.Financial_Advisor_Team__r != null
-                ? householdRow.Account__r.Financial_Advisor_Team__r.Name
-                : null;
-            row.advisorTeamId = householdRow != null
-                && householdRow.Account__r != null
-                && householdRow.Account__r.Financial_Advisor_Team__r != null
-                ? householdRow.Account__r.Financial_Advisor_Team__r.Id
-                : null;
-            row.createdDate = env.CreatedDate;
-            row.createdByName = env.CreatedBy != null ? env.CreatedBy.Name : null;
-            row.createdById = env.CreatedById;
-            row.ownerId = env.OwnerId;
-            row.lastModifiedDate = env.LastModifiedDate;
-            row.lastModifiedByName = env.LastModifiedBy != null ? env.LastModifiedBy.Name : null;
-            data.envelopes.add(row);
-        }
-
-        // Same metrics, same caveats, as getWizEnvelopes (see the comment there).
-        Set<Id> envelopeIds = new Map<Id, Envelope__c>(envelopes).keySet();
-        Map<Id, EntityCounts> countsByEnvelope;
-        try {
-            countsByEnvelope = buildEntityCounts(envelopeIds);
-        } catch (Exception e) {
-            System.debug(LoggingLevel.ERROR, 'Envelope entity counts failed: ' + e);
-            countsByEnvelope = new Map<Id, EntityCounts>();
-        }
-        for (Envelope__c state : [
-            SELECT Id, Envelope_JSON__c, Missing_Items_Count__c, Missing_Items_Has_Plus__c
+        Set<Id> teamIds = currentUserTeamIds();
+        Map<Id, Envelope_Content__c> householdRowByEnvelope = householdRowByTeamEnvelope(teamIds);
+        Set<Id> teamEnvelopeIds = householdRowByEnvelope.keySet();
+        List<Envelope__c> envelopes = [
+            SELECT Id, Name, Household_Name__c, Household__c,
+                   CreatedDate, CreatedById, CreatedBy.Name, OwnerId,
+                   LastModifiedDate, LastModifiedBy.Name
             FROM Envelope__c
-            WHERE Id IN :envelopeIds
-        ]) {
-            data.envelopeMetrics.add(buildEnvelopeMetrics(state, countsByEnvelope.get(state.Id)));
+            WHERE Id IN :matchedIds
+            AND Status__c IN ('New', 'In Progress')
+            AND (Id IN :teamEnvelopeIds OR OwnerId = :UserInfo.getUserId())
+            WITH SECURITY_ENFORCED
+            ORDER BY LastModifiedDate DESC
+            LIMIT :ENVELOPE_LIST_LIMIT
+        ];
+        if (envelopes.isEmpty()) {
+            return data;
         }
+
+        resolveUnresolvedHouseholdRows(householdRowByEnvelope, envelopes);
+        for (Envelope__c env : envelopes) {
+            data.envelopes.add(buildEnvelopeRow(env, householdRowByEnvelope.get(env.Id)));
+        }
+        populateEnvelopeMetrics(data, envelopes);
         return data;
     }
 

@@ -409,6 +409,72 @@ private class WorkDatatableControllerTest {
     );
   }
 
+  @IsTest
+  static void searchWorkCasesFindsOwnedCaseByFixedSearchResult() {
+    Case ownedCase = new Case(
+      Subject = 'Zephyr Search Case',
+      Status = 'New',
+      OwnerId = UserInfo.getUserId()
+    );
+    insert ownedCase;
+
+    Test.setFixedSearchResults(new List<Id>{ ownedCase.Id });
+
+    Test.startTest();
+    WorkDatatableModels.WorkDatatableData data = WorkDatatableController.searchWorkCases(
+      'My',
+      'Zephyr'
+    );
+    Test.stopTest();
+
+    System.assertNotEquals(null, data, 'Expected work data wrapper');
+    System.assertEquals(true, containsCaseId(data, ownedCase.Id));
+  }
+
+  @IsTest
+  static void searchWorkCasesTeamScopeFindsFixedSearchResult() {
+    Financial_Advisor_Team__c team = ArcRelatedTableTestData.createFinancialAdvisorTeam(
+      'Work Datatable Search Team Scope'
+    );
+    ArcRelatedTableTestData.createTeamMembership(team.Id, UserInfo.getUserId());
+
+    Case teamCase = new Case(
+      Subject = 'Zephyr Team Case',
+      Status = 'New',
+      Financial_Advisor_Team__c = team.Id
+    );
+    insert teamCase;
+
+    Test.setFixedSearchResults(new List<Id>{ teamCase.Id });
+
+    Test.startTest();
+    WorkDatatableModels.WorkDatatableData data = WorkDatatableController.searchWorkCases(
+      'Team',
+      'Zephyr'
+    );
+    Test.stopTest();
+
+    System.assertNotEquals(null, data, 'Expected work data wrapper');
+    System.assertEquals(true, containsCaseId(data, teamCase.Id));
+  }
+
+  @IsTest
+  static void searchWorkCasesBelowMinLengthReturnsNoRows() {
+    Test.startTest();
+    WorkDatatableModels.WorkDatatableData data = WorkDatatableController.searchWorkCases(
+      'My',
+      'a'
+    );
+    Test.stopTest();
+
+    System.assertNotEquals(null, data, 'Expected work data wrapper');
+    System.assertEquals(
+      0,
+      data.totalCount,
+      'A term below the minimum length should not reach the server search.'
+    );
+  }
+
   private static Boolean containsCaseId(
     WorkDatatableModels.WorkDatatableData data,
     Id caseId

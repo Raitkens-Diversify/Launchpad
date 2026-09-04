@@ -1,6 +1,12 @@
 @isTest
 private class HelpGuideAdminControllerTest {
 
+    /** The deployer's own access is not enough in production; see HelpCenterTestDataFactory. */
+    @TestSetup
+    static void grantAccess() {
+        HelpCenterTestDataFactory.grantAdminToRunningUser();
+    }
+
     private class MockDeployer implements HelpGuideAdminController.MetadataDeployer {
         public Metadata.DeployContainer captured;
         public Id enqueue(Metadata.DeployContainer container, Metadata.DeployCallback callback) {
