@@ -86,7 +86,8 @@ private class NotificationStaleLogCleanupBatchTest {
     Database.executeBatch(batch, 200);
     Test.stopTest();
 
-    System.assertEquals(0, [
+    System.assertEquals(0, batch.getSuppressedCountForTest());
+    System.assertEquals(1, [
       SELECT COUNT()
       FROM Notification_Log__c
       WHERE

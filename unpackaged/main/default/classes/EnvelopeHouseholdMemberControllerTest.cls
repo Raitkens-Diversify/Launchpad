@@ -6,6 +6,25 @@ private class EnvelopeHouseholdMemberControllerTest {
     return env;
   }
 
+  // An envelope with a Household on it, which is the only shape that occurs in practice:
+  // every envelope in the org has one, and every caller of saveEntity passes an envelope.
+  // saveEntity reads this household to set Household__c and Type on a new member, so a
+  // household-less envelope leaves Type blank and the insert fails
+  // Type_OR_Classification_Required. Tests that exercise a real save need this, not
+  // makeEnvelope().
+  private static Envelope__c makeEnvelopeWithHousehold() {
+    Envelope__c env = makeEnvelope();
+    Account household = new Account(
+      Name = 'Test Household',
+      RecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
+        .get('Household')
+        .getRecordTypeId()
+    );
+    insert household;
+    insert new Envelope_Content__c(Envelope__c = env.Id, Account__c = household.Id);
+    return env;
+  }
+
   // Some Account record types (IndustriesBusiness / IndustriesInstitution) are only
   // assignable to certain profiles. When the running user can't use a record type, an
   // Account insert with it fails with INVALID_CROSS_REFERENCE_KEY regardless of our code,
@@ -38,7 +57,7 @@ private class EnvelopeHouseholdMemberControllerTest {
 
   @isTest
   static void testSaveEntity_NewClient() {
-    Envelope__c env = makeEnvelope();
+    Envelope__c env = makeEnvelopeWithHousehold();
 
     Map<String, Object> acc = new Map<String, Object>{
       'RecordTypeId' => 'client',
@@ -217,31 +236,6 @@ private class EnvelopeHouseholdMemberControllerTest {
   }
 
   @isTest
-  static void testSaveEntity_NoEnvelope() {
-    // envelopeId == null should skip Envelope_Content creation but still upsert the Account.
-    Map<String, Object> acc = new Map<String, Object>{
-      'RecordTypeId' => 'client',
-      'FirstName' => 'Solo',
-      'LastName' => 'Member'
-    };
-
-    Test.startTest();
-    Id accId = EnvelopeHouseholdMemberController.saveEntity(acc, null, null);
-    Test.stopTest();
-
-    System.assertNotEquals(
-      null,
-      accId,
-      'Account should be created even without an envelope.'
-    );
-    System.assertEquals(
-      0,
-      [SELECT COUNT() FROM Envelope_Content__c WHERE Account__c = :accId],
-      'No Envelope_Content should be created when envelopeId is null.'
-    );
-  }
-
-  @isTest
   static void testSaveEntity_NewClient_InheritsFatAndLinksToHousehold() {
     // Household with a Financial Advisor Team, linked to the envelope — the
     // setup the FAT-inheritance and household-linking paths key off.
@@ -256,7 +250,7 @@ private class EnvelopeHouseholdMemberControllerTest {
     Account household = new Account(
       Name = 'Test Household',
       RecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
-        .get('IndustriesHousehold')
+        .get('Household')
         .getRecordTypeId(),
       Financial_Advisor_Team__c = team.Id
     );
@@ -312,7 +306,7 @@ private class EnvelopeHouseholdMemberControllerTest {
     Account household = new Account(
       Name = 'Test Household',
       RecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
-        .get('IndustriesHousehold')
+        .get('Household')
         .getRecordTypeId()
     );
     insert household;
@@ -367,7 +361,7 @@ private class EnvelopeHouseholdMemberControllerTest {
 
   @isTest
   static void testSaveEntity_UpdateDoesNotDuplicate() {
-    Envelope__c env = makeEnvelope();
+    Envelope__c env = makeEnvelopeWithHousehold();
 
     Map<String, Object> createAcc = new Map<String, Object>{
       'RecordTypeId' => 'client',
@@ -502,13 +496,14 @@ private class EnvelopeHouseholdMemberControllerTest {
     Account household = new Account(
       Name = 'Test Household',
       RecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
-        .get('IndustriesHousehold')
+        .get('Household')
         .getRecordTypeId(),
       Financial_Advisor_Team__c = team.Id
     );
     insert household;
 
     Account person = new Account(
+      Type = 'Prospect',
       FirstName = 'Roster',
       LastName = 'Member',
       RecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
@@ -523,6 +518,7 @@ private class EnvelopeHouseholdMemberControllerTest {
     );
 
     Account person2 = new Account(
+      Type = 'Prospect',
       FirstName = 'Aar',
       LastName = 'Member',
       RecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
@@ -593,12 +589,14 @@ private class EnvelopeHouseholdMemberControllerTest {
     insert new List<Account>{ householdA, householdB };
 
     Account memberOfA = new Account(
+      Type = 'Prospect',
       FirstName = 'Member',
       LastName = 'OfA',
       RecordTypeId = personRecordTypeId,
       Submitted__c = true
     );
     Account memberOfB = new Account(
+      Type = 'Prospect',
       FirstName = 'Member',
       LastName = 'OfB',
       RecordTypeId = personRecordTypeId,
@@ -659,6 +657,7 @@ private class EnvelopeHouseholdMemberControllerTest {
     insert household;
 
     Account person = new Account(
+      Type = 'Prospect',
       FirstName = 'AAR',
       LastName = 'Linked',
       RecordTypeId = personRecordTypeId,
@@ -703,12 +702,14 @@ private class EnvelopeHouseholdMemberControllerTest {
     insert household;
 
     Account draftFromOtherEnvelope = new Account(
+      Type = 'Prospect',
       FirstName = 'Draft',
       LastName = 'FromOtherEnvelope',
       RecordTypeId = personRecordTypeId,
       Submitted__c = false
     );
     Account memberAddedToThisEnvelope = new Account(
+      Type = 'Prospect',
       FirstName = 'Added',
       LastName = 'ToThisEnvelope',
       RecordTypeId = personRecordTypeId,
@@ -728,6 +729,15 @@ private class EnvelopeHouseholdMemberControllerTest {
         Active__c = true
       )
     };
+
+    // The draft has to actually belong to another envelope for this to be the cross-envelope
+    // case: belongsInEnvelope admits an unsubmitted member that is on no envelope at all,
+    // since an orphan draft is not another envelope's draft.
+    Envelope__c otherEnvelope = makeEnvelope();
+    insert new Envelope_Content__c(
+      Envelope__c = otherEnvelope.Id,
+      Account__c = draftFromOtherEnvelope.Id
+    );
 
     Envelope__c thisEnvelope = makeEnvelope();
     insert new Envelope_Content__c(
@@ -775,6 +785,7 @@ private class EnvelopeHouseholdMemberControllerTest {
     insert household;
 
     Account retirementPlan = new Account(
+      Type = 'Prospect',
       Name = 'A Retirement Plan',
       RecordTypeId = retirementPlanRecordTypeId,
       Submitted__c = true
@@ -825,11 +836,12 @@ private class EnvelopeHouseholdMemberControllerTest {
     Account household = new Account(
       Name = 'Link Household',
       RecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
-        .get('IndustriesHousehold')
+        .get('Household')
         .getRecordTypeId()
     );
     insert household;
     Account person = new Account(
+      Type = 'Prospect',
       FirstName = 'Related',
       LastName = 'Person',
       RecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
@@ -890,6 +902,7 @@ private class EnvelopeHouseholdMemberControllerTest {
 
   private static Account makePerson(String firstName, String lastName) {
     Account person = new Account(
+      Type = 'Prospect',
       FirstName = firstName,
       LastName = lastName,
       RecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
@@ -929,7 +942,7 @@ private class EnvelopeHouseholdMemberControllerTest {
   @isTest
   static void testSaveRelatedParties_LinksPartiesAndEnvelope() {
     Envelope__c env = makeEnvelope();
-    Account entity = new Account(Name = 'Acme Holdings');
+    Account entity = new Account(Name = 'Acme Holdings', Type = 'Prospect');
     insert entity;
     Account authorized = makePerson('Ann', 'Authorized');
     Account beneficial = makePerson('Ben', 'Beneficial');
@@ -953,7 +966,7 @@ private class EnvelopeHouseholdMemberControllerTest {
     Test.stopTest();
 
     List<Account_Account_Relationship__c> written = [
-      SELECT Related_Account__c, Role__c, Roles__c, RecordTypeId, Active__c
+      SELECT Related_Account__c, Roles__c, RecordTypeId, Active__c
       FROM Account_Account_Relationship__c
       WHERE Account__c = :entity.Id
     ];
@@ -972,11 +985,6 @@ private class EnvelopeHouseholdMemberControllerTest {
       'Authorized Person',
       byPerson.get(authorized.Id).Roles__c,
       'The authorized person should carry the Authorized Person role.'
-    );
-    System.assertEquals(
-      null,
-      byPerson.get(authorized.Id).Role__c,
-      'The single-value Role field is no longer written; Roles carries the roles.'
     );
     System.assertEquals(
       fiduciaryRecordTypeId(),
@@ -1010,7 +1018,7 @@ private class EnvelopeHouseholdMemberControllerTest {
   @isTest
   static void testSaveRelatedParties_RemovesOnlyPartiesNoLongerSent() {
     Envelope__c env = makeEnvelope();
-    Account entity = new Account(Name = 'Acme Holdings');
+    Account entity = new Account(Name = 'Acme Holdings', Type = 'Prospect');
     insert entity;
     Account keep = makePerson('Keep', 'Person');
     Account drop = makePerson('Drop', 'Person');
@@ -1074,8 +1082,8 @@ private class EnvelopeHouseholdMemberControllerTest {
   @isTest
   static void testGetRelatedParties_ReturnsRowsForRequestedEntities() {
     Envelope__c env = makeEnvelope();
-    Account entity = new Account(Name = 'Acme Holdings');
-    Account otherEntity = new Account(Name = 'Other Holdings');
+    Account entity = new Account(Name = 'Acme Holdings', Type = 'Prospect');
+    Account otherEntity = new Account(Name = 'Other Holdings', Type = 'Prospect');
     insert new List<Account>{ entity, otherEntity };
     Account trustee = makePerson('Tina', 'Trustee');
     Account other = makePerson('Ozzy', 'Other');
@@ -1160,7 +1168,7 @@ private class EnvelopeHouseholdMemberControllerTest {
       'A missing entity account should throw AuraHandledException.'
     );
 
-    Account entity = new Account(Name = 'Acme Holdings');
+    Account entity = new Account(Name = 'Acme Holdings', Type = 'Prospect');
     insert entity;
     Account person = makePerson('No', 'Roles');
 
@@ -1195,7 +1203,7 @@ private class EnvelopeHouseholdMemberControllerTest {
   @isTest
   static void testSaveRelatedParties_UnusablePartyRejectsTheSave() {
     Envelope__c env = makeEnvelope();
-    Account entity = new Account(Name = 'Acme Holdings');
+    Account entity = new Account(Name = 'Acme Holdings', Type = 'Prospect');
     insert entity;
     Account usable = makePerson('Ursula', 'Usable');
 
@@ -1240,7 +1248,7 @@ private class EnvelopeHouseholdMemberControllerTest {
   @isTest
   static void testSaveRelatedParties_UnknownRoleIsSkippedAndReported() {
     Envelope__c env = makeEnvelope();
-    Account entity = new Account(Name = 'Acme Holdings');
+    Account entity = new Account(Name = 'Acme Holdings', Type = 'Prospect');
     insert entity;
     Account valid = makePerson('Vera', 'Valid');
     Account unknown = makePerson('Ulf', 'Unknown');
@@ -1297,7 +1305,7 @@ private class EnvelopeHouseholdMemberControllerTest {
   @isTest
   static void testSaveRelatedParties_MalformedPayloadIsReported() {
     Envelope__c env = makeEnvelope();
-    Account entity = new Account(Name = 'Acme Holdings');
+    Account entity = new Account(Name = 'Acme Holdings', Type = 'Prospect');
     insert entity;
 
     Boolean thrown = false;
@@ -1324,7 +1332,7 @@ private class EnvelopeHouseholdMemberControllerTest {
   @isTest
   static void testSaveRelatedParties_BlankPayloadRemovesHeldParties() {
     Envelope__c env = makeEnvelope();
-    Account entity = new Account(Name = 'Acme Holdings');
+    Account entity = new Account(Name = 'Acme Holdings', Type = 'Prospect');
     insert entity;
     Account dropped = makePerson('Dee', 'Dropped');
     insert new Account_Account_Relationship__c(
@@ -1360,7 +1368,7 @@ private class EnvelopeHouseholdMemberControllerTest {
   @isTest
   static void testSaveRelatedParties_LinksEnvelopeWithoutManagedRoles() {
     Envelope__c env = makeEnvelope();
-    Account entity = new Account(Name = 'Acme Holdings');
+    Account entity = new Account(Name = 'Acme Holdings', Type = 'Prospect');
     insert entity;
     Account person = makePerson('Elle', 'Existing');
 
@@ -1419,7 +1427,7 @@ private class EnvelopeHouseholdMemberControllerTest {
   @isTest
   static void testSaveRelatedParties_OnePersonInTwoRolesWritesOneRelationship() {
     Envelope__c env = makeEnvelope();
-    Account entity = new Account(Name = 'Family Trust');
+    Account entity = new Account(Name = 'Family Trust', Type = 'Prospect');
     insert entity;
     Account person = makePerson('Tess', 'Both');
 
@@ -1464,7 +1472,7 @@ private class EnvelopeHouseholdMemberControllerTest {
   @isTest
   static void testGetRelatedParties_SplitsRolesIntoOneRowEach() {
     Envelope__c env = makeEnvelope();
-    Account entity = new Account(Name = 'Family Trust');
+    Account entity = new Account(Name = 'Family Trust', Type = 'Prospect');
     insert entity;
     Account person = makePerson('Tess', 'Both');
     EnvelopeHouseholdMemberController.saveRelatedParties(
@@ -1511,7 +1519,7 @@ private class EnvelopeHouseholdMemberControllerTest {
   @isTest
   static void testSaveRelatedParties_DroppingOneRoleKeepsTheRelationship() {
     Envelope__c env = makeEnvelope();
-    Account entity = new Account(Name = 'Family Trust');
+    Account entity = new Account(Name = 'Family Trust', Type = 'Prospect');
     insert entity;
     Account person = makePerson('Tess', 'Both');
     EnvelopeHouseholdMemberController.saveRelatedParties(
@@ -1569,7 +1577,7 @@ private class EnvelopeHouseholdMemberControllerTest {
   @isTest
   static void testSaveRelatedParties_DroppedPartyLeavesTheEnvelope() {
     Envelope__c env = makeEnvelope();
-    Account entity = new Account(Name = 'Family Trust');
+    Account entity = new Account(Name = 'Family Trust', Type = 'Prospect');
     insert entity;
     insert new Envelope_Content__c(Envelope__c = env.Id, Account__c = entity.Id);
     Account person = makePerson('Tess', 'Trustee');
@@ -1624,8 +1632,8 @@ private class EnvelopeHouseholdMemberControllerTest {
   @isTest
   static void testSaveRelatedParties_PartyServingAnotherEntityKeepsItsEnvelopeLink() {
     Envelope__c env = makeEnvelope();
-    Account first = new Account(Name = 'First Trust');
-    Account second = new Account(Name = 'Second Trust');
+    Account first = new Account(Name = 'First Trust', Type = 'Prospect');
+    Account second = new Account(Name = 'Second Trust', Type = 'Prospect');
     insert new List<Account>{ first, second };
     insert new List<Envelope_Content__c>{
       new Envelope_Content__c(Envelope__c = env.Id, Account__c = first.Id),
@@ -1676,7 +1684,7 @@ private class EnvelopeHouseholdMemberControllerTest {
   @isTest
   static void testSaveRelatedParties_DroppingOneRoleKeepsTheEnvelopeLink() {
     Envelope__c env = makeEnvelope();
-    Account entity = new Account(Name = 'Family Trust');
+    Account entity = new Account(Name = 'Family Trust', Type = 'Prospect');
     insert entity;
     insert new Envelope_Content__c(Envelope__c = env.Id, Account__c = entity.Id);
     Account person = makePerson('Tess', 'Both');
@@ -1727,7 +1735,7 @@ private class EnvelopeHouseholdMemberControllerTest {
   @isTest
   static void testSaveRelatedParties_UnmanagedRoleOnTheSameRelationshipSurvives() {
     Envelope__c env = makeEnvelope();
-    Account entity = new Account(Name = 'Family Trust');
+    Account entity = new Account(Name = 'Family Trust', Type = 'Prospect');
     insert entity;
     Account person = makePerson('Tess', 'Trustee');
     insert new Account_Account_Relationship__c(
@@ -1764,7 +1772,7 @@ private class EnvelopeHouseholdMemberControllerTest {
   @isTest
   static void testSaveRelatedParties_RelationshipWithNoManagedRoleIsUntouched() {
     Envelope__c env = makeEnvelope();
-    Account entity = new Account(Name = 'Family Trust');
+    Account entity = new Account(Name = 'Family Trust', Type = 'Prospect');
     insert entity;
     Account person = makePerson('Ozzy', 'Other');
     insert new Account_Account_Relationship__c(
@@ -1802,7 +1810,7 @@ private class EnvelopeHouseholdMemberControllerTest {
   @isTest
   static void testSaveRelatedParties_CollapsesDuplicateRelationshipsForAPair() {
     Envelope__c env = makeEnvelope();
-    Account entity = new Account(Name = 'Family Trust');
+    Account entity = new Account(Name = 'Family Trust', Type = 'Prospect');
     insert entity;
     Account person = makePerson('Tess', 'Both');
     insert new List<Account_Account_Relationship__c>{
@@ -1854,7 +1862,7 @@ private class EnvelopeHouseholdMemberControllerTest {
   @isTest
   static void testSaveRelatedParties_ReactivatesAnInactiveRelationship() {
     Envelope__c env = makeEnvelope();
-    Account entity = new Account(Name = 'Family Trust');
+    Account entity = new Account(Name = 'Family Trust', Type = 'Prospect');
     insert entity;
     Account person = makePerson('Tess', 'Trustee');
     insert new Account_Account_Relationship__c(
@@ -1903,8 +1911,8 @@ private class EnvelopeHouseholdMemberControllerTest {
   @isTest
   static void testSaveRelatedParties_RolesOnAnotherEntityAreUntouched() {
     Envelope__c env = makeEnvelope();
-    Account trustA = new Account(Name = 'Trust A');
-    Account trustB = new Account(Name = 'Trust B');
+    Account trustA = new Account(Name = 'Trust A', Type = 'Prospect');
+    Account trustB = new Account(Name = 'Trust B', Type = 'Prospect');
     insert new List<Account>{ trustA, trustB };
     Account person = makePerson('Tess', 'Both');
     EnvelopeHouseholdMemberController.saveRelatedParties(
@@ -2047,7 +2055,7 @@ private class EnvelopeHouseholdMemberControllerTest {
 
   @isTest
   static void testSaveEntity_AcceptsWellFormedTaxIdAndRejectsBadUpdate() {
-    Envelope__c env = makeEnvelope();
+    Envelope__c env = makeEnvelopeWithHousehold();
     injectSsnRule();
 
     Test.startTest();

@@ -98,6 +98,8 @@ public class NotificationConstants {
   public static final String SUPPRESSION_USER_IMMEDIATE_DISABLED =
     'User immediate delivery disabled for channel';
   public static final String SUPPRESSION_NO_PREFERENCE = 'No matching notification preference';
+  public static final String SUPPRESSION_STALE_QUEUED_CLEANUP =
+    'Stale queued notification log suppressed during monthly cleanup';
 
   /** Resolved scope label when pit stop tasks bypass user notification preferences. */
   public static final String PREFERENCE_SCOPE_PIT_STOP_BYPASS = 'PIT_STOP_BYPASS';

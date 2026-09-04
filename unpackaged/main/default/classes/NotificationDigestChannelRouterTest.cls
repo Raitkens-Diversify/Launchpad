@@ -16,25 +16,25 @@ private class NotificationDigestChannelRouterTest {
         NotificationConstants.CHANNEL_EMAIL
       ) instanceof EmailDigestChannelHandler
     );
-    System.assert(
-      NotificationDigestChannelRouter.getHandler(
-        NotificationConstants.CHANNEL_ZOOM
-      ) instanceof ZoomDigestChannelHandler
-    );
   }
 
   @IsTest
   static void getHandler_throwsForUnsupportedChannel() {
-    Boolean didThrow = false;
+    for (String channel : new List<String>{
+      'Unsupported',
+      NotificationConstants.CHANNEL_ZOOM
+    }) {
+      Boolean didThrow = false;
 
-    try {
-      NotificationDigestChannelRouter.getHandler('Unsupported');
-    } catch (
-      NotificationDigestChannelRouter.NotificationDigestChannelRouterException expected
-    ) {
-      didThrow = true;
+      try {
+        NotificationDigestChannelRouter.getHandler(channel);
+      } catch (
+        NotificationDigestChannelRouter.NotificationDigestChannelRouterException expected
+      ) {
+        didThrow = true;
+      }
+
+      System.assertEquals(true, didThrow, 'Expected unsupported channel: ' + channel);
     }
-
-    System.assertEquals(true, didThrow);
   }
 }

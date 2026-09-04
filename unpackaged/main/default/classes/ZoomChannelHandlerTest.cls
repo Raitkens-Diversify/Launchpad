@@ -56,28 +56,4 @@ private class ZoomChannelHandlerTest {
 
     System.assertEquals(true, result.success);
   }
-
-  @IsTest
-  static void digestHandler_sendsUsingUserEmailFallback() {
-    Test.setMock(HttpCalloutMock.class, new ZoomSuccessMock(200));
-
-    NotificationUserChannelService.ChannelSettings settings =
-      new NotificationUserChannelService.ChannelSettings();
-    settings.userEmail = 'digest@example.com';
-
-    NotificationDigestModels.DigestDeliveryContext digestContext =
-      new NotificationDigestModels.DigestDeliveryContext();
-    digestContext.channelSettings = settings;
-    digestContext.message = new NotificationDigestModels.ConsolidatedMessage();
-    digestContext.message.body = 'Digest Zoom body';
-    digestContext.request.recipientId = UserInfo.getUserId();
-    digestContext.request.channel = NotificationConstants.CHANNEL_ZOOM;
-
-    Test.startTest();
-    NotificationDigestModels.DeliveryResult result = new ZoomDigestChannelHandler()
-      .deliver(digestContext);
-    Test.stopTest();
-
-    System.assertEquals(true, result.success);
-  }
 }

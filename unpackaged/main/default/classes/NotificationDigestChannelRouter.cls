@@ -12,10 +12,6 @@ public with sharing class NotificationDigestChannelRouter {
       return new EmailDigestChannelHandler();
     }
 
-    if (channel == NotificationConstants.CHANNEL_ZOOM) {
-      return new ZoomDigestChannelHandler();
-    }
-
     throw new NotificationDigestChannelRouterException(
       'Unsupported digest channel: ' + channel
     );

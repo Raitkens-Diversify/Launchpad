@@ -120,7 +120,7 @@ export const ACTIVITY_TYPES = Object.freeze({
     label: "Significant Event",
     category: ACTIVITY_CATEGORIES.INTERACTIONS,
     icon: "standard:event",
-    badgeKey: "meeting",
+    badgeKey: "significant-event",
     recordObjectApiName: "Significant_Event__c",
     summaryText: Object.freeze({
       default: "has a significant event"
