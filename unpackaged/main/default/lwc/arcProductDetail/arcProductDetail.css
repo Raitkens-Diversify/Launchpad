@@ -367,15 +367,17 @@
    the hand-rendered Waterfall Order sits level with the form beside it. */
 .arc-product-detail__field-label {
   display: block;
-  margin: 10px 0 2px;
-  font-size: 12px;
-  line-height: 18px;
+  margin: 10px 0 4px;
+  font-size: 14px;
+  line-height: 21px;
   color: var(--lwc-colorTextWeak, #444444);
 }
 
 .arc-product-detail__waterfall-steps {
   margin: 0;
-  padding-left: 1.25rem;
+  padding-left: 1.5rem;
+  /* SLDS resets list markers; the ranking IS the information here. */
+  list-style: decimal outside;
   font-size: 13px;
   line-height: 19.5px;
   color: var(--lwc-colorTextDefault, #181818);
@@ -383,4 +385,11 @@
 
 .arc-product-detail__waterfall-steps li {
   padding: 2px 0;
+}
+
+/* ── Files (Egnyte embed) ───────────────────────────────────────────────── */
+
+/* c-egnyte-vf-embed draws its own card; keep it in the main column's rhythm. */
+.arc-product-detail__files {
+  min-width: 0;
 }

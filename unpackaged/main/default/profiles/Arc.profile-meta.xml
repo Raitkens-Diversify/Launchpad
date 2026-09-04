@@ -2591,6 +2591,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <pageAccesses>
+        <apexPage>Egnyte_record_page</apexPage>
+        <enabled>true</enabled>
+    </pageAccesses>
+    <pageAccesses>
         <apexPage>fsc_screenFlow</apexPage>
         <enabled>true</enabled>
     </pageAccesses>
@@ -2801,7 +2805,22 @@
     </applicationVisibilities>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Account.American_Funds_F2_Signed__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Account.Interval_Fund_Signed__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Account.No_Reportable_Beneficial_Owners__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Account.Structure_Notes_Signed__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

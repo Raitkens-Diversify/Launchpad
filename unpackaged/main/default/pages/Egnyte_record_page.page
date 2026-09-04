@@ -1,0 +1,12 @@
+<!--
+  Egnyte file browser for one record of ANY object, embedded by egnyteVfEmbed
+  (LWR) through EgnyteVfEmbedController. Egnyte_integration_page does the same
+  job for Account only: it is bound to the Account standard controller, which
+  rejects every other Id, and the org will not let that binding change because
+  an internal Account page layout embeds the page. This page takes the Id from
+  ?id= directly; efs:egnyteload resolves the Egnyte folder from the Id for any
+  object with an active efs__EgnyteSyncObject__c row (Product__c, Case, ...).
+-->
+<apex:page showHeader="false" sidebar="false">
+<efs:egnyteload recordId="{!$CurrentPage.parameters.id}" pageHeight="600px"/>
+</apex:page>

@@ -2,7 +2,7 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Maestro_Home_Email__c</fullName>
     <externalId>false</externalId>
-    <formula>UPPER(LEFT( FinServ__FinancialAccount__r.FinServ__PrimaryOwner__r.PersonEmail, 50))</formula>
+    <formula>UPPER(LEFT( Wizard_Financial_Account__r.Primary_Owner__r.PersonEmail, 50))</formula>
     <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
     <label>Maestro Home Email</label>
     <required>false</required>

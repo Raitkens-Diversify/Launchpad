@@ -3,20 +3,41 @@
  * Date: 2026-08-20
  *
  * Builds Visualforce URLs for the egnyteVfEmbed LWC iframe.
- * Uses Egnyte_integration_page for record pages and efs__MyEgnyte for standalone views.
+ * Record pages use Egnyte_integration_page for Accounts (that page is bound to
+ * the Account standard controller and cannot be unbound: an internal Account
+ * page layout embeds it) and Egnyte_record_page for every other object;
+ * standalone views use efs__MyEgnyte.
  */
 public with sharing class EgnyteVfEmbedController {
     private static final String DEFAULT_SITE_NAME = 'ARC';
     private static final String DEFAULT_DOMAIN = 'https://arc-launchpad.diversify.com';
     private static final String RECORD_VF_PAGE = 'Egnyte_integration_page';
+    private static final String GENERIC_RECORD_VF_PAGE = 'Egnyte_record_page';
     private static final String STANDALONE_VF_PAGE = 'efs__MyEgnyte';
 
     @AuraEnabled
     public static String buildVfEmbedUrl(String domain, String recordId) {
         String vfPageName = String.isNotBlank(recordId)
-            ? RECORD_VF_PAGE
+            ? resolveRecordVfPage(recordId)
             : STANDALONE_VF_PAGE;
         return buildVfEmbedUrlInternal(vfPageName, domain, recordId);
+    }
+
+    /**
+     * Account keeps the original page (unchanged behaviour for the Household
+     * Documents tab); any other object, or an unparseable Id, gets the generic
+     * page, which reads the Id straight from the URL.
+     */
+    @TestVisible
+    private static String resolveRecordVfPage(String recordId) {
+        try {
+            Id parsed = Id.valueOf(recordId.trim());
+            return parsed.getSobjectType() == Account.SObjectType
+                ? RECORD_VF_PAGE
+                : GENERIC_RECORD_VF_PAGE;
+        } catch (Exception e) {
+            return GENERIC_RECORD_VF_PAGE;
+        }
     }
 
     @TestVisible

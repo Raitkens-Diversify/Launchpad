@@ -59,7 +59,7 @@
           <template lwc:if={hasSponsor}>
             <div class="arc-product-detail__key-fact">
               <dt>Sponsor</dt>
-              <dd>{sponsorValue}</dd>
+              <dd>{sponsorName}</dd>
             </div>
           </template>
           <template lwc:if={hasDateApproved}>
@@ -135,6 +135,7 @@
                     object-api-name={objectApiName}
                     fields={section.fields}
                     columns="2"
+                    density="comfy"
                     mode="readonly"
                   ></lightning-record-form>
                 </div>
@@ -212,6 +213,7 @@
                       object-api-name={objectApiName}
                       fields={section.fields}
                       columns="1"
+                      density="comfy"
                       mode="readonly"
                     ></lightning-record-form>
                   </div>
@@ -219,6 +221,19 @@
               </details>
             </template>
           </template>
+
+          <!-- Files: the internal page's Files tab is the Egnyte for
+               Salesforce component; this is ARC's Egnyte embed, the same one
+               the Household page's Documents tab uses. It resolves the record
+               from the page URL and Egnyte resolves the Product folder from
+               the record. -->
+          <div class="arc-product-detail__files">
+            <c-egnyte-vf-embed
+              domain={egnyteDomain}
+              card-title="Files"
+              frame-height="600"
+            ></c-egnyte-vf-embed>
+          </div>
         </div>
 
         <div class="arc-product-detail__side">
@@ -230,6 +245,7 @@
                 object-api-name={objectApiName}
                 fields={sponsorInfoFields}
                 columns="1"
+                density="comfy"
                 mode="readonly"
               ></lightning-record-form>
             </div>
@@ -246,6 +262,7 @@
                 object-api-name={objectApiName}
                 fields={notesFields}
                 columns="1"
+                density="comfy"
                 mode="readonly"
               ></lightning-record-form>
             </div>

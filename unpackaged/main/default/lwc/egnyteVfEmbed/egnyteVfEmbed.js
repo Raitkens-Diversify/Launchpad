@@ -72,6 +72,9 @@ import getApprovalUrl from '@salesforce/apex/ArcEgnyteAccessController.getApprov
 const STANDALONE_VF_PAGE = 'efs__MyEgnyte';
 const SITE_PATH_PREFIX = 'vforcesite';
 const RECORD_VF_PAGE = 'Egnyte_integration_page';
+/** Any object other than Account -- see EgnyteVfEmbedController.resolveRecordVfPage. */
+const GENERIC_RECORD_VF_PAGE = 'Egnyte_record_page';
+const ACCOUNT_KEY_PREFIX = '001';
 const DEFAULT_DOMAIN = 'https://arc-launchpad.diversify.com';
 const IFRAME_TITLE = 'Egnyte';
 /**
@@ -246,7 +249,13 @@ export default class EgnyteVfEmbed extends NavigationMixin(LightningElement) {
 
     buildClientFallbackUrl(siteDomain, recordId) {
         const params = new URLSearchParams();
-        const vfPageName = recordId ? RECORD_VF_PAGE : STANDALONE_VF_PAGE;
+        // Mirrors EgnyteVfEmbedController.resolveRecordVfPage: only Accounts may
+        // use the Account-bound page.
+        const vfPageName = recordId
+            ? recordId.startsWith(ACCOUNT_KEY_PREFIX)
+                ? RECORD_VF_PAGE
+                : GENERIC_RECORD_VF_PAGE
+            : STANDALONE_VF_PAGE;
 
         if (recordId) {
             params.set('id', recordId);

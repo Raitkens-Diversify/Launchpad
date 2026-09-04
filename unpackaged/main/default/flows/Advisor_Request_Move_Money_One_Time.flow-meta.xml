@@ -8,7 +8,7 @@
         <locationX>380</locationX>
         <locationY>1898</locationY>
         <assignmentItems>
-            <assignToReference>varCase.Household__c</assignToReference>
+            <assignToReference>varCase.AccountId</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>varHousehold.Id</elementReference>
@@ -36,7 +36,7 @@
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>varCase.Wizard_Financial_Account__c</assignToReference>
+            <assignToReference>varCase.FinServ__FinancialAccount__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>Get_Financial_Account.Id</elementReference>
@@ -134,6 +134,13 @@
             </value>
         </assignmentItems>
         <assignmentItems>
+            <assignToReference>varCase.FinServ__Household__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>varHousehold.Id</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
             <assignToReference>varCase.Submitted__c</assignToReference>
             <operator>Assign</operator>
             <value>
@@ -176,7 +183,7 @@
             <assignToReference>varSelectedFinancialAccount</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>varFinancialAccountCustom.Id</elementReference>
+                <elementReference>varFinancialAccount.Id</elementReference>
             </value>
         </assignmentItems>
         <connector>
@@ -258,7 +265,7 @@
             <name>FA</name>
             <conditionLogic>and</conditionLogic>
             <conditions>
-                <leftValueReference>varFinancialAccountCustom.Id</leftValueReference>
+                <leftValueReference>varFinancialAccount.Id</leftValueReference>
                 <operator>IsNull</operator>
                 <rightValue>
                     <booleanValue>false</booleanValue>
@@ -344,21 +351,6 @@
         <picklistObject>Case</picklistObject>
     </dynamicChoiceSets>
     <dynamicChoiceSets>
-        <name>FinAcct_RecordChoices</name>
-        <dataType>String</dataType>
-        <displayField>Name</displayField>
-        <filterLogic>and</filterLogic>
-        <filters>
-            <field>Household__c</field>
-            <operator>EqualTo</operator>
-            <value>
-                <elementReference>varHousehold.Id</elementReference>
-            </value>
-        </filters>
-        <object>Financial_Account__c</object>
-        <valueField>Id</valueField>
-    </dynamicChoiceSets>
-    <dynamicChoiceSets>
         <name>FinancialAccount_Record_ChoiceSet</name>
         <dataType>String</dataType>
         <displayField>Name</displayField>
@@ -387,7 +379,7 @@
         <displayField>Extended_Name__c</displayField>
         <filterLogic>and</filterLogic>
         <filters>
-            <field>Wizard_Financial_Account__c</field>
+            <field>Financial_Account__c</field>
             <operator>EqualTo</operator>
             <value>
                 <elementReference>Get_Financial_Account.Id</elementReference>
@@ -488,7 +480,7 @@
             <field>Id</field>
             <operator>EqualTo</operator>
             <value>
-                <elementReference>Get_Financial_Account.Primary_Owner__c</elementReference>
+                <elementReference>Get_Financial_Account.FinServ__PrimaryOwner__r.PersonContactId</elementReference>
             </value>
         </filters>
         <getFirstRecordOnly>true</getFirstRecordOnly>
@@ -513,7 +505,7 @@
             </value>
         </filters>
         <getFirstRecordOnly>true</getFirstRecordOnly>
-        <object>Financial_Account__c</object>
+        <object>FinServ__FinancialAccount__c</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <recordLookups>
@@ -565,7 +557,7 @@
                 <elementReference>varStateWithholdings</elementReference>
             </value>
         </inputAssignments>
-        <object>Financial_Account__c</object>
+        <object>FinServ__FinancialAccount__c</object>
     </recordUpdates>
     <recordUpdates>
         <name>Update_SLOA</name>
@@ -671,7 +663,7 @@
                 </fields>
                 <fields>
                     <name>Financial_Account</name>
-                    <choiceReferences>FinAcct_RecordChoices</choiceReferences>
+                    <choiceReferences>FinancialAccount_Record_ChoiceSet</choiceReferences>
                     <extensionName>flowruntime:choiceLookup</extensionName>
                     <fieldText>Financial Account:</fieldText>
                     <fieldType>ComponentChoice</fieldType>
@@ -695,7 +687,7 @@
                     <visibilityRule>
                         <conditionLogic>and</conditionLogic>
                         <conditions>
-                            <leftValueReference>varFinancialAccountCustom.Id</leftValueReference>
+                            <leftValueReference>varFinancialAccount.Id</leftValueReference>
                             <operator>IsNull</operator>
                             <rightValue>
                                 <booleanValue>true</booleanValue>
@@ -1531,14 +1523,6 @@
         <isInput>true</isInput>
         <isOutput>false</isOutput>
         <objectType>FinServ__FinancialAccount__c</objectType>
-    </variables>
-    <variables>
-        <name>varFinancialAccountCustom</name>
-        <dataType>SObject</dataType>
-        <isCollection>false</isCollection>
-        <isInput>true</isInput>
-        <isOutput>false</isOutput>
-        <objectType>Financial_Account__c</objectType>
     </variables>
     <variables>
         <name>varHousehold</name>

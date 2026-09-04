@@ -22,6 +22,30 @@ private class EgnyteVfEmbedControllerTest {
     }
 
     @IsTest
+    static void buildVfEmbedUrl_routesNonAccountRecordsToGenericPage() {
+        // A Product__c-shaped Id (prefix a2h in this org); anything that is not an
+        // Account must not hit the Account-bound page.
+        String productId = 'a2hTO00000PPtR7YAL';
+        String url = EgnyteVfEmbedController.buildVfEmbedUrl(CUSTOM_DOMAIN, productId);
+
+        System.assertNotEquals(null, url, 'Expected a record embed URL.');
+        System.assert(url.contains('/apex/Egnyte_record_page'), url);
+        System.assert(!url.contains('/apex/Egnyte_integration_page'), url);
+        System.assert(url.contains('id=' + productId), url);
+        System.assert(url.contains('isdtp=nv'), url);
+        System.assertEquals(
+            'Egnyte_record_page',
+            EgnyteVfEmbedController.resolveRecordVfPage('not-an-id'),
+            'An unparseable Id falls back to the generic page.'
+        );
+        System.assertEquals(
+            'Egnyte_integration_page',
+            EgnyteVfEmbedController.resolveRecordVfPage(RECORD_ID),
+            'Accounts keep the original page.'
+        );
+    }
+
+    @IsTest
     static void buildVfEmbedUrl_returnsStandaloneMyEgnyteUrl() {
         Test.startTest();
         String url = EgnyteVfEmbedController.buildVfEmbedUrl(CUSTOM_DOMAIN, null);

@@ -42,9 +42,10 @@
  *   - Monitoring Updates and Related Properties: the flexipage's two extra
  *     tabs (lst:dynamicRelatedList on Monitoring_Updates__r and
  *     DST_Properties__r), rendered as cards at the end of the main column
- *     with the same visibility rules as the tabs. The Files tab is an Egnyte
- *     component (third-party file store) with no Experience Cloud equivalent
- *     and is not reproduced.
+ *     with the same visibility rules as the tabs.
+ *   - Files: the internal Files tab is Egnyte for Salesforce (efs:EgnyteComponent);
+ *     here it is c/egnyteVfEmbed, the same Egnyte embed the Household page's
+ *     Documents tab uses, routed to the object-agnostic Egnyte_record_page.
  *   - Right rail, as on the internal page: Sponsor Information, Notes
  *     (Analyst Notes -- Internal Notes is deliberately left out: the Advisors
  *     page gates it to the Due Diligence permission / System Administrator,
@@ -67,7 +68,7 @@
  * security still applies: a field the reader cannot see is simply omitted by
  * the form, so a section can render fewer fields than listed here.
  */
-import { LightningElement, wire } from "lwc";
+import { LightningElement, api, wire } from "lwc";
 import { CurrentPageReference } from "lightning/navigation";
 import { getRecord, getFieldValue } from "lightning/uiRecordApi";
 import { getObjectInfo } from "lightning/uiObjectInfoApi";
@@ -132,6 +133,8 @@ const HEADER_FIELDS = [
   "Asset_Category__c",
   "Asset_Class__c",
   "Sponsor__c",
+  // Sponsor__c is a lookup; its value is an Id. The header shows the name.
+  "Sponsor__r.Name",
   "Date_Approved__c"
 ];
 
@@ -436,6 +439,13 @@ const PERFORMANCE_STATUS_TONES = {
 };
 
 export default class ArcProductDetail extends LightningElement {
+  /**
+   * Published site domain for the Files card's Egnyte iframe, forwarded to
+   * c-egnyte-vf-embed exactly as arcHouseholdDetail forwards its own. Blank
+   * lets that component fall back to its default (the published ARC domain).
+   */
+  @api egnyteDomain = "";
+
   recordId;
   errorMessage;
 
@@ -598,12 +608,12 @@ export default class ArcProductDetail extends LightningElement {
     return Boolean(this.assetClassValue);
   }
 
-  get sponsorValue() {
-    return this.fieldValue("Sponsor__c");
+  get sponsorName() {
+    return this.fieldValue("Sponsor__r.Name");
   }
 
   get hasSponsor() {
-    return Boolean(this.sponsorValue);
+    return Boolean(this.sponsorName);
   }
 
   get dateApprovedValue() {

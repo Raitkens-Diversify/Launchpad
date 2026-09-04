@@ -9,4 +9,15 @@
         <target>lightningCommunity__Page</target>
         <target>lightningCommunity__Default</target>
     </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property
+                name="egnyteDomain"
+                type="String"
+                default="https://arc-launchpad.diversify.com"
+                label="Egnyte Domain"
+                description="Published Experience site domain, forwarded to the Files card's Egnyte embed."
+            />
+        </targetConfig>
+    </targetConfigs>
 </LightningComponentBundle>

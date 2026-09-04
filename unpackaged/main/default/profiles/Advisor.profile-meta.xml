@@ -2758,6 +2758,11 @@
     </customMetadataTypeAccesses>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Account.American_Funds_F2_Signed__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Account.Count_of_Accounts__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -2792,6 +2797,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>true</editable>
+        <field>Account.Interval_Fund_Signed__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>false</editable>
         <field>Account.Last_Day_of_This_Quarter__c</field>
         <readable>true</readable>
@@ -2819,6 +2829,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Account.Revenue_T12__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Account.Structure_Notes_Signed__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

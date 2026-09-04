@@ -2811,6 +2811,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Account.American_Funds_F2_Signed__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Account.AnnualRevenue</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -3241,6 +3246,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Account.Interval_Fund_Signed__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Account.Investment_Objectives__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -3632,6 +3642,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Account.Stocks_Bonds_MF_through_Retirement__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Account.Structure_Notes_Signed__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
