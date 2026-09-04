@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Helios UAT admin console (LWC tab; granted by UAT_Admin). Split out of Admin_Console on 2026-09-04 so the Help Center / Resource Center console carries no UAT metadata.</description>
+    <label>UAT Admin</label>
+    <lwcComponent>uatAdminConsole</lwcComponent>
+    <motif>Custom57: Building Block</motif>
+</CustomTab>

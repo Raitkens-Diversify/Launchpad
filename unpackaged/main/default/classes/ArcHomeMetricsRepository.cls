@@ -1,14 +1,17 @@
 /**
  * Counts for the 5 Home dashboard metric tiles (Cases/Tasks assigned to me
- * and to my teams', plus Cases awaiting Home Office review). Mirrors the
- * scope semantics already established by ArcCaseMetricsRepository /
- * ArcTaskMetricsRepository: "mine" = Case/Task OwnerId, "my teams'" =
- * Financial_Advisor_Team__c membership via FinancialAdvisorTeamAccessService.
+ * and to my teams', plus My Pitstop Tasks). Mirrors the scope semantics
+ * already established by ArcCaseMetricsRepository / ArcTaskMetricsRepository:
+ * "mine" = Case/Task OwnerId, "my teams'" = Financial_Advisor_Team__c
+ * membership via FinancialAdvisorTeamAccessService.
  *
- * "Awaiting Home Office" has no direct status field on Case — it's derived
- * from the same Home_Office_Pit_Stop__c boolean ArcTaskMetricsRepository
- * already treats as the source of truth for "HO" on Task, joined back to
- * the owning Case.
+ * "My Pitstop Tasks" = the user's own open Tasks flagged Branch_Pit_Stop__c
+ * or Home_Office_Pit_Stop__c -- the same two booleans ArcTaskMetricsRepository
+ * treats as the source of truth for the Task donut's pit stop slices, so this
+ * tile equals that donut's "HO pit stop" + "Branch pit stop" for the same
+ * user. (Until 2026-09-04 the tile instead counted the user's own Cases that
+ * had an open Home Office pit stop task -- a case-owner scope that stayed at
+ * 0 for advisors whose pit stop tasks sit on other people's cases.)
  */
 public with sharing class ArcHomeMetricsRepository {
   private final FinancialAdvisorTeamAccessService teamAccessService;
@@ -43,31 +46,16 @@ public with sharing class ArcHomeMetricsRepository {
       ]
       .size();
 
-    Set<Id> hoPitStopCaseIds = new Set<Id>();
-    for (Task hoTask : [
-      SELECT WhatId
-      FROM Task
-      WHERE
-        Home_Office_Pit_Stop__c = TRUE
-        AND IsClosed = FALSE
-        AND WhatId != NULL
-      WITH SECURITY_ENFORCED
-    ]) {
-      hoPitStopCaseIds.add(hoTask.WhatId);
-    }
-
-    result.casesAwaitingHomeOffice = hoPitStopCaseIds.isEmpty()
-      ? 0
-      : [
-            SELECT Id
-            FROM Case
-            WHERE
-              OwnerId = :currentUserId
-              AND IsClosed = FALSE
-              AND Id IN :hoPitStopCaseIds
-            WITH SECURITY_ENFORCED
-          ]
-          .size();
+    result.pitStopTasksAssignedToMe = [
+        SELECT Id
+        FROM Task
+        WHERE
+          OwnerId = :currentUserId
+          AND IsClosed = FALSE
+          AND (Branch_Pit_Stop__c = TRUE OR Home_Office_Pit_Stop__c = TRUE)
+        WITH SECURITY_ENFORCED
+      ]
+      .size();
 
     FinancialAdvisorTeamAccessService.TeamAccessContext teamAccess = teamAccessService.getCurrentUserTeamAccess();
     if (teamAccess.teamIds.isEmpty()) {

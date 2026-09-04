@@ -9,11 +9,11 @@ import {
     TYPE_WEBINAR,
     WEBINAR_STATUS_UPCOMING,
     WEBINAR_STATUS_PAST,
-    WEBINAR_STATUS_RECORDED
+    WEBINAR_STATUS_RECORDED,
+    formatDurationMinutes
 } from 'c/rcConstants';
 import { linkContext, articleHref } from 'c/contextNav';
 import { formatDateTime } from 'c/dsDateBlock';
-import { formatDurationMinutes } from 'c/uatCardUtil';
 
 /**
  * resourceDetail — full resource view. File-backed types (PDF/Form/Template):

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>UAT Admin Console</masterLabel>
+    <description>Helios UAT admin console: cycles, books, cases, taxonomy, teams, pool health, cycle report. Same shell as the Admin Console, on its own tab so the Help Center console carries no UAT metadata. Internal surfaces only.</description>
+    <targets>
+        <target>lightning__Tab</target>
+        <target>lightning__AppPage</target>
+    </targets>
+</LightningComponentBundle>

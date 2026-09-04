@@ -19,8 +19,9 @@ const TILE_ROUTES = {
 
 /**
  * Home dashboard's 5-tile KPI row (Figma node 791:29291): Cases/Tasks
- * assigned to me, Cases/Tasks assigned to my teams', and Cases awaiting
- * Home Office review. Each tile's chevron navigates to that record type's
+ * assigned to me, Cases/Tasks assigned to my teams', and My Pitstop Tasks
+ * (the user's open Branch + Home Office pit stop tasks, matching the Task
+ * donut's two pit stop slices). Each tile's chevron navigates to that record type's
  * object home page via standard__objectPage/actionName "home" — the same
  * PageReference arcNavigation's sidebar links already use for Case/Task,
  * confirmed working there, rather than guessing at a hardcoded route URL.
@@ -33,7 +34,7 @@ export default class ArcHomeMetrics extends NavigationMixin(LightningElement) {
     tasksAssignedToMe: 0,
     casesAssignedToMyTeams: 0,
     tasksAssignedToMyTeams: 0,
-    casesAwaitingHomeOffice: 0
+    pitStopTasksAssignedToMe: 0
   };
 
   get caretIconStyle() {
@@ -82,11 +83,11 @@ export default class ArcHomeMetrics extends NavigationMixin(LightningElement) {
         objectApiName: "Task"
       },
       {
-        key: "awaiting-ho",
-        label: "Awaiting",
-        value: this.metrics.casesAwaitingHomeOffice,
-        subtext: "Home office",
-        objectApiName: "Case"
+        key: "pitstops-mine",
+        label: "My Pitstop Tasks",
+        value: this.metrics.pitStopTasksAssignedToMe,
+        subtext: "Branch and home office",
+        objectApiName: "Task"
       }
     ];
   }

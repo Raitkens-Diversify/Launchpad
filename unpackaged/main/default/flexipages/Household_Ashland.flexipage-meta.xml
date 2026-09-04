@@ -2215,10 +2215,10 @@
                 </componentInstanceProperties>
                 <componentInstanceProperties>
                     <name>title</name>
-                    <value>Significant Event Linked Contacts</value>
+                    <value>Significant Events</value>
                 </componentInstanceProperties>
-                <componentName>significantEventLinkedContactsTable</componentName>
-                <identifier>c_significantEventLinkedContactsTable</identifier>
+                <componentName>significantEventTable</componentName>
+                <identifier>c_significantEventTable</identifier>
             </componentInstance>
         </itemInstances>
         <name>Facet-0ad3652a-c4f3-474e-9850-811cc5902797</name>

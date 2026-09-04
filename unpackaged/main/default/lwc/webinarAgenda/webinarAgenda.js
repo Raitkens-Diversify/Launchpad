@@ -3,10 +3,10 @@ import getWebinars from '@salesforce/apex/ResourceCenterService.getWebinars';
 import {
     WEBINAR_STATUS_UPCOMING,
     WEBINAR_STATUS_PAST,
-    WEBINAR_STATUS_RECORDED
+    WEBINAR_STATUS_RECORDED,
+    formatDurationMinutes
 } from 'c/rcConstants';
 import { formatTime } from 'c/dsDateBlock';
-import { formatDurationMinutes } from 'c/uatCardUtil';
 
 /**
  * webinarAgenda — the landing page's side panel listing upcoming and recent

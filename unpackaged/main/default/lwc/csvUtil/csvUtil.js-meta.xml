@@ -2,5 +2,5 @@
 <LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>61.0</apiVersion>
     <isExposed>false</isExposed>
-    <description>Shared service module: RFC 4180 CSV serialisation, filename construction, ISO date/boolean formatting, and the org&#39;s single browser-download mechanic (downloadBlob) used by adminUatReport for both CSV and .xlsx. No template.</description>
+    <description>Shared service module: RFC 4180 CSV serialisation, filename construction, ISO date/boolean formatting, and the single browser-download mechanic (downloadBlob) used by the events page and the UAT cycle report. No template.</description>
 </LightningComponentBundle>

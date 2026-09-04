@@ -34,12 +34,8 @@ import {
     toFilterOptions,
     toOptions
 } from 'c/uatConstants';
-import {
-    formatDateLong,
-    formatDateTimeLong,
-    formatDurationMinutes,
-    matchesSearch
-} from 'c/uatCardUtil';
+import { formatDateLong, formatDateTimeLong, matchesSearch } from 'c/uatCardUtil';
+import { formatDurationMinutes } from 'c/rcConstants';
 import { shortCaseRef } from 'c/uatTitleUtil';
 import { slugify } from 'c/slugUtil';
 import { buildCsvContent, csvFilename, downloadBlob, downloadCsv, isoDate } from 'c/csvUtil';

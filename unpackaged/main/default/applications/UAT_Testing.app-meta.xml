@@ -4,7 +4,7 @@
         <headerColor>#0F406F</headerColor>
         <shouldOverrideOrgTheme>false</shouldOverrideOrgTheme>
     </brand>
-    <description>Helios UAT Testing — tester queue, step-by-step runner, evidence, and exploratory testing. Admins additionally see the Admin Console tab (UAT sections live there).</description>
+    <description>Helios UAT Testing — tester queue, step-by-step runner, evidence, and exploratory testing. Admins additionally see the UAT Admin tab (cycles, books, cases, taxonomy, teams, pool health, cycle report).</description>
     <formFactors>Small</formFactors>
     <formFactors>Large</formFactors>
     <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
@@ -14,7 +14,7 @@
     <label>UAT Testing</label>
     <navType>Standard</navType>
     <tabs>UAT_Testing</tabs>
-    <tabs>Admin_Console</tabs>
+    <tabs>UAT_Admin_Console</tabs>
     <tabs>Test_Execution__c</tabs>
     <tabs>Exploratory_Finding__c</tabs>
     <uiType>Lightning</uiType>

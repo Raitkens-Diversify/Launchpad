@@ -3,7 +3,7 @@
     <apiVersion>66.0</apiVersion>
     <isExposed>true</isExposed>
     <masterLabel>Arc Home Metrics</masterLabel>
-    <description>Home dashboard&#39;s 5-tile KPI row: Cases/Tasks assigned to me and to my teams&#39;, plus Cases awaiting Home Office review.</description>
+    <description>Home dashboard&#39;s 5-tile KPI row: Cases/Tasks assigned to me and to my teams&#39;, plus My Pitstop Tasks (the user&#39;s open Branch and Home Office pit stop tasks).</description>
     <targets>
         <target>lightningCommunity__Page</target>
         <target>lightningCommunity__Default</target>

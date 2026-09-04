@@ -51,7 +51,7 @@ export default class AdminSortableTree extends LightningElement {
         this._allowAddChild = value === '' ? true : Boolean(value);
     }
 
-    // Optional row actions added for the UAT dual picker (flat lists that
+    // Optional row actions for flat-list hosts (e.g. a two-pane picker) (flat lists that
     // reorder + remove, no edit). Both default off — existing hosts
     // (Help topics, Resource categories) are unaffected.
     _removable = false;

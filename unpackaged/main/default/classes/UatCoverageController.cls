@@ -289,7 +289,7 @@ public with sharing class UatCoverageController {
 
     /** Same capability as the Cycles section (the feed exposes the audit
      *  trail, so bare read on cycles isn't enough) — mirrors
-     *  AdminAccessService.getAccess().uatCoverage. */
+     *  UatAdminAccessService.getAccess().uatCoverage. */
     private static void assertCoverage() {
         if (!Schema.sObjectType.Test_Cycle__c.isCreateable()
             || !Schema.sObjectType.Test_Cycle__c.isUpdateable()

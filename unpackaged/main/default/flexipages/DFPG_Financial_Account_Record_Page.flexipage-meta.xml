@@ -117,16 +117,6 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
-                <fieldItem>Record.Rep_Code_Name__c</fieldItem>
-                <identifier>RecordRep_Code_Name__cField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
                 <fieldItem>Record.As_of_Date__c</fieldItem>
                 <identifier>RecordAs_of_Date__cField</identifier>
             </fieldInstance>
@@ -143,12 +133,20 @@
         </itemInstances>
         <itemInstances>
             <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
                 <fieldItem>Record.State_Withholding__c</fieldItem>
                 <identifier>RecordState_Withholding__cField</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
             <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
                 <fieldItem>Record.Federal_Withholding__c</fieldItem>
                 <identifier>RecordFederal_Withholding__cField</identifier>
             </fieldInstance>

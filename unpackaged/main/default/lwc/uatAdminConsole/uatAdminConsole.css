@@ -1,8 +1,9 @@
 :host {
     display: block;
 
-    /* Self-declared token block (mirrors resourceCenter/nexsLanding): V2
-       --slds-g-* palette + V1 --ds-* primitives. No dsTokensV2 provider. */
+    /* Self-declared token block, copied verbatim from adminConsole: this is a
+       second root and must carry its own tokens (platform-injected --slds-g-*
+       hooks beat inheritance). V2 --slds-g-* palette + V1 --ds-* primitives. */
     --slds-g-color-surface-container-1: #ffffff;
     --slds-g-color-surface-container-2: #f3f4f6;
     --slds-g-color-on-surface-1: #4b5563;

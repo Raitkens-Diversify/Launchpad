@@ -5,12 +5,6 @@
  * (feature-license dependent), so the license branch is exercised through the
  * @TestVisible knowledgeUserOverride seam; the perm-driven sections are
  * exercised with real users (minimal profile vs. Resource_Center_Admin).
- *
- * The persona custom permissions (Help_Center_Console / UAT_Console) follow
- * the same split: the gating logic runs through the @TestVisible overrides
- * (the deploying user's real assignments are unknowable), and the end-to-end
- * permset wiring is asserted once via Resource_Center_Admin, which carries
- * Help_Center_Console.
  */
 @IsTest
 private class AdminAccessServiceTest {
@@ -31,10 +25,23 @@ private class AdminAccessServiceTest {
         );
     }
 
+    /**
+     * Org flows auto-assign permission sets to every new internal user; strip
+     * them so a "minimal" user really is minimal.
+     */
+    private static void stripAutoAssignedPermSets(Id userId) {
+        delete [
+            SELECT Id FROM PermissionSetAssignment
+            WHERE AssigneeId = :userId
+            AND (PermissionSetGroupId != null OR PermissionSet.IsOwnedByProfile = false)
+        ];
+    }
+
     @IsTest
     static void minimalUserSeesNoSections() {
         User u = makeUser('Minimum Access - Salesforce', 'min');
         insert u;
+        stripAutoAssignedPermSets(u.Id);
 
         System.runAs(u) {
             AdminAccessService.knowledgeUserOverride = false;
@@ -59,6 +66,7 @@ private class AdminAccessServiceTest {
     static void resourceCenterAdminSeesAdminSections() {
         User u = makeUser('Minimum Access - Salesforce', 'rca');
         insert u;
+        stripAutoAssignedPermSets(u.Id);
         PermissionSet ps = [
             SELECT Id FROM PermissionSet WHERE Name = 'Resource_Center_Admin' LIMIT 1
         ];
@@ -79,85 +87,7 @@ private class AdminAccessServiceTest {
             System.assertEquals(false, dto.articles,
                 'Article authoring stays off without the Knowledge User license');
             System.assertEquals(true, dto.anySection, 'At least one section visible');
-
-            // The perm set carries Help_Center_Console, which flips the user
-            // into persona mode: without UAT_Console the UAT group is closed
-            // even where object capabilities would allow it.
-            System.assertEquals(false, dto.uatCycles,
-                'Help-Center persona: UAT sections closed');
-            System.assertEquals(false, dto.uatCoverage,
-                'Help-Center persona: UAT sections closed');
-            System.assertEquals(false, dto.uatDashboard,
-                'Help-Center persona: UAT sections closed');
-            System.assertEquals(false, dto.uatReport,
-                'Help-Center persona: UAT sections closed');
         }
-    }
-
-    /**
-     * Persona gating via the seams, run as the deploying user (whose describes
-     * are typically all-true via ModifyAllData — exactly the case the custom
-     * permissions exist to scope). Only the gated-off group is asserted: it
-     * must be false regardless of the runner's capabilities.
-     */
-    @IsTest
-    static void helpCenterPersonaClosesUatGroup() {
-        AdminAccessService.helpCenterConsoleOverride = true;
-        AdminAccessService.uatConsoleOverride = false;
-        AdminAccessService.knowledgeUserOverride = true;
-
-        AdminAccessService.AccessDTO dto = AdminAccessService.getAccess();
-
-        System.assertEquals(false, dto.uatCycles, 'UAT group closed in HC persona');
-        System.assertEquals(false, dto.uatBooks, 'UAT group closed in HC persona');
-        System.assertEquals(false, dto.uatCases, 'UAT group closed in HC persona');
-        System.assertEquals(false, dto.uatTaxonomy, 'UAT group closed in HC persona');
-        System.assertEquals(false, dto.uatTeams, 'UAT group closed in HC persona');
-        System.assertEquals(false, dto.uatCoverage, 'UAT group closed in HC persona');
-        System.assertEquals(false, dto.uatDashboard, 'UAT group closed in HC persona');
-        System.assertEquals(false, dto.uatReport, 'UAT group closed in HC persona');
-    }
-
-    @IsTest
-    static void uatPersonaClosesHelpCenterGroup() {
-        AdminAccessService.helpCenterConsoleOverride = false;
-        AdminAccessService.uatConsoleOverride = true;
-        AdminAccessService.knowledgeUserOverride = true;
-
-        AdminAccessService.AccessDTO dto = AdminAccessService.getAccess();
-
-        System.assertEquals(false, dto.articles, 'HC group closed in UAT persona');
-        System.assertEquals(false, dto.articlePerms,
-            'articlePerms gated too, so the license note stays hidden');
-        System.assertEquals(false, dto.submissions, 'HC group closed in UAT persona');
-        System.assertEquals(false, dto.resources, 'HC group closed in UAT persona');
-        System.assertEquals(false, dto.categories, 'HC group closed in UAT persona');
-        System.assertEquals(false, dto.guides, 'HC group closed in UAT persona');
-        System.assertEquals(false, dto.synonyms, 'HC group closed in UAT persona');
-        System.assertEquals(false, dto.analytics, 'HC group closed in UAT persona');
-    }
-
-    @IsTest
-    static void bothConsolePermissionsOpenBothGroups() {
-        AdminAccessService.helpCenterConsoleOverride = true;
-        AdminAccessService.uatConsoleOverride = true;
-        AdminAccessService.knowledgeUserOverride = true;
-
-        AdminAccessService.AccessDTO fullAdmin = AdminAccessService.getAccess();
-
-        // Holding neither permission must behave identically to holding both
-        // (legacy capability-only mode) — that equivalence is the no-lockout
-        // rollout guarantee.
-        AdminAccessService.helpCenterConsoleOverride = false;
-        AdminAccessService.uatConsoleOverride = false;
-        AdminAccessService.AccessDTO legacy = AdminAccessService.getAccess();
-
-        System.assertEquals(legacy.resources, fullAdmin.resources,
-            'Both-permissions mode matches legacy capability mode');
-        System.assertEquals(legacy.uatCycles, fullAdmin.uatCycles,
-            'Both-permissions mode matches legacy capability mode');
-        System.assertEquals(legacy.anySection, fullAdmin.anySection,
-            'Both-permissions mode matches legacy capability mode');
     }
 
     @IsTest
@@ -187,5 +117,12 @@ private class AdminAccessServiceTest {
         AdminAccessService.AccessDTO dto = AdminAccessService.getAccess();
         System.assertEquals(me.UserPermissionsKnowledgeUser, dto.knowledgeUser,
             'knowledgeUser should reflect User.UserPermissionsKnowledgeUser');
+    }
+
+    @IsTest
+    static void canAuthorArticlesFollowsTheLicenseSeam() {
+        AdminAccessService.knowledgeUserOverride = false;
+        System.assertEquals(false, AdminAccessService.canAuthorArticles(),
+            'No license flag means no authoring, whatever the object perms');
     }
 }

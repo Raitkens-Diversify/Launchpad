@@ -7,36 +7,24 @@ import getAccess from '@salesforce/apex/AdminAccessService.getAccess';
  * Center / Get Help features. Same orchestrator + branded-chrome pattern as
  * resourceCenter: a left rail swaps sections inline; no page navigation.
  *
- * Access: the Admin_Console tab is granted by Resource_Center_Admin and
- * UAT_Admin, but that only hides the entry point — sections render exclusively
- * from AdminAccessService.getAccess() (server-side describe/perm checks plus
- * the Help_Center_Console / UAT_Console persona custom permissions carried by
- * those perm sets), and every Admin*Controller method re-checks on the server.
+ * Access: the Admin_Console tab is granted by Resource_Center_Admin, but that
+ * only hides the entry point — sections render exclusively from
+ * AdminAccessService.getAccess() (server-side describe/perm checks), and every
+ * Admin*Controller method re-checks on the server.
  *
- * Phase (a) ships the shell: rail, chrome, access gating, and per-section
- * placeholders. Later phases replace the placeholders with the real section
- * components (articles → resources/categories → guides embed → analytics).
+ * The Helios test-management admin sections lived here until 2026-09-04; they
+ * now have their own root on their own tab so this console can ship to
+ * production on its own.
  */
 // Rail sections, in display order within their group. Group headers render
-// only when the user can see sections in more than one group, so Help-Center
-// admins without UAT access (and vice versa) see the same flat rail as before.
-// UAT group target order (added as each phase ships): Test Cycles, Test Books,
-// Test Cases, Taxonomy, Teams. Cycle Report closes the group: every section
-// above it is a management surface, it is the only read-out.
+// only when the user can see sections in more than one group (a single group
+// renders the flat rail).
 const SECTIONS = [
     { key: 'articles', gate: 'articles', label: 'Articles', icon: 'utility:knowledge_base', group: 'Help Center' },
     { key: 'resources', gate: 'resources', label: 'Resources', icon: 'utility:file', group: 'Help Center' },
     { key: 'categories', gate: 'categories', label: 'Categories', icon: 'utility:hierarchy', group: 'Help Center' },
     { key: 'guides', gate: 'guides', label: 'Help Guides', icon: 'utility:questions_and_answers', group: 'Help Center' },
-    { key: 'analytics', gate: 'analytics', label: 'Analytics', icon: 'utility:chart', group: 'Help Center' },
-    { key: 'uatDashboard', gate: 'uatDashboard', label: 'Cycle Dashboard', icon: 'utility:home', group: 'UAT Testing' },
-    { key: 'uatCycles', gate: 'uatCycles', label: 'Test Cycles', icon: 'utility:retail_execution', group: 'UAT Testing' },
-    { key: 'uatBooks', gate: 'uatBooks', label: 'Test Books', icon: 'utility:open_folder', group: 'UAT Testing' },
-    { key: 'uatCases', gate: 'uatCases', label: 'Test Cases', icon: 'utility:task', group: 'UAT Testing' },
-    { key: 'uatTaxonomy', gate: 'uatTaxonomy', label: 'Taxonomy', icon: 'utility:layers', group: 'UAT Testing' },
-    { key: 'uatTeams', gate: 'uatTeams', label: 'Teams', icon: 'utility:groups', group: 'UAT Testing' },
-    { key: 'uatCoverage', gate: 'uatCoverage', label: 'Pool Health', icon: 'utility:metrics', group: 'UAT Testing' },
-    { key: 'uatReport', gate: 'uatReport', label: 'Cycle Report', icon: 'utility:page', group: 'UAT Testing' }
+    { key: 'analytics', gate: 'analytics', label: 'Analytics', icon: 'utility:chart', group: 'Help Center' }
 ];
 
 export default class AdminConsole extends LightningElement {
@@ -55,14 +43,6 @@ export default class AdminConsole extends LightningElement {
     // Resources section subview state: list | editor
     resourcesView = 'list';
     editResourceId = null;
-
-    // UAT cross-section navigation context (uatnavigate event): a cycle to
-    // open in the Cycles editor, a case (+ origin cycle for the breadcrumb)
-    // to open in the Cases detail, or a book to open in the Books editor
-    // (Create-book-from-module-group). Cleared on direct rail clicks.
-    uatCycleOpenId = null;
-    uatCaseContext = null;
-    uatBookOpenId = null;
 
     @wire(getAccess)
     wiredAccess({ data, error }) {
@@ -176,38 +156,6 @@ export default class AdminConsole extends LightningElement {
         return this.section === 'analytics';
     }
 
-    get isUatDashboardSection() {
-        return this.section === 'uatDashboard';
-    }
-
-    get isUatCyclesSection() {
-        return this.section === 'uatCycles';
-    }
-
-    get isUatBooksSection() {
-        return this.section === 'uatBooks';
-    }
-
-    get isUatCasesSection() {
-        return this.section === 'uatCases';
-    }
-
-    get isUatTaxonomySection() {
-        return this.section === 'uatTaxonomy';
-    }
-
-    get isUatTeamsSection() {
-        return this.section === 'uatTeams';
-    }
-
-    get isUatCoverageSection() {
-        return this.section === 'uatCoverage';
-    }
-
-    get isUatReportSection() {
-        return this.section === 'uatReport';
-    }
-
     get isResourceList() {
         return this.resourcesView === 'list';
     }
@@ -281,36 +229,6 @@ export default class AdminConsole extends LightningElement {
 
     handleSectionClick(event) {
         this.section = event.currentTarget.dataset.key;
-        this.uatCycleOpenId = null;
-        this.uatCaseContext = null;
-        this.uatBookOpenId = null;
-    }
-
-    /** UAT sections raise uatnavigate to jump across sections: book usage
-     *  line -> cycle editor, Run this book -> cycle editor, execution chip ->
-     *  case detail with the cycle breadcrumb, Create book from module group
-     *  -> book editor. */
-    handleUatNavigate(event) {
-        const { section, recordId, context } = event.detail;
-        if (section === 'uatCycles') {
-            this.uatCycleOpenId = recordId;
-            this.uatCaseContext = null;
-            this.uatBookOpenId = null;
-        } else if (section === 'uatCases') {
-            this.uatCaseContext = {
-                caseId: recordId,
-                executionId: context ? context.executionId : null,
-                cycleId: context ? context.cycleId : null,
-                cycleName: context ? context.cycleName : null
-            };
-            this.uatCycleOpenId = null;
-            this.uatBookOpenId = null;
-        } else if (section === 'uatBooks') {
-            this.uatBookOpenId = recordId;
-            this.uatCycleOpenId = null;
-            this.uatCaseContext = null;
-        }
-        this.section = section;
     }
 
     handleArticlesSubnav(event) {

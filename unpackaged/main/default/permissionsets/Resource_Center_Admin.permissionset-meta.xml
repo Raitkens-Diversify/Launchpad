@@ -63,10 +63,6 @@
         <application>Resource_Center</application>
         <visible>true</visible>
     </applicationVisibilities>
-    <customPermissions>
-        <enabled>true</enabled>
-        <name>Help_Center_Console</name>
-    </customPermissions>
     <fieldPermissions>
         <editable>false</editable>
         <field>Article_Feedback__c.Article_Id__c</field>

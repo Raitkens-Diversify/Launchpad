@@ -1,7 +1,7 @@
 import { LightningElement, api } from 'lwc';
 import USER_ID from '@salesforce/user/Id';
 import { formatTime, formatShortDate } from 'c/dsDateBlock';
-import { formatDurationMinutes } from 'c/uatCardUtil';
+import { formatDurationMinutes } from 'c/rcConstants';
 
 /* localStorage guarded like uatTesterApp/bookOfBusinessUtils: typeof checks +
  * try/catch — private mode or storage quirks degrade to "dismissal doesn't

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
-    <description>Helios UAT administrator: full control of the UAT test-management objects (taxonomy, teams, cases/steps, books, cycles, executions) plus the Admin Console tab and the UAT_Console persona permission that scopes its rail.</description>
+    <description>Helios UAT administrator: full control of the UAT test-management objects (taxonomy, teams, cases/steps, books, cycles, executions) plus the UAT Admin tab and the UAT_Console custom permission (moderation rights in UatAudienceService).</description>
     <hasActivationRequired>false</hasActivationRequired>
     <label>UAT Admin</label>
     <classAccesses>
-        <apexClass>AdminAccessService</apexClass>
+        <apexClass>UatAdminAccessService</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
@@ -706,7 +706,7 @@
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
     <tabSettings>
-        <tab>Admin_Console</tab>
+        <tab>UAT_Admin_Console</tab>
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>

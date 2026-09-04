@@ -11,7 +11,8 @@ public class ArcHomeMetricsModels {
     public Integer casesAssignedToMyTeams = 0;
     @AuraEnabled
     public Integer tasksAssignedToMyTeams = 0;
+    /** Open Tasks assigned to the user that are a Branch or Home Office pit stop. */
     @AuraEnabled
-    public Integer casesAwaitingHomeOffice = 0;
+    public Integer pitStopTasksAssignedToMe = 0;
   }
 }

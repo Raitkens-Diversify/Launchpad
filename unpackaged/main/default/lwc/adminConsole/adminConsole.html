@@ -39,7 +39,7 @@
                         <lightning-icon icon-name="utility:lock" size="small"></lightning-icon>
                         <p class="ac-card__text">
                             You don’t have access to any admin tools. The Resource Center
-                            Admin and UAT Admin permission sets grant access to this console.
+                            Admin permission set grants access to this console.
                         </p>
                     </div>
                 </div>
@@ -132,40 +132,6 @@
                             <c-admin-analytics></c-admin-analytics>
                         </template>
 
-                        <template if:true={isUatDashboardSection}>
-                            <c-admin-uat-dashboard onuatnavigate={handleUatNavigate}></c-admin-uat-dashboard>
-                        </template>
-
-                        <template if:true={isUatCyclesSection}>
-                            <c-admin-uat-cycles open-cycle-id={uatCycleOpenId}
-                                                onuatnavigate={handleUatNavigate}></c-admin-uat-cycles>
-                        </template>
-
-                        <template if:true={isUatBooksSection}>
-                            <c-admin-uat-books open-book-id={uatBookOpenId}
-                                               onuatnavigate={handleUatNavigate}></c-admin-uat-books>
-                        </template>
-
-                        <template if:true={isUatCasesSection}>
-                            <c-admin-uat-cases open-context={uatCaseContext}
-                                               onuatnavigate={handleUatNavigate}></c-admin-uat-cases>
-                        </template>
-
-                        <template if:true={isUatTaxonomySection}>
-                            <c-admin-uat-taxonomy onuatnavigate={handleUatNavigate}></c-admin-uat-taxonomy>
-                        </template>
-
-                        <template if:true={isUatTeamsSection}>
-                            <c-admin-uat-teams></c-admin-uat-teams>
-                        </template>
-
-                        <template if:true={isUatCoverageSection}>
-                            <c-admin-uat-coverage onuatnavigate={handleUatNavigate}></c-admin-uat-coverage>
-                        </template>
-
-                        <template if:true={isUatReportSection}>
-                            <c-admin-uat-report onuatnavigate={handleUatNavigate}></c-admin-uat-report>
-                        </template>
                     </main>
                 </div>
             </template>

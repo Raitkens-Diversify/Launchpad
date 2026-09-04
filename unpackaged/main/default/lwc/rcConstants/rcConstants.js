@@ -138,3 +138,23 @@ export function eventCta(item) {
         canAddToCalendar: status === WEBINAR_STATUS_UPCOMING
     };
 }
+
+/**
+ * Whole minutes → "4 min" / "1 h 26 m" / "31 h 51 m". The webinar / event
+ * duration formatter (agenda rows, the events page, the resource detail, and
+ * the landing banner). Minutes are the grain the Apex sends; anything finer
+ * would be false precision. Lives here (since 2026-09-04) so the Help Center
+ * surfaces depend on no module outside their own package.
+ */
+export function formatDurationMinutes(minutes) {
+    if (minutes === null || minutes === undefined || Number.isNaN(Number(minutes))) {
+        return null;
+    }
+    const total = Math.max(0, Math.round(Number(minutes)));
+    if (total < 60) {
+        return `${total} min`;
+    }
+    const hours = Math.floor(total / 60);
+    const rest = total % 60;
+    return rest === 0 ? `${hours} h` : `${hours} h ${rest} m`;
+}

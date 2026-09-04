@@ -2435,6 +2435,14 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>UatAdminAccessService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>UatAdminAccessServiceTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>UatAudienceService</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -22791,6 +22799,10 @@
     <tabVisibilities>
         <tab>Trade_Error_Log__c</tab>
         <visibility>DefaultOn</visibility>
+    </tabVisibilities>
+    <tabVisibilities>
+        <tab>UAT_Admin_Console</tab>
+        <visibility>Hidden</visibility>
     </tabVisibilities>
     <tabVisibilities>
         <tab>UAT_Testing</tab>
