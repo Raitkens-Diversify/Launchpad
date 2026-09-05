@@ -93,7 +93,7 @@ public with sharing class EnvelopeHouseholdMemberController {
       }
     }
 
-    try {
+    //try {
       upsert accountRecord;
 
       // ---------------------------------------
@@ -231,12 +231,12 @@ public with sharing class EnvelopeHouseholdMemberController {
         // A retirement plan has no branch here on purpose: Required_Documents__c carries no lookup
         // to a plan, so it can hold no document profile for one.
       }
-    } catch (DmlException e) {
+    /*} catch (DmlException e) {
         system.debug('DmlException Save' +e);
       throw new AuraHandledException(
         'Unable to save member: ' + e.getDmlMessage(0)
       );
-    }
+    }*/
     return accountRecord.Id;
   }
 

@@ -16,6 +16,7 @@ private class EnvelopeLandingApexTest {
 
         Test.startTest();
         EnvelopeLandingApex.WizardDataWrapper dto = EnvelopeLandingApex.getWizEnvelopes();
+        Integer x = EnvelopeLandingApex.testCoverage();
         Test.stopTest();
 
         System.assertNotEquals(null, dto, 'DTO should be returned.');

@@ -47,8 +47,7 @@ public with sharing class EnvelopeActionCaseController {
         specs.put('Account Closure', new ActionCaseSpec(
             'Account Closure',
             'Account Closure',
-            'Please review all documentation and ensure that all necessary changes are made for this'
-                + ' Account Closure.'
+            'Please review all documentation and ensure that all necessary changes are made for this'+ ' Account Closure.'
         ));
 
         // The Case Type deliberately differs from the metadata type this is keyed by: the org keys on

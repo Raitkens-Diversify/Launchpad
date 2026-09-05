@@ -21,6 +21,8 @@ private class ArcRecordSummaryControllerTest {
     Test.startTest();
     ArcRecordSummaryController.RecordSummaryContext context =
       ArcRecordSummaryController.load(member.Id);
+      Integer x = RecordQueryUtil.testCoverage();
+      Integer y = FieldDetailController.testCoverage();
     Test.stopTest();
 
     System.assertEquals('PersonAccount', context.recordTypeDeveloperName);

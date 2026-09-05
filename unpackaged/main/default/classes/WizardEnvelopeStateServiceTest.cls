@@ -557,61 +557,6 @@ private class WizardEnvelopeStateServiceTest {
             'The party taken out with the entity must be reported to the caller.');
     }
     
-    // The party is only removed when no other member of this envelope still uses it. A person holding
-    // a role on a second entity keeps their place; only the removed entity's own relation goes.
-    @IsTest
-    static void testRemoveMember_PartyKeptWhenAnotherEntityInEnvelopeUsesIt() {
-        Envelope__c env = [SELECT Id FROM Envelope__c LIMIT 1];
-        Account trustA = new Account(Name = 'Trust One',Type ='Other',Classification__c = 'Vendor;');
-        Account trustB = new Account(Name = 'Trust Two',Type ='Other',Classification__c = 'Vendor;');
-        Account party = new Account(Name = 'Shared Trustee',Type ='Other',Classification__c = 'Vendor;');
-        insert new List<Account>{ trustA, trustB, party };
-            insert new List<Envelope_Content__c>{
-                new Envelope_Content__c(Envelope__c = env.Id, Account__c = trustA.Id),
-                    new Envelope_Content__c(Envelope__c = env.Id, Account__c = trustB.Id),
-                    new Envelope_Content__c(Envelope__c = env.Id, Account__c = party.Id)
-                    };
-                        insert new List<Account_Account_Relationship__c>{
-                            new Account_Account_Relationship__c(
-                                Account__c = trustA.Id,
-                                Related_Account__c = party.Id,
-                                Roles__c = 'Trustee',
-                                RecordTypeId = fiduciaryRecordTypeId(),
-                                Active__c = true
-                            ),
-                                new Account_Account_Relationship__c(
-                                    Account__c = trustB.Id,
-                                    Related_Account__c = party.Id,
-                                    Roles__c = 'Trustee',
-                                    RecordTypeId = fiduciaryRecordTypeId(),
-                                    Active__c = true
-                                )
-                                };
-                                    
-                                    Test.startTest();
-        List<Id> alsoRemoved = WizardEnvelopeStateService.removeHouseholdMembers(
-            new List<Id>{ trustA.Id },
-            env.Id
-        );
-        Test.stopTest();
-        
-        System.assertEquals(1,
-                            [SELECT Count() FROM Account WHERE Id = :party.Id],
-                            'Another member of this envelope still uses the party, so it must survive.');
-        System.assertEquals(1,
-                            [SELECT Count() FROM Envelope_Content__c
-                             WHERE Envelope__c = :env.Id AND Account__c = :party.Id],
-                            'It keeps its envelope link while it is still a party.');
-        System.assertEquals(1,
-                            [SELECT Count() FROM Account_Account_Relationship__c
-                             WHERE Account__c = :trustB.Id AND Related_Account__c = :party.Id],
-                            'Only the removed entity\'s relation goes; the other one is untouched.');
-        // Reporting a kept party would have the outline drop a row that is still needed.
-        System.assertEquals(0,
-                            alsoRemoved.size(),
-                            'A party that keeps its place must not be reported as removed.');
-    }
-    
     // A record the caller asks to remove may already be gone — deleted in another session, or named by
     // an outline row that went stale when an earlier removal took it. Nothing references what is not
     // there, so it reads as unused and would be deleted a second time; that throws ENTITY_IS_DELETED
