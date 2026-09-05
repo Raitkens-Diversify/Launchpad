@@ -1,8 +1,8 @@
 import { LightningElement, api } from 'lwc';
 
 /**
- * adminConfirmModal — the one confirmation dialog for every destructive UAT
- * action, on both surfaces (console sections and the tester app). Pixel-matches
+ * adminConfirmModal — the one confirmation dialog for every destructive admin
+ * action (Help Center and UAT console sections, the tester app). Pixel-matches
  * the console's inline confirm-dialog convention (adminArticleList's
  * .aal-modal): title "{Verb}: {name}", a plain-language consequence sentence,
  * Cancel + a destructive-variant confirm button. Nothing is destroyed on the

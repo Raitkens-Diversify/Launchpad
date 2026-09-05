@@ -99,10 +99,6 @@
                 <label>Core Objects</label>
                 <name>Core_Objects</name>
             </dataCategory>
-            <dataCategory>
-                <label>Guides</label>
-                <name>Guides</name>
-            </dataCategory>
             <label>Cosmos Vocab &amp; Data Structure</label>
             <name>Data_Model</name>
         </dataCategory>

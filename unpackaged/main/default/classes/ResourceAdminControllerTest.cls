@@ -424,6 +424,118 @@ private class ResourceAdminControllerTest {
             } catch (AuraHandledException e) {
                 System.assert(true);
             }
+            try {
+                ResourceAdminController.deleteCategory(null);
+                System.assert(false, 'Expected an access exception from deleteCategory');
+            } catch (AuraHandledException e) {
+                System.assert(true);
+            }
+        }
+    }
+
+    // ---- Category delete -------------------------------------------------------------
+
+    @IsTest
+    static void deleteCategoryRemovesEmptyCategory() {
+        Id catId = makeCategory('Lonely', 'lonely', null);
+
+        ResourceAdminController.CategoryDeleteImpactDTO impact =
+            ResourceAdminController.getCategoryDeleteImpact(catId);
+        System.assertEquals('Lonely', impact.name);
+        System.assertEquals(0, impact.resourceCount);
+        System.assertEquals(0, impact.subcategoryCount);
+        System.assertEquals(0, impact.guideOptionCount);
+
+        Test.startTest();
+        ResourceAdminController.deleteCategory(catId);
+        Test.stopTest();
+
+        System.assertEquals(0, [SELECT COUNT() FROM Resource_Category__c WHERE Id = :catId],
+            'Empty category is gone');
+    }
+
+    @IsTest
+    static void deleteCategoryCascadesEmptySubtopics() {
+        Id parentId = makeCategory('Parent', 'parent', null);
+        Id subA = makeCategory('Sub A', 'sub-a', parentId);
+        Id subB = makeCategory('Sub B', 'sub-b', parentId);
+
+        System.assertEquals(2,
+            ResourceAdminController.getCategoryDeleteImpact(parentId).subcategoryCount,
+            'Impact reports the cascade');
+
+        Test.startTest();
+        ResourceAdminController.deleteCategory(parentId);
+        Test.stopTest();
+
+        System.assertEquals(0, [
+            SELECT COUNT() FROM Resource_Category__c WHERE Id IN :new Set<Id>{ parentId, subA, subB }
+        ], 'Parent and its empty subtopics are deleted together');
+    }
+
+    @IsTest
+    static void deleteCategoryBlockedByResources() {
+        Id parentId = makeCategory('Busy', 'busy', null);
+        Id subId = makeCategory('Busy Sub', 'busy-sub', parentId);
+        insert new Resource__c(
+            Name = 'In Sub', Slug__c = 'in-sub', Category__c = subId, Resource_Type__c = 'PDF');
+
+        System.assertEquals(1,
+            ResourceAdminController.getCategoryDeleteImpact(parentId).resourceCount,
+            'Resources under a subtopic count against the parent');
+
+        for (Id target : new List<Id>{ parentId, subId }) {
+            try {
+                ResourceAdminController.deleteCategory(target);
+                System.assert(false, 'A category with resources must not delete');
+            } catch (AuraHandledException e) {
+                System.assert(e.getMessage().contains('resource'), e.getMessage());
+                System.assert(!e.getMessage().contains('DELETE_FAILED'),
+                    'Friendly guard, not the DML error: ' + e.getMessage());
+            }
+        }
+        System.assertEquals(2, [
+            SELECT COUNT() FROM Resource_Category__c WHERE Id IN :new Set<Id>{ parentId, subId }
+        ], 'Nothing was deleted');
+    }
+
+    @IsTest
+    static void deleteCategoryBlockedByHelpGuideOption() {
+        Id catId = makeCategory('Guide Target', 'guide-target', null);
+        Id subId = makeCategory('Guide Sub', 'guide-sub', catId);
+        Help_Guide_Draft__c guide = new Help_Guide_Draft__c(Guide_Key__c = 'del_probe', Label__c = 'Probe');
+        insert guide;
+        Help_Guide_Node_Draft__c node = new Help_Guide_Node_Draft__c(
+            Guide__c = guide.Id, Is_Root__c = true, Question__c = 'Where to?');
+        insert node;
+        insert new Help_Guide_Option_Draft__c(
+            Node__c = node.Id, Label__c = 'Go', Target_Type__c = 'category',
+            Target_Value__c = 'guide-sub');
+
+        System.assertEquals(1,
+            ResourceAdminController.getCategoryDeleteImpact(catId).guideOptionCount,
+            'A guide option targeting a subtopic slug counts against the parent');
+
+        try {
+            ResourceAdminController.deleteCategory(catId);
+            System.assert(false, 'A guide-linked category must not delete');
+        } catch (AuraHandledException e) {
+            System.assert(e.getMessage().contains('Help Guide Builder'), e.getMessage());
+        }
+        System.assertEquals(2, [
+            SELECT COUNT() FROM Resource_Category__c WHERE Id IN :new Set<Id>{ catId, subId }
+        ], 'Nothing was deleted');
+    }
+
+    @IsTest
+    static void deleteCategoryMissingIdRejected() {
+        Id catId = makeCategory('Gone', 'gone', null);
+        delete new Resource_Category__c(Id = catId);
+        try {
+            ResourceAdminController.getCategoryDeleteImpact(catId);
+            System.assert(false, 'A vanished category must be reported');
+        } catch (AuraHandledException e) {
+            System.assert(e.getMessage().contains('no longer exists'), e.getMessage());
         }
     }
 

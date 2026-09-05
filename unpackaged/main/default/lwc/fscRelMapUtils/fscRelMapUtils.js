@@ -835,6 +835,19 @@ const resolveCounterpartRoleLabel = (relationship = {}) => {
   );
 };
 
+const resolveFocalMemberRoleLabel = (relationship = {}) => {
+  const memberRoleLabel = resolveMemberRoleLabel(relationship);
+
+  if (memberRoleLabel) {
+    return memberRoleLabel;
+  }
+
+  return (
+    resolveInverseRoleLabel(relationship) ||
+    resolveRelationshipRole(relationship)
+  );
+};
+
 const isBusinessMemberRelationship = (
   recordTypeDeveloperName = "",
   memberRelationshipRecordTypes = []
@@ -875,7 +888,7 @@ const resolveFocalMemberCounterpartRoleLabel = (
       continue;
     }
 
-    const counterpartRoleLabel = resolveCounterpartRoleLabel(relationship);
+    const counterpartRoleLabel = resolveFocalMemberRoleLabel(relationship);
 
     if (counterpartRoleLabel) {
       return counterpartRoleLabel;
@@ -885,7 +898,7 @@ const resolveFocalMemberCounterpartRoleLabel = (
   for (const relationship of buildMemberAccountRelationshipViewModels(
     rawRelationships
   )) {
-    const counterpartRoleLabel = resolveCounterpartRoleLabel(relationship);
+    const counterpartRoleLabel = resolveFocalMemberRoleLabel(relationship);
 
     if (counterpartRoleLabel) {
       return counterpartRoleLabel;

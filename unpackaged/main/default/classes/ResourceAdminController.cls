@@ -563,6 +563,91 @@ public with sharing class ResourceAdminController {
         return true;
     }
 
+    // ---- Category delete -----------------------------------------------------------
+
+    /** Pre-flight for the delete confirm: what blocks, and what cascades. */
+    public class CategoryDeleteImpactDTO {
+        @AuraEnabled public String name;
+        @AuraEnabled public Integer resourceCount;     // self + subtopics; > 0 blocks
+        @AuraEnabled public Integer subcategoryCount;  // removed with the category (all empty by then)
+        @AuraEnabled public Integer guideOptionCount;  // help-guide options targeting a slug; > 0 blocks
+    }
+
+    /**
+     * What deleting a category would touch. Resource__c.Category__c is a
+     * Restrict lookup (DML would fail anyway) and help guides target
+     * categories by slug (published options and Builder drafts), so both
+     * block. Parent_Category__c is SetNull — deleting a parent alone would
+     * silently promote its subtopics, so empty subtopics are deleted with it.
+     */
+    @AuraEnabled
+    public static CategoryDeleteImpactDTO getCategoryDeleteImpact(Id categoryId) {
+        assertCategoryAdmin();
+        List<Resource_Category__c> found = [
+            SELECT Id, Name, Slug__c FROM Resource_Category__c WHERE Id = :categoryId LIMIT 1
+        ];
+        if (found.isEmpty()) {
+            throw auraError('That category no longer exists — refresh.');
+        }
+        Set<Id> ids = new Set<Id>{ found[0].Id };
+        Set<String> slugs = new Set<String>{ found[0].Slug__c };
+        Integer subs = 0;
+        for (Resource_Category__c sub : [
+            SELECT Id, Slug__c FROM Resource_Category__c
+            WHERE Parent_Category__c = :categoryId
+            LIMIT :LIST_LIMIT
+        ]) {
+            ids.add(sub.Id);
+            slugs.add(sub.Slug__c);
+            subs++;
+        }
+        CategoryDeleteImpactDTO dto = new CategoryDeleteImpactDTO();
+        dto.name = found[0].Name;
+        dto.subcategoryCount = subs;
+        dto.resourceCount = [SELECT COUNT() FROM Resource__c WHERE Category__c IN :ids];
+        dto.guideOptionCount = [
+            SELECT COUNT() FROM Help_Guide_Option__mdt
+            WHERE Target_Type__c = 'category' AND Active__c = true AND Target_Value__c IN :slugs
+        ] + [
+            SELECT COUNT() FROM Help_Guide_Option_Draft__c
+            WHERE Target_Type__c = 'category' AND Target_Value__c IN :slugs
+        ];
+        return dto;
+    }
+
+    /** Deletes the category and its (empty) subtopics; re-validates everything first. */
+    @AuraEnabled
+    public static void deleteCategory(Id categoryId) {
+        assertCategoryAdmin();
+        if (!Schema.sObjectType.Resource_Category__c.isDeletable()) {
+            throw auraError('You do not have access to delete resource categories.');
+        }
+        CategoryDeleteImpactDTO impact = getCategoryDeleteImpact(categoryId);
+        if (impact.resourceCount > 0) {
+            throw auraError('Can\'t delete this category — ' + impact.resourceCount + ' resource'
+                + (impact.resourceCount == 1 ? ' lives' : 's live')
+                + ' under it. Move or delete those resources first.');
+        }
+        if (impact.guideOptionCount > 0) {
+            throw auraError('Can\'t delete this category — ' + impact.guideOptionCount
+                + ' help guide option' + (impact.guideOptionCount == 1 ? ' links' : 's link')
+                + ' to it. Retarget or remove ' + (impact.guideOptionCount == 1 ? 'it' : 'them')
+                + ' in the Help Guide Builder first.');
+        }
+        List<Resource_Category__c> doomed = [
+            SELECT Id FROM Resource_Category__c
+            WHERE Parent_Category__c = :categoryId
+            LIMIT :LIST_LIMIT
+        ];
+        doomed.add(new Resource_Category__c(Id = categoryId));
+        try {
+            delete doomed;
+        } catch (DmlException e) {
+            // Restrict race: a resource landed between the check and the delete.
+            throw auraError('It could not be deleted: ' + e.getDmlMessage(0));
+        }
+    }
+
     // ---- Internals ----------------------------------------------------------------
 
     /** New categories append after their siblings, like new help topics do. */

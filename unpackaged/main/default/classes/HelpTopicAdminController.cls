@@ -1,12 +1,14 @@
 /**
  * HelpTopicAdminController
  *
- * Admin Console management for the Help_Topics Knowledge data category group —
- * SAFE operations only: add topic/subtopic, rename display labels, reorder.
- * Deleting or renaming API names is deliberately NOT offered: article
- * assignments (Knowledge__DataCategorySelection) and help-guide category
- * targets reference categories by name string, so those operations silently
- * orphan content. They stay in Setup → Data Category Setup.
+ * Admin Console management for the Help_Topics Knowledge data category group:
+ * add topic/subtopic, rename display labels, reorder, and delete. Delete is
+ * guarded — article assignments (Knowledge__DataCategorySelection) reference
+ * categories by name string and would be silently orphaned, so a topic (or
+ * any of its subtopics) with ANY article version filed under it (draft,
+ * online or archived) cannot be deleted from here; the admin moves those
+ * articles first. Empty subtopics are removed with their parent. Renaming an
+ * API name is still not offered and stays in Setup → Data Category Setup.
  *
  * Writes go through HelpTopicMetadataService (SOAP Metadata API — see that
  * class for why Metadata.Operations can't do this). Every write re-reads the
@@ -18,10 +20,23 @@ public with sharing class HelpTopicAdminController {
     private static final String GROUP_NAME = 'Help_Topics';
     private static final Integer NAME_MAX = 40;
     private static final Integer MAX_DEPTH = 2; // topics + subtopics (UI convention)
+    // Category API names are alphanumerics/underscores (see uniqueName); anything
+    // else is rejected before a callout is spent on it.
+    private static final Pattern NAME_PATTERN = Pattern.compile('^[A-Za-z0-9_]{1,40}$');
+    // DataCategoryGroupName/DataCategoryName are not filterable in SOQL, so the
+    // delete guard scans selections and filters in Apex. Fail closed past this.
+    @TestVisible private static Integer selectionScanLimit = 10000;
 
     public class TopicTreeDTO {
         @AuraEnabled public Boolean editable;
         @AuraEnabled public List<HelpTopicMetadataService.Category> topics;
+    }
+
+    /** Pre-flight for the delete confirm: what blocks, and what cascades. */
+    public class TopicDeleteImpactDTO {
+        @AuraEnabled public String label;
+        @AuraEnabled public Integer articleCount;   // filed article versions (draft/online/archived); > 0 blocks
+        @AuraEnabled public Integer subtopicCount;  // removed with the topic (all empty by then)
     }
 
     /** Cheap gate check for the UI (no callout — display uses the describe tree). */
@@ -144,6 +159,73 @@ public with sharing class HelpTopicAdminController {
         }
     }
 
+    // ---- Delete ------------------------------------------------------------------
+
+    /**
+     * What deleting `name` would touch: distinct articles filed under it or
+     * any subtopic (any version — blocks), and how many subtopics go with it.
+     * The UI shows this before asking for confirmation; deleteTopic re-checks.
+     */
+    @AuraEnabled
+    public static TopicDeleteImpactDTO getTopicDeleteImpact(String name) {
+        assertTopicAdmin();
+        requireValidName(name);
+        try {
+            HelpTopicMetadataService.GroupSnapshot snap = readGroup();
+            HelpTopicMetadataService.Category target = findChild(snap.root, name, MAX_DEPTH);
+            if (target == null) {
+                throw auraError('Topic "' + name + '" no longer exists — refresh.');
+            }
+            TopicDeleteImpactDTO dto = new TopicDeleteImpactDTO();
+            dto.label = target.label;
+            dto.subtopicCount = target.children.size();
+            dto.articleCount = countArticlesFiledUnder(collectNames(target));
+            return dto;
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            throw auraError(e.getMessage());
+        }
+    }
+
+    /**
+     * Removes the topic (and its subtopics) from the group by writing the
+     * group back without that node — the Metadata API has no per-category
+     * delete. Refused while any article version is filed under the subtree.
+     */
+    @AuraEnabled
+    public static void deleteTopic(String name) {
+        assertTopicAdmin();
+        requireValidName(name);
+        try {
+            HelpTopicMetadataService.GroupSnapshot snap = readGroup();
+            HelpTopicMetadataService.Category parent = findParentOf(snap.root, name, MAX_DEPTH);
+            if (parent == null) {
+                throw auraError('Topic "' + name + '" no longer exists — refresh.');
+            }
+            Integer index = -1;
+            for (Integer i = 0; i < parent.children.size(); i++) {
+                if (parent.children[i].name == name) {
+                    index = i;
+                }
+            }
+            HelpTopicMetadataService.Category target = parent.children[index];
+            Integer filed = countArticlesFiledUnder(collectNames(target));
+            if (filed > 0) {
+                throw auraError('Can\'t delete this topic — ' + filed + ' article version'
+                    + (filed == 1 ? ' is' : 's are')
+                    + ' filed under it (drafts and archived versions included). '
+                    + 'Move those articles to another topic first.');
+            }
+            parent.children.remove(index);
+            HelpTopicMetadataService.updateGroup(snap);
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            throw auraError(e.getMessage());
+        }
+    }
+
     // ---- Internals ----------------------------------------------------------------
 
     private static HelpTopicMetadataService.GroupSnapshot readGroup() {
@@ -167,12 +249,63 @@ public with sharing class HelpTopicAdminController {
         return null;
     }
 
+    /** The node whose direct children contain `name` (same depth rule as findChild). */
+    private static HelpTopicMetadataService.Category findParentOf(
+            HelpTopicMetadataService.Category node, String name, Integer maxDepth) {
+        for (HelpTopicMetadataService.Category child : node.children) {
+            if (child.name == name) {
+                return node;
+            }
+            if (maxDepth > 1) {
+                HelpTopicMetadataService.Category hit = findParentOf(child, name, maxDepth - 1);
+                if (hit != null) {
+                    return hit;
+                }
+            }
+        }
+        return null;
+    }
+
     private static Set<String> collectNames(HelpTopicMetadataService.Category node) {
         Set<String> names = new Set<String>{ node.name };
         for (HelpTopicMetadataService.Category child : node.children) {
             names.addAll(collectNames(child));
         }
         return names;
+    }
+
+    /**
+     * Distinct article versions (draft, online or archived) filed under any of
+     * `names` in the Help_Topics group. Neither selection column is
+     * filterable, so scan and filter here (ArticleAdminController does the
+     * same per article). Deliberately counts selection parents rather than
+     * resolving them through Knowledge__kav: draft versions are invisible to
+     * a user without the Knowledge User license, and a guard that quietly
+     * saw fewer filings would fail open.
+     */
+    private static Integer countArticlesFiledUnder(Set<String> names) {
+        Set<Id> versionIds = new Set<Id>();
+        List<Knowledge__DataCategorySelection> selections = [
+            SELECT ParentId, DataCategoryGroupName, DataCategoryName
+            FROM Knowledge__DataCategorySelection
+            LIMIT :selectionScanLimit
+        ];
+        if (selections.size() >= selectionScanLimit) {
+            throw auraError('Too many article filings to check safely — delete this topic '
+                + 'in Setup → Data Category Setup.');
+        }
+        for (Knowledge__DataCategorySelection sel : selections) {
+            if (sel.DataCategoryGroupName == GROUP_NAME && names.contains(sel.DataCategoryName)) {
+                versionIds.add(sel.ParentId);
+            }
+        }
+        return versionIds.size();
+    }
+
+    private static void requireValidName(String name) {
+        if (String.isBlank(name) || !NAME_PATTERN.matcher(name).matches()) {
+            throw auraError('Invalid topic name.');
+        }
     }
 
     /** Label → unique category API name: alphanumerics + single underscores. */

@@ -10,19 +10,33 @@ import canEditTopics from '@salesforce/apex/HelpTopicAdminController.canEditTopi
 import addTopicApex from '@salesforce/apex/HelpTopicAdminController.addTopic';
 import renameTopicApex from '@salesforce/apex/HelpTopicAdminController.renameTopic';
 import reorderTopicsApex from '@salesforce/apex/HelpTopicAdminController.reorderTopics';
+import getCategoryDeleteImpact from '@salesforce/apex/ResourceAdminController.getCategoryDeleteImpact';
+import deleteCategoryApex from '@salesforce/apex/ResourceAdminController.deleteCategory';
+import getTopicDeleteImpact from '@salesforce/apex/HelpTopicAdminController.getTopicDeleteImpact';
+import deleteTopicApex from '@salesforce/apex/HelpTopicAdminController.deleteTopic';
 import { messageFrom, toast } from 'c/messageUtil';
+
+const plural = (n, one, many) => (n === 1 ? one : many);
 
 /**
  * adminCategoryManager — the two taxonomies, side by side and clearly labeled,
  * both rendered by the shared c-admin-sortable-tree (drag/keyboard reorder):
  *  - Resource Categories (Resource_Category__c): editable — create, rename,
- *    re-parent, reorder (persists Display_Order__c), icon picker, active flag.
- *    Two levels: main topics with subtopics, mirroring Help topics.
- *  - Help Topics (Knowledge data categories): safe ops via the SOAP Metadata
- *    channel (HelpTopicAdminController) — add topic/subtopic, rename labels,
- *    reorder. Delete / API-name rename stay in Setup (they orphan article
- *    assignments). New topics show a generic icon on the Help Center until
- *    nexsTopicIcons.js gets a mapping (deploy).
+ *    re-parent, reorder (persists Display_Order__c), icon picker, active flag,
+ *    delete (blocked while resources or help-guide links sit under it; empty
+ *    subtopics go with their parent). Two levels: main topics with subtopics,
+ *    mirroring Help topics.
+ *  - Help Topics (Knowledge data categories): via the SOAP Metadata channel
+ *    (HelpTopicAdminController) — add topic/subtopic, rename labels, reorder,
+ *    delete (blocked while any article version is filed under the topic or
+ *    its subtopics — filing references topics by name and would be orphaned).
+ *    API-name rename stays in Setup. New topics show a generic icon on the
+ *    Help Center until nexsTopicIcons.js gets a mapping (deploy).
+ *
+ * Delete lives in each edit dialog and always goes through the shared
+ * c-admin-confirm-modal (docs/ui-standards.md): the edit dialog closes, a
+ * pre-flight impact call decides between a "blocked" notice and a destructive
+ * confirm, and the server re-validates before anything is removed.
  */
 export default class AdminCategoryManager extends LightningElement {
     rows = [];
@@ -50,6 +64,11 @@ export default class AdminCategoryManager extends LightningElement {
     topicModalMode = 'add';      // 'add' | 'add-sub' | 'rename'
     topicModalTarget = null;     // parent name (add-sub) or topic name (rename)
     topicModalValue = '';
+
+    // Delete confirm state: null, or { action: 'blocked'|'delete', kind:
+    // 'category'|'topic', id, header, message, confirmLabel, variant }.
+    confirm = null;
+    confirmBusy = false;
 
     connectedCallback() {
         this.load();
@@ -96,8 +115,20 @@ export default class AdminCategoryManager extends LightningElement {
 
     get topicsSubtitle() {
         return this.topicsEditable
-            ? 'Editable — add topics, rename labels, reorder. Organizes Help Center articles.'
+            ? 'Editable — add topics, rename labels, reorder, delete empty topics. Organizes Help Center articles.'
             : 'Read-only — organizes Help Center articles. Editing needs Modify Metadata access.';
+    }
+
+    get confirmOpen() {
+        return this.confirm !== null;
+    }
+
+    get isEditingCategory() {
+        return Boolean(this.editingId);
+    }
+
+    get topicModalIsRename() {
+        return this.topicModalMode === 'rename';
     }
 
     /** Two-level items for c-admin-sortable-tree, sorted like the server list. */
@@ -439,6 +470,163 @@ export default class AdminCategoryManager extends LightningElement {
             toast(this, 'error', messageFrom(e, 'Could not reorder help topics.'));
             await this.load();
         } finally {
+            this.topicsBusy = false;
+        }
+    }
+
+    // ---- Delete (both panes; the console's blocked-vs-delete confirm pattern) ----
+
+    /**
+     * Delete from the category edit dialog. The dialog closes first (two
+     * overlays would fight over focus and Escape); its form state stays so
+     * Cancel or the blocked "OK" reopens it exactly as it was.
+     */
+    async handleCategoryDeleteClick() {
+        const row = this.rows.find((c) => c.id === this.editingId);
+        if (!row) {
+            return;
+        }
+        this.modalOpen = false;
+        this.categoriesBusy = true;
+        try {
+            const impact = await getCategoryDeleteImpact({ categoryId: row.id });
+            this.confirm = this.buildCategoryConfirm(row, impact);
+        } catch (e) {
+            toast(this, 'error', messageFrom(e, 'Could not check the category.'));
+            this.modalOpen = true;
+        } finally {
+            this.categoriesBusy = false;
+        }
+    }
+
+    buildCategoryConfirm(row, impact) {
+        const subs = impact.subcategoryCount || 0;
+        const base = { kind: 'category', id: row.id };
+        if (impact.resourceCount > 0) {
+            const n = impact.resourceCount;
+            return {
+                ...base,
+                action: 'blocked',
+                variant: 'brand',
+                header: `Can't delete: ${row.name}`,
+                message: `${n} resource${plural(n, ' lives', 's live')} under this category`
+                    + `${subs ? ' or its subtopics' : ''}. Move or delete those resources first.`,
+                confirmLabel: 'OK'
+            };
+        }
+        if (impact.guideOptionCount > 0) {
+            const n = impact.guideOptionCount;
+            return {
+                ...base,
+                action: 'blocked',
+                variant: 'brand',
+                header: `Can't delete: ${row.name}`,
+                message: `${n} help guide option${plural(n, ' links', 's link')} to this category`
+                    + `${subs ? ' or its subtopics' : ''}. Retarget or remove `
+                    + `${plural(n, 'it', 'them')} in the Help Guide Builder first.`,
+                confirmLabel: 'OK'
+            };
+        }
+        return {
+            ...base,
+            action: 'delete',
+            header: `Delete category: ${row.name}`,
+            message: `Deletes this category${subs
+                ? ` and its ${subs} subtopic${plural(subs, '', 's')} (all empty)` : ''}. `
+                + 'No resources live under it. This cannot be undone.',
+            confirmLabel: 'Delete'
+        };
+    }
+
+    /** Delete from the topic Rename dialog; same close-then-confirm choreography. */
+    async handleTopicDeleteClick() {
+        const name = this.topicModalTarget;
+        if (!name) {
+            return;
+        }
+        this.topicModalOpen = false;
+        this.topicsBusy = true;
+        try {
+            const impact = await getTopicDeleteImpact({ name });
+            this.confirm = this.buildTopicConfirm(name, impact);
+        } catch (e) {
+            toast(this, 'error', messageFrom(e, 'Could not check the topic.'));
+            this.topicModalOpen = true;
+        } finally {
+            this.topicsBusy = false;
+        }
+    }
+
+    buildTopicConfirm(name, impact) {
+        const label = impact.label || this.topicModalValue || name;
+        const subs = impact.subtopicCount || 0;
+        const base = { kind: 'topic', id: name };
+        if (impact.articleCount > 0) {
+            const n = impact.articleCount;
+            return {
+                ...base,
+                action: 'blocked',
+                variant: 'brand',
+                header: `Can't delete: ${label}`,
+                message: `${n} article version${plural(n, ' is', 's are')} filed under this topic`
+                    + `${subs ? ' or its subtopics' : ''} (drafts and archived versions included). `
+                    + 'Move those articles to another topic first.',
+                confirmLabel: 'OK'
+            };
+        }
+        return {
+            ...base,
+            action: 'delete',
+            header: `Delete topic: ${label}`,
+            message: `Removes this topic${subs
+                ? ` and its ${subs} subtopic${plural(subs, '', 's')} (all empty)` : ''} `
+                + 'from the Help Topics group. No articles are filed under it. This cannot be undone.',
+            confirmLabel: 'Delete'
+        };
+    }
+
+    /** Cancel (or the blocked notice's OK) returns to the dialog it came from. */
+    handleConfirmCancel() {
+        const pending = this.confirm;
+        this.confirm = null;
+        if (!pending) {
+            return;
+        }
+        if (pending.kind === 'category') {
+            this.modalOpen = true;
+        } else {
+            this.topicModalOpen = true;
+        }
+    }
+
+    async handleConfirmProceed() {
+        const pending = this.confirm;
+        if (!pending || pending.action !== 'delete') {
+            this.handleConfirmCancel();
+            return;
+        }
+        const isCategory = pending.kind === 'category';
+        this.confirmBusy = true;
+        if (isCategory) {
+            this.categoriesBusy = true;
+        } else {
+            this.topicsBusy = true;
+        }
+        try {
+            if (isCategory) {
+                await deleteCategoryApex({ categoryId: pending.id });
+            } else {
+                await deleteTopicApex({ name: pending.id });
+            }
+            this.confirm = null;
+            toast(this, 'success', isCategory ? 'Category deleted.' : 'Topic deleted.');
+            await this.load();
+        } catch (e) {
+            // Keep the confirm open so the admin reads why and can back out.
+            toast(this, 'error', messageFrom(e, 'Could not delete.'));
+        } finally {
+            this.confirmBusy = false;
+            this.categoriesBusy = false;
             this.topicsBusy = false;
         }
     }

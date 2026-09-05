@@ -60,6 +60,10 @@ private class HelpTopicAdminControllerTest {
         return mock;
     }
 
+    private static String nameTag(String name) {
+        return '<met:name>' + name + '</met:name>';
+    }
+
     @IsTest
     static void treeParsesLabelsNamesAndNesting() {
         arm(new List<String>{ readResponse() });
@@ -184,5 +188,151 @@ private class HelpTopicAdminControllerTest {
         String longLabel = 'A'.repeat(60);
         Assert.isTrue(HelpTopicAdminController.uniqueName(longLabel, new Set<String>()).length() <= 40,
             'Names cap at 40 chars.');
+    }
+
+    // ---- Delete ------------------------------------------------------------------
+
+    @IsTest
+    static void deleteTopicRemovesNodeAndRoundTripsRest() {
+        SoapMock mock = arm(new List<String>{ readResponse(), updateResponse(true, null) });
+        Test.startTest();
+        HelpTopicAdminController.deleteTopic('Cases_and_Tasks');
+        Test.stopTest();
+
+        Assert.areEqual(2, mock.requestBodies.size(), 'One read, one update.');
+        String sent = mock.requestBodies[1];
+        Assert.isTrue(sent.contains('updateMetadata'), 'Delete is an update without the node.');
+        Assert.isFalse(sent.contains(nameTag('Cases_and_Tasks')), 'Deleted topic is gone: ' + sent);
+        Assert.isTrue(sent.contains(nameTag('Getting_Started')), 'Sibling survives.');
+        Assert.isTrue(sent.contains(nameTag('The_Basics')), 'Sibling subtree survives.');
+        Assert.isTrue(sent.contains(nameTag('All')), 'Root survives.');
+        Assert.isTrue(sent.contains('<met:description>Topic taxonomy &amp; more</met:description>'),
+            'Description round-trips.');
+        Assert.isTrue(sent.contains('<met:objectUsage><met:object>KnowledgeArticleVersion</met:object></met:objectUsage>'),
+            'Object usage round-trips.');
+    }
+
+    @IsTest
+    static void deleteTopicCascadesEmptySubtree() {
+        SoapMock mock = arm(new List<String>{ readResponse(), readResponse(), updateResponse(true, null) });
+        Test.startTest();
+        HelpTopicAdminController.TopicDeleteImpactDTO impact =
+            HelpTopicAdminController.getTopicDeleteImpact('Getting_Started');
+        Assert.areEqual('Getting Started', impact.label);
+        Assert.areEqual(1, impact.subtopicCount, 'The Basics goes with its parent.');
+        Assert.areEqual(0, impact.articleCount, 'Nothing filed in this org fixture.');
+
+        HelpTopicAdminController.deleteTopic('Getting_Started');
+        Test.stopTest();
+
+        String sent = mock.requestBodies[2];
+        Assert.isFalse(sent.contains(nameTag('Getting_Started')), 'Parent removed: ' + sent);
+        Assert.isFalse(sent.contains(nameTag('The_Basics')), 'Empty subtopic removed with it.');
+        Assert.isTrue(sent.contains(nameTag('Cases_and_Tasks')), 'Sibling survives.');
+    }
+
+    @IsTest
+    static void deleteSubtopicLeavesParent() {
+        SoapMock mock = arm(new List<String>{ readResponse(), updateResponse(true, null) });
+        Test.startTest();
+        HelpTopicAdminController.deleteTopic('The_Basics');
+        Test.stopTest();
+
+        String sent = mock.requestBodies[1];
+        Assert.isFalse(sent.contains(nameTag('The_Basics')), 'Subtopic removed: ' + sent);
+        Assert.isTrue(sent.contains('<met:label>Getting Started</met:label>' + nameTag('Getting_Started')),
+            'Parent keeps its label and name.');
+    }
+
+    /**
+     * Filing an article under a fixture topic needs that category to exist in
+     * the org — The_Basics ships in Help_Topics in every org this deploys to.
+     * Creating and filing the draft needs the Knowledge User license on the
+     * running user (a sandbox where the deployer lacks the seat cannot
+     * exercise this path; prod deployers hold it), so the test proves the
+     * guard only when it can actually plant a filing.
+     */
+    @IsTest
+    static void deleteTopicBlockedByFiledArticle() {
+        Boolean licensed = [
+            SELECT UserPermissionsKnowledgeUser FROM User WHERE Id = :UserInfo.getUserId()
+        ].UserPermissionsKnowledgeUser;
+        if (!licensed) {
+            System.debug('Skipped: running user has no Knowledge User license.');
+            return;
+        }
+        Knowledge__kav draft = new Knowledge__kav(
+            Title = 'Filed Under Basics', UrlName = 'filed-under-basics-' + System.currentTimeMillis(),
+            Summary = 'Blocks the delete');
+        insert draft;
+        insert new Knowledge__DataCategorySelection(
+            ParentId = draft.Id, DataCategoryGroupName = 'Help_Topics', DataCategoryName = 'The_Basics');
+
+        SoapMock mock = arm(new List<String>{ readResponse(), readResponse() });
+        Test.startTest();
+        Assert.areEqual(1,
+            HelpTopicAdminController.getTopicDeleteImpact('Getting_Started').articleCount,
+            'An article filed under a subtopic counts against the parent.');
+        try {
+            HelpTopicAdminController.deleteTopic('The_Basics');
+            Assert.fail('A topic with filed articles must not delete');
+        } catch (AuraHandledException e) {
+            Assert.isTrue(e.getMessage().contains('filed under'), e.getMessage());
+        }
+        Test.stopTest();
+
+        for (String body : mock.requestBodies) {
+            Assert.isFalse(body.contains('updateMetadata'), 'No write was attempted.');
+        }
+    }
+
+    @IsTest
+    static void deleteTopicScanLimitFailsClosed() {
+        HelpTopicAdminController.selectionScanLimit = 0;
+        arm(new List<String>{ readResponse() });
+        Test.startTest();
+        try {
+            HelpTopicAdminController.deleteTopic('Cases_and_Tasks');
+            Assert.fail('Past the scan limit the delete must refuse');
+        } catch (AuraHandledException e) {
+            Assert.isTrue(e.getMessage().contains('Setup'), e.getMessage());
+        }
+        Test.stopTest();
+    }
+
+    @IsTest
+    static void deleteTopicUnknownOrInvalidNameRejected() {
+        SoapMock mock = arm(new List<String>{ readResponse() });
+        Test.startTest();
+        for (String bad : new List<String>{ null, '  ', 'bad name!', 'x/y' }) {
+            try {
+                HelpTopicAdminController.deleteTopic(bad);
+                Assert.fail('Invalid name must be rejected: ' + bad);
+            } catch (AuraHandledException e) {
+                Assert.isTrue(e.getMessage().contains('Invalid'), e.getMessage());
+            }
+        }
+        Assert.areEqual(0, mock.requestBodies.size(), 'Invalid names never reach the Metadata API.');
+
+        try {
+            HelpTopicAdminController.deleteTopic('Gone_Topic');
+            Assert.fail('Unknown topic must be rejected');
+        } catch (AuraHandledException e) {
+            Assert.isTrue(e.getMessage().contains('no longer exists'), e.getMessage());
+        }
+        Test.stopTest();
+    }
+
+    @IsTest
+    static void deleteTopicServerRejectionSurfaces() {
+        arm(new List<String>{ readResponse(), updateResponse(false, 'Category in use') });
+        Test.startTest();
+        try {
+            HelpTopicAdminController.deleteTopic('Cases_and_Tasks');
+            Assert.fail('Server rejection must surface');
+        } catch (AuraHandledException e) {
+            Assert.isTrue(e.getMessage().contains('Category in use'), e.getMessage());
+        }
+        Test.stopTest();
     }
 }
