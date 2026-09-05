@@ -214,7 +214,7 @@
         <inputAssignments>
             <field>FinServ__Household__c</field>
             <value>
-                <elementReference>get_Case.FinServ__Household__c</elementReference>
+                <elementReference>get_Case.Household__c</elementReference>
             </value>
         </inputAssignments>
         <inputAssignments>

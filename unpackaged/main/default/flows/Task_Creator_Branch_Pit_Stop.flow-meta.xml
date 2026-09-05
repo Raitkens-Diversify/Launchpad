@@ -133,7 +133,7 @@
             <assignToReference>varTask.FinServ__Household__c</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>varCase.FinServ__Household__c</elementReference>
+                <elementReference>varCase.Household__c</elementReference>
             </value>
         </assignmentItems>
         <connector>
