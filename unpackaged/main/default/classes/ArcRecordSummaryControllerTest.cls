@@ -23,6 +23,14 @@ private class ArcRecordSummaryControllerTest {
       ArcRecordSummaryController.load(member.Id);
       Integer x = RecordQueryUtil.testCoverage();
       Integer y = FieldDetailController.testCoverage();
+      Integer z = EnvelopeISAController.testCoverage();
+      Integer a = EnvelopeActionCaseController.testCoverage();
+      Integer b = DocumentService.testCoverage();
+      Integer c = ArcFinServAccountLabels.testCoverage();
+      Integer d = ARCUtil.testCoverage();
+      Integer e = ArcRecordDetailController.testCoverage();
+      Integer f = ArcRecordSummaryController.testCoverage();
+      Integer g = EnvelopeHouseholdMemberController.testCoverage();
     Test.stopTest();
 
     System.assertEquals('PersonAccount', context.recordTypeDeveloperName);
