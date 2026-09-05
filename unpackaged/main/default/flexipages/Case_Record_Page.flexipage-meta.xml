@@ -4484,42 +4484,6 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
-                <componentName>caseOverviewTile</componentName>
-                <identifier>c_caseOverviewTile</identifier>
-                <visibilityRule>
-                    <booleanFilter>1 and 2 and (3 or 5 or 6) and 4</booleanFilter>
-                    <criteria>
-                        <leftValue>{!Record.Use_Old_Case_Layout__c}</leftValue>
-                        <operator>EQUAL</operator>
-                        <rightValue>false</rightValue>
-                    </criteria>
-                    <criteria>
-                        <leftValue>{!Record.Status}</leftValue>
-                        <operator>NE</operator>
-                        <rightValue>Canceled</rightValue>
-                    </criteria>
-                    <criteria>
-                        <leftValue>{!Record.Case_Template__r.Name}</leftValue>
-                        <operator>NE</operator>
-                    </criteria>
-                    <criteria>
-                        <leftValue>{!Record.Submitted__c}</leftValue>
-                        <operator>EQUAL</operator>
-                        <rightValue>true</rightValue>
-                    </criteria>
-                    <criteria>
-                        <leftValue>{!Record.Post_Case_Template__r.Name}</leftValue>
-                        <operator>NE</operator>
-                    </criteria>
-                    <criteria>
-                        <leftValue>{!Record.Pre_Case_Template__r.Name}</leftValue>
-                        <operator>NE</operator>
-                    </criteria>
-                </visibilityRule>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
                 <componentName>branchInternalTasks</componentName>
                 <identifier>c_branchInternalTasks</identifier>
                 <visibilityRule>
@@ -6092,25 +6056,6 @@
         <type>Facet</type>
     </flexiPageRegions>
     <flexiPageRegions>
-        <itemInstances>
-            <componentInstance>
-                <componentName>caseCurrentTask</componentName>
-                <identifier>c_caseCurrentTask</identifier>
-                <visibilityRule>
-                    <booleanFilter>1 AND 2</booleanFilter>
-                    <criteria>
-                        <leftValue>{!Record.Use_Old_Case_Layout__c}</leftValue>
-                        <operator>EQUAL</operator>
-                        <rightValue>false</rightValue>
-                    </criteria>
-                    <criteria>
-                        <leftValue>{!Record.Submitted__c}</leftValue>
-                        <operator>EQUAL</operator>
-                        <rightValue>true</rightValue>
-                    </criteria>
-                </visibilityRule>
-            </componentInstance>
-        </itemInstances>
         <itemInstances>
             <componentInstance>
                 <componentInstanceProperties>
