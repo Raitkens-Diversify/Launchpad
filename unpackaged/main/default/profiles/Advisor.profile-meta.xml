@@ -5763,6 +5763,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>User.Has_Seen_Welcome__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>User.Notification_Email_Delivery_Address__c</field>
         <readable>true</readable>
     </fieldPermissions>

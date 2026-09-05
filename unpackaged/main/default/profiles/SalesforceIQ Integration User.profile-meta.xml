@@ -2234,6 +2234,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>User.Has_Seen_Welcome__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>User.Platform_Fee__c</field>
         <readable>true</readable>
     </fieldPermissions>
