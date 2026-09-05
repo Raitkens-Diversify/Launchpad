@@ -254,18 +254,22 @@ public without sharing class NotificationRecipientService {
       return recipientIds == null ? new List<Id>() : recipientIds;
     }
 
-    Map<Id, String> profileNameByUserId = NotificationRecipientUserRepository.selectEligibleProfileNameByUserId(
+    Map<Id, User> eligibleUsersById = NotificationRecipientUserRepository.selectEligibleUsersById(
       new Set<Id>(recipientIds)
     );
     List<Id> filteredRecipientIds = new List<Id>();
 
     for (Id recipientId : recipientIds) {
-      String profileName = profileNameByUserId.get(recipientId);
+      User eligibleUser = eligibleUsersById.get(recipientId);
+      if (eligibleUser == null) {
+        continue;
+      }
 
       if (
         NotificationConstants.shouldIncludeRecipientInNormalTaskNotifications(
           taskRecord,
-          profileName
+          eligibleUser.Profile.Name,
+          eligibleUser.UserType
         )
       ) {
         filteredRecipientIds.add(recipientId);

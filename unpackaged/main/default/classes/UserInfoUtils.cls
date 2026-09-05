@@ -5,12 +5,13 @@
  * User profile and branch helpers for the running user and arbitrary user context.
  */
 public with sharing class UserInfoUtils {
+  /** Arc profile name; {@link #isNexSProfile} also covers Arc Login and community users. */
   public static final String PROFILE_NEXS = 'Arc';
-  public static final String PROFILE_ARC_LOGIN = 'Arc Login';
-  public static final String PROFILE_BRANCH_CRM = 'Branch CRM';
   public static final String PROFILE_ADVISOR = 'Advisor';
   public static final String PROFILE_HOME_OFFICE = 'Home Office';
   public static final String PROFILE_SYSTEM_ADMINISTRATOR = 'System Administrator';
+  public static final String USER_TYPE_STANDARD = 'Standard';
+  public static final String PROFILE_NEXS_LOGIN = 'Arc Login';
 
   private static User currentUserCache;
 
@@ -25,7 +26,7 @@ public with sharing class UserInfoUtils {
     }
 
     currentUserCache = [
-      SELECT Profile.Name, Branch__c
+      SELECT Profile.Name, Branch__c, UserType
       FROM User
       WHERE Id = :UserInfo.getUserId()
       LIMIT 1
@@ -33,16 +34,26 @@ public with sharing class UserInfoUtils {
     return currentUserCache;
   }
 
+  public static Set<String> nexsProfileNames() {
+    return new Set<String>{ PROFILE_NEXS, PROFILE_NEXS_LOGIN };
+  }
+
+  public static Boolean isCommunityUserType(String userType) {
+    return String.isNotBlank(userType) && userType != USER_TYPE_STANDARD;
+  }
+
+  /**
+   * NexS profile-name check (Arc or Arc Login). Use the two-arg overload when UserType is available.
+   */
   public static Boolean isNexSProfile(String profileName) {
-    return profileName == PROFILE_NEXS;
+    return nexsProfileNames().contains(profileName);
   }
 
-  public static Boolean isArcLoginProfile(String profileName) {
-    return profileName == PROFILE_ARC_LOGIN;
-  }
-
-  public static Boolean isBranchCrmProfile(String profileName) {
-    return profileName == PROFILE_BRANCH_CRM;
+  /**
+   * NexS user: Arc, Arc Login, or any non-Standard (community) license user.
+   */
+  public static Boolean isNexSProfile(String profileName, String userType) {
+    return isNexSProfile(profileName) || isCommunityUserType(userType);
   }
 
   public static Boolean isAdvisorProfile(String profileName) {
@@ -62,14 +73,11 @@ public with sharing class UserInfoUtils {
   }
 
   public static Boolean isBranchUserProfile(String profileName) {
-    return isBranchNotificationProfile(profileName);
+    return isNexSProfile(profileName) || isAdvisorProfile(profileName);
   }
 
-  public static Boolean isBranchNotificationProfile(String profileName) {
-    return isNexSProfile(profileName) ||
-      isArcLoginProfile(profileName) ||
-      isBranchCrmProfile(profileName) ||
-      isAdvisorProfile(profileName);
+  public static Boolean isBranchUser(String profileName, String userType) {
+    return isNexSProfile(profileName, userType) || isAdvisorProfile(profileName);
   }
 
   public static Boolean isSystemAdministratorProfile(String profileName) {
@@ -77,24 +85,33 @@ public with sharing class UserInfoUtils {
   }
 
   public static Boolean isNotificationEligibleProfile(String profileName) {
-    return isBranchNotificationProfile(profileName) ||
+    return isNexSProfile(profileName) ||
+      isAdvisorProfile(profileName) ||
+      isHomeOfficeProfile(profileName) ||
+      isSystemAdministratorProfile(profileName);
+  }
+
+  public static Boolean isNotificationEligibleUser(
+    String profileName,
+    String userType
+  ) {
+    return isNexSProfile(profileName, userType) ||
+      isAdvisorProfile(profileName) ||
       isHomeOfficeProfile(profileName) ||
       isSystemAdministratorProfile(profileName);
   }
 
   public static Set<String> notificationEligibleProfileNames() {
-    return new Set<String>{
-      PROFILE_NEXS,
-      PROFILE_ARC_LOGIN,
-      PROFILE_BRANCH_CRM,
-      PROFILE_ADVISOR,
-      PROFILE_HOME_OFFICE,
-      PROFILE_SYSTEM_ADMINISTRATOR
-    };
+    Set<String> profileNames = nexsProfileNames();
+    profileNames.add(PROFILE_ADVISOR);
+    profileNames.add(PROFILE_HOME_OFFICE);
+    profileNames.add(PROFILE_SYSTEM_ADMINISTRATOR);
+    return profileNames;
   }
 
   public static Boolean isCurrentUserNexS() {
-    return isNexSProfile(getCurrentUser().Profile.Name);
+    User currentUser = getCurrentUser();
+    return isNexSProfile(currentUser.Profile.Name, currentUser.UserType);
   }
 
   public static Boolean isCurrentUserAdvisor() {
@@ -107,7 +124,8 @@ public with sharing class UserInfoUtils {
   }
 
   public static Boolean isCurrentUserBranchUser() {
-    return isBranchUserProfile(getCurrentUser().Profile.Name);
+    User currentUser = getCurrentUser();
+    return isBranchUser(currentUser.Profile.Name, currentUser.UserType);
   }
 
   public static Boolean isCurrentUserSystemAdministrator() {
@@ -115,7 +133,11 @@ public with sharing class UserInfoUtils {
   }
 
   public static Boolean isCurrentUserNotificationEligible() {
-    return isNotificationEligibleProfile(getCurrentUser().Profile.Name);
+    User currentUser = getCurrentUser();
+    return isNotificationEligibleUser(
+      currentUser.Profile.Name,
+      currentUser.UserType
+    );
   }
 
   private UserInfoUtils() {

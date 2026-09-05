@@ -42,9 +42,7 @@ public without sharing class NotificationTaskPitStopService {
     List<Id> recipientIds = new List<Id>();
 
     for (Id userId : candidateUserIds) {
-      String profileName = profileNameByUserId.get(userId);
-
-      if (NotificationConstants.isPitStopRecipientProfile(taskRecord, profileName)) {
+      if (profileNameByUserId.containsKey(userId)) {
         recipientIds.add(userId);
       }
     }

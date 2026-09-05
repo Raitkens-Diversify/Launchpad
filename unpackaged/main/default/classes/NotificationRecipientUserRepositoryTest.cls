@@ -7,7 +7,7 @@ private class NotificationRecipientUserRepositoryTest {
   @IsTest
   static void selectEligibleProfileNameByUserId_returnsRunningUserProfile() {
     User runningUser = [
-      SELECT Id, Profile.Name
+      SELECT Id, Profile.Name, UserType
       FROM User
       WHERE Id = :UserInfo.getUserId()
       LIMIT 1
@@ -23,9 +23,11 @@ private class NotificationRecipientUserRepositoryTest {
       userIdToProfileName.get(runningUser.Id)
     );
     System.assert(
-      UserInfoUtils.notificationEligibleProfileNames()
-        .contains(runningUser.Profile.Name),
-      'Running user profile should be notification eligible.'
+      UserInfoUtils.isNotificationEligibleUser(
+        runningUser.Profile.Name,
+        runningUser.UserType
+      ),
+      'Running user should be notification eligible.'
     );
   }
 
@@ -176,6 +178,98 @@ private class NotificationRecipientUserRepositoryTest {
       NotificationRecipientUserRepository.selectEligibleActiveMemberUserIdsByTeamId(
           new Set<Id>()
         )
+        .size()
+    );
+  }
+
+  @IsTest
+  static void selectPitStopRecipientProfileNameByUserId_returnsBranchProfiles() {
+    User runningUser = [
+      SELECT Id, Profile.Name, UserType
+      FROM User
+      WHERE Id = :UserInfo.getUserId()
+      LIMIT 1
+    ];
+
+    Task branchTask = new Task(Branch_Pit_Stop__c = true);
+    Map<Id, String> branchProfiles = NotificationRecipientUserRepository.selectPitStopRecipientProfileNameByUserId(
+      new Set<Id>{ runningUser.Id },
+      branchTask
+    );
+
+    if (
+      UserInfoUtils.isBranchUser(runningUser.Profile.Name, runningUser.UserType)
+    ) {
+      System.assertEquals(1, branchProfiles.size());
+      System.assertEquals(
+        runningUser.Profile.Name,
+        branchProfiles.get(runningUser.Id)
+      );
+    } else {
+      System.assertEquals(0, branchProfiles.size());
+    }
+  }
+
+  @IsTest
+  static void selectPitStopRecipientProfileNameByUserId_returnsEmptyForInvalidInput() {
+    Task branchTask = new Task(Branch_Pit_Stop__c = true);
+
+    System.assertEquals(
+      0,
+      NotificationRecipientUserRepository.selectPitStopRecipientProfileNameByUserId(
+          null,
+          branchTask
+        )
+        .size()
+    );
+    System.assertEquals(
+      0,
+      NotificationRecipientUserRepository.selectPitStopRecipientProfileNameByUserId(
+          new Set<Id>(),
+          branchTask
+        )
+        .size()
+    );
+    System.assertEquals(
+      0,
+      NotificationRecipientUserRepository.selectPitStopRecipientProfileNameByUserId(
+          new Set<Id>{ UserInfo.getUserId() },
+          null
+        )
+        .size()
+    );
+  }
+
+  @IsTest
+  static void selectEligibleUsersById_returnsRunningUser() {
+    User runningUser = [
+      SELECT Id, Profile.Name, UserType
+      FROM User
+      WHERE Id = :UserInfo.getUserId()
+      LIMIT 1
+    ];
+
+    Map<Id, User> usersById = NotificationRecipientUserRepository.selectEligibleUsersById(
+      new Set<Id>{ runningUser.Id }
+    );
+
+    System.assertEquals(1, usersById.size());
+    System.assertEquals(runningUser.Id, usersById.get(runningUser.Id).Id);
+    System.assertEquals(
+      runningUser.Profile.Name,
+      usersById.get(runningUser.Id).Profile.Name
+    );
+  }
+
+  @IsTest
+  static void selectEligibleUsersById_returnsEmptyForNullOrEmptyInput() {
+    System.assertEquals(
+      0,
+      NotificationRecipientUserRepository.selectEligibleUsersById(null).size()
+    );
+    System.assertEquals(
+      0,
+      NotificationRecipientUserRepository.selectEligibleUsersById(new Set<Id>())
         .size()
     );
   }

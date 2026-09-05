@@ -40,18 +40,25 @@ public without sharing class NotificationCaseRecipientService {
       return new List<Id>();
     }
 
-    Map<Id, String> userIdToProfileName = NotificationRecipientUserRepository.selectEligibleProfileNameByUserId(
+    Map<Id, User> eligibleUsersById = NotificationRecipientUserRepository.selectEligibleUsersById(
       candidateUserIds
     );
     List<Id> eligibleRecipientIds = new List<Id>();
 
     for (Id userId : candidateUserIds) {
-      String profileName = userIdToProfileName.get(userId);
-      if (profileName == null) {
+      User eligibleUser = eligibleUsersById.get(userId);
+      if (eligibleUser == null) {
         continue;
       }
 
-      if (isEligibleRecipient(userId, profileName, context)) {
+      if (
+        isEligibleRecipient(
+          userId,
+          eligibleUser.Profile.Name,
+          eligibleUser.UserType,
+          context
+        )
+      ) {
         eligibleRecipientIds.add(userId);
       }
     }
@@ -119,6 +126,9 @@ public without sharing class NotificationCaseRecipientService {
 
     Set<Id> primaryAdvisorUserIds = new Set<Id>();
 
+    Set<String> eligibleProfileNames = UserInfoUtils.notificationEligibleProfileNames();
+    String standardUserType = UserInfoUtils.USER_TYPE_STANDARD;
+
     for (Financial_Advisor_Team_Member__c teamMember : [
       SELECT User__c
       FROM Financial_Advisor_Team_Member__c
@@ -127,7 +137,10 @@ public without sharing class NotificationCaseRecipientService {
         AND Primary__c = TRUE
         AND Active__c = TRUE
         AND User__c != NULL
-        AND User__r.Profile.Name IN :UserInfoUtils.notificationEligibleProfileNames()
+        AND (
+          User__r.Profile.Name IN :eligibleProfileNames
+          OR User__r.UserType != :standardUserType
+        )
     ]) {
       primaryAdvisorUserIds.add(teamMember.User__c);
     }
@@ -178,6 +191,7 @@ public without sharing class NotificationCaseRecipientService {
   private static Boolean isEligibleRecipient(
     Id userId,
     String profileName,
+    String userType,
     CaseRecipientContext context
   ) {
     Boolean isOwner = context.ownerUserId == userId;
@@ -191,15 +205,10 @@ public without sharing class NotificationCaseRecipientService {
       return isOwner || isQueueMember;
     }
 
-    if (UserInfoUtils.isNexSProfile(profileName)) {
-      return isOwner || isQueueMember || isPrimaryAdvisor;
-    }
-
-    if (UserInfoUtils.isAdvisorProfile(profileName)) {
-      return isOwner || isQueueMember || isPrimaryAdvisor;
-    }
-
-    if (UserInfoUtils.isSystemAdministratorProfile(profileName)) {
+    if (
+      UserInfoUtils.isBranchUser(profileName, userType) ||
+      UserInfoUtils.isSystemAdministratorProfile(profileName)
+    ) {
       return isOwner || isQueueMember || isPrimaryAdvisor;
     }
 

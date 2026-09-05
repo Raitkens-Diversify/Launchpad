@@ -4,14 +4,14 @@
  *
  * Resolves Task notification recipients by profile-specific eligibility rules.
  *
- * NexS (Arc), Arc Login, Branch CRM, Advisor, and System Administrator users may qualify when a Task is assigned to them,
+ * NexS, Advisor, and System Administrator users may qualify when a Task is assigned to them,
  * linked to a Case they own or submitted, linked to a Case on their FA team,
  * or linked to a Household where they are the primary advisor.
  *
  * Home Office users qualify when a Task is assigned to them or linked to a Case
  * they own or that is owned by a queue they belong to.
  *
- * NexS (Arc), Arc Login, Branch CRM, Advisor, and System Administrator users also qualify when linked to a
+ * NexS, Advisor, and System Administrator users also qualify when linked to a
  * Case they own, submitted, FA team serves, or a queue they belong to owns.
  *
  * Notification_Rule__c records control delivery settings after eligibility passes.
@@ -46,18 +46,25 @@ public without sharing class NotificationTaskRecipientService {
       return new List<Id>();
     }
 
-    Map<Id, String> userIdToProfileName = NotificationRecipientUserRepository.selectEligibleProfileNameByUserId(
+    Map<Id, User> eligibleUsersById = NotificationRecipientUserRepository.selectEligibleUsersById(
       candidateUserIds
     );
     List<Id> eligibleRecipientIds = new List<Id>();
 
     for (Id userId : candidateUserIds) {
-      String profileName = userIdToProfileName.get(userId);
-      if (profileName == null) {
+      User eligibleUser = eligibleUsersById.get(userId);
+      if (eligibleUser == null) {
         continue;
       }
 
-      if (isEligibleRecipient(userId, profileName, context)) {
+      if (
+        isEligibleRecipient(
+          userId,
+          eligibleUser.Profile.Name,
+          eligibleUser.UserType,
+          context
+        )
+      ) {
         eligibleRecipientIds.add(userId);
       }
     }
@@ -155,6 +162,7 @@ public without sharing class NotificationTaskRecipientService {
   private static Boolean isEligibleRecipient(
     Id userId,
     String profileName,
+    String userType,
     TaskRecipientContext context
   ) {
     Boolean isAssignee = context.assigneeUserId == userId;
@@ -173,10 +181,21 @@ public without sharing class NotificationTaskRecipientService {
         (context.hasCaseAssociation && (isCaseOwner || isCaseQueueMember));
     }
 
-    if (
-      UserInfoUtils.isBranchNotificationProfile(profileName) ||
-      UserInfoUtils.isSystemAdministratorProfile(profileName)
-    ) {
+    if (UserInfoUtils.isNexSProfile(profileName, userType)) {
+      return isAssignee ||
+        isPrimaryAdvisorOnHousehold ||
+        (context.hasCaseAssociation &&
+        (isCaseOwner || isCaseSubmitter || isCaseFaTeamMember || isCaseQueueMember));
+    }
+
+    if (UserInfoUtils.isAdvisorProfile(profileName)) {
+      return isAssignee ||
+        isPrimaryAdvisorOnHousehold ||
+        (context.hasCaseAssociation &&
+        (isCaseOwner || isCaseSubmitter || isCaseFaTeamMember || isCaseQueueMember));
+    }
+
+    if (UserInfoUtils.isSystemAdministratorProfile(profileName)) {
       return isAssignee ||
         isPrimaryAdvisorOnHousehold ||
         (context.hasCaseAssociation &&
@@ -220,6 +239,8 @@ public without sharing class NotificationTaskRecipientService {
     }
 
     Set<Id> primaryAdvisorUserIds = new Set<Id>();
+    Set<String> eligibleProfileNames = UserInfoUtils.notificationEligibleProfileNames();
+    String standardUserType = UserInfoUtils.USER_TYPE_STANDARD;
 
     for (Financial_Advisor_Team_Member__c teamMember : [
       SELECT User__c
@@ -229,7 +250,10 @@ public without sharing class NotificationTaskRecipientService {
         AND Primary__c = TRUE
         AND Active__c = TRUE
         AND User__c != NULL
-        AND User__r.Profile.Name IN :UserInfoUtils.notificationEligibleProfileNames()
+        AND (
+          User__r.Profile.Name IN :eligibleProfileNames
+          OR User__r.UserType != :standardUserType
+        )
     ]) {
       primaryAdvisorUserIds.add(teamMember.User__c);
     }

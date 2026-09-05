@@ -37,7 +37,7 @@ const VIEW_CONFIG = Object.freeze({
   "notification-rules": {
     title: "Notification Rules",
     label: "Notification Rules",
-    subtitle: "Task, Case, and Event rules for Arc, Arc Login, Branch CRM, Advisor, and Home Office users",
+    subtitle: "Task, Case, and Event rules for NexS, Advisor, and Home Office users",
     icon: NAV_VIEW_ICONS["notification-rules"]
   },
   "notification-log": {

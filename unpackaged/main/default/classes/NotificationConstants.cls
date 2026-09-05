@@ -146,7 +146,7 @@ public class NotificationConstants {
     }
 
     if (taskRecord.Branch_Pit_Stop__c == true) {
-      profileNames.add(UserInfoUtils.PROFILE_NEXS);
+      profileNames.addAll(UserInfoUtils.nexsProfileNames());
       profileNames.add(UserInfoUtils.PROFILE_ADVISOR);
     }
 
@@ -161,12 +161,20 @@ public class NotificationConstants {
     Task taskRecord,
     String profileName
   ) {
+    return isPitStopRecipientProfile(taskRecord, profileName, null);
+  }
+
+  public static Boolean isPitStopRecipientProfile(
+    Task taskRecord,
+    String profileName,
+    String userType
+  ) {
     if (taskRecord == null || String.isBlank(profileName)) {
       return false;
     }
 
     if (taskRecord.Branch_Pit_Stop__c == true &&
-      UserInfoUtils.isBranchUserProfile(profileName)) {
+      UserInfoUtils.isBranchUser(profileName, userType)) {
       return true;
     }
 
@@ -192,6 +200,18 @@ public class NotificationConstants {
     Task taskRecord,
     String profileName
   ) {
+    return shouldIncludeRecipientInNormalTaskNotifications(
+      taskRecord,
+      profileName,
+      null
+    );
+  }
+
+  public static Boolean shouldIncludeRecipientInNormalTaskNotifications(
+    Task taskRecord,
+    String profileName,
+    String userType
+  ) {
     if (taskRecord == null) {
       return true;
     }
@@ -205,8 +225,10 @@ public class NotificationConstants {
         return false;
       }
 
-      if (UserInfoUtils.isBranchUserProfile(profileName) &&
-        isCaseRelatedTask(taskRecord)) {
+      if (
+        UserInfoUtils.isBranchUser(profileName, userType) &&
+        isCaseRelatedTask(taskRecord)
+      ) {
         return false;
       }
     }

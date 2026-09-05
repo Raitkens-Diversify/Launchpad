@@ -37,18 +37,25 @@ public without sharing class NotificationEventRecipientService {
       return new List<Id>();
     }
 
-    Map<Id, String> userIdToProfileName = NotificationRecipientUserRepository.selectEligibleProfileNameByUserId(
+    Map<Id, User> eligibleUsersById = NotificationRecipientUserRepository.selectEligibleUsersById(
       candidateUserIds
     );
     List<Id> eligibleRecipientIds = new List<Id>();
 
     for (Id userId : candidateUserIds) {
-      String profileName = userIdToProfileName.get(userId);
-      if (profileName == null) {
+      User eligibleUser = eligibleUsersById.get(userId);
+      if (eligibleUser == null) {
         continue;
       }
 
-      if (isEligibleRecipient(userId, profileName, context)) {
+      if (
+        isEligibleRecipient(
+          userId,
+          eligibleUser.Profile.Name,
+          eligibleUser.UserType,
+          context
+        )
+      ) {
         eligibleRecipientIds.add(userId);
       }
     }
@@ -131,6 +138,7 @@ public without sharing class NotificationEventRecipientService {
   private static Boolean isEligibleRecipient(
     Id userId,
     String profileName,
+    String userType,
     EventRecipientContext context
   ) {
     Boolean isCreator = context.creatorUserId == userId;
@@ -138,41 +146,24 @@ public without sharing class NotificationEventRecipientService {
       context.attendeeUserIds.contains(userId);
     Boolean isPrimaryAdvisor = context.primaryAdvisorUserIds != null &&
       context.primaryAdvisorUserIds.contains(userId);
-    Boolean hasNexSAssociation = hasNexSEligibleAssociation(context);
-    Boolean hasAdvisorAssociation = hasAdvisorEligibleAssociation(context);
 
     if (UserInfoUtils.isHomeOfficeProfile(profileName)) {
       return isCreator || isAttendee;
     }
 
-    if (UserInfoUtils.isNexSProfile(profileName)) {
+    if (
+      UserInfoUtils.isBranchUser(profileName, userType) ||
+      UserInfoUtils.isSystemAdministratorProfile(profileName)
+    ) {
       return isCreator ||
         isAttendee ||
-        (isPrimaryAdvisor && hasNexSAssociation);
-    }
-
-    if (UserInfoUtils.isAdvisorProfile(profileName)) {
-      return isCreator ||
-        isAttendee ||
-        (isPrimaryAdvisor && hasAdvisorAssociation);
-    }
-
-    if (UserInfoUtils.isSystemAdministratorProfile(profileName)) {
-      return isCreator ||
-        isAttendee ||
-        (isPrimaryAdvisor && hasNexSAssociation);
+        (isPrimaryAdvisor && hasNexSEligibleAssociation(context));
     }
 
     return false;
   }
 
   private static Boolean hasNexSEligibleAssociation(EventRecipientContext context) {
-    return context.hasEligibleRelatedAccount ||
-      context.hasHouseholdAssociation ||
-      context.hasContactAssociation;
-  }
-
-  private static Boolean hasAdvisorEligibleAssociation(EventRecipientContext context) {
     return context.hasEligibleRelatedAccount ||
       context.hasHouseholdAssociation ||
       context.hasContactAssociation;
@@ -264,6 +255,9 @@ public without sharing class NotificationEventRecipientService {
 
     Set<Id> primaryAdvisorUserIds = new Set<Id>();
 
+    Set<String> eligibleProfileNames = UserInfoUtils.notificationEligibleProfileNames();
+    String standardUserType = UserInfoUtils.USER_TYPE_STANDARD;
+
     for (Financial_Advisor_Team_Member__c teamMember : [
       SELECT User__c
       FROM Financial_Advisor_Team_Member__c
@@ -272,7 +266,10 @@ public without sharing class NotificationEventRecipientService {
         AND Primary__c = TRUE
         AND Active__c = TRUE
         AND User__c != NULL
-        AND User__r.Profile.Name IN :UserInfoUtils.notificationEligibleProfileNames()
+        AND (
+          User__r.Profile.Name IN :eligibleProfileNames
+          OR User__r.UserType != :standardUserType
+        )
     ]) {
       primaryAdvisorUserIds.add(teamMember.User__c);
     }

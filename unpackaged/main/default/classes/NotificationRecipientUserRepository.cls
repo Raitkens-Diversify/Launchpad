@@ -5,22 +5,38 @@
  * Shared user queries for notification recipient eligibility.
  */
 public without sharing class NotificationRecipientUserRepository {
-  public static Map<Id, String> selectEligibleProfileNameByUserId(Set<Id> userIds) {
-    Map<Id, String> userIdToProfileName = new Map<Id, String>();
+  public static Map<Id, User> selectEligibleUsersById(Set<Id> userIds) {
+    Map<Id, User> usersById = new Map<Id, User>();
 
     if (userIds == null || userIds.isEmpty()) {
-      return userIdToProfileName;
+      return usersById;
     }
 
+    Set<String> eligibleProfileNames = UserInfoUtils.notificationEligibleProfileNames();
+    String standardUserType = UserInfoUtils.USER_TYPE_STANDARD;
+
     for (User recipientUser : [
-      SELECT Id, Profile.Name
+      SELECT Id, Profile.Name, UserType
       FROM User
       WHERE
         Id IN :userIds
         AND IsActive = TRUE
-        AND Profile.Name IN :UserInfoUtils.notificationEligibleProfileNames()
+        AND (
+          Profile.Name IN :eligibleProfileNames
+          OR UserType != :standardUserType
+        )
     ]) {
-      userIdToProfileName.put(recipientUser.Id, recipientUser.Profile.Name);
+      usersById.put(recipientUser.Id, recipientUser);
+    }
+
+    return usersById;
+  }
+
+  public static Map<Id, String> selectEligibleProfileNameByUserId(Set<Id> userIds) {
+    Map<Id, String> userIdToProfileName = new Map<Id, String>();
+
+    for (User eligibleUser : selectEligibleUsersById(userIds).values()) {
+      userIdToProfileName.put(eligibleUser.Id, eligibleUser.Profile.Name);
     }
 
     return userIdToProfileName;
@@ -44,14 +60,35 @@ public without sharing class NotificationRecipientUserRepository {
       return userIdToProfileName;
     }
 
-    for (User recipientUser : [
-      SELECT Id, Profile.Name
-      FROM User
-      WHERE
-        Id IN :userIds
-        AND IsActive = TRUE
-        AND Profile.Name IN :profileNames
-    ]) {
+    String standardUserType = UserInfoUtils.USER_TYPE_STANDARD;
+    Boolean includeCommunityUsers = taskRecord != null &&
+      taskRecord.Branch_Pit_Stop__c == true;
+
+    List<User> recipientUsers;
+    if (includeCommunityUsers) {
+      recipientUsers = [
+        SELECT Id, Profile.Name, UserType
+        FROM User
+        WHERE
+          Id IN :userIds
+          AND IsActive = TRUE
+          AND (
+            Profile.Name IN :profileNames
+            OR UserType != :standardUserType
+          )
+      ];
+    } else {
+      recipientUsers = [
+        SELECT Id, Profile.Name, UserType
+        FROM User
+        WHERE
+          Id IN :userIds
+          AND IsActive = TRUE
+          AND Profile.Name IN :profileNames
+      ];
+    }
+
+    for (User recipientUser : recipientUsers) {
       userIdToProfileName.put(recipientUser.Id, recipientUser.Profile.Name);
     }
 
@@ -65,6 +102,9 @@ public without sharing class NotificationRecipientUserRepository {
       return activeMemberUserIds;
     }
 
+    Set<String> eligibleProfileNames = UserInfoUtils.notificationEligibleProfileNames();
+    String standardUserType = UserInfoUtils.USER_TYPE_STANDARD;
+
     for (Financial_Advisor_Team_Member__c teamMember : [
       SELECT User__c
       FROM Financial_Advisor_Team_Member__c
@@ -72,7 +112,10 @@ public without sharing class NotificationRecipientUserRepository {
         Financial_Advisor_Team__c = :teamId
         AND Active__c = TRUE
         AND User__c != NULL
-        AND User__r.Profile.Name IN :UserInfoUtils.notificationEligibleProfileNames()
+        AND (
+          User__r.Profile.Name IN :eligibleProfileNames
+          OR User__r.UserType != :standardUserType
+        )
     ]) {
       activeMemberUserIds.add(teamMember.User__c);
     }
@@ -89,6 +132,9 @@ public without sharing class NotificationRecipientUserRepository {
       return teamIdToUserIds;
     }
 
+    Set<String> eligibleProfileNames = UserInfoUtils.notificationEligibleProfileNames();
+    String standardUserType = UserInfoUtils.USER_TYPE_STANDARD;
+
     for (Financial_Advisor_Team_Member__c teamMember : [
       SELECT User__c, Financial_Advisor_Team__c
       FROM Financial_Advisor_Team_Member__c
@@ -96,7 +142,10 @@ public without sharing class NotificationRecipientUserRepository {
         Financial_Advisor_Team__c IN :teamIds
         AND Active__c = TRUE
         AND User__c != NULL
-        AND User__r.Profile.Name IN :UserInfoUtils.notificationEligibleProfileNames()
+        AND (
+          User__r.Profile.Name IN :eligibleProfileNames
+          OR User__r.UserType != :standardUserType
+        )
     ]) {
       addUserIdToTeamMap(
         teamIdToUserIds,

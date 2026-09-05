@@ -5,19 +5,63 @@
 @IsTest
 private class UserInfoUtilsTest {
   @IsTest
-  static void profileHelpers_identifyKnownProfiles() {
+  static void isNexSProfile_identifiesArcAndArcLoginByProfileName() {
     System.assertEquals(true, UserInfoUtils.isNexSProfile(UserInfoUtils.PROFILE_NEXS));
+    System.assertEquals(true, UserInfoUtils.isNexSProfile('Arc Login'));
     System.assertEquals(false, UserInfoUtils.isNexSProfile(UserInfoUtils.PROFILE_ADVISOR));
+  }
 
+  @IsTest
+  static void isNexSProfile_identifiesCommunityUsersWithUserType() {
     System.assertEquals(
       true,
-      UserInfoUtils.isArcLoginProfile(UserInfoUtils.PROFILE_ARC_LOGIN)
+      UserInfoUtils.isNexSProfile(UserInfoUtils.PROFILE_NEXS, 'Standard')
     );
     System.assertEquals(
       true,
-      UserInfoUtils.isBranchCrmProfile(UserInfoUtils.PROFILE_BRANCH_CRM)
+      UserInfoUtils.isNexSProfile('Arc Login', 'Standard')
     );
+    System.assertEquals(
+      true,
+      UserInfoUtils.isNexSProfile('Partner Community User', 'CspLitePortal')
+    );
+    System.assertEquals(
+      true,
+      UserInfoUtils.isNexSProfile('Any Profile', 'PowerCustomerSuccess')
+    );
+    System.assertEquals(
+      false,
+      UserInfoUtils.isNexSProfile(UserInfoUtils.PROFILE_ADVISOR, 'Standard')
+    );
+  }
 
+  @IsTest
+  static void isCommunityUserType_treatsNonStandardUsersAsCommunityUsers() {
+    System.assertEquals(true, UserInfoUtils.isCommunityUserType('CspLitePortal'));
+    System.assertEquals(true, UserInfoUtils.isCommunityUserType('PowerCustomerSuccess'));
+    System.assertEquals(true, UserInfoUtils.isCommunityUserType('AnyOtherLicense'));
+    System.assertEquals(false, UserInfoUtils.isCommunityUserType('Standard'));
+    System.assertEquals(false, UserInfoUtils.isCommunityUserType(null));
+  }
+
+  @IsTest
+  static void isBranchUser_treatsNexSAndCommunityUsersAsBranchUsers() {
+    System.assertEquals(
+      true,
+      UserInfoUtils.isBranchUser('Any Community Profile', 'CspLitePortal')
+    );
+    System.assertEquals(
+      true,
+      UserInfoUtils.isBranchUser(UserInfoUtils.PROFILE_ADVISOR, 'Standard')
+    );
+    System.assertEquals(
+      false,
+      UserInfoUtils.isBranchUser(UserInfoUtils.PROFILE_HOME_OFFICE, 'Standard')
+    );
+  }
+
+  @IsTest
+  static void profileHelpers_identifyOtherKnownProfiles() {
     System.assertEquals(
       true,
       UserInfoUtils.isAdvisorProfile(UserInfoUtils.PROFILE_ADVISOR)
@@ -62,16 +106,9 @@ private class UserInfoUtilsTest {
   }
 
   @IsTest
-  static void isBranchUserProfile_identifiesNexsAndAdvisor() {
+  static void isBranchUserProfile_identifiesNexSAndAdvisorProfiles() {
     System.assertEquals(true, UserInfoUtils.isBranchUserProfile(UserInfoUtils.PROFILE_NEXS));
-    System.assertEquals(
-      true,
-      UserInfoUtils.isBranchUserProfile(UserInfoUtils.PROFILE_ARC_LOGIN)
-    );
-    System.assertEquals(
-      true,
-      UserInfoUtils.isBranchUserProfile(UserInfoUtils.PROFILE_BRANCH_CRM)
-    );
+    System.assertEquals(true, UserInfoUtils.isBranchUserProfile('Arc Login'));
     System.assertEquals(
       true,
       UserInfoUtils.isBranchUserProfile(UserInfoUtils.PROFILE_ADVISOR)
@@ -83,6 +120,15 @@ private class UserInfoUtilsTest {
   }
 
   @IsTest
+  static void nexsProfileNames_includesArcAndArcLogin() {
+    Set<String> profileNames = UserInfoUtils.nexsProfileNames();
+
+    System.assertEquals(2, profileNames.size());
+    System.assert(profileNames.contains(UserInfoUtils.PROFILE_NEXS));
+    System.assert(profileNames.contains('Arc Login'));
+  }
+
+  @IsTest
   static void isNotificationEligibleProfile_includesExpectedProfiles() {
     System.assertEquals(
       true,
@@ -90,11 +136,7 @@ private class UserInfoUtilsTest {
     );
     System.assertEquals(
       true,
-      UserInfoUtils.isNotificationEligibleProfile(UserInfoUtils.PROFILE_ARC_LOGIN)
-    );
-    System.assertEquals(
-      true,
-      UserInfoUtils.isNotificationEligibleProfile(UserInfoUtils.PROFILE_BRANCH_CRM)
+      UserInfoUtils.isNotificationEligibleProfile('Arc Login')
     );
     System.assertEquals(
       true,
@@ -114,13 +156,24 @@ private class UserInfoUtilsTest {
   }
 
   @IsTest
+  static void isNotificationEligibleUser_includesCommunityUsers() {
+    System.assertEquals(
+      true,
+      UserInfoUtils.isNotificationEligibleUser('Partner Community User', 'CspLitePortal')
+    );
+    System.assertEquals(
+      false,
+      UserInfoUtils.isNotificationEligibleUser('Standard User', 'Standard')
+    );
+  }
+
+  @IsTest
   static void notificationEligibleProfileNames_returnsAllEligibleProfiles() {
     Set<String> profileNames = UserInfoUtils.notificationEligibleProfileNames();
 
-    System.assertEquals(6, profileNames.size());
+    System.assertEquals(5, profileNames.size());
     System.assert(profileNames.contains(UserInfoUtils.PROFILE_NEXS));
-    System.assert(profileNames.contains(UserInfoUtils.PROFILE_ARC_LOGIN));
-    System.assert(profileNames.contains(UserInfoUtils.PROFILE_BRANCH_CRM));
+    System.assert(profileNames.contains('Arc Login'));
     System.assert(profileNames.contains(UserInfoUtils.PROFILE_ADVISOR));
     System.assert(profileNames.contains(UserInfoUtils.PROFILE_HOME_OFFICE));
     System.assert(profileNames.contains(UserInfoUtils.PROFILE_SYSTEM_ADMINISTRATOR));
@@ -129,7 +182,7 @@ private class UserInfoUtilsTest {
   @IsTest
   static void currentUserHelpers_matchRunningUserContext() {
     User runningUser = [
-      SELECT Profile.Name, Branch__c
+      SELECT Profile.Name, Branch__c, UserType
       FROM User
       WHERE Id = :UserInfo.getUserId()
       LIMIT 1
@@ -138,7 +191,7 @@ private class UserInfoUtilsTest {
     UserInfoUtils.resetCurrentUserCacheForTest();
 
     System.assertEquals(
-      UserInfoUtils.isNexSProfile(runningUser.Profile.Name),
+      UserInfoUtils.isNexSProfile(runningUser.Profile.Name, runningUser.UserType),
       UserInfoUtils.isCurrentUserNexS()
     );
     System.assertEquals(
@@ -153,7 +206,7 @@ private class UserInfoUtilsTest {
       UserInfoUtils.isCurrentUserHomeOffice()
     );
     System.assertEquals(
-      UserInfoUtils.isBranchUserProfile(runningUser.Profile.Name),
+      UserInfoUtils.isBranchUser(runningUser.Profile.Name, runningUser.UserType),
       UserInfoUtils.isCurrentUserBranchUser()
     );
     System.assertEquals(
@@ -161,7 +214,10 @@ private class UserInfoUtilsTest {
       UserInfoUtils.isCurrentUserSystemAdministrator()
     );
     System.assertEquals(
-      UserInfoUtils.isNotificationEligibleProfile(runningUser.Profile.Name),
+      UserInfoUtils.isNotificationEligibleUser(
+        runningUser.Profile.Name,
+        runningUser.UserType
+      ),
       UserInfoUtils.isCurrentUserNotificationEligible()
     );
   }
