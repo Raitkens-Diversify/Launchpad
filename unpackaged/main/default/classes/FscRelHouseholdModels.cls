@@ -78,6 +78,8 @@ public class FscRelHouseholdModels {
     @AuraEnabled
     public String recordTypeLabel;
     @AuraEnabled
+    public String accountType;
+    @AuraEnabled
     public List<TreeMember> members;
     @AuraEnabled
     public List<TreeAccount> relatedAccounts;

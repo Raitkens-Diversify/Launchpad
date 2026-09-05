@@ -356,6 +356,7 @@ private class FscRelHouseholdServiceTest {
 
     System.assertEquals(String.valueOf(scenario.rootAccount.Id), treeData.rootAccountId);
     System.assertEquals(scenario.rootAccount.Name, treeData.name);
+    System.assertEquals(scenario.rootAccount.Type, treeData.accountType);
     System.assertEquals(2, treeData.members.size());
     System.assertEquals(2, treeData.clientAccounts.size());
     System.assert(
@@ -1242,6 +1243,79 @@ private class FscRelHouseholdServiceTest {
         WHERE Id = :relation.Id
       ]
     );
+  }
+
+  @IsTest
+  static void getRelationshipTree_usesAssociationTypeWhenReciprocalRoleMissing() {
+    FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
+    Account partnerBusinessAccount = FscDataTestDataFactory.createRootAccount(
+      'Entity Map Partner Business'
+    );
+    FscRelHouseholdService service = new FscRelHouseholdService();
+    String associationType = resolveAssociationTypeValue(service, 'Client');
+
+    if (String.isBlank(associationType)) {
+      return;
+    }
+
+    FscRelHouseholdModels.TreeAccountRelationshipInput input = new FscRelHouseholdModels.TreeAccountRelationshipInput();
+    input.accountId = String.valueOf(partnerBusinessAccount.Id);
+    input.associationType = associationType;
+
+    FscRelHouseholdModels.TreeAccountResult saveResult = service.saveAccountRelationship(
+      scenario.relatedBusinessAccount.Id,
+      input
+    );
+    System.assertEquals(true, saveResult.success, saveResult.message);
+
+    Test.startTest();
+    FscRelHouseholdModels.RelationshipTreeData treeData = service.getRelationshipTree(
+      scenario.relatedBusinessAccount.Id
+    );
+    Test.stopTest();
+
+    FscRelHouseholdModels.TreeAccount relatedAccount;
+    for (FscRelHouseholdModels.TreeAccount candidate : treeData.relatedAccounts) {
+      if (candidate.accountId == String.valueOf(partnerBusinessAccount.Id)) {
+        relatedAccount = candidate;
+        break;
+      }
+    }
+
+    System.assertNotEquals(null, relatedAccount);
+    System.assertEquals(
+      new List<String>{ associationType },
+      relatedAccount.roles,
+      'Business map should expose association type when reciprocal roles are missing.'
+    );
+  }
+
+  private static String resolveAssociationTypeValue(
+    FscRelHouseholdService service,
+    String preferredValue
+  ) {
+    String fallbackValue;
+
+    for (
+      FscRelHouseholdModels.PicklistOption option : service.getAccountAccountRelationshipAssociationTypeOptions()
+    ) {
+      if (String.isBlank(option?.value)) {
+        continue;
+      }
+
+      if (
+        !String.isBlank(preferredValue) &&
+        option.value.equalsIgnoreCase(preferredValue)
+      ) {
+        return option.value;
+      }
+
+      if (fallbackValue == null) {
+        fallbackValue = option.value;
+      }
+    }
+
+    return fallbackValue;
   }
 
   private static String resolveFirstAssociationTypeValue(

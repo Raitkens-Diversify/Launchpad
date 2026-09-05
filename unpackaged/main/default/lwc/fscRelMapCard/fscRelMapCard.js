@@ -383,20 +383,31 @@ export default class FscRelMapCard extends LightningElement {
     return Boolean(String(this.node?.sub || "").trim());
   }
 
-  get showRecordTypeFooterPill() {
+  get isRoleFooterPill() {
+    if (this.node?.nodeType === MAP_NODE_TYPE.ROOT) {
+      return false;
+    }
+
+    if (this.node?.isRoleSub === true) {
+      return true;
+    }
+
+    if (this.node?.isRoleSub === false) {
+      return false;
+    }
+
     return (
-      this.showPlainSub &&
-      (this.node?.nodeType === MAP_NODE_TYPE.ROOT ||
-        this.node?.nodeType === MAP_NODE_TYPE.ACCOUNT)
+      this.node?.nodeType === MAP_NODE_TYPE.RELATED_CONTACT ||
+      this.node?.nodeType === MAP_NODE_TYPE.MEMBER
     );
   }
 
+  get showRecordTypeFooterPill() {
+    return this.showPlainSub && !this.isRoleFooterPill;
+  }
+
   get showRoleFooterPill() {
-    return (
-      this.showPlainSub &&
-      (this.node?.nodeType === MAP_NODE_TYPE.RELATED_CONTACT ||
-        this.node?.nodeType === MAP_NODE_TYPE.MEMBER)
-    );
+    return this.showPlainSub && this.isRoleFooterPill;
   }
 
   get showActionsMenu() {
@@ -454,9 +465,14 @@ export default class FscRelMapCard extends LightningElement {
       );
     }
 
+    const supportsMemberRelationshipMenu =
+      this.node?.nodeType === MAP_NODE_TYPE.MEMBER ||
+      this.node?.nodeType === MAP_NODE_TYPE.ACCOUNT;
+
     if (
-      this.node?.nodeType === MAP_NODE_TYPE.MEMBER &&
-      (this.node?.showManageMemberRelationships || this.node?.showManageRelatedContacts)
+      supportsMemberRelationshipMenu &&
+      (this.node?.showManageMemberRelationships ||
+        this.node?.showManageRelatedContacts)
     ) {
       return (this.node?.memberRelationshipActions || []).map((action) => ({
         name: action.name,

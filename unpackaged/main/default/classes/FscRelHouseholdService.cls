@@ -96,6 +96,7 @@ public with sharing class FscRelHouseholdService {
     data.recordTypeLabel = rootAccount.RecordType == null
       ? null
       : rootAccount.RecordType.Name;
+    data.accountType = rootAccount.Type;
     data.relatedAccounts = buildRelatedAccounts(
       accountRelationRepository.selectByRootAccount(rootAccountId)
     );
@@ -139,6 +140,7 @@ public with sharing class FscRelHouseholdService {
     data.recordTypeLabel = personAccount.RecordType == null
       ? null
       : personAccount.RecordType.Name;
+    data.accountType = personAccount.Type;
     data.relatedAccounts = new List<FscRelHouseholdModels.TreeAccount>();
 
     FscRelHouseholdModels.TreeMember member = new FscRelHouseholdModels.TreeMember();
@@ -866,6 +868,7 @@ public with sharing class FscRelHouseholdService {
         : mapAccountToTreeAccount(relation.Related_Account__r);
 
       treeAccount.relationId = String.valueOf(relation.Id);
+      treeAccount.roles = buildRolesFromRelation(relation);
       clientAccountById.put(relation.Related_Account__c, treeAccount);
     }
 
@@ -959,6 +962,7 @@ public with sharing class FscRelHouseholdService {
   ) {
     Map<Id, FscRelHouseholdModels.TreeAccount> classifiedAccountById = new Map<Id, FscRelHouseholdModels.TreeAccount>();
     Map<Id, String> relationIdByAccountId = new Map<Id, String>();
+    Map<Id, List<String>> rolesByAccountId = new Map<Id, List<String>>();
     Set<Id> candidateAccountIds = new Set<Id>();
 
     for (FscRelHouseholdModels.TreeAccount clientAccount : clientAccounts) {
@@ -972,6 +976,10 @@ public with sharing class FscRelHouseholdService {
       if (String.isNotBlank(clientAccount.relationId)) {
         relationIdByAccountId.put(accountId, clientAccount.relationId);
       }
+
+      if (clientAccount.roles != null && !clientAccount.roles.isEmpty()) {
+        rolesByAccountId.put(accountId, clientAccount.roles);
+      }
     }
 
     for (FscRelHouseholdModels.TreeAccount relatedAccount : relatedAccounts) {
@@ -984,6 +992,10 @@ public with sharing class FscRelHouseholdService {
 
       if (String.isNotBlank(relatedAccount.relationId)) {
         relationIdByAccountId.put(accountId, relatedAccount.relationId);
+      }
+
+      if (relatedAccount.roles != null && !relatedAccount.roles.isEmpty()) {
+        rolesByAccountId.put(accountId, relatedAccount.roles);
       }
     }
 
@@ -1014,6 +1026,10 @@ public with sharing class FscRelHouseholdService {
 
       if (relationIdByAccountId.containsKey(account.Id)) {
         treeAccount.relationId = relationIdByAccountId.get(account.Id);
+      }
+
+      if (rolesByAccountId.containsKey(account.Id)) {
+        treeAccount.roles = rolesByAccountId.get(account.Id);
       }
 
       classifiedAccountById.put(account.Id, treeAccount);
@@ -1126,7 +1142,16 @@ public with sharing class FscRelHouseholdService {
   private List<String> buildRolesFromRelation(
     Account_Account_Relationship__c relation
   ) {
-    String roleName = FscRelRoleUtils.resolveRelatedAccountRoleName(relation);
+    String roleName = FscRelRoleUtils.resolveInverseRoleName(relation);
+
+    if (
+      String.isBlank(roleName) &&
+      relation != null &&
+      relation.isSet('Association_Type__c')
+    ) {
+      roleName = relation.Association_Type__c;
+    }
+
     return String.isBlank(roleName)
       ? new List<String>()
       : new List<String>{ roleName };

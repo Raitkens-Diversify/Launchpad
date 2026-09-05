@@ -301,7 +301,8 @@ const buildClassificationPersonMemberNode = (
     account,
     nestedMemberRelationsByAccountId,
     nestedMemberRelationCountByAccountId,
-    memberRelationshipRecordTypes
+    memberRelationshipRecordTypes,
+    { suppressRolePill: true }
   );
 
   return {
@@ -361,11 +362,13 @@ const buildClassificationAccountNode = (
   );
   const supportsMemberRelations = memberRelationshipActions.length > 0;
   const presentation = resolveAccountPresentation(account);
+  const cardSub = resolveTopLevelGroupCardSub(account);
 
   const baseNode = {
     id: `${parentGroupId}::classification-account::${classificationValue || "Other"}::${accountId}`,
     label: account.name || "",
-    sub: presentation.sub,
+    sub: cardSub.sub,
+    isRoleSub: cardSub.isRoleSub,
     iconName: presentation.iconName,
     kind: presentation.kind,
     nodeType: MAP_NODE_TYPE.ACCOUNT,
@@ -766,7 +769,15 @@ const isPersonAccountRecord = (account = {}) => {
   }
 
   const developerName = String(account.recordTypeDeveloperName || "").trim();
-  return PERSON_ACCOUNT_RECORD_TYPE_DEVELOPER_NAMES.has(developerName);
+  if (PERSON_ACCOUNT_RECORD_TYPE_DEVELOPER_NAMES.has(developerName)) {
+    return true;
+  }
+
+  const label = String(account.recordTypeLabel || "")
+    .trim()
+    .toLowerCase();
+
+  return label === "individual" || label === "person account";
 };
 
 const formatRecordTypeLabel = (developerName) => {
@@ -1112,23 +1123,95 @@ const resolveRecordTypePresentation = (recordTypeDeveloperName) => {
   };
 };
 
-const formatAccountSub = (account = {}, presentation = {}) => {
-  const recordTypeLabel =
-    String(account.recordTypeLabel || "").trim() || presentation.label || "";
-  const roleLabels = (Array.isArray(account.roles) ? account.roles : [])
-    .map((role) => String(role || "").trim())
-    .filter(Boolean);
+const normalizeAccountSubLabel = (label = "") => String(label || "").trim();
 
-  if (!recordTypeLabel) {
-    return roleLabels.join(" · ");
-  }
+const resolveRecordTypeSubLabel = (account = {}, presentation = {}) =>
+  normalizeAccountSubLabel(account.recordTypeLabel) ||
+  normalizeAccountSubLabel(presentation.label);
 
-  if (!roleLabels.length) {
-    return recordTypeLabel;
-  }
+const collectDistinctAccountRoleLabels = (
+  account = {},
+  { excludeRecordTypeLabel = "" } = {}
+) => {
+  const excludedKeys = new Set(
+    [excludeRecordTypeLabel]
+      .map((label) => normalizeAccountSubLabel(label).toLowerCase())
+      .filter(Boolean)
+  );
+  const roleLabels = [];
+  const seenRoleKeys = new Set();
 
-  return [recordTypeLabel, ...roleLabels].join(" · ");
+  const addRoleLabel = (label) => {
+    const normalizedLabel = normalizeAccountSubLabel(label);
+    const roleKey = normalizedLabel.toLowerCase();
+
+    if (!normalizedLabel || seenRoleKeys.has(roleKey) || excludedKeys.has(roleKey)) {
+      return;
+    }
+
+    seenRoleKeys.add(roleKey);
+    roleLabels.push(normalizedLabel);
+  };
+
+  buildRoleLabels(account).forEach(addRoleLabel);
+  addRoleLabel(account.associationType);
+
+  return roleLabels;
 };
+
+const resolveTopLevelGroupCardSub = (account = {}) => {
+  if (isPersonAccountRecord(account)) {
+    return { sub: "", isRoleSub: false };
+  }
+
+  const presentation = resolveRecordTypePresentation(
+    account.recordTypeDeveloperName
+  );
+
+  return {
+    sub:
+      resolveRecordTypeSubLabel(account, presentation) ||
+      resolveAccountTypeDisplayLabel(
+        account.recordTypeDeveloperName,
+        account.recordTypeLabel
+      ),
+    isRoleSub: false
+  };
+};
+
+const formatAccountSub = (account = {}, presentation = {}) => {
+  const recordTypeLabel = resolveRecordTypeSubLabel(account, presentation);
+  const relationshipRoles = buildRoleLabels(account);
+  const roleLabels = collectDistinctAccountRoleLabels(account, {
+    excludeRecordTypeLabel: recordTypeLabel
+  });
+
+  if (relationshipRoles.length) {
+    return {
+      sub: (roleLabels.length ? roleLabels : relationshipRoles).join(" · "),
+      isRoleSub: true
+    };
+  }
+
+  if (roleLabels.length) {
+    return {
+      sub: roleLabels.join(" · "),
+      isRoleSub: true
+    };
+  }
+
+  return {
+    sub: recordTypeLabel,
+    isRoleSub: false
+  };
+};
+
+const resolveRootAccountPresentation = (treeData = {}) =>
+  resolveAccountPresentation({
+    recordTypeDeveloperName: treeData.recordTypeDeveloperName,
+    recordTypeLabel: treeData.recordTypeLabel,
+    accountType: treeData.accountType
+  });
 
 const resolveRoleSubline = (account = {}) => {
   return (Array.isArray(account.roles) ? account.roles : [])
@@ -1139,10 +1222,13 @@ const resolveRoleSubline = (account = {}) => {
 
 const resolveAccountPresentation = (account = {}) => {
   if (isPersonAccountRecord(account)) {
+    const sub = resolveRoleSubline(account);
+
     return {
       iconName: "standard:contact",
       kind: MAP_KIND.PERSON,
-      sub: resolveRoleSubline(account)
+      sub,
+      isRoleSub: Boolean(sub)
     };
   }
 
@@ -1153,7 +1239,7 @@ const resolveAccountPresentation = (account = {}) => {
   return {
     iconName: presentation.iconName,
     kind: presentation.kind,
-    sub: formatAccountSub(account, presentation)
+    ...formatAccountSub(account, presentation)
   };
 };
 
@@ -1210,9 +1296,13 @@ const buildLazyAccountNode = (
   nestedAccountMemberCountByAccountId = {},
   memberRelationshipRecordTypes = [],
   nestedMemberRelationsByAccountId = {},
-  nestedMemberRelationCountByAccountId = {}
+  nestedMemberRelationCountByAccountId = {},
+  { topLevelGroupCard = false } = {}
 ) => {
-  const node = buildAccountNode(account, { memberRelationshipRecordTypes });
+  const node = buildAccountNode(account, {
+    memberRelationshipRecordTypes,
+    topLevelGroupCard
+  });
 
   if (node.showManageMemberRelationships) {
     return attachMemberRelationsToMemberNode(
@@ -1314,20 +1404,38 @@ const buildMemberRelationshipActions = (memberRelationshipRecordTypes = []) =>
         recordType.developerName
     }));
 
-const buildAccountNode = (
-  account,
-  { memberRelationshipRecordTypes = [] } = {}
+const resolveMemberRelationshipMenuSupport = (
+  memberRelationshipRecordTypes = []
 ) => {
-  const presentation = resolveAccountPresentation(account);
   const memberRelationshipActions = buildMemberRelationshipActions(
     memberRelationshipRecordTypes
   );
-  const supportsMemberRelations = memberRelationshipActions.length > 0;
+
+  return {
+    memberRelationshipActions,
+    supportsMemberRelations: memberRelationshipActions.length > 0
+  };
+};
+
+const buildAccountNode = (
+  account,
+  { memberRelationshipRecordTypes = [], topLevelGroupCard = false } = {}
+) => {
+  const presentation = resolveAccountPresentation(account);
+  const cardSub = topLevelGroupCard
+    ? resolveTopLevelGroupCardSub(account)
+    : {
+        sub: presentation.sub,
+        isRoleSub: Boolean(presentation.isRoleSub)
+      };
+  const { memberRelationshipActions, supportsMemberRelations } =
+    resolveMemberRelationshipMenuSupport(memberRelationshipRecordTypes);
 
   return {
     id: `account-${account.relationId || account.id}`,
     label: account.name || "",
-    sub: presentation.sub,
+    sub: cardSub.sub,
+    isRoleSub: cardSub.isRoleSub,
     iconName: presentation.iconName,
     kind: presentation.kind,
     nodeType: MAP_NODE_TYPE.ACCOUNT,
@@ -1378,7 +1486,7 @@ export const buildContactRelationNode = (
   recordTypeDeveloperName = "",
   options = {}
 ) => {
-  const { showFamilyRelatedTo = true } = options;
+  const { showFamilyRelatedTo = true, topLevelGroupCard = false } = options;
   const memberRoleLabel = resolveMemberRoleLabel(relationship);
   const inverseRoleLabel = resolveInverseRoleLabel(relationship);
   const roleLabel = resolveCounterpartRoleLabel(relationship);
@@ -1387,6 +1495,7 @@ export const buildContactRelationNode = (
   const parentAccountId = String(parentMember.accountId || "").trim();
   const parentName = String(parentMember.label || "").trim();
   const useRelatedToSubline =
+    !topLevelGroupCard &&
     showFamilyRelatedTo &&
     shouldShowMemberRelatedToSubline(
       resolvedRecordType,
@@ -1396,6 +1505,16 @@ export const buildContactRelationNode = (
     );
   const relatedPresentation = resolveRelatedContactPresentation(relationship);
   const roleOrTypeSub = resolveRelatedContactSub(relationship, roleLabel);
+  const topLevelCardSub = topLevelGroupCard
+    ? resolveTopLevelGroupCardSub({
+        recordTypeDeveloperName:
+          relationship.relatedAccountRecordTypeDeveloperName,
+        recordTypeLabel: relationship.relatedAccountRecordTypeLabel,
+        isPersonAccount:
+          relationship.relatedAccountIsPersonAccount ||
+          relatedPresentation.kind === MAP_KIND.PERSON
+      })
+    : null;
 
   return {
     id: `related-account-${relationship.relationId || relationship.relatedAccountId || relationship.relatedContactId}`,
@@ -1403,7 +1522,12 @@ export const buildContactRelationNode = (
       relationship.relatedAccountName ||
       relationship.relatedContactName ||
       "Related person account",
-    sub: useRelatedToSubline ? "" : roleOrTypeSub,
+    sub: topLevelCardSub
+      ? topLevelCardSub.sub
+      : useRelatedToSubline
+        ? ""
+        : roleOrTypeSub,
+    isRoleSub: topLevelCardSub ? topLevelCardSub.isRoleSub : Boolean(roleOrTypeSub),
     iconName: relatedPresentation.iconName,
     kind: relatedPresentation.kind,
     nodeType: MAP_NODE_TYPE.RELATED_CONTACT,
@@ -1543,11 +1667,19 @@ export const consolidateContactRelationNodes = (nodes = []) => {
             : roleLabels,
         sub: relationshipLinks.length
           ? ""
-          : roleLabels.length === 1
-            ? roleLabels[0]
-            : roleLabels.length > 1
-              ? ""
-              : primary.sub
+          : primary.isRoleSub === false
+            ? primary.sub || ""
+            : roleLabels.length === 1
+              ? roleLabels[0]
+              : roleLabels.length > 1
+                ? ""
+                : primary.sub,
+        isRoleSub:
+          relationshipLinks.length || primary.isRoleSub === false
+            ? false
+            : roleLabels.length === 1
+              ? true
+              : primary.isRoleSub
       };
     })
     .sort((first, second) =>
@@ -1644,7 +1776,8 @@ export const buildHouseholdNetworkCards = (
           buildContactRelationNode(
             relationship,
             parentMember,
-            relationship.recordTypeDeveloperName
+            relationship.recordTypeDeveloperName,
+            { topLevelGroupCard: true }
           )
         );
       });
@@ -1674,7 +1807,8 @@ const attachMemberRelationsToMemberNode = (
   memberNode,
   nestedMemberRelationsByAccountId = {},
   nestedMemberRelationCountByAccountId = {},
-  memberRelationshipRecordTypes = []
+  memberRelationshipRecordTypes = [],
+  { suppressRolePill = false } = {}
 ) => {
   const accountId = memberNode.accountId;
   if (!accountId) {
@@ -1696,10 +1830,16 @@ const attachMemberRelationsToMemberNode = (
       relations,
       memberRelationshipRecordTypes
     );
+    const shouldApplyCounterpartRoleSub =
+      Boolean(counterpartRoleSub) &&
+      memberNode.nodeType === MAP_NODE_TYPE.MEMBER &&
+      !suppressRolePill;
 
     return {
       ...memberNode,
-      ...(counterpartRoleSub ? { sub: counterpartRoleSub } : {}),
+      ...(shouldApplyCounterpartRoleSub
+        ? { sub: counterpartRoleSub, isRoleSub: true }
+        : {}),
       children: relationGroups,
       relatedContactCount,
       memberRelationsLoaded: true,
@@ -1805,7 +1945,8 @@ const buildClientMemberNode = (
   account,
   nestedMemberRelationsByAccountId,
   nestedMemberRelationCountByAccountId,
-  memberRelationshipRecordTypes
+  memberRelationshipRecordTypes,
+  { suppressRolePill = false } = {}
 ) =>
   attachMemberRelationsToMemberNode(
     buildMemberNode(
@@ -1821,8 +1962,32 @@ const buildClientMemberNode = (
     ),
     nestedMemberRelationsByAccountId,
     nestedMemberRelationCountByAccountId,
-    memberRelationshipRecordTypes
+    memberRelationshipRecordTypes,
+    { suppressRolePill }
   );
+
+const mergeEntityCentricRelatedAccount = (accountById, account) => {
+  const existing = accountById.get(account.accountId);
+  if (!existing) {
+    accountById.set(account.accountId, account);
+    return;
+  }
+
+  const existingRoles = existing.roles || [];
+  const nextRoles = account.roles || [];
+
+  accountById.set(account.accountId, {
+    ...existing,
+    ...account,
+    roles: nextRoles.length > 0 ? nextRoles : existingRoles,
+    selectedRoles:
+      (account.selectedRoles || []).length > 0
+        ? account.selectedRoles
+        : existing.selectedRoles,
+    associationType: account.associationType || existing.associationType,
+    relationId: account.relationId || existing.relationId
+  });
+};
 
 const collectEntityCentricRelatedAccounts = (
   treeData = {},
@@ -1848,7 +2013,7 @@ const collectEntityCentricRelatedAccounts = (
       return;
     }
 
-    accountById.set(accountId, account);
+    mergeEntityCentricRelatedAccount(accountById, account);
   });
 
   return [...accountById.values()].sort((leftAccount, rightAccount) =>
@@ -1870,13 +2035,19 @@ export const isEntityCentricMapTreeData = (treeData = {}) => {
   );
 };
 
-const buildEntityCentricGroupedAccountNode = (account = {}) => {
+const buildEntityCentricGroupedAccountNode = (
+  account = {},
+  { memberRelationshipRecordTypes = [] } = {}
+) => {
   const presentation = resolveAccountPresentation(account);
+  const { memberRelationshipActions, supportsMemberRelations } =
+    resolveMemberRelationshipMenuSupport(memberRelationshipRecordTypes);
 
   return {
     id: `account-${account.relationId || account.accountId}`,
     label: account.name || "",
     sub: presentation.sub,
+    isRoleSub: Boolean(presentation.isRoleSub),
     iconName: presentation.iconName,
     kind: presentation.kind,
     nodeType: MAP_NODE_TYPE.ACCOUNT,
@@ -1885,6 +2056,9 @@ const buildEntityCentricGroupedAccountNode = (account = {}) => {
     relationId: account.relationId || "",
     accountId: account.accountId || "",
     isLazyExpandable: false,
+    showManageRelatedContacts: supportsMemberRelations,
+    showManageMemberRelationships: supportsMemberRelations,
+    memberRelationshipActions,
     defaultOpen: false,
     children: []
   };
@@ -1892,7 +2066,8 @@ const buildEntityCentricGroupedAccountNode = (account = {}) => {
 
 const buildEntityCentricGroupedRelationNodes = (
   relatedAccounts = [],
-  parentNodeId = "account"
+  parentNodeId = "account",
+  memberRelationshipRecordTypes = []
 ) => {
   const accountsByRecordType = new Map();
 
@@ -1928,21 +2103,28 @@ const buildEntityCentricGroupedRelationNodes = (
         parentNodeId,
         recordTypeDeveloperName,
         String(recordTypeLabel || "Account").toUpperCase(),
-        accounts.map((account) => buildEntityCentricGroupedAccountNode(account))
+        accounts.map((account) =>
+          buildEntityCentricGroupedAccountNode(account, {
+            memberRelationshipRecordTypes
+          })
+        )
       )
     );
 };
 
 const buildEntityCentricRelatedAccountNode = (
   account = {},
-  { parentAccountId = "" } = {}
+  { parentAccountId = "", memberRelationshipRecordTypes = [] } = {}
 ) => {
   const presentation = resolveAccountPresentation(account);
+  const { memberRelationshipActions, supportsMemberRelations } =
+    resolveMemberRelationshipMenuSupport(memberRelationshipRecordTypes);
 
   return {
     id: `account-${account.relationId || account.accountId}`,
     label: account.name || "",
     sub: presentation.sub,
+    isRoleSub: Boolean(presentation.isRoleSub),
     iconName: presentation.iconName,
     kind: presentation.kind,
     nodeType: MAP_NODE_TYPE.ACCOUNT,
@@ -1952,9 +2134,9 @@ const buildEntityCentricRelatedAccountNode = (
     accountId: account.accountId || "",
     parentAccountId: parentAccountId || "",
     isLazyExpandable: true,
-    showManageRelatedContacts: false,
-    showManageMemberRelationships: false,
-    memberRelationshipActions: [],
+    showManageRelatedContacts: supportsMemberRelations,
+    showManageMemberRelationships: supportsMemberRelations,
+    memberRelationshipActions,
     defaultOpen: false,
     children: []
   };
@@ -1964,9 +2146,13 @@ const enrichEntityCentricAccountNode = (
   account = {},
   parentAccountId = "",
   nestedEntityRelationsByAccountId = {},
-  entityRelationCountByAccountId = {}
+  entityRelationCountByAccountId = {},
+  memberRelationshipRecordTypes = []
 ) => {
-  const node = buildEntityCentricRelatedAccountNode(account, { parentAccountId });
+  const node = buildEntityCentricRelatedAccountNode(account, {
+    parentAccountId,
+    memberRelationshipRecordTypes
+  });
   const accountId = String(account.accountId || "").trim();
 
   if (!accountId) {
@@ -1978,7 +2164,8 @@ const enrichEntityCentricAccountNode = (
   if (Array.isArray(nestedAccounts)) {
     const groupNodes = buildEntityCentricGroupedRelationNodes(
       nestedAccounts,
-      node.id
+      node.id,
+      memberRelationshipRecordTypes
     );
 
     return {
@@ -2031,7 +2218,8 @@ export const collectLazyExpandableEntityAccountNodes = (node, matches = []) => {
 export const buildEntityCentricMapTree = ({
   treeData,
   nestedEntityRelationsByAccountId = {},
-  entityRelationCountByAccountId = {}
+  entityRelationCountByAccountId = {},
+  memberRelationshipRecordTypes = []
 } = {}) => {
   if (!treeData) {
     return null;
@@ -2042,19 +2230,18 @@ export const buildEntityCentricMapTree = ({
       account,
       treeData.rootAccountId || "",
       nestedEntityRelationsByAccountId,
-      entityRelationCountByAccountId
+      entityRelationCountByAccountId,
+      memberRelationshipRecordTypes
     )
   );
 
-  const rootPresentation = resolveAccountPresentation({
-    recordTypeDeveloperName: treeData.recordTypeDeveloperName,
-    recordTypeLabel: treeData.recordTypeLabel
-  });
+  const rootPresentation = resolveRootAccountPresentation(treeData);
 
   return {
     id: `root-${treeData.rootAccountId || "entity"}`,
     label: treeData.name || "Account",
     sub: rootPresentation.sub,
+    isRoleSub: false,
     iconName: rootPresentation.iconName,
     kind: rootPresentation.kind,
     nodeType: MAP_NODE_TYPE.ROOT,
@@ -2086,7 +2273,8 @@ export const buildMapTree = ({
     return buildEntityCentricMapTree({
       treeData,
       nestedEntityRelationsByAccountId,
-      entityRelationCountByAccountId
+      entityRelationCountByAccountId,
+      memberRelationshipRecordTypes
     });
   }
 
@@ -2147,7 +2335,8 @@ export const buildMapTree = ({
           account,
           nestedMemberRelationsByAccountId,
           nestedMemberRelationCountByAccountId,
-          memberRelationshipRecordTypes
+          memberRelationshipRecordTypes,
+          { suppressRolePill: true }
         )
       );
 
@@ -2158,7 +2347,8 @@ export const buildMapTree = ({
           nestedAccountMemberCountByAccountId,
           memberRelationshipRecordTypes,
           nestedMemberRelationsByAccountId,
-          nestedMemberRelationCountByAccountId
+          nestedMemberRelationCountByAccountId,
+          { topLevelGroupCard: true }
         )
       );
 
@@ -2205,7 +2395,8 @@ export const buildMapTree = ({
           account,
           nestedMemberRelationsByAccountId,
           nestedMemberRelationCountByAccountId,
-          memberRelationshipRecordTypes
+          memberRelationshipRecordTypes,
+          { suppressRolePill: true }
         )
       );
       const leadProspectAccountNodes = leadProspectEntityAccounts.map((account) =>
@@ -2215,7 +2406,8 @@ export const buildMapTree = ({
           nestedAccountMemberCountByAccountId,
           memberRelationshipRecordTypes,
           nestedMemberRelationsByAccountId,
-          nestedMemberRelationCountByAccountId
+          nestedMemberRelationCountByAccountId,
+          { topLevelGroupCard: true }
         )
       );
 
@@ -2375,15 +2567,13 @@ export const buildMapTree = ({
 
   const sortedGroupNodes = sortTopLevelGroupNodes(groupNodes);
 
-  const rootPresentation = resolveAccountPresentation({
-    recordTypeDeveloperName: treeData.recordTypeDeveloperName,
-    recordTypeLabel: treeData.recordTypeLabel
-  });
+  const rootPresentation = resolveRootAccountPresentation(treeData);
 
   return {
     id: `root-${treeData.rootAccountId || "household"}`,
     label: treeData.name || "Household",
     sub: rootPresentation.sub,
+    isRoleSub: false,
     iconName: rootPresentation.iconName,
     kind: rootPresentation.kind,
     nodeType: MAP_NODE_TYPE.ROOT,

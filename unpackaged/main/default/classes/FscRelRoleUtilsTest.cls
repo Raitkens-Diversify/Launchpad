@@ -96,6 +96,63 @@ private class FscRelRoleUtilsTest {
   }
 
   @IsTest
+  static void resolveInverseRoleName_returnsInverseRoleOnly() {
+    FscDataTestDataFactory.createTreeScenario();
+    FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
+    String recordTypeDeveloperName = FscRelRecordTypeUtils.BUSINESS_RECORD_TYPE;
+    Id recordTypeId = FscRelRecordTypeUtils.selectAccountRelationRecordTypeId(
+      recordTypeDeveloperName
+    );
+
+    if (recordTypeId == null) {
+      return;
+    }
+
+    Reciprocal_Role__c employeeRole = FscDataTestDataFactory.createReciprocalRoleForMemberRelationship(
+      recordTypeDeveloperName,
+      'Employee',
+      'Employer'
+    );
+    Reciprocal_Role__c employerRole = [
+      SELECT Id, Role__c
+      FROM Reciprocal_Role__c
+      WHERE Role__c = 'Employer'
+      LIMIT 1
+    ];
+    Account_Account_Relationship__c relation = new Account_Account_Relationship__c(
+      Account__c = scenario.relatedBusinessAccount.Id,
+      Related_Account__c = scenario.linkedPersonAccount.Id,
+      RecordTypeId = recordTypeId,
+      Reciprocal_Role__c = employerRole.Id,
+      Inverse_Reciprocal_Role__c = employeeRole.Id,
+      Active__c = true
+    );
+    insert relation;
+
+    relation = [
+      SELECT
+        Id,
+        Reciprocal_Role__c,
+        Reciprocal_Role__r.Role__c,
+        Reciprocal_Role__r.Name,
+        Inverse_Reciprocal_Role__c,
+        Inverse_Reciprocal_Role__r.Role__c,
+        Inverse_Reciprocal_Role__r.Name
+      FROM Account_Account_Relationship__c
+      WHERE Id = :relation.Id
+      LIMIT 1
+    ];
+
+    Test.startTest();
+    String inverseRoleName = FscRelRoleUtils.resolveInverseRoleName(relation);
+    String missingInverseRoleName = FscRelRoleUtils.resolveInverseRoleName(null);
+    Test.stopTest();
+
+    System.assertEquals('Employee', inverseRoleName);
+    System.assertEquals(null, missingInverseRoleName);
+  }
+
+  @IsTest
   static void resolveReciprocalRoleName_returnsNullWhenMissingRole() {
     Test.startTest();
     String roleName = FscRelRoleUtils.resolveReciprocalRoleName(null);

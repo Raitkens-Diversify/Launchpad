@@ -22,20 +22,27 @@ public class FscRelRoleUtils {
     return null;
   }
 
-  public static String resolveRelatedAccountRoleName(
+  public static String resolveInverseRoleName(
     Account_Account_Relationship__c relation
   ) {
-    if (relation == null) {
+    if (relation == null || relation.Inverse_Reciprocal_Role__r == null) {
       return null;
     }
 
-    if (relation.Inverse_Reciprocal_Role__r != null) {
-      String inverseRoleName = FscRelReciprocalRoleRepository.resolveDisplayName(
-        relation.Inverse_Reciprocal_Role__r
-      );
-      if (!String.isBlank(inverseRoleName)) {
-        return inverseRoleName;
-      }
+    String inverseRoleName = FscRelReciprocalRoleRepository.resolveDisplayName(
+      relation.Inverse_Reciprocal_Role__r
+    );
+
+    return String.isBlank(inverseRoleName) ? null : inverseRoleName;
+  }
+
+  public static String resolveRelatedAccountRoleName(
+    Account_Account_Relationship__c relation
+  ) {
+    String inverseRoleName = resolveInverseRoleName(relation);
+
+    if (!String.isBlank(inverseRoleName)) {
+      return inverseRoleName;
     }
 
     return resolveReciprocalRoleName(relation);
