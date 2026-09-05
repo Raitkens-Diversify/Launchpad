@@ -102,12 +102,6 @@
    footer's content box, and the negative side margins extend it back out
    across the footer's own left/right padding to reach the rail's edges. The
    bottom margin is separate spacing, clear of the logo below it. */
-.nav-footer__uat-link,
-.nav-footer__uat-anchor {
-  align-self: stretch;
-  margin: 0 -16px 12px;
-}
-
 .nav-footer__logo {
   max-width: 140px;
   width: 100%;

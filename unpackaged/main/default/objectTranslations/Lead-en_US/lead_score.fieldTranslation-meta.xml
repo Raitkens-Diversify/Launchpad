@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <caseValues>
+            <plural>false</plural>
+            <value>Lead and Referral Score</value>
+        </caseValues>
+        <caseValues>
+            <plural>true</plural>
+            <value>Lead and Referral Scores</value>
+        </caseValues>
+        <name>lead_score</name>
+        <startsWith>Consonant</startsWith>
+    </CustomFieldTranslation>

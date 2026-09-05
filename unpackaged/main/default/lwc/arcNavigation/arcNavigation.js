@@ -14,7 +14,6 @@ import {
   NAV_PATH_CHANGE_EVENT,
   UPGRADE_REQUESTED_EVENT,
   NAV_SELECT_REQUEST_EVENT,
-  UAT_TESTING_PATH,
   patchHistoryForNavigation,
   resolveCurrentPath,
   resolveCurrentQueryParams,
@@ -23,8 +22,7 @@ import {
   recordNavSelectionById,
   findNavTargetById,
   syncNavTrailFromLocation,
-  isNavItemActive,
-  isLaunchpadEnvironment
+  isNavItemActive
 } from "c/arcNavTrailState";
 
 /** Hoang Long Vu To — Aug 12, 2026 */
@@ -63,11 +61,6 @@ export default class ArcNavigation extends NavigationMixin(LightningElement) {
 
   builtByLogoUrl = BUILT_BY_DIVERSIFY_LOGO;
   circleLogoUrl = CIRCLE_LOGO;
-  /** Footer link, directly above the Diversify logo -- not a STATIC_NAV_ITEMS
-   *  entry, since that list renders inside the scrolling rail above the
-   *  footer's own divider, not between it and the logo. */
-  showUatTesting = isLaunchpadEnvironment();
-  uatTestingIconStyle = buildIconStyle("bug.svg");
 
   pathname = "";
   search = "";
@@ -434,17 +427,6 @@ export default class ArcNavigation extends NavigationMixin(LightningElement) {
       });
       this.scheduleLocationSync();
     }
-  }
-
-  /** The footer's UAT Testing link -- a fixed single destination, so it
-   *  skips the generic STATIC_NAV_ITEMS click routing entirely. */
-  handleUatTestingClick(event) {
-    event.preventDefault();
-    this[NavigationMixin.Navigate]({
-      type: "standard__webPage",
-      attributes: { url: UAT_TESTING_PATH }
-    });
-    this.scheduleLocationSync();
   }
 
   scheduleLocationSync() {
