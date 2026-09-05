@@ -2,7 +2,7 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Maestro_Rep_ID__c</fullName>
     <externalId>false</externalId>
-    <formula>IF( ISBLANK(Rep_Code_for_Transaction__c), FinServ__FinancialAccount__r.Rep_Code__c, Rep_Code_for_Transaction__c)</formula>
+    <formula>IF( ISBLANK(Rep_Code_for_Transaction__c), Wizard_Financial_Account__r.Rep_Code__c, Rep_Code_for_Transaction__c)</formula>
     <inlineHelpText>This shows you the Rep_Code_for_Transaction__c field listed on the Case. If it&#39;s blank, it&#39;ll show you the Rep_Code__c on the Financial Account (not the Blue one, the second one).</inlineHelpText>
     <label>Maestro Rep ID</label>
     <required>false</required>

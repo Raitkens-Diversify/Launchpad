@@ -4,21 +4,21 @@
     <externalId>false</externalId>
     <formula>UPPER(IF(
 LEN(
-FinServ__FinancialAccount__r.FinServ__JointOwner__r.FirstName + &quot; &quot; +
-FinServ__FinancialAccount__r.FinServ__JointOwner__r.MiddleName + &quot; &quot; +
-FinServ__FinancialAccount__r.FinServ__JointOwner__r.LastName
+Wizard_Financial_Account__r.Joint_Owner__r.FirstName + &quot; &quot; +
+Wizard_Financial_Account__r.Joint_Owner__r.MiddleName + &quot; &quot; +
+Wizard_Financial_Account__r.Joint_Owner__r.LastName
 ) &gt; 40,
 MID(
-FinServ__FinancialAccount__r.FinServ__JointOwner__r.FirstName + &quot; &quot; +
-FinServ__FinancialAccount__r.FinServ__JointOwner__r.MiddleName + &quot; &quot; +
-FinServ__FinancialAccount__r.FinServ__JointOwner__r.LastName,
+Wizard_Financial_Account__r.Joint_Owner__r.FirstName + &quot; &quot; +
+Wizard_Financial_Account__r.Joint_Owner__r.MiddleName + &quot; &quot; +
+Wizard_Financial_Account__r.Joint_Owner__r.LastName,
 81,
 MIN(
 40,
 LEN(
-FinServ__FinancialAccount__r.FinServ__JointOwner__r.FirstName + &quot; &quot; +
-FinServ__FinancialAccount__r.FinServ__JointOwner__r.MiddleName + &quot; &quot; +
-FinServ__FinancialAccount__r.FinServ__JointOwner__r.LastName
+Wizard_Financial_Account__r.Joint_Owner__r.FirstName + &quot; &quot; +
+Wizard_Financial_Account__r.Joint_Owner__r.MiddleName + &quot; &quot; +
+Wizard_Financial_Account__r.Joint_Owner__r.LastName
 ) - 80
 )
 ),

@@ -3,7 +3,7 @@
     <fullName>Maestro_Net_Worth_Value__c</fullName>
     <externalId>false</externalId>
     <formula>SUBSTITUTE(
-TEXT(FinServ__Household__r.Approximate_Net_Worth__c),
+TEXT(Wizard_Financial_Account__r.Primary_Owner__r.Approximate_Net_Worth__c),
 &quot;,&quot;, &quot;&quot;
 )</formula>
     <label>Maestro Net Worth Value</label>

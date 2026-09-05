@@ -3,14 +3,14 @@
     <fullName>Maestro_Birthdate_2__c</fullName>
     <externalId>false</externalId>
     <formula>IF(
-    NOT(ISBLANK(TEXT(FinServ__Household__r.Entity_Type__c))), 
+    NOT(ISBLANK(TEXT(Wizard_Financial_Account__r.Joint_Owner__r.Entity_Type__c))), 
     NULL, 
     IF(
-        ISBLANK(Joint_Account_Owner__r.PersonBirthdate), 
+        ISBLANK(Wizard_Financial_Account__r.Joint_Owner__r.PersonBirthdate), 
         NULL, 
-        LPAD(TEXT(MONTH(Joint_Account_Owner__r.PersonBirthdate)), 2, &#39;0&#39;) &amp; &#39;/&#39; &amp;
-        LPAD(TEXT(DAY(Joint_Account_Owner__r.PersonBirthdate)), 2, &#39;0&#39;) &amp; &#39;/&#39; &amp;
-        TEXT(YEAR(Joint_Account_Owner__r.PersonBirthdate))
+        LPAD(TEXT(MONTH(Wizard_Financial_Account__r.Joint_Owner__r.PersonBirthdate)), 2, &#39;0&#39;) &amp; &#39;/&#39; &amp;
+        LPAD(TEXT(DAY(Wizard_Financial_Account__r.Joint_Owner__r.PersonBirthdate)), 2, &#39;0&#39;) &amp; &#39;/&#39; &amp;
+        TEXT(YEAR(Wizard_Financial_Account__r.Joint_Owner__r.PersonBirthdate))
     )
 )</formula>
     <label>Maestro Birthdate 2</label>

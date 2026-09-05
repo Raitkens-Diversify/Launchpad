@@ -3,7 +3,7 @@
     <fullName>Maestro_SSN_2__c</fullName>
     <externalId>false</externalId>
     <formula>IF(
-NOT(ISBLANK(TEXT(FinServ__Household__r.Entity_Type__c))),
+NOT(ISBLANK(TEXT(Wizard_Financial_Account__r.Primary_Owner__r.Entity_Type__c))),
 NULL,
 SUBSTITUTE( Joint_Account_Owner__r.Tax_ID__c , &quot;-&quot;, &quot;&quot;))</formula>
     <label>Maestro SSN 2</label>

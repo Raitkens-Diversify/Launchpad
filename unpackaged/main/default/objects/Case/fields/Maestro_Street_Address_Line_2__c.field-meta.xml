@@ -2,8 +2,8 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Maestro_Street_Address_Line_2__c</fullName>
     <externalId>false</externalId>
-    <formula>UPPER(IF(LEN( FinServ__Household__r.BillingStreet) &gt; 79,
-MID(FinServ__Household__r.BillingStreet, 80, MIN(79, LEN(FinServ__Household__r.BillingStreet) - 79)),
+    <formula>UPPER(IF(LEN(Wizard_Financial_Account__r.Primary_Owner__r.BillingStreet) &gt; 79,
+MID(Wizard_Financial_Account__r.Primary_Owner__r.BillingStreet, 80, MIN(79, LEN(Wizard_Financial_Account__r.Primary_Owner__r.BillingStreet) - 79)),
 &quot;&quot;))</formula>
     <label>Maestro Street Address Line 2</label>
     <required>false</required>

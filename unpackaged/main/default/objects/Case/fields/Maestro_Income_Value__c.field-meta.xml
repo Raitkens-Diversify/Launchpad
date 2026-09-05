@@ -4,7 +4,7 @@
     <externalId>false</externalId>
     <formula>SUBSTITUTE(
 SUBSTITUTE(
-TEXT(FinServ__Household__r.Approximate_Annual_Income_All_Sources__c),
+TEXT(Wizard_Financial_Account__r.Primary_Owner__r.Approximate_Annual_Income_All_Sources__c),
 &quot;.&quot;, &quot;&quot;
 ),
 &quot;,&quot;, &quot;&quot;

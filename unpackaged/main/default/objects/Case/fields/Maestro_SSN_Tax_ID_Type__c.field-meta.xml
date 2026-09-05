@@ -3,7 +3,7 @@
     <fullName>Maestro_SSN_Tax_ID_Type__c</fullName>
     <externalId>false</externalId>
     <formula>CASE(
-TEXT(FinServ__Household__r.Entity_Type__c),
+TEXT(Wizard_Financial_Account__r.Primary_Owner__r.Entity_Type__c),
 &quot;&quot;, &quot;S&quot;,
 &quot;Sole Proprietorship&quot;, &quot;S&quot;,
 &quot;Revocable Trust&quot;, &quot;S&quot;,

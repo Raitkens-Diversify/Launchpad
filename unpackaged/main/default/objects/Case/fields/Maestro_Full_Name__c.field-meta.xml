@@ -3,11 +3,11 @@
     <fullName>Maestro_Full_Name__c</fullName>
     <externalId>false</externalId>
     <formula>UPPER(IF(
-NOT(ISBLANK(TEXT(FinServ__Household__r.Entity_Type__c))),
+NOT(ISBLANK(TEXT(Household__r.Entity_Type__c))),
 NULL, 
-FinServ__FinancialAccount__r.FinServ__JointOwner__r.FirstName + &quot; &quot; +
-IF(NOT(ISNULL(FinServ__FinancialAccount__r.FinServ__JointOwner__r.MiddleName)), &quot; &quot; + FinServ__FinancialAccount__r.FinServ__JointOwner__r.MiddleName + &quot; &quot;, &quot; &quot;) +
-FinServ__FinancialAccount__r.FinServ__JointOwner__r.LastName
+Wizard_Financial_Account__r.Joint_Owner__r.FirstName + &quot; &quot; +
+IF(NOT(ISNULL(Wizard_Financial_Account__r.Joint_Owner__r.MiddleName)), &quot; &quot; + Wizard_Financial_Account__r.Joint_Owner__r.MiddleName + &quot; &quot;, &quot; &quot;) +
+Wizard_Financial_Account__r.Joint_Owner__r.LastName
 ))</formula>
     <label>Maestro Full Name</label>
     <required>false</required>

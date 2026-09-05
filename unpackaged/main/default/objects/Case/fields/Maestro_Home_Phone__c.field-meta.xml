@@ -7,7 +7,7 @@ SUBSTITUTE(
 SUBSTITUTE(
 SUBSTITUTE(
 SUBSTITUTE(
- FinServ__FinancialAccount__r.FinServ__PrimaryOwner__r.PersonMobilePhone,
+ Wizard_Financial_Account__r.Primary_Owner__r.PersonMobilePhone,
 &quot; &quot;, &quot;&quot;
 ),
 &quot;-&quot;, &quot;&quot;
