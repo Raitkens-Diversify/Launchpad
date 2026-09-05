@@ -539,6 +539,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>BranchInternalTaskControllerTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>BranchOpportunitySyncService</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -892,6 +896,10 @@
     </classAccesses>
     <classAccesses>
         <apexClass>FlowActionHandler</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FlowActionHandlerTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>

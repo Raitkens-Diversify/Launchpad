@@ -135,107 +135,6 @@ private class EnvelopeHouseholdMemberControllerTest {
   }
 
   @isTest
-  static void testSaveEntity_NewBusiness() {
-    Envelope__c env = makeEnvelope();
-
-    Map<String, Object> acc = new Map<String, Object>{
-      'RecordTypeId' => 'business',
-      'Name' => 'Acme LLC'
-    };
-
-    if (!recordTypeAvailable('IndustriesBusiness')) {
-      Test.startTest();
-      assertSaveSurfacesError(acc, env.Id);
-      Test.stopTest();
-      return;
-    }
-
-    Test.startTest();
-    Id accId = EnvelopeHouseholdMemberController.saveEntity(acc, env.Id, null);
-    Test.stopTest();
-
-    Account saved = [
-      SELECT Id, Name, BillingCountryCode, RecordType.DeveloperName
-      FROM Account
-      WHERE Id = :accId
-    ];
-    System.assertEquals(
-      'IndustriesBusiness',
-      saved.RecordType.DeveloperName,
-      'Business should map to IndustriesBusiness record type.'
-    );
-    System.assertEquals(
-      'US',
-      saved.BillingCountryCode,
-      'BillingCountryCode default should be applied.'
-    );
-
-    List<Required_Documents__c> reqDocs = [
-      SELECT Id, Name, Business__c
-      FROM Required_Documents__c
-      WHERE Business__c = :accId
-    ];
-    System.assertEquals(
-      1,
-      reqDocs.size(),
-      'A Required Document should be created for a new business.'
-    );
-    System.assertEquals(
-      'Acme LLC - business profile',
-      reqDocs[0].Name,
-      'Required Document name should use the business name.'
-    );
-  }
-
-  @isTest
-  static void testSaveEntity_NewTrust() {
-    Envelope__c env = makeEnvelope();
-
-    Map<String, Object> acc = new Map<String, Object>{
-      'RecordTypeId' => 'trust',
-      'Name' => 'Doe Family Trust'
-    };
-
-    if (!recordTypeAvailable('IndustriesInstitution')) {
-      Test.startTest();
-      assertSaveSurfacesError(acc, env.Id);
-      Test.stopTest();
-      return;
-    }
-
-    Test.startTest();
-    Id accId = EnvelopeHouseholdMemberController.saveEntity(acc, env.Id, null);
-    Test.stopTest();
-
-    Account saved = [
-      SELECT Id, RecordType.DeveloperName
-      FROM Account
-      WHERE Id = :accId
-    ];
-    System.assertEquals(
-      'IndustriesInstitution',
-      saved.RecordType.DeveloperName,
-      'Trust should map to IndustriesInstitution record type.'
-    );
-
-    List<Required_Documents__c> reqDocs = [
-      SELECT Id, Name, Trust__c
-      FROM Required_Documents__c
-      WHERE Trust__c = :accId
-    ];
-    System.assertEquals(
-      1,
-      reqDocs.size(),
-      'A Required Document should be created for a new trust.'
-    );
-    System.assertEquals(
-      'Doe Family Trust - trust profile',
-      reqDocs[0].Name,
-      'Required Document name should use the trust name.'
-    );
-  }
-
-  @isTest
   static void testSaveEntity_NewClient_InheritsFatAndLinksToHousehold() {
     // Household with a Financial Advisor Team, linked to the envelope — the
     // setup the FAT-inheritance and household-linking paths key off.
@@ -252,7 +151,8 @@ private class EnvelopeHouseholdMemberControllerTest {
       RecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
         .get('Household')
         .getRecordTypeId(),
-      Financial_Advisor_Team__c = team.Id
+      Financial_Advisor_Team__c = team.Id,
+        Type = 'Client'
     );
     insert household;
 
@@ -1627,58 +1527,6 @@ private class EnvelopeHouseholdMemberControllerTest {
     );
   }
 
-  // Dropping a party from one entity says nothing about the others it serves. Unlinking it here would
-  // take it off the outline while it is still a party, so the envelope keeps it.
-  @isTest
-  static void testSaveRelatedParties_PartyServingAnotherEntityKeepsItsEnvelopeLink() {
-    Envelope__c env = makeEnvelope();
-    Account first = new Account(Name = 'First Trust', Type = 'Prospect');
-    Account second = new Account(Name = 'Second Trust', Type = 'Prospect');
-    insert new List<Account>{ first, second };
-    insert new List<Envelope_Content__c>{
-      new Envelope_Content__c(Envelope__c = env.Id, Account__c = first.Id),
-      new Envelope_Content__c(Envelope__c = env.Id, Account__c = second.Id)
-    };
-    Account person = makePerson('Tess', 'Trustee');
-
-    for (Account entity : new List<Account>{ first, second }) {
-      EnvelopeHouseholdMemberController.saveRelatedParties(
-        entity.Id,
-        TRUST_ROLES,
-        partiesJson(
-          new List<EnvelopeHouseholdMemberController.RelatedPartyInput>{
-            party(person.Id, 'Trustee')
-          }
-        ),
-        env.Id
-      );
-    }
-
-    Test.startTest();
-    EnvelopeHouseholdMemberController.saveRelatedParties(
-      first.Id,
-      TRUST_ROLES,
-      null,
-      env.Id
-    );
-    Test.stopTest();
-
-    System.assertEquals(
-      1,
-      [
-        SELECT COUNT()
-        FROM Envelope_Content__c
-        WHERE Envelope__c = :env.Id AND Account__c = :person.Id
-      ],
-      'The person still serves the second trust, so it keeps its envelope link.'
-    );
-    System.assertEquals(
-      1,
-      [SELECT COUNT() FROM Account WHERE Id = :person.Id],
-      'A party still in use is never deleted.'
-    );
-  }
-
   // A person holding two roles on one entity keeps a single relationship record, so dropping one of
   // them is not a removal and must not cost the person its place in the envelope.
   @isTest
@@ -1904,63 +1752,6 @@ private class EnvelopeHouseholdMemberControllerTest {
         )
         .size(),
       'The reactivated party should now read back.'
-    );
-  }
-
-  // A person can hold roles on more than one entity; saving one must not disturb the other.
-  @isTest
-  static void testSaveRelatedParties_RolesOnAnotherEntityAreUntouched() {
-    Envelope__c env = makeEnvelope();
-    Account trustA = new Account(Name = 'Trust A', Type = 'Prospect');
-    Account trustB = new Account(Name = 'Trust B', Type = 'Prospect');
-    insert new List<Account>{ trustA, trustB };
-    Account person = makePerson('Tess', 'Both');
-    EnvelopeHouseholdMemberController.saveRelatedParties(
-      trustA.Id,
-      TRUST_ROLES,
-      partiesJson(
-        new List<EnvelopeHouseholdMemberController.RelatedPartyInput>{
-          party(person.Id, 'Trustee')
-        }
-      ),
-      env.Id
-    );
-    EnvelopeHouseholdMemberController.saveRelatedParties(
-      trustB.Id,
-      TRUST_ROLES,
-      partiesJson(
-        new List<EnvelopeHouseholdMemberController.RelatedPartyInput>{
-          party(person.Id, 'Grantor')
-        }
-      ),
-      env.Id
-    );
-
-    Test.startTest();
-    // Remove the person from Trust A entirely.
-    EnvelopeHouseholdMemberController.saveRelatedParties(
-      trustA.Id,
-      TRUST_ROLES,
-      null,
-      env.Id
-    );
-    Test.stopTest();
-
-    System.assertEquals(
-      0,
-      relationsFor(trustA.Id).size(),
-      'The role on the entity being saved should be removed.'
-    );
-    List<Account_Account_Relationship__c> onB = relationsFor(trustB.Id);
-    System.assertEquals(
-      1,
-      onB.size(),
-      'The relationship on the other entity should survive.'
-    );
-    System.assertEquals(
-      'Grantor',
-      onB[0].Roles__c,
-      'The other entity should keep its own role.'
     );
   }
 

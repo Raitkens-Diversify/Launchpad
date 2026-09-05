@@ -198,7 +198,7 @@ public with sharing class EnvelopeHouseholdMemberController {
         // ------------------------------------------------------------------
         else if (memberType == 'business') {
           Required_Documents__c reqDoc = new Required_Documents__c(
-            Name = accountRecord.Name + ' - business profile',
+            Name = accountRecord.Name + ' - Business Profile',
             Business__c = accountRecord.Id
           );
 
@@ -215,7 +215,7 @@ public with sharing class EnvelopeHouseholdMemberController {
         // ------------------------------------------------------------------
         else if (memberType == 'trust') {
           Required_Documents__c reqDoc = new Required_Documents__c(
-            Name = accountRecord.Name + ' - trust profile',
+            Name = accountRecord.Name + ' - Trust Profile',
             Trust__c = accountRecord.Id
           );
 
