@@ -2,6 +2,7 @@
     <c-ds-chrome logo-url={logoUrl} hide-branding={hideBranding} brand-label="Help Center" onbrandclick={handleBrandHome}>
         <div class={pageClass}>
             <header class="ev__head">
+                <c-ds-breadcrumbs items={crumbItems} oncrumbselect={handleCrumb}></c-ds-breadcrumbs>
                 <h1 class="ev__heading">Events</h1>
                 <p class="ev__sub">Live webinars and recordings from the Diversify team.</p>
             </header>

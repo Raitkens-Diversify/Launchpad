@@ -3,7 +3,7 @@ import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import diversifyLogo from '@salesforce/resourceUrl/DiversifyLogoV2';
 import getEvents from '@salesforce/apex/ResourceCenterService.getEvents';
 import { formatTime, formatDateTime, formatMonthYear, localDateKey } from 'c/dsDateBlock';
-import { eventCta, formatDurationMinutes } from 'c/rcConstants';
+import { eventCta, formatDurationMinutes, HELP_HOME_LABEL, CRUMB_HELP_HOME } from 'c/rcConstants';
 import { linkContext, readParams, isSiteRef, goToResource, goToHome } from 'c/contextNav';
 import { downloadBlob } from 'c/csvUtil';
 import { buildIcsEvent } from './ics';
@@ -37,6 +37,11 @@ import { buildIcsEvent } from './ics';
  * Dual-surface rules as the other roots: inline everything, no community-only
  * imports. Navigation goes through c/contextNav — a site URL on Experience
  * Cloud, a Lightning PageReference in the core app.
+ *
+ * Way home: a "Help & Resources › Events" crumb above the heading (the same
+ * c-ds-breadcrumbs the article and resource pages carry). It is the ONLY way
+ * back when the page is embedded with the branding hidden (ARC), where the
+ * chrome's brand crumb is gone.
  */
 const VIEW_UPCOMING = 'upcoming';
 const VIEW_CALENDAR = 'calendar';
@@ -194,6 +199,10 @@ export default class EventsPage extends NavigationMixin(LightningElement) {
         return this.isCalendarView ? 'ev ev--calendar' : 'ev';
     }
 
+    get crumbItems() {
+        return [{ label: HELP_HOME_LABEL, key: CRUMB_HELP_HOME }, { label: 'Events' }];
+    }
+
     get allItems() {
         return [...(this.events.upcoming || []), ...(this.events.past || [])];
     }
@@ -288,6 +297,12 @@ export default class EventsPage extends NavigationMixin(LightningElement) {
     }
 
     // ---- Actions -------------------------------------------------------------
+
+    handleCrumb(event) {
+        if (event.detail.key === CRUMB_HELP_HOME) {
+            goToHome(this, this.linkCtx);
+        }
+    }
 
     handleTabChange(event) {
         this._restored = true;

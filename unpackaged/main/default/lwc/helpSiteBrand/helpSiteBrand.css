@@ -1,0 +1,54 @@
+/* Placed in a theme-layout region (a sibling of the page roots), so nothing
+   is inherited: self-declare the token block (docs/ui-standards.md §1; the
+   canonical values live in nexsLanding.css). Only the tokens used here. */
+:host {
+    display: inline-block;
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+
+    --slds-g-spacing-3: 0.75rem;
+    --slds-g-font-family-base: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    --slds-g-font-scale-1: 14px;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-accent-1: #0f406f;
+}
+
+/* Mirrors dsChrome's brand strip so the header reads the same as before. */
+.hsb {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-3, 12px);
+    text-decoration: none;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.hsb__logo {
+    height: 24px;
+    width: auto;
+    display: block;
+}
+
+.hsb__divider {
+    flex: none;
+    width: 1px;
+    height: 24px;
+    background: var(--slds-g-color-border-1, #d1d5db);
+}
+
+.hsb__label {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.hsb:hover .hsb__label,
+.hsb:focus-visible .hsb__label {
+    color: var(--slds-g-color-accent-1, #0f406f);
+}
+
+.hsb:focus-visible {
+    outline: 2px solid var(--slds-g-color-accent-1, #0f406f);
+    outline-offset: 4px;
+    border-radius: 4px;
+}

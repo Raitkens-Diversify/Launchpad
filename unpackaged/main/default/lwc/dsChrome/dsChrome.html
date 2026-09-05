@@ -1,6 +1,6 @@
 <template>
     <div class="ds-chrome">
-        <header class="ds-chrome__header">
+        <header class={headerClass}>
             <template if:true={showBranding}>
                 <img class="ds-chrome__logo" src={logoUrl} alt="Diversify" />
                 <span class="ds-chrome__divider" aria-hidden="true"></span>
@@ -20,9 +20,11 @@
             <slot></slot>
         </div>
 
-        <footer class="ds-chrome__footer">
-            <span class="ds-chrome__footer-brand">{brandLabel}</span>
-            <span class="ds-chrome__footer-meta">{copyrightLine}</span>
-        </footer>
+        <template if:true={showFooter}>
+            <footer class="ds-chrome__footer">
+                <span class="ds-chrome__footer-brand">{brandLabel}</span>
+                <span class="ds-chrome__footer-meta">{copyrightLine}</span>
+            </footer>
+        </template>
     </div>
 </template>

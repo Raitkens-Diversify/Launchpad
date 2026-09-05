@@ -1,6 +1,6 @@
 import { LightningElement, api, wire } from 'lwc';
 import { iconPath } from 'c/rcIcons';
-import { toContentItem } from 'c/rcConstants';
+import { toContentItem, rcRootCrumbs, CRUMB_HELP_HOME, CRUMB_RC_HOME } from 'c/rcConstants';
 import getCategoryBySlug from '@salesforce/apex/ResourceCenterService.getCategoryBySlug';
 import getCategoryNav from '@salesforce/apex/ResourceCenterService.getCategoryNav';
 
@@ -26,7 +26,7 @@ import getCategoryNav from '@salesforce/apex/ResourceCenterService.getCategoryNa
  *    open), direct-filed resources trailing in "General resources"; topics
  *    with at most one section render the plain card grid.
  *  - Subtopic (slug has a parent): flat card grid of its own resources with
- *    a Resource Center › Parent › Subtopic crumb. Subtopic slugs are their
+ *    a Help & Resources › Resource Center › Parent › Subtopic crumb. Subtopic slugs are their
  *    own pages — deep links land here directly.
  *
  * Emits (composed) `categoryselect { slug }`, `rchome`, and
@@ -153,7 +153,7 @@ export default class ResourceCategoryPage extends LightningElement {
     }
 
     get crumbItems() {
-        const crumbs = [{ label: 'Resource Center', key: 'home' }];
+        const crumbs = rcRootCrumbs();
         if (this.detail && this.detail.parentSlug) {
             crumbs.push({ label: this.detail.parentName, key: this.detail.parentSlug });
         }
@@ -199,7 +199,9 @@ export default class ResourceCategoryPage extends LightningElement {
 
     handleCrumb(event) {
         const key = event.detail.key;
-        if (key === 'home') {
+        if (key === CRUMB_HELP_HOME) {
+            this.handleHelpHome();
+        } else if (key === CRUMB_RC_HOME) {
             this.handleHome();
         } else {
             this.fireCategorySelect(key);
@@ -223,6 +225,11 @@ export default class ResourceCategoryPage extends LightningElement {
 
     handleHome() {
         this.dispatchEvent(new CustomEvent('rchome', { bubbles: true, composed: true }));
+    }
+
+    /** The unified home is another page; the shell routes it via c/contextNav. */
+    handleHelpHome() {
+        this.dispatchEvent(new CustomEvent('helphome', { bubbles: true, composed: true }));
     }
 
     reduce(error) {

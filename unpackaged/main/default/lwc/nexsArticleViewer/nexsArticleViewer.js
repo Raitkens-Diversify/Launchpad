@@ -1,10 +1,71 @@
 import { LightningElement, api, track } from 'lwc';
 import getArticle from '@salesforce/apex/NexSKnowledgeController.getArticle';
 import logView from '@salesforce/apex/NexSArticleEngagementController.logView';
+import {
+    linkContext,
+    isInternal,
+    isSameSite,
+    articleHref,
+    topicHref,
+    resourceHref,
+    goToResource
+} from 'c/contextNav';
 
 // Active-content tags stripped by the sanitizer; standard formatting markup
 // (headings, lists, tables, images, links) passes through untouched.
 const BLOCKED_TAGS = 'script, style, iframe, object, embed, link, meta, form';
+
+/**
+ * Authored links INTO the Help Center / Resource Center. Authors paste the
+ * page URL they see (`https://<sandbox>.my.site.com/help/resources?rcview=…`),
+ * which is host-absolute and site-absolute — wrong on every other org and on
+ * the core-app article tab. Rewritten at render time through c/contextNav, so
+ * the same body links correctly on the site (client-side), in Lightning
+ * (tab URL) and after a domain change. Default site path when no site
+ * context is available (the core app) — the shared Help Center's prefix.
+ */
+const DEFAULT_SITE_PATH = '/help';
+const LINK_DATA_KIND = 'data-nexs-link';
+
+function escapeRegExp(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/** Site path the ctx describes (`/help`), falling back to the shared one. */
+function sitePathOf(ctx) {
+    if (ctx && ctx.helpBase) {
+        try {
+            const path = new URL(ctx.helpBase).pathname.replace(/\/$/, '');
+            if (path) {
+                return path;
+            }
+        } catch (e) {
+            // fall through
+        }
+    }
+    return DEFAULT_SITE_PATH;
+}
+
+/**
+ * Parse an authored href into {kind, params} when it targets the Help Center
+ * site's resources or article page (with or without a host); null otherwise.
+ */
+function parseSiteLink(href, sitePath) {
+    if (!href) {
+        return null;
+    }
+    const re = new RegExp(
+        `^(?:https?://[^/]+)?${escapeRegExp(sitePath)}/(resources|article)/?(?:\\?([^#]*))?(?:#.*)?$`,
+        'i'
+    );
+    const m = href.trim().match(re);
+    if (!m) {
+        return null;
+    }
+    // Authored HTML carries `&amp;`; DOMParser has already decoded it here.
+    const params = new URLSearchParams(m[2] || '');
+    return { kind: m[1].toLowerCase(), params };
+}
 
 /**
  * nexsArticleViewer
@@ -55,13 +116,22 @@ export default class NexsArticleViewer extends LightningElement {
         }
     }
 
+    /** {surface, helpBase, resourceBase} from c/contextNav; resolved before the
+        first body render so authored site links can be rewritten. */
+    _linkCtx = null;
+    _bodyClickBound = false;
+
     async load() {
         this.loading = true;
         this.error = undefined;
         this._renderedArticleId = undefined;
         try {
-            const detail = await getArticle({ articleId: this._articleId });
-            const { html, headings } = this.sanitizeAndIndex(detail.body);
+            const [detail, ctx] = await Promise.all([
+                getArticle({ articleId: this._articleId }),
+                linkContext() // memoized, never rejects
+            ]);
+            this._linkCtx = ctx;
+            const { html, headings } = this.sanitizeAndIndex(detail.body, ctx);
             this._bodyHtml = html;
             this.headings = headings;
             this.article = detail;
@@ -112,6 +182,89 @@ export default class NexsArticleViewer extends LightningElement {
         }
         container.innerHTML = this._bodyHtml;
         this._renderedArticleId = this.article.id;
+        if (!this._bodyClickBound) {
+            // Delegated: the body is manual DOM, re-injected per article.
+            container.addEventListener('click', (event) => this.handleBodyClick(event));
+            this._bodyClickBound = true;
+        }
+    }
+
+    /**
+     * Rewrite authored links into the Help Center site (resources / article
+     * pages, with or without a host) through c/contextNav's href builders, and
+     * tag them so handleBodyClick can route plain clicks in place.
+     */
+    rewriteSiteLinks(doc, ctx) {
+        const sitePath = sitePathOf(ctx);
+        doc.body.querySelectorAll('a[href]').forEach((a) => {
+            const link = parseSiteLink(a.getAttribute('href'), sitePath);
+            if (!link) {
+                return;
+            }
+            const p = link.params;
+            let href = null;
+            if (link.kind === 'resources') {
+                const slug = p.get('rcslug');
+                const view = p.get('rcview') || 'detail';
+                if (!slug || view === 'search') {
+                    return; // term-only / bare front door: leave as authored
+                }
+                href = resourceHref(ctx, slug, view);
+                if (href) {
+                    a.setAttribute(LINK_DATA_KIND, 'resource');
+                    a.setAttribute('data-nexs-slug', slug);
+                    a.setAttribute('data-nexs-view', view);
+                }
+            } else {
+                const name = p.get('name') || p.get('article');
+                const topic = p.get('topic');
+                href = name ? articleHref(ctx, name) : topicHref(ctx, topic);
+                if (href && name) {
+                    a.setAttribute(LINK_DATA_KIND, 'article');
+                    a.setAttribute('data-nexs-name', name);
+                }
+            }
+            if (href) {
+                a.setAttribute('href', href);
+                a.removeAttribute('target'); // same site or same app — never a new tab
+            }
+        });
+    }
+
+    /**
+     * Plain clicks on rewritten links route in place: a resource link goes
+     * through contextNav (no mixin here → `resourceselect` bubbles to the
+     * routed host, helpArticlePage); an article link asks the browser to open
+     * it inline (`articlelink`, handled by nexsArticleBrowser). Only on the
+     * site being viewed — in the core app the rewritten Lightning tab URL
+     * navigates natively. Middle/modifier clicks keep the anchor.
+     */
+    handleBodyClick(event) {
+        const path = typeof event.composedPath === 'function' ? event.composedPath() : [];
+        const anchor = path.find((n) => n && n.getAttribute && n.hasAttribute && n.hasAttribute(LINK_DATA_KIND));
+        if (!anchor) {
+            return;
+        }
+        const isPlainClick =
+            event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
+        if (!isPlainClick || isInternal(this._linkCtx) || !isSameSite(this._linkCtx)) {
+            return;
+        }
+        event.preventDefault();
+        if (anchor.getAttribute(LINK_DATA_KIND) === 'resource') {
+            goToResource(this, this._linkCtx, {
+                slug: anchor.getAttribute('data-nexs-slug'),
+                view: anchor.getAttribute('data-nexs-view') || 'detail'
+            });
+            return;
+        }
+        this.dispatchEvent(
+            new CustomEvent('articlelink', {
+                detail: { urlName: anchor.getAttribute('data-nexs-name') },
+                bubbles: true,
+                composed: true
+            })
+        );
     }
 
     /**
@@ -119,7 +272,7 @@ export default class NexsArticleViewer extends LightningElement {
      * handlers and javascript: URLs, and tag h2/h3 with generated ids so the
      * anchor nav can scroll to them.
      */
-    sanitizeAndIndex(html) {
+    sanitizeAndIndex(html, ctx = this._linkCtx) {
         const doc = new DOMParser().parseFromString(html || '', 'text/html');
 
         doc.body.querySelectorAll(BLOCKED_TAGS).forEach((el) => el.remove());
@@ -137,6 +290,8 @@ export default class NexsArticleViewer extends LightningElement {
                 }
             });
         });
+
+        this.rewriteSiteLinks(doc, ctx);
 
         const headings = [];
         doc.body.querySelectorAll('h2, h3').forEach((h, i) => {

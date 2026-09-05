@@ -24,11 +24,11 @@ private class ArcRecentlyViewedListControllerTest {
 
   @IsTest
   static void enrichAccountRecordsByIds_preservesOrder() {
-    Account firstAccount = FscDataTestDataFactory.createPersonAccount(
+    Account firstAccount = createPersonAccount(
       'First',
       'Account'
     );
-    Account secondAccount = FscDataTestDataFactory.createPersonAccount(
+    Account secondAccount = createPersonAccount(
       'Second',
       'Account'
     );
@@ -121,10 +121,10 @@ private class ArcRecentlyViewedListControllerTest {
 
   @IsTest
   static void buildItemFromRecord_includesHouseholdMetadataForAccounts() {
-    Account household = FscDataTestDataFactory.createHouseholdAccountForClientLink(
+    Account household = createIsaHouseholdAccount(
       'Recently Viewed Household'
     );
-    Account memberAccount = FscDataTestDataFactory.createPersonAccount(
+    Account memberAccount = createPersonAccount(
       'Sarah',
       'Harrison'
     );
@@ -227,7 +227,7 @@ private class ArcRecentlyViewedListControllerTest {
 
   @IsTest
   static void buildItemsFromRecords_appliesLastViewedDateOverride() {
-    Account memberAccount = FscDataTestDataFactory.createPersonAccount(
+    Account memberAccount = createPersonAccount(
       'Override',
       'Account'
     );
@@ -265,7 +265,7 @@ private class ArcRecentlyViewedListControllerTest {
 
   @IsTest
   static void buildLastViewedDateMapFromRecords_mapsRecordIdsToDates() {
-    Account memberAccount = FscDataTestDataFactory.createPersonAccount(
+    Account memberAccount = createPersonAccount(
       'Date',
       'Map'
     );
@@ -355,7 +355,7 @@ private class ArcRecentlyViewedListControllerTest {
 
   @IsTest
   static void deduplicateRecentlyViewedRows_removesDuplicateRecordIds() {
-    Account account = FscDataTestDataFactory.createPersonAccount(
+    Account account = createPersonAccount(
       'Duplicate',
       'Account'
     );
@@ -378,7 +378,7 @@ private class ArcRecentlyViewedListControllerTest {
 
   @IsTest
   static void deduplicateRecordsById_removesDuplicateRecords() {
-    Account account = FscDataTestDataFactory.createPersonAccount(
+    Account account = createPersonAccount(
       'Duplicate',
       'Record'
     );
@@ -398,7 +398,7 @@ private class ArcRecentlyViewedListControllerTest {
 
   @IsTest
   static void deduplicateItemsById_removesDuplicateItems() {
-    Account account = FscDataTestDataFactory.createPersonAccount(
+    Account account = createPersonAccount(
       'Duplicate',
       'Item'
     );
@@ -463,7 +463,7 @@ private class ArcRecentlyViewedListControllerTest {
 
   @IsTest
   static void enrichAccountRecordsFromRecentlyViewed_skipsDuplicateRecentlyViewedRows() {
-    Account account = FscDataTestDataFactory.createPersonAccount(
+    Account account = createPersonAccount(
       'Duplicate',
       'Enrich'
     );
@@ -478,6 +478,39 @@ private class ArcRecentlyViewedListControllerTest {
 
     System.assertEquals(1, enrichedRecords.size());
     System.assertEquals(account.Id, enrichedRecords[0].Id);
+  }
+
+  /**
+   * Local stand-in for FscDataTestDataFactory.createPersonAccount. The Account
+   * validation rule Type_OR_Classification_Required (active since 2026-08-20)
+   * rejects a person account that carries neither Type nor Classification__c,
+   * and the git copy of the shared factory predates that rule. Building the
+   * account here keeps this test passing whichever factory version is deployed.
+   */
+  private static Account createPersonAccount(String firstName, String lastName) {
+    List<RecordType> personRecordTypes = [
+      SELECT Id
+      FROM RecordType
+      WHERE SObjectType = 'Account' AND IsPersonType = TRUE AND IsActive = TRUE
+      LIMIT 1
+    ];
+    System.assert(
+      !personRecordTypes.isEmpty(),
+      'A person account record type is required to run this test.'
+    );
+    Account personAccount = new Account(
+      FirstName = firstName,
+      LastName = lastName,
+      RecordTypeId = personRecordTypes[0].Id,
+      Type = 'Prospect'
+    );
+    insert personAccount;
+    return [
+      SELECT Id, Name, IsPersonAccount, PersonContactId, Classification__c
+      FROM Account
+      WHERE Id = :personAccount.Id
+      LIMIT 1
+    ];
   }
 
   private static Account createIsaHouseholdAccount(String name) {

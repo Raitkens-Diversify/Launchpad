@@ -15,6 +15,23 @@ import { typeMeta } from 'c/resourceTypeIcons';
  *   TYPE_WEBINAR and WEBINAR_STATUS_* ↔ WebinarLifecycle
  */
 
+/**
+ * The unified home's user-facing name (the Help & Resources app / the
+ * unifiedLanding page) and the two crumbs every Resource Center trail starts
+ * with: Help & Resources › Resource Center › … . `help` routes to the unified
+ * home (resourceCenter's `helphome` → c/contextNav.goToHome), `home` to the
+ * Resource Center front door (`rchome`).
+ */
+export const HELP_HOME_LABEL = 'Help & Resources';
+export const CRUMB_HELP_HOME = 'help';
+export const CRUMB_RC_HOME = 'home';
+export function rcRootCrumbs() {
+    return [
+        { label: HELP_HOME_LABEL, key: CRUMB_HELP_HOME },
+        { label: 'Resource Center', key: CRUMB_RC_HOME }
+    ];
+}
+
 /** Resource_Type__c values, in the canonical display order. */
 export const RESOURCE_TYPES = ['PDF', 'Form', 'Video', 'Template', 'External Link', 'Webinar'];
 

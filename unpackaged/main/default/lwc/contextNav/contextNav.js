@@ -11,8 +11,10 @@
  * Surface contract (mirrors ResourceCenterService.getLinkContext):
  *   site      → helpBase is the CURRENT site's root and homeBase /
  *               articleBase / resourceBase / eventsBase are that site's page
- *               URLs (Help_Surface__mdt, keyed by Network name) — so a user
- *               inside ARC stays inside ARC. Navigate by URL. A ctx that only
+ *               URLs (Help_Surface__mdt, keyed by Network name). A target on
+ *               the site being viewed goes through the LWR router
+ *               (NavigationMixin standard__webPage, no reload); a target on
+ *               another site or origin leaves by URL. A ctx that only
  *               carries helpBase (older shapes, host-synthesized literals)
  *               derives the pages from the root with the default names.
  *   internal  → every base is null; navigate with NavigationMixin.
@@ -139,6 +141,55 @@ function trimEnd(base) {
     return base.replace(/\/$/, '');
 }
 
+// ---- same-site detection (R1, 2026-09-04) --------------------------------
+
+/** {origin, path} of the site root the ctx describes, or null when internal
+    or unparseable. */
+function siteScope(ctx) {
+    if (isInternal(ctx)) {
+        return null;
+    }
+    try {
+        const url = new URL(ctx.helpBase);
+        return { origin: url.origin, path: trimEnd(url.pathname) };
+    } catch (e) {
+        return null;
+    }
+}
+
+/**
+ * True when the page is being viewed ON the site the ctx describes: same
+ * origin, and the current pathname is the site root or sits under it. This is
+ * what lets `navigate()` hand a target to the LWR router instead of reloading
+ * the document — a target on another site (or another origin) still leaves by
+ * URL, because the router cannot cross sites.
+ */
+export function isSameSite(ctx, loc = window.location) {
+    const scope = siteScope(ctx);
+    if (!scope || !loc) {
+        return false;
+    }
+    const path = trimEnd(loc.pathname || '');
+    return loc.origin === scope.origin && (path === scope.path || path.startsWith(scope.path + '/'));
+}
+
+/** `/help/article?name=x` from the absolute site URL — what standard__webPage
+    wants (origin-relative, not basePath-relative). */
+function siteRelative(absolute) {
+    const url = new URL(absolute);
+    return url.pathname + url.search;
+}
+
+/** True when the target's route is the one already on screen (a query-only
+    change). Those keep the reload: see `navigate()`. */
+function sameRoute(absolute, loc) {
+    try {
+        return trimEnd(new URL(absolute).pathname) === trimEnd((loc && loc.pathname) || '');
+    } catch (e) {
+        return false;
+    }
+}
+
 /** The site page URL for `key`, or the default page under the site root. */
 function pageBase(ctx, key, defaultPath) {
     return ctx[key] ? trimEnd(ctx[key]) : trimEnd(ctx.helpBase) + defaultPath;
@@ -228,18 +279,48 @@ export function homeHref(ctx) {
  * The fallback ladder every goTo* runs, modelled on articleResources' CTA
  * precedence chain (the one real ladder in this codebase):
  *
- *   1. site      → window.location.assign(absolute)   — unchanged behavior
- *   2. internal, NavigationMixin present → PageReference navigation
- *   3. internal, no mixin → composed CustomEvent so an ancestor swaps in place
- *   4. last resort → the same-site relative URL, exactly as before
+ *   1a. site, target on THIS site and a different route:
+ *         mixin present → NavigationMixin standard__webPage (LWR client router,
+ *                         no document reload — docs/r1-router-verification.md)
+ *         no mixin      → the composed CustomEvent of rung 3, so a host WITH a
+ *                         mixin re-enters here and routes client-side
+ *   1b. site, anything else → window.location.assign(absolute)
+ *         (another site or origin; a same-route query-only target — the hosts'
+ *         CurrentPageReference wires latch after the first restore and would
+ *         not consume a router-driven state change; no mixin and no event)
+ *   2.  internal, NavigationMixin present → PageReference navigation
+ *   3.  internal, no mixin → composed CustomEvent so an ancestor swaps in place
+ *   4.  last resort → the same-site relative URL, exactly as before
  *
  * Rung 3 is why the presentational components (resourceDetail,
- * resourceSearchResults, articleResources, helpGuide) need no mixin.
+ * resourceSearchResults, articleResources) need no mixin.
  */
 function navigate(cmp, options) {
-    const { absolute, tab, state, fallbackEvent, relative } = options;
+    const { ctx, absolute, tab, state, fallbackEvent, relative } = options;
 
     if (absolute) {
+        if (isSameSite(ctx) && !sameRoute(absolute, window.location)) {
+            if (cmp && typeof cmp[NavigationMixin.Navigate] === 'function') {
+                try {
+                    cmp[NavigationMixin.Navigate]({
+                        type: 'standard__webPage',
+                        attributes: { url: siteRelative(absolute) }
+                    });
+                    return;
+                } catch (e) {
+                    // Fall through — a reload is never a dead end.
+                }
+            } else if (cmp && fallbackEvent) {
+                cmp.dispatchEvent(
+                    new CustomEvent(fallbackEvent.name, {
+                        detail: fallbackEvent.detail,
+                        bubbles: true,
+                        composed: true
+                    })
+                );
+                return;
+            }
+        }
         window.location.assign(absolute);
         return;
     }
@@ -284,6 +365,7 @@ export function goToArticle(cmp, ctx, target) {
     const { urlName, topic } = target || {};
     const absolute = urlName ? articleHref(ctx, urlName) : topicHref(ctx, topic);
     navigate(cmp, {
+        ctx,
         absolute: isInternal(ctx) ? null : absolute,
         tab: TABS.article,
         state: { name: urlName, topic },
@@ -313,6 +395,7 @@ export function goToResource(cmp, ctx, target) {
     }
 
     navigate(cmp, {
+        ctx,
         absolute: isInternal(ctx)
             ? null
             : (term ? resourceSearchHref(ctx, term) : resourceHref(ctx, slug, view)),
@@ -330,6 +413,7 @@ export function goToResource(cmp, ctx, target) {
 
 export function goToEvents(cmp, ctx) {
     navigate(cmp, {
+        ctx,
         absolute: isInternal(ctx) ? null : eventsHref(ctx),
         tab: TABS.events,
         state: {},
@@ -339,6 +423,7 @@ export function goToEvents(cmp, ctx) {
 
 export function goToHome(cmp, ctx) {
     navigate(cmp, {
+        ctx,
         absolute: isInternal(ctx) ? null : homeHref(ctx),
         tab: TABS.home,
         state: {},

@@ -22,7 +22,8 @@
           "children" : [ {
             "children" : [ {
               "attributes" : {
-                "dxpStyle" : { }
+                "dxpStyle" : { },
+                "hideBranding" : true
               },
               "definition" : "c:helpArticlePage",
               "id" : "6290f325-4410-47bf-baca-0ee7675a35cb",

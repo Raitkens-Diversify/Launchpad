@@ -1,6 +1,6 @@
 {
   "type" : "sfdc_cms__view",
-  "title" : "Learning",
+  "title" : "Resources",
   "contentBody" : {
     "component" : {
       "children" : [ {
@@ -48,7 +48,7 @@
             "customHeadTags" : "",
             "description" : "",
             "dxpStyle" : { },
-            "pageTitle" : "Learning"
+            "pageTitle" : "Resources"
           },
           "definition" : "community_builder:seoAssistant",
           "id" : "5e6f7a8b-9c0d-4e1f-8a2b-3c4d5e6f7a8b",

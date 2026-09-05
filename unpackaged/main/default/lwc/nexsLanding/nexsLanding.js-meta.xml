@@ -13,11 +13,11 @@
     <targetConfigs>
         <targetConfig targets="lightningCommunity__Default">
             <property name="hideBranding" type="Boolean" label="Hide Diversify Branding"
-                      description="Hides the Diversify logo and brand crumb in the header for sites or pages that already have their own header/branding."/>
+                      description="The site supplies the brand chrome: hides the Diversify logo, brand crumb and brand footer, and collapses the header strip while no page control is slotted. Set on the /help site pages (the theme layout owns the header) and on embeddings that carry their own header/branding."/>
         </targetConfig>
         <targetConfig targets="lightning__AppPage">
             <property name="hideBranding" type="Boolean" label="Hide Diversify Branding"
-                      description="Hides the Diversify logo and brand crumb in the header for sites or pages that already have their own header/branding."/>
+                      description="The site supplies the brand chrome: hides the Diversify logo, brand crumb and brand footer, and collapses the header strip while no page control is slotted. Set on the /help site pages (the theme layout owns the header) and on embeddings that carry their own header/branding."/>
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>

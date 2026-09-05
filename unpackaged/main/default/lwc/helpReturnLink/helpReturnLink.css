@@ -1,0 +1,40 @@
+/* Placed in a theme-layout region (a sibling of the page roots), so nothing
+   is inherited: self-declare the tokens used (docs/ui-standards.md §1;
+   canonical values in nexsLanding.css). */
+:host {
+    display: inline-block;
+    font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+
+    --slds-g-spacing-2: 0.5rem;
+    --slds-g-font-family-base: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    --slds-g-font-scale-1: 14px;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-accent-1: #0f406f;
+}
+
+.hrl {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 8px);
+    padding: 6px 12px;
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: 999px;
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: 500;
+    line-height: 1;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.hrl:hover,
+.hrl:focus-visible {
+    color: var(--slds-g-color-accent-1, #0f406f);
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+}
+
+.hrl:focus-visible {
+    outline: 2px solid var(--slds-g-color-accent-1, #0f406f);
+    outline-offset: 2px;
+}

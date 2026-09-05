@@ -100,31 +100,11 @@
     flex: 1 1 auto;
 }
 
-/* --- Get Help guide view (crumb recipe mirrors resourceCategoryPage) --- */
+/* --- Get Help guide view (crumbs: the shared c-ds-breadcrumbs) --- */
 .rc-guide {
     max-width: 720px;
     margin: 0 auto;
     padding: var(--ds-space-xl, 24px) var(--ds-space-lg, 16px);
-}
-.rc-guide__crumbs {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--ds-space-xs, 4px);
-    font-size: 0.875rem;
-    margin-bottom: var(--ds-space-lg, 16px);
-}
-.rc-guide__crumb-link {
-    color: var(--ds-medium-blue, #1a76bb);
-    text-decoration: none;
-    cursor: pointer;
-}
-.rc-guide__crumb-link:hover {
-    text-decoration: underline;
-}
-.rc-guide__crumb-sep,
-.rc-guide__crumb-current {
-    color: var(--slds-g-color-on-surface-1, #4b5563);
 }
 .rc-guide__title {
     margin: 0;

@@ -46,6 +46,28 @@ private class ResourceCenterServiceTest {
         return [SELECT Id FROM Resource__c WHERE Slug__c = :slug LIMIT 1].Id;
     }
 
+    /**
+     * Knowledge__kav DML and KbManagement.PublishingService calls require the
+     * Knowledge User feature license, which no admin in this org carries.
+     * Run the whole test as a dedicated user who has it. Insert happens inside
+     * runAs(currentUser()) so the setup-object DML (User) doesn't mix with the
+     * @TestSetup data already committed in this test.
+     */
+    private static User makeKnowledgeUser() {
+        Profile p = [SELECT Id FROM Profile WHERE Name = 'System Administrator' LIMIT 1];
+        User u = new User(
+            Alias = 'kbuser', Email = 'kbuser@example.com', EmailEncodingKey = 'UTF-8',
+            LastName = 'Knowledge', LanguageLocaleKey = 'en_US', LocaleSidKey = 'en_US',
+            ProfileId = p.Id, TimeZoneSidKey = 'America/Los_Angeles',
+            Username = 'kbuser.' + Datetime.now().getTime() + Math.round(Math.random() * 100000) + '@example.com',
+            UserPermissionsKnowledgeUser = true
+        );
+        System.runAs(HelpCenterTestDataFactory.currentUser()) {
+            insert u;
+        }
+        return u;
+    }
+
     @isTest
     static void topLevelCategoriesRollUpCounts() {
         Test.startTest();
@@ -203,58 +225,64 @@ private class ResourceCenterServiceTest {
     static void resourcesForArticleSurviveRepublish() {
         // Publish an article, link a resource to its KA Id, then republish and
         // confirm the junction still resolves through the NEW version Id.
-        Knowledge__kav kav = new Knowledge__kav(
-            Title = 'How to brand', UrlName = 'how-to-brand', Language = 'en_US', Summary = 's');
-        insert kav;
-        Id v1 = kav.Id;
-        String kaId = [SELECT KnowledgeArticleId FROM Knowledge__kav WHERE Id = :v1].KnowledgeArticleId;
-        KbManagement.PublishingService.publishArticle(kaId, true);
+        // Knowledge__kav DML/publish needs the Knowledge User feature license —
+        // no admin in this org has it — so the whole test runs as a user who does.
+        System.runAs(makeKnowledgeUser()) {
+            Knowledge__kav kav = new Knowledge__kav(
+                Title = 'How to brand', UrlName = 'how-to-brand', Language = 'en_US', Summary = 's');
+            insert kav;
+            Id v1 = kav.Id;
+            String kaId = [SELECT KnowledgeArticleId FROM Knowledge__kav WHERE Id = :v1].KnowledgeArticleId;
+            KbManagement.PublishingService.publishArticle(kaId, true);
 
-        insert new Article_Resource__c(
-            Resource__c = resourceId('brand-flyer'), Knowledge_Article_Id__c = kaId,
-            Article_UrlName__c = 'how-to-brand', Display_Order__c = 1);
+            insert new Article_Resource__c(
+                Resource__c = resourceId('brand-flyer'), Knowledge_Article_Id__c = kaId,
+                Article_UrlName__c = 'how-to-brand', Display_Order__c = 1);
 
-        Test.startTest();
-        List<ResourceCenterService.ResourceCard> before =
-            ResourceCenterService.getResourcesForArticle(v1);
+            Test.startTest();
+            List<ResourceCenterService.ResourceCard> before =
+                ResourceCenterService.getResourcesForArticle(v1);
 
-        // Republish: creates a new draft version, publish again → new version Id.
-        KbManagement.PublishingService.editOnlineArticle(kaId, false);
-        Id v2 = [
-            SELECT Id FROM Knowledge__kav
-            WHERE KnowledgeArticleId = :kaId AND PublishStatus = 'Draft' LIMIT 1
-        ].Id;
-        KbManagement.PublishingService.publishArticle(kaId, true);
-        List<ResourceCenterService.ResourceCard> after =
-            ResourceCenterService.getResourcesForArticle(v2);
-        Test.stopTest();
+            // Republish: creates a new draft version, publish again → new version Id.
+            KbManagement.PublishingService.editOnlineArticle(kaId, false);
+            Id v2 = [
+                SELECT Id FROM Knowledge__kav
+                WHERE KnowledgeArticleId = :kaId AND PublishStatus = 'Draft' LIMIT 1
+            ].Id;
+            KbManagement.PublishingService.publishArticle(kaId, true);
+            List<ResourceCenterService.ResourceCard> after =
+                ResourceCenterService.getResourcesForArticle(v2);
+            Test.stopTest();
 
-        Assert.areEqual(1, before.size(), 'Resource resolves through the original version Id.');
-        Assert.areEqual(1, after.size(),
-            'Resource still resolves through the new version Id — junction keyed on the stable KA Id.');
-        Assert.areEqual('brand-flyer', after[0].slug, 'Same resource after republish.');
+            Assert.areEqual(1, before.size(), 'Resource resolves through the original version Id.');
+            Assert.areEqual(1, after.size(),
+                'Resource still resolves through the new version Id — junction keyed on the stable KA Id.');
+            Assert.areEqual('brand-flyer', after[0].slug, 'Same resource after republish.');
+        }
     }
 
     @isTest
     static void relatedArticlesForResourceResolveLatestVersion() {
-        Knowledge__kav kav = new Knowledge__kav(
-            Title = 'Brand guide', UrlName = 'brand-guide', Language = 'en_US', Summary = 's');
-        insert kav;
-        String kaId = [SELECT KnowledgeArticleId FROM Knowledge__kav WHERE Id = :kav.Id].KnowledgeArticleId;
-        KbManagement.PublishingService.publishArticle(kaId, true);
+        System.runAs(makeKnowledgeUser()) {
+            Knowledge__kav kav = new Knowledge__kav(
+                Title = 'Brand guide', UrlName = 'brand-guide', Language = 'en_US', Summary = 's');
+            insert kav;
+            String kaId = [SELECT KnowledgeArticleId FROM Knowledge__kav WHERE Id = :kav.Id].KnowledgeArticleId;
+            KbManagement.PublishingService.publishArticle(kaId, true);
 
-        Id rId = resourceId('brand-flyer');
-        insert new Article_Resource__c(
-            Resource__c = rId, Knowledge_Article_Id__c = kaId, Article_UrlName__c = 'brand-guide');
+            Id rId = resourceId('brand-flyer');
+            insert new Article_Resource__c(
+                Resource__c = rId, Knowledge_Article_Id__c = kaId, Article_UrlName__c = 'brand-guide');
 
-        Test.startTest();
-        List<ResourceCenterService.RelatedArticle> related =
-            ResourceCenterService.getRelatedArticlesForResource(rId);
-        Test.stopTest();
+            Test.startTest();
+            List<ResourceCenterService.RelatedArticle> related =
+                ResourceCenterService.getRelatedArticlesForResource(rId);
+            Test.stopTest();
 
-        Assert.areEqual(1, related.size(), 'One linked article.');
-        Assert.areEqual('brand-guide', related[0].urlName, 'Latest published UrlName resolved.');
-        Assert.areEqual('Brand guide', related[0].title, 'Latest published title resolved.');
+            Assert.areEqual(1, related.size(), 'One linked article.');
+            Assert.areEqual('brand-guide', related[0].urlName, 'Latest published UrlName resolved.');
+            Assert.areEqual('Brand guide', related[0].title, 'Latest published title resolved.');
+        }
     }
 
     @isTest
@@ -355,8 +383,10 @@ private class ResourceCenterServiceTest {
     @isTest
     static void linkContextMapsTheCurrentNetworkToItsOwnPages() {
         // A network with a Help_Surface__mdt row gets ITS site's pages — the
-        // reason the table exists: ARC embeds the components on its own pages,
-        // and a link to the shared /help site is a different login.
+        // reason the table exists: ARC hosts the Help & Resources components on
+        // its own pages (help-center / article / learning / events), and a
+        // link to the shared /help site would be a different login. Seeded
+        // with the real ARC row shape (customMetadata/Help_Surface.ARC).
         ResourceCenterService.surfaceOverride = 'ARC';
         ResourceCenterService.surfaceRows = new Map<String, Help_Surface__mdt>{
             'ARC' => new Help_Surface__mdt(
@@ -697,5 +727,72 @@ private class ResourceCenterServiceTest {
         Assert.isNotNull(card, 'Featured webinar appears in the featured strip.');
         Assert.areEqual(WebinarLifecycle.UPCOMING, card.webinarStatus);
         Assert.areEqual('https://example.com/register', card.registrationUrl);
+    }
+
+    // ---- Link bases are site-relative ON the Help Center site ----------------
+
+    @isTest
+    static void linkBasesAreSiteRelativeOnTheHelpSite() {
+        // Running on the shared site itself: a link built from the base must be
+        // a same-site hop, not a host-absolute one.
+        ResourceCenterService.surfaceOverride = 'Diversify Help Center';
+        ResourceCenterService.helpSiteLabelOverride = 'Diversify Help Center';
+
+        Test.startTest();
+        String helpBase = ResourceCenterService.getHelpCenterLinkBase();
+        String resourceBase = ResourceCenterService.getResourceLinkBase();
+        Test.stopTest();
+
+        Assert.areEqual('/help', helpBase, 'Site-relative root on the help site');
+        Assert.areEqual('/help/resources', resourceBase);
+    }
+
+    @isTest
+    static void linkBasesStayAbsoluteOffTheHelpSite() {
+        // Another site (ARC's sidebar links to the Help Center) still needs the
+        // full URL of the OTHER site — never a relative path.
+        ResourceCenterService.surfaceOverride = 'ARC';
+        ResourceCenterService.helpSiteLabelOverride = 'Diversify Help Center';
+
+        Test.startTest();
+        String helpBase = ResourceCenterService.getHelpCenterLinkBase();
+        Test.stopTest();
+
+        if (helpBase != null) {
+            Assert.isTrue(helpBase.startsWith('https://'), 'Absolute off-site: ' + helpBase);
+        }
+    }
+
+    // ---- ARC bridge (c/helpReturnLink) ---------------------------------------
+
+    @isTest
+    static void arcBridgeUsesTheSeams() {
+        // Site / NetworkMember rows can't be created in tests; the seams stand
+        // in for "the ARC site resolved and the viewer is a member".
+        ResourceCenterService.arcSiteBaseOverride = 'https://x.my.site.com/ARC';
+        ResourceCenterService.arcMemberOverride = true;
+
+        Test.startTest();
+        ResourceCenterService.ArcBridge bridge = ResourceCenterService.getArcBridge();
+        Test.stopTest();
+
+        Assert.areEqual('https://x.my.site.com/ARC', bridge.siteUrl);
+        Assert.isTrue(bridge.isMember);
+    }
+
+    @isTest
+    static void arcBridgeNeverThrowsAndDefaultsToNoLink() {
+        // No seams: whatever the org has, the call must come back with a
+        // well-formed answer — a null site or a non-member simply hides the link.
+        Test.startTest();
+        ResourceCenterService.ArcBridge bridge = ResourceCenterService.getArcBridge();
+        Test.stopTest();
+
+        Assert.isNotNull(bridge);
+        Assert.isNotNull(bridge.isMember, 'Membership is always a definite boolean');
+        if (bridge.siteUrl != null) {
+            Assert.isTrue(bridge.siteUrl.startsWith('https://'), 'Absolute site root: ' + bridge.siteUrl);
+            Assert.isFalse(bridge.siteUrl.endsWith('/'), 'No trailing slash: ' + bridge.siteUrl);
+        }
     }
 }

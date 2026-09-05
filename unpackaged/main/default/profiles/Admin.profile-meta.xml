@@ -15,6 +15,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>ARCUtilTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>AccountAccountRelationshipTriggerHandler</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -163,6 +167,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>ArcCaseCommentControllerTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>ArcCaseDetailController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -207,6 +215,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>ArcCostLineItemControllerTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>ArcEgnyteAccessController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -224,6 +236,10 @@
     </classAccesses>
     <classAccesses>
         <apexClass>ArcFlowLookupController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>ArcFlowLookupControllerTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
@@ -535,6 +551,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>BookOfBusinessTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>BranchInternalTaskController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -723,6 +743,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>DocumentServiceTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>EgnyteArcEmbedController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -783,6 +807,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>EnvelopeFormAccountControllerTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>EnvelopeHouseholdMemberController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -800,6 +828,10 @@
     </classAccesses>
     <classAccesses>
         <apexClass>EnvelopeISAController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>EnvelopeISAControllerTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
@@ -840,6 +872,10 @@
     </classAccesses>
     <classAccesses>
         <apexClass>FieldDetailController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>FieldDetailControllerTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
@@ -1220,6 +1256,10 @@
     </classAccesses>
     <classAccesses>
         <apexClass>HelpTopicMetadataService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>HelpTopicMetadataServiceTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
@@ -2131,6 +2171,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>RecordQueryUtilTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>Redtail</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -2371,6 +2415,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>TaskTemplateAssignmentServiceTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>Task_Comment_TriggerHandler</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -2608,6 +2656,10 @@
     </classAccesses>
     <classAccesses>
         <apexClass>UserPreferenceService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>UserPreferenceTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
@@ -2970,6 +3022,41 @@
         <application>Welcome</application>
         <default>false</default>
         <visible>false</visible>
+    </applicationVisibilities>
+    <applicationVisibilities>
+        <application>standard__AgentforceStudio</application>
+        <default>false</default>
+        <visible>true</visible>
+    </applicationVisibilities>
+    <applicationVisibilities>
+        <application>standard__AppLauncher</application>
+        <default>false</default>
+        <visible>true</visible>
+    </applicationVisibilities>
+    <applicationVisibilities>
+        <application>standard__DigitalWallet</application>
+        <default>false</default>
+        <visible>true</visible>
+    </applicationVisibilities>
+    <applicationVisibilities>
+        <application>standard__FlowsApp</application>
+        <default>false</default>
+        <visible>true</visible>
+    </applicationVisibilities>
+    <applicationVisibilities>
+        <application>standard__IndustriesEcm</application>
+        <default>false</default>
+        <visible>true</visible>
+    </applicationVisibilities>
+    <applicationVisibilities>
+        <application>standard__IndustriesEpc</application>
+        <default>false</default>
+        <visible>true</visible>
+    </applicationVisibilities>
+    <applicationVisibilities>
+        <application>standard__SalesCloudMobile</application>
+        <default>false</default>
+        <visible>true</visible>
     </applicationVisibilities>
     <customMetadataTypeAccesses>
         <enabled>true</enabled>

@@ -90,4 +90,120 @@ private class ArcRelatedWorkTableRepositoryTest {
     System.assertEquals(true, ids.contains(String.valueOf(teamCase.Id)));
     System.assertEquals(true, ids.contains(String.valueOf(teammateTask.Id)));
   }
+
+  /**
+   * Team scope with no team at all returns no Cases (selectCaseRows short
+   * circuits on an empty teamIds), but FinancialAdvisorTeamAccessService
+   * always seeds teamMemberUserIds with the running user regardless of team
+   * membership, so selectTaskRows still returns that user's own open tasks --
+   * "my team" degrades to "just me" rather than to nothing.
+   */
+  @IsTest
+  static void selectRowsTeamReturnsOnlyOwnTasksWhenUserHasNoTeam() {
+    Case unrelatedCase = new Case(
+      Subject = 'Unrelated Case',
+      Status = 'New',
+      Origin = 'Phone',
+      OwnerId = UserInfo.getUserId()
+    );
+    insert unrelatedCase;
+    Task ownTask = new Task(
+      Subject = 'Unrelated Task',
+      Status = 'Not Started',
+      Priority = 'Normal',
+      OwnerId = UserInfo.getUserId()
+    );
+    insert ownTask;
+
+    ArcRelatedWorkTableRepository repository = new ArcRelatedWorkTableRepository();
+
+    Test.startTest();
+    ArcRelatedTableModels.TableData result = repository.selectRows(
+      ArcRelatedTableScope.Value.TEAM
+    );
+    Test.stopTest();
+
+    System.assertEquals(1, result.totalCount);
+    Set<String> ids = new Set<String>();
+    for (ArcRelatedTableModels.TableRow row : result.rows) {
+      ids.add(row.id);
+    }
+    System.assertEquals(
+      false,
+      ids.contains(String.valueOf(unrelatedCase.Id)),
+      'No team means selectCaseRows returns nothing.'
+    );
+    System.assertEquals(
+      true,
+      ids.contains(String.valueOf(ownTask.Id)),
+      'selectTaskRows still includes the running user\'s own tasks.'
+    );
+  }
+
+  /**
+   * A task's "Related To" label is resolved from whichever object WhatId
+   * points at -- a Case (by CaseNumber) or an Account (by Name) -- and a task
+   * with an explicit ActivityDate is dated from that field rather than
+   * falling back to LastModifiedDate.
+   */
+  @IsTest
+  static void selectRowsMineResolvesRelatedToLabelForCaseAndAccountTasks() {
+    Case relatedCase = new Case(
+      Subject = 'Related Case',
+      Status = 'New',
+      Origin = 'Phone',
+      OwnerId = UserInfo.getUserId()
+    );
+    insert relatedCase;
+    relatedCase = [SELECT Id, CaseNumber FROM Case WHERE Id = :relatedCase.Id];
+
+    Account relatedAccount = new Account(Name = 'Related Account', Type = 'Prospect');
+    insert relatedAccount;
+
+    Task caseTask = new Task(
+      Subject = 'Case Related Task',
+      Status = 'Not Started',
+      Priority = 'Normal',
+      OwnerId = UserInfo.getUserId(),
+      WhatId = relatedCase.Id,
+      ActivityDate = Date.today()
+    );
+    Task accountTask = new Task(
+      Subject = 'Account Related Task',
+      Status = 'Not Started',
+      Priority = 'Normal',
+      OwnerId = UserInfo.getUserId(),
+      WhatId = relatedAccount.Id
+    );
+    insert new List<Task>{ caseTask, accountTask };
+
+    ArcRelatedWorkTableRepository repository = new ArcRelatedWorkTableRepository();
+
+    Test.startTest();
+    ArcRelatedTableModels.TableData result = repository.selectRows(
+      ArcRelatedTableScope.Value.MINE
+    );
+    Test.stopTest();
+
+    Map<String, ArcRelatedTableModels.TableRow> rowsById = new Map<String, ArcRelatedTableModels.TableRow>();
+    for (ArcRelatedTableModels.TableRow row : result.rows) {
+      rowsById.put(row.id, row);
+    }
+
+    System.assertEquals(
+      relatedCase.CaseNumber,
+      rowsById.get(String.valueOf(caseTask.Id)).relatedTo,
+      'A task on a Case shows the case number.'
+    );
+    System.assertEquals(
+      'Related Account',
+      rowsById.get(String.valueOf(accountTask.Id)).relatedTo,
+      'A task on an Account shows the account name.'
+    );
+    System.assertNotEquals(
+      null,
+      rowsById.get(String.valueOf(caseTask.Id)).activityDate,
+      'An explicit ActivityDate is formatted rather than left blank.'
+    );
+  }
 }

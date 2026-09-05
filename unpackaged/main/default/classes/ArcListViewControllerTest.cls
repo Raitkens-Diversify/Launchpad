@@ -6,7 +6,7 @@
 private class ArcListViewControllerTest {
   @IsTest
   static void resolveReferenceLabelsReturnsAccountNames() {
-    Account account = new Account(Name = 'Lookup Test Account', Classification__c = 'Unclassified');
+    Account account = new Account(Name = 'Lookup Test Account', Type = 'Prospect', Classification__c = 'Unclassified');
     insert account;
 
     Test.startTest();

@@ -922,7 +922,7 @@ public with sharing class ResourceCenterService {
      */
     @AuraEnabled(cacheable=true)
     public static String getResourceLinkBase() {
-        String root = getSiteBaseUrl();
+        String root = getHelpCenterLinkBase();
         return root == null ? null : root + '/' + RESOURCES_PAGE_PATH;
     }
 
@@ -932,13 +932,50 @@ public with sharing class ResourceCenterService {
      * (c/rcLinkUtil.articleUrl); the legacy /?article= form still resolves via
      * the home route's shim, but is never built for new links.
      *
-     * Site-absolute on EVERY surface, deliberately: the Admin Console's
-     * "Copy link" actions share these with people who may be external. Callers
-     * that need surface-aware behavior use getLinkContext() instead.
+     * Site-absolute everywhere EXCEPT on the Help Center site itself (2026-09-04):
+     * a caller running on /help gets the site-relative root ('/help'), so a
+     * link built from it stays a same-site hop instead of a host-absolute one.
+     * Off-site callers stay absolute on purpose — the Admin Console's "Copy
+     * link" actions share these with people who may be external, and ARC's
+     * sidebar (arcNavigation) needs the other site's full URL. Callers that
+     * need per-page routing use getLinkContext() instead.
      */
     @AuraEnabled(cacheable=true)
     public static String getHelpCenterLinkBase() {
+        if (onHelpSite()) {
+            return '/' + helpPrefix().removeStart('/').removeEnd('/');
+        }
         return getSiteBaseUrl();
+    }
+
+    /** Test seam: the Help Center site's MasterLabel without a real Site row. */
+    @TestVisible private static String helpSiteLabelOverride;
+
+    /** True when the CURRENT network IS the shared Help Center site
+        (Network.Name == the site's MasterLabel, the same convention
+        currentSiteBaseUrl relies on). Never throws. */
+    private static Boolean onHelpSite() {
+        String surface = surfaceOverride != null
+            ? surfaceOverride
+            : NexSArticleEngagementController.resolveSurface();
+        if (surface == null || surface == INTERNAL_SURFACE) {
+            return false;
+        }
+        String label = helpSiteLabelOverride;
+        if (label == null) {
+            try {
+                String prefix = helpPrefix();
+                List<Site> sites = [
+                    SELECT MasterLabel FROM Site
+                    WHERE UrlPathPrefix = :prefix AND SiteType = 'ChatterNetworkPicasso'
+                    LIMIT 1
+                ];
+                label = sites.isEmpty() ? null : sites[0].MasterLabel;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        return label != null && label == surface;
     }
 
     /**
@@ -1037,11 +1074,27 @@ public with sharing class ResourceCenterService {
 
     /** Root SecureUrl of the shared LWR site, or null when unresolvable. */
     private static String getSiteBaseUrl() {
+        return siteBaseUrlForPrefix(helpPrefix());
+    }
+
+    /** URL path prefix of the shared Help Center site (Resource_Center_Setting__mdt). */
+    private static String helpPrefix() {
+        Resource_Center_Setting__mdt setting = Resource_Center_Setting__mdt.getInstance('Default');
+        return setting == null || String.isBlank(setting.Site_Url_Path_Prefix__c)
+            ? 'help'
+            : setting.Site_Url_Path_Prefix__c.trim();
+    }
+
+    /** URL path prefix of the ARC site (Resource_Center_Setting__mdt); blank → 'ARC'. */
+    private static String arcPrefix() {
+        Resource_Center_Setting__mdt setting = Resource_Center_Setting__mdt.getInstance('Default');
+        Object v = setting == null ? null : setting.getPopulatedFieldsAsMap().get('Arc_Site_Url_Path_Prefix__c');
+        return v instanceof String && String.isNotBlank((String) v) ? ((String) v).trim() : 'ARC';
+    }
+
+    /** Root SecureUrl of the LWR site at `prefix`, or null when unresolvable. */
+    private static String siteBaseUrlForPrefix(String prefix) {
         try {
-            Resource_Center_Setting__mdt setting = Resource_Center_Setting__mdt.getInstance('Default');
-            String prefix = setting == null || String.isBlank(setting.Site_Url_Path_Prefix__c)
-                ? 'help'
-                : setting.Site_Url_Path_Prefix__c.trim();
             // LWR Experience sites are SiteType ChatterNetworkPicasso; the
             // sibling ChatterNetwork row is the legacy vforcesite shell.
             List<Site> sites = [
@@ -1053,6 +1106,59 @@ public with sharing class ResourceCenterService {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    // ---- Public API: ARC bridge ----------------------------------------------
+
+    /** getArcBridge response: where "Back to ARC" goes and whether the viewer
+        belongs there. */
+    public class ArcBridge {
+        @AuraEnabled public String siteUrl;   // ARC site root; null when unresolvable
+        @AuraEnabled public Boolean isMember; // viewer is a member of ARC's network
+    }
+
+    /** Test seams: the ARC site root / membership without real Site or NetworkMember rows. */
+    @TestVisible private static String arcSiteBaseOverride;
+    @TestVisible private static Boolean arcMemberOverride;
+
+    /**
+     * The ARC site's root URL plus whether the current user is a member of its
+     * network, for c/helpReturnLink ("Back to ARC" in the /help site header).
+     * The prefix comes from Resource_Center_Setting__mdt so a site rename is a
+     * record edit. Never throws — no link is the safe default (a guest on the
+     * login page, a blocked NetworkMember query).
+     */
+    @AuraEnabled(cacheable=true)
+    public static ArcBridge getArcBridge() {
+        ArcBridge bridge = new ArcBridge();
+        bridge.isMember = false;
+        try {
+            String prefix = arcPrefix();
+            bridge.siteUrl = arcSiteBaseOverride != null ? arcSiteBaseOverride : siteBaseUrlForPrefix(prefix);
+            bridge.isMember = arcMemberOverride != null ? arcMemberOverride : isMemberOfSiteWithPrefix(prefix);
+        } catch (Exception e) {
+            // Leave siteUrl / isMember at their safe defaults.
+        }
+        return bridge;
+    }
+
+    /** Site.MasterLabel == Network.Name (the same convention currentSiteBaseUrl
+        relies on), then NetworkMember for the running user. */
+    private static Boolean isMemberOfSiteWithPrefix(String prefix) {
+        List<Site> sites = [
+            SELECT MasterLabel FROM Site
+            WHERE UrlPathPrefix = :prefix AND SiteType = 'ChatterNetworkPicasso'
+            LIMIT 1
+        ];
+        if (sites.isEmpty()) {
+            return false;
+        }
+        List<Network> networks = [SELECT Id FROM Network WHERE Name = :sites[0].MasterLabel LIMIT 1];
+        if (networks.isEmpty()) {
+            return false;
+        }
+        Id userId = UserInfo.getUserId();
+        return [SELECT COUNT() FROM NetworkMember WHERE NetworkId = :networks[0].Id AND MemberId = :userId] > 0;
     }
 
     private static String secureUrlOf(Id siteId) {

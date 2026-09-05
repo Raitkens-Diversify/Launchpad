@@ -74,6 +74,15 @@ export default class HelpArticlePage extends NavigationMixin(LightningElement) {
         goToResource(this, this.linkCtx, { view: 'home' });
     }
 
+    /** `resourceselect` bubbling out of the article rail (articleResources has
+        no mixin, so contextNav hands the target up to this host to route). */
+    handleResourceSelect(event) {
+        const slug = event.detail && event.detail.slug;
+        if (slug) {
+            goToResource(this, this.linkCtx, { slug });
+        }
+    }
+
     connectedCallback() {
         this.applyParams(readParams(this._pageRef));
         linkContext().then((ctx) => {

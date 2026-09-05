@@ -22,7 +22,8 @@
           "children" : [ {
             "children" : [ {
               "attributes" : {
-                "dxpStyle" : { }
+                "dxpStyle" : { },
+                "hideBranding" : true
               },
               "definition" : "c:eventsPage",
               "id" : "4b4e2980-27c9-449e-bb8c-bc7c513a856d",

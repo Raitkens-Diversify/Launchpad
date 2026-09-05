@@ -10,7 +10,7 @@
 private class ArcCheckLogControllerTest {
   @TestSetup
   static void setup() {
-    Account client = new Account(Name = 'Kelby Test Client', Classification__c = 'Unclassified');
+    Account client = new Account(Name = 'Kelby Test Client', Type = 'Prospect', Classification__c = 'Unclassified');
     insert client;
 
     FinServ__FinancialAccount__c account = new FinServ__FinancialAccount__c(
@@ -110,6 +110,21 @@ private class ArcCheckLogControllerTest {
   }
 
   @IsTest
+  static void nullCheckLogIdReturnsEmptyDepositsAndFiles() {
+    Test.startTest();
+    List<ArcCheckLogController.CheckDepositInfo> deposits = ArcCheckLogController.getCheckDeposits(
+      null
+    );
+    List<ArcCheckLogController.FileInfo> files = ArcCheckLogController.getCheckLogFiles(
+      null
+    );
+    Test.stopTest();
+
+    System.assertEquals(0, deposits.size(), 'A null id has no deposits');
+    System.assertEquals(0, files.size(), 'A null id has no files');
+  }
+
+  @IsTest
   static void depositDetailCarriesEveryPopupField() {
     Check_Deposit__c deposit = [SELECT Id, Name FROM Check_Deposit__c LIMIT 1];
 
@@ -146,6 +161,101 @@ private class ArcCheckLogControllerTest {
       'test-bytes',
       EncodingUtil.base64Decode(payload.base64Data).toString(),
       'The payload must round-trip the file bytes'
+    );
+  }
+
+  @IsTest
+  static void fileDataThrowsForANullId() {
+    Test.startTest();
+    try {
+      ArcFileViewerController.getFileData(null);
+      System.assert(false, 'Expected an exception for a null id');
+    } catch (AuraHandledException e) {
+      System.assert(true);
+    }
+    Test.stopTest();
+  }
+
+  @IsTest
+  static void fileDataThrowsWhenTheFileIsMissing() {
+    // A syntactically valid id that simply does not point at any
+    // ContentDocument -- any other object's real id works, since the
+    // controller only ever compares it against ContentVersion.ContentDocumentId.
+    Check_Log__c checkLog = [SELECT Id FROM Check_Log__c LIMIT 1];
+
+    Test.startTest();
+    try {
+      ArcFileViewerController.getFileData(checkLog.Id);
+      System.assert(false, 'Expected an exception when no file matches');
+    } catch (AuraHandledException e) {
+      System.assert(true);
+    }
+    Test.stopTest();
+  }
+
+  @IsTest
+  static void unknownExtensionMapsToOctetStream() {
+    ContentVersion version = new ContentVersion(
+      Title = 'Notes',
+      PathOnClient = 'notes.txt',
+      VersionData = Blob.valueOf('plain text notes')
+    );
+    insert version;
+    Id documentId = [
+      SELECT ContentDocumentId
+      FROM ContentVersion
+      WHERE Id = :version.Id
+    ]
+    .ContentDocumentId;
+
+    Test.startTest();
+    ArcFileViewerController.FilePayload payload = ArcFileViewerController.getFileData(
+      documentId
+    );
+    Test.stopTest();
+
+    System.assertEquals(
+      'application/octet-stream',
+      payload.mimeType,
+      'An extension outside the known map falls back to a generic mime type'
+    );
+  }
+
+  @IsTest
+  static void tooLargeFileReturnsNoDataButStillReportsMetadata() {
+    // One byte past MAX_FILE_PREVIEW_BYTES (3 * 1024 * 1024), matching the
+    // controller's own @TestVisible constant so this stays correct if that
+    // cap ever changes.
+    Integer oversized = ArcFileViewerController.MAX_FILE_PREVIEW_BYTES + 1;
+    ContentVersion version = new ContentVersion(
+      Title = 'Big File',
+      PathOnClient = 'bigfile.pdf',
+      VersionData = Blob.valueOf('x'.repeat(oversized))
+    );
+    insert version;
+    Id documentId = [
+      SELECT ContentDocumentId
+      FROM ContentVersion
+      WHERE Id = :version.Id
+    ]
+    .ContentDocumentId;
+
+    Test.startTest();
+    ArcFileViewerController.FilePayload payload = ArcFileViewerController.getFileData(
+      documentId
+    );
+    Test.stopTest();
+
+    System.assertEquals(true, payload.tooLarge, 'The file exceeds the cap');
+    System.assertEquals(
+      null,
+      payload.base64Data,
+      'No bytes should be sent for an oversized file'
+    );
+    System.assertEquals(
+      'Big File',
+      payload.title,
+      'Metadata still comes back even when the bytes do not'
     );
   }
 

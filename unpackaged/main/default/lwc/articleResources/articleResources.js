@@ -1,6 +1,6 @@
 import { LightningElement, api, wire } from 'lwc';
 import { typeMeta } from 'c/resourceTypeIcons';
-import { linkContext, resourceHref } from 'c/contextNav';
+import { linkContext, resourceHref, isSameSite, goToResource } from 'c/contextNav';
 import { isFileType, resourceAction } from 'c/rcConstants';
 import getResourcesForArticle from '@salesforce/apex/ResourceCenterService.getResourcesForArticle';
 import trackDownload from '@salesforce/apex/ResourceCenterService.trackDownload';
@@ -77,11 +77,15 @@ export default class ArticleResources extends LightningElement {
             return {
                 id: r.id,
                 name: r.name,
+                slug: r.slug,
                 iconPath: meta.iconPath,
                 badge: meta.badge,
                 action: cta.action,
                 href,
                 target,
+                // A same-site detail link: plain clicks route in place (see
+                // handleLinkClick); the href stays for middle/modifier clicks.
+                isDetail: !cta.href && !!detailUrl,
                 download,
                 trackClick,
                 contentDocumentId: isFile ? r.contentDocumentId : null
@@ -94,6 +98,22 @@ export default class ArticleResources extends LightningElement {
     }
 
     handleLinkClick(event) {
+        // A plain click on a same-site detail link routes in place instead of
+        // following the target="_blank" anchor: goToResource has no mixin here,
+        // so contextNav dispatches `resourceselect` for the host with a mixin
+        // (helpArticlePage / resourceCenter / unifiedLanding) to route
+        // client-side. Middle/modifier clicks keep the anchor's new-tab
+        // semantics. Gated on isSameSite: the core-app hosts (nexsLanding) do
+        // not listen for resourceselect, and there the anchor already goes to
+        // the Resource_Center tab.
+        const isPlainClick =
+            event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
+        if (event.currentTarget.dataset.detail === 'true' && isPlainClick && isSameSite(this.linkCtx)) {
+            event.preventDefault();
+            goToResource(this, this.linkCtx, { slug: event.currentTarget.dataset.slug });
+            return;
+        }
+
         // Downloads are normally tracked on the detail page; only the direct-
         // download fallback needs to track here.
         const id = event.currentTarget.dataset.id;

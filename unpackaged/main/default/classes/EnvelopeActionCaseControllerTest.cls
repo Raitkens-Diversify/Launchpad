@@ -416,4 +416,422 @@ private class EnvelopeActionCaseControllerTest {
         } catch (AuraHandledException expected) {
         }
     }
+
+    @isTest
+    static void memberActionCaseThrowsWhenMemberRecordIsGone() {
+        Account toDelete = new Account(Name = 'Ghost Member', Type = 'Prospect');
+        insert toDelete;
+        Id ghostId = toDelete.Id;
+        delete toDelete;
+
+        Test.startTest();
+        try {
+            EnvelopeActionCaseController.saveMemberActionCase(ghostId, envelopeId(), 'editIndividual');
+            Assert.fail('A member record that no longer exists must throw.');
+        } catch (AuraHandledException expected) {
+        }
+        Test.stopTest();
+    }
+
+    // ---------------------------------------------------------
+    // updateActionCaseFields: coercion and DML failure paths
+    // ---------------------------------------------------------
+
+    @isTest
+    static void updateActionCaseFieldsCoercionFailureReportsFieldName() {
+        String caseId = EnvelopeActionCaseController.saveAccountActionCase(
+            faId(), new Map<String, Object>(), envelopeId(), 'Account Closure');
+
+        Test.startTest();
+        try {
+            EnvelopeActionCaseController.saveAccountActionCase(
+                faId(),
+                new Map<String, Object>{ 'Id' => caseId, 'Account_Closure_End_Date__c' => 'not-a-date' },
+                envelopeId(),
+                'Account Closure'
+            );
+            Assert.fail('A field value that cannot be coerced must be reported, not silently dropped.');
+        } catch (AuraHandledException expected) {
+            // AuraHandledException.getMessage() always returns 'Script-thrown exception' unless
+            // setMessage() is called explicitly — a platform limitation, not a bug here — so only
+            // the throw itself (not its text) can be asserted from Apex.
+        }
+        Test.stopTest();
+    }
+
+    @isTest
+    static void updateActionCaseFieldsDmlFailureIsWrapped() {
+        String caseId = EnvelopeActionCaseController.saveAccountActionCase(
+            faId(), new Map<String, Object>(), envelopeId(), 'Account Closure');
+
+        Test.startTest();
+        try {
+            EnvelopeActionCaseController.saveAccountActionCase(
+                faId(),
+                new Map<String, Object>{ 'Id' => caseId, 'Account_Closure_Reason__c' => 'NotARealReason' },
+                envelopeId(),
+                'Account Closure'
+            );
+            Assert.fail('An invalid restricted-picklist value must fail the update.');
+        } catch (AuraHandledException expected) {
+            // getMessage() is masked to 'Script-thrown exception' by the platform; the DML failure
+            // path itself is what this test covers.
+        }
+        Test.stopTest();
+    }
+
+    // ---------------------------------------------------------
+    // createManagedPlatformCase
+    // ---------------------------------------------------------
+
+    @isTest
+    static void managedPlatformCaseNonDmsCreatesCaseAndUpdatesPlatform() {
+        Test.startTest();
+        String caseId = EnvelopeActionCaseController.createManagedPlatformCase(
+            faId(),
+            new Map<String, Object>{ 'managedAccountPlatform' => 'AMS (Wrap)' },
+            envelopeId()
+        );
+        Test.stopTest();
+
+        Assert.isTrue(String.isNotBlank(caseId), 'The router must create and return a Case.');
+        Case created = [
+            SELECT Type, Subject, Management_Style__c, Previous_Management_Style__c, Order_Tickets__c
+            FROM Case WHERE Id = :caseId
+        ];
+        Assert.areEqual('Change Management Style', created.Type);
+        Assert.areEqual('AMS (Wrap)', created.Management_Style__c);
+        Assert.areEqual('AMS', created.Previous_Management_Style__c,
+            'The previous style is the account platform before this call.');
+        Assert.isFalse(created.Order_Tickets__c,
+            'A non-DMS platform does not open the DMS order-ticket workload.');
+        Assert.areEqual('AMS (Wrap)',
+            [SELECT Managed_Account_Platform__c FROM Financial_Account__c WHERE Id = :faId()]
+                .Managed_Account_Platform__c,
+            'The account moves onto the new platform.');
+        Assert.areEqual(1, [SELECT COUNT() FROM Envelope_Content__c WHERE Case__c = :caseId]);
+    }
+
+    // A DMS platform change also flips Household__c.Has_FAs_that_are_DMS__c
+    // (Financial_Account_TriggerHandler.setDMSOnHousehold), which requires the Financial Account to
+    // carry a real Household__c — the shared @testSetup account has none, so the DMS-path tests use
+    // their own Financial Account with a household attached.
+    private static Id dmsCapableFaId() {
+        Account household = new Account(Name = 'DMS Household', Type = 'Prospect');
+        insert household;
+        Financial_Account__c fa = new Financial_Account__c(
+            Name = 'DMS FA', Managed_Account_Platform__c = 'AMS', Household__c = household.Id
+        );
+        insert fa;
+        return fa.Id;
+    }
+
+    @isTest
+    static void managedPlatformCaseDmsWithBondLadderCapturesAddendumFields() {
+        Test.startTest();
+        String caseId = EnvelopeActionCaseController.createManagedPlatformCase(
+            dmsCapableFaId(),
+            new Map<String, Object>{
+                'managedAccountPlatform' => 'DMS',
+                'bondLadder' => true,
+                'blCashWithdrawalSelection' => 'Coupon Only',
+                'blAmount' => 5000.0,
+                'blFrequency' => 'Monthly',
+                'blOtherFrequency' => '',
+                'blStartDate' => '2026-01-01',
+                'blLiquidatePermission' => true,
+                'blReinvestPermission' => false,
+                'blCustomization' => 'Ladder notes'
+            },
+            envelopeId()
+        );
+        Test.stopTest();
+
+        Case created = [
+            SELECT Order_Tickets__c, Incomplete_Record__c, Bond_Ladder__c, Cash_Withdrawal_Selection__c,
+                Cash_Withdrawal_Amount__c, DMS_Addendum_Frequency__c, DMS_Frequency_Start_Date__c,
+                Permission_to_Liquidate__c, Permission_to_Reinvest__c, Special_Instructions__c
+            FROM Case WHERE Id = :caseId
+        ];
+        Assert.isTrue(created.Order_Tickets__c, 'DMS opens the order-ticket workload.');
+        Assert.isFalse(created.Incomplete_Record__c);
+        Assert.isTrue(created.Bond_Ladder__c);
+        Assert.areEqual('Coupon Only', created.Cash_Withdrawal_Selection__c);
+        Assert.areEqual(5000.0, created.Cash_Withdrawal_Amount__c);
+        Assert.areEqual('Monthly', created.DMS_Addendum_Frequency__c);
+        Assert.areEqual(Date.valueOf('2026-01-01'), created.DMS_Frequency_Start_Date__c);
+        Assert.isTrue(created.Permission_to_Liquidate__c);
+        Assert.isFalse(created.Permission_to_Reinvest__c);
+        Assert.areEqual('Ladder notes', created.Special_Instructions__c);
+    }
+
+    @isTest
+    static void managedPlatformCaseDmsWithStcmCapturesAddendumFields() {
+        Test.startTest();
+        String caseId = EnvelopeActionCaseController.createManagedPlatformCase(
+            dmsCapableFaId(),
+            new Map<String, Object>{
+                'managedAccountPlatform' => 'DMS (Wrap)',
+                'stcm' => true,
+                'stcmCashWithdrawalSelection' => 'Other',
+                'stcmFrequency' => 'Quarterly',
+                'stcmOtherFrequency' => '',
+                'stcmStartDate' => '2026-02-01',
+                'stcmLiquidatePermission' => false,
+                'stcmReinvestPermission' => true,
+                'stcmCustomization' => 'STCM notes',
+                'stcmStrategyTerm' => 'Perpetual'
+            },
+            envelopeId()
+        );
+        Test.stopTest();
+
+        Case created = [
+            SELECT STCM__c, Cash_Withdrawal_Selection__c, DMS_Addendum_Frequency__c,
+                DMS_Frequency_Start_Date__c, Permission_to_Liquidate__c, Permission_to_Reinvest__c,
+                Special_Instructions__c, STCM_Strategy_Term__c
+            FROM Case WHERE Id = :caseId
+        ];
+        Assert.isTrue(created.STCM__c);
+        Assert.areEqual('Other', created.Cash_Withdrawal_Selection__c);
+        Assert.areEqual('Quarterly', created.DMS_Addendum_Frequency__c);
+        Assert.areEqual(Date.valueOf('2026-02-01'), created.DMS_Frequency_Start_Date__c);
+        Assert.isFalse(created.Permission_to_Liquidate__c);
+        Assert.isTrue(created.Permission_to_Reinvest__c);
+        Assert.areEqual('STCM notes', created.Special_Instructions__c);
+        Assert.areEqual('Perpetual', created.STCM_Strategy_Term__c);
+    }
+
+    @isTest
+    static void managedPlatformCaseUpdateRoundTripsIdWithoutDuplicateLink() {
+        String caseId = EnvelopeActionCaseController.createManagedPlatformCase(
+            faId(), new Map<String, Object>{ 'managedAccountPlatform' => 'AMS' }, envelopeId());
+
+        Test.startTest();
+        String updated = EnvelopeActionCaseController.createManagedPlatformCase(
+            faId(),
+            new Map<String, Object>{ 'Id' => caseId, 'managedAccountPlatform' => 'OMS' },
+            envelopeId()
+        );
+        Test.stopTest();
+
+        Assert.areEqual(caseId, updated, 'An update call round-trips the existing id.');
+        Assert.areEqual(1, [SELECT COUNT() FROM Envelope_Content__c WHERE Case__c = :caseId],
+            'No duplicate envelope link is created on update.');
+    }
+
+    @isTest
+    static void managedPlatformCaseWrapsUnexpectedFailure() {
+        Test.startTest();
+        try {
+            EnvelopeActionCaseController.createManagedPlatformCase(
+                null, new Map<String, Object>{ 'managedAccountPlatform' => 'AMS' }, envelopeId());
+            Assert.fail('A missing Financial Account must not silently succeed.');
+        } catch (AuraHandledException expected) {
+        }
+        Test.stopTest();
+    }
+
+    // ---------------------------------------------------------
+    // createAccountClosureCase
+    // ---------------------------------------------------------
+
+    @isTest
+    static void accountClosureClientTerminatedServicesCapturesEndDate() {
+        Test.startTest();
+        String caseId = EnvelopeActionCaseController.createAccountClosureCase(
+            faId(),
+            new Map<String, Object>{
+                'accountClosureReason' => 'Client Terminated Services',
+                'endDate' => '2026-03-01'
+            },
+            envelopeId()
+        );
+        Test.stopTest();
+
+        Case created = [
+            SELECT Type, Subject, Account_Closure_Reason__c, Account_Closure_End_Date__c
+            FROM Case WHERE Id = :caseId
+        ];
+        Assert.areEqual('Account Closure', created.Type);
+        Assert.areEqual('Account Closure - Client Terminated Services', created.Subject);
+        Assert.areEqual('Client Terminated Services', created.Account_Closure_Reason__c);
+        Assert.areEqual(Date.valueOf('2026-03-01'), created.Account_Closure_End_Date__c);
+        Assert.areEqual(1, [SELECT COUNT() FROM Envelope_Content__c WHERE Case__c = :caseId]);
+    }
+
+    @isTest
+    static void accountClosureMissingEndDateThrows() {
+        Test.startTest();
+        try {
+            EnvelopeActionCaseController.createAccountClosureCase(
+                faId(),
+                new Map<String, Object>{ 'accountClosureReason' => 'Client Terminated Services' },
+                envelopeId()
+            );
+            Assert.fail('A missing required End Date must throw.');
+        } catch (AuraHandledException expected) {
+            // getMessage() is masked to 'Script-thrown exception' by the platform (see the coercion
+            // test above); the throw itself is what this test covers.
+        }
+        Test.stopTest();
+    }
+
+    @isTest
+    static void accountClosureInvalidEndDateThrows() {
+        Test.startTest();
+        try {
+            EnvelopeActionCaseController.createAccountClosureCase(
+                faId(),
+                new Map<String, Object>{
+                    'accountClosureReason' => 'Client Terminated Services',
+                    'endDate' => 'not-a-date'
+                },
+                envelopeId()
+            );
+            Assert.fail('A malformed End Date must throw.');
+        } catch (AuraHandledException expected) {
+        }
+        Test.stopTest();
+    }
+
+    // 'Terminated Services' (without 'Client') is not an active Account_Closure_Reason__c value in
+    // this org - only 'Client Terminated Services' is (confirmed against the org's field describe).
+    // Setting the reason to this legacy value fails the Case insert with a restricted-picklist
+    // error, wrapped as an AuraHandledException. Documents current behavior; the branch that reads
+    // 'additionalInformation' is otherwise unreachable through a valid save.
+    @isTest
+    static void accountClosureLegacyTerminatedServicesReasonFails() {
+        Test.startTest();
+        try {
+            EnvelopeActionCaseController.createAccountClosureCase(
+                faId(),
+                new Map<String, Object>{
+                    'accountClosureReason' => 'Terminated Services',
+                    'additionalInformation' => 'Some notes'
+                },
+                envelopeId()
+            );
+            Assert.fail('An inactive closure reason value must not silently insert.');
+        } catch (AuraHandledException expected) {
+        }
+        Test.stopTest();
+    }
+
+    @isTest
+    static void accountClosureOtherReasonCapturesExplanation() {
+        Test.startTest();
+        String caseId = EnvelopeActionCaseController.createAccountClosureCase(
+            faId(),
+            new Map<String, Object>{
+                'accountClosureReason' => 'Other',
+                'explanation' => 'Client moving to another firm'
+            },
+            envelopeId()
+        );
+        Test.stopTest();
+
+        Assert.areEqual('Client moving to another firm',
+            [SELECT Account_Closure_Explanation__c FROM Case WHERE Id = :caseId]
+                .Account_Closure_Explanation__c);
+    }
+
+    @isTest
+    static void accountClosureDeathInTheFutureThrows() {
+        Test.startTest();
+        try {
+            EnvelopeActionCaseController.createAccountClosureCase(
+                faId(),
+                new Map<String, Object>{
+                    'accountClosureReason' => 'Death',
+                    'dateOfDeath' => String.valueOf(Date.today().addDays(30))
+                },
+                envelopeId()
+            );
+            Assert.fail('A future Date of Death must throw.');
+        } catch (AuraHandledException expected) {
+        }
+        Test.stopTest();
+    }
+
+    @isTest
+    static void accountClosureDeathMarksThePrimaryOwnerDeceased() {
+        Id personRtId = Schema.SObjectType.Account
+            .getRecordTypeInfosByDeveloperName().get('PersonAccount').getRecordTypeId();
+        Account owner = new Account(
+            FirstName = 'Pat', LastName = 'Owner', RecordTypeId = personRtId, Type = 'Prospect'
+        );
+        insert owner;
+        Financial_Account__c fa = new Financial_Account__c(
+            Name = 'Owned FA', Managed_Account_Platform__c = 'AMS', Primary_Owner__c = owner.Id
+        );
+        insert fa;
+
+        Test.startTest();
+        String caseId = EnvelopeActionCaseController.createAccountClosureCase(
+            fa.Id,
+            new Map<String, Object>{
+                'accountClosureReason' => 'Death',
+                'dateOfDeath' => '2026-01-15'
+            },
+            envelopeId()
+        );
+        Test.stopTest();
+
+        Assert.areEqual(Date.valueOf('2026-01-15'),
+            [SELECT Date_of_Death__c FROM Case WHERE Id = :caseId].Date_of_Death__c);
+        Account updatedOwner = [SELECT LastName, Date_of_Death__c FROM Account WHERE Id = :owner.Id];
+        Assert.areEqual(Date.valueOf('2026-01-15'), updatedOwner.Date_of_Death__c);
+        Assert.areEqual('Owner (DECEASED)', updatedOwner.LastName,
+            'The primary owner is flagged deceased on the account itself.');
+    }
+
+    @isTest
+    static void accountClosureAttachesUploadedFiles() {
+        ContentVersion cv = new ContentVersion(
+            Title = 'Closure Doc',
+            PathOnClient = 'closure.pdf',
+            VersionData = Blob.valueOf('closure document body')
+        );
+        insert cv;
+        Id contentDocumentId = [
+            SELECT ContentDocumentId FROM ContentVersion WHERE Id = :cv.Id
+        ].ContentDocumentId;
+
+        Test.startTest();
+        String caseId = EnvelopeActionCaseController.createAccountClosureCase(
+            faId(),
+            new Map<String, Object>{
+                'accountClosureReason' => 'Other',
+                'explanation' => 'With supporting doc',
+                'uploadedFiles' => new List<Object>{
+                    new Map<Object, Object>{ 'documentId' => (Object) String.valueOf(contentDocumentId) }
+                }
+            },
+            envelopeId()
+        );
+        Test.stopTest();
+
+        Assert.areEqual(1,
+            [SELECT COUNT() FROM ContentDocumentLink
+                WHERE ContentDocumentId = :contentDocumentId AND LinkedEntityId = :caseId],
+            'The uploaded file is linked to the new closure Case.');
+    }
+
+    // ---------------------------------------------------------
+    // deleteAccountActionCase
+    // ---------------------------------------------------------
+
+    @isTest
+    static void deleteAccountActionCaseRemovesTheCase() {
+        String caseId = EnvelopeActionCaseController.saveAccountActionCase(
+            faId(), new Map<String, Object>(), envelopeId(), 'Additional Funding');
+
+        Test.startTest();
+        EnvelopeActionCaseController.deleteAccountActionCase(caseId);
+        Test.stopTest();
+
+        Assert.areEqual(0, [SELECT COUNT() FROM Case WHERE Id = :caseId],
+            'The case is deleted.');
+    }
 }

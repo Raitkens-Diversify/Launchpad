@@ -16,6 +16,7 @@
                         <template if:true={row.href}>
                             <a class="ar-row__link" href={row.href} target={row.target}
                                download={row.download} data-id={row.id} data-track={row.trackClick}
+                               data-slug={row.slug} data-detail={row.isDetail}
                                data-content-document-id={row.contentDocumentId}
                                onclick={handleLinkClick}>{row.action}</a>
                         </template>

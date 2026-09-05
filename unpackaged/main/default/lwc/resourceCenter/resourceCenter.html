@@ -9,6 +9,7 @@
          onarticleselect={handleArticleSelect}
          onrcsearch={handleSearch}
          onrchome={handleHome}
+         onhelphome={handleHelpCenter}
          onguideopen={handleGuideOpen}
          onresourcedownload={handleDownload}>
 
@@ -55,11 +56,8 @@
                 </template>
                 <template if:true={isGuide}>
                     <section class="rc-guide">
-                        <nav class="rc-guide__crumbs" aria-label="Breadcrumb">
-                            <a class="rc-guide__crumb-link" href="#" onclick={handleGuideBack}>Resource Center</a>
-                            <span class="rc-guide__crumb-sep" aria-hidden="true">›</span>
-                            <span class="rc-guide__crumb-current">Get Help</span>
-                        </nav>
+                        <c-ds-breadcrumbs items={guideCrumbs}
+                                          oncrumbselect={handleGuideCrumb}></c-ds-breadcrumbs>
                         <h1 class="rc-guide__title">Get Help</h1>
                         <p class="rc-guide__sub">Answer a couple of questions and we&rsquo;ll point you to the right place.</p>
                         <!-- Embedded mode: category/resource terminals fire events the

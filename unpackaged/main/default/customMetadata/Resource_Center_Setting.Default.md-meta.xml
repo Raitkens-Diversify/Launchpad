@@ -3,6 +3,10 @@
     <label>Default</label>
     <protected>false</protected>
     <values>
+        <field>Arc_Site_Url_Path_Prefix__c</field>
+        <value xsi:type="xsd:string">ARC</value>
+    </values>
+    <values>
         <field>File_Delivery_Mode__c</field>
         <value xsi:type="xsd:string">Shepherd</value>
     </values>

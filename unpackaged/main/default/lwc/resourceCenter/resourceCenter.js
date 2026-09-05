@@ -6,6 +6,7 @@ import typeahead from '@salesforce/apex/ResourceCenterService.typeahead';
 import { createSuggestionFetcher } from 'c/dsSearchBar';
 import { createSearchLogger, logSearchEntry, APP_RESOURCE_CENTER } from 'c/searchLogUtil';
 import { linkContext, readParams, isSiteRef, goToHome, goToArticle } from 'c/contextNav';
+import { rcRootCrumbs, CRUMB_HELP_HOME, CRUMB_RC_HOME } from 'c/rcConstants';
 
 /**
  * resourceCenter — root orchestrator + branded chrome, matching the NexS Help
@@ -116,9 +117,17 @@ export default class ResourceCenter extends NavigationMixin(LightningElement) {
 
     handleHome() { this.setState('home'); }
     handleGuideOpen() { this.setState('guide'); }
-    handleGuideBack(event) {
-        event.preventDefault(); // crumb is an anchor; don't jump the page
-        this.setState('home');
+    /** Help & Resources › Resource Center › Get Help */
+    get guideCrumbs() {
+        return [...rcRootCrumbs(), { label: 'Get Help' }];
+    }
+    handleGuideCrumb(event) {
+        const key = event.detail.key;
+        if (key === CRUMB_HELP_HOME) {
+            this.handleHelpCenter();
+        } else if (key === CRUMB_RC_HOME) {
+            this.setState('home');
+        }
     }
     handleCategorySelect(event) { this.setState('category', event.detail.slug); }
     handleResourceSelect(event) { this.setState('detail', event.detail.slug); }
@@ -178,6 +187,8 @@ export default class ResourceCenter extends NavigationMixin(LightningElement) {
         }
     }
 
+    /** The chrome's Help Center action AND every child crumb's `helphome`
+        (Help & Resources › …) land here. */
     handleHelpCenter() {
         // A Builder-supplied override stays a plain external link; otherwise
         // contextNav routes to the site or the core-app tab as appropriate.

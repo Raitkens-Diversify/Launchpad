@@ -30,7 +30,11 @@ private class ArcWelcomeControllerTest {
         insert u;
 
         // Grant FLS on Has_Seen_Welcome__c via the shipped permission set, the
-        // same way a real Arc user is provisioned.
+        // same way a real Arc user is provisioned. The field's own comment
+        // notes it is shared with the "Welcome to Nexus/Arc" flow, and
+        // NexSHelpCenter (not "ArcHelpCenter", which does not exist in this
+        // org -- confirmed via `sf data query` against launchpad) is the
+        // permission set that actually grants edit/read on it.
         PermissionSet ps = [SELECT Id FROM PermissionSet WHERE Name = 'NexSHelpCenter' LIMIT 1];
         insert new PermissionSetAssignment(AssigneeId = u.Id, PermissionSetId = ps.Id);
 

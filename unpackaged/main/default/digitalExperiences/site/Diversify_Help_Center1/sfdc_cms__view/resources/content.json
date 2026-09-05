@@ -22,7 +22,8 @@
           "children" : [ {
             "children" : [ {
               "attributes" : {
-                "dxpStyle" : { }
+                "dxpStyle" : { },
+                "hideBranding" : true
               },
               "definition" : "c:resourceCenter",
               "id" : "9f8a4c31-6d02-47be-8fa5-c1e7290d63b4",

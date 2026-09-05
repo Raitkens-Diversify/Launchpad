@@ -159,10 +159,10 @@
         <locationX>314</locationX>
         <locationY>350</locationY>
         <assignmentItems>
-            <assignToReference>varSelectedFinancialAccount</assignToReference>
+            <assignToReference>varWizFin</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>Financial_Account_Transferring_Into.selectedChoiceValues</elementReference>
+                <elementReference>varWizFin</elementReference>
             </value>
         </assignmentItems>
         <connector>
@@ -182,7 +182,7 @@
             <name>FA</name>
             <conditionLogic>and</conditionLogic>
             <conditions>
-                <leftValueReference>varFinancialAccount.Id</leftValueReference>
+                <leftValueReference>varWizFin.Id</leftValueReference>
                 <operator>IsNull</operator>
                 <rightValue>
                     <booleanValue>false</booleanValue>
@@ -233,6 +233,21 @@
         <object xsi:nil="true" />
         <picklistField>Signature_Type__c</picklistField>
         <picklistObject>Case</picklistObject>
+    </dynamicChoiceSets>
+    <dynamicChoiceSets>
+        <name>WizFinRCS</name>
+        <dataType>String</dataType>
+        <displayField>Name</displayField>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Household__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>varHousehold.Id</elementReference>
+            </value>
+        </filters>
+        <object>Financial_Account__c</object>
+        <valueField>Id</valueField>
     </dynamicChoiceSets>
     <environments>Default</environments>
     <formulas>
@@ -320,7 +335,7 @@
                 <fieldType>Region</fieldType>
                 <fields>
                     <name>Financial_Account_Transferring_Into</name>
-                    <choiceReferences>FinancialAccount_Record_ChoiceSet</choiceReferences>
+                    <choiceReferences>WizFinRCS</choiceReferences>
                     <extensionName>flowruntime:choiceLookup</extensionName>
                     <fieldText>Financial Account Transferring Into:</fieldText>
                     <fieldType>ComponentChoice</fieldType>
@@ -365,7 +380,7 @@
                     <inputParameters>
                         <name>defaultValue</name>
                         <value>
-                            <elementReference>varFinancialAccount.Name</elementReference>
+                            <elementReference>varWizFin.Name</elementReference>
                         </value>
                     </inputParameters>
                     <inputParameters>
@@ -388,7 +403,7 @@
                     <visibilityRule>
                         <conditionLogic>and</conditionLogic>
                         <conditions>
-                            <leftValueReference>varFinancialAccount.Id</leftValueReference>
+                            <leftValueReference>varWizFin.Id</leftValueReference>
                             <operator>IsNull</operator>
                             <rightValue>
                                 <booleanValue>false</booleanValue>
@@ -780,7 +795,7 @@
             <targetReference>FA_Selection</targetReference>
         </connector>
     </start>
-    <status>Active</status>
+    <status>Draft</status>
     <variables>
         <name>Advisor_Request_Item_variable_id</name>
         <dataType>String</dataType>
@@ -840,5 +855,13 @@
         <isInput>true</isInput>
         <isOutput>false</isOutput>
         <objectType>Wizard_Flow_Values__mdt</objectType>
+    </variables>
+    <variables>
+        <name>varWizFin</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Financial_Account__c</objectType>
     </variables>
 </Flow>

@@ -328,6 +328,14 @@ export default class NexsArticleBrowser extends LightningElement {
             });
     }
 
+    /** An authored in-body link to another article (nexsArticleViewer
+        `articlelink`): open it inline, exactly like a Suggested Articles pick,
+        so the routed host mirrors it into ?name= via articleopen. */
+    handleArticleLink(event) {
+        event.stopPropagation();
+        this.openArticleByUrlName(event.detail && event.detail.urlName);
+    }
+
     /** Run a full search (blank term returns to the category list). */
     @api
     searchFor(term) {

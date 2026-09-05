@@ -28,6 +28,11 @@
     z-index: 20;
 }
 
+/* Branding hidden (the site owns the header) and nothing slotted: no strip. */
+.ds-chrome__header--empty {
+    display: none;
+}
+
 .ds-chrome__logo {
     height: 24px;
     width: auto;

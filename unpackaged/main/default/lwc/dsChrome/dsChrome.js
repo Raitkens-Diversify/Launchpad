@@ -11,9 +11,15 @@ import { LightningElement, api } from 'lwc';
  *   @api logoUrl        — brand image (DiversifyLogoV2 static resource URL)
  *   @api brandLabel     — crumb text + footer brand ("Help Center", …)
  *   @api copyrightLine  — footer meta; sensible default
- *   @api hideBranding   — hides logo + divider + brand crumb (search/actions
- *                         slots and the footer still render) for embeddings,
- *                         like ARC, that carry their own site chrome
+ *   @api hideBranding   — "the site supplies the brand chrome": hides logo +
+ *                         divider + brand crumb AND the brand footer, and
+ *                         collapses the header strip entirely while both the
+ *                         search and actions slots are empty. Set by the
+ *                         /help site pages (the theme layout owns the header
+ *                         + nav + footer since 2026-09-04) and by embeddings,
+ *                         like ARC, that carry their own site chrome. The
+ *                         search/actions slots still render when occupied —
+ *                         page-specific controls stay, below the site header.
  *   slots: search (right-aligned, flexible width), actions (after search:
  *          help menu, cross-app links), default (page body)
  *   events: brandclick  — the brand crumb was clicked (host routes home)
@@ -38,6 +44,17 @@ export default class DsChrome extends LightningElement {
     }
     get showBranding() {
         return !this._hideBranding;
+    }
+    /** The brand footer belongs to whoever owns the branding. */
+    get showFooter() {
+        return this.showBranding;
+    }
+    /** With branding hidden and nothing slotted, the strip would be an empty
+        64px bar under the site header — collapse it. The slots stay mounted
+        (inside the header) so slotchange keeps firing when a view swaps. */
+    get headerClass() {
+        const empty = !this.showBranding && !this.hasSearch && !this.hasActions;
+        return empty ? 'ds-chrome__header ds-chrome__header--empty' : 'ds-chrome__header';
     }
 
     // Track slot occupancy so an empty search slot doesn't eat flex space

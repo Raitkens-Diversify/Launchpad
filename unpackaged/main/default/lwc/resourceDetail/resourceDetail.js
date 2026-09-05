@@ -10,6 +10,9 @@ import {
     WEBINAR_STATUS_UPCOMING,
     WEBINAR_STATUS_PAST,
     WEBINAR_STATUS_RECORDED,
+    rcRootCrumbs,
+    CRUMB_HELP_HOME,
+    CRUMB_RC_HOME,
     formatDurationMinutes
 } from 'c/rcConstants';
 import { linkContext, articleHref } from 'c/contextNav';
@@ -207,9 +210,14 @@ export default class ResourceDetail extends LightningElement {
         this.dispatchEvent(new CustomEvent('rchome', { bubbles: true, composed: true }));
     }
 
-    /** Full-path crumb trail: RC › [main topic ›] [subtopic ›] resource. */
+    /** The unified home is another page; the shell routes it via c/contextNav. */
+    handleHelpHome() {
+        this.dispatchEvent(new CustomEvent('helphome', { bubbles: true, composed: true }));
+    }
+
+    /** Full-path crumb trail: Help & Resources › RC › [main topic ›] [subtopic ›] resource. */
     get crumbItems() {
-        const crumbs = [{ label: 'Resource Center', key: 'home' }];
+        const crumbs = rcRootCrumbs();
         if (this.detail) {
             if (this.detail.categoryParentSlug) {
                 crumbs.push({
@@ -227,7 +235,9 @@ export default class ResourceDetail extends LightningElement {
 
     handleCrumb(event) {
         const key = event.detail.key;
-        if (key === 'home') {
+        if (key === CRUMB_HELP_HOME) {
+            this.handleHelpHome();
+        } else if (key === CRUMB_RC_HOME) {
             this.handleHome();
         } else {
             this.dispatchEvent(new CustomEvent('categoryselect', {

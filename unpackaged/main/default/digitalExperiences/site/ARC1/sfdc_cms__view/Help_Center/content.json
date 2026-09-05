@@ -1,6 +1,6 @@
 {
   "type" : "sfdc_cms__view",
-  "title" : "Help Center",
+  "title" : "Help and Resources",
   "contentBody" : {
     "component" : {
       "children" : [ {
@@ -48,7 +48,7 @@
             "customHeadTags" : "",
             "description" : "",
             "dxpStyle" : { },
-            "pageTitle" : "Help Center"
+            "pageTitle" : "Help and Resources"
           },
           "definition" : "community_builder:seoAssistant",
           "id" : "5f6a7b8c-9d0e-4f1a-8b2c-4d5e6f7a8b9c",

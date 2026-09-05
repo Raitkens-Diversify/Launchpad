@@ -4,10 +4,31 @@
     <containerType>Network</containerType>
     <label>Default Navigation</label>
     <navigationMenuItem>
-        <label>Topics</label>
+        <label>Home</label>
         <position>1</position>
-        <publiclyAvailable>true</publiclyAvailable>
-        <target>ShowMoreTopics</target>
-        <type>NavigationalTopic</type>
+        <publiclyAvailable>false</publiclyAvailable>
+        <target>/</target>
+        <type>InternalLink</type>
+    </navigationMenuItem>
+    <navigationMenuItem>
+        <label>Help Center</label>
+        <position>2</position>
+        <publiclyAvailable>false</publiclyAvailable>
+        <target>/article</target>
+        <type>InternalLink</type>
+    </navigationMenuItem>
+    <navigationMenuItem>
+        <label>Resources</label>
+        <position>3</position>
+        <publiclyAvailable>false</publiclyAvailable>
+        <target>/resources</target>
+        <type>InternalLink</type>
+    </navigationMenuItem>
+    <navigationMenuItem>
+        <label>Events</label>
+        <position>4</position>
+        <publiclyAvailable>false</publiclyAvailable>
+        <target>/events</target>
+        <type>InternalLink</type>
     </navigationMenuItem>
 </NavigationMenu>

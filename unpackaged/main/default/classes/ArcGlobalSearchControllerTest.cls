@@ -10,7 +10,7 @@
 private class ArcGlobalSearchControllerTest {
   @TestSetup
   static void setup() {
-    insert new Account(Name = 'Acme Test Account', Type = 'Household');
+    insert new Account(Name = 'Acme Test Account', Type = 'Prospect');
     insert new Case(Subject = 'Test Case Subject', Status = 'New');
     insert new Task(Subject = 'Test Task Subject', Status = 'Open');
     // Name is an auto-number (CL-######), so it can't be set here.
@@ -111,7 +111,7 @@ private class ArcGlobalSearchControllerTest {
       'Acme Test Account',
       byKey.get('contacts').items[0].title
     );
-    System.assertEquals('Household', byKey.get('contacts').items[0].subtitle);
+    System.assertEquals('Prospect', byKey.get('contacts').items[0].subtitle);
     System.assertEquals(
       'Account',
       byKey.get('contacts').items[0].objectApiName
@@ -192,7 +192,7 @@ private class ArcGlobalSearchControllerTest {
   static void capsPreviewRowsPerCategoryButKeepsFullCount() {
     List<Account> extras = new List<Account>();
     for (Integer i = 0; i < 5; i++) {
-      extras.add(new Account(Name = 'Extra Test Account ' + i, Classification__c = 'Unclassified'));
+      extras.add(new Account(Name = 'Extra Test Account ' + i, Type = 'Prospect', Classification__c = 'Unclassified'));
     }
     insert extras;
 
@@ -232,7 +232,7 @@ private class ArcGlobalSearchControllerTest {
   static void fullSearchReturnsEveryRowNotJustAPreview() {
     List<Account> extras = new List<Account>();
     for (Integer i = 0; i < 5; i++) {
-      extras.add(new Account(Name = 'Extra Test Account ' + i, Classification__c = 'Unclassified'));
+      extras.add(new Account(Name = 'Extra Test Account ' + i, Type = 'Prospect', Classification__c = 'Unclassified'));
     }
     insert extras;
 

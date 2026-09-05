@@ -1,6 +1,6 @@
 {
   "type" : "sfdc_cms__route",
-  "title" : "Help Center",
+  "title" : "Help and Resources",
   "contentBody" : {
     "activeViewId" : "Help_Center",
     "configurationTags" : [ ],

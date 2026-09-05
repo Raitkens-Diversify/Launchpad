@@ -1000,6 +1000,130 @@ private class ArcRecordDetailControllerTest {
   }
 
   @IsTest
+  static void searchFinancialAdvisorTeamsReturnsEmptyListForBlankSearchKey() {
+    Assert.areEqual(
+      0,
+      ArcRecordDetailController.searchFinancialAdvisorTeams(null).size(),
+      'A null search key should not query anything.'
+    );
+    Assert.areEqual(
+      0,
+      ArcRecordDetailController.searchFinancialAdvisorTeams('   ').size(),
+      'A blank search key should not query anything.'
+    );
+  }
+
+  @IsTest
+  static void searchFinancialAdvisorTeamsReturnsMatchingActiveTeams() {
+    Financial_Advisor_Team__c team = new Financial_Advisor_Team__c(
+      Name = 'Search Team Alpha'
+    );
+    insert team;
+
+    Test.startTest();
+    List<Map<String, String>> results = ArcRecordDetailController.searchFinancialAdvisorTeams(
+      'Search Team'
+    );
+    Test.stopTest();
+
+    Assert.areEqual(1, results.size(), 'The matching team should be found.');
+    Assert.areEqual(String.valueOf(team.Id), results[0].get('value'));
+    Assert.areEqual('Search Team Alpha', results[0].get('label'));
+    Assert.areEqual('standard:team_member', results[0].get('icon'));
+  }
+
+  /**
+   * The Financial Account record page's schema configures lookups
+   * (Primary_Owner__c -> Account, Financial_Advisor_Team__c ->
+   * Financial_Advisor_Team__c) whose display names load() resolves through
+   * resolveReferenceLabels so read mode shows a name instead of a bare id.
+   */
+  @IsTest
+  static void loadResolvesReferenceLabelsForFinancialAccountLookups() {
+    Account owner = new Account(Name = 'Ref Label Owner', Type = 'Prospect');
+    insert owner;
+
+    Financial_Advisor_Team__c team = new Financial_Advisor_Team__c(
+      Name = 'Ref Label Team'
+    );
+    insert team;
+
+    Financial_Account__c fa = new Financial_Account__c(
+      Name = 'Ref Label FA',
+      Primary_Owner__c = owner.Id,
+      Financial_Advisor_Team__c = team.Id
+    );
+    insert fa;
+
+    Test.startTest();
+    ArcRecordDetailController.RecordDetailContext context = ArcRecordDetailController.load(
+      fa.Id,
+      null,
+      null,
+      false,
+      null
+    );
+    Test.stopTest();
+
+    Assert.areEqual(
+      'Ref Label Owner',
+      context.referenceLabels.get('Primary_Owner__c'),
+      'The owner lookup should resolve to the Account name.'
+    );
+    Assert.areEqual(
+      'Ref Label Team',
+      context.referenceLabels.get('Financial_Advisor_Team__c'),
+      'The team lookup should resolve to the Financial Advisor Team name.'
+    );
+  }
+
+  /**
+   * Check_Deposit__c.Financial_Account__c is a lookup to
+   * FinServ__FinancialAccount__c, which the portal profile cannot read under
+   * USER_MODE. resolveReferenceLabels special-cases that object and resolves
+   * its display name through ArcFinServAccountLabels instead of the generic
+   * describe-driven query.
+   */
+  @IsTest
+  static void loadResolvesFinServFinancialAccountReferenceLabelOnCheckDeposit() {
+    Account owner = new Account(Name = 'FinServ Owner', Type = 'Prospect');
+    insert owner;
+
+    FinServ__FinancialAccount__c finServAccount = new FinServ__FinancialAccount__c(
+      Name = 'FinServ Ref Label Account',
+      FinServ__PrimaryOwner__c = owner.Id
+    );
+    insert finServAccount;
+
+    Check_Log__c log = new Check_Log__c();
+    insert log;
+
+    Check_Deposit__c deposit = new Check_Deposit__c(
+      Check__c = log.Id,
+      Financial_Account__c = finServAccount.Id,
+      Amount__c = 100
+    );
+    insert deposit;
+
+    Test.startTest();
+    ArcRecordDetailController.RecordDetailContext context = ArcRecordDetailController.load(
+      deposit.Id,
+      null,
+      null,
+      false,
+      null
+    );
+    Test.stopTest();
+
+    Assert.areEqual('Check_Deposit__c', context.objectApiName);
+    Assert.areEqual(
+      'FinServ Ref Label Account',
+      context.referenceLabels.get('Financial_Account__c'),
+      'The FinServ financial account lookup resolves through ArcFinServAccountLabels.'
+    );
+  }
+
+  @IsTest
   static void formatFieldValueForWireSerializesDateAndDatetime() {
     System.assertEquals(
       '2024-07-19',
