@@ -142,7 +142,10 @@ export default class AdminCategoryManager extends LightningElement {
             key: r.id,
             label: r.name,
             sublabel: r.slug,
-            badge: String(r.resourceCount),
+            // "3 +2": three resources live here, two more are also shown here.
+            badge: r.secondaryCount > 0
+                ? `${r.resourceCount} +${r.secondaryCount}`
+                : String(r.resourceCount),
             statusLabel: r.statusLabel,
             statusClass: r.statusClass,
             children: []
@@ -514,6 +517,18 @@ export default class AdminCategoryManager extends LightningElement {
                 confirmLabel: 'OK'
             };
         }
+        if (impact.secondaryCount > 0) {
+            const n = impact.secondaryCount;
+            return {
+                ...base,
+                action: 'blocked',
+                variant: 'brand',
+                header: `Can't delete: ${row.name}`,
+                message: `${n} resource${plural(n, ' is', 's are')} also shown in this category`
+                    + `${subs ? ' or its subtopics' : ''}. Remove it from those resources first.`,
+                confirmLabel: 'OK'
+            };
+        }
         if (impact.guideOptionCount > 0) {
             const n = impact.guideOptionCount;
             return {
@@ -533,7 +548,7 @@ export default class AdminCategoryManager extends LightningElement {
             header: `Delete category: ${row.name}`,
             message: `Deletes this category${subs
                 ? ` and its ${subs} subtopic${plural(subs, '', 's')} (all empty)` : ''}. `
-                + 'No resources live under it. This cannot be undone.',
+                + 'No resources live under it or are shown in it. This cannot be undone.',
             confirmLabel: 'Delete'
         };
     }

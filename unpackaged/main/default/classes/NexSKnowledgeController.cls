@@ -706,39 +706,67 @@ public with sharing class NexSKnowledgeController {
             }
         }
 
-        // 2. Top up with articles from the same Help Topic.
-        // (DataCategoryGroupName is not filterable in SOQL, so filter in Apex.)
+        // 2. Top up with articles from the article's Help Topics — every topic
+        //    it is filed under (subtopics widened to their top-level topic, like
+        //    the section pages), in ONE query, Featured first.
         if (out.size() < MAX_SUGGESTIONS) {
-            String topic;
-            for (Knowledge__DataCategorySelection sel : [
-                SELECT DataCategoryGroupName, DataCategoryName
-                FROM Knowledge__DataCategorySelection
-                WHERE ParentId = :article.Id
-            ]) {
-                if (sel.DataCategoryGroupName == DATA_CATEGORY_GROUP) {
-                    topic = sel.DataCategoryName;
-                    break;
-                }
-            }
-            if (topic != null) {
-                // The article may be filed under a subtopic — suggest across
-                // its whole top-level topic, like the section pages do.
-                loadTaxonomy();
-                if (childToTopicCache.containsKey(topic)) {
-                    topic = childToTopicCache.get(topic);
-                }
-                for (ArticleSummary s : getArticlesByCategory(topic)) {
-                    if (out.size() >= MAX_SUGGESTIONS) {
-                        break;
+            List<String> topics = topLevelTopicsFor(article.Id);
+            if (!topics.isEmpty()) {
+                // The bound covers the article itself and the authored picks,
+                // which are excluded below; the loop caps at MAX_SUGGESTIONS.
+                String soql =
+                    'SELECT Id, Title, Summary, UrlName, Featured__c, RecordType.DeveloperName, RecordType.Name ' +
+                    'FROM Knowledge__kav ' +
+                    'WHERE ' + publishedFilter() +
+                    dataCategoryClause(topics) +
+                    ' ORDER BY Featured__c DESC, Title ASC LIMIT ' + (MAX_SUGGESTIONS + pickedIds.size());
+                try {
+                    for (ArticleSummary s : toSummaries(Database.query(soql))) {
+                        if (out.size() >= MAX_SUGGESTIONS) {
+                            break;
+                        }
+                        if (!pickedIds.contains(s.id)) {
+                            pickedIds.add(s.id);
+                            out.add(s);
+                        }
                     }
-                    if (!pickedIds.contains(s.id)) {
-                        pickedIds.add(s.id);
-                        out.add(s);
-                    }
+                } catch (QueryException e) {
+                    // A filing under a category that no longer exists must not
+                    // break the article page — the rail just stays shorter.
                 }
             }
         }
         return out;
+    }
+
+    /**
+     * Every top-level Help Topic an article version is filed under: each
+     * selection (topic or subtopic) mapped to its topic, deduped, in taxonomy
+     * order (unknown names trail). The group-name field isn't filterable in
+     * SOQL, so the group is filtered in Apex.
+     */
+    private static List<String> topLevelTopicsFor(Id versionId) {
+        loadTaxonomy();
+        Set<String> found = new Set<String>();
+        for (Knowledge__DataCategorySelection sel : [
+            SELECT DataCategoryGroupName, DataCategoryName
+            FROM Knowledge__DataCategorySelection
+            WHERE ParentId = :versionId
+        ]) {
+            if (sel.DataCategoryGroupName == DATA_CATEGORY_GROUP) {
+                found.add(childToTopicCache.containsKey(sel.DataCategoryName)
+                    ? childToTopicCache.get(sel.DataCategoryName)
+                    : sel.DataCategoryName);
+            }
+        }
+        List<String> ordered = new List<String>();
+        for (String topic : topicOrderCache) {
+            if (found.remove(topic)) {
+                ordered.add(topic);
+            }
+        }
+        ordered.addAll(found);
+        return ordered;
     }
 
 
@@ -821,6 +849,8 @@ public with sharing class NexSKnowledgeController {
     private static Map<String, String> childToTopicCache;
     /** Topic name → its subtopics, in taxonomy order. */
     private static Map<String, List<CategoryInfo>> topicChildrenCache;
+    /** Top-level topic names in taxonomy order (Map iteration order is not insertion order). */
+    private static List<String> topicOrderCache;
 
     private static void loadTaxonomy() {
         if (childToTopicCache != null) {
@@ -828,6 +858,7 @@ public with sharing class NexSKnowledgeController {
         }
         childToTopicCache = new Map<String, String>();
         topicChildrenCache = new Map<String, List<CategoryInfo>>();
+        topicOrderCache = new List<String>();
 
         List<Schema.DescribeDataCategoryGroupResult> groups =
             Schema.describeDataCategoryGroups(new List<String>{ 'KnowledgeArticleVersion' });
@@ -856,6 +887,7 @@ public with sharing class NexSKnowledgeController {
                         childToTopicCache.put(sub.getName(), topic.getName());
                     }
                     topicChildrenCache.put(topic.getName(), children);
+                    topicOrderCache.add(topic.getName());
                 }
             }
         }
@@ -866,6 +898,9 @@ public with sharing class NexSKnowledgeController {
      * one of the topic's subtopics gets that subtopic's label as its section
      * header (taxonomy order preserved). Articles filed on the topic itself keep
      * section = null and fall back to record-type grouping client-side.
+     * An article filed under several of the topic's subtopics is listed once,
+     * under the earliest subtopic in taxonomy order — the section is a single
+     * header per row, so the choice has to be deterministic.
      */
     private static void applySections(List<ArticleSummary> summaries, String topic) {
         if (String.isBlank(topic) || summaries.isEmpty()) {
@@ -897,8 +932,11 @@ public with sharing class NexSKnowledgeController {
             if (sel.DataCategoryGroupName == DATA_CATEGORY_GROUP
                 && labelByName.containsKey(sel.DataCategoryName)) {
                 ArticleSummary s = byId.get(sel.ParentId);
-                s.section = labelByName.get(sel.DataCategoryName);
-                s.sectionOrder = orderByName.get(sel.DataCategoryName);
+                Integer order = orderByName.get(sel.DataCategoryName);
+                if (s.section == null || order < s.sectionOrder) {
+                    s.section = labelByName.get(sel.DataCategoryName);
+                    s.sectionOrder = order;
+                }
             }
         }
     }
@@ -930,6 +968,31 @@ public with sharing class NexSKnowledgeController {
         // BELOW (not AT): a topic query also matches articles filed under its
         // subtopics — the Hulu-style section headers within a topic.
         return ' WITH DATA CATEGORY ' + DATA_CATEGORY_GROUP + '__c BELOW ' + category + '__c';
+    }
+
+    /**
+     * Multi-category form of dataCategoryClause: `BELOW (A__c, B__c)` matches
+     * articles filed under any of the topics. Same per-element injection guard;
+     * blanks are skipped and an empty list yields no clause.
+     */
+    private static String dataCategoryClause(List<String> categories) {
+        List<String> parts = new List<String>();
+        for (String category : categories == null ? new List<String>() : categories) {
+            if (String.isBlank(category)) {
+                continue;
+            }
+            if (!Pattern.matches('^[A-Za-z0-9_]{1,80}$', category)) {
+                throw new AuraHandledException('Invalid category.');
+            }
+            parts.add(category + '__c');
+        }
+        if (parts.isEmpty()) {
+            return '';
+        }
+        if (parts.size() == 1) {
+            return dataCategoryClause(categories[0]);
+        }
+        return ' WITH DATA CATEGORY ' + DATA_CATEGORY_GROUP + '__c BELOW (' + String.join(parts, ', ') + ')';
     }
 
     private static void assertAccessible() {

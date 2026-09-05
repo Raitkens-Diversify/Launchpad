@@ -68,7 +68,12 @@
                                     <span class="arsl__slug">{row.slug}</span>
                                 </td>
                                 <td>{row.resourceType}</td>
-                                <td>{row.categoryName}</td>
+                                <td title={row.categoryTitle}>
+                                    {row.categoryName}
+                                    <template if:true={row.secondaryCount}>
+                                        <span class="arsl__more">{row.moreLabel}</span>
+                                    </template>
+                                </td>
                                 <td>
                                     <span class={row.statusClass}>{row.statusLabel}</span>
                                     <template if:true={row.lifecycleLabel}>

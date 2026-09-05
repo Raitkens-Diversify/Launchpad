@@ -80,3 +80,10 @@
     font-size: 0.875rem;
     color: var(--slds-g-color-on-surface-1, #4b5563);
 }
+/* "Also show in" placements beside the home category. */
+.arsl__more {
+    margin-left: 0.35rem;
+    font-size: 0.8em;
+    color: var(--slds-g-color-neutral-base-50, #706e6b);
+    white-space: nowrap;
+}

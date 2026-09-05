@@ -16246,6 +16246,9 @@
         <layout>Release_Notes__c-Release Notes Layout</layout>
     </layoutAssignments>
     <layoutAssignments>
+        <layout>Resource_Category_Link__c-Resource Category Link Layout</layout>
+    </layoutAssignments>
+    <layoutAssignments>
         <layout>Rider__c-Rider Layout</layout>
     </layoutAssignments>
     <layoutAssignments>

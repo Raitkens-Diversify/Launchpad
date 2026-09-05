@@ -13,8 +13,10 @@ import { FILE_TYPES, DEFAULT_TYPE, TYPE_VIDEO, TYPE_EXTERNAL_LINK, TYPE_WEBINAR 
 
 /**
  * adminResourceEditor — guided Resource__c form replacing addResourceAction:
- * type-first conditional fields, auto-suggested slug, single-select category
- * tree, explicit file management (the newest file is what downloads), and a
+ * type-first conditional fields, auto-suggested slug, single-select home
+ * category tree plus a multi-select "Also show in" tree (secondary placements
+ * via Resource_Category_Link__c; the home is stripped client- and server-side),
+ * explicit file management (the newest file is what downloads), and a
  * related-articles linker writing stable KA Ids. Emits `back`.
  *
  * Webinar: a conditional section (event date/time, registration URL, duration,
@@ -51,7 +53,8 @@ export default class AdminResourceEditor extends LightningElement {
     slug = '';
     description = '';
     resourceType = DEFAULT_TYPE;
-    categorySelection = [];
+    categorySelection = [];   // home category (single)
+    secondarySelection = [];  // "Also show in" — never contains the home
     externalUrl = '';
     videoEmbedUrl = '';
     eventDatetime = null; // ISO-8601 string (lightning-input type=datetime)
@@ -96,6 +99,7 @@ export default class AdminResourceEditor extends LightningElement {
         this.description = r.description || '';
         this.resourceType = r.resourceType || DEFAULT_TYPE;
         this.categorySelection = r.categoryId ? [r.categoryId] : [];
+        this.secondarySelection = (r.secondaryCategoryIds || []).filter((id) => id !== r.categoryId);
         this.externalUrl = r.externalUrl || '';
         this.videoEmbedUrl = r.videoEmbedUrl || '';
         this.eventDatetime = r.eventDatetime || null;
@@ -255,6 +259,14 @@ export default class AdminResourceEditor extends LightningElement {
     }
     handleCategoryChange(event) {
         this.categorySelection = event.detail.names;
+        // The home is always included; never list it a second time.
+        this.secondarySelection = this.secondarySelection.filter((id) => id !== this.homeCategoryId);
+    }
+    handleSecondaryChange(event) {
+        this.secondarySelection = (event.detail.names || []).filter((id) => id !== this.homeCategoryId);
+    }
+    get homeCategoryId() {
+        return this.categorySelection[0] || null;
     }
     handleExternalUrlChange(event) {
         this.externalUrl = event.target.value;
@@ -319,7 +331,7 @@ export default class AdminResourceEditor extends LightningElement {
             return false;
         }
         if (this.categorySelection.length === 0) {
-            toast(this, 'error', 'Pick a category — resources always live in one.');
+            toast(this, 'error', 'Pick a home category — resources always live in one.');
             return false;
         }
         if (this.isVideo && !this.videoEmbedUrl.trim()) {
@@ -366,7 +378,8 @@ export default class AdminResourceEditor extends LightningElement {
                     slug: this.slug,
                     description: this.description,
                     resourceType: this.resourceType,
-                    categoryId: this.categorySelection[0],
+                    categoryId: this.homeCategoryId,
+                    secondaryCategoryIds: this.secondarySelection.filter((id) => id !== this.homeCategoryId),
                     externalUrl: this.externalUrl || null,
                     videoEmbedUrl: this.videoEmbedUrl || null,
                     // Webinar-only; the server clears these for other types.

@@ -96,6 +96,14 @@ private class NexSKnowledgeControllerTest {
     static void publishArticle(String title, String urlName, String summary,
                                String keywords, Boolean featured, String category,
                                String suggested) {
+        publishArticle(title, urlName, summary, keywords, featured,
+            new List<String>{ category }, suggested);
+    }
+
+    /** Multi-topic variant: one selection per category, all filed before publishing. */
+    static void publishArticle(String title, String urlName, String summary,
+                               String keywords, Boolean featured, List<String> categories,
+                               String suggested) {
         Knowledge__kav kav = new Knowledge__kav(
             Title = title,
             UrlName = urlName,
@@ -107,11 +115,16 @@ private class NexSKnowledgeControllerTest {
         );
         insert kav;
 
-        insert new Knowledge__DataCategorySelection(
-            ParentId = kav.Id,
-            DataCategoryGroupName = 'Help_Topics',
-            DataCategoryName = category
-        );
+        List<Knowledge__DataCategorySelection> selections =
+            new List<Knowledge__DataCategorySelection>();
+        for (String category : categories) {
+            selections.add(new Knowledge__DataCategorySelection(
+                ParentId = kav.Id,
+                DataCategoryGroupName = 'Help_Topics',
+                DataCategoryName = category
+            ));
+        }
+        insert selections;
 
         Knowledge__kav refreshed = [
             SELECT KnowledgeArticleId FROM Knowledge__kav WHERE Id = :kav.Id LIMIT 1
@@ -320,6 +333,92 @@ private class NexSKnowledgeControllerTest {
                 'Authored picks keep their authored order.');
             Assert.areEqual('getting-started-with-nexs', detail.suggestions[2].urlName,
                 'Same-topic article tops up after authored picks.');
+        }
+    }
+
+    // ---- Multi-topic filing ----------------------------------------------------
+
+    @IsTest
+    static void twoSubtopicsSameTopicKeepEarliestSectionOnce() {
+        System.runAs(kbUser()) {
+            // Filed under two subtopics of one topic: listed once, under the
+            // subtopic that comes first in taxonomy order.
+            publishArticle('Two Subs', 'two-subs', 'Lives in two subtopics.', 'two', false,
+                new List<String>{ 'Working_Tasks', 'Creating_Cases' }, null);
+
+            Test.startTest();
+            List<NexSKnowledgeController.ArticleSummary> results =
+                NexSKnowledgeController.getArticlesByCategory('Cases_and_Tasks');
+            Test.stopTest();
+
+            Integer hits = 0;
+            for (NexSKnowledgeController.ArticleSummary s : results) {
+                if (s.urlName == 'two-subs') {
+                    hits++;
+                    Assert.areEqual('Creating Cases', s.section,
+                        'Earliest subtopic in taxonomy order wins the section header.');
+                    Assert.areEqual(0, s.sectionOrder);
+                }
+            }
+            Assert.areEqual(1, hits, 'A multi-filed article is listed once per topic page.');
+        }
+    }
+
+    // Note: the platform refuses to file one article under a topic AND one of
+    // its own subtopics ("multiple nodes of a same branch"), so that case
+    // cannot arise and is not tested.
+
+    @IsTest
+    static void suggestionsDrawFromAllTopicsDeduped() {
+        System.runAs(kbUser()) {
+            // Filed under two different topics: the rail tops up from both.
+            publishArticle('Bridge', 'bridge', 'Spans two topics.', 'bridge', false,
+                new List<String>{ 'Cases_and_Tasks', 'Getting_Started' }, null);
+            Knowledge__kav kav = [
+                SELECT Id FROM Knowledge__kav WHERE PublishStatus = 'Online' AND Title = 'Bridge' LIMIT 1
+            ];
+
+            Test.startTest();
+            NexSKnowledgeController.ArticleDetail detail = NexSKnowledgeController.getArticle(kav.Id);
+            Test.stopTest();
+
+            Set<String> urlNames = new Set<String>();
+            Set<Id> ids = new Set<Id>();
+            for (NexSKnowledgeController.ArticleSummary s : detail.suggestions) {
+                Assert.areNotEqual(kav.Id, s.id, 'The open article never suggests itself.');
+                Assert.isTrue(ids.add(s.id), 'No suggestion repeats.');
+                urlNames.add(s.urlName);
+            }
+            Assert.isTrue(urlNames.contains('creating-a-case'), 'Cases and Tasks contributes: ' + urlNames);
+            Assert.isTrue(urlNames.contains('getting-started-with-nexs'), 'Getting Started contributes: ' + urlNames);
+            Assert.isFalse(urlNames.contains('resolving-envelope-errors'), 'Unrelated topics stay out.');
+            Assert.isTrue(detail.suggestions.size() <= 6, 'Capped at MAX_SUGGESTIONS.');
+        }
+    }
+
+    @IsTest
+    static void suggestionsTwoSubtopicsSameTopicNoDuplicates() {
+        System.runAs(kbUser()) {
+            publishArticle('Dup', 'dup', 'Two subtopics, one topic.', 'dup', false,
+                new List<String>{ 'Creating_Cases', 'Working_Tasks' }, null);
+            publishArticle('Closing a Case', 'closing-a-case', 'Wrap up a case.', 'case close', false,
+                'Cases_and_Tasks');
+            Knowledge__kav kav = [
+                SELECT Id FROM Knowledge__kav WHERE PublishStatus = 'Online' AND Title = 'Dup' LIMIT 1
+            ];
+
+            Test.startTest();
+            NexSKnowledgeController.ArticleDetail detail = NexSKnowledgeController.getArticle(kav.Id);
+            Test.stopTest();
+
+            Set<Id> ids = new Set<Id>();
+            Set<String> urlNames = new Set<String>();
+            for (NexSKnowledgeController.ArticleSummary s : detail.suggestions) {
+                Assert.isTrue(ids.add(s.id), 'No suggestion repeats.');
+                urlNames.add(s.urlName);
+            }
+            Assert.areEqual(new Set<String>{ 'creating-a-case', 'closing-a-case' }, urlNames,
+                'Both same-topic articles, each once.');
         }
     }
 

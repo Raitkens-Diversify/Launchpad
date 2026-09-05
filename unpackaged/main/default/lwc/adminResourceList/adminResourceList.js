@@ -61,8 +61,14 @@ export default class AdminResourceList extends LightningElement {
             const data = await listResources();
             this.rows = (data || []).map((r) => {
                 const lifecycle = LIFECYCLE[r.webinarStatus];
+                const secondary = r.secondaryCategoryNames || [];
                 return {
                     ...r,
+                    secondaryCategoryNames: secondary,
+                    secondaryCount: secondary.length,
+                    moreLabel: `+${secondary.length} more`,
+                    // Hover reveals every placement: home first, then "Also show in".
+                    categoryTitle: [r.categoryName, ...secondary].filter(Boolean).join(', '),
                     statusLabel: r.active ? 'Active' : 'Inactive',
                     statusClass: r.active
                         ? 'arl-badge arl-badge--on'
@@ -73,9 +79,11 @@ export default class AdminResourceList extends LightningElement {
             });
             const cats = new Map();
             this.rows.forEach((r) => {
-                if (r.categoryName) {
-                    cats.set(r.categoryName, r.categoryName);
-                }
+                [r.categoryName, ...r.secondaryCategoryNames].forEach((name) => {
+                    if (name) {
+                        cats.set(name, name);
+                    }
+                });
             });
             this.categoryOptions = [
                 { label: 'All categories', value: '' },
@@ -107,7 +115,9 @@ export default class AdminResourceList extends LightningElement {
             if (this.lifecycleFilter && row.webinarStatus !== this.lifecycleFilter) {
                 return false;
             }
-            if (this.categoryFilter && row.categoryName !== this.categoryFilter) {
+            // A category filter matches the home OR any "Also show in" placement.
+            if (this.categoryFilter && row.categoryName !== this.categoryFilter
+                && !row.secondaryCategoryNames.includes(this.categoryFilter)) {
                 return false;
             }
             if (this.activeOnly && !row.active) {

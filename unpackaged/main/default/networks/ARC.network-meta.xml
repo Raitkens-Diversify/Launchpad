@@ -3,7 +3,7 @@
     <allowInternalUserLogin>true</allowInternalUserLogin>
     <allowMembersToFlag>false</allowMembersToFlag>
     <changePasswordTemplate>NexS/NexS_Password_Reset</changePasswordTemplate>
-    <communityRoles/>
+    <communityRoles />
     <disablePvtPagesForPwdResetInLWR>false</disablePvtPagesForPwdResetInLWR>
     <disableReputationRecordConversations>false</disableReputationRecordConversations>
     <emailSenderAddress>devnotifications+diversify@callawaycloudconsulting.com</emailSenderAddress>
@@ -78,7 +78,7 @@
     <secondaryEmailSenderEnabled>false</secondaryEmailSenderEnabled>
     <selfRegistration>false</selfRegistration>
     <sendWelcomeEmail>true</sendWelcomeEmail>
-    <site>ARC</site>
+    <site>Arc2</site>
     <siteArchiveStatus>NotArchived</siteArchiveStatus>
     <status>Live</status>
     <tabs>

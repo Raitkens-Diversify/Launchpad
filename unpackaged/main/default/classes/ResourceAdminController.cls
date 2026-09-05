@@ -33,8 +33,9 @@ public with sharing class ResourceAdminController {
         @AuraEnabled public String name;
         @AuraEnabled public String slug;
         @AuraEnabled public String resourceType;
-        @AuraEnabled public String categoryName;
+        @AuraEnabled public String categoryName;                       // home category
         @AuraEnabled public Id categoryId;
+        @AuraEnabled public List<String> secondaryCategoryNames = new List<String>(); // "Also show in"
         @AuraEnabled public Boolean featured;
         @AuraEnabled public Boolean active;
         @AuraEnabled public Decimal displayOrder;
@@ -78,6 +79,8 @@ public with sharing class ResourceAdminController {
         @AuraEnabled public String presenter;
         @AuraEnabled public List<ArticleLink> relatedArticles = new List<ArticleLink>();
         @AuraEnabled public List<FileInfo> files = new List<FileInfo>();
+        /** "Also show in" categories (never the home category). */
+        @AuraEnabled public List<Id> secondaryCategoryIds = new List<Id>();
     }
 
     public class ResourceInput {
@@ -98,6 +101,8 @@ public with sharing class ResourceAdminController {
         @AuraEnabled public Decimal durationMinutes;
         @AuraEnabled public String presenter;
         @AuraEnabled public List<String> relatedArticleKaIds;
+        /** "Also show in" category Ids: null = untouched, empty = clear all. Home is stripped. */
+        @AuraEnabled public List<String> secondaryCategoryIds;
     }
 
     public class CategoryRow {
@@ -109,7 +114,8 @@ public with sharing class ResourceAdminController {
         @AuraEnabled public Id parentId;
         @AuraEnabled public String parentName;
         @AuraEnabled public Boolean active;
-        @AuraEnabled public Integer resourceCount;
+        @AuraEnabled public Integer resourceCount;   // resources whose home this is
+        @AuraEnabled public Integer secondaryCount;  // resources also shown here
     }
 
     public class CategoryInput {
@@ -161,6 +167,19 @@ public with sharing class ResourceAdminController {
         Map<Id, ResourceCenterService.FileInfo> files = webinarIds.isEmpty()
             ? new Map<Id, ResourceCenterService.FileInfo>()
             : ResourceCenterService.fileInfoByResource(webinarIds);
+        // "Also show in" names, one bulk query over every listed row.
+        Map<Id, List<String>> secondaryNames = new Map<Id, List<String>>();
+        for (Resource_Category_Link__c link : [
+            SELECT Resource__c, Category__r.Name
+            FROM Resource_Category_Link__c
+            WHERE Resource__c IN :rows
+            ORDER BY Category__r.Name ASC
+        ]) {
+            if (!secondaryNames.containsKey(link.Resource__c)) {
+                secondaryNames.put(link.Resource__c, new List<String>());
+            }
+            secondaryNames.get(link.Resource__c).add(link.Category__r.Name);
+        }
         Datetime now = System.now();
         for (Resource__c r : rows) {
             ResourceRow row = new ResourceRow();
@@ -170,6 +189,9 @@ public with sharing class ResourceAdminController {
             row.resourceType = r.Resource_Type__c;
             row.categoryId = r.Category__c;
             row.categoryName = r.Category__r == null ? null : r.Category__r.Name;
+            if (secondaryNames.containsKey(r.Id)) {
+                row.secondaryCategoryNames = secondaryNames.get(r.Id);
+            }
             row.featured = r.Is_Featured__c == true;
             row.active = r.Is_Active__c == true;
             row.displayOrder = r.Display_Order__c;
@@ -216,6 +238,7 @@ public with sharing class ResourceAdminController {
         detail.presenter = r.Presenter__c;
         detail.relatedArticles = relatedArticlesFor(resourceId);
         detail.files = filesFor(resourceId);
+        detail.secondaryCategoryIds = secondaryCategoryIdsFor(resourceId);
         return detail;
     }
 
@@ -281,7 +304,7 @@ public with sharing class ResourceAdminController {
             throw auraError('External Link resources need an External URL.');
         }
         if (input.categoryId == null) {
-            throw auraError('Pick a category — resources always live in one.');
+            throw auraError('Pick a home category — resources always live in one.');
         }
         // Webinar rules mirror the two validation rules on Resource__c
         // (Webinar_Requires_Event_Datetime, Webinar_Upcoming_Requires_Registration)
@@ -326,6 +349,7 @@ public with sharing class ResourceAdminController {
                 update record;
             }
             syncRelatedArticles(record.Id, input.relatedArticleKaIds);
+            syncSecondaryCategories(record.Id, input.categoryId, input.secondaryCategoryIds);
             return record.Id;
         } catch (AuraHandledException e) {
             Database.rollback(sp);
@@ -375,6 +399,12 @@ public with sharing class ResourceAdminController {
         ]) {
             counts.put((Id) ar.get('cat'), (Integer) ar.get('cnt'));
         }
+        Map<Id, Integer> secondaryCounts = new Map<Id, Integer>();
+        for (AggregateResult ar : [
+            SELECT Category__c cat, COUNT(Id) cnt FROM Resource_Category_Link__c GROUP BY Category__c
+        ]) {
+            secondaryCounts.put((Id) ar.get('cat'), (Integer) ar.get('cnt'));
+        }
         List<CategoryRow> out = new List<CategoryRow>();
         for (Resource_Category__c c : [
             SELECT Id, Name, Slug__c, Icon_Name__c, Display_Order__c,
@@ -394,6 +424,8 @@ public with sharing class ResourceAdminController {
             row.active = c.Is_Active__c == true;
             Integer cnt = counts.get(c.Id);
             row.resourceCount = cnt == null ? 0 : cnt;
+            Integer secondary = secondaryCounts.get(c.Id);
+            row.secondaryCount = secondary == null ? 0 : secondary;
             out.add(row);
         }
         return out;
@@ -571,14 +603,16 @@ public with sharing class ResourceAdminController {
         @AuraEnabled public Integer resourceCount;     // self + subtopics; > 0 blocks
         @AuraEnabled public Integer subcategoryCount;  // removed with the category (all empty by then)
         @AuraEnabled public Integer guideOptionCount;  // help-guide options targeting a slug; > 0 blocks
+        @AuraEnabled public Integer secondaryCount;    // "Also show in" links from other resources; > 0 blocks
     }
 
     /**
-     * What deleting a category would touch. Resource__c.Category__c is a
-     * Restrict lookup (DML would fail anyway) and help guides target
-     * categories by slug (published options and Builder drafts), so both
-     * block. Parent_Category__c is SetNull — deleting a parent alone would
-     * silently promote its subtopics, so empty subtopics are deleted with it.
+     * What deleting a category would touch. Resource__c.Category__c and
+     * Resource_Category_Link__c.Category__c are Restrict lookups (DML would
+     * fail anyway) and help guides target categories by slug (published
+     * options and Builder drafts), so all three block. Parent_Category__c is
+     * SetNull — deleting a parent alone would silently promote its subtopics,
+     * so empty subtopics are deleted with it.
      */
     @AuraEnabled
     public static CategoryDeleteImpactDTO getCategoryDeleteImpact(Id categoryId) {
@@ -605,6 +639,7 @@ public with sharing class ResourceAdminController {
         dto.name = found[0].Name;
         dto.subcategoryCount = subs;
         dto.resourceCount = [SELECT COUNT() FROM Resource__c WHERE Category__c IN :ids];
+        dto.secondaryCount = [SELECT COUNT() FROM Resource_Category_Link__c WHERE Category__c IN :ids];
         dto.guideOptionCount = [
             SELECT COUNT() FROM Help_Guide_Option__mdt
             WHERE Target_Type__c = 'category' AND Active__c = true AND Target_Value__c IN :slugs
@@ -627,6 +662,11 @@ public with sharing class ResourceAdminController {
             throw auraError('Can\'t delete this category — ' + impact.resourceCount + ' resource'
                 + (impact.resourceCount == 1 ? ' lives' : 's live')
                 + ' under it. Move or delete those resources first.');
+        }
+        if (impact.secondaryCount > 0) {
+            throw auraError('Can\'t delete this category — ' + impact.secondaryCount + ' resource'
+                + (impact.secondaryCount == 1 ? ' is' : 's are')
+                + ' also shown in it. Remove it from those resources first.');
         }
         if (impact.guideOptionCount > 0) {
             throw auraError('Can\'t delete this category — ' + impact.guideOptionCount
@@ -687,6 +727,97 @@ public with sharing class ResourceAdminController {
             }
         }
         return out;
+    }
+
+    private static List<Id> secondaryCategoryIdsFor(Id resourceId) {
+        List<Id> out = new List<Id>();
+        for (Resource_Category_Link__c link : [
+            SELECT Category__c FROM Resource_Category_Link__c
+            WHERE Resource__c = :resourceId
+            ORDER BY Category__r.Name ASC
+        ]) {
+            out.add(link.Category__c);
+        }
+        return out;
+    }
+
+    /**
+     * "Also show in" sync: null = untouched (only a link that now equals the
+     * home category is dropped); otherwise the home is stripped, the rest are
+     * validated to exist, and the junction is diffed — delete removed, insert new.
+     */
+    private static void syncSecondaryCategories(Id resourceId, Id homeCategoryId,
+            List<String> categoryIds) {
+        Set<Id> wanted = new Set<Id>();
+        if (categoryIds != null) {
+            for (String raw : categoryIds) {
+                if (String.isBlank(raw)) {
+                    continue;
+                }
+                try {
+                    wanted.add(Id.valueOf(raw.trim()));
+                } catch (Exception e) {
+                    throw auraError('One of the "Also show in" categories no longer exists — refresh and re-pick.');
+                }
+            }
+            wanted.remove(homeCategoryId);
+            if (!wanted.isEmpty()
+                && [SELECT COUNT() FROM Resource_Category__c WHERE Id IN :wanted] != wanted.size()) {
+                throw auraError('One of the "Also show in" categories no longer exists — refresh and re-pick.');
+            }
+        }
+
+        List<Resource_Category_Link__c> existing = [
+            SELECT Id, Category__c FROM Resource_Category_Link__c
+            WHERE Resource__c = :resourceId
+        ];
+        if (categoryIds == null) {
+            // Untouched — but a home change must not leave a self-link behind.
+            List<Resource_Category_Link__c> stale = new List<Resource_Category_Link__c>();
+            for (Resource_Category_Link__c link : existing) {
+                if (link.Category__c == homeCategoryId) {
+                    stale.add(link);
+                }
+            }
+            if (!stale.isEmpty()) {
+                assertLinkWritable();
+                delete stale;
+            }
+            return;
+        }
+
+        Set<Id> kept = new Set<Id>();
+        List<Resource_Category_Link__c> toDelete = new List<Resource_Category_Link__c>();
+        for (Resource_Category_Link__c link : existing) {
+            if (wanted.contains(link.Category__c) && !kept.contains(link.Category__c)) {
+                kept.add(link.Category__c);
+            } else {
+                toDelete.add(link); // removed, now the home, or a duplicate
+            }
+        }
+        List<Resource_Category_Link__c> toInsert = new List<Resource_Category_Link__c>();
+        for (Id catId : wanted) {
+            if (!kept.contains(catId)) {
+                toInsert.add(new Resource_Category_Link__c(Resource__c = resourceId, Category__c = catId));
+            }
+        }
+        if (toDelete.isEmpty() && toInsert.isEmpty()) {
+            return;
+        }
+        assertLinkWritable();
+        if (!toDelete.isEmpty()) {
+            delete toDelete;
+        }
+        if (!toInsert.isEmpty()) {
+            insert toInsert;
+        }
+    }
+
+    private static void assertLinkWritable() {
+        if (!Schema.sObjectType.Resource_Category_Link__c.isCreateable()
+            || !Schema.sObjectType.Resource_Category_Link__c.isDeletable()) {
+            throw auraError('You do not have access to manage category placements.');
+        }
     }
 
     /**

@@ -6,30 +6,30 @@
     <entitiesAndFields>
         <entityName>FeedComment</entityName>
         <fieldName>RawCommentBody</fieldName>
-        <keywordList>ARC.Banned</keywordList>
+        <keywordList>Arc.Banned</keywordList>
     </entitiesAndFields>
     <entitiesAndFields>
         <entityName>FeedItem</entityName>
         <fieldName>LinkUrl</fieldName>
-        <keywordList>ARC.Banned</keywordList>
+        <keywordList>Arc.Banned</keywordList>
     </entitiesAndFields>
     <entitiesAndFields>
         <entityName>FeedItem</entityName>
         <fieldName>RawBody</fieldName>
-        <keywordList>ARC.Banned</keywordList>
+        <keywordList>Arc.Banned</keywordList>
     </entitiesAndFields>
     <entitiesAndFields>
         <entityName>FeedItem</entityName>
         <fieldName>Title</fieldName>
-        <keywordList>ARC.Banned</keywordList>
+        <keywordList>Arc.Banned</keywordList>
     </entitiesAndFields>
     <entitiesAndFields>
         <entityName>FeedPollChoice</entityName>
         <fieldName>ChoiceBody</fieldName>
-        <keywordList>ARC.Banned</keywordList>
+        <keywordList>Arc.Banned</keywordList>
     </entitiesAndFields>
     <masterLabel>Flag posts or comments containing banned keywords</masterLabel>
     <type>Content</type>
-    <userCriteria>ARC.Customer_Members</userCriteria>
+    <userCriteria>Arc.Customer_Members</userCriteria>
     <userMessage>You can&#39;t use %BLOCKED_KEYWORD% or other inappropriate words in this community. Review your content and try again.</userMessage>
 </ModerationRule>

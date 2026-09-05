@@ -247,11 +247,6 @@
         <default>false</default>
         <visible>false</visible>
     </applicationVisibilities>
-    <applicationVisibilities>
-        <application>standard__Platform</application>
-        <default>true</default>
-        <visible>true</visible>
-    </applicationVisibilities>
     <fieldPermissions>
         <editable>true</editable>
         <field>AccountContactRelation.EndDate</field>
@@ -7806,6 +7801,9 @@
     </layoutAssignments>
     <layoutAssignments>
         <layout>WorkAccess-Access Layout</layout>
+    </layoutAssignments>
+    <layoutAssignments>
+        <layout>Resource_Category_Link__c-Resource Category Link Layout</layout>
     </layoutAssignments>
     <recordTypeVisibilities>
         <default>false</default>

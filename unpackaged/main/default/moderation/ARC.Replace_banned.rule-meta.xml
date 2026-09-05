@@ -6,27 +6,27 @@
     <entitiesAndFields>
         <entityName>FeedComment</entityName>
         <fieldName>RawCommentBody</fieldName>
-        <keywordList>ARC.Banned</keywordList>
+        <keywordList>Arc.Banned</keywordList>
     </entitiesAndFields>
     <entitiesAndFields>
         <entityName>FeedItem</entityName>
         <fieldName>LinkUrl</fieldName>
-        <keywordList>ARC.Banned</keywordList>
+        <keywordList>Arc.Banned</keywordList>
     </entitiesAndFields>
     <entitiesAndFields>
         <entityName>FeedItem</entityName>
         <fieldName>RawBody</fieldName>
-        <keywordList>ARC.Banned</keywordList>
+        <keywordList>Arc.Banned</keywordList>
     </entitiesAndFields>
     <entitiesAndFields>
         <entityName>FeedItem</entityName>
         <fieldName>Title</fieldName>
-        <keywordList>ARC.Banned</keywordList>
+        <keywordList>Arc.Banned</keywordList>
     </entitiesAndFields>
     <entitiesAndFields>
         <entityName>FeedPollChoice</entityName>
         <fieldName>ChoiceBody</fieldName>
-        <keywordList>ARC.Banned</keywordList>
+        <keywordList>Arc.Banned</keywordList>
     </entitiesAndFields>
     <masterLabel>Replace banned keywords with asterisks</masterLabel>
     <type>Content</type>

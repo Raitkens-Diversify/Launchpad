@@ -271,27 +271,72 @@ public with sharing class ResourceCenterService {
             topAncestor.put(cat.Id, cursor.Id);
         }
 
-        Map<Id, Integer> resourceCount = new Map<Id, Integer>();
-        for (AggregateResult ar : [
-            SELECT Category__c cat, COUNT(Id) c
+        // Distinct resources per top-level tile: home placements rolled up to
+        // the top-level ancestor, plus "Also show in" placements. Id-level rows
+        // rather than an aggregate so a resource placed twice under one tile
+        // still counts once (reference-data volumes keep this cheap).
+        Map<Id, Set<Id>> resourcesByTop = new Map<Id, Set<Id>>();
+        for (Resource__c r : [
+            SELECT Id, Category__c
             FROM Resource__c
             WHERE Is_Active__c = true AND Category__c IN :byId.keySet()
-            GROUP BY Category__c
         ]) {
-            Id cat = (Id) ar.get('cat');
-            Id top = topAncestor.containsKey(cat) ? topAncestor.get(cat) : cat;
-            Integer c = (Integer) ar.get('c');
-            resourceCount.put(top, (resourceCount.containsKey(top) ? resourceCount.get(top) : 0) + c);
+            bucketByTop(resourcesByTop, topAncestor, r.Category__c, r.Id);
+        }
+        Map<Id, Set<Id>> secondary = secondaryResourceIdsByCategory(byId.keySet());
+        for (Id cat : secondary.keySet()) {
+            for (Id resourceId : secondary.get(cat)) {
+                bucketByTop(resourcesByTop, topAncestor, cat, resourceId);
+            }
         }
 
         List<CategoryTile> tiles = new List<CategoryTile>();
         for (Resource_Category__c cat : topLevel) {
             CategoryTile t = toTile(cat);
             t.subcategoryCount = childCount.containsKey(cat.Id) ? childCount.get(cat.Id) : 0;
-            t.resourceCount = resourceCount.containsKey(cat.Id) ? resourceCount.get(cat.Id) : 0;
+            t.resourceCount = resourcesByTop.containsKey(cat.Id) ? resourcesByTop.get(cat.Id).size() : 0;
             tiles.add(t);
         }
         return tiles;
+    }
+
+    private static void bucketByTop(Map<Id, Set<Id>> buckets, Map<Id, Id> topAncestor,
+            Id categoryId, Id resourceId) {
+        Id top = topAncestor.containsKey(categoryId) ? topAncestor.get(categoryId) : categoryId;
+        if (!buckets.containsKey(top)) {
+            buckets.put(top, new Set<Id>());
+        }
+        buckets.get(top).add(resourceId);
+    }
+
+    /**
+     * Secondary placements ("Also show in", Resource_Category_Link__c) for the
+     * given categories: category Id → Ids of site-visible resources also shown
+     * there. Home memberships are NOT included. A link is ignored when its
+     * category is inactive, or when the resource (or its home category) is
+     * inactive — the same visibility rule the home path applies everywhere.
+     * Soft-fails to empty without object access, like getRelatedArticlesForResource.
+     */
+    private static Map<Id, Set<Id>> secondaryResourceIdsByCategory(Set<Id> categoryIds) {
+        Map<Id, Set<Id>> out = new Map<Id, Set<Id>>();
+        if (categoryIds == null || categoryIds.isEmpty()
+            || !Schema.sObjectType.Resource_Category_Link__c.isAccessible()) {
+            return out;
+        }
+        for (Resource_Category_Link__c link : [
+            SELECT Category__c, Resource__c
+            FROM Resource_Category_Link__c
+            WHERE Category__c IN :categoryIds
+            AND Category__r.Is_Active__c = true
+            AND Resource__r.Is_Active__c = true
+            AND Resource__r.Category__r.Is_Active__c = true
+        ]) {
+            if (!out.containsKey(link.Category__c)) {
+                out.put(link.Category__c, new Set<Id>());
+            }
+            out.get(link.Category__c).add(link.Resource__c);
+        }
+        return out;
     }
 
     /**
@@ -319,6 +364,8 @@ public with sharing class ResourceCenterService {
         ]) {
             hasResources.add((Id) ar.get('cat'));
         }
+        // A subtopic populated only through "Also show in" still belongs in the nav.
+        hasResources.addAll(secondaryResourceIdsByCategory(allIds).keySet());
 
         Map<Id, NavTopic> topById = new Map<Id, NavTopic>();
         List<NavTopic> topics = new List<NavTopic>();
@@ -388,7 +435,20 @@ public with sharing class ResourceCenterService {
             detail.subcategories.add(toTile(child));
         }
 
-        // One query covers the category's own resources and its subcategories'
+        // Memberships on this page = home placements (category or an active
+        // subcategory) plus "Also show in" links to any of them.
+        Set<Id> pageCatIds = new Set<Id>{ cat.Id };
+        for (CategoryTile sub : detail.subcategories) {
+            pageCatIds.add(sub.id);
+        }
+        Map<Id, Set<Id>> secondary = secondaryResourceIdsByCategory(pageCatIds);
+        Set<Id> secondaryIds = new Set<Id>();
+        for (Set<Id> ids : secondary.values()) {
+            secondaryIds.addAll(ids);
+        }
+
+        // One query covers the category's own resources, its subcategories' and
+        // the ones also shown here, so the ORDER BY stays authoritative
         // (inactive subcategories stay hidden, like everywhere user-facing).
         List<Resource__c> resources = [
             SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Display_Order__c,
@@ -396,39 +456,45 @@ public with sharing class ResourceCenterService {
                    Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c,
                    Category__c, Category__r.Slug__c
             FROM Resource__c
-            WHERE (Category__c = :cat.Id OR Category__r.Parent_Category__c = :cat.Id)
+            WHERE (Category__c = :cat.Id OR Category__r.Parent_Category__c = :cat.Id
+                   OR Id IN :secondaryIds)
             AND Is_Active__c = true AND Category__r.Is_Active__c = true
             ORDER BY Display_Order__c NULLS LAST, Name ASC
         ];
         List<ResourceCard> allCards = toCards(resources);
-        Map<Id, Id> categoryByResource = new Map<Id, Id>();
+        Map<Id, Set<Id>> membershipsByResource = new Map<Id, Set<Id>>();
         for (Resource__c r : resources) {
-            categoryByResource.put(r.Id, r.Category__c);
+            Set<Id> memberships = new Set<Id>();
+            if (pageCatIds.contains(r.Category__c)) {
+                memberships.add(r.Category__c);
+            }
+            membershipsByResource.put(r.Id, memberships);
         }
-
-        List<ResourceCard> direct = new List<ResourceCard>();
-        Map<Id, List<ResourceCard>> cardsBySubcategory = new Map<Id, List<ResourceCard>>();
-        for (ResourceCard card : allCards) {
-            Id resourceCat = categoryByResource.get(card.id);
-            if (resourceCat == cat.Id) {
-                direct.add(card);
-            } else {
-                if (!cardsBySubcategory.containsKey(resourceCat)) {
-                    cardsBySubcategory.put(resourceCat, new List<ResourceCard>());
+        for (Id secondaryCat : secondary.keySet()) {
+            for (Id resourceId : secondary.get(secondaryCat)) {
+                if (membershipsByResource.containsKey(resourceId)) {
+                    membershipsByResource.get(resourceId).add(secondaryCat);
                 }
-                cardsBySubcategory.get(resourceCat).add(card);
             }
         }
-        detail.resources = direct;
 
-        // Sections: one per subcategory with resources (in subcategory order),
-        // then direct-filed resources trail in "General resources".
+        // Sections: one per subcategory with resources (in subcategory order) —
+        // a card sits in every subcategory section it belongs to — then
+        // resources placed on the category itself trail in "General resources",
+        // unless they already landed in a named section on this page.
         detail.sections = new List<ResourceSection>();
+        Set<Id> placed = new Set<Id>();
         Integer position = 0;
         for (CategoryTile sub : detail.subcategories) {
             position++;
-            List<ResourceCard> subCards = cardsBySubcategory.get(sub.id);
-            if (subCards == null || subCards.isEmpty()) {
+            List<ResourceCard> subCards = new List<ResourceCard>();
+            for (ResourceCard card : allCards) {
+                if (membershipsByResource.get(card.id).contains(sub.id)) {
+                    subCards.add(card);
+                    placed.add(card.id);
+                }
+            }
+            if (subCards.isEmpty()) {
                 continue;
             }
             ResourceSection section = new ResourceSection();
@@ -438,6 +504,13 @@ public with sharing class ResourceCenterService {
             section.resources = subCards;
             detail.sections.add(section);
         }
+        List<ResourceCard> direct = new List<ResourceCard>();
+        for (ResourceCard card : allCards) {
+            if (membershipsByResource.get(card.id).contains(cat.Id) && !placed.contains(card.id)) {
+                direct.add(card);
+            }
+        }
+        detail.resources = direct;
         if (!direct.isEmpty()) {
             ResourceSection general = new ResourceSection();
             general.key = 'general';

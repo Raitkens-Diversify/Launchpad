@@ -795,4 +795,160 @@ private class ResourceCenterServiceTest {
             Assert.isFalse(bridge.siteUrl.endsWith('/'), 'No trailing slash: ' + bridge.siteUrl);
         }
     }
+
+    // ---- "Also show in" (Resource_Category_Link__c) ------------------------------
+
+    private static Id categoryId(String slug) {
+        return [SELECT Id FROM Resource_Category__c WHERE Slug__c = :slug LIMIT 1].Id;
+    }
+
+    private static void link(String resourceSlug, Id catId) {
+        insert new Resource_Category_Link__c(Resource__c = resourceId(resourceSlug), Category__c = catId);
+    }
+
+    private static Id makeTopLevel(String name, String slug, Integer order, Boolean active) {
+        Resource_Category__c c = new Resource_Category__c(
+            Name = name, Slug__c = slug, Display_Order__c = order, Is_Active__c = active);
+        insert c;
+        return c.Id;
+    }
+
+    private static Id makeSub(String name, String slug, Id parentId, Integer order) {
+        Resource_Category__c c = new Resource_Category__c(
+            Name = name, Slug__c = slug, Parent_Category__c = parentId,
+            Display_Order__c = order, Is_Active__c = true);
+        insert c;
+        return c.Id;
+    }
+
+    private static List<String> slugs(List<ResourceCenterService.ResourceCard> cards) {
+        List<String> out = new List<String>();
+        for (ResourceCenterService.ResourceCard c : cards) {
+            out.add(c.slug);
+        }
+        return out;
+    }
+
+    @isTest
+    static void secondaryPlacementCountsDistinctOnTiles() {
+        Id compliance = makeTopLevel('Compliance', 'compliance', 2, true);
+        link('brand-flyer', compliance);              // shown under a second top-level
+        link('partner-site', categoryId('flyers'));   // also shown under its own top-level's subtopic
+
+        Test.startTest();
+        List<ResourceCenterService.CategoryTile> tiles = ResourceCenterService.getTopLevelCategories();
+        Test.stopTest();
+
+        Map<String, Integer> countBySlug = new Map<String, Integer>();
+        for (ResourceCenterService.CategoryTile t : tiles) {
+            countBySlug.put(t.slug, t.resourceCount);
+        }
+        Assert.areEqual(2, countBySlug.get('marketing'),
+            'A resource placed twice under one tile still counts once.');
+        Assert.areEqual(1, countBySlug.get('compliance'),
+            'A secondary placement counts toward the other tile.');
+    }
+
+    @isTest
+    static void secondaryPlacementSurfacesEmptySubtopicInNav() {
+        Id templates = makeSub('Templates', 'templates', categoryId('marketing'), 2);
+        link('partner-site', templates);
+
+        Test.startTest();
+        List<ResourceCenterService.NavTopic> nav = ResourceCenterService.getCategoryNav();
+        Test.stopTest();
+
+        List<String> childSlugs = new List<String>();
+        for (ResourceCenterService.NavTopic t : nav) {
+            if (t.slug == 'marketing') {
+                for (ResourceCenterService.NavChild c : t.children) {
+                    childSlugs.add(c.slug);
+                }
+            }
+        }
+        Assert.areEqual(new List<String>{ 'flyers', 'templates' }, childSlugs,
+            'A subtopic populated only through Also show in joins the nav.');
+    }
+
+    @isTest
+    static void categoryPageListsSecondaryInEverySectionNeverTwiceInGeneral() {
+        Id templates = makeSub('Templates', 'templates', categoryId('marketing'), 2);
+        link('brand-flyer', templates);              // Flyers (home) + Templates
+        link('partner-site', categoryId('flyers'));  // home Marketing itself + Flyers
+
+        Test.startTest();
+        ResourceCenterService.CategoryDetail marketing = ResourceCenterService.getCategoryBySlug('marketing');
+        Test.stopTest();
+
+        List<String> keys = new List<String>();
+        for (ResourceCenterService.ResourceSection s : marketing.sections) {
+            keys.add(s.key);
+        }
+        Assert.areEqual(new List<String>{ 'flyers', 'templates' }, keys,
+            'Named sections only: every direct-filed resource already landed in a section.');
+        Assert.areEqual(new List<String>{ 'brand-flyer', 'partner-site' }, slugs(marketing.sections[0].resources),
+            'Flyers lists its home resource and the one also shown there, in display order.');
+        Assert.areEqual(new List<String>{ 'brand-flyer' }, slugs(marketing.sections[1].resources),
+            'Templates lists the resource also shown there.');
+        Assert.areEqual(0, marketing.resources.size(),
+            'General is empty: the direct-filed resource is already in a named section.');
+    }
+
+    @isTest
+    static void categoryPageSecondaryOnTopicLandsInGeneralOnce() {
+        Id compliance = makeTopLevel('Compliance', 'compliance', 2, true);
+        insert new Resource__c(
+            Name = 'Policy', Slug__c = 'policy', Category__c = compliance,
+            Resource_Type__c = 'PDF', Is_Active__c = true, Display_Order__c = 1);
+        link('policy', categoryId('marketing'));       // foreign resource shown on the topic itself
+        link('brand-flyer', categoryId('marketing'));  // already in Flyers: must not repeat in General
+
+        Test.startTest();
+        ResourceCenterService.CategoryDetail marketing = ResourceCenterService.getCategoryBySlug('marketing');
+        Test.stopTest();
+
+        Assert.areEqual(2, marketing.sections.size(), 'Flyers + General.');
+        Assert.areEqual(new List<String>{ 'brand-flyer' }, slugs(marketing.sections[0].resources));
+        Assert.areEqual('general', marketing.sections[1].key);
+        Assert.areEqual(new List<String>{ 'policy', 'partner-site' }, slugs(marketing.sections[1].resources),
+            'General carries the topic-level placements once each, in display order.');
+        Assert.areEqual(new List<String>{ 'policy', 'partner-site' }, slugs(marketing.resources));
+    }
+
+    @isTest
+    static void secondaryPlacementIgnoresInactiveCategories() {
+        Id hidden = categoryId('hidden');
+        insert new Resource__c(
+            Name = 'Hidden Home', Slug__c = 'hidden-home', Category__c = hidden,
+            Resource_Type__c = 'PDF', Is_Active__c = true);
+        link('partner-site', hidden);                       // link INTO an inactive category
+        link('hidden-home', categoryId('marketing'));       // link FROM a resource whose home is inactive
+
+        Test.startTest();
+        List<ResourceCenterService.CategoryTile> tiles = ResourceCenterService.getTopLevelCategories();
+        ResourceCenterService.CategoryDetail marketing = ResourceCenterService.getCategoryBySlug('marketing');
+        List<ResourceCenterService.NavTopic> nav = ResourceCenterService.getCategoryNav();
+        Test.stopTest();
+
+        Assert.areEqual(1, tiles.size(), 'The inactive category is still no tile.');
+        Assert.areEqual(2, tiles[0].resourceCount, 'A resource homed in an inactive category never counts.');
+        Assert.areEqual(new List<String>{ 'partner-site' }, slugs(marketing.resources),
+            'The inactive-home resource is not shown even when linked here.');
+        for (ResourceCenterService.NavTopic t : nav) {
+            Assert.areNotEqual('hidden', t.slug, 'Inactive categories never enter the nav.');
+        }
+    }
+
+    @isTest
+    static void resourceBySlugBreadcrumbStaysHome() {
+        Id compliance = makeTopLevel('Compliance', 'compliance', 2, true);
+        link('brand-flyer', compliance);
+
+        Test.startTest();
+        ResourceCenterService.ResourceDetail d = ResourceCenterService.getResourceBySlug('brand-flyer');
+        Test.stopTest();
+
+        Assert.areEqual('flyers', d.categorySlug, 'Breadcrumb and link always use the home category.');
+        Assert.areEqual('marketing', d.categoryParentSlug);
+    }
 }

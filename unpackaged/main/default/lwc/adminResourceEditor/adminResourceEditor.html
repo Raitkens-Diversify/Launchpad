@@ -150,7 +150,7 @@
                                          onchange={handleFeaturedChange}></lightning-input>
                         <lightning-input type="number"
                                          label="Display order"
-                                         field-level-help="Lower numbers sort first within the category."
+                                         field-level-help="Lower numbers sort first — in the home category and anywhere else it's shown."
                                          value={displayOrder}
                                          onchange={handleOrderChange}></lightning-input>
                     </section>
@@ -158,12 +158,25 @@
 
                 <div class="are__col are__col--side">
                     <section class="are__card">
-                        <h3 class="are__card-title">Category</h3>
-                        <p class="are__help">Every resource lives in exactly one category.</p>
+                        <h3 class="are__card-title">Home category</h3>
+                        <p class="are__help">Where the resource lives: its breadcrumb and link.</p>
                         <c-admin-category-tree nodes={categoryTree}
                                                selected={categorySelection}
                                                mode="single"
                                                onselectionchange={handleCategoryChange}></c-admin-category-tree>
+                    </section>
+
+                    <section class="are__card">
+                        <h3 class="are__card-title">Also show in</h3>
+                        <p class="are__help">
+                            Optional. The resource also appears on these category pages. Its
+                            home category is always included.
+                        </p>
+                        <c-admin-category-tree nodes={categoryTree}
+                                               selected={secondarySelection}
+                                               mode="multi"
+                                               class="are__secondary"
+                                               onselectionchange={handleSecondaryChange}></c-admin-category-tree>
                     </section>
 
                     <section class="are__card">

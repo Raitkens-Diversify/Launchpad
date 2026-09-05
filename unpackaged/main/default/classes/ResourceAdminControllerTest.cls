@@ -528,6 +528,129 @@ private class ResourceAdminControllerTest {
     }
 
     @IsTest
+    static void deleteCategoryBlockedBySecondaryPlacement() {
+        Id homeId = makeCategory('Home', 'home', null);
+        Id alsoId = makeCategory('Also', 'also', null);
+        Id alsoSubId = makeCategory('Also Sub', 'also-sub', alsoId);
+        ResourceAdminController.ResourceInput r = input('Shared Doc', 'shared-doc', homeId);
+        r.secondaryCategoryIds = new List<String>{ alsoSubId };
+        ResourceAdminController.saveResource(JSON.serialize(r));
+
+        ResourceAdminController.CategoryDeleteImpactDTO impact =
+            ResourceAdminController.getCategoryDeleteImpact(alsoId);
+        System.assertEquals(0, impact.resourceCount, 'No resource lives here');
+        System.assertEquals(1, impact.secondaryCount, 'One resource is also shown under a subtopic');
+
+        for (Id target : new List<Id>{ alsoId, alsoSubId }) {
+            try {
+                ResourceAdminController.deleteCategory(target);
+                System.assert(false, 'A category with secondary placements must not delete');
+            } catch (AuraHandledException e) {
+                System.assert(e.getMessage().contains('also shown in it'), e.getMessage());
+            }
+        }
+        System.assertEquals(2, [
+            SELECT COUNT() FROM Resource_Category__c WHERE Id IN :new Set<Id>{ alsoId, alsoSubId }
+        ], 'Nothing was deleted');
+    }
+
+    // ---- "Also show in" (secondary categories) ------------------------------------
+
+    @IsTest
+    static void secondaryCategoriesSyncInsertReplaceClearNull() {
+        Id a = makeCategory('A', 'a', null);
+        Id b = makeCategory('B', 'b', null);
+        Id c = makeCategory('C', 'c', null);
+        ResourceAdminController.ResourceInput r = input('Multi', 'multi', a);
+        r.secondaryCategoryIds = new List<String>{ b, c };
+        Id resId = ResourceAdminController.saveResource(JSON.serialize(r));
+        System.assertEquals(2, [SELECT COUNT() FROM Resource_Category_Link__c WHERE Resource__c = :resId]);
+        System.assertEquals(new Set<Id>{ b, c },
+            new Set<Id>(ResourceAdminController.getResource(resId).secondaryCategoryIds),
+            'Detail echoes the placements');
+
+        r.id = resId;
+        r.secondaryCategoryIds = new List<String>{ c };
+        ResourceAdminController.saveResource(JSON.serialize(r));
+        System.assertEquals(new List<Id>{ c },
+            ResourceAdminController.getResource(resId).secondaryCategoryIds, 'Replaced');
+
+        r.secondaryCategoryIds = null;
+        ResourceAdminController.saveResource(JSON.serialize(r));
+        System.assertEquals(1, [SELECT COUNT() FROM Resource_Category_Link__c WHERE Resource__c = :resId],
+            'null leaves placements untouched');
+
+        r.secondaryCategoryIds = new List<String>();
+        ResourceAdminController.saveResource(JSON.serialize(r));
+        System.assertEquals(0, [SELECT COUNT() FROM Resource_Category_Link__c WHERE Resource__c = :resId],
+            'Empty list clears');
+    }
+
+    @IsTest
+    static void secondaryCategoriesStripHomeAndDedupe() {
+        Id a = makeCategory('A', 'a', null);
+        Id b = makeCategory('B', 'b', null);
+        ResourceAdminController.ResourceInput r = input('Stripped', 'stripped', a);
+        r.secondaryCategoryIds = new List<String>{ a, b, b };
+        Id resId = ResourceAdminController.saveResource(JSON.serialize(r));
+        List<Resource_Category_Link__c> links = [
+            SELECT Category__c FROM Resource_Category_Link__c WHERE Resource__c = :resId
+        ];
+        System.assertEquals(1, links.size(), 'Home stripped, duplicate collapsed');
+        System.assertEquals(b, links[0].Category__c);
+
+        // Moving the home onto B with the list untouched drops the self-link.
+        r.id = resId;
+        r.categoryId = b;
+        r.secondaryCategoryIds = null;
+        ResourceAdminController.saveResource(JSON.serialize(r));
+        System.assertEquals(0, [SELECT COUNT() FROM Resource_Category_Link__c WHERE Resource__c = :resId],
+            'A placement equal to the new home is removed even when untouched');
+    }
+
+    @IsTest
+    static void secondaryCategoriesRejectUnknownId() {
+        Id a = makeCategory('A', 'a', null);
+        for (String bad : new List<String>{ 'a0X000000000000AAA', 'nope' }) {
+            ResourceAdminController.ResourceInput r = input('Bad ' + bad, 'bad-' + bad.toLowerCase(), a);
+            r.secondaryCategoryIds = new List<String>{ bad };
+            try {
+                ResourceAdminController.saveResource(JSON.serialize(r));
+                System.assert(false, 'Unknown category must be rejected: ' + bad);
+            } catch (AuraHandledException e) {
+                System.assert(e.getMessage().contains('no longer exists'), e.getMessage());
+            }
+        }
+        System.assertEquals(0, [SELECT COUNT() FROM Resource__c WHERE Category__c = :a],
+            'The save rolled back with the failed placement');
+    }
+
+    @IsTest
+    static void listSurfacesSecondaryNamesAndCounts() {
+        Id a = makeCategory('Alpha', 'alpha', null);
+        Id b = makeCategory('Beta', 'beta', null);
+        ResourceAdminController.ResourceInput r = input('Listed', 'listed', a);
+        r.secondaryCategoryIds = new List<String>{ b };
+        Id resId = ResourceAdminController.saveResource(JSON.serialize(r));
+
+        ResourceAdminController.ResourceRow found;
+        for (ResourceAdminController.ResourceRow row : ResourceAdminController.listResources()) {
+            if (row.id == resId) {
+                found = row;
+            }
+        }
+        System.assertEquals('Alpha', found.categoryName, 'Home category');
+        System.assertEquals(new List<String>{ 'Beta' }, found.secondaryCategoryNames);
+
+        for (ResourceAdminController.CategoryRow row : ResourceAdminController.listCategories()) {
+            if (row.id == b) {
+                System.assertEquals(0, row.resourceCount, 'Nothing lives in Beta');
+                System.assertEquals(1, row.secondaryCount, 'One resource is also shown in Beta');
+            }
+        }
+    }
+
+    @IsTest
     static void deleteCategoryMissingIdRejected() {
         Id catId = makeCategory('Gone', 'gone', null);
         delete new Resource_Category__c(Id = catId);

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Category__c</fullName>
+    <deleteConstraint>Restrict</deleteConstraint>
+    <description>An additional category the resource is shown in. Never the resource&#39;s home category.</description>
+    <label>Category</label>
+    <referenceTo>Resource_Category__c</referenceTo>
+    <relationshipLabel>Also Shown Resources</relationshipLabel>
+    <relationshipName>Resource_Links</relationshipName>
+    <required>true</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

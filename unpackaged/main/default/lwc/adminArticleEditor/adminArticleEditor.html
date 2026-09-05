@@ -115,7 +115,8 @@
                                                 onitemschange={handleSuggestedChange}></c-admin-related-linker>
                         <p class="aae__help">
                             Curates the “Suggested” rail next to this article, in this order.
-                            Left empty, the rail fills automatically with same-topic articles.
+                            Left empty, the rail fills automatically with articles from the
+                            same topics.
                         </p>
                     </section>
                 </div>
@@ -124,9 +125,9 @@
                     <section class="aae__card">
                         <h3 class="aae__card-title">Help topics</h3>
                         <p class="aae__help">
-                            Where this article lives in the Help Center — pick the topic
-                            section(s) it should appear under. Most articles belong to exactly
-                            one subtopic.
+                            Where this article lives in the Help Center — pick every topic or
+                            subtopic it should appear under. An article can live in more than
+                            one.
                         </p>
                         <c-admin-category-tree nodes={categoryTree}
                                                selected={categoryNames}

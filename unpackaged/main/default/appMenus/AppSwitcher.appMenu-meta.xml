@@ -349,7 +349,7 @@
         <type>ConnectedApp</type>
     </appMenuItems>
     <appMenuItems>
-        <name>ARC</name>
+        <name>Arc</name>
         <type>Network</type>
     </appMenuItems>
     <appMenuItems>
