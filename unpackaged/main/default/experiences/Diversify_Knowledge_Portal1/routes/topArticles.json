@@ -1,9 +1,9 @@
 {
-  "activeViewId" : "5c41ca83-a222-48ed-9282-60ab6d2e00c4",
+  "activeViewId" : "af62cce1-14e5-4580-ac23-b89229b2ee65",
   "appPageId" : "d5e3c47c-ae25-4c7a-848f-ab2b98f65f4d",
   "configurationTags" : [ ],
   "devName" : "Top_Articles",
-  "id" : "0a81460e-2978-45cf-9f5b-733dbced1f29",
+  "id" : "d33d7a16-7036-48ce-9abb-8ff5896d2b05",
   "label" : "Top Articles",
   "routeType" : "top-articles",
   "type" : "route",
