@@ -1,0 +1,94 @@
+<template>
+    <template if:true={isScribe}>
+        <div class={wrapperClass} data-lazy={lazyMode} data-state={state}>
+            <div class="se__bar">
+                <span class="se__glyph" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                        <path d={scribeIconPath}></path>
+                    </svg>
+                </span>
+                <div class="se__heading">
+                    <span class="se__kicker">Interactive guide</span>
+                    <span class="se__title">{displayTitle}</span>
+                </div>
+                <div class="se__actions">
+                    <button type="button"
+                            class="se__btn se__btn--expand"
+                            aria-label={expandLabel}
+                            title={expandLabel}
+                            onclick={handleToggleExpand}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true">
+                            <path d={expandIconPath}></path>
+                        </svg>
+                        <span class="se__btn-label">{expandLabel}</span>
+                    </button>
+                    <a class="se__btn se__btn--open"
+                       href={shareUrl}
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       aria-label="Open in Scribe (new tab)"
+                       title="Open in Scribe">
+                        <span class="se__btn-label">Open in Scribe</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true">
+                            <path d={externalIconPath}></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="se__stage" aria-busy={isBusy}>
+                <template if:true={showSkeleton}>
+                    <div class="se__skeleton" aria-hidden="true">
+                        <div class="se__skel-step">
+                            <div class="se__skel-shot"></div>
+                            <div class="se__skel-line"></div>
+                            <div class="se__skel-line se__skel-line--short"></div>
+                        </div>
+                        <div class="se__skel-step">
+                            <div class="se__skel-shot"></div>
+                            <div class="se__skel-line"></div>
+                            <div class="se__skel-line se__skel-line--short"></div>
+                        </div>
+                    </div>
+                    <span class="se__sr-only">Loading guide…</span>
+                </template>
+
+                <template for:each={frameItems} for:item="f">
+                    <iframe key={f.key}
+                            class={frameClass}
+                            src={embedSrc}
+                            title={frameTitle}
+                            allow="fullscreen"
+                            referrerpolicy="strict-origin-when-cross-origin"
+                            onload={handleFrameLoad}
+                            onerror={handleFrameError}></iframe>
+                </template>
+
+                <template if:true={showFallback}>
+                    <div class="se__fallback" role="status">
+                        <span class="se__fallback-glyph" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                                <path d={scribeIconPath}></path>
+                            </svg>
+                        </span>
+                        <p class="se__fallback-title">{displayTitle}</p>
+                        <p class="se__fallback-note">This guide couldn’t be displayed here.</p>
+                        <div class="se__fallback-actions">
+                            <a class="se__btn se__btn--primary"
+                               href={shareUrl}
+                               target="_blank"
+                               rel="noopener noreferrer">Open in Scribe ↗</a>
+                            <button type="button" class="se__btn se__btn--ghost" onclick={handleRetry}>
+                                Try again
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </template>
+</template>

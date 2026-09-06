@@ -1,0 +1,348 @@
+/* Self-declared --slds-g-* block (canonical values, ui-standards §1):
+   injected SLDS2 hooks beat :host inheritance, so consumers of these names
+   declare their own. */
+:host {
+    display: block;
+    --slds-g-spacing-1: 4px;
+    --slds-g-spacing-2: 0.5rem;
+    --slds-g-spacing-3: 0.75rem;
+    --slds-g-spacing-4: 1rem;
+    --slds-g-spacing-5: 24px;
+    --slds-g-font-family-base: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-accent-3: #071c31;
+    --slds-g-color-on-accent-1: #ffffff;
+    /* Host hooks: a consumer can size the stage; the card bar height feeds the
+       full-screen math. */
+    --scribe-embed-height: clamp(480px, 75vh, 860px);
+    --se-bar-h: 52px;
+}
+
+/* ---- Card ---------------------------------------------------------------------- */
+.se {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+    box-shadow: var(--ds-shadow-rest, 0 1px 2px rgba(15, 23, 42, 0.06));
+    overflow: hidden;
+    font-family: var(--slds-g-font-family-base, "Inter", -apple-system, BlinkMacSystemFont, sans-serif);
+}
+
+/* ---- Bar ------------------------------------------------------------------------ */
+.se__bar {
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-3, 12px);
+    min-height: var(--se-bar-h, 52px);
+    box-sizing: border-box;
+    padding: var(--slds-g-spacing-2, 8px) var(--slds-g-spacing-4, 16px);
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+
+.se__glyph {
+    display: inline-flex;
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: var(--slds-g-color-accent-1, #0f406f);
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+}
+
+.se__glyph svg,
+.se__btn svg,
+.se__fallback-glyph svg {
+    width: 18px;
+    height: 18px;
+}
+
+.se__heading {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-width: 0;
+    line-height: 1.25;
+}
+
+.se__kicker {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.se__title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.se__actions {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 8px);
+}
+
+/* ---- Buttons (local recipe — there is no shared button module) --------------- */
+.se__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--slds-g-color-accent-1, #0f406f);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-md, 8px);
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.se__btn:hover {
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+
+.se__btn:focus-visible {
+    outline: 2px solid var(--slds-g-color-accent-1, #0f406f);
+    outline-offset: 2px;
+}
+
+.se__btn--primary {
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+    background: var(--slds-g-color-accent-1, #0f406f);
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+}
+
+.se__btn--primary:hover {
+    background: var(--slds-g-color-accent-2, #0b2f51);
+    border-color: var(--slds-g-color-accent-2, #0b2f51);
+}
+
+.se__btn--ghost {
+    border-color: transparent;
+    background: transparent;
+}
+
+/* ---- Stage ------------------------------------------------------------------ */
+.se__stage {
+    position: relative;
+    flex: 1 1 auto;
+    width: 100%;
+    height: var(--scribe-embed-height, clamp(480px, 75vh, 860px));
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+
+.se__frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: transparent;
+}
+
+.se__frame--hidden {
+    visibility: hidden;
+}
+
+/* ---- Skeleton (Scribe-shaped: screenshot + caption per step) ----------------- */
+.se__skeleton {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-5, 24px);
+    padding: var(--slds-g-spacing-5, 24px);
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.se__skel-step {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-2, 8px);
+}
+
+.se__skel-shot,
+.se__skel-line {
+    background: var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-md, 8px);
+    animation: se-pulse 1.4s ease-in-out infinite;
+}
+
+.se__skel-shot {
+    height: 180px;
+    max-height: 40%;
+}
+
+.se__skel-line {
+    height: 12px;
+    width: 70%;
+    border-radius: 999px;
+}
+
+.se__skel-line--short {
+    width: 40%;
+}
+
+@keyframes se-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
+}
+
+/* ---- Fallback card ------------------------------------------------------------ */
+.se__fallback {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--slds-g-spacing-2, 8px);
+    padding: var(--slds-g-spacing-5, 24px);
+    text-align: center;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.se__fallback-glyph {
+    display: inline-flex;
+    width: 48px;
+    height: 48px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    color: var(--slds-g-color-accent-1, #0f406f);
+}
+
+.se__fallback-glyph svg {
+    width: 22px;
+    height: 22px;
+}
+
+.se__fallback-title {
+    margin: var(--slds-g-spacing-2, 8px) 0 0;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.se__fallback-note {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.se__fallback-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--slds-g-spacing-2, 8px);
+    margin-top: var(--slds-g-spacing-3, 12px);
+}
+
+.se__fallback-actions .se__btn {
+    padding: 10px 18px;
+    font-size: 0.9375rem;
+}
+
+/* ---- Enlarged: native fullscreen or the fixed overlay fallback ---------------- */
+.se--fullscreen,
+.se--expanded {
+    border-radius: 0;
+    border: 0;
+    box-shadow: none;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+}
+
+.se--expanded {
+    position: fixed;
+    inset: 0;
+    z-index: var(--env-z-modal, 9000);
+}
+
+.se--fullscreen {
+    width: 100vw;
+    height: 100vh;
+}
+
+.se--fullscreen .se__stage,
+.se--expanded .se__stage {
+    height: calc(100vh - var(--se-bar-h, 52px));
+}
+
+/* ---- Mobile: icon-only actions, shorter stage ---------------------------------- */
+@media (max-width: 640px) {
+    :host {
+        --scribe-embed-height: clamp(400px, 70vh, 640px);
+    }
+
+    .se__bar {
+        padding-left: var(--slds-g-spacing-3, 12px);
+        padding-right: var(--slds-g-spacing-3, 12px);
+    }
+
+    .se__btn-label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
+
+    .se__btn {
+        padding: 8px;
+    }
+
+    .se__fallback-actions .se__btn-label {
+        position: static;
+        width: auto;
+        height: auto;
+        clip: auto;
+    }
+}
+
+/* ---- Utilities ---------------------------------------------------------------- */
+.se__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .se__skel-shot,
+    .se__skel-line {
+        animation: none;
+        opacity: 0.7;
+    }
+}

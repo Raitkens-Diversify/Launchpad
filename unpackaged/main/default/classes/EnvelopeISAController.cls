@@ -141,8 +141,8 @@ public with sharing class EnvelopeISAController {
                     // Create Required Document
                     Required_Documents__c reqDoc = new Required_Documents__c(
                         Name = finAccount.Name + ' - account opening'
-                        //,
-                        //Financial_Account__c = finAccount.Id
+                        ,
+                        Financial_Account__c = finAccount.Id
                     );
                     
                     insert reqDoc;

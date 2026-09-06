@@ -150,7 +150,20 @@
     border-radius: var(--ds-radius-sm, 6px);
 }
 
-/* Interactive embed (e.g. Scribe): full card width, generous height. */
+/* Stacked html runs keep their paragraph rhythm across a lifted-out guide. */
+.nexs-article__body + .nexs-article__body {
+    margin-top: var(--slds-g-spacing-4, 16px);
+}
+
+/* Scribe guide lifted out of the body: spans the card, not the 72ch measure. */
+.nexs-article__guide {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    margin: var(--slds-g-spacing-5, 24px) 0;
+}
+
+/* Legacy non-Scribe Embed_URL__c frame: full card width, generous height. */
 .nexs-article__embed {
     display: block;
     width: 100%;

@@ -93,8 +93,16 @@
                 </a>
             </template>
 
-            <!-- External link -->
-            <template if:true={isExternal}>
+            <!-- External link that is a Scribe guide: inline, above the fold, so eager -->
+            <template if:true={isScribeLink}>
+                <c-scribe-embed class="rd__guide"
+                                url={detail.externalUrl}
+                                title={detail.name}
+                                eager></c-scribe-embed>
+            </template>
+
+            <!-- Any other external link -->
+            <template if:true={isPlainExternal}>
                 <a class="rd__btn" href={detail.externalUrl} target="_blank"
                    rel="noopener noreferrer">Open link</a>
             </template>

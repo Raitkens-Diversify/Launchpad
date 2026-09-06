@@ -69,9 +69,11 @@
                     <section class="ase__card">
                         <h3 class="ase__card-title">Content</h3>
                         <p class="ase__help">
-                            The article body. Use headings to structure it. Don’t paste iframes
-                            or embed codes — they’re stripped on display; use the Embed URL
-                            field below instead.
+                            The article body. Use headings to structure it. To add a Scribe
+                            guide, paste its link on a line of its own (or link a short label to
+                            it) and it renders right there; the Scribe must be shared as “Anyone
+                            with the link can view”. Don’t paste iframes or embed codes — they’re
+                            stripped on display.
                         </p>
                         <lightning-input-rich-text value={content}
                                                    label="Article body"
@@ -91,8 +93,8 @@
                                                        label-visible
                                                        onchange={handleAnswerChange}></lightning-input-rich-text>
                         </template>
-                        <lightning-input label="Embed URL (optional)"
-                                         field-level-help="Paste an https:// embed link (e.g. a Scribe share link). It renders as an interactive frame below the article body."
+                        <lightning-input label="Embed URL (optional, legacy)"
+                                         field-level-help="A Scribe link here renders as a guide after the body — prefer pasting it in the body where it belongs. Only scribehow.com links are framed; any other https:// value shows as a plain frame."
                                          value={embedUrl}
                                          type="url"
                                          onchange={handleEmbedUrlChange}></lightning-input>

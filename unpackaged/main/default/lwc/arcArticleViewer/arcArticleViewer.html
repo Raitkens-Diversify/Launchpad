@@ -30,14 +30,28 @@
                 </nav>
             </template>
 
-            <!-- Sanitized in JS (sanitizeAndIndex) before injection. -->
-            <div class="arc-article__body" lwc:dom="manual"></div>
+            <!-- Body as ordered segments: sanitized html runs (injected in
+                 renderedCallback) interleaved with Scribe guides lifted out of
+                 the body. -->
+            <div class="arc-article__content">
+                <template for:each={segments} for:item="s">
+                    <template if:true={s.isHtml}>
+                        <div key={s.key} class="arc-article__body" lwc:dom="manual" data-seg={s.key}></div>
+                    </template>
+                    <template if:true={s.isEmbed}>
+                        <c-scribe-embed key={s.key}
+                                        class="arc-article__guide"
+                                        url={s.url}
+                                        title={s.title}></c-scribe-embed>
+                    </template>
+                </template>
+            </div>
 
-            <!-- Interactive embed (e.g. Scribe guide), driven by Embed_URL__c. -->
-            <template if:true={embedSrc}>
+            <!-- Legacy Embed_URL__c that is not a Scribe link: the raw frame it always had. -->
+            <template if:true={legacyEmbedSrc}>
                 <iframe
                     class="arc-article__embed"
-                    src={embedSrc}
+                    src={legacyEmbedSrc}
                     title="Embedded guide"
                     allow="fullscreen"
                 ></iframe>

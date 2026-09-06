@@ -164,16 +164,6 @@ public with sharing class WizardEnvelopeStateService {
         return response;
     }
     
-    // JACKSON DEAD CODE CLEANUP: dead method. Zero JS callers anywhere and no test invokes it. Remove with
-    // Tier 4d of docs/envelope-wizard-audit.md.
-    /* @AuraEnabled
-public static void saveWizardViewPreference(String viewMode) {
-update new User(
-Id = UserInfo.getUserId(),
-Wizard_View_Preference__c = viewMode
-);
-}*/
-    
     @AuraEnabled
     public static void saveAccountInfo(Map<String, Object> data) {
 
@@ -996,7 +986,7 @@ return result;
             SELECT Id
             FROM Required_Documents__c
             WHERE Person__c IN :ids OR Business__c IN :ids OR Trust__c IN :ids
-                //OR Financial_Account__c IN :ids
+                OR Financial_Account__c IN :ids
         ];
         Set<Id> documentIds = new Map<Id, Required_Documents__c>(documents).keySet();
 

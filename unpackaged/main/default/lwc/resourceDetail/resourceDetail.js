@@ -17,6 +17,7 @@ import {
 } from 'c/rcConstants';
 import { linkContext, articleHref } from 'c/contextNav';
 import { formatDateTime } from 'c/dsDateBlock';
+import { isScribeUrl } from 'c/scribeUrlUtil';
 
 /**
  * resourceDetail — full resource view. File-backed types (PDF/Form/Template):
@@ -113,6 +114,14 @@ export default class ResourceDetail extends LightningElement {
     }
     get isExternal() {
         return this.detail && this.detail.resourceType === TYPE_EXTERNAL_LINK && !!this.detail.externalUrl;
+    }
+    /** An External Link that is a Scribe guide renders inline (c-scribe-embed
+        carries its own "Open in Scribe"); any other link keeps the button. */
+    get isScribeLink() {
+        return !!this.isExternal && isScribeUrl(this.detail.externalUrl);
+    }
+    get isPlainExternal() {
+        return !!this.isExternal && !this.isScribeLink;
     }
     get hasFile() {
         return !!(this.detail && this.detail.file && this.detail.file.downloadUrl);
