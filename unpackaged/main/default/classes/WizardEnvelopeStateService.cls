@@ -1112,7 +1112,7 @@ return result;
             }
             
             List<Financial_Account__c> finAccounts = [
-                SELECT ID, Name, Registration_Type__c, Rep_Code__c, Custodian__c, Primary_Owner__c, Product_Type__c, DPI__c, BD_or_RIA__c, Managed_Account_Platform__c, Submitted__c
+                SELECT ID, Name, Registration_Type__c, Rep_Code__c, /*Custodian__c,*/ Primary_Owner__c, Product_Type__c, DPI__c, BD_or_RIA__c, Managed_Account_Platform__c, Submitted__c
                 FROM Financial_Account__c
                 WHERE Household__c = :householdId OR Id IN :envelopeFinAccountIds
                 WITH USER_MODE
@@ -1899,7 +1899,7 @@ return result;
         act.Id = finAccount.Id;
         act.Name = finAccount.Name;
         act.registrationType = finAccount.Registration_Type__c;
-        act.custodian = finAccount.Custodian__c ;
+        //act.custodian = finAccount.Custodian__c ;
         act.selectedRepCode = finAccount.Rep_Code__c;
         act.ownerMemberId = finAccount.Primary_Owner__c;
         act.bdProductType = finAccount.Product_Type__c;

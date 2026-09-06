@@ -85,6 +85,46 @@ private class CaseCurrentTaskControllerTest {
     }
 
     @isTest
+    static void testEmptyQueueIsClaimableByAnyone() {
+        Map<String, Id> queues = createQueues(new List<String>{ 'Unassigned' });
+
+        Test.startTest();
+        Boolean claimable = CaseCurrentTaskController.isCurrentUserMemberOfQueue(
+            queues.get('Unassigned')
+        );
+        Test.stopTest();
+
+        Assert.isTrue(claimable, 'A queue with no members is a holding bucket anyone may take from');
+    }
+
+    @isTest
+    static void testQueueWithOtherMembersIsNotClaimable() {
+        Map<String, Id> queues = createQueues(new List<String>{ 'Operations' });
+        Profile p = [SELECT Id FROM Profile WHERE Name = 'System Administrator' LIMIT 1];
+        User other = new User(
+            Alias = 'cctoth',
+            Email = 'cct.other@example.com',
+            EmailEncodingKey = 'UTF-8',
+            LastName = 'Other',
+            LanguageLocaleKey = 'en_US',
+            LocaleSidKey = 'en_US',
+            ProfileId = p.Id,
+            TimeZoneSidKey = 'America/Los_Angeles',
+            Username = 'cct.other.' + System.currentTimeMillis() + '@example.com'
+        );
+        insert other;
+        insert new GroupMember(GroupId = queues.get('Operations'), UserOrGroupId = other.Id);
+
+        Test.startTest();
+        Boolean claimable = CaseCurrentTaskController.isCurrentUserMemberOfQueue(
+            queues.get('Operations')
+        );
+        Test.stopTest();
+
+        Assert.isFalse(claimable, 'A queue with members stays limited to those members');
+    }
+
+    @isTest
     static void testUpdateTask() {
         Task t = [SELECT Id FROM Task LIMIT 1];
         Id currentUserId = UserInfo.getUserId();

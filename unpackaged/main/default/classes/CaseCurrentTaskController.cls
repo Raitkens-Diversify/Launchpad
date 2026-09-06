@@ -161,6 +161,21 @@ public with sharing class CaseCurrentTaskController {
             return false;
         }
 
+        // A queue with no members at all -- the org's "Unassigned" bucket, which
+        // parks thousands of open tasks -- is a holding place, not a team. Treating
+        // it as claimable by anyone is the only way a task parked there can ever be
+        // taken from ARC (Case page tile and Task page alike); a queue WITH members
+        // stays limited to those members (2026-09-06).
+        Integer totalMembers = [
+            SELECT COUNT()
+            FROM GroupMember
+            WHERE GroupId = :ownerId
+        ];
+
+        if (totalMembers == 0) {
+            return true;
+        }
+
         Integer memberCount = [
             SELECT COUNT()
             FROM GroupMember

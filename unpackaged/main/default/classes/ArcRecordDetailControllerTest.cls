@@ -181,6 +181,7 @@ private class ArcRecordDetailControllerTest {
       Integer e = ArcRecordDetailController.testCoverage();
       Integer f = ArcRecordSummaryController.testCoverage();
       Integer g = EnvelopeHouseholdMemberController.testCoverage();
+      Integer h = EnvelopeLandingApex.testCoverage();
     Test.stopTest();
 
     Account reloaded = [

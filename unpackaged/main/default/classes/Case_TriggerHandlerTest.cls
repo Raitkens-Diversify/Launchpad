@@ -136,8 +136,9 @@ public class Case_TriggerHandlerTest {
         
         //Data create  for findFinAcct Test
         Financial_Account__c wfa = new Financial_Account__c(
-            Name = 'Test Wizard Financial Account',
-            Custodian__c = 'Schwab'
+            Name = 'Test Wizard Financial Account'
+            //,
+            //Custodian__c = 'Schwab'
         );
         Insert wfa ;
     }
@@ -292,7 +293,7 @@ public class Case_TriggerHandlerTest {
     }
     
     
-    /*
+    
     @isTest
     private static void testFindWizardTemplate(){
         Id newAccountRecordTypeId = Schema.sObjectType.Case.getRecordTypeInfosByName().get('Account Opening').getRecordTypeId();
@@ -319,7 +320,7 @@ public class Case_TriggerHandlerTest {
         Assert.areEqual(lstTask.size(), 1);
         
     }
-    */
+    
     /*@isTest
     private static void testAdvisorRequestTemplate(){
         Id newAccountRecordTypeId = Schema.sObjectType.Case.getRecordTypeInfosByName().get('Account Opening').getRecordTypeId();
@@ -419,7 +420,8 @@ public class Case_TriggerHandlerTest {
     @isTest
     private static void testSetCustodianFromWizardFinancialAccountOnInsert(){
         Financial_Account__c wfa = [
-            SELECT Id, Custodian__c
+            SELECT Id
+            //, Custodian__c
             FROM Financial_Account__c
             LIMIT 1
         ];
@@ -458,7 +460,7 @@ public class Case_TriggerHandlerTest {
         Test.stopTest();
 
         Case insertedCase = [SELECT Custodian__c FROM Case WHERE Id = :testCase.Id];
-        //Assert.areEqual('Fidelity', insertedCase.Custodian__c);
+        Assert.areEqual('Fidelity', insertedCase.Custodian__c);
     }
 
     // A brand-new Account Opening Case (created when a new Financial Account is added in the

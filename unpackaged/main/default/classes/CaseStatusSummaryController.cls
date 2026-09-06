@@ -133,7 +133,7 @@ public with sharing class CaseStatusSummaryController {
         List<String> parts = new List<String>{ c.Type };
         if (fa != null) {
             parts.add(fa.Registration_Type__c);
-            parts.add(fa.Custodian__c);
+            //parts.add(fa.Custodian__c);
             parts.add(fa.Managed_Account_Platform__c);
             parts.add(fa.BD_or_RIA__c);
             parts.add('</br>');

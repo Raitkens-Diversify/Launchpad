@@ -379,7 +379,7 @@ public class CaseStatusSummaryControllerTest {
         Financial_Account__c financialAccount = new Financial_Account__c(
             Name = 'Membership Line Account',
             Registration_Type__c = '403(b)',
-            Custodian__c = 'DIRECT',
+            //Custodian__c = 'DIRECT',
             Managed_Account_Platform__c = 'AltMS',
             BD_or_RIA__c = 'RIA',
             Primary_Owner__c = personOwner.Id
