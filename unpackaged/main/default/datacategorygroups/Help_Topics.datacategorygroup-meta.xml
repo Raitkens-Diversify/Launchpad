@@ -99,8 +99,104 @@
                 <label>Core Objects</label>
                 <name>Core_Objects</name>
             </dataCategory>
-            <label>Cosmos Vocab &amp; Data Structure</label>
+            <label>Arc Vocab &amp; Data Structure</label>
             <name>Data_Model</name>
+        </dataCategory>
+        <dataCategory>
+            <dataCategory>
+                <label>Framework &amp; Scope</label>
+                <name>Forms_Framework</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Regulatory Disclosures</label>
+                <name>Forms_Regulatory_Disclosures</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Universal (Diversify) Forms</label>
+                <name>Forms_Universal</name>
+            </dataCategory>
+            <dataCategory>
+                <label>DFPG (Broker-Dealer) Forms</label>
+                <name>Forms_DFPG</name>
+            </dataCategory>
+            <dataCategory>
+                <label>RIA Forms (DWM &amp; DAS)</label>
+                <name>Forms_RIA</name>
+            </dataCategory>
+            <dataCategory>
+                <label>General Policies</label>
+                <name>Forms_Policies</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Glossary</label>
+                <name>Forms_Glossary</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Scenarios: Onboarding</label>
+                <name>Scenarios_Onboarding</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Scenarios: Transactions</label>
+                <name>Scenarios_Transactions</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Scenarios: Cross-Channel</label>
+                <name>Scenarios_Cross_Channel</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Scenarios: Courtesy Accounts</label>
+                <name>Scenarios_Courtesy</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Scenarios: Account Lifecycle</label>
+                <name>Scenarios_Lifecycle</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Lifecycle Trigger Policies</label>
+                <name>Lifecycle_Triggers</name>
+            </dataCategory>
+            <label>Forms &amp; Paperwork</label>
+            <name>Forms_and_Paperwork</name>
+        </dataCategory>
+        <dataCategory>
+            <dataCategory>
+                <label>Clients, Firms &amp; Scope</label>
+                <name>FAQ_Clients_Firms</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Disclosures &amp; Form CRS</label>
+                <name>FAQ_Regulatory</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Client Consents &amp; Trusts</label>
+                <name>FAQ_Consents_Trusts</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Universal &amp; Product Forms</label>
+                <name>FAQ_Universal_Products</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Broker-Dealer (DFPG) Forms</label>
+                <name>FAQ_DFPG</name>
+            </dataCategory>
+            <dataCategory>
+                <label>RIA Agreements &amp; Platforms</label>
+                <name>FAQ_RIA</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Signing &amp; General Policies</label>
+                <name>FAQ_Signing</name>
+            </dataCategory>
+            <dataCategory>
+                <label>What&#39;s Changing</label>
+                <name>FAQ_Whats_Changing</name>
+            </dataCategory>
+            <dataCategory>
+                <label>Account Lifecycle Events</label>
+                <name>FAQ_Lifecycle</name>
+            </dataCategory>
+            <label>FAQs</label>
+            <name>FAQs</name>
         </dataCategory>
         <label>All</label>
         <name>All</name>

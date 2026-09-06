@@ -367,9 +367,13 @@ public with sharing class ArcRecordSearchController {
    * (appended to the caller's own clauses list, ANDed with everything
    * else), never a replacement.
    *
-   * Case/My_teams_open_cases deliberately carries no IsClosed-style status
-   * clause -- team visibility here is defined purely by ownership within
-   * the requesting user's own Financial Advisor Team(s), nothing else.
+   * Both Case tabs are OPEN cases only (IsClosed = false), matching their
+   * labels and the Task tabs below. Case/My_teams_open_cases is scoped by
+   * the case's own Financial_Advisor_Team__c lookup -- a case belongs to
+   * "my team" when that team is one the running user is an active member
+   * of, whoever owns the case. Ownership was the old rule, and it showed an
+   * advisor nothing once a case moved to a home-office owner (0 rows for a
+   * user whose teams had 23 open cases).
    */
   private static void appendMandatoryFilter(
     String objectApiName,
@@ -383,11 +387,18 @@ public with sharing class ArcRecordSearchController {
 
     if (objectApiName == 'Case') {
       if (listViewApiName == 'MyOpenCases') {
+        binds.put('mandatoryClosed', false);
         binds.put('mandatoryOwnerId', UserInfo.getUserId());
+        clauses.add('IsClosed = :mandatoryClosed');
         clauses.add('OwnerId = :mandatoryOwnerId');
       } else if (listViewApiName == 'My_teams_open_cases') {
-        binds.put('mandatoryTeamUserIds', resolveFinancialAdvisorTeamUserIds());
-        clauses.add('OwnerId IN :mandatoryTeamUserIds');
+        // Linked to one of my active teams, open only -- see the class
+        // comment above. An empty team set is valid: IN :emptySet matches
+        // nothing, which is right for someone on no team.
+        binds.put('mandatoryClosed', false);
+        binds.put('mandatoryTeamIds', resolveFinancialAdvisorTeamIds());
+        clauses.add('IsClosed = :mandatoryClosed');
+        clauses.add('Financial_Advisor_Team__c IN :mandatoryTeamIds');
       }
       return;
     }
@@ -466,7 +477,8 @@ public with sharing class ArcRecordSearchController {
     return ids;
   }
 
-  private static Set<Id> resolveFinancialAdvisorTeamUserIds() {
+  /** The Financial Advisor Teams the running user is an active member of. */
+  private static Set<Id> resolveFinancialAdvisorTeamIds() {
     Set<Id> teamIds = new Set<Id>();
     for (Financial_Advisor_Team_Member__c membership : [
       SELECT Financial_Advisor_Team__c
@@ -478,6 +490,11 @@ public with sharing class ArcRecordSearchController {
         teamIds.add(membership.Financial_Advisor_Team__c);
       }
     }
+    return teamIds;
+  }
+
+  private static Set<Id> resolveFinancialAdvisorTeamUserIds() {
+    Set<Id> teamIds = resolveFinancialAdvisorTeamIds();
 
     Set<Id> userIds = new Set<Id>();
     if (teamIds.isEmpty()) {

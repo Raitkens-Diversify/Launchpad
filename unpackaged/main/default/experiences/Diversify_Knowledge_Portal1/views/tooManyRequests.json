@@ -2,7 +2,7 @@
   "appPageId" : "d5e3c47c-ae25-4c7a-848f-ab2b98f65f4d",
   "componentName" : "siteforce:sldsOneColLayout",
   "dataProviders" : [ ],
-  "id" : "77e937f3-9214-4145-9221-a97c8094bed6",
+  "id" : "f3c7b584-1053-4a08-8fda-aaf57901b9e9",
   "label" : "Too Many Requests",
   "regions" : [ {
     "components" : [ {
@@ -10,19 +10,19 @@
         "richTextValue" : "<div style='display: flex; align-items: center; flex-direction: column; margin: 60px 25px 30px 25px;'><div style='background-image: url(/sfsites/assets/Images/tooManyRequests/tooManyRequests.svg); background-size: contain; height: 350px; width: 100%; background-repeat: no-repeat; background-position: center;'></div></div><div style='margin: 0 25px; text-align: center;'><h1 class='slds-text-heading_large'>Looks like the site is experiencing higher than usual demand…</h1><p class='slds-text-heading_small'>Don't go anywhere. We'll redirect you in a moment.</p></div>"
       },
       "componentName" : "forceCommunity:htmlBlock",
-      "id" : "d26b6420-217f-48d4-b6fd-0c38aef532f0",
+      "id" : "076feafc-1044-4809-af7e-93fae89a954a",
       "renderPriority" : "NEUTRAL",
       "renditionMap" : { },
       "type" : "component"
     }, {
       "componentAttributes" : { },
       "componentName" : "forceCommunity:autoRefresh",
-      "id" : "e5dfc4ed-3073-495a-ad05-66982d13fbe5",
+      "id" : "10946d4a-1443-447a-a2d1-a9c83bb46e43",
       "renderPriority" : "NEUTRAL",
       "renditionMap" : { },
       "type" : "component"
     } ],
-    "id" : "1ae9d956-f361-49ac-9606-ade823f48dab",
+    "id" : "606b65fe-5853-4985-b118-2518272d531f",
     "regionName" : "content",
     "type" : "region"
   } ],

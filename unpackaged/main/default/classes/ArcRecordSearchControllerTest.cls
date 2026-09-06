@@ -347,16 +347,18 @@ private class ArcRecordSearchControllerTest {
   // ---- Per-tab mandatory filters (appendMandatoryFilter) ------------------
 
   @IsTest
-  static void searchRecordsMyOpenCasesOnlyReturnsCasesOwnedByTheRunningUser() {
+  static void searchRecordsMyOpenCasesOnlyReturnsOpenCasesOwnedByTheRunningUser() {
     User otherOwner = createTestUser('CaseOtherOwner');
 
     Case mine = new Case(Subject = 'Owned by me', Status = 'New');
+    // Same owner, but closed -- the tab is "My OPEN Cases", so it stays out.
+    Case mineClosed = new Case(Subject = 'Owned by me, closed', Status = 'Closed');
     Case theirs = new Case(
       Subject = 'Owned by someone else',
       Status = 'New',
       OwnerId = otherOwner.Id
     );
-    insert new List<Case>{ mine, theirs };
+    insert new List<Case>{ mine, mineClosed, theirs };
 
     Test.startTest();
     ArcRecordSearchController.SearchResult result = ArcRecordSearchController.searchRecords(
@@ -372,15 +374,14 @@ private class ArcRecordSearchControllerTest {
     );
     Test.stopTest();
 
-    Assert.areEqual(1, result.rows.size());
+    Assert.areEqual(1, result.rows.size(), 'only my open case; my closed one and theirs stay out');
     Assert.areEqual('Owned by me', result.rows[0].cells[0]);
   }
 
   @IsTest
-  static void searchRecordsMyTeamsOpenCasesReturnsCasesOwnedByActiveTeammatesOnly() {
+  static void searchRecordsMyTeamsOpenCasesReturnsOpenCasesLinkedToMyActiveTeams() {
     User teammate = createTestUser('CaseTeammate');
     User outsider = createTestUser('CaseOutsider');
-    User inactiveTeammate = createTestUser('CaseInactiveTeammate');
 
     // Financial_Advisor_Team_TriggerHandler.updateRepCode (unrelated,
     // pre-existing automation that fires on a Related_Advisors__c change
@@ -391,8 +392,9 @@ private class ArcRecordSearchControllerTest {
     insert new Financial_Advisor_Team__c(Name = 'Default Team');
 
     Financial_Advisor_Team__c myTeam = new Financial_Advisor_Team__c(Name = 'My Team');
+    Financial_Advisor_Team__c inactiveTeam = new Financial_Advisor_Team__c(Name = 'Former Team');
     Financial_Advisor_Team__c otherTeam = new Financial_Advisor_Team__c(Name = 'Other Team');
-    insert new List<Financial_Advisor_Team__c>{ myTeam, otherTeam };
+    insert new List<Financial_Advisor_Team__c>{ myTeam, inactiveTeam, otherTeam };
 
     insert new List<Financial_Advisor_Team_Member__c>{
       new Financial_Advisor_Team_Member__c(
@@ -407,12 +409,12 @@ private class ArcRecordSearchControllerTest {
         Role__c = 'Financial Advisor',
         Active__c = true
       ),
-      // Inactive membership on my own team -- their cases should NOT count
-      // as "my team's", proving Active__c is actually checked and not just
-      // team membership on its own.
+      // My own membership, but inactive -- that team's cases are not "my
+      // team's" any more, proving Active__c is checked and not mere
+      // membership.
       new Financial_Advisor_Team_Member__c(
-        Financial_Advisor_Team__c = myTeam.Id,
-        User__c = inactiveTeammate.Id,
+        Financial_Advisor_Team__c = inactiveTeam.Id,
+        User__c = UserInfo.getUserId(),
         Role__c = 'Financial Advisor',
         Active__c = false
       ),
@@ -424,23 +426,54 @@ private class ArcRecordSearchControllerTest {
       )
     };
 
-    Case mine = new Case(Subject = 'Mine', Status = 'New');
-    Case teammatesCase = new Case(
-      Subject = 'Teammates',
+    // Membership decides, not ownership: the case linked to my team counts
+    // even when someone off the team owns it, and a teammate's case with no
+    // team link does not. (Case_TriggerHandler.setProjectManager resets the
+    // owner of any team-linked case on insert, so the off-team owner is
+    // applied with an update below.)
+    Case linkedToMyTeam = new Case(
+      Subject = 'MyTeamOpen',
+      Status = 'New',
+      Financial_Advisor_Team__c = myTeam.Id
+    );
+    Case linkedToMyTeamByTeammate = new Case(
+      Subject = 'MyTeamOpenByTeammate',
+      Status = 'New',
+      Financial_Advisor_Team__c = myTeam.Id,
+      OwnerId = teammate.Id
+    );
+    Case linkedToMyTeamClosed = new Case(
+      Subject = 'MyTeamClosed',
+      Status = 'Closed',
+      Financial_Advisor_Team__c = myTeam.Id
+    );
+    Case linkedToInactiveTeam = new Case(
+      Subject = 'InactiveTeamOpen',
+      Status = 'New',
+      Financial_Advisor_Team__c = inactiveTeam.Id
+    );
+    Case linkedToOtherTeam = new Case(
+      Subject = 'OtherTeamOpen',
+      Status = 'New',
+      Financial_Advisor_Team__c = otherTeam.Id
+    );
+    Case teammatesUnlinked = new Case(
+      Subject = 'NoTeamOwnedByTeammate',
       Status = 'New',
       OwnerId = teammate.Id
     );
-    Case inactiveTeammatesCase = new Case(
-      Subject = 'InactiveTeammates',
-      Status = 'New',
-      OwnerId = inactiveTeammate.Id
-    );
-    Case outsidersCase = new Case(
-      Subject = 'Outsiders',
-      Status = 'New',
-      OwnerId = outsider.Id
-    );
-    insert new List<Case>{ mine, teammatesCase, inactiveTeammatesCase, outsidersCase };
+    Case mineUnlinked = new Case(Subject = 'NoTeamMine', Status = 'New');
+    insert new List<Case>{
+      linkedToMyTeam,
+      linkedToMyTeamByTeammate,
+      linkedToMyTeamClosed,
+      linkedToInactiveTeam,
+      linkedToOtherTeam,
+      teammatesUnlinked,
+      mineUnlinked
+    };
+    linkedToMyTeam.OwnerId = outsider.Id;
+    update linkedToMyTeam;
 
     Test.startTest();
     ArcRecordSearchController.SearchResult result = ArcRecordSearchController.searchRecords(
@@ -460,11 +493,14 @@ private class ArcRecordSearchControllerTest {
     for (ArcRecordSearchController.SearchRow row : result.rows) {
       subjects.add(row.cells[0]);
     }
-    Assert.areEqual(2, result.rows.size());
-    Assert.isTrue(subjects.contains('Mine'));
-    Assert.isTrue(subjects.contains('Teammates'));
-    Assert.isFalse(subjects.contains('InactiveTeammates'));
-    Assert.isFalse(subjects.contains('Outsiders'));
+    Assert.areEqual(2, result.rows.size(), 'open cases linked to my active team only: ' + subjects);
+    Assert.isTrue(subjects.contains('MyTeamOpen'), 'linked to my team, owned off-team');
+    Assert.isTrue(subjects.contains('MyTeamOpenByTeammate'), 'linked to my team, owned by a teammate');
+    Assert.isFalse(subjects.contains('MyTeamClosed'), 'closed cases stay out');
+    Assert.isFalse(subjects.contains('InactiveTeamOpen'), 'inactive membership does not count');
+    Assert.isFalse(subjects.contains('OtherTeamOpen'), 'another team\'s case');
+    Assert.isFalse(subjects.contains('NoTeamOwnedByTeammate'), 'ownership alone no longer qualifies');
+    Assert.isFalse(subjects.contains('NoTeamMine'), 'my own unlinked case belongs to My Open Cases, not here');
   }
 
   @IsTest
