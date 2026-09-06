@@ -15,7 +15,7 @@ import getFormSchema from "@salesforce/apex/FieldDetailController.getFormSchema"
 import getSectionLayouts from "@salesforce/apex/FieldDetailController.getSectionLayouts";
 import getRecordValuesForType from "@salesforce/apex/FieldDetailController.getRecordValuesForType";
 import getRelationships from "@salesforce/apex/ArcAccountRelationshipsController.getRelationships";
-import { evaluateWhereStatement } from "c/envelopeFormSchema";
+import { applyInputMask, evaluateWhereStatement } from "c/envelopeFormSchema";
 
 /**
  * arcHouseholdDetail
@@ -216,13 +216,105 @@ const NAV_ITEM_BY_LOOKUP_FIELD = {
  * Household: Financial Summary, Financial Statement and Suitability Information
  * were removed at the business's request (2026-09-03); the household's
  * Relationships (its members) fill the Details tab in their place.
+ *
+ * Retirement Plan: Suitability Information was removed at the business's
+ * request (2026-09-06); a plan carries no investor profile of its own.
  */
 const HIDDEN_SECTIONS_BY_SCHEMA_TYPE = {
   "Household Detail": new Set([
     "Financial Summary",
     "Financial Statement",
     "Suitability Information"
-  ])
+  ]),
+  "Retirement Plan Detail": new Set(["Suitability Information"])
+};
+
+/**
+ * ARC's own heading for a section, keyed by the Section_Name__c the rows still
+ * carry and applied to every account type. The business asked (2026-09-06) for
+ * "Suitability Information" to read "Investor Profile" wherever it appears --
+ * contact, business and trust alike. The metadata keeps the Lightning page's
+ * name, so hiding, Section__mdt ordering and the wizard all still match on it;
+ * only the rendered title changes.
+ */
+const SECTION_TITLES = { "Suitability Information": "Investor Profile" };
+
+/**
+ * ARC's own label for a field, by field API name, applied on every account
+ * type (same request, 2026-09-06). Lightning calls an account's compound
+ * addresses Billing/Shipping; on ARC they are its permanent and mailing
+ * addresses, the words the contact page already uses for the same two
+ * addresses; and the Investor Profile's "Approximate Highest Tax Bracket" is
+ * simply "Tax Bracket". Everything else keeps the describe label, as the
+ * header note above explains.
+ */
+const FIELD_LABELS = {
+  BillingAddress: "Permanent Address",
+  ShippingAddress: "Mailing Address",
+  Approximate_Highest_Tax_Bracket__c: "Tax Bracket"
+};
+
+/**
+ * Labels that apply to one schema type only, keyed by schema type then field
+ * API name; these win over FIELD_LABELS.
+ */
+const FIELD_LABELS_BY_SCHEMA_TYPE = {
+  "Client - Individual": { PersonMobilePhone: "Primary Phone" }
+};
+
+/**
+ * Display formats for rows whose Format__c is blank, keyed by schema type then
+ * field API name. The *Detail types copy the Lightning page, which prints the
+ * Tax ID as bare digits; ARC punctuates it (see formatDisplayText), the same
+ * way on every entity type that carries one.
+ */
+const TAX_ID_FORMATS = { Tax_ID__c: "SSN or EIN" };
+const FIELD_FORMATS_BY_SCHEMA_TYPE = {
+  "Business Detail": TAX_ID_FORMATS,
+  "Trust Detail": TAX_ID_FORMATS,
+  "Retirement Plan Detail": TAX_ID_FORMATS
+};
+
+/**
+ * Fields ARC shows in a section beyond its Envelope_Field__mdt rows, keyed by
+ * schema type. "Client - Individual" is the onboarding interview and asks no
+ * tax-bracket question, but the contact's Investor Profile should show the one
+ * the record holds (2026-09-06). Read through the record wire below rather than
+ * getRecordValuesForType, which only knows the schema's own rows; appended
+ * after the section's configured fields.
+ */
+const EXTRA_FIELDS_BY_SCHEMA_TYPE = {
+  "Client - Individual": [
+    {
+      section: "Suitability Information",
+      fieldPath: "Approximate_Highest_Tax_Bracket__c",
+      label: "Tax Bracket",
+      type: "PICKLIST"
+    }
+  ]
+};
+
+/** Account.TIN_or_SSN__c -- decides how a "SSN or EIN" Tax ID is punctuated. */
+const TAX_ID_KIND_FIELD = "Account.TIN_or_SSN__c";
+
+/**
+ * Text punctuated the way the wizard's input masks type it -- an SSN as
+ * 256-21-4100, an EIN as 98-7654321, a phone as (645) 513-2451 -- so the
+ * read-only page shows the same shape the edit form does. "SSN or EIN" is
+ * settled by the record's own TIN_or_SSN__c: SSN when it says so, EIN
+ * otherwise, since a business's Tax ID is an EIN unless the record says it is
+ * a sole proprietor's SSN. A format the mask does not know, or a value it
+ * reduces to nothing, renders as the server sent it.
+ */
+const formatDisplayText = (format, raw, taxIdKind) => {
+  const text = String(raw);
+  if (!format) {
+    return text;
+  }
+  const resolved =
+    format === "SSN or EIN" ? (taxIdKind === "SSN" ? "SSN" : "EIN") : format;
+  const masked = applyInputMask(resolved, text);
+  return masked ? String(masked) : text;
 };
 
 /**
@@ -324,10 +416,18 @@ export default class ArcHouseholdDetail extends NavigationMixin(
 
   /**
    * Spanning field paths for the lookups on this schema, e.g.
-   * "Account.Household__r.Name". Reactive: set once the schema is known, which
-   * re-runs the wire below with the names it needs.
+   * "Account.Household__r.Name", plus the record's own fields ARC reads outside
+   * the schema (TIN_or_SSN__c and EXTRA_FIELDS_BY_SCHEMA_TYPE). Reactive: set
+   * once the schema is known, which re-runs the wire below with the names it
+   * needs.
    */
-  lookupFields = [];
+  lookupFields = [TAX_ID_KIND_FIELD];
+
+  /** Values of this type's EXTRA_FIELDS_BY_SCHEMA_TYPE rows, by field API name. */
+  extraValues = {};
+
+  /** Account.TIN_or_SSN__c, read for formatDisplayText. */
+  taxIdKind;
 
   /** fieldPath -> resolved related-record name. */
   lookupNames = {};
@@ -375,6 +475,19 @@ export default class ArcHouseholdDetail extends NavigationMixin(
         }
       });
       this.lookupNames = names;
+
+      this.taxIdKind = getFieldValue(data, TAX_ID_KIND_FIELD) || undefined;
+
+      const extraValues = {};
+      (EXTRA_FIELDS_BY_SCHEMA_TYPE[this.resolvedSchemaType] || []).forEach(
+        (extra) => {
+          extraValues[extra.fieldPath] = getFieldValue(
+            data,
+            `${this.objectApiName}.${extra.fieldPath}`
+          );
+        }
+      );
+      this.extraValues = extraValues;
 
       this.loadSchema();
       return;
@@ -500,8 +613,12 @@ export default class ArcHouseholdDetail extends NavigationMixin(
       });
     });
 
+    const extraPaths = (
+      EXTRA_FIELDS_BY_SCHEMA_TYPE[this.resolvedSchemaType] || []
+    ).map((extra) => `${this.objectApiName}.${extra.fieldPath}`);
+
     this._lookupPathByField = pathByField;
-    this.lookupFields = paths;
+    this.lookupFields = [TAX_ID_KIND_FIELD, ...extraPaths, ...paths];
   }
 
   // ---- rendering ----------------------------------------------------------
@@ -516,6 +633,16 @@ export default class ArcHouseholdDetail extends NavigationMixin(
    */
   get sections() {
     const values = this.values || {};
+    const type = this.resolvedSchemaType;
+    const titles = SECTION_TITLES;
+    const labels = FIELD_LABELS_BY_SCHEMA_TYPE[type] || {};
+    const formats = FIELD_FORMATS_BY_SCHEMA_TYPE[type] || {};
+    const extras = EXTRA_FIELDS_BY_SCHEMA_TYPE[type] || [];
+    const labelFor = (field) =>
+      labels[field.fieldPath] ||
+      FIELD_LABELS[field.fieldPath] ||
+      field.label ||
+      field.fieldPath;
 
     return (this.sectionsRaw || [])
       .map((section) => {
@@ -536,12 +663,20 @@ export default class ArcHouseholdDetail extends NavigationMixin(
          * fields and is dropped below, which is how a whole tab hides per
          * account.
          */
-        const visibleFields = (section.fields || []).filter((field) =>
+        const sectionFields = [
+          ...(section.fields || []),
+          ...extras
+            .filter((extra) => extra.section === section.name)
+            .map((extra) => ({ ...extra, isExtra: true }))
+        ];
+        const visibleFields = sectionFields.filter((field) =>
           evaluateWhereStatement(field.shownWhereStatement, values, {})
         );
 
         const fields = visibleFields.map((field, index) => {
-          const raw = values[field.fieldPath];
+          const raw = field.isExtra
+            ? this.extraValues[field.fieldPath]
+            : values[field.fieldPath];
           const type = (field.type || "").toUpperCase();
 
           /*
@@ -553,7 +688,7 @@ export default class ArcHouseholdDetail extends NavigationMixin(
           if (type === "BOOLEAN") {
             return {
               key: `${section.name}-${field.fieldPath}-${index}`,
-              label: field.label || field.fieldPath,
+              label: labelFor(field),
               value: raw === true ? "\u2611" : "\u2610",
               valueClass: "arc-household-detail__value"
             };
@@ -576,7 +711,7 @@ export default class ArcHouseholdDetail extends NavigationMixin(
 
             return {
               key: `${section.name}-${field.fieldPath}-${index}`,
-              label: field.label || field.fieldPath,
+              label: labelFor(field),
               value: lines.length ? lines.join("\n") : "\u2014",
               valueClass: lines.length
                 ? "arc-household-detail__value arc-household-detail__value--address"
@@ -599,7 +734,7 @@ export default class ArcHouseholdDetail extends NavigationMixin(
             const href = name ? this.lookupHrefFor(field, raw) : "";
             return {
               key: `${section.name}-${field.fieldPath}-${index}`,
-              label: field.label || field.fieldPath,
+              label: labelFor(field),
               value: name || "\u2014",
               isLink: Boolean(href),
               href,
@@ -617,14 +752,22 @@ export default class ArcHouseholdDetail extends NavigationMixin(
           /*
            * A currency renders as money, not as the bare number the server
            * returns -- "$5,000,000.00" rather than "5000000", as the Lightning
-           * page shows it. Other types still render as the server sent them.
+           * page shows it. Text with a display format -- the row's Format__c or
+           * FIELD_FORMATS_BY_SCHEMA_TYPE -- renders punctuated the way the
+           * wizard's mask types it. Everything else renders as the server sent it.
            */
           const displayValue =
-            type === TYPE_CURRENCY ? formatCurrency(raw) : String(raw);
+            type === TYPE_CURRENCY
+              ? formatCurrency(raw)
+              : formatDisplayText(
+                  formats[field.fieldPath] || field.format,
+                  raw,
+                  this.taxIdKind
+                );
 
           return {
             key: `${section.name}-${field.fieldPath}-${index}`,
-            label: field.label || field.fieldPath,
+            label: labelFor(field),
             value: isBlank ? "—" : displayValue,
             // Computed here, not in the template: LWC cannot build a class
             // string from an expression, and a getter per row is not possible
@@ -638,6 +781,7 @@ export default class ArcHouseholdDetail extends NavigationMixin(
         return {
           key: section.name,
           name: section.name,
+          title: titles[section.name] || section.name,
           fields,
           hasFields: fields.length > 0
         };

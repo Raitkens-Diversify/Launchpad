@@ -54,7 +54,7 @@
                   ></c-arc-account-relationships>
                 </template>
                 <template lwc:else>
-                <h3 class="arc-household-detail__section-heading">{section.name}</h3>
+                <h3 class="arc-household-detail__section-heading">{section.title}</h3>
                 <dl class="arc-household-detail__grid">
                   <template for:each={section.fields} for:item="field">
                     <div key={field.key} class="arc-household-detail__field">
