@@ -883,6 +883,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>FieldSetControllerTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>FileUploadController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -2116,6 +2120,10 @@
     </classAccesses>
     <classAccesses>
         <apexClass>ObjectFieldController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>ObjectFieldControllerTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
