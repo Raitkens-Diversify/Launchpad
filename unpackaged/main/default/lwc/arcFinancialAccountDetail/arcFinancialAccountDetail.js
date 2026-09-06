@@ -14,6 +14,11 @@
  * (rows navigate to the role's Account — the role object has no page of its
  * own), Related Products (rows open the read-only quick-view popup, same as
  * the Case page — no site route), and Financial Account History.
+ *
+ * The header names the Household and the Financial Advisor Team only. The
+ * owners are not repeated here (nor in the Account Information section): the
+ * Financial Account Roles list below is where they live, per the business
+ * (2026-09-06).
  */
 import { LightningElement, wire } from "lwc";
 import { NavigationMixin, CurrentPageReference } from "lightning/navigation";
@@ -36,8 +41,6 @@ const HEADER_FIELDS = [
   "Registration_Type__c",
   "Account_Number__c",
   "Balance__c",
-  "Primary_Owner__c",
-  "Primary_Owner__r.Name",
   "Household__c",
   "Household__r.Name",
   "Financial_Advisor_Team__r.Name"
@@ -106,18 +109,6 @@ export default class ArcFinancialAccountDetail extends NavigationMixin(
     return this.balance !== undefined && this.balance !== null;
   }
 
-  get primaryOwnerId() {
-    return this.fieldValue("Primary_Owner__c");
-  }
-
-  get primaryOwnerName() {
-    return this.fieldValue("Primary_Owner__r.Name");
-  }
-
-  get hasPrimaryOwner() {
-    return Boolean(this.primaryOwnerId && this.primaryOwnerName);
-  }
-
   get householdId() {
     return this.fieldValue("Household__c");
   }
@@ -136,11 +127,6 @@ export default class ArcFinancialAccountDetail extends NavigationMixin(
 
   get hasAdvisorTeam() {
     return Boolean(this.advisorTeamName);
-  }
-
-  handlePrimaryOwnerClick(event) {
-    event.preventDefault();
-    this.navigateToRecord(this.primaryOwnerId, "Account");
   }
 
   handleHouseholdClick(event) {

@@ -16,12 +16,20 @@
                 <span class={priorityPillClass}>{priority} Priority</span>
               </template>
             </div>
-            <template lwc:if={hasMarkCompleteError}>
+            <template lwc:if={hasActionError}>
               <p class="arc-task-detail__inline-error" role="alert">
-                {markCompleteErrorMessage}
+                {actionErrorMessage}
               </p>
             </template>
             <div class="arc-task-detail__actions">
+              <template lwc:if={canAssignToMe}>
+                <lightning-button
+                  label="Assign to Me"
+                  variant="brand"
+                  disabled={disableAssignToMe}
+                  onclick={handleAssignToMe}
+                ></lightning-button>
+              </template>
               <template lwc:if={showMarkComplete}>
                 <lightning-button
                   label="Mark Complete"

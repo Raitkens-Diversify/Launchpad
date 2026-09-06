@@ -22,7 +22,7 @@ public class Case_TriggerHandler {
         applyMaestroClientLoaderDefaults(newList);
         setProjectManager(newList);
         setRepCode(newList, null);
-        setCustodian(newList, null);
+        //setCustodian(newList, null);
         setOriginalOwner(newList);
         setAccountForVAAP(newList);
         setCaseTemplateForWizard(newList);
@@ -35,7 +35,7 @@ public class Case_TriggerHandler {
         if(bypassAutomation){
             return;
         }
-        setCustodian(newMap.values(), oldMap);
+        //setCustodian(newMap.values(), oldMap);
         setRepCode(newMap.values(), oldMap);
         createTask(newMap, oldMap);
         //setOwnerAndStatusOnCase(newMap.values(), oldMap);
@@ -130,7 +130,7 @@ public class Case_TriggerHandler {
             new Map<Id, Financial_Account__c>(
                 [SELECT Id,
                         Registration_Type__c,
-                        Custodian__c,
+                        //Custodian__c,
                         Managed_Account_Platform__c,
                         BD_or_RIA__c,
                         Primary_Owner__r.FirstName,
@@ -160,7 +160,7 @@ public class Case_TriggerHandler {
             branchParts.add(c.Type);
             if (fa != null) {
                 branchParts.add(fa.Registration_Type__c);
-                branchParts.add(fa.Custodian__c);
+                //branchParts.add(fa.Custodian__c);
                 branchParts.add(fa.Managed_Account_Platform__c);
                 branchParts.add(fa.BD_or_RIA__c);
                 branchParts.add('</br>');
@@ -177,7 +177,7 @@ public class Case_TriggerHandler {
             homeParts.add(c.Type);
             if (fa != null) {
                 homeParts.add(fa.Registration_Type__c);
-                homeParts.add(fa.Custodian__c);
+                //homeParts.add(fa.Custodian__c);
                 homeParts.add(fa.Managed_Account_Platform__c);
                 homeParts.add(fa.BD_or_RIA__c);
                 homeParts.add('</br>');
@@ -436,7 +436,7 @@ public class Case_TriggerHandler {
         return c.Wizard_Financial_Account__c != oldCase.Wizard_Financial_Account__c;
     }
     
-    public static void setCustodian(List<Case> cases, Map<Id, Case> oldMap){
+    /*public static void setCustodian(List<Case> cases, Map<Id, Case> oldMap){
         Set<Id> finAcctIds = new Set<Id>();
         
         for(Case c : cases){
@@ -474,7 +474,7 @@ public class Case_TriggerHandler {
         }
         Case oldCase = oldMap.get(c.Id);
         return c.Wizard_Financial_Account__c != oldCase.Wizard_Financial_Account__c;
-    }
+    }*/
     
     public static void setOriginalOwner(List<Case> newList){
         for(Case c : newList){

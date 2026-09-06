@@ -19,6 +19,9 @@ import getOpenActivitiesForParentCase from "@salesforce/apex/ArcTaskDetailContro
 import getOpenActivitiesForParent from "@salesforce/apex/ArcTaskDetailController.getOpenActivitiesForParent";
 import getOpenCasesForHousehold from "@salesforce/apex/ArcTaskDetailController.getOpenCasesForHousehold";
 import markComplete from "@salesforce/apex/CaseCurrentTaskController.markComplete";
+import updateTask from "@salesforce/apex/CaseCurrentTaskController.updateTask";
+import isCurrentUserMemberOfQueue from "@salesforce/apex/CaseCurrentTaskController.isCurrentUserMemberOfQueue";
+import USER_ID from "@salesforce/user/Id";
 import addComment from "@salesforce/apex/TaskCommentController.addComment";
 
 const ACTIVITY_COLUMNS = [
@@ -79,7 +82,9 @@ export default class ArcTaskDetail extends NavigationMixin(LightningElement) {
   _householdCasesResult;
 
   isMarkingComplete = false;
-  markCompleteErrorMessage = "";
+  isAssigning = false;
+  actionErrorMessage = "";
+  isQueueMember = false;
 
   isCommentModalOpen = false;
   commentBody = "";
@@ -96,6 +101,16 @@ export default class ArcTaskDetail extends NavigationMixin(LightningElement) {
   wiredTaskContext(result) {
     this._taskContextResult = result;
     this.taskContext = result?.data || {};
+  }
+
+  /**
+   * Whether the viewer belongs to the queue that owns this task. Only asked
+   * when the owner IS a queue -- queueOwnerId is undefined otherwise, which
+   * keeps the wire idle. Same gate the Case page's current-task tile applies.
+   */
+  @wire(isCurrentUserMemberOfQueue, { ownerId: "$queueOwnerId" })
+  wiredQueueMembership({ data }) {
+    this.isQueueMember = data === true;
   }
 
   @wire(getOpenActivitiesForParentCase, { taskId: "$_recordId" })
@@ -183,13 +198,49 @@ export default class ArcTaskDetail extends NavigationMixin(LightningElement) {
     return this.status === "Completed";
   }
 
+  get ownerId() {
+    return this.taskContext?.ownerId || "";
+  }
+
+  get isOwnedByCurrentUser() {
+    return Boolean(this.ownerId) && String(this.ownerId) === String(USER_ID);
+  }
+
+  get isOwnerQueue() {
+    return String(this.ownerId).startsWith("00G");
+  }
+
+  /** The owning queue's Id, or undefined when a user owns the task (idles the wire). */
+  get queueOwnerId() {
+    return this.isOwnerQueue ? this.ownerId : undefined;
+  }
+
   /**
-   * Mark Complete mirrors the Lightning Task page: the action is present on
-   * any loaded task and enabled while the task is still open, greying out once
-   * it is Completed — not restricted to the task owner.
+   * Same rule as the Case page's current-task tile: a task is completed by the
+   * person it is assigned to. Anyone else sees Assign to Me instead (for a
+   * queue-owned task, only a member of that queue), and Mark Complete appears
+   * once the task is theirs. The business asked for the two pages to agree
+   * (2026-09-06); CaseCurrentTaskController.markComplete enforces the same rule
+   * server-side.
    */
   get showMarkComplete() {
-    return this.hasRecordId && Boolean(this.status);
+    return this.hasRecordId && Boolean(this.status) && this.isOwnedByCurrentUser;
+  }
+
+  get canAssignToMe() {
+    if (
+      !this.hasRecordId ||
+      !this.status ||
+      this.isCompleted ||
+      this.isOwnedByCurrentUser
+    ) {
+      return false;
+    }
+    return this.isOwnerQueue ? this.isQueueMember : true;
+  }
+
+  get disableAssignToMe() {
+    return this.isAssigning;
   }
 
   get disableMarkComplete() {
@@ -261,8 +312,8 @@ export default class ArcTaskDetail extends NavigationMixin(LightningElement) {
     return `Open Cases for Household (${this.householdCases.length})`;
   }
 
-  get hasMarkCompleteError() {
-    return Boolean(this.markCompleteErrorMessage);
+  get hasActionError() {
+    return Boolean(this.actionErrorMessage);
   }
 
   get hasCommentError() {
@@ -296,7 +347,7 @@ export default class ArcTaskDetail extends NavigationMixin(LightningElement) {
     }
 
     this.isMarkingComplete = true;
-    this.markCompleteErrorMessage = "";
+    this.actionErrorMessage = "";
     try {
       await markComplete({ taskId: this._recordId });
       await Promise.all([
@@ -305,10 +356,34 @@ export default class ArcTaskDetail extends NavigationMixin(LightningElement) {
       ]);
       this.getRecordDetail()?.refresh();
     } catch (error) {
-      this.markCompleteErrorMessage =
+      this.actionErrorMessage =
         error?.body?.message || error?.message || "Could not mark this task complete.";
     } finally {
       this.isMarkingComplete = false;
+    }
+  }
+
+  /** Takes the task over (owner = viewer), the step the Case page asks for before completing. */
+  async handleAssignToMe() {
+    if (this.isAssigning || !this.canAssignToMe) {
+      return;
+    }
+
+    this.isAssigning = true;
+    this.actionErrorMessage = "";
+    try {
+      await updateTask({
+        taskId: this._recordId,
+        ownerId: USER_ID,
+        dueDate: this.taskContext?.dueDate || null
+      });
+      await refreshApex(this._taskContextResult);
+      this.getRecordDetail()?.refresh();
+    } catch (error) {
+      this.actionErrorMessage =
+        error?.body?.message || error?.message || "Could not assign this task to you.";
+    } finally {
+      this.isAssigning = false;
     }
   }
 

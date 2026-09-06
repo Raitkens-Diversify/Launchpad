@@ -57,6 +57,34 @@ private class CaseCurrentTaskControllerTest {
     }
 
     @isTest
+    static void testMarkCompleteRejectsTaskNotAssignedToCaller() {
+        Map<String, Id> queues = createQueues(new List<String>{ 'Operations' });
+        Task t = [SELECT Id FROM Task LIMIT 1];
+        t.OwnerId = queues.get('Operations');
+        update t;
+
+        Boolean threw = false;
+        Test.startTest();
+        try {
+            CaseCurrentTaskController.markComplete(t.Id);
+        } catch (AuraHandledException e) {
+            threw = true;
+            Assert.isTrue(
+                e.getMessage().contains('Assign to Me'),
+                'The refusal should point at Assign to Me: ' + e.getMessage()
+            );
+        }
+        Test.stopTest();
+
+        Assert.isTrue(threw, 'A task assigned to someone else must not be completable');
+        Assert.areEqual(
+            'Not Started',
+            [SELECT Status FROM Task WHERE Id = :t.Id].Status,
+            'The task must be left open'
+        );
+    }
+
+    @isTest
     static void testUpdateTask() {
         Task t = [SELECT Id FROM Task LIMIT 1];
         Id currentUserId = UserInfo.getUserId();
@@ -73,6 +101,12 @@ private class CaseCurrentTaskControllerTest {
 
     @isTest
     static void testMarkCompletePitStopReassignsByFaTeamPermission() {
+        // Financial_Advisor_Team_TriggerHandler.updateRepCode (fired through the dlrs
+        // rollup when a team member is inserted below) looks up a team literally named
+        // 'Default Team' and throws "List has no rows" without one -- the same seed
+        // ArcRecordSearchControllerTest and FATMember_TriggerHandler_Test carry.
+        insert new Financial_Advisor_Team__c(Name = 'Default Team');
+
         Financial_Advisor_Team__c fat = new Financial_Advisor_Team__c(Name = 'Test FAT');
         insert fat;
 

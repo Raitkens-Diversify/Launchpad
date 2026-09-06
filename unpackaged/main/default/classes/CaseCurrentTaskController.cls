@@ -28,11 +28,24 @@ public with sharing class CaseCurrentTaskController {
     @AuraEnabled
     public static void markComplete(Id taskId) {
         Task completedTask = [
-            SELECT Id, Status, WhatId, Branch_Pit_Stop__c, Home_Office_Pit_Stop__c
+            SELECT Id, Status, OwnerId, WhatId, Branch_Pit_Stop__c, Home_Office_Pit_Stop__c
             FROM Task
             WHERE Id = :taskId
             LIMIT 1
         ];
+
+        // A task is completed by the person it is assigned to. Both callers (the
+        // Case page's current-task tile and the ARC Task page) offer Assign to Me
+        // first; this keeps the rule true whatever the client does (2026-09-06).
+        if (completedTask.OwnerId != UserInfo.getUserId()) {
+            AuraHandledException notOwner = new AuraHandledException(
+                'Only the person this task is assigned to can mark it complete. Use Assign to Me first.'
+            );
+            notOwner.setMessage(
+                'Only the person this task is assigned to can mark it complete. Use Assign to Me first.'
+            );
+            throw notOwner;
+        }
 
         completedTask.Status = 'Completed';
         update completedTask;

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-    <label>FA Detail - Joint Owner</label>
+    <label>Managed Account Platform</label>
     <protected>false</protected>
     <values>
         <field>Account_Type__c</field>
@@ -16,7 +16,7 @@
     </values>
     <values>
         <field>Field_API__c</field>
-        <value xsi:type="xsd:string">Joint_Owner__c</value>
+        <value xsi:type="xsd:string">Managed_Account_Platform__c</value>
     </values>
     <values>
         <field>Field_Type_Override__c</field>
@@ -36,7 +36,7 @@
     </values>
     <values>
         <field>Label__c</field>
-        <value xsi:type="xsd:string">Joint Owner</value>
+        <value xsi:type="xsd:string">Managed Account Platform</value>
     </values>
     <values>
         <field>Max__c</field>
@@ -52,7 +52,7 @@
     </values>
     <values>
         <field>Order__c</field>
-        <value xsi:type="xsd:double">3.0</value>
+        <value xsi:type="xsd:double">22.0</value>
     </values>
     <values>
         <field>Original_Account_Field__c</field>

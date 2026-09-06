@@ -1623,7 +1623,7 @@ public with sharing class EnvelopeHouseholdMemberController {
     List<Required_Documents__c> docs = [
       SELECT Id
       FROM Required_Documents__c
-      //WHERE Financial_Account__c = :financialAccountId
+      WHERE Financial_Account__c = :financialAccountId
     ];
     if (docs.isEmpty()) {
       return;
