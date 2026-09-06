@@ -1,0 +1,64 @@
+<template>
+    <nav class="ds-tree" aria-label={heading}>
+        <template if:true={heading}>
+            <h2 class="ds-tree__title">{heading}</h2>
+        </template>
+        <ul class="ds-tree__list" role="tree" aria-label={heading}>
+            <template if:true={hasUpRow}>
+                <li role="none" class="ds-tree__up">
+                    <button type="button" class="ds-tree__up-btn" onclick={handleUp}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true">
+                            <path d="M15 18l-6-6 6-6"></path>
+                        </svg>
+                        <span class="ds-tree__up-label">Back to {upRow.label}</span>
+                    </button>
+                </li>
+            </template>
+            <template for:each={rows} for:item="r">
+                <li key={r.key}
+                    role="treeitem"
+                    aria-level={r.level}
+                    aria-setsize={r.setSize}
+                    aria-posinset={r.posInSet}
+                    aria-expanded={r.ariaExpanded}
+                    aria-selected={r.active}
+                    class={r.rowClass}
+                    style={r.style}>
+                    <template if:true={r.hasChildren}>
+                        <button type="button" class={r.toggleClass}
+                                tabindex="-1"
+                                aria-label={r.toggleLabel}
+                                data-key={r.key}
+                                onclick={handleToggle}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true">
+                                <path d="M9 6l6 6-6 6"></path>
+                            </svg>
+                        </button>
+                    </template>
+                    <button type="button" class="ds-tree__item"
+                            data-key={r.key}
+                            tabindex={r.tabIndex}
+                            aria-current={r.ariaCurrent}
+                            onclick={handleSelect}
+                            onkeydown={handleKeydown}>
+                        <template if:true={r.showIcon}>
+                            <span class="ds-tree__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round"
+                                     stroke-linejoin="round" focusable="false">
+                                    <path d={r.iconPath}></path>
+                                </svg>
+                            </span>
+                        </template>
+                        <span class="ds-tree__label">{r.label}</span>
+                        <template if:true={r.count}>
+                            <span class="ds-tree__count">{r.count}</span>
+                        </template>
+                    </button>
+                </li>
+            </template>
+        </ul>
+    </nav>
+</template>

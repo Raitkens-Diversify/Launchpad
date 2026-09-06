@@ -51,13 +51,15 @@ export default class AdminArticleList extends LightningElement {
     async loadMeta() {
         try {
             const meta = await getAuthoringMeta();
+            // Any depth: one option per node, indented one dash per level.
             const options = [{ label: 'All topics', value: '' }];
-            (meta.categoryTree || []).forEach((topic) => {
-                options.push({ label: topic.label, value: topic.label });
-                (topic.children || []).forEach((sub) => {
-                    options.push({ label: '— ' + sub.label, value: sub.label });
+            const walk = (nodes, depth) => {
+                (nodes || []).forEach((node) => {
+                    options.push({ label: '— '.repeat(depth) + node.label, value: node.label });
+                    walk(node.children, depth + 1);
                 });
-            });
+            };
+            walk(meta.categoryTree, 0);
             this.categoryOptions = options;
         } catch (e) {
             // filter dropdown degrades to "All topics" — the list still works

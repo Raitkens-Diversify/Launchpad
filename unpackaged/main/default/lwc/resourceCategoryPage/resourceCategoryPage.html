@@ -1,9 +1,21 @@
 <template>
     <div class="rc-cat">
-        <aside class="rc-cat__nav">
-            <c-ds-topic-nav heading="All topics"
-                            items={navItems}
-                            onnavselect={handleNavSelect}></c-ds-topic-nav>
+        <!-- Phone widths only (CSS): the sidebar becomes a drawer behind this button. -->
+        <button type="button" class="rc-cat__nav-toggle"
+                aria-expanded={navToggleExpanded}
+                onclick={handleNavToggle}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true">
+                <path d="M3 6h18M3 12h18M3 18h18"></path>
+            </svg>
+            {navToggleLabel}
+        </button>
+        <aside class={navClass} onkeydown={handleNavKeydown}>
+            <c-ds-tree heading="All topics"
+                       roots={navRoots}
+                       active-key={activeKey}
+                       show-counts
+                       onnavselect={handleNavSelect}></c-ds-tree>
         </aside>
 
         <main class="rc-cat__main">
@@ -15,11 +27,17 @@
 
             <template if:true={detail}>
                 <c-ds-breadcrumbs items={crumbItems}
+                                  collapse-at="4"
                                   oncrumbselect={handleCrumb}></c-ds-breadcrumbs>
 
                 <h1 class="rc-cat__title">{detail.name}</h1>
                 <template if:true={detail.description}>
                     <p class="rc-cat__desc">{detail.description}</p>
+                </template>
+                <template if:true={showSubtopics}>
+                    <c-ds-subnav label="In this category"
+                                 items={subtopicItems}
+                                 onnavselect={handleNavSelect}></c-ds-subnav>
                 </template>
 
                 <template if:true={useSections}>

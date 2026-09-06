@@ -84,6 +84,9 @@
                                     </svg>
                                 </span>
                                 <span class="home-topics__label">{t.label}</span>
+                                <template if:true={t.meta}>
+                                    <span class="home-topics__meta">{t.meta}</span>
+                                </template>
                             </button>
                         </li>
                     </template>

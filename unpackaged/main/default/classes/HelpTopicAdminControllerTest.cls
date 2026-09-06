@@ -71,12 +71,74 @@ private class HelpTopicAdminControllerTest {
         HelpTopicAdminController.TopicTreeDTO dto = HelpTopicAdminController.getTopicTree();
         Test.stopTest();
 
-        Assert.areEqual(2, dto.topics.size(), 'Root children only (All itself is hidden).');
-        Assert.areEqual('Getting_Started', dto.topics[0].name);
-        Assert.areEqual('Getting Started', dto.topics[0].label);
-        Assert.areEqual(1, dto.topics[0].children.size());
-        Assert.areEqual('The_Basics', dto.topics[0].children[0].name);
+        Assert.areEqual(2, dto.roots.size(), 'Root children only (All itself is hidden).');
+        Assert.areEqual('Getting_Started', dto.roots[0].id);
+        Assert.areEqual('Getting Started', dto.roots[0].label);
+        Assert.areEqual(1, dto.roots[0].depth);
+        Assert.areEqual(1, dto.roots[0].children.size());
+        Assert.areEqual('The_Basics', dto.roots[0].children[0].id);
+        Assert.areEqual(2, dto.roots[0].children[0].depth);
+        Assert.areEqual('/Getting_Started/The_Basics/', dto.roots[0].children[0].path);
+        Assert.isTrue(dto.maxDepth > 0 && dto.maxDepth <= CategoryTreeService.PLATFORM_DATA_CATEGORY_DEPTH,
+            'The limit travels with the tree, capped by the platform.');
         Assert.isNotNull(dto.editable, 'Editable flag is populated.');
+    }
+
+    @IsTest
+    static void addTopicNestsAtAnyDepthUpToTheLimit() {
+        CategoryTreeService.maxDepthOverride = 3;
+        SoapMock mock = arm(new List<String>{ readResponse(), updateResponse(true, null), readResponse() });
+        Test.startTest();
+        HelpTopicAdminController.addTopic('The_Basics', 'Deeper');
+        String sent = mock.requestBodies[1];
+        Assert.isTrue(sent.indexOf(nameTag('Deeper')) < sent.indexOf(nameTag('The_Basics')),
+            'A third level serializes inside the subtopic: ' + sent);
+
+        // The fixture has no third level, so with max depth 2 a child of a subtopic is refused.
+        CategoryTreeService.maxDepthOverride = 2;
+        try {
+            HelpTopicAdminController.addTopic('The_Basics', 'Too Deep');
+            Assert.fail('Past the depth limit the add must refuse');
+        } catch (AuraHandledException e) {
+            Assert.areEqual(CategoryTreeService.depthMessage(2), e.getMessage());
+        }
+        Test.stopTest();
+        Assert.areEqual(3, mock.requestBodies.size(), 'The refused add never wrote.');
+    }
+
+    @IsTest
+    static void moveTopicReparentsWithOrderAndRejectsBadTargets() {
+        SoapMock mock = arm(new List<String>{
+            readResponse(), updateResponse(true, null), readResponse(), readResponse()
+        });
+        Test.startTest();
+        // Cases_and_Tasks (top level) becomes a subtopic of Getting_Started, placed first.
+        HelpTopicAdminController.moveTopic('Cases_and_Tasks', 'Getting_Started',
+            JSON.serialize(new List<String>{ 'Cases_and_Tasks', 'The_Basics' }));
+        String sent = mock.requestBodies[1];
+        Integer cases = sent.indexOf(nameTag('Cases_and_Tasks'));
+        Integer basics = sent.indexOf(nameTag('The_Basics'));
+        Integer parent = sent.indexOf(nameTag('Getting_Started'));
+        Assert.isTrue(cases < basics && basics < parent,
+            'Moved node serializes first among the new siblings, inside the parent: ' + sent);
+        Assert.areEqual(1, sent.countMatches(nameTag('Cases_and_Tasks')), 'Detached from the old parent.');
+
+        try {
+            HelpTopicAdminController.moveTopic('Getting_Started', 'The_Basics',
+                JSON.serialize(new List<String>{ 'Getting_Started' }));
+            Assert.fail('Moving into its own subtree must be rejected');
+        } catch (AuraHandledException e) {
+            Assert.areEqual(CategoryTreeService.MSG_DESCENDANT, e.getMessage());
+        }
+        try {
+            HelpTopicAdminController.moveTopic('The_Basics', null,
+                JSON.serialize(new List<String>{ 'The_Basics' }));
+            Assert.fail('A stale sibling list must be rejected');
+        } catch (AuraHandledException e) {
+            Assert.isTrue(e.getMessage().contains('refresh'), e.getMessage());
+        }
+        Test.stopTest();
+        Assert.areEqual(4, mock.requestBodies.size(), 'Rejected moves read but never write.');
     }
 
     @IsTest
@@ -196,7 +258,7 @@ private class HelpTopicAdminControllerTest {
     static void deleteTopicRemovesNodeAndRoundTripsRest() {
         SoapMock mock = arm(new List<String>{ readResponse(), updateResponse(true, null) });
         Test.startTest();
-        HelpTopicAdminController.deleteTopic('Cases_and_Tasks');
+        HelpTopicAdminController.deleteTopic('Cases_and_Tasks', 'block');
         Test.stopTest();
 
         Assert.areEqual(2, mock.requestBodies.size(), 'One read, one update.');
@@ -213,29 +275,44 @@ private class HelpTopicAdminControllerTest {
     }
 
     @IsTest
-    static void deleteTopicCascadesEmptySubtree() {
-        SoapMock mock = arm(new List<String>{ readResponse(), readResponse(), updateResponse(true, null) });
+    static void deleteTopicWithSubtopicsBlocksOrMovesThemUp() {
+        SoapMock mock = arm(new List<String>{
+            readResponse(), readResponse(), readResponse(), updateResponse(true, null)
+        });
         Test.startTest();
         HelpTopicAdminController.TopicDeleteImpactDTO impact =
             HelpTopicAdminController.getTopicDeleteImpact('Getting_Started');
         Assert.areEqual('Getting Started', impact.label);
-        Assert.areEqual(1, impact.subtopicCount, 'The Basics goes with its parent.');
+        Assert.areEqual(1, impact.childCount, 'One subtopic would move up.');
+        Assert.areEqual(1, impact.descendantCount);
+        Assert.isNull(impact.parentName, 'A top-level topic\'s children would become topics.');
         Assert.areEqual(0, impact.articleCount, 'Nothing filed in this org fixture.');
+        Assert.areEqual(0, impact.ownArticleCount);
 
-        HelpTopicAdminController.deleteTopic('Getting_Started');
+        try {
+            HelpTopicAdminController.deleteTopic('Getting_Started', 'block');
+            Assert.fail('A topic with subtopics must not delete in block mode');
+        } catch (AuraHandledException e) {
+            Assert.isTrue(e.getMessage().contains('subtopic'), e.getMessage());
+        }
+
+        HelpTopicAdminController.deleteTopic('Getting_Started', 'reparent');
         Test.stopTest();
 
-        String sent = mock.requestBodies[2];
+        Assert.areEqual(4, mock.requestBodies.size(), 'Three reads, one write (the block never wrote).');
+        String sent = mock.requestBodies[3];
         Assert.isFalse(sent.contains(nameTag('Getting_Started')), 'Parent removed: ' + sent);
-        Assert.isFalse(sent.contains(nameTag('The_Basics')), 'Empty subtopic removed with it.');
-        Assert.isTrue(sent.contains(nameTag('Cases_and_Tasks')), 'Sibling survives.');
+        Assert.isTrue(sent.contains(nameTag('The_Basics')), 'The subtopic survives, promoted.');
+        Assert.isTrue(sent.indexOf(nameTag('The_Basics')) < sent.indexOf(nameTag('Cases_and_Tasks')),
+            'Promoted child keeps its parent\'s position among the top-level topics: ' + sent);
+        Assert.isTrue(sent.contains(nameTag('All')), 'Root survives.');
     }
 
     @IsTest
     static void deleteSubtopicLeavesParent() {
         SoapMock mock = arm(new List<String>{ readResponse(), updateResponse(true, null) });
         Test.startTest();
-        HelpTopicAdminController.deleteTopic('The_Basics');
+        HelpTopicAdminController.deleteTopic('The_Basics', 'block');
         Test.stopTest();
 
         String sent = mock.requestBodies[1];
@@ -274,7 +351,7 @@ private class HelpTopicAdminControllerTest {
             HelpTopicAdminController.getTopicDeleteImpact('Getting_Started').articleCount,
             'An article filed under a subtopic counts against the parent.');
         try {
-            HelpTopicAdminController.deleteTopic('The_Basics');
+            HelpTopicAdminController.deleteTopic('The_Basics', 'block');
             Assert.fail('A topic with filed articles must not delete');
         } catch (AuraHandledException e) {
             Assert.isTrue(e.getMessage().contains('filed under'), e.getMessage());
@@ -292,7 +369,7 @@ private class HelpTopicAdminControllerTest {
         arm(new List<String>{ readResponse() });
         Test.startTest();
         try {
-            HelpTopicAdminController.deleteTopic('Cases_and_Tasks');
+            HelpTopicAdminController.deleteTopic('Cases_and_Tasks', 'block');
             Assert.fail('Past the scan limit the delete must refuse');
         } catch (AuraHandledException e) {
             Assert.isTrue(e.getMessage().contains('Setup'), e.getMessage());
@@ -306,7 +383,7 @@ private class HelpTopicAdminControllerTest {
         Test.startTest();
         for (String bad : new List<String>{ null, '  ', 'bad name!', 'x/y' }) {
             try {
-                HelpTopicAdminController.deleteTopic(bad);
+                HelpTopicAdminController.deleteTopic(bad, 'block');
                 Assert.fail('Invalid name must be rejected: ' + bad);
             } catch (AuraHandledException e) {
                 Assert.isTrue(e.getMessage().contains('Invalid'), e.getMessage());
@@ -315,7 +392,7 @@ private class HelpTopicAdminControllerTest {
         Assert.areEqual(0, mock.requestBodies.size(), 'Invalid names never reach the Metadata API.');
 
         try {
-            HelpTopicAdminController.deleteTopic('Gone_Topic');
+            HelpTopicAdminController.deleteTopic('Gone_Topic', 'block');
             Assert.fail('Unknown topic must be rejected');
         } catch (AuraHandledException e) {
             Assert.isTrue(e.getMessage().contains('no longer exists'), e.getMessage());
@@ -328,7 +405,7 @@ private class HelpTopicAdminControllerTest {
         arm(new List<String>{ readResponse(), updateResponse(false, 'Category in use') });
         Test.startTest();
         try {
-            HelpTopicAdminController.deleteTopic('Cases_and_Tasks');
+            HelpTopicAdminController.deleteTopic('Cases_and_Tasks', 'block');
             Assert.fail('Server rejection must surface');
         } catch (AuraHandledException e) {
             Assert.isTrue(e.getMessage().contains('Category in use'), e.getMessage());

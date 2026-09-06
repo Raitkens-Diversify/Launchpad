@@ -157,7 +157,7 @@ public with sharing class UnifiedSearchService {
         try {
             if (Schema.sObjectType.Resource__c.isAccessible()) {
                 for (ResourceCenterService.ResourceCard c :
-                        ResourceCenterService.typeahead(term)) {
+                        ResourceCenterService.typeahead(term, null)) {
                     Suggestion s = new Suggestion();
                     s.id = c.id;
                     s.title = c.name;

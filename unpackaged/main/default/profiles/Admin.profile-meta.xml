@@ -635,6 +635,14 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>CategoryTreeService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>CategoryTreeServiceTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>ChangePasswordController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -1264,6 +1272,10 @@
     </classAccesses>
     <classAccesses>
         <apexClass>HelpTopicMetadataServiceTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>HelpTopicTreeProvider</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
@@ -2248,6 +2260,18 @@
     </classAccesses>
     <classAccesses>
         <apexClass>ResourceAdminControllerTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>ResourceCategoryTreeHandler</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>ResourceCategoryTreeHandlerTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>ResourceCategoryTreeProvider</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>

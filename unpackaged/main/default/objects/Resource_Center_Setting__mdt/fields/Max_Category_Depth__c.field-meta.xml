@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Max_Category_Depth__c</fullName>
+    <description>Deepest level allowed in the Resource Center category tree and the Help Center topic tree (1 = top level). Blank or zero falls back to 5. Help topics are additionally capped by the platform&#39;s Data Category limit (5). Read through CategoryTreeService.maxDepth; the admin console reads it from the tree payload and never hard-codes it.</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Max Category Depth</label>
+    <precision>2</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

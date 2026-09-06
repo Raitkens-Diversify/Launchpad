@@ -1,5 +1,5 @@
 import { LightningElement, api, wire, track } from 'lwc';
-import getCategories from '@salesforce/apex/NexSKnowledgeController.getCategories';
+import getCategoryTree from '@salesforce/apex/NexSKnowledgeController.getCategoryTree';
 import getArticlesByCategory from '@salesforce/apex/NexSKnowledgeController.getArticlesByCategory';
 import getArticle from '@salesforce/apex/NexSKnowledgeController.getArticle';
 import typeahead from '@salesforce/apex/NexSKnowledgeController.typeahead';
@@ -13,6 +13,20 @@ import { topicIconPath } from 'c/nexsTopicIcons';
 import { registerTourScope } from 'c/tourDom';
 
 const MAX_POPULAR = 6;
+
+/** "12 articles · 3 subtopics" for a top-level tree node ('' when empty). */
+function topicMeta(node) {
+    const articles = node.descendantItemCount || 0;
+    const subs = (node.children || []).length;
+    const parts = [];
+    if (articles) {
+        parts.push(`${articles} ${articles === 1 ? 'article' : 'articles'}`);
+    }
+    if (subs) {
+        parts.push(`${subs} ${subs === 1 ? 'subtopic' : 'subtopics'}`);
+    }
+    return parts.join(' · ');
+}
 
 /**
  * nexsHome
@@ -58,10 +72,16 @@ export default class NexsHome extends LightningElement {
         this._searchLogger.dispose();
     }
 
-    @wire(getCategories)
+    /** Top-level topics only (the grid stays flat); each carries a "what's
+        underneath" line built from the tree's rolled-up counts. */
+    @wire(getCategoryTree)
     wiredCategories({ data, error }) {
         if (data) {
-            this.categories = data;
+            this.categories = (data.roots || []).map((r) => ({
+                name: r.id,
+                label: r.label,
+                meta: topicMeta(r)
+            }));
         } else if (error) {
             // eslint-disable-next-line no-console
             console.error('nexsHome category load error', error);

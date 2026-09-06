@@ -26,19 +26,28 @@
                                           disabled={categoriesBusy}
                                           onclick={handleNew}></lightning-button>
                     </div>
+                    <div class="acm__note">
+                        Drag a category to reorder it or to file it under another one — its
+                        subtopics travel with it. Double-click a name (or press F2 on its grip)
+                        to rename in place. Counts show what lives on a category and what is
+                        shown anywhere below it.
+                    </div>
 
-                    <template if:true={hasRows}>
-                        <c-admin-sortable-tree items={categoryItems}
-                                               editable
-                                               busy={categoriesBusy}
-                                               allow-add-child
-                                               edit-label="Edit"
-                                               add-child-label="Add subtopic"
-                                               onreorder={handleCategoryReorder}
-                                               onedit={handleEdit}
-                                               onaddchild={handleAddSubcategory}></c-admin-sortable-tree>
+                    <template if:true={hasCategories}>
+                        <c-admin-tree-editor roots={categoryRoots}
+                                             max-depth={categoryMaxDepth}
+                                             editable
+                                             busy={categoriesBusy}
+                                             allow-add-child
+                                             allow-rename
+                                             edit-label="Edit"
+                                             add-child-label="Add subtopic"
+                                             onmove={handleCategoryMove}
+                                             onrename={handleCategoryRename}
+                                             onedit={handleEdit}
+                                             onaddchild={handleAddSubcategory}></c-admin-tree-editor>
                     </template>
-                    <template if:false={hasRows}>
+                    <template if:false={hasCategories}>
                         <p class="acm__empty">No resource categories yet.</p>
                     </template>
                 </section>
@@ -58,21 +67,25 @@
                     </div>
                     <div class="acm__note">
                         Renames change the display label only — article filing stays intact.
-                        Delete lives in a topic's Rename dialog and is blocked while any
-                        article (drafts included) is filed under the topic or its subtopics.
-                        A new topic shows a generic icon on the Help Center until a developer
-                        maps it in nexsTopicIcons (needs a deploy).
+                        Delete lives in a topic's Rename dialog; a topic with subtopics asks
+                        whether to move them up first, and nothing is removed while any
+                        article (drafts included) is filed on it. A new topic shows a generic
+                        icon on the Help Center until a developer maps it in nexsTopicIcons
+                        (needs a deploy).
                     </div>
                     <template if:true={hasHelpTopics}>
-                        <c-admin-sortable-tree items={helpTopicItems}
-                                               editable={topicsEditable}
-                                               busy={topicsBusy}
-                                               allow-add-child
-                                               edit-label="Rename"
-                                               add-child-label="Add subtopic"
-                                               onreorder={handleTopicReorder}
-                                               onedit={handleTopicRename}
-                                               onaddchild={handleSubtopicNew}></c-admin-sortable-tree>
+                        <c-admin-tree-editor roots={helpRoots}
+                                             max-depth={helpMaxDepth}
+                                             editable={topicsEditable}
+                                             busy={topicsBusy}
+                                             allow-add-child
+                                             allow-rename
+                                             edit-label="Rename"
+                                             add-child-label="Add subtopic"
+                                             onmove={handleTopicMove}
+                                             onrename={handleTopicInlineRename}
+                                             onedit={handleTopicRename}
+                                             onaddchild={handleSubtopicNew}></c-admin-tree-editor>
                     </template>
                     <template if:false={hasHelpTopics}>
                         <p class="acm__empty">Help topics unavailable (needs Knowledge read access).</p>
@@ -100,7 +113,6 @@
                     <lightning-combobox label="Parent category"
                                         value={formParentId}
                                         options={parentOptions}
-                                        disabled={parentDisabled}
                                         field-level-help={parentHelp}
                                         onchange={handleParentChange}></lightning-combobox>
                     <fieldset class="acm-icons">
@@ -169,6 +181,9 @@
                                    message={confirm.message}
                                    confirm-label={confirm.confirmLabel}
                                    variant={confirm.variant}
+                                   choices={confirm.choices}
+                                   default-choice={confirm.mode}
+                                   choice-label="What should happen to its subtopics?"
                                    busy={confirmBusy}
                                    onconfirm={handleConfirmProceed}
                                    oncancel={handleConfirmCancel}></c-admin-confirm-modal>

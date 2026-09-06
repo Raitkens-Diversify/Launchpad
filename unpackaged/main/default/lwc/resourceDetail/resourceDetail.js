@@ -224,16 +224,14 @@ export default class ResourceDetail extends LightningElement {
         this.dispatchEvent(new CustomEvent('helphome', { bubbles: true, composed: true }));
     }
 
-    /** Full-path crumb trail: Help & Resources › RC › [main topic ›] [subtopic ›] resource. */
+    /** Full-path crumb trail: Help & Resources › RC › [ancestors… ›] category › resource
+        (always the HOME category's chain, never a secondary placement). */
     get crumbItems() {
         const crumbs = rcRootCrumbs();
         if (this.detail) {
-            if (this.detail.categoryParentSlug) {
-                crumbs.push({
-                    label: this.detail.categoryParentName,
-                    key: this.detail.categoryParentSlug
-                });
-            }
+            (this.detail.categoryAncestors || []).forEach((a) => {
+                crumbs.push({ label: a.name, key: a.slug });
+            });
             if (this.detail.categorySlug) {
                 crumbs.push({ label: this.detail.categoryName, key: this.detail.categorySlug });
             }

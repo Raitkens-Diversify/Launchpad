@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>false</isExposed>
+    <description>Shared N-level tree editor for the Admin Console category panes: expand/collapse, add a child within the depth limit, inline rename, grip drag-and-drop that reorders or reparents whole subtrees (invalid drops refused via c/treeUtil), keyboard reorder.</description>
+</LightningComponentBundle>

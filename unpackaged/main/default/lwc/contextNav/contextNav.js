@@ -46,9 +46,10 @@ const TABS = Object.freeze({
 
 /** Lightning namespaces custom page-reference state; LWR does not. */
 const C_PREFIX = 'c__';
-/** Article route: name / article (legacy) / topic. Resources: rcview / rcslug /
-    rcterm. Events: view ('upcoming' | 'calendar') / month ('YYYY-MM'). */
-const PARAM_NAMES = ['name', 'article', 'topic', 'rcview', 'rcslug', 'rcterm', 'view', 'month'];
+/** Article route: name / article (legacy) / topic (any depth). Resources:
+    rcview / rcslug / rcterm / rcscope (search scoped to a category subtree).
+    Events: view ('upcoming' | 'calendar') / month ('YYYY-MM'). */
+const PARAM_NAMES = ['name', 'article', 'topic', 'rcview', 'rcslug', 'rcterm', 'rcscope', 'view', 'month'];
 
 const INTERNAL_CTX = Object.freeze({ surface: INTERNAL, helpBase: null, resourceBase: null });
 
@@ -248,15 +249,18 @@ export function resourceHref(ctx, slug, view) {
         '&rcslug=' + encodeURIComponent(slug);
 }
 
-/** Resource Center search results for a term. */
-function resourceSearchHref(ctx, term) {
+/** Resource Center search results for a term, optionally scoped to a category slug. */
+function resourceSearchHref(ctx, term, scope) {
     if (isInternal(ctx)) {
-        return internalHref(TABS.resources, { rcview: 'search', rcterm: term });
+        return internalHref(TABS.resources, scope
+            ? { rcview: 'search', rcterm: term, rcscope: scope }
+            : { rcview: 'search', rcterm: term });
     }
     if (!ctx.resourceBase) {
         return null;
     }
-    return trimEnd(ctx.resourceBase) + '?rcview=search&rcterm=' + encodeURIComponent(term);
+    return trimEnd(ctx.resourceBase) + '?rcview=search&rcterm=' + encodeURIComponent(term)
+        + (scope ? '&rcscope=' + encodeURIComponent(scope) : '');
 }
 
 export function eventsHref(ctx) {
@@ -383,12 +387,13 @@ export function goToArticle(cmp, ctx, target) {
  * slug and view 'home' — the Resource Center front door.
  */
 export function goToResource(cmp, ctx, target) {
-    const { slug, term } = target || {};
+    const { slug, term, scope } = target || {};
     const view = (target && target.view) || 'detail';
 
     let relativeQuery = '';
     if (term) {
-        relativeQuery = '?rcview=search&rcterm=' + encodeURIComponent(term);
+        relativeQuery = '?rcview=search&rcterm=' + encodeURIComponent(term)
+            + (scope ? '&rcscope=' + encodeURIComponent(scope) : '');
     } else if (slug) {
         relativeQuery = '?rcview=' + encodeURIComponent(view) +
             '&rcslug=' + encodeURIComponent(slug);
@@ -398,9 +403,10 @@ export function goToResource(cmp, ctx, target) {
         ctx,
         absolute: isInternal(ctx)
             ? null
-            : (term ? resourceSearchHref(ctx, term) : resourceHref(ctx, slug, view)),
+            : (term ? resourceSearchHref(ctx, term, scope) : resourceHref(ctx, slug, view)),
         tab: TABS.resources,
-        state: { rcview: term ? 'search' : (slug ? view : null), rcslug: slug, rcterm: term },
+        state: { rcview: term ? 'search' : (slug ? view : null), rcslug: slug, rcterm: term,
+                 rcscope: term && scope ? scope : undefined },
         fallbackEvent: slug
             ? {
                   name: view === 'category' ? 'categoryselect' : 'resourceselect',

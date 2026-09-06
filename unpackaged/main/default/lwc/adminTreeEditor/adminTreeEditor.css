@@ -1,0 +1,205 @@
+/* Self-declared --slds-g-* block (canonical values, ui-standards §1). Row
+   visuals follow adminSortableTree (the console's tree convention) with the
+   depth cue carried by a per-level indent set inline from the row's depth. */
+:host {
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-on-accent-1: #ffffff;
+    display: block;
+}
+.ate__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+.ate__toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.75rem;
+}
+.ate__tool {
+    padding: 2px 8px;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: 999px;
+    font: inherit;
+    font-weight: 600;
+    color: var(--slds-g-color-accent-1, #0f406f);
+    cursor: pointer;
+}
+.ate__tool:hover,
+.ate__tool:focus-visible {
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    outline: none;
+}
+.ate__depth-note {
+    margin-left: auto;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ate__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+}
+.ate__row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 32px;
+    padding-right: 4px;
+    border-radius: 6px;
+}
+.ate__row:hover {
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+.ate__row--inactive .ate__label {
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ate__toggle {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    border-radius: 50%;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    cursor: pointer;
+}
+.ate__toggle svg {
+    width: 14px;
+    height: 14px;
+    transition: transform 120ms ease;
+}
+.ate__toggle--open svg {
+    transform: rotate(90deg);
+}
+.ate__toggle--leaf {
+    cursor: default;
+}
+.ate__toggle:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+}
+.ate__label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.ate__rename {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 2px 6px;
+    border: 1px solid var(--slds-g-color-accent-1, #0f406f);
+    border-radius: 4px;
+    font: inherit;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.ate__sublabel {
+    flex: none;
+    max-width: 9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.75rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ate__count {
+    flex: none;
+    min-width: 1.25rem;
+    padding: 0.125rem 0.375rem;
+    border-radius: 10px;
+    background: #eef2f7;
+    color: var(--slds-g-color-accent-2, #0b2f51);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-align: center;
+}
+.ate__count--total {
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ate__status {
+    flex: none;
+    padding: 0.125rem 0.5rem;
+    border-radius: 10px;
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    font-size: 0.6875rem;
+    font-weight: 600;
+}
+.ate__actions {
+    display: inline-flex;
+    gap: 2px;
+    flex: none;
+}
+
+/* Drag-and-drop */
+.ate__grip {
+    flex: none;
+    padding: 0 2px;
+    border: none;
+    background: none;
+    cursor: grab;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    font-size: 0.75rem;
+    letter-spacing: -2px;
+    line-height: 1;
+}
+.ate__grip:active {
+    cursor: grabbing;
+}
+.ate__grip:disabled {
+    cursor: default;
+    opacity: 0.4;
+}
+.ate__grip:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    border-radius: 4px;
+}
+.ate__row--dragging {
+    opacity: 0.4;
+}
+/* Insertion line via box-shadow — borders would shift the layout. */
+.ate__row--drop-before {
+    box-shadow: 0 -2px 0 0 var(--ds-medium-blue, #1a76bb);
+}
+.ate__row--drop-after {
+    box-shadow: 0 2px 0 0 var(--ds-medium-blue, #1a76bb);
+}
+.ate__row--drop-into {
+    box-shadow: inset 0 0 0 2px var(--ds-medium-blue, #1a76bb);
+    background: var(--ds-lightest-blue, #e2f8ff);
+}
+.ate__row--invalid {
+    box-shadow: inset 0 0 0 2px #b42318;
+    background: #fdecea;
+    cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ate__toggle svg {
+        transition: none;
+    }
+}

@@ -120,6 +120,79 @@
     border-right: 1px solid var(--slds-g-color-border-1, #d1d5db);
 }
 
+/* Drawer toggle: hidden on desktop, the sidebar's only entry on phones
+   (the ≤768px block below flips both). */
+.nexs__nav-toggle {
+    display: none;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 8px);
+    align-self: flex-start;
+    padding: 10px var(--slds-g-spacing-4, 16px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-md, 8px);
+    font-family: inherit;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    cursor: pointer;
+}
+.nexs__nav-toggle svg {
+    width: 18px;
+    height: 18px;
+}
+.nexs__nav-toggle:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+
+/* Search scope: "Search within {topic}" offer, or the active scope chip. */
+.nexs__scope {
+    margin: 0 0 var(--slds-g-spacing-4, 16px);
+    font-size: var(--slds-g-font-scale-2, 0.875rem);
+}
+.nexs__scope-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 8px);
+    padding: 4px 6px 4px 12px;
+    border-radius: 999px;
+    background: var(--slds-g-color-accent-1, #0f406f);
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+}
+.nexs__scope-clear {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.18);
+    color: inherit;
+    font: inherit;
+    line-height: 1;
+    cursor: pointer;
+}
+.nexs__scope-clear:hover,
+.nexs__scope-clear:focus-visible {
+    background: rgba(255, 255, 255, 0.32);
+    outline: none;
+}
+.nexs__scope-btn {
+    padding: 6px 12px;
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: 999px;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    color: var(--slds-g-color-accent-1, #0f406f);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+.nexs__scope-btn:hover,
+.nexs__scope-btn:focus-visible {
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    outline: none;
+}
+
 /* Nav list visuals live in the shared c-ds-topic-nav component; this host
    keeps only the column layout (.nexs__nav above). */
 
@@ -127,6 +200,15 @@
 .nexs__main {
     flex: 1 1 auto;
     min-width: 0;
+}
+
+/* Browse-view topic title, matching .rc-cat__title in the Resource Center. */
+.nexs__title {
+    margin: 0 0 var(--slds-g-spacing-3, 12px);
+    font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+    font-size: 1.75rem;
+    font-weight: 400;
+    color: var(--slds-g-color-on-surface-3, #09243f);
 }
 
 /* Breadcrumb visuals live in the shared c-ds-breadcrumbs component. */
@@ -279,11 +361,18 @@
     .nexs {
         flex-direction: column;
     }
+    .nexs__nav-toggle {
+        display: inline-flex;
+    }
     .nexs__nav {
+        display: none;
         flex-basis: auto;
         width: 100%;
         padding-right: 0;
         border-right: none;
+    }
+    .nexs__nav--open {
+        display: block;
     }
 }
 

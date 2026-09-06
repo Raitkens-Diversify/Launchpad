@@ -52,14 +52,29 @@ public with sharing class ResourceCenterService {
         @AuraEnabled public Integer resourceCount;
     }
 
+    /** One breadcrumb segment: a category's name + routing slug. */
+    public class Crumb {
+        @AuraEnabled public String name;
+        @AuraEnabled public String slug;
+        public Crumb(String name, String slug) {
+            this.name = name;
+            this.slug = slug;
+        }
+    }
+
     public class CategoryDetail {
         @AuraEnabled public Id id;
         @AuraEnabled public String name;
         @AuraEnabled public String slug;
         @AuraEnabled public String description;
         @AuraEnabled public String iconName;
+        /** Nearest ancestor (null at top level); ancestors carries the whole chain. */
         @AuraEnabled public String parentSlug;
         @AuraEnabled public String parentName;
+        /** Root-first ancestors, excluding this category — the breadcrumb chain. */
+        @AuraEnabled public List<Crumb> ancestors = new List<Crumb>();
+        @AuraEnabled public Integer depth;
+        @AuraEnabled public Boolean hasChildren = false;
         @AuraEnabled public List<CategoryTile> subcategories;
         @AuraEnabled public List<ResourceCard> resources;
         @AuraEnabled public List<ResourceSection> sections;
@@ -76,21 +91,6 @@ public with sharing class ResourceCenterService {
         @AuraEnabled public String title;         // subcategory name, or 'General resources'
         @AuraEnabled public Integer displayOrder; // subcategory position; 900 = trailing General
         @AuraEnabled public List<ResourceCard> resources = new List<ResourceCard>();
-    }
-
-    /** Sidebar taxonomy node: a main topic with its non-empty subtopics. */
-    public class NavTopic {
-        @AuraEnabled public Id id;
-        @AuraEnabled public String name;
-        @AuraEnabled public String slug;
-        @AuraEnabled public String iconName;
-        @AuraEnabled public List<NavChild> children = new List<NavChild>();
-    }
-
-    public class NavChild {
-        @AuraEnabled public Id id;
-        @AuraEnabled public String name;
-        @AuraEnabled public String slug;
     }
 
     public class ResourceCard {
@@ -125,9 +125,8 @@ public with sharing class ResourceCenterService {
         @AuraEnabled public Decimal downloadCount;
         @AuraEnabled public String categorySlug;
         @AuraEnabled public String categoryName;
-        /** Grandparent crumb segment — null when the category is top-level. */
-        @AuraEnabled public String categoryParentSlug;
-        @AuraEnabled public String categoryParentName;
+        /** Root-first ancestors of the home category (excluding it) — crumb segments. */
+        @AuraEnabled public List<Crumb> categoryAncestors = new List<Crumb>();
         @AuraEnabled public FileInfo file;
         @AuraEnabled public List<RelatedArticle> relatedArticles;
         // Webinar-only (null for every other type) — derived by WebinarLifecycle.
@@ -340,64 +339,36 @@ public with sharing class ResourceCenterService {
     }
 
     /**
-     * Sidebar taxonomy for the public topic nav: every active top-level
-     * category (always listed, even when empty), each with its active
-     * subcategories that hold at least one active resource — empty subtopics
-     * stay out of the public nav. Both levels in Display_Order__c order.
+     * The reader's category tree for c-ds-tree: active categories only (an
+     * inactive category hides its subtree), any depth, with counts. Non-root
+     * nodes with nothing to show anywhere below them are pruned — empty
+     * subtopics stay out of the public nav; main topics always list.
      */
     @AuraEnabled(cacheable=true)
-    public static List<NavTopic> getCategoryNav() {
+    public static CategoryTreeService.TreeDTO getCategoryTree() {
         assertCategoriesReadable();
-        List<Resource_Category__c> all = [
-            SELECT Id, Name, Slug__c, Icon_Name__c, Parent_Category__c
-            FROM Resource_Category__c
-            WHERE Is_Active__c = true
-            ORDER BY Display_Order__c NULLS LAST, Name ASC
-        ];
-        Set<Id> allIds = new Map<Id, Resource_Category__c>(all).keySet();
-        Set<Id> hasResources = new Set<Id>();
-        for (AggregateResult ar : [
-            SELECT Category__c cat
-            FROM Resource__c
-            WHERE Is_Active__c = true AND Category__c IN :allIds
-            GROUP BY Category__c
-        ]) {
-            hasResources.add((Id) ar.get('cat'));
-        }
-        // A subtopic populated only through "Also show in" still belongs in the nav.
-        hasResources.addAll(secondaryResourceIdsByCategory(allIds).keySet());
-
-        Map<Id, NavTopic> topById = new Map<Id, NavTopic>();
-        List<NavTopic> topics = new List<NavTopic>();
-        for (Resource_Category__c cat : all) {
-            if (cat.Parent_Category__c == null) {
-                NavTopic t = new NavTopic();
-                t.id = cat.Id;
-                t.name = cat.Name;
-                t.slug = cat.Slug__c;
-                t.iconName = cat.Icon_Name__c;
-                topById.put(cat.Id, t);
-                topics.add(t);
-            }
-        }
-        for (Resource_Category__c cat : all) {
-            if (cat.Parent_Category__c == null || !hasResources.contains(cat.Id)) {
+        CategoryTreeService.Tree tree = ResourceCategoryTreeProvider.load(true);
+        for (CategoryTreeService.TreeNode n : tree.ordered) {
+            if (n.children.isEmpty()) {
                 continue;
             }
-            NavTopic parent = topById.get(cat.Parent_Category__c);
-            if (parent == null) {
-                continue; // orphan/deep nesting — not part of the two-level nav
+            List<CategoryTreeService.TreeNode> kept = new List<CategoryTreeService.TreeNode>();
+            for (CategoryTreeService.TreeNode c : n.children) {
+                if (c.descendantItemCount > 0) {
+                    kept.add(c);
+                }
             }
-            NavChild child = new NavChild();
-            child.id = cat.Id;
-            child.name = cat.Name;
-            child.slug = cat.Slug__c;
-            parent.children.add(child);
+            n.children = kept;
+            n.hasChildren = !kept.isEmpty();
         }
-        return topics;
+        return tree.toDTO();
     }
 
-    /** A category by slug, with its active subcategories and its own resources. */
+    /**
+     * A category by slug: its breadcrumb ancestors, direct subcategories
+     * (tiles), and every resource shown on the page — filed on the category,
+     * anywhere in its subtree, or placed here through "Also show in".
+     */
     @AuraEnabled(cacheable=true)
     public static CategoryDetail getCategoryBySlug(String slug) {
         assertCategoriesReadable();
@@ -405,14 +376,15 @@ public with sharing class ResourceCenterService {
             throw new AuraHandledException('No category specified.');
         }
         List<Resource_Category__c> cats = [
-            SELECT Id, Name, Slug__c, Description__c, Icon_Name__c, Display_Order__c,
-                   Parent_Category__c, Parent_Category__r.Name, Parent_Category__r.Slug__c
+            SELECT Id, Name, Slug__c, Description__c, Icon_Name__c, Display_Order__c, Parent_Category__c
             FROM Resource_Category__c
             WHERE Slug__c = :slug AND Is_Active__c = true
             LIMIT 1
         ];
-        if (cats.isEmpty()) {
-            throw new AuraHandledException('Category not found.');
+        CategoryTreeService.Tree tree = ResourceCategoryTreeProvider.load(true);
+        CategoryTreeService.TreeNode node = cats.isEmpty() ? null : tree.get(cats[0].Id);
+        if (node == null) {
+            throw new AuraHandledException('Category not found.'); // or an inactive ancestor hides it
         }
         Resource_Category__c cat = cats[0];
 
@@ -422,24 +394,27 @@ public with sharing class ResourceCenterService {
         detail.slug = cat.Slug__c;
         detail.description = cat.Description__c;
         detail.iconName = cat.Icon_Name__c;
-        detail.parentSlug = cat.Parent_Category__r != null ? cat.Parent_Category__r.Slug__c : null;
-        detail.parentName = cat.Parent_Category__r != null ? cat.Parent_Category__r.Name : null;
+        detail.depth = node.depth;
+        detail.hasChildren = node.hasChildren;
+        List<CategoryTreeService.TreeNode> ancestors = tree.ancestorsOf(node.id);
+        for (CategoryTreeService.TreeNode a : ancestors) {
+            detail.ancestors.add(new Crumb(a.label, a.slug));
+        }
+        if (!ancestors.isEmpty()) {
+            detail.parentSlug = ancestors[ancestors.size() - 1].slug;
+            detail.parentName = ancestors[ancestors.size() - 1].label;
+        }
 
         detail.subcategories = new List<CategoryTile>();
-        for (Resource_Category__c child : [
-            SELECT Id, Name, Slug__c, Description__c, Icon_Name__c, Display_Order__c
-            FROM Resource_Category__c
-            WHERE Parent_Category__c = :cat.Id AND Is_Active__c = true
-            ORDER BY Display_Order__c NULLS LAST, Name ASC
-        ]) {
+        for (CategoryTreeService.TreeNode child : node.children) {
             detail.subcategories.add(toTile(child));
         }
 
-        // Memberships on this page = home placements (category or an active
-        // subcategory) plus "Also show in" links to any of them.
+        // Memberships on this page = home placements on the category or any
+        // descendant, plus "Also show in" links to any of them.
         Set<Id> pageCatIds = new Set<Id>{ cat.Id };
-        for (CategoryTile sub : detail.subcategories) {
-            pageCatIds.add(sub.id);
+        for (String descendantId : tree.descendantIdsOf(node.id)) {
+            pageCatIds.add(descendantId);
         }
         Map<Id, Set<Id>> secondary = secondaryResourceIdsByCategory(pageCatIds);
         Set<Id> secondaryIds = new Set<Id>();
@@ -447,17 +422,16 @@ public with sharing class ResourceCenterService {
             secondaryIds.addAll(ids);
         }
 
-        // One query covers the category's own resources, its subcategories' and
-        // the ones also shown here, so the ORDER BY stays authoritative
-        // (inactive subcategories stay hidden, like everywhere user-facing).
+        // One query covers the whole subtree and the ones also shown here, so
+        // the ORDER BY stays authoritative (inactive homes stay hidden, like
+        // everywhere user-facing).
         List<Resource__c> resources = [
             SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Display_Order__c,
                    Is_Featured__c, External_URL__c, Video_Embed_URL__c,
                    Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c,
                    Category__c, Category__r.Slug__c
             FROM Resource__c
-            WHERE (Category__c = :cat.Id OR Category__r.Parent_Category__c = :cat.Id
-                   OR Id IN :secondaryIds)
+            WHERE (Category__c IN :pageCatIds OR Id IN :secondaryIds)
             AND Is_Active__c = true AND Category__r.Is_Active__c = true
             ORDER BY Display_Order__c NULLS LAST, Name ASC
         ];
@@ -478,18 +452,30 @@ public with sharing class ResourceCenterService {
             }
         }
 
-        // Sections: one per subcategory with resources (in subcategory order) —
-        // a card sits in every subcategory section it belongs to — then
+        // Sections: one per direct subcategory (in order) holding everything in
+        // THAT child's subtree — a grandchild's resources group under the child
+        // they hang from; a card sits in every section it belongs to — then
         // resources placed on the category itself trail in "General resources",
         // unless they already landed in a named section on this page.
         detail.sections = new List<ResourceSection>();
         Set<Id> placed = new Set<Id>();
         Integer position = 0;
-        for (CategoryTile sub : detail.subcategories) {
+        for (CategoryTreeService.TreeNode child : node.children) {
             position++;
+            Set<Id> subtree = new Set<Id>{ child.id };
+            for (String descendantId : tree.descendantIdsOf(child.id)) {
+                subtree.add(descendantId);
+            }
             List<ResourceCard> subCards = new List<ResourceCard>();
             for (ResourceCard card : allCards) {
-                if (membershipsByResource.get(card.id).contains(sub.id)) {
+                Boolean inSubtree = false;
+                for (Id membership : membershipsByResource.get(card.id)) {
+                    if (subtree.contains(membership)) {
+                        inSubtree = true;
+                        break;
+                    }
+                }
+                if (inSubtree) {
                     subCards.add(card);
                     placed.add(card.id);
                 }
@@ -498,8 +484,8 @@ public with sharing class ResourceCenterService {
                 continue;
             }
             ResourceSection section = new ResourceSection();
-            section.key = sub.slug;
-            section.title = sub.name;
+            section.key = child.slug;
+            section.title = child.label;
             section.displayOrder = position;
             section.resources = subCards;
             detail.sections.add(section);
@@ -724,9 +710,8 @@ public with sharing class ResourceCenterService {
         }
         List<Resource__c> rows = [
             SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Video_Embed_URL__c,
-                   External_URL__c, Download_Count__c, Category__r.Name, Category__r.Slug__c,
-                   Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c,
-                   Category__r.Parent_Category__r.Name, Category__r.Parent_Category__r.Slug__c
+                   External_URL__c, Download_Count__c, Category__c, Category__r.Name, Category__r.Slug__c,
+                   Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c
             FROM Resource__c
             WHERE Slug__c = :slug AND Is_Active__c = true
             LIMIT 1
@@ -747,9 +732,9 @@ public with sharing class ResourceCenterService {
         d.downloadCount = r.Download_Count__c;
         d.categoryName = r.Category__r != null ? r.Category__r.Name : null;
         d.categorySlug = r.Category__r != null ? r.Category__r.Slug__c : null;
-        if (r.Category__r != null && r.Category__r.Parent_Category__r != null) {
-            d.categoryParentName = r.Category__r.Parent_Category__r.Name;
-            d.categoryParentSlug = r.Category__r.Parent_Category__r.Slug__c;
+        // Breadcrumb ancestors of the HOME category (never a secondary placement).
+        for (CategoryTreeService.TreeNode a : ResourceCategoryTreeProvider.load(true).ancestorsOf(r.Category__c)) {
+            d.categoryAncestors.add(new Crumb(a.label, a.slug));
         }
         d.file = fileInfoByResource(new Set<Id>{ r.Id }).get(r.Id);
         d.relatedArticles = getRelatedArticlesForResource(r.Id);
@@ -850,9 +835,14 @@ public with sharing class ResourceCenterService {
 
     // ---- Public API: search --------------------------------------------------
 
-    /** SOSL across resource name/description. Active resources only. */
+    /**
+     * SOSL across resource name/description. Active resources only. An optional
+     * categorySlug scopes the hits to that category's subtree — filed there or
+     * anywhere below, or placed there through "Also show in" (an unknown slug
+     * matches nothing).
+     */
     @AuraEnabled(cacheable=true)
-    public static List<ResourceCard> searchResources(String term) {
+    public static List<ResourceCard> searchResources(String term, String categorySlug) {
         assertResourcesReadable();
         String findExpr = buildFind(term);
         if (findExpr == null) {
@@ -861,36 +851,90 @@ public with sharing class ResourceCenterService {
         String sosl =
             'FIND \'' + findExpr + '\' IN ALL FIELDS RETURNING Resource__c(' +
             'Id, Name, Slug__c, Resource_Type__c, Description__c, Display_Order__c, ' +
-            'Is_Featured__c, External_URL__c, Video_Embed_URL__c, Category__r.Slug__c, ' +
+            'Is_Featured__c, External_URL__c, Video_Embed_URL__c, Category__c, Category__r.Slug__c, ' +
             'Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c ' +
             'WHERE Is_Active__c = true) LIMIT ' + MAX_SEARCH_RESULTS;
         List<List<SObject>> results = Search.query(sosl);
         List<Resource__c> rows = results.isEmpty()
             ? new List<Resource__c>()
             : (List<Resource__c>) results[0];
+        if (String.isNotBlank(categorySlug)) {
+            SearchScope scope = scopeFor(categorySlug);
+            List<Resource__c> inScope = new List<Resource__c>();
+            for (Resource__c r : rows) {
+                if (scope.categoryIds.contains(r.Category__c) || scope.secondaryResourceIds.contains(r.Id)) {
+                    inScope.add(r);
+                }
+            }
+            rows = inScope;
+        }
         return toCards(rows);
+    }
+
+    /** A category subtree (ids) plus the resources also shown anywhere in it. */
+    private class SearchScope {
+        Set<Id> categoryIds = new Set<Id>();
+        Set<Id> secondaryResourceIds = new Set<Id>();
+    }
+
+    private static SearchScope scopeFor(String categorySlug) {
+        SearchScope scope = new SearchScope();
+        CategoryTreeService.Tree tree = ResourceCategoryTreeProvider.load(true);
+        CategoryTreeService.TreeNode node;
+        for (CategoryTreeService.TreeNode n : tree.ordered) {
+            if (n.slug == categorySlug) {
+                node = n;
+                break;
+            }
+        }
+        if (node == null) {
+            return scope;
+        }
+        scope.categoryIds.add(node.id);
+        for (String descendantId : tree.descendantIdsOf(node.id)) {
+            scope.categoryIds.add(descendantId);
+        }
+        for (Set<Id> ids : secondaryResourceIdsByCategory(scope.categoryIds).values()) {
+            scope.secondaryResourceIds.addAll(ids);
+        }
+        return scope;
     }
 
     /**
      * Lightweight typeahead for the search bar — SOQL-only (no scoring, no file
-     * lookup) so it stays cheap per keystroke. Matches active resources by Name.
+     * lookup) so it stays cheap per keystroke. Matches active resources by Name,
+     * optionally scoped to a category subtree like searchResources.
      */
     @AuraEnabled(cacheable=true)
-    public static List<ResourceCard> typeahead(String term) {
+    public static List<ResourceCard> typeahead(String term, String categorySlug) {
         assertResourcesReadable();
         String clean = term == null ? '' : term.replaceAll('[^a-zA-Z0-9 ]', ' ').trim();
         if (String.isBlank(clean)) {
             return new List<ResourceCard>();
         }
         String pattern = '%' + clean + '%';
+        List<Resource__c> rows;
+        if (String.isNotBlank(categorySlug)) {
+            SearchScope scope = scopeFor(categorySlug);
+            rows = [
+                SELECT Id, Name, Slug__c, Resource_Type__c
+                FROM Resource__c
+                WHERE Is_Active__c = true AND Name LIKE :pattern
+                AND (Category__c IN :scope.categoryIds OR Id IN :scope.secondaryResourceIds)
+                ORDER BY Name ASC
+                LIMIT 7
+            ];
+        } else {
+            rows = [
+                SELECT Id, Name, Slug__c, Resource_Type__c
+                FROM Resource__c
+                WHERE Is_Active__c = true AND Name LIKE :pattern
+                ORDER BY Name ASC
+                LIMIT 7
+            ];
+        }
         List<ResourceCard> out = new List<ResourceCard>();
-        for (Resource__c r : [
-            SELECT Id, Name, Slug__c, Resource_Type__c
-            FROM Resource__c
-            WHERE Is_Active__c = true AND Name LIKE :pattern
-            ORDER BY Name ASC
-            LIMIT 7
-        ]) {
+        for (Resource__c r : rows) {
             ResourceCard c = new ResourceCard();
             c.id = r.Id;
             c.name = r.Name;
@@ -917,7 +961,7 @@ public with sharing class ResourceCenterService {
         CombinedSearch out = new CombinedSearch();
 
         try {
-            for (ResourceCard card : searchResources(term)) {
+            for (ResourceCard card : searchResources(term, null)) {
                 CombinedResult cr = new CombinedResult();
                 cr.type = 'resource';
                 cr.id = card.id;
@@ -1270,6 +1314,20 @@ public with sharing class ResourceCenterService {
         t.displayOrder = cat.Display_Order__c == null ? null : Integer.valueOf(cat.Display_Order__c);
         t.subcategoryCount = 0;
         t.resourceCount = 0;
+        return t;
+    }
+
+    /** Tile from a reader-tree node: counts cover the node's whole subtree. */
+    private static CategoryTile toTile(CategoryTreeService.TreeNode node) {
+        CategoryTile t = new CategoryTile();
+        t.id = node.id;
+        t.name = node.label;
+        t.slug = node.slug;
+        t.description = node.description;
+        t.iconName = node.iconName;
+        t.displayOrder = node.sortOrder + 1;
+        t.subcategoryCount = node.children.size();
+        t.resourceCount = node.descendantItemCount;
         return t;
     }
 

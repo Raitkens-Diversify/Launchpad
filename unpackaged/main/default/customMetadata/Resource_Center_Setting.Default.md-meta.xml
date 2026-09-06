@@ -11,6 +11,10 @@
         <value xsi:type="xsd:string">Shepherd</value>
     </values>
     <values>
+        <field>Max_Category_Depth__c</field>
+        <value xsi:type="xsd:double">5.0</value>
+    </values>
+    <values>
         <field>Site_Url_Path_Prefix__c</field>
         <value xsi:type="xsd:string">help</value>
     </values>

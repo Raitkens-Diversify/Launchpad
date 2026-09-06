@@ -2,7 +2,9 @@ import { LightningElement } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { resourceDetailUrl, copyText } from 'c/rcLinkUtil';
 import listResources from '@salesforce/apex/ResourceAdminController.listResources';
+import getCategoryTree from '@salesforce/apex/ResourceAdminController.getCategoryTree';
 import getResourceLinkBase from '@salesforce/apex/ResourceCenterService.getResourceLinkBase';
+import { indexTree, descendantsOf, optionsFor } from 'c/treeUtil';
 import {
     RESOURCE_TYPES,
     toOptions,
@@ -42,10 +44,12 @@ export default class AdminResourceList extends LightningElement {
     lifecycleFilter = '';
     activeOnly = false;
     categoryOptions = [{ label: 'All categories', value: '' }];
+    _categoryTree = indexTree([]);
     linkBase = null;
 
     connectedCallback() {
         this.load();
+        this.loadCategories();
         getResourceLinkBase()
             .then((base) => {
                 this.linkBase = base || null;
@@ -77,24 +81,31 @@ export default class AdminResourceList extends LightningElement {
                     lifecycleVariant: lifecycle ? lifecycle.variant : undefined
                 };
             });
-            const cats = new Map();
-            this.rows.forEach((r) => {
-                [r.categoryName, ...r.secondaryCategoryNames].forEach((name) => {
-                    if (name) {
-                        cats.set(name, name);
-                    }
-                });
-            });
-            this.categoryOptions = [
-                { label: 'All categories', value: '' },
-                ...[...cats.keys()].sort().map((c) => ({ label: c, value: c }))
-            ];
             this.errorMessage = undefined;
         } catch (e) {
             this.errorMessage =
                 (e && e.body && e.body.message) || 'Could not load resources.';
         } finally {
             this.loading = false;
+        }
+    }
+
+    /**
+     * The whole category tree drives the filter: every category at any depth,
+     * indented by level, and picking one includes everything below it. (Row
+     * names alone could not express "and its subtopics".)
+     */
+    async loadCategories() {
+        try {
+            const dto = await getCategoryTree();
+            this._categoryTree = indexTree((dto && dto.roots) || []);
+            this.categoryOptions = [
+                { label: 'All categories', value: '' },
+                ...optionsFor(this._categoryTree, null, dto && dto.maxDepth ? dto.maxDepth : 5)
+                    .map((o) => ({ label: o.label, value: o.value }))
+            ];
+        } catch (e) {
+            // Filter degrades to "All categories" — the list still works.
         }
     }
 
@@ -115,9 +126,9 @@ export default class AdminResourceList extends LightningElement {
             if (this.lifecycleFilter && row.webinarStatus !== this.lifecycleFilter) {
                 return false;
             }
-            // A category filter matches the home OR any "Also show in" placement.
-            if (this.categoryFilter && row.categoryName !== this.categoryFilter
-                && !row.secondaryCategoryNames.includes(this.categoryFilter)) {
+            // A category filter matches the home OR any "Also show in"
+            // placement, in the picked category or anywhere below it.
+            if (this.categoryFilter && !this.inCategoryScope(row)) {
                 return false;
             }
             if (this.activeOnly && !row.active) {
@@ -145,6 +156,25 @@ export default class AdminResourceList extends LightningElement {
 
     get hasRows() {
         return this.filteredRows.length > 0;
+    }
+
+    /** Ids of the filtered category and everything under it (empty = no filter). */
+    get categoryScopeIds() {
+        if (!this.categoryFilter) {
+            return null;
+        }
+        const ids = new Set([this.categoryFilter]);
+        descendantsOf(this._categoryTree, this.categoryFilter).forEach((n) => ids.add(n.id));
+        return ids;
+    }
+
+    inCategoryScope(row) {
+        const scope = this.categoryScopeIds;
+        if (!scope) {
+            return true;
+        }
+        return scope.has(row.categoryId)
+            || (row.secondaryCategoryIds || []).some((id) => scope.has(id));
     }
 
     handleSearchChange(event) {

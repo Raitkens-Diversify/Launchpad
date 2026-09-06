@@ -1,15 +1,16 @@
 import { LightningElement } from 'lwc';
 import { slugify } from 'c/slugUtil';
 import { categoryIconOptions } from 'c/rcIcons';
-import listCategories from '@salesforce/apex/ResourceAdminController.listCategories';
+import { indexTree, findNode, applyMove, optionsFor } from 'c/treeUtil';
+import getCategoryTree from '@salesforce/apex/ResourceAdminController.getCategoryTree';
 import saveCategory from '@salesforce/apex/ResourceAdminController.saveCategory';
-import reorderCategories from '@salesforce/apex/ResourceAdminController.reorderCategories';
+import moveCategory from '@salesforce/apex/ResourceAdminController.moveCategory';
 import isCategorySlugAvailable from '@salesforce/apex/ResourceAdminController.isCategorySlugAvailable';
-import getAuthoringMeta from '@salesforce/apex/ArticleAdminController.getAuthoringMeta';
+import getHelpTopicTree from '@salesforce/apex/NexSKnowledgeController.getCategoryTree';
 import canEditTopics from '@salesforce/apex/HelpTopicAdminController.canEditTopics';
 import addTopicApex from '@salesforce/apex/HelpTopicAdminController.addTopic';
 import renameTopicApex from '@salesforce/apex/HelpTopicAdminController.renameTopic';
-import reorderTopicsApex from '@salesforce/apex/HelpTopicAdminController.reorderTopics';
+import moveTopicApex from '@salesforce/apex/HelpTopicAdminController.moveTopic';
 import getCategoryDeleteImpact from '@salesforce/apex/ResourceAdminController.getCategoryDeleteImpact';
 import deleteCategoryApex from '@salesforce/apex/ResourceAdminController.deleteCategory';
 import getTopicDeleteImpact from '@salesforce/apex/HelpTopicAdminController.getTopicDeleteImpact';
@@ -17,30 +18,38 @@ import deleteTopicApex from '@salesforce/apex/HelpTopicAdminController.deleteTop
 import { messageFrom, toast } from 'c/messageUtil';
 
 const plural = (n, one, many) => (n === 1 ? one : many);
+const MODE_REPARENT = 'reparent';
+const MODE_BLOCK = 'block';
+const CHOICE_KEEP = 'keep';
 
 /**
  * adminCategoryManager — the two taxonomies, side by side and clearly labeled,
- * both rendered by the shared c-admin-sortable-tree (drag/keyboard reorder):
- *  - Resource Categories (Resource_Category__c): editable — create, rename,
- *    re-parent, reorder (persists Display_Order__c), icon picker, active flag,
- *    delete (blocked while resources or help-guide links sit under it; empty
- *    subtopics go with their parent). Two levels: main topics with subtopics,
- *    mirroring Help topics.
+ * both rendered by the shared c-admin-tree-editor (any depth up to the limit
+ * the server sends with each tree; never hard-coded here):
+ *  - Resource Categories (Resource_Category__c): create anywhere, rename
+ *    (inline or in the dialog), re-parent by drag or from the dialog's parent
+ *    picker (which only offers parents the subtree fits under), reorder
+ *    (moveCategory persists parent + Display_Order__c in one call), icon
+ *    picker, active flag, delete.
  *  - Help Topics (Knowledge data categories): via the SOAP Metadata channel
- *    (HelpTopicAdminController) — add topic/subtopic, rename labels, reorder,
- *    delete (blocked while any article version is filed under the topic or
- *    its subtopics — filing references topics by name and would be orphaned).
- *    API-name rename stays in Setup. New topics show a generic icon on the
- *    Help Center until nexsTopicIcons.js gets a mapping (deploy).
+ *    (HelpTopicAdminController) — add under any topic, rename labels, move,
+ *    reorder, delete. API-name rename stays in Setup. New topics show a
+ *    generic icon on the Help Center until nexsTopicIcons.js gets a mapping.
  *
- * Delete lives in each edit dialog and always goes through the shared
- * c-admin-confirm-modal (docs/ui-standards.md): the edit dialog closes, a
- * pre-flight impact call decides between a "blocked" notice and a destructive
- * confirm, and the server re-validates before anything is removed.
+ * Delete never cascades. It lives in each edit dialog and always goes through
+ * the shared c-admin-confirm-modal: the dialog closes, a pre-flight impact
+ * call decides between a "blocked" notice (content on the node itself, or
+ * content below a childless node) and a confirm; a node WITH subtopics asks
+ * the admin to choose — move the subtopics up to its parent, or keep the
+ * node until it is emptied — and the server re-validates the chosen mode.
  */
 export default class AdminCategoryManager extends LightningElement {
-    rows = [];
-    helpTopics = [];
+    categoryRoots = [];
+    categoryMaxDepth = 5;
+    _categoryTree = indexTree([]);
+    helpRoots = [];
+    helpMaxDepth = 5;
+    _helpTree = indexTree([]);
     loading = true;
     errorMessage;
     categoriesBusy = false;
@@ -66,7 +75,8 @@ export default class AdminCategoryManager extends LightningElement {
     topicModalValue = '';
 
     // Delete confirm state: null, or { action: 'blocked'|'delete', kind:
-    // 'category'|'topic', id, header, message, confirmLabel, variant }.
+    // 'category'|'topic', id, header, message, confirmLabel, variant,
+    // choices?, choice?, mode }.
     confirm = null;
     confirmBusy = false;
 
@@ -81,41 +91,47 @@ export default class AdminCategoryManager extends LightningElement {
             });
     }
 
-    async load() {
-        this.loading = true;
+    /**
+     * quiet = refresh in place: no spinner, so a drag's optimistic tree stays
+     * on screen while the server answer (fresh order values, paths, counts)
+     * is fetched. A blanked pane after every move would read as a flicker.
+     */
+    async load(quiet = false) {
+        this.loading = !quiet;
         try {
-            const [cats, meta] = await Promise.all([
-                listCategories(),
-                getAuthoringMeta().catch(() => null)
+            const [cats, topics] = await Promise.all([
+                getCategoryTree(),
+                getHelpTopicTree().catch(() => null)
             ]);
-            this.rows = (cats || []).map((c) => ({
-                ...c,
-                statusLabel: c.active ? 'Active' : 'Inactive',
-                statusClass: c.active
-                    ? 'acm-badge acm-badge--on'
-                    : 'acm-badge acm-badge--off'
-            }));
-            this.helpTopics = meta ? meta.categoryTree : [];
+            this.setCategoryTree(cats);
+            this.helpRoots = topics ? topics.roots || [] : [];
+            this.helpMaxDepth = topics && topics.maxDepth ? topics.maxDepth : 5;
+            this._helpTree = indexTree(this.helpRoots);
             this.errorMessage = undefined;
         } catch (e) {
-            this.errorMessage =
-                (e && e.body && e.body.message) || 'Could not load categories.';
+            this.errorMessage = messageFrom(e, 'Could not load categories.');
         } finally {
             this.loading = false;
         }
     }
 
-    get hasRows() {
-        return this.rows.length > 0;
+    setCategoryTree(dto) {
+        this.categoryRoots = dto ? dto.roots || [] : [];
+        this.categoryMaxDepth = dto && dto.maxDepth ? dto.maxDepth : 5;
+        this._categoryTree = indexTree(this.categoryRoots);
+    }
+
+    get hasCategories() {
+        return this.categoryRoots.length > 0;
     }
 
     get hasHelpTopics() {
-        return this.helpTopics.length > 0;
+        return this.helpRoots.length > 0;
     }
 
     get topicsSubtitle() {
         return this.topicsEditable
-            ? 'Editable — add topics, rename labels, reorder, delete empty topics. Organizes Help Center articles.'
+            ? `Editable — add, rename, move and reorder topics up to ${this.helpMaxDepth} levels deep. Organizes Help Center articles.`
             : 'Read-only — organizes Help Center articles. Editing needs Modify Metadata access.';
     }
 
@@ -131,48 +147,6 @@ export default class AdminCategoryManager extends LightningElement {
         return this.topicModalMode === 'rename';
     }
 
-    /** Two-level items for c-admin-sortable-tree, sorted like the server list. */
-    get categoryItems() {
-        const sortSiblings = (list) => [...list].sort((a, b) => {
-            const ao = a.displayOrder == null ? Number.MAX_SAFE_INTEGER : a.displayOrder;
-            const bo = b.displayOrder == null ? Number.MAX_SAFE_INTEGER : b.displayOrder;
-            return ao - bo || a.name.localeCompare(b.name);
-        });
-        const toItem = (r) => ({
-            key: r.id,
-            label: r.name,
-            sublabel: r.slug,
-            // "3 +2": three resources live here, two more are also shown here.
-            badge: r.secondaryCount > 0
-                ? `${r.resourceCount} +${r.secondaryCount}`
-                : String(r.resourceCount),
-            statusLabel: r.statusLabel,
-            statusClass: r.statusClass,
-            children: []
-        });
-        const tops = sortSiblings(this.rows.filter((r) => !r.parentId)).map(toItem);
-        const topByKey = new Map(tops.map((t) => [t.key, t]));
-        sortSiblings(this.rows.filter((r) => r.parentId)).forEach((r) => {
-            const parent = topByKey.get(r.parentId);
-            if (parent) {
-                parent.children.push(toItem(r));
-            } else {
-                // Orphan (parent itself nested or missing) — keep it visible
-                // and fixable rather than silently hiding it.
-                tops.push(toItem(r));
-            }
-        });
-        return tops;
-    }
-
-    get helpTopicItems() {
-        return this.helpTopics.map((t) => ({
-            key: t.name,
-            label: t.label,
-            children: (t.children || []).map((s) => ({ key: s.name, label: s.label }))
-        }));
-    }
-
     get topicModalTitle() {
         if (this.topicModalMode === 'rename') {
             return 'Rename topic';
@@ -184,27 +158,19 @@ export default class AdminCategoryManager extends LightningElement {
         return this.topicModalMode === 'rename' ? 'New label' : 'Label';
     }
 
+    /** Any category the edited one (with its subtree) fits under — never itself
+        or its own descendants, never deeper than the limit allows. */
     get parentOptions() {
         const options = [{ label: 'None (top level)', value: '' }];
-        this.rows
-            .filter((c) => !c.parentId && c.id !== this.editingId)
-            .forEach((c) => options.push({ label: c.name, value: c.id }));
+        optionsFor(this._categoryTree, this.editingId, this.categoryMaxDepth).forEach((o) => {
+            options.push({ label: o.label, value: o.value });
+        });
         return options;
     }
 
-    get editingHasChildren() {
-        return Boolean(this.editingId)
-            && this.rows.some((r) => r.parentId === this.editingId);
-    }
-
-    get parentDisabled() {
-        return this.editingHasChildren;
-    }
-
     get parentHelp() {
-        return this.editingHasChildren
-            ? 'This category has subtopics, so it must stay top level.'
-            : 'Pick a main topic to file this category as its subtopic.';
+        return `Pick any category to file this one under it — up to ${this.categoryMaxDepth} levels deep. `
+            + 'Moving a category takes its subtopics with it.';
     }
 
     get modalTitle() {
@@ -233,24 +199,24 @@ export default class AdminCategoryManager extends LightningElement {
         this.modalOpen = true;
     }
 
-    /** "+" on a main topic: new category with the parent preset. */
+    /** "+" on any node: new category with the parent preset. */
     handleAddSubcategory(event) {
         this.handleNew();
         this.formParentId = event.detail.parentKey || '';
     }
 
     handleEdit(event) {
-        const row = this.rows.find((c) => c.id === event.detail.key);
-        if (!row) {
+        const node = findNode(this._categoryTree, event.detail.key);
+        if (!node) {
             return;
         }
-        this.editingId = row.id;
-        this.formName = row.name;
-        this.formSlug = row.slug;
-        this.formIcon = row.iconName || '';
-        this.formOrder = row.displayOrder;
-        this.formParentId = row.parentId || '';
-        this.formActive = row.active;
+        this.editingId = node.id;
+        this.formName = node.label;
+        this.formSlug = node.slug;
+        this.formIcon = node.iconName || '';
+        this.formOrder = node.displayOrder;
+        this.formParentId = node.parentId || '';
+        this.formActive = node.active !== false;
         this.slugTouched = true;
         this.slugError = '';
         this.modalOpen = true;
@@ -353,42 +319,67 @@ export default class AdminCategoryManager extends LightningElement {
             toast(this, 'success', 'Category saved.');
             this.load();
         } catch (e) {
-            toast(this, 
-                'error',
-                (e && e.body && e.body.message) || 'Could not save the category.'
-            );
+            toast(this, 'error', messageFrom(e, 'Could not save the category.'));
         }
     }
 
-    // ---- Resource-category reordering (persists Display_Order__c) ------------------
-
-    /**
-     * Apply the new order locally, then persist. Optimistic: the server
-     * rejects the save unless the submitted Id set exactly matches the live
-     * siblings, so a success means this order IS the persisted order. On
-     * failure, reload to roll back to server truth.
-     */
-    async handleCategoryReorder(event) {
-        const { parentKey, orderedKeys } = event.detail;
-        const orderByKey = new Map(orderedKeys.map((k, i) => [k, i + 1]));
-        this.rows = this.rows.map((r) =>
-            orderByKey.has(r.id) ? { ...r, displayOrder: orderByKey.get(r.id) } : r
-        );
+    /** Inline rename from the tree: everything else on the record is echoed. */
+    async handleCategoryRename(event) {
+        const node = findNode(this._categoryTree, event.detail.key);
+        if (!node) {
+            return;
+        }
         this.categoriesBusy = true;
         try {
-            await reorderCategories({
-                parentId: parentKey,
-                orderedIdsJson: JSON.stringify(orderedKeys)
+            await saveCategory({
+                inputJson: JSON.stringify({
+                    id: node.id,
+                    name: event.detail.label,
+                    slug: node.slug,
+                    iconName: node.iconName || null,
+                    displayOrder: node.displayOrder,
+                    parentId: node.parentId || null,
+                    active: node.active !== false
+                })
             });
-        } catch (e) {
-            toast(this, 'error', messageFrom(e, 'Could not reorder categories.'));
+            toast(this, 'success', 'Category renamed.');
             await this.load();
+        } catch (e) {
+            toast(this, 'error', messageFrom(e, 'Could not rename the category.'));
         } finally {
             this.categoriesBusy = false;
         }
     }
 
-    // ---- Help-topic editing (safe ops via the SOAP Metadata channel) ---------------
+    // ---- Resource-category moves (reorder or re-parent; persists both) ------------
+
+    /**
+     * Apply the move locally, then persist. Optimistic: the server rejects the
+     * save unless the submitted sibling set exactly matches the live one, so a
+     * success means this tree IS the persisted tree; reload afterwards for the
+     * fresh order values and counts. On failure, reload to roll back.
+     */
+    async handleCategoryMove(event) {
+        const { key, newParentKey, orderedSiblingKeys } = event.detail;
+        const moved = applyMove(this._categoryTree, key, newParentKey, orderedSiblingKeys);
+        this._categoryTree = moved;
+        this.categoryRoots = moved.roots;
+        this.categoriesBusy = true;
+        try {
+            await moveCategory({
+                categoryId: key,
+                newParentId: newParentKey,
+                orderedSiblingIdsJson: JSON.stringify(orderedSiblingKeys)
+            });
+        } catch (e) {
+            toast(this, 'error', messageFrom(e, 'Could not move the category.'));
+        } finally {
+            this.categoriesBusy = false;
+            await this.load(true);
+        }
+    }
+
+    // ---- Help-topic editing (via the SOAP Metadata channel) --------------------------
 
     handleTopicNew() {
         this.topicModalMode = 'add';
@@ -446,38 +437,46 @@ export default class AdminCategoryManager extends LightningElement {
         }
     }
 
-    /**
-     * Optimistic help-topic reorder (see handleCategoryReorder for the
-     * pattern; here a reload is also a slow Metadata API round trip, so
-     * success skips it on purpose).
-     */
-    async handleTopicReorder(event) {
-        const { parentKey, orderedKeys } = event.detail;
-        const byName = new Map();
-        (parentKey
-            ? (this.helpTopics.find((t) => t.name === parentKey) || {}).children || []
-            : this.helpTopics
-        ).forEach((n) => byName.set(n.name, n));
-        const reordered = orderedKeys.map((n) => byName.get(n));
-        this.helpTopics = parentKey
-            ? this.helpTopics.map((t) => (t.name === parentKey ? { ...t, children: reordered } : t))
-            : reordered;
+    /** Inline rename from the tree (display label only, like the dialog). */
+    async handleTopicInlineRename(event) {
         this.topicsBusy = true;
         try {
-            // JSON-string transport (org gotcha: non-primitive params arrive null).
-            await reorderTopicsApex({
-                parentName: parentKey,
-                orderedNamesJson: JSON.stringify(orderedKeys)
-            });
-        } catch (e) {
-            toast(this, 'error', messageFrom(e, 'Could not reorder help topics.'));
+            await renameTopicApex({ name: event.detail.key, newLabel: event.detail.label });
+            toast(this, 'success', 'Topic renamed.');
             await this.load();
+        } catch (e) {
+            toast(this, 'error', messageFrom(e, 'Could not rename the topic.'));
         } finally {
             this.topicsBusy = false;
         }
     }
 
-    // ---- Delete (both panes; the console's blocked-vs-delete confirm pattern) ----
+    /**
+     * Optimistic help-topic move (see handleCategoryMove for the pattern; a
+     * reload here is a slow Metadata API round trip, so success skips it).
+     */
+    async handleTopicMove(event) {
+        const { key, newParentKey, orderedSiblingKeys } = event.detail;
+        const moved = applyMove(this._helpTree, key, newParentKey, orderedSiblingKeys);
+        this._helpTree = moved;
+        this.helpRoots = moved.roots;
+        this.topicsBusy = true;
+        try {
+            // JSON-string transport (org gotcha: non-primitive params arrive null).
+            await moveTopicApex({
+                name: key,
+                newParentName: newParentKey,
+                orderedNamesJson: JSON.stringify(orderedSiblingKeys)
+            });
+        } catch (e) {
+            toast(this, 'error', messageFrom(e, 'Could not move the topic.'));
+            await this.load(true);
+        } finally {
+            this.topicsBusy = false;
+        }
+    }
+
+    // ---- Delete (both panes; blocked notice, plain confirm, or a choice) ---------
 
     /**
      * Delete from the category edit dialog. The dialog closes first (two
@@ -485,15 +484,15 @@ export default class AdminCategoryManager extends LightningElement {
      * Cancel or the blocked "OK" reopens it exactly as it was.
      */
     async handleCategoryDeleteClick() {
-        const row = this.rows.find((c) => c.id === this.editingId);
-        if (!row) {
+        const node = findNode(this._categoryTree, this.editingId);
+        if (!node) {
             return;
         }
         this.modalOpen = false;
         this.categoriesBusy = true;
         try {
-            const impact = await getCategoryDeleteImpact({ categoryId: row.id });
-            this.confirm = this.buildCategoryConfirm(row, impact);
+            const impact = await getCategoryDeleteImpact({ categoryId: node.id });
+            this.confirm = this.buildCategoryConfirm(node, impact);
         } catch (e) {
             toast(this, 'error', messageFrom(e, 'Could not check the category.'));
             this.modalOpen = true;
@@ -502,54 +501,64 @@ export default class AdminCategoryManager extends LightningElement {
         }
     }
 
-    buildCategoryConfirm(row, impact) {
-        const subs = impact.subcategoryCount || 0;
-        const base = { kind: 'category', id: row.id };
-        if (impact.resourceCount > 0) {
-            const n = impact.resourceCount;
+    buildCategoryConfirm(node, impact) {
+        const name = impact.name || node.label;
+        const subs = impact.childCount || 0;
+        const base = { kind: 'category', id: node.id };
+        const blocked = (message) => ({
+            ...base, action: 'blocked', variant: 'brand', header: `Can't delete: ${name}`,
+            message, confirmLabel: 'OK'
+        });
+        // Content on the node itself blocks either way.
+        if (impact.ownResourceCount > 0) {
+            const n = impact.ownResourceCount;
+            return blocked(`${n} resource${plural(n, ' lives', 's live')} in this category. `
+                + 'Move or delete those resources first.');
+        }
+        if (impact.ownSecondaryCount > 0) {
+            const n = impact.ownSecondaryCount;
+            return blocked(`${n} resource${plural(n, ' is', 's are')} also shown in this category. `
+                + 'Remove it from those resources first.');
+        }
+        if (impact.ownGuideOptionCount > 0) {
+            const n = impact.ownGuideOptionCount;
+            return blocked(`${n} help guide option${plural(n, ' links', 's link')} to this category. `
+                + `Retarget or remove ${plural(n, 'it', 'them')} in the Help Guide Builder first.`);
+        }
+        if (subs === 0) {
             return {
-                ...base,
-                action: 'blocked',
-                variant: 'brand',
-                header: `Can't delete: ${row.name}`,
-                message: `${n} resource${plural(n, ' lives', 's live')} under this category`
-                    + `${subs ? ' or its subtopics' : ''}. Move or delete those resources first.`,
-                confirmLabel: 'OK'
+                ...base, action: 'delete', mode: MODE_BLOCK,
+                header: `Delete category: ${name}`,
+                message: 'Deletes this category. No resources live under it or are shown in it. '
+                    + 'This cannot be undone.',
+                confirmLabel: 'Delete'
             };
+        }
+        // Has subtopics: never a cascade — the admin chooses.
+        const where = impact.parentName ? `up to ${impact.parentName}` : 'up to the top level';
+        const below = [];
+        if (impact.resourceCount > 0) {
+            below.push(`${impact.resourceCount} resource${plural(impact.resourceCount, '', 's')}`);
         }
         if (impact.secondaryCount > 0) {
-            const n = impact.secondaryCount;
-            return {
-                ...base,
-                action: 'blocked',
-                variant: 'brand',
-                header: `Can't delete: ${row.name}`,
-                message: `${n} resource${plural(n, ' is', 's are')} also shown in this category`
-                    + `${subs ? ' or its subtopics' : ''}. Remove it from those resources first.`,
-                confirmLabel: 'OK'
-            };
+            below.push(`${impact.secondaryCount} "also shown in" placement${plural(impact.secondaryCount, '', 's')}`);
         }
         if (impact.guideOptionCount > 0) {
-            const n = impact.guideOptionCount;
-            return {
-                ...base,
-                action: 'blocked',
-                variant: 'brand',
-                header: `Can't delete: ${row.name}`,
-                message: `${n} help guide option${plural(n, ' links', 's link')} to this category`
-                    + `${subs ? ' or its subtopics' : ''}. Retarget or remove `
-                    + `${plural(n, 'it', 'them')} in the Help Guide Builder first.`,
-                confirmLabel: 'OK'
-            };
+            below.push(`${impact.guideOptionCount} help guide link${plural(impact.guideOptionCount, '', 's')}`);
         }
+        const deeper = (impact.descendantCount || 0) - subs;
         return {
-            ...base,
-            action: 'delete',
-            header: `Delete category: ${row.name}`,
-            message: `Deletes this category${subs
-                ? ` and its ${subs} subtopic${plural(subs, '', 's')} (all empty)` : ''}. `
-                + 'No resources live under it or are shown in it. This cannot be undone.',
-            confirmLabel: 'Delete'
+            ...base, action: 'delete', mode: MODE_REPARENT,
+            header: `Delete category: ${name}`,
+            message: `This category has ${subs} subtopic${plural(subs, '', 's')}`
+                + `${deeper > 0 ? ` (${deeper} more below them)` : ''}`
+                + `${below.length ? `, holding ${below.join(', ')}` : ''}. `
+                + 'Nothing is deleted with it: the subtopics keep their content. This cannot be undone.',
+            confirmLabel: 'Continue',
+            choices: [
+                { label: `Move the subtopics ${where}, then delete "${name}"`, value: MODE_REPARENT },
+                { label: `Keep "${name}" — I'll empty it first`, value: CHOICE_KEEP }
+            ]
         };
     }
 
@@ -574,29 +583,51 @@ export default class AdminCategoryManager extends LightningElement {
 
     buildTopicConfirm(name, impact) {
         const label = impact.label || this.topicModalValue || name;
-        const subs = impact.subtopicCount || 0;
+        const subs = impact.childCount || 0;
         const base = { kind: 'topic', id: name };
-        if (impact.articleCount > 0) {
-            const n = impact.articleCount;
+        if (impact.ownArticleCount > 0) {
+            const n = impact.ownArticleCount;
             return {
-                ...base,
-                action: 'blocked',
-                variant: 'brand',
+                ...base, action: 'blocked', variant: 'brand',
                 header: `Can't delete: ${label}`,
-                message: `${n} article version${plural(n, ' is', 's are')} filed under this topic`
-                    + `${subs ? ' or its subtopics' : ''} (drafts and archived versions included). `
-                    + 'Move those articles to another topic first.',
+                message: `${n} article version${plural(n, ' is', 's are')} filed on this topic `
+                    + '(drafts and archived versions included). Move those articles to another topic first.',
                 confirmLabel: 'OK'
             };
         }
+        if (subs === 0) {
+            if (impact.articleCount > 0) {
+                const n = impact.articleCount;
+                return {
+                    ...base, action: 'blocked', variant: 'brand',
+                    header: `Can't delete: ${label}`,
+                    message: `${n} article version${plural(n, ' is', 's are')} filed under this topic `
+                        + '(drafts and archived versions included). Move those articles to another topic first.',
+                    confirmLabel: 'OK'
+                };
+            }
+            return {
+                ...base, action: 'delete', mode: MODE_BLOCK,
+                header: `Delete topic: ${label}`,
+                message: 'Removes this topic from the Help Topics group. No articles are filed under it. '
+                    + 'This cannot be undone.',
+                confirmLabel: 'Delete'
+            };
+        }
+        const where = impact.parentLabel ? `up to ${impact.parentLabel}` : 'up to the top level';
+        const filed = impact.articleCount > 0
+            ? `, with ${impact.articleCount} article version${plural(impact.articleCount, '', 's')} filed under them`
+            : '';
         return {
-            ...base,
-            action: 'delete',
+            ...base, action: 'delete', mode: MODE_REPARENT,
             header: `Delete topic: ${label}`,
-            message: `Removes this topic${subs
-                ? ` and its ${subs} subtopic${plural(subs, '', 's')} (all empty)` : ''} `
-                + 'from the Help Topics group. No articles are filed under it. This cannot be undone.',
-            confirmLabel: 'Delete'
+            message: `This topic has ${subs} subtopic${plural(subs, '', 's')}${filed}. `
+                + 'Nothing is removed with it: the subtopics keep their articles. This cannot be undone.',
+            confirmLabel: 'Continue',
+            choices: [
+                { label: `Move the subtopics ${where}, then delete "${label}"`, value: MODE_REPARENT },
+                { label: `Keep "${label}" — I'll empty it first`, value: CHOICE_KEEP }
+            ]
         };
     }
 
@@ -614,12 +645,18 @@ export default class AdminCategoryManager extends LightningElement {
         }
     }
 
-    async handleConfirmProceed() {
+    async handleConfirmProceed(event) {
         const pending = this.confirm;
         if (!pending || pending.action !== 'delete') {
             this.handleConfirmCancel();
             return;
         }
+        const choice = event && event.detail ? event.detail.choice : undefined;
+        if (pending.choices && choice === CHOICE_KEEP) {
+            this.handleConfirmCancel();
+            return;
+        }
+        const mode = pending.choices ? (choice || pending.mode) : pending.mode;
         const isCategory = pending.kind === 'category';
         this.confirmBusy = true;
         if (isCategory) {
@@ -629,9 +666,9 @@ export default class AdminCategoryManager extends LightningElement {
         }
         try {
             if (isCategory) {
-                await deleteCategoryApex({ categoryId: pending.id });
+                await deleteCategoryApex({ categoryId: pending.id, mode });
             } else {
-                await deleteTopicApex({ name: pending.id });
+                await deleteTopicApex({ name: pending.id, mode });
             }
             this.confirm = null;
             toast(this, 'success', isCategory ? 'Category deleted.' : 'Topic deleted.');
@@ -645,5 +682,4 @@ export default class AdminCategoryManager extends LightningElement {
             this.topicsBusy = false;
         }
     }
-
 }

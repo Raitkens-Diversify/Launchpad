@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Path__c</fullName>
+    <description>Materialized ancestor path, maintained by ResourceCategoryTreeHandler — never edit by hand. &quot;/&quot; for a top-level category, &quot;/&lt;rootId&gt;/&lt;parentId&gt;/&quot; for a grandchild. Descendants of a category X are the rows whose Path__c starts with X.Path__c + X.Id + &quot;/&quot;. Recomputed on every save; scripts/apex/backfillCategoryPaths.apex repairs it in bulk.</description>
+    <externalId>false</externalId>
+    <label>Path</label>
+    <length>255</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

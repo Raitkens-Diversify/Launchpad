@@ -1,25 +1,29 @@
 /**
  * HelpTopicAdminController
  *
- * Admin Console management for the Help_Topics Knowledge data category group:
- * add topic/subtopic, rename display labels, reorder, and delete. Delete is
- * guarded — article assignments (Knowledge__DataCategorySelection) reference
- * categories by name string and would be silently orphaned, so a topic (or
- * any of its subtopics) with ANY article version filed under it (draft,
- * online or archived) cannot be deleted from here; the admin moves those
- * articles first. Empty subtopics are removed with their parent. Renaming an
- * API name is still not offered and stays in Setup → Data Category Setup.
+ * Admin Console management for the Help_Topics Knowledge data category group,
+ * any depth up to CategoryTreeService.helpTopicMaxDepth(): add a topic under
+ * any node, rename display labels, reorder siblings, move a subtree to another
+ * parent, and delete. Delete is guarded — article assignments
+ * (Knowledge__DataCategorySelection) reference categories by name string and
+ * would be silently orphaned — and never cascades: either the subtopics move
+ * up to the deleted topic's parent ("reparent") or the topic must already be
+ * empty ("block"). Renaming an API name is still not offered and stays in
+ * Setup → Data Category Setup.
  *
  * Writes go through HelpTopicMetadataService (SOAP Metadata API — see that
  * class for why Metadata.Operations can't do this). Every write re-reads the
  * live group first so concurrent Setup edits are never clobbered from a stale
- * snapshot. Gate mirrors SynonymAdminController: Modify Metadata.
+ * snapshot; tree rules (cycles, depth counting the moved subtree) are checked
+ * on that snapshot through CategoryTreeService, the same rules the resource
+ * side and c/treeUtil apply. Gate mirrors SynonymAdminController: Modify Metadata.
  */
 public with sharing class HelpTopicAdminController {
 
     private static final String GROUP_NAME = 'Help_Topics';
     private static final Integer NAME_MAX = 40;
-    private static final Integer MAX_DEPTH = 2; // topics + subtopics (UI convention)
+    public static final String MODE_BLOCK = 'block';
+    public static final String MODE_REPARENT = 'reparent';
     // Category API names are alphanumerics/underscores (see uniqueName); anything
     // else is rejected before a callout is spent on it.
     private static final Pattern NAME_PATTERN = Pattern.compile('^[A-Za-z0-9_]{1,40}$');
@@ -27,16 +31,22 @@ public with sharing class HelpTopicAdminController {
     // delete guard scans selections and filters in Apex. Fail closed past this.
     @TestVisible private static Integer selectionScanLimit = 10000;
 
+    /** The admin tree: CategoryTreeService nodes (id = API name) + the limit. */
     public class TopicTreeDTO {
         @AuraEnabled public Boolean editable;
-        @AuraEnabled public List<HelpTopicMetadataService.Category> topics;
+        @AuraEnabled public Integer maxDepth;
+        @AuraEnabled public List<CategoryTreeService.TreeNode> roots;
     }
 
-    /** Pre-flight for the delete confirm: what blocks, and what cascades. */
+    /** Pre-flight for the delete dialog: what blocks, and where children would go. */
     public class TopicDeleteImpactDTO {
         @AuraEnabled public String label;
-        @AuraEnabled public Integer articleCount;   // filed article versions (draft/online/archived); > 0 blocks
-        @AuraEnabled public Integer subtopicCount;  // removed with the topic (all empty by then)
+        @AuraEnabled public String parentName;    // null = top level: children would become topics
+        @AuraEnabled public String parentLabel;
+        @AuraEnabled public Integer childCount;       // direct subtopics
+        @AuraEnabled public Integer descendantCount;  // whole subtree below
+        @AuraEnabled public Integer articleCount;     // versions filed anywhere in the subtree; blocks "block"
+        @AuraEnabled public Integer ownArticleCount;  // versions filed on the topic itself; blocks "reparent"
     }
 
     /** Cheap gate check for the UI (no callout — display uses the describe tree). */
@@ -50,14 +60,16 @@ public with sharing class HelpTopicAdminController {
         TopicTreeDTO dto = new TopicTreeDTO();
         dto.editable = AdminAccessService.hasModifyMetadata();
         try {
-            dto.topics = readGroup().root.children;
+            CategoryTreeService.Tree tree = HelpTopicTreeProvider.fromSnapshot(readGroup().root.children, true);
+            dto.maxDepth = tree.maxDepth;
+            dto.roots = tree.roots;
         } catch (Exception e) {
             throw auraError(e.getMessage());
         }
         return dto;
     }
 
-    /** parentName null/blank = new top-level topic; else a subtopic under it. */
+    /** parentName null/blank = new top-level topic; else a child of that node (any depth). */
     @AuraEnabled
     public static void addTopic(String parentName, String label) {
         assertTopicAdmin();
@@ -68,11 +80,13 @@ public with sharing class HelpTopicAdminController {
             HelpTopicMetadataService.GroupSnapshot snap = readGroup();
             HelpTopicMetadataService.Category parent = snap.root;
             if (String.isNotBlank(parentName)) {
-                // Subtopics only nest under top-level topics (the Help Center
-                // renders exactly two levels).
-                parent = findChild(snap.root, parentName.trim(), 1);
+                parent = findChild(snap.root, parentName.trim());
                 if (parent == null) {
                     throw auraError('Topic "' + parentName + '" no longer exists — refresh.');
+                }
+                CategoryTreeService.Tree tree = HelpTopicTreeProvider.fromSnapshot(snap.root.children, false);
+                if (tree.get(parent.name).depth + 1 > tree.maxDepth) {
+                    throw auraError(CategoryTreeService.depthMessage(tree.maxDepth));
                 }
             }
             HelpTopicMetadataService.Category fresh = new HelpTopicMetadataService.Category();
@@ -96,8 +110,7 @@ public with sharing class HelpTopicAdminController {
         }
         try {
             HelpTopicMetadataService.GroupSnapshot snap = readGroup();
-            HelpTopicMetadataService.Category target =
-                findChild(snap.root, name == null ? '' : name.trim(), MAX_DEPTH);
+            HelpTopicMetadataService.Category target = findChild(snap.root, name == null ? '' : name.trim());
             if (target == null) {
                 throw auraError('Topic "' + name + '" no longer exists — refresh.');
             }
@@ -119,38 +132,61 @@ public with sharing class HelpTopicAdminController {
     @AuraEnabled
     public static void reorderTopics(String parentName, String orderedNamesJson) {
         assertTopicAdmin();
-        List<String> orderedNames;
-        try {
-            orderedNames = String.isBlank(orderedNamesJson)
-                ? null
-                : (List<String>) JSON.deserialize(orderedNamesJson, List<String>.class);
-        } catch (Exception e) {
-            throw auraError('Could not read the new order — refresh and try again.');
-        }
+        List<String> orderedNames = parseNames(orderedNamesJson);
         try {
             HelpTopicMetadataService.GroupSnapshot snap = readGroup();
             HelpTopicMetadataService.Category parent = String.isBlank(parentName)
                 ? snap.root
-                : findChild(snap.root, parentName.trim(), 1);
+                : findChild(snap.root, parentName.trim());
             if (parent == null) {
                 throw auraError('Topic "' + parentName + '" no longer exists — refresh.');
             }
-            Map<String, HelpTopicMetadataService.Category> byName =
-                new Map<String, HelpTopicMetadataService.Category>();
-            for (HelpTopicMetadataService.Category c : parent.children) {
-                byName.put(c.name, c);
+            parent.children = inOrder(parent.children, orderedNames);
+            HelpTopicMetadataService.updateGroup(snap);
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            throw auraError(e.getMessage());
+        }
+    }
+
+    /**
+     * Drag-and-drop move: `name` (with its whole subtree) becomes a child of
+     * newParentName (null/blank = top level), and orderedNamesJson lists EVERY
+     * sibling under the new parent including the moved one, in final order.
+     * Refused when the target is the node itself or inside its subtree, or when
+     * the subtree's height would push past the depth limit.
+     */
+    @AuraEnabled
+    public static void moveTopic(String name, String newParentName, String orderedNamesJson) {
+        assertTopicAdmin();
+        requireValidName(name);
+        List<String> orderedNames = parseNames(orderedNamesJson);
+        String targetName = String.isBlank(newParentName) ? null : newParentName.trim();
+        try {
+            HelpTopicMetadataService.GroupSnapshot snap = readGroup();
+            CategoryTreeService.Tree tree = HelpTopicTreeProvider.fromSnapshot(snap.root.children, false);
+            String problem = tree.validateMove(name, targetName);
+            if (problem != null) {
+                throw auraError(problem);
             }
-            if (orderedNames == null
-                || orderedNames.size() != parent.children.size()
-                || !byName.keySet().equals(new Set<String>(orderedNames))) {
-                throw auraError('The topic list changed while you were editing — refresh.');
+            HelpTopicMetadataService.Category oldParent = findParentOf(snap.root, name);
+            HelpTopicMetadataService.Category node = findChild(snap.root, name);
+            HelpTopicMetadataService.Category target = targetName == null
+                ? snap.root : findChild(snap.root, targetName);
+            if (oldParent == null || node == null || target == null) {
+                throw auraError('Topic "' + name + '" no longer exists — refresh.');
             }
-            List<HelpTopicMetadataService.Category> reordered =
-                new List<HelpTopicMetadataService.Category>();
-            for (String n : orderedNames) {
-                reordered.add(byName.get(n));
+            // Detach, then rebuild the target's children in the submitted order.
+            for (Integer i = oldParent.children.size() - 1; i >= 0; i--) {
+                if (oldParent.children[i].name == name) {
+                    oldParent.children.remove(i);
+                }
             }
-            parent.children = reordered;
+            List<HelpTopicMetadataService.Category> pool =
+                new List<HelpTopicMetadataService.Category>(target.children);
+            pool.add(node);
+            target.children = inOrder(pool, orderedNames);
             HelpTopicMetadataService.updateGroup(snap);
         } catch (AuraHandledException e) {
             throw e;
@@ -162,9 +198,10 @@ public with sharing class HelpTopicAdminController {
     // ---- Delete ------------------------------------------------------------------
 
     /**
-     * What deleting `name` would touch: distinct articles filed under it or
-     * any subtopic (any version — blocks), and how many subtopics go with it.
-     * The UI shows this before asking for confirmation; deleteTopic re-checks.
+     * What deleting `name` would touch: article versions filed in the subtree
+     * (any version — the "block" guard) and on the node itself (the
+     * "reparent" guard), plus how many subtopics would move up and to where.
+     * The UI shows this before asking for the choice; deleteTopic re-checks.
      */
     @AuraEnabled
     public static TopicDeleteImpactDTO getTopicDeleteImpact(String name) {
@@ -172,15 +209,7 @@ public with sharing class HelpTopicAdminController {
         requireValidName(name);
         try {
             HelpTopicMetadataService.GroupSnapshot snap = readGroup();
-            HelpTopicMetadataService.Category target = findChild(snap.root, name, MAX_DEPTH);
-            if (target == null) {
-                throw auraError('Topic "' + name + '" no longer exists — refresh.');
-            }
-            TopicDeleteImpactDTO dto = new TopicDeleteImpactDTO();
-            dto.label = target.label;
-            dto.subtopicCount = target.children.size();
-            dto.articleCount = countArticlesFiledUnder(collectNames(target));
-            return dto;
+            return impactOf(snap, name);
         } catch (AuraHandledException e) {
             throw e;
         } catch (Exception e) {
@@ -189,20 +218,21 @@ public with sharing class HelpTopicAdminController {
     }
 
     /**
-     * Removes the topic (and its subtopics) from the group by writing the
-     * group back without that node — the Metadata API has no per-category
-     * delete. Refused while any article version is filed under the subtree.
+     * Removes the topic by writing the group back without that node — the
+     * Metadata API has no per-category delete. mode 'reparent' splices its
+     * subtopics into its parent at the same position (nothing may be filed on
+     * the node itself); mode 'block' (default) needs the whole subtree empty
+     * and childless. Never a cascade.
      */
     @AuraEnabled
-    public static void deleteTopic(String name) {
+    public static void deleteTopic(String name, String mode) {
         assertTopicAdmin();
         requireValidName(name);
+        Boolean reparent = mode == MODE_REPARENT;
         try {
             HelpTopicMetadataService.GroupSnapshot snap = readGroup();
-            HelpTopicMetadataService.Category parent = findParentOf(snap.root, name, MAX_DEPTH);
-            if (parent == null) {
-                throw auraError('Topic "' + name + '" no longer exists — refresh.');
-            }
+            TopicDeleteImpactDTO impact = impactOf(snap, name);
+            HelpTopicMetadataService.Category parent = findParentOf(snap.root, name);
             Integer index = -1;
             for (Integer i = 0; i < parent.children.size(); i++) {
                 if (parent.children[i].name == name) {
@@ -210,14 +240,28 @@ public with sharing class HelpTopicAdminController {
                 }
             }
             HelpTopicMetadataService.Category target = parent.children[index];
-            Integer filed = countArticlesFiledUnder(collectNames(target));
-            if (filed > 0) {
-                throw auraError('Can\'t delete this topic — ' + filed + ' article version'
-                    + (filed == 1 ? ' is' : 's are')
-                    + ' filed under it (drafts and archived versions included). '
-                    + 'Move those articles to another topic first.');
+            if (reparent) {
+                if (impact.ownArticleCount > 0) {
+                    throw auraError('Can\'t delete this topic — ' + articleVersions(impact.ownArticleCount)
+                        + ' filed on it directly. Move those articles to another topic first.');
+                }
+                parent.children.remove(index);
+                for (Integer i = 0; i < target.children.size(); i++) {
+                    parent.children.add(index + i, target.children[i]);
+                }
+            } else {
+                if (impact.childCount > 0) {
+                    throw auraError('Can\'t delete this topic — it has ' + impact.childCount
+                        + (impact.childCount == 1 ? ' subtopic' : ' subtopics')
+                        + '. Move them up or move them elsewhere first.');
+                }
+                if (impact.articleCount > 0) {
+                    throw auraError('Can\'t delete this topic — ' + articleVersions(impact.articleCount)
+                        + ' filed under it (drafts and archived versions included). '
+                        + 'Move those articles to another topic first.');
+                }
+                parent.children.remove(index);
             }
-            parent.children.remove(index);
             HelpTopicMetadataService.updateGroup(snap);
         } catch (AuraHandledException e) {
             throw e;
@@ -232,59 +276,116 @@ public with sharing class HelpTopicAdminController {
         return HelpTopicMetadataService.readGroup(GROUP_NAME);
     }
 
-    /** Depth-limited search among descendants (depth 1 = direct children). */
+    private static TopicDeleteImpactDTO impactOf(HelpTopicMetadataService.GroupSnapshot snap, String name) {
+        HelpTopicMetadataService.Category target = findChild(snap.root, name);
+        HelpTopicMetadataService.Category parent = findParentOf(snap.root, name);
+        if (target == null || parent == null) {
+            throw auraError('Topic "' + name + '" no longer exists — refresh.');
+        }
+        TopicDeleteImpactDTO dto = new TopicDeleteImpactDTO();
+        dto.label = target.label;
+        dto.parentName = parent === snap.root ? null : parent.name;
+        dto.parentLabel = parent === snap.root ? null : parent.label;
+        dto.childCount = target.children.size();
+        dto.descendantCount = collectNames(target).size() - 1;
+        Map<String, Integer> filed = countArticlesFiledUnder(collectNames(target));
+        dto.articleCount = filed.get('subtree');
+        dto.ownArticleCount = filed.containsKey(name) ? filed.get(name) : 0;
+        return dto;
+    }
+
+    private static String articleVersions(Integer n) {
+        return n + ' article version' + (n == 1 ? ' is' : 's are');
+    }
+
+    private static List<String> parseNames(String orderedNamesJson) {
+        try {
+            return String.isBlank(orderedNamesJson)
+                ? null
+                : (List<String>) JSON.deserialize(orderedNamesJson, List<String>.class);
+        } catch (Exception e) {
+            throw auraError('Could not read the new order — refresh and try again.');
+        }
+    }
+
+    /** The pool in the submitted order; the two sets must match exactly. */
+    private static List<HelpTopicMetadataService.Category> inOrder(
+            List<HelpTopicMetadataService.Category> pool, List<String> orderedNames) {
+        Map<String, HelpTopicMetadataService.Category> byName =
+            new Map<String, HelpTopicMetadataService.Category>();
+        for (HelpTopicMetadataService.Category c : pool) {
+            byName.put(c.name, c);
+        }
+        if (orderedNames == null
+            || orderedNames.size() != pool.size()
+            || !byName.keySet().equals(new Set<String>(orderedNames))) {
+            throw auraError('The topic list changed while you were editing — refresh.');
+        }
+        List<HelpTopicMetadataService.Category> reordered =
+            new List<HelpTopicMetadataService.Category>();
+        for (String n : orderedNames) {
+            reordered.add(byName.get(n));
+        }
+        return reordered;
+    }
+
+    /** Search the whole subtree (iterative — depth is data-controlled). */
     private static HelpTopicMetadataService.Category findChild(
-            HelpTopicMetadataService.Category node, String name, Integer maxDepth) {
-        for (HelpTopicMetadataService.Category child : node.children) {
-            if (child.name == name) {
-                return child;
+            HelpTopicMetadataService.Category node, String name) {
+        List<HelpTopicMetadataService.Category> stack =
+            new List<HelpTopicMetadataService.Category>(node.children);
+        while (!stack.isEmpty()) {
+            HelpTopicMetadataService.Category c = stack.remove(stack.size() - 1);
+            if (c.name == name) {
+                return c;
             }
-            if (maxDepth > 1) {
-                HelpTopicMetadataService.Category hit = findChild(child, name, maxDepth - 1);
-                if (hit != null) {
-                    return hit;
-                }
-            }
+            stack.addAll(c.children);
         }
         return null;
     }
 
-    /** The node whose direct children contain `name` (same depth rule as findChild). */
+    /** The node whose direct children contain `name`, anywhere in the tree. */
     private static HelpTopicMetadataService.Category findParentOf(
-            HelpTopicMetadataService.Category node, String name, Integer maxDepth) {
-        for (HelpTopicMetadataService.Category child : node.children) {
-            if (child.name == name) {
-                return node;
-            }
-            if (maxDepth > 1) {
-                HelpTopicMetadataService.Category hit = findParentOf(child, name, maxDepth - 1);
-                if (hit != null) {
-                    return hit;
+            HelpTopicMetadataService.Category node, String name) {
+        List<HelpTopicMetadataService.Category> stack =
+            new List<HelpTopicMetadataService.Category>{ node };
+        while (!stack.isEmpty()) {
+            HelpTopicMetadataService.Category c = stack.remove(stack.size() - 1);
+            for (HelpTopicMetadataService.Category child : c.children) {
+                if (child.name == name) {
+                    return c;
                 }
             }
+            stack.addAll(c.children);
         }
         return null;
     }
 
     private static Set<String> collectNames(HelpTopicMetadataService.Category node) {
-        Set<String> names = new Set<String>{ node.name };
-        for (HelpTopicMetadataService.Category child : node.children) {
-            names.addAll(collectNames(child));
+        Set<String> names = new Set<String>();
+        List<HelpTopicMetadataService.Category> stack =
+            new List<HelpTopicMetadataService.Category>{ node };
+        while (!stack.isEmpty()) {
+            HelpTopicMetadataService.Category c = stack.remove(stack.size() - 1);
+            names.add(c.name);
+            stack.addAll(c.children);
         }
         return names;
     }
 
     /**
-     * Distinct article versions (draft, online or archived) filed under any of
-     * `names` in the Help_Topics group. Neither selection column is
-     * filterable, so scan and filter here (ArticleAdminController does the
-     * same per article). Deliberately counts selection parents rather than
-     * resolving them through Knowledge__kav: draft versions are invisible to
-     * a user without the Knowledge User license, and a guard that quietly
-     * saw fewer filings would fail open.
+     * Distinct article versions (draft, online or archived) filed under each of
+     * `names` in the Help_Topics group, plus the distinct total under key
+     * 'subtree'. Neither selection column is filterable, so scan and filter
+     * here (ArticleAdminController does the same per article). Deliberately
+     * counts selection parents rather than resolving them through
+     * Knowledge__kav: draft versions are invisible to a user without the
+     * Knowledge User license, and a guard that quietly saw fewer filings
+     * would fail open.
      */
-    private static Integer countArticlesFiledUnder(Set<String> names) {
-        Set<Id> versionIds = new Set<Id>();
+    private static Map<String, Integer> countArticlesFiledUnder(Set<String> names) {
+        Map<String, Set<Id>> byName = new Map<String, Set<Id>>();
+        Set<Id> subtree = new Set<Id>();
         List<Knowledge__DataCategorySelection> selections = [
             SELECT ParentId, DataCategoryGroupName, DataCategoryName
             FROM Knowledge__DataCategorySelection
@@ -296,10 +397,18 @@ public with sharing class HelpTopicAdminController {
         }
         for (Knowledge__DataCategorySelection sel : selections) {
             if (sel.DataCategoryGroupName == GROUP_NAME && names.contains(sel.DataCategoryName)) {
-                versionIds.add(sel.ParentId);
+                subtree.add(sel.ParentId);
+                if (!byName.containsKey(sel.DataCategoryName)) {
+                    byName.put(sel.DataCategoryName, new Set<Id>());
+                }
+                byName.get(sel.DataCategoryName).add(sel.ParentId);
             }
         }
-        return versionIds.size();
+        Map<String, Integer> counts = new Map<String, Integer>{ 'subtree' => subtree.size() };
+        for (String n : byName.keySet()) {
+            counts.put(n, byName.get(n).size());
+        }
+        return counts;
     }
 
     private static void requireValidName(String name) {

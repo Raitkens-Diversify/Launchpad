@@ -1,0 +1,225 @@
+/* Self-declared --slds-g-* block (canonical values, ui-standards §1):
+   injected SLDS2 hooks beat :host inheritance, so consumers of these names
+   declare their own. Visuals port dsTopicNav's rows (pixel parity for the
+   top level and the first nested level); deeper levels indent 16px per
+   level behind a left rule and keep the nested type size. */
+:host {
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-border-3: #e5e7eb;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-on-accent-1: #ffffff;
+    --slds-g-spacing-2: 8px;
+    --slds-g-spacing-3: 12px;
+    --slds-g-spacing-4: 16px;
+    display: block;
+}
+.ds-tree__title {
+    margin: 0 0 var(--slds-g-spacing-4, 16px);
+    font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+    font-size: 1.5rem;
+    line-height: 1.2;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.ds-tree__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-md, 8px);
+    overflow: hidden;
+}
+
+/* Every row: chevron (when it has children) + the item button. */
+.ds-tree__row {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.ds-tree__row--top + .ds-tree__row--top,
+.ds-tree__row--nested + .ds-tree__row--top {
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+.ds-tree__row--nested {
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+.ds-tree__row--top + .ds-tree__row--nested {
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+.ds-tree__row--nested + .ds-tree__row--nested {
+    border-top: 1px solid var(--slds-g-color-border-3, #e5e7eb);
+}
+/* Depth cue for the nested levels: a rule under the label column. */
+.ds-tree__row--nested::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 52px;
+    border-left: 2px solid var(--slds-g-color-border-1, #d1d5db);
+}
+
+.ds-tree__item {
+    flex: 1 1 auto;
+    min-width: 0;
+    box-sizing: border-box;
+    background: none;
+    border: none;
+    font-family: inherit;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-3, 12px);
+    padding: var(--slds-g-spacing-4, 16px);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-2, #374151);
+    cursor: pointer;
+}
+.ds-tree__row--nested .ds-tree__item {
+    padding: 12px var(--slds-g-spacing-4, 16px) 12px 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+.ds-tree__row:hover .ds-tree__item,
+.ds-tree__row--active .ds-tree__item {
+    background: var(--slds-g-color-accent-1, #0f406f);
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+}
+.ds-tree__row--active .ds-tree__label {
+    text-decoration: underline;
+}
+.ds-tree__row--active:hover .ds-tree__item {
+    background: var(--slds-g-color-accent-2, #0b2f51);
+}
+.ds-tree__row:hover,
+.ds-tree__row--active {
+    background: var(--slds-g-color-accent-1, #0f406f);
+}
+.ds-tree__row:hover::before,
+.ds-tree__row--active::before {
+    border-color: var(--slds-g-color-accent-2, #0b2f51);
+}
+
+.ds-tree__icon {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--ds-lightest-blue, #e2f8ff);
+    color: var(--ds-medium-blue, #1a76bb);
+}
+.ds-tree__icon svg {
+    width: 20px;
+    height: 20px;
+}
+.ds-tree__label {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.ds-tree__count {
+    flex: none;
+    min-width: 1.5em;
+    padding: 0 6px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.5;
+    text-align: center;
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ds-tree__row:hover .ds-tree__count,
+.ds-tree__row--active .ds-tree__count {
+    background: rgba(255, 255, 255, 0.18);
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+}
+
+/* Chevron toggles: peek into a branch without navigating. */
+.ds-tree__toggle {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    margin-left: var(--slds-g-spacing-2, 8px);
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    border-radius: 50%;
+    color: inherit;
+    cursor: pointer;
+}
+.ds-tree__row--top .ds-tree__toggle {
+    margin-left: var(--slds-g-spacing-3, 12px);
+}
+.ds-tree__row--nested .ds-tree__toggle {
+    margin-left: 0;
+    margin-right: 4px;
+}
+.ds-tree__toggle svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 120ms ease;
+}
+.ds-tree__toggle--open svg {
+    transform: rotate(90deg);
+}
+.ds-tree__row:hover .ds-tree__toggle,
+.ds-tree__row--active .ds-tree__toggle {
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+}
+/* Rows without a toggle keep the label column aligned. */
+.ds-tree__row--nested .ds-tree__item:first-child {
+    padding-left: 32px;
+}
+
+/* Rebased view: one "back" row above the local subtree. */
+.ds-tree__up-btn {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: var(--slds-g-spacing-2, 8px);
+    padding: 12px var(--slds-g-spacing-4, 16px);
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    border: none;
+    border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--slds-g-color-accent-1, #0f406f);
+    text-align: left;
+    cursor: pointer;
+}
+.ds-tree__up-btn svg {
+    width: 16px;
+    height: 16px;
+}
+.ds-tree__up-btn:hover {
+    text-decoration: underline;
+}
+
+/* Real buttons get keyboard focus — visible without shifting the layout. */
+.ds-tree__item:focus-visible,
+.ds-tree__toggle:focus-visible,
+.ds-tree__up-btn:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: -2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ds-tree__toggle svg {
+        transition: none;
+    }
+}

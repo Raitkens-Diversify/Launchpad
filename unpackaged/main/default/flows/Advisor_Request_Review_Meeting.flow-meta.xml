@@ -29,7 +29,7 @@
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>varCase.FinServ__Household__c</assignToReference>
+            <assignToReference>varCase.Household__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>varHousehold.Id</elementReference>

@@ -1,11 +1,8 @@
-.act-list,
-.act-children {
+/* One flat list; each row indents by its depth (inline padding-left). */
+.act-list {
     list-style: none;
     margin: 0;
     padding: 0;
-}
-.act-children {
-    margin-left: 1.5rem;
 }
 .act-item {
     display: flex;

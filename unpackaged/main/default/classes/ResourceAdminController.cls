@@ -36,6 +36,8 @@ public with sharing class ResourceAdminController {
         @AuraEnabled public String categoryName;                       // home category
         @AuraEnabled public Id categoryId;
         @AuraEnabled public List<String> secondaryCategoryNames = new List<String>(); // "Also show in"
+        /** Same placements as ids — the list filters by category subtree, not by name. */
+        @AuraEnabled public List<Id> secondaryCategoryIds = new List<Id>();
         @AuraEnabled public Boolean featured;
         @AuraEnabled public Boolean active;
         @AuraEnabled public Decimal displayOrder;
@@ -105,19 +107,6 @@ public with sharing class ResourceAdminController {
         @AuraEnabled public List<String> secondaryCategoryIds;
     }
 
-    public class CategoryRow {
-        @AuraEnabled public Id id;
-        @AuraEnabled public String name;
-        @AuraEnabled public String slug;
-        @AuraEnabled public String iconName;
-        @AuraEnabled public Decimal displayOrder;
-        @AuraEnabled public Id parentId;
-        @AuraEnabled public String parentName;
-        @AuraEnabled public Boolean active;
-        @AuraEnabled public Integer resourceCount;   // resources whose home this is
-        @AuraEnabled public Integer secondaryCount;  // resources also shown here
-    }
-
     public class CategoryInput {
         @AuraEnabled public Id id;                   // null = create
         @AuraEnabled public String name;
@@ -167,18 +156,22 @@ public with sharing class ResourceAdminController {
         Map<Id, ResourceCenterService.FileInfo> files = webinarIds.isEmpty()
             ? new Map<Id, ResourceCenterService.FileInfo>()
             : ResourceCenterService.fileInfoByResource(webinarIds);
-        // "Also show in" names, one bulk query over every listed row.
+        // "Also show in" placements, one bulk query over every listed row —
+        // names for the cell, ids for the category-subtree filter.
         Map<Id, List<String>> secondaryNames = new Map<Id, List<String>>();
+        Map<Id, List<Id>> secondaryIds = new Map<Id, List<Id>>();
         for (Resource_Category_Link__c link : [
-            SELECT Resource__c, Category__r.Name
+            SELECT Resource__c, Category__c, Category__r.Name
             FROM Resource_Category_Link__c
             WHERE Resource__c IN :rows
             ORDER BY Category__r.Name ASC
         ]) {
             if (!secondaryNames.containsKey(link.Resource__c)) {
                 secondaryNames.put(link.Resource__c, new List<String>());
+                secondaryIds.put(link.Resource__c, new List<Id>());
             }
             secondaryNames.get(link.Resource__c).add(link.Category__r.Name);
+            secondaryIds.get(link.Resource__c).add(link.Category__c);
         }
         Datetime now = System.now();
         for (Resource__c r : rows) {
@@ -191,6 +184,7 @@ public with sharing class ResourceAdminController {
             row.categoryName = r.Category__r == null ? null : r.Category__r.Name;
             if (secondaryNames.containsKey(r.Id)) {
                 row.secondaryCategoryNames = secondaryNames.get(r.Id);
+                row.secondaryCategoryIds = secondaryIds.get(r.Id);
             }
             row.featured = r.Is_Featured__c == true;
             row.active = r.Is_Active__c == true;
@@ -390,80 +384,43 @@ public with sharing class ResourceAdminController {
 
     // ---- Category reads/writes --------------------------------------------------------
 
+    /**
+     * The admin tree for c-admin-tree-editor: every category (inactive rows
+     * included, flagged), any depth, own/"also shown"/subtree counts, and the
+     * depth limit the editor must respect (never hard-coded client-side).
+     */
     @AuraEnabled
-    public static List<CategoryRow> listCategories() {
+    public static CategoryTreeService.TreeDTO getCategoryTree() {
         assertCategoryAdmin();
-        Map<Id, Integer> counts = new Map<Id, Integer>();
-        for (AggregateResult ar : [
-            SELECT Category__c cat, COUNT(Id) cnt FROM Resource__c GROUP BY Category__c
-        ]) {
-            counts.put((Id) ar.get('cat'), (Integer) ar.get('cnt'));
-        }
-        Map<Id, Integer> secondaryCounts = new Map<Id, Integer>();
-        for (AggregateResult ar : [
-            SELECT Category__c cat, COUNT(Id) cnt FROM Resource_Category_Link__c GROUP BY Category__c
-        ]) {
-            secondaryCounts.put((Id) ar.get('cat'), (Integer) ar.get('cnt'));
-        }
-        List<CategoryRow> out = new List<CategoryRow>();
-        for (Resource_Category__c c : [
-            SELECT Id, Name, Slug__c, Icon_Name__c, Display_Order__c,
-                   Parent_Category__c, Parent_Category__r.Name, Is_Active__c
-            FROM Resource_Category__c
-            ORDER BY Parent_Category__c NULLS FIRST, Display_Order__c ASC NULLS LAST, Name ASC
-            LIMIT :LIST_LIMIT
-        ]) {
-            CategoryRow row = new CategoryRow();
-            row.id = c.Id;
-            row.name = c.Name;
-            row.slug = c.Slug__c;
-            row.iconName = c.Icon_Name__c;
-            row.displayOrder = c.Display_Order__c;
-            row.parentId = c.Parent_Category__c;
-            row.parentName = c.Parent_Category__r == null ? null : c.Parent_Category__r.Name;
-            row.active = c.Is_Active__c == true;
-            Integer cnt = counts.get(c.Id);
-            row.resourceCount = cnt == null ? 0 : cnt;
-            Integer secondary = secondaryCounts.get(c.Id);
-            row.secondaryCount = secondary == null ? 0 : secondary;
-            out.add(row);
-        }
-        return out;
+        return ResourceCategoryTreeProvider.load(false).toDTO();
     }
 
-    /** Two-level tree for the single-select picker in the resource editor. */
+    /** Active categories, any depth, in the pickers' {name,label,children} shape. */
     @AuraEnabled
     public static List<CategoryNode> getResourceCategoryTree() {
         assertCategoryReadable();
-        Map<Id, CategoryNode> topByid = new Map<Id, CategoryNode>();
         List<CategoryNode> roots = new List<CategoryNode>();
-        List<Resource_Category__c> all = [
-            SELECT Id, Name, Parent_Category__c, Is_Active__c
-            FROM Resource_Category__c
-            WHERE Is_Active__c = true
-            ORDER BY Display_Order__c ASC NULLS LAST, Name ASC
-            LIMIT :LIST_LIMIT
-        ];
-        for (Resource_Category__c c : all) {
-            if (c.Parent_Category__c == null) {
-                CategoryNode node = new CategoryNode();
-                node.name = c.Id;
-                node.label = c.Name;
-                topByid.put(c.Id, node);
-                roots.add(node);
-            }
+        // Parallel stacks: source node / destination node (iterative, any depth).
+        List<CategoryTreeService.TreeNode> src = new List<CategoryTreeService.TreeNode>();
+        List<CategoryNode> dst = new List<CategoryNode>();
+        for (CategoryTreeService.TreeNode r : ResourceCategoryTreeProvider.load(true).roots) {
+            CategoryNode node = new CategoryNode();
+            node.name = r.id;
+            node.label = r.label;
+            roots.add(node);
+            src.add(r);
+            dst.add(node);
         }
-        for (Resource_Category__c c : all) {
-            if (c.Parent_Category__c != null) {
-                CategoryNode parent = topByid.get(c.Parent_Category__c);
-                CategoryNode node = new CategoryNode();
-                node.name = c.Id;
-                node.label = c.Name;
-                if (parent != null) {
-                    parent.children.add(node);
-                } else {
-                    roots.add(node); // orphan/deep nesting — still selectable
-                }
+        while (!src.isEmpty()) {
+            CategoryTreeService.TreeNode t = src.remove(src.size() - 1);
+            CategoryNode n = dst.remove(dst.size() - 1);
+            for (CategoryTreeService.TreeNode c : t.children) {
+                CategoryNode child = new CategoryNode();
+                child.name = c.id;
+                child.label = c.label;
+                n.children.add(child);
+                src.add(c);
+                dst.add(child);
             }
         }
         return roots;
@@ -476,27 +433,24 @@ public with sharing class ResourceAdminController {
         if (input == null || String.isBlank(input.name) || String.isBlank(input.slug)) {
             throw auraError('Name and URL slug are required.');
         }
-        if (input.id != null && input.parentId == input.id) {
-            throw auraError('A category cannot be its own parent.');
-        }
-        if (input.parentId != null) {
-            // Two levels only: the parent must itself be top-level, and a
-            // category that has subtopics must stay top-level. Together these
-            // also make parent cycles impossible.
-            List<Resource_Category__c> parents = [
-                SELECT Parent_Category__c FROM Resource_Category__c
-                WHERE Id = :input.parentId
-                LIMIT 1
-            ];
-            if (parents.isEmpty()) {
-                throw auraError('That parent category no longer exists — refresh.');
+        // Tree rules — self, cycles, depth counting the moved subtree — checked
+        // here for a clean message; the trigger re-checks every DML path.
+        if (input.id != null || input.parentId != null) {
+            CategoryTreeService.Tree tree = ResourceCategoryTreeProvider.load(false);
+            String problem = null;
+            if (input.id != null) {
+                problem = tree.validateMove(String.valueOf(input.id),
+                    input.parentId == null ? null : String.valueOf(input.parentId));
+            } else {
+                CategoryTreeService.TreeNode parent = tree.get(String.valueOf(input.parentId));
+                if (parent == null) {
+                    problem = CategoryTreeService.MSG_MISSING_PARENT;
+                } else if (parent.depth + 1 > tree.maxDepth) {
+                    problem = CategoryTreeService.depthMessage(tree.maxDepth);
+                }
             }
-            if (parents[0].Parent_Category__c != null) {
-                throw auraError('Subtopics cannot have their own subtopics — pick a top-level category as the parent.');
-            }
-            if (input.id != null
-                && [SELECT COUNT() FROM Resource_Category__c WHERE Parent_Category__c = :input.id] > 0) {
-                throw auraError('This category has subtopics, so it must stay top level.');
+            if (problem != null) {
+                throw auraError(problem);
             }
         }
         if (input.id == null && input.displayOrder == null) {
@@ -579,6 +533,68 @@ public with sharing class ResourceAdminController {
         }
     }
 
+    /**
+     * Drag-and-drop move: `categoryId` (with its whole subtree) becomes a child
+     * of newParentId (blank = top level) and orderedSiblingIdsJson — EVERY
+     * sibling under the new parent including the moved one, in final order —
+     * is written as Display_Order__c, all in one transaction. Validated against
+     * the live tree (self / own subtree / depth counting the subtree's height)
+     * and re-validated by the trigger; stale lists are rejected like
+     * reorderCategories.
+     */
+    @AuraEnabled
+    public static void moveCategory(String categoryId, String newParentId, String orderedSiblingIdsJson) {
+        assertCategoryAdmin();
+        Id moved;
+        Id parent;
+        List<String> orderedIds;
+        try {
+            moved = Id.valueOf(categoryId.trim());
+            parent = String.isBlank(newParentId) ? null : Id.valueOf(newParentId.trim());
+            orderedIds = String.isBlank(orderedSiblingIdsJson)
+                ? null
+                : (List<String>) JSON.deserialize(orderedSiblingIdsJson, List<String>.class);
+        } catch (Exception e) {
+            throw auraError('Could not read the move — refresh and try again.');
+        }
+        CategoryTreeService.Tree tree = ResourceCategoryTreeProvider.load(false);
+        String problem = tree.validateMove(String.valueOf(moved), parent == null ? null : String.valueOf(parent));
+        if (problem != null) {
+            throw auraError(problem);
+        }
+        Set<Id> expected = new Set<Id>{ moved };
+        for (CategoryTreeService.TreeNode s : parent == null ? tree.roots : tree.get(String.valueOf(parent)).children) {
+            expected.add(Id.valueOf(s.id));
+        }
+        Set<Id> submitted = new Set<Id>();
+        if (orderedIds != null) {
+            for (String catId : orderedIds) {
+                try {
+                    submitted.add(Id.valueOf(catId));
+                } catch (Exception e) {
+                    throw auraError('The category list changed while you were editing — refresh.');
+                }
+            }
+        }
+        if (orderedIds == null || orderedIds.size() != expected.size() || !expected.equals(submitted)) {
+            throw auraError('The category list changed while you were editing — refresh.');
+        }
+        List<Resource_Category__c> updates = new List<Resource_Category__c>();
+        Integer order = 1;
+        for (String catId : orderedIds) {
+            Resource_Category__c row = new Resource_Category__c(Id = catId, Display_Order__c = order++);
+            if (row.Id == moved) {
+                row.Parent_Category__c = parent;
+            }
+            updates.add(row);
+        }
+        try {
+            update updates;
+        } catch (DmlException e) {
+            throw auraError('Could not move the category: ' + e.getDmlMessage(0));
+        }
+    }
+
     @AuraEnabled
     public static Boolean isCategorySlugAvailable(String slug, Id excludeId) {
         assertCategoryReadable();
@@ -597,13 +613,26 @@ public with sharing class ResourceAdminController {
 
     // ---- Category delete -----------------------------------------------------------
 
-    /** Pre-flight for the delete confirm: what blocks, and what cascades. */
+    public static final String MODE_BLOCK = 'block';
+    public static final String MODE_REPARENT = 'reparent';
+
+    /**
+     * Pre-flight for the delete dialog: what blocks each mode, and where the
+     * subtopics would go. Subtree counts guard "block"; own counts guard
+     * "reparent" (the subtopics keep their content and move up).
+     */
     public class CategoryDeleteImpactDTO {
         @AuraEnabled public String name;
-        @AuraEnabled public Integer resourceCount;     // self + subtopics; > 0 blocks
-        @AuraEnabled public Integer subcategoryCount;  // removed with the category (all empty by then)
-        @AuraEnabled public Integer guideOptionCount;  // help-guide options targeting a slug; > 0 blocks
-        @AuraEnabled public Integer secondaryCount;    // "Also show in" links from other resources; > 0 blocks
+        @AuraEnabled public Id parentId;               // where children go with "reparent" (null = top level)
+        @AuraEnabled public String parentName;
+        @AuraEnabled public Integer childCount;        // direct subtopics
+        @AuraEnabled public Integer descendantCount;   // whole subtree below
+        @AuraEnabled public Integer resourceCount;     // home resources in the subtree (self included)
+        @AuraEnabled public Integer ownResourceCount;  // home resources on the category itself
+        @AuraEnabled public Integer secondaryCount;    // "Also show in" links into the subtree
+        @AuraEnabled public Integer ownSecondaryCount;
+        @AuraEnabled public Integer guideOptionCount;  // help-guide options targeting any slug in the subtree
+        @AuraEnabled public Integer ownGuideOptionCount;
     }
 
     /**
@@ -611,77 +640,134 @@ public with sharing class ResourceAdminController {
      * Resource_Category_Link__c.Category__c are Restrict lookups (DML would
      * fail anyway) and help guides target categories by slug (published
      * options and Builder drafts), so all three block. Parent_Category__c is
-     * SetNull — deleting a parent alone would silently promote its subtopics,
-     * so empty subtopics are deleted with it.
+     * SetNull — the platform would silently promote subtopics — so a category
+     * with subtopics is only deleted with an explicit choice (deleteCategory).
      */
     @AuraEnabled
     public static CategoryDeleteImpactDTO getCategoryDeleteImpact(Id categoryId) {
         assertCategoryAdmin();
-        List<Resource_Category__c> found = [
-            SELECT Id, Name, Slug__c FROM Resource_Category__c WHERE Id = :categoryId LIMIT 1
-        ];
-        if (found.isEmpty()) {
+        CategoryTreeService.Tree tree = ResourceCategoryTreeProvider.load(false);
+        CategoryTreeService.TreeNode node = categoryId == null ? null : tree.get(String.valueOf(categoryId));
+        if (node == null) {
             throw auraError('That category no longer exists — refresh.');
         }
-        Set<Id> ids = new Set<Id>{ found[0].Id };
-        Set<String> slugs = new Set<String>{ found[0].Slug__c };
-        Integer subs = 0;
-        for (Resource_Category__c sub : [
-            SELECT Id, Slug__c FROM Resource_Category__c
-            WHERE Parent_Category__c = :categoryId
-            LIMIT :LIST_LIMIT
-        ]) {
-            ids.add(sub.Id);
-            slugs.add(sub.Slug__c);
-            subs++;
+        Set<Id> ids = new Set<Id>{ categoryId };
+        Set<String> slugs = new Set<String>{ node.slug };
+        for (CategoryTreeService.TreeNode d : tree.descendantsOf(node.id)) {
+            ids.add(Id.valueOf(d.id));
+            slugs.add(d.slug);
         }
         CategoryDeleteImpactDTO dto = new CategoryDeleteImpactDTO();
-        dto.name = found[0].Name;
-        dto.subcategoryCount = subs;
-        dto.resourceCount = [SELECT COUNT() FROM Resource__c WHERE Category__c IN :ids];
-        dto.secondaryCount = [SELECT COUNT() FROM Resource_Category_Link__c WHERE Category__c IN :ids];
-        dto.guideOptionCount = [
-            SELECT COUNT() FROM Help_Guide_Option__mdt
+        dto.name = node.label;
+        dto.parentId = node.parentId == null ? null : Id.valueOf(node.parentId);
+        dto.parentName = node.parentId == null ? null : tree.get(node.parentId).label;
+        dto.childCount = node.children.size();
+        dto.descendantCount = ids.size() - 1;
+        dto.resourceCount = 0;
+        dto.ownResourceCount = 0;
+        for (AggregateResult ar : [
+            SELECT Category__c cat, COUNT(Id) c FROM Resource__c WHERE Category__c IN :ids GROUP BY Category__c
+        ]) {
+            Integer c = (Integer) ar.get('c');
+            dto.resourceCount += c;
+            if ((Id) ar.get('cat') == categoryId) {
+                dto.ownResourceCount = c;
+            }
+        }
+        dto.secondaryCount = 0;
+        dto.ownSecondaryCount = 0;
+        for (AggregateResult ar : [
+            SELECT Category__c cat, COUNT(Id) c FROM Resource_Category_Link__c
+            WHERE Category__c IN :ids GROUP BY Category__c
+        ]) {
+            Integer c = (Integer) ar.get('c');
+            dto.secondaryCount += c;
+            if ((Id) ar.get('cat') == categoryId) {
+                dto.ownSecondaryCount = c;
+            }
+        }
+        dto.guideOptionCount = 0;
+        dto.ownGuideOptionCount = 0;
+        List<String> targets = new List<String>();
+        for (Help_Guide_Option__mdt opt : [
+            SELECT Target_Value__c FROM Help_Guide_Option__mdt
             WHERE Target_Type__c = 'category' AND Active__c = true AND Target_Value__c IN :slugs
-        ] + [
-            SELECT COUNT() FROM Help_Guide_Option_Draft__c
+        ]) {
+            targets.add(opt.Target_Value__c);
+        }
+        for (Help_Guide_Option_Draft__c opt : [
+            SELECT Target_Value__c FROM Help_Guide_Option_Draft__c
             WHERE Target_Type__c = 'category' AND Target_Value__c IN :slugs
-        ];
+        ]) {
+            targets.add(opt.Target_Value__c);
+        }
+        for (String target : targets) {
+            dto.guideOptionCount++;
+            if (target == node.slug) {
+                dto.ownGuideOptionCount++;
+            }
+        }
         return dto;
     }
 
-    /** Deletes the category and its (empty) subtopics; re-validates everything first. */
+    /**
+     * Deletes ONE category — never a cascade. mode 'reparent': its direct
+     * subtopics move up to its parent (appended after the existing siblings,
+     * their own order kept; the trigger rewrites their paths) and only the
+     * category itself must be empty. mode 'block' (default): the category must
+     * have no subtopics and nothing anywhere in its subtree — resources,
+     * "Also show in" links, help-guide targets. Re-validates everything first.
+     */
     @AuraEnabled
-    public static void deleteCategory(Id categoryId) {
+    public static void deleteCategory(Id categoryId, String mode) {
         assertCategoryAdmin();
         if (!Schema.sObjectType.Resource_Category__c.isDeletable()) {
             throw auraError('You do not have access to delete resource categories.');
         }
+        Boolean reparent = mode == MODE_REPARENT;
         CategoryDeleteImpactDTO impact = getCategoryDeleteImpact(categoryId);
-        if (impact.resourceCount > 0) {
-            throw auraError('Can\'t delete this category — ' + impact.resourceCount + ' resource'
-                + (impact.resourceCount == 1 ? ' lives' : 's live')
-                + ' under it. Move or delete those resources first.');
+        Integer resources = reparent ? impact.ownResourceCount : impact.resourceCount;
+        Integer secondary = reparent ? impact.ownSecondaryCount : impact.secondaryCount;
+        Integer guides = reparent ? impact.ownGuideOptionCount : impact.guideOptionCount;
+        // Content blocks regardless of mode, so report it first; the subtopic
+        // rule only matters once the content question is settled.
+        if (resources > 0) {
+            throw auraError('Can\'t delete this category — ' + resources + ' resource'
+                + (resources == 1 ? ' lives' : 's live')
+                + (reparent ? ' on it' : ' under it') + '. Move or delete those resources first.');
         }
-        if (impact.secondaryCount > 0) {
-            throw auraError('Can\'t delete this category — ' + impact.secondaryCount + ' resource'
-                + (impact.secondaryCount == 1 ? ' is' : 's are')
+        if (secondary > 0) {
+            throw auraError('Can\'t delete this category — ' + secondary + ' resource'
+                + (secondary == 1 ? ' is' : 's are')
                 + ' also shown in it. Remove it from those resources first.');
         }
-        if (impact.guideOptionCount > 0) {
-            throw auraError('Can\'t delete this category — ' + impact.guideOptionCount
-                + ' help guide option' + (impact.guideOptionCount == 1 ? ' links' : 's link')
-                + ' to it. Retarget or remove ' + (impact.guideOptionCount == 1 ? 'it' : 'them')
+        if (guides > 0) {
+            throw auraError('Can\'t delete this category — ' + guides
+                + ' help guide option' + (guides == 1 ? ' links' : 's link')
+                + ' to it. Retarget or remove ' + (guides == 1 ? 'it' : 'them')
                 + ' in the Help Guide Builder first.');
         }
-        List<Resource_Category__c> doomed = [
-            SELECT Id FROM Resource_Category__c
-            WHERE Parent_Category__c = :categoryId
-            LIMIT :LIST_LIMIT
-        ];
-        doomed.add(new Resource_Category__c(Id = categoryId));
+        if (!reparent && impact.childCount > 0) {
+            throw auraError('Can\'t delete this category — it has ' + impact.childCount
+                + (impact.childCount == 1 ? ' subtopic' : ' subtopics')
+                + '. Move them up or move them elsewhere first.');
+        }
         try {
-            delete doomed;
+            if (reparent && impact.childCount > 0) {
+                Decimal order = nextDisplayOrder(impact.parentId);
+                List<Resource_Category__c> promoted = new List<Resource_Category__c>();
+                for (Resource_Category__c child : [
+                    SELECT Id FROM Resource_Category__c
+                    WHERE Parent_Category__c = :categoryId
+                    ORDER BY Display_Order__c ASC NULLS LAST, Name ASC
+                    LIMIT :LIST_LIMIT
+                ]) {
+                    promoted.add(new Resource_Category__c(
+                        Id = child.Id, Parent_Category__c = impact.parentId, Display_Order__c = order++));
+                }
+                update promoted;
+            }
+            delete new Resource_Category__c(Id = categoryId);
         } catch (DmlException e) {
             // Restrict race: a resource landed between the check and the delete.
             throw auraError('It could not be deleted: ' + e.getDmlMessage(0));

@@ -1,0 +1,22 @@
+<template>
+    <template if:true={hasItems}>
+        <nav class="ds-subnav" aria-label={label}>
+            <span class="ds-subnav__label">{label}</span>
+            <ul class="ds-subnav__list">
+                <template for:each={decorated} for:item="item">
+                    <li key={item.key}>
+                        <button type="button"
+                                class="ds-subnav__chip"
+                                data-key={item.key}
+                                onclick={handleSelect}>
+                            <span class="ds-subnav__text">{item.label}</span>
+                            <template if:true={item.count}>
+                                <span class="ds-subnav__count">{item.count}</span>
+                            </template>
+                        </button>
+                    </li>
+                </template>
+            </ul>
+        </nav>
+    </template>
+</template>

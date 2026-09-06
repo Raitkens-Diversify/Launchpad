@@ -454,6 +454,32 @@ private class NexSKnowledgeControllerTest {
     }
 
     @IsTest
+    static void categoryTreeCarriesDepthPathAndPublishedCounts() {
+        Test.startTest();
+        CategoryTreeService.TreeDTO tree = NexSKnowledgeController.getCategoryTree();
+        Test.stopTest();
+
+        CategoryTreeService.TreeNode gettingStarted;
+        for (CategoryTreeService.TreeNode root : tree.roots) {
+            Assert.areEqual(1, root.depth, 'Top-level topics are depth 1.');
+            Assert.isNull(root.parentId);
+            if (root.id == 'Getting_Started') {
+                gettingStarted = root;
+            }
+        }
+        Assert.isNotNull(gettingStarted, 'Getting_Started is a top-level topic.');
+        Assert.areEqual('/Getting_Started/', gettingStarted.path);
+        Assert.isTrue(gettingStarted.hasChildren, 'The org fixture nests subtopics under it.');
+        CategoryTreeService.TreeNode child = gettingStarted.children[0];
+        Assert.areEqual(2, child.depth);
+        Assert.areEqual('Getting_Started', child.parentId);
+        Assert.isTrue(child.path.startsWith('/Getting_Started/'), 'Paths chain through the parent.');
+        Assert.isTrue(gettingStarted.itemCount >= 1, 'The setup article filed here is counted.');
+        Assert.isTrue(gettingStarted.descendantItemCount >= gettingStarted.itemCount, 'Counts roll up.');
+        Assert.isTrue(tree.maxDepth >= 2 && tree.maxDepth <= CategoryTreeService.PLATFORM_DATA_CATEGORY_DEPTH);
+    }
+
+    @IsTest
     static void unknownCategoryRejected() {
         System.runAs(kbUser()) {
             Test.startTest();

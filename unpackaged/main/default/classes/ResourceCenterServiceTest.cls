@@ -109,24 +109,100 @@ private class ResourceCenterServiceTest {
         };
 
         Test.startTest();
-        List<ResourceCenterService.NavTopic> nav = ResourceCenterService.getCategoryNav();
+        CategoryTreeService.TreeDTO tree = ResourceCenterService.getCategoryTree();
         Test.stopTest();
 
-        Map<String, ResourceCenterService.NavTopic> bySlug =
-            new Map<String, ResourceCenterService.NavTopic>();
-        for (ResourceCenterService.NavTopic t : nav) {
-            bySlug.put(t.slug, t);
-        }
+        Map<String, CategoryTreeService.TreeNode> bySlug = rootsBySlug(tree);
         Assert.isTrue(bySlug.containsKey('marketing'), 'Marketing is a nav topic.');
         Assert.isTrue(bySlug.containsKey('empty-top'),
             'A main topic with no resources still shows in the nav.');
         Assert.isFalse(bySlug.containsKey('hidden'), 'Inactive categories never show.');
+        Assert.isTrue(tree.maxDepth >= 2, 'The limit travels with the tree.');
 
-        ResourceCenterService.NavTopic marketing = bySlug.get('marketing');
+        CategoryTreeService.TreeNode marketing = bySlug.get('marketing');
         Assert.areEqual(1, marketing.children.size(),
             'Only Flyers qualifies — the empty subcategory is hidden from the nav.');
         Assert.areEqual('flyers', marketing.children[0].slug);
+        Assert.areEqual(2, marketing.children[0].depth);
+        Assert.areEqual(2, marketing.descendantItemCount, 'Counts roll up to the topic.');
         Assert.areEqual(0, bySlug.get('empty-top').children.size());
+        Assert.isFalse(bySlug.get('empty-top').hasChildren);
+    }
+
+    private static Map<String, CategoryTreeService.TreeNode> rootsBySlug(CategoryTreeService.TreeDTO tree) {
+        Map<String, CategoryTreeService.TreeNode> bySlug = new Map<String, CategoryTreeService.TreeNode>();
+        for (CategoryTreeService.TreeNode t : tree.roots) {
+            bySlug.put(t.slug, t);
+        }
+        return bySlug;
+    }
+
+    private static List<String> childSlugs(CategoryTreeService.TreeNode node) {
+        List<String> out = new List<String>();
+        for (CategoryTreeService.TreeNode c : node.children) {
+            out.add(c.slug);
+        }
+        return out;
+    }
+
+    @isTest
+    static void deepCategoryPagesGroupDescendantsAndScopeSearch() {
+        Id flyersId = categoryId('flyers');
+        Id printId = makeSub('Print', 'print', flyersId, 1);       // depth 3
+        insert new Resource__c(
+            Name = 'Deep Poster', Slug__c = 'deep-poster', Category__c = printId,
+            Resource_Type__c = 'PDF', Is_Active__c = true, Display_Order__c = 5);
+
+        Test.setFixedSearchResults(new List<Id>{ resourceId('brand-flyer'), resourceId('partner-site'), resourceId('deep-poster') });
+        Test.startTest();
+        ResourceCenterService.CategoryDetail marketing = ResourceCenterService.getCategoryBySlug('marketing');
+        ResourceCenterService.CategoryDetail flyers = ResourceCenterService.getCategoryBySlug('flyers');
+        ResourceCenterService.CategoryDetail print = ResourceCenterService.getCategoryBySlug('print');
+        ResourceCenterService.ResourceDetail poster = ResourceCenterService.getResourceBySlug('deep-poster');
+        List<ResourceCenterService.ResourceCard> scoped = ResourceCenterService.searchResources('x', 'flyers');
+        List<ResourceCenterService.ResourceCard> unscoped = ResourceCenterService.searchResources('x', null);
+        List<ResourceCenterService.ResourceCard> ahead = ResourceCenterService.typeahead('e', 'flyers');
+        Test.stopTest();
+
+        // Marketing page: the Flyers section holds the whole Flyers subtree.
+        Assert.areEqual(new List<String>{ 'brand-flyer', 'deep-poster' }, slugs(marketing.sections[0].resources),
+            'A grandchild resource groups under the child it hangs from.');
+        Assert.areEqual(1, marketing.subcategories.size(), 'Tiles stay direct children only.');
+        Assert.areEqual(2, marketing.subcategories[0].resourceCount, 'Tile count covers the subtree.');
+        Assert.isTrue(marketing.hasChildren);
+        Assert.areEqual(1, marketing.depth);
+
+        // Flyers page: now a branch — Print section + General for its own resource.
+        Assert.isTrue(flyers.hasChildren);
+        Assert.areEqual(2, flyers.depth);
+        Assert.areEqual(new List<String>{ 'print', 'general' },
+            new List<String>{ flyers.sections[0].key, flyers.sections[1].key });
+        Assert.areEqual(1, flyers.ancestors.size());
+        Assert.areEqual('marketing', flyers.ancestors[0].slug);
+        Assert.areEqual('marketing', flyers.parentSlug, 'Nearest ancestor still exposed.');
+
+        // Print page: leaf at depth 3 with the full crumb chain.
+        Assert.isFalse(print.hasChildren);
+        Assert.areEqual(3, print.depth);
+        Assert.areEqual(new List<String>{ 'marketing', 'flyers' },
+            new List<String>{ print.ancestors[0].slug, print.ancestors[1].slug });
+        Assert.areEqual('flyers', print.parentSlug);
+        Assert.areEqual(new List<String>{ 'deep-poster' }, slugs(print.resources));
+
+        // Resource detail carries the home category's ancestors, root-first.
+        Assert.areEqual('print', poster.categorySlug);
+        Assert.areEqual(2, poster.categoryAncestors.size());
+        Assert.areEqual('marketing', poster.categoryAncestors[0].slug);
+        Assert.areEqual('Flyers', poster.categoryAncestors[1].name);
+
+        // Search scoped to a mid-level node returns its descendants' items only.
+        Assert.areEqual(new Set<String>{ 'brand-flyer', 'deep-poster' }, new Set<String>(slugs(scoped)),
+            'Scoped search keeps the subtree, drops the sibling branch.');
+        Assert.areEqual(3, unscoped.size(), 'No scope = everything.');
+        Assert.areEqual(new Set<String>{ 'brand-flyer', 'deep-poster' }, new Set<String>(slugs(ahead)),
+            'Typeahead honours the same scope.');
+        Assert.areEqual(0, ResourceCenterService.searchResources('x', 'no-such-slug').size(),
+            'An unknown scope matches nothing.');
     }
 
     @isTest
@@ -136,12 +212,12 @@ private class ResourceCenterServiceTest {
         ResourceCenterService.ResourceDetail direct = ResourceCenterService.getResourceBySlug('partner-site');
         Test.stopTest();
 
-        Assert.areEqual('marketing', nested.categoryParentSlug,
+        Assert.areEqual(1, nested.categoryAncestors.size(),
             'A subtopic-filed resource reports its main topic for the crumb.');
-        Assert.areEqual('Marketing', nested.categoryParentName);
-        Assert.isNull(direct.categoryParentSlug,
-            'A resource filed directly on a main topic has no parent crumb segment.');
-        Assert.isNull(direct.categoryParentName);
+        Assert.areEqual('marketing', nested.categoryAncestors[0].slug);
+        Assert.areEqual('Marketing', nested.categoryAncestors[0].name);
+        Assert.areEqual(0, direct.categoryAncestors.size(),
+            'A resource filed directly on a main topic has no ancestor crumb segments.');
     }
 
     @isTest
@@ -289,7 +365,7 @@ private class ResourceCenterServiceTest {
     static void searchResourcesReturnsActive() {
         Test.setFixedSearchResults(new List<Id>{ resourceId('brand-flyer') });
         Test.startTest();
-        List<ResourceCenterService.ResourceCard> hits = ResourceCenterService.searchResources('flyer');
+        List<ResourceCenterService.ResourceCard> hits = ResourceCenterService.searchResources('flyer', null);
         Test.stopTest();
         Assert.areEqual(1, hits.size(), 'Fixed SOSL result returned.');
         Assert.areEqual('brand-flyer', hits[0].slug, 'Matched the flyer.');
@@ -298,8 +374,8 @@ private class ResourceCenterServiceTest {
     @isTest
     static void typeaheadMatchesByName() {
         Test.startTest();
-        List<ResourceCenterService.ResourceCard> hits = ResourceCenterService.typeahead('Brand');
-        List<ResourceCenterService.ResourceCard> none = ResourceCenterService.typeahead('   ');
+        List<ResourceCenterService.ResourceCard> hits = ResourceCenterService.typeahead('Brand', null);
+        List<ResourceCenterService.ResourceCard> none = ResourceCenterService.typeahead('   ', null);
         Test.stopTest();
         Assert.areEqual(1, hits.size(), 'Brand Flyer matches "Brand".');
         Assert.areEqual('brand-flyer', hits[0].slug, 'Typeahead carries the slug for selection.');
@@ -308,7 +384,7 @@ private class ResourceCenterServiceTest {
 
     @isTest
     static void searchResourcesBlankTermIsEmpty() {
-        Assert.areEqual(0, ResourceCenterService.searchResources('   ').size(),
+        Assert.areEqual(0, ResourceCenterService.searchResources('   ', null).size(),
             'Blank term yields no SOSL and an empty list.');
     }
 
@@ -855,18 +931,10 @@ private class ResourceCenterServiceTest {
         link('partner-site', templates);
 
         Test.startTest();
-        List<ResourceCenterService.NavTopic> nav = ResourceCenterService.getCategoryNav();
+        CategoryTreeService.TreeDTO tree = ResourceCenterService.getCategoryTree();
         Test.stopTest();
 
-        List<String> childSlugs = new List<String>();
-        for (ResourceCenterService.NavTopic t : nav) {
-            if (t.slug == 'marketing') {
-                for (ResourceCenterService.NavChild c : t.children) {
-                    childSlugs.add(c.slug);
-                }
-            }
-        }
-        Assert.areEqual(new List<String>{ 'flyers', 'templates' }, childSlugs,
+        Assert.areEqual(new List<String>{ 'flyers', 'templates' }, childSlugs(rootsBySlug(tree).get('marketing')),
             'A subtopic populated only through Also show in joins the nav.');
     }
 
@@ -927,16 +995,14 @@ private class ResourceCenterServiceTest {
         Test.startTest();
         List<ResourceCenterService.CategoryTile> tiles = ResourceCenterService.getTopLevelCategories();
         ResourceCenterService.CategoryDetail marketing = ResourceCenterService.getCategoryBySlug('marketing');
-        List<ResourceCenterService.NavTopic> nav = ResourceCenterService.getCategoryNav();
+        CategoryTreeService.TreeDTO tree = ResourceCenterService.getCategoryTree();
         Test.stopTest();
 
         Assert.areEqual(1, tiles.size(), 'The inactive category is still no tile.');
         Assert.areEqual(2, tiles[0].resourceCount, 'A resource homed in an inactive category never counts.');
         Assert.areEqual(new List<String>{ 'partner-site' }, slugs(marketing.resources),
             'The inactive-home resource is not shown even when linked here.');
-        for (ResourceCenterService.NavTopic t : nav) {
-            Assert.areNotEqual('hidden', t.slug, 'Inactive categories never enter the nav.');
-        }
+        Assert.isFalse(rootsBySlug(tree).containsKey('hidden'), 'Inactive categories never enter the nav.');
     }
 
     @isTest
@@ -949,6 +1015,6 @@ private class ResourceCenterServiceTest {
         Test.stopTest();
 
         Assert.areEqual('flyers', d.categorySlug, 'Breadcrumb and link always use the home category.');
-        Assert.areEqual('marketing', d.categoryParentSlug);
+        Assert.areEqual('marketing', d.categoryAncestors[0].slug);
     }
 }

@@ -2,46 +2,77 @@
     <div class="rsr">
         <h1 class="rsr__title">Results for &ldquo;{term}&rdquo;</h1>
 
+        <template if:true={isScoped}>
+            <p class="rsr__scope">
+                <span class="rsr__scope-chip">
+                    Resources in <strong>{scopeLabel}</strong>
+                    <button type="button" class="rsr__scope-clear"
+                            aria-label="Clear the category filter"
+                            title="Clear the category filter"
+                            onclick={handleScopeClear}>&times;</button>
+                </span>
+                <span class="rsr__scope-note">Help Center articles aren&rsquo;t filtered by resource category.</span>
+            </p>
+        </template>
+
         <template if:true={showFuzzy}>
             <p class="rsr__notice">Showing results for &ldquo;{meta.corrected}&rdquo;.</p>
         </template>
 
-        <template if:true={loading}>
-            <div class="rsr__status">
-                <lightning-spinner alternative-text="Searching" size="small"></lightning-spinner>
+        <div class="rsr__layout">
+            <template if:true={hasFacets}>
+                <aside class="rsr__facets">
+                    <p class="rsr__label">Filter resources by category</p>
+                    <button type="button" class={allClass} aria-pressed={allPressed} onclick={handleScopeClear}>
+                        All categories
+                    </button>
+                    <c-ds-tree heading=""
+                               roots={facetRoots}
+                               active-key={scopeKey}
+                               show-counts
+                               onnavselect={handleFacetSelect}></c-ds-tree>
+                </aside>
+            </template>
+
+            <div class="rsr__body">
+                <template if:true={loading}>
+                    <div class="rsr__status">
+                        <lightning-spinner alternative-text="Searching" size="small"></lightning-spinner>
+                    </div>
+                </template>
+
+                <template if:true={hasArticles}>
+                    <section class="rsr__section">
+                        <p class="rsr__label">Help Center Articles</p>
+                        <div class="rsr__grid" oncontentselect={handleContentSelect}>
+                            <template for:each={articleItems} for:item="item">
+                                <c-ds-content-card key={item.id} item={item}></c-ds-content-card>
+                            </template>
+                        </div>
+                    </section>
+                </template>
+                <template if:true={articlesDegraded}>
+                    <p class="rsr__status">Help Center articles couldn&rsquo;t be searched right now.</p>
+                </template>
+
+                <template if:true={hasResources}>
+                    <section class="rsr__section">
+                        <p class="rsr__label">Resources</p>
+                        <div class="rsr__grid" oncontentselect={handleContentSelect}>
+                            <template for:each={resourceItems} for:item="item">
+                                <c-ds-content-card key={item.id} item={item}></c-ds-content-card>
+                            </template>
+                        </div>
+                    </section>
+                </template>
+                <template if:true={resourcesDegraded}>
+                    <p class="rsr__status">Resources couldn&rsquo;t be searched right now.</p>
+                </template>
+
+                <template if:true={isEmpty}>
+                    <p class="rsr__status">{emptyMessage}</p>
+                </template>
             </div>
-        </template>
-
-        <template if:true={hasArticles}>
-            <section class="rsr__section">
-                <p class="rsr__label">Help Center Articles</p>
-                <div class="rsr__grid" oncontentselect={handleContentSelect}>
-                    <template for:each={articleItems} for:item="item">
-                        <c-ds-content-card key={item.id} item={item}></c-ds-content-card>
-                    </template>
-                </div>
-            </section>
-        </template>
-        <template if:true={articlesDegraded}>
-            <p class="rsr__status">Help Center articles couldn&rsquo;t be searched right now.</p>
-        </template>
-
-        <template if:true={hasResources}>
-            <section class="rsr__section">
-                <p class="rsr__label">Resources</p>
-                <div class="rsr__grid" oncontentselect={handleContentSelect}>
-                    <template for:each={resourceItems} for:item="item">
-                        <c-ds-content-card key={item.id} item={item}></c-ds-content-card>
-                    </template>
-                </div>
-            </section>
-        </template>
-        <template if:true={resourcesDegraded}>
-            <p class="rsr__status">Resources couldn&rsquo;t be searched right now.</p>
-        </template>
-
-        <template if:true={isEmpty}>
-            <p class="rsr__status">No resources or articles matched your search.</p>
-        </template>
+        </div>
     </div>
 </template>

@@ -38,8 +38,9 @@ private class ResourceAdminControllerTest {
         Id topId = makeCategory('Top Cat', 'top-cat', null);
         Id childId = makeCategory('Child Cat', 'child-cat', topId);
 
-        List<ResourceAdminController.CategoryRow> rows = ResourceAdminController.listCategories();
-        System.assert(rows.size() >= 2);
+        CategoryTreeService.TreeDTO adminTree = ResourceAdminController.getCategoryTree();
+        System.assert(adminTree.nodeCount >= 2);
+        System.assert(adminTree.maxDepth >= 2, 'The limit travels with the tree');
 
         List<ResourceAdminController.CategoryNode> tree =
             ResourceAdminController.getResourceCategoryTree();
@@ -89,36 +90,61 @@ private class ResourceAdminControllerTest {
         }
     }
 
+    private static Id saveCat(String name, String slug, Id parentId) {
+        ResourceAdminController.CategoryInput c = new ResourceAdminController.CategoryInput();
+        c.name = name;
+        c.slug = slug;
+        c.parentId = parentId;
+        return ResourceAdminController.saveCategory(JSON.serialize(c));
+    }
+
     @IsTest
-    static void saveCategoryEnforcesDepthAndChildren() {
-        Id topId = makeCategory('Depth Top', 'depth-top', null);
-        Id subId = makeCategory('Depth Sub', 'depth-sub', topId);
+    static void saveCategoryNestsToTheLimitAndRefusesCycles() {
+        CategoryTreeService.maxDepthOverride = 5;
+        Id l1 = saveCat('Level 1', 'level-1', null);
+        Id l2 = saveCat('Level 2', 'level-2', l1);
+        Id l3 = saveCat('Level 3', 'level-3', l2);
+        Id l4 = saveCat('Level 4', 'level-4', l3);
+        Id l5 = saveCat('Level 5', 'level-5', l4);
+        System.assertEquals(5, [SELECT Depth__c FROM Resource_Category__c WHERE Id = :l5].Depth__c,
+            'Five levels nest through the console');
 
-        // A subtopic cannot be a parent (depth 2 max).
-        ResourceAdminController.CategoryInput grandchild = new ResourceAdminController.CategoryInput();
-        grandchild.name = 'Depth Grandchild';
-        grandchild.slug = 'depth-grandchild';
-        grandchild.parentId = subId;
         try {
-            ResourceAdminController.saveCategory(JSON.serialize(grandchild));
-            System.assert(false, 'Nesting under a subtopic must be rejected');
+            saveCat('Level 6', 'level-6', l5);
+            System.assert(false, 'A sixth level must be rejected');
         } catch (AuraHandledException e) {
-            System.assert(e.getMessage().contains('top-level'), e.getMessage());
+            System.assertEquals(CategoryTreeService.depthMessage(5), e.getMessage());
         }
 
-        // A category with subtopics must stay top-level.
-        Id otherTopId = makeCategory('Depth Other', 'depth-other', null);
-        ResourceAdminController.CategoryInput demote = new ResourceAdminController.CategoryInput();
-        demote.id = topId;
-        demote.name = 'Depth Top';
-        demote.slug = 'depth-top';
-        demote.parentId = otherTopId;
+        // Moving a category into its own subtree is a cycle.
+        ResourceAdminController.CategoryInput cycle = new ResourceAdminController.CategoryInput();
+        cycle.id = l2;
+        cycle.name = 'Level 2';
+        cycle.slug = 'level-2';
+        cycle.parentId = l4;
         try {
-            ResourceAdminController.saveCategory(JSON.serialize(demote));
-            System.assert(false, 'A parent with subtopics must stay top-level');
+            ResourceAdminController.saveCategory(JSON.serialize(cycle));
+            System.assert(false, 'A category cannot move under its own descendant');
         } catch (AuraHandledException e) {
-            System.assert(e.getMessage().contains('has subtopics'), e.getMessage());
+            System.assertEquals(CategoryTreeService.MSG_DESCENDANT, e.getMessage());
         }
+
+        // Moving a 4-tall subtree under a depth-2 node would reach level 6.
+        Id otherTop = saveCat('Other Top', 'other-top', null);
+        Id otherSub = saveCat('Other Sub', 'other-sub', otherTop);
+        ResourceAdminController.CategoryInput tooDeep = new ResourceAdminController.CategoryInput();
+        tooDeep.id = l2;
+        tooDeep.name = 'Level 2';
+        tooDeep.slug = 'level-2';
+        tooDeep.parentId = otherSub;
+        try {
+            ResourceAdminController.saveCategory(JSON.serialize(tooDeep));
+            System.assert(false, 'A subtree taller than the remaining depth must be rejected');
+        } catch (AuraHandledException e) {
+            System.assertEquals(CategoryTreeService.depthMessage(5), e.getMessage());
+        }
+        System.assertEquals(l1, [SELECT Parent_Category__c FROM Resource_Category__c WHERE Id = :l2].Parent_Category__c,
+            'Rejected saves leave the tree alone');
 
         // A vanished parent gets the friendly refresh message.
         Id goneId = makeCategory('Depth Gone', 'depth-gone', null);
@@ -188,6 +214,53 @@ private class ResourceAdminControllerTest {
         System.assertEquals(1, [
             SELECT Display_Order__c FROM Resource_Category__c WHERE Id = :topC
         ].Display_Order__c, 'Reordering subtopics leaves top-level order alone');
+    }
+
+    @IsTest
+    static void moveCategoryReparentsWithOrderAndRejectsBadTargets() {
+        CategoryTreeService.maxDepthOverride = 5;
+        Id a = makeCategory('Move A', 'move-a', null);
+        Id a1 = makeCategory('Move A1', 'move-a1', a);
+        Id a1x = makeCategory('Move A1x', 'move-a1x', a1);
+        Id b = makeCategory('Move B', 'move-b', null);
+        Id b1 = makeCategory('Move B1', 'move-b1', b);
+
+        // a1 (with a1x) moves under b, placed before b1.
+        Test.startTest();
+        ResourceAdminController.moveCategory(a1, b, JSON.serialize(new List<Id>{ a1, b1 }));
+        Test.stopTest();
+
+        Map<Id, Resource_Category__c> rows = new Map<Id, Resource_Category__c>([
+            SELECT Parent_Category__c, Display_Order__c, Path__c, Depth__c FROM Resource_Category__c
+        ]);
+        System.assertEquals(b, rows.get(a1).Parent_Category__c, 'Reparented');
+        System.assertEquals(1, rows.get(a1).Display_Order__c, 'Placed first among the new siblings');
+        System.assertEquals(2, rows.get(b1).Display_Order__c);
+        System.assertEquals('/' + b + '/' + a1 + '/', rows.get(a1x).Path__c, 'The subtree travelled');
+        System.assertEquals(3, rows.get(a1x).Depth__c);
+
+        // Into its own descendant, and with a stale sibling list.
+        try {
+            ResourceAdminController.moveCategory(b, a1x, JSON.serialize(new List<Id>{ b }));
+            System.assert(false, 'Moving into a descendant must be rejected');
+        } catch (AuraHandledException e) {
+            System.assertEquals(CategoryTreeService.MSG_DESCENDANT, e.getMessage());
+        }
+        try {
+            // b's live children are a1 and b1; a list naming only the mover is stale.
+            ResourceAdminController.moveCategory(a1x, b, JSON.serialize(new List<Id>{ a1x }));
+            System.assert(false, 'A list missing live siblings must be rejected');
+        } catch (AuraHandledException e) {
+            System.assert(e.getMessage().contains('changed'), e.getMessage());
+        }
+        try {
+            ResourceAdminController.moveCategory('not-an-id', null, '[]');
+            System.assert(false, 'Malformed input must fail cleanly');
+        } catch (AuraHandledException e) {
+            System.assert(e.getMessage().contains('refresh'), e.getMessage());
+        }
+        System.assertEquals(a1, [SELECT Parent_Category__c FROM Resource_Category__c WHERE Id = :a1x].Parent_Category__c,
+            'Rejected moves write nothing');
     }
 
     @IsTest
@@ -425,7 +498,7 @@ private class ResourceAdminControllerTest {
                 System.assert(true);
             }
             try {
-                ResourceAdminController.deleteCategory(null);
+                ResourceAdminController.deleteCategory(null, 'block');
                 System.assert(false, 'Expected an access exception from deleteCategory');
             } catch (AuraHandledException e) {
                 System.assert(true);
@@ -443,11 +516,12 @@ private class ResourceAdminControllerTest {
             ResourceAdminController.getCategoryDeleteImpact(catId);
         System.assertEquals('Lonely', impact.name);
         System.assertEquals(0, impact.resourceCount);
-        System.assertEquals(0, impact.subcategoryCount);
+        System.assertEquals(0, impact.childCount);
+        System.assertEquals(0, impact.descendantCount);
         System.assertEquals(0, impact.guideOptionCount);
 
         Test.startTest();
-        ResourceAdminController.deleteCategory(catId);
+        ResourceAdminController.deleteCategory(catId, null);
         Test.stopTest();
 
         System.assertEquals(0, [SELECT COUNT() FROM Resource_Category__c WHERE Id = :catId],
@@ -455,22 +529,60 @@ private class ResourceAdminControllerTest {
     }
 
     @IsTest
-    static void deleteCategoryCascadesEmptySubtopics() {
-        Id parentId = makeCategory('Parent', 'parent', null);
+    static void deleteCategoryWithSubtopicsBlocksOrMovesThemUp() {
+        Id grand = makeCategory('Grand', 'grand', null);
+        Id parentId = makeCategory('Parent', 'parent', grand);
         Id subA = makeCategory('Sub A', 'sub-a', parentId);
         Id subB = makeCategory('Sub B', 'sub-b', parentId);
+        Id leaf = makeCategory('Leaf', 'leaf', subB);
+        update new List<Resource_Category__c>{
+            new Resource_Category__c(Id = subA, Display_Order__c = 1),
+            new Resource_Category__c(Id = subB, Display_Order__c = 2)
+        };
 
-        System.assertEquals(2,
-            ResourceAdminController.getCategoryDeleteImpact(parentId).subcategoryCount,
-            'Impact reports the cascade');
+        // "block" with an empty subtree: the subtopics themselves are the blocker.
+        try {
+            ResourceAdminController.deleteCategory(parentId, 'block');
+            System.assert(false, 'A category with subtopics must not delete in block mode');
+        } catch (AuraHandledException e) {
+            System.assert(e.getMessage().contains('subtopic'), e.getMessage());
+        }
 
+        insert new Resource__c(
+            Name = 'Deep Doc', Slug__c = 'deep-doc', Category__c = leaf, Resource_Type__c = 'PDF');
+        ResourceAdminController.CategoryDeleteImpactDTO impact =
+            ResourceAdminController.getCategoryDeleteImpact(parentId);
+        System.assertEquals(2, impact.childCount);
+        System.assertEquals(3, impact.descendantCount);
+        System.assertEquals(grand, impact.parentId, 'Children would move up to Grand');
+        System.assertEquals('Grand', impact.parentName);
+        System.assertEquals(1, impact.resourceCount, 'The subtree holds one resource');
+        System.assertEquals(0, impact.ownResourceCount, 'Nothing lives on Parent itself');
+
+        // "block" with content below: the content is reported first — it blocks either mode.
+        try {
+            ResourceAdminController.deleteCategory(parentId, 'block');
+            System.assert(false, 'A category with resources below must not delete in block mode');
+        } catch (AuraHandledException e) {
+            System.assert(e.getMessage().contains('resource'), e.getMessage());
+        }
+        System.assertEquals(5, [SELECT COUNT() FROM Resource_Category__c], 'Nothing was deleted');
+
+        // "reparent": children move up to Grand after its existing siblings, keeping order.
         Test.startTest();
-        ResourceAdminController.deleteCategory(parentId);
+        ResourceAdminController.deleteCategory(parentId, 'reparent');
         Test.stopTest();
 
-        System.assertEquals(0, [
-            SELECT COUNT() FROM Resource_Category__c WHERE Id IN :new Set<Id>{ parentId, subA, subB }
-        ], 'Parent and its empty subtopics are deleted together');
+        System.assertEquals(0, [SELECT COUNT() FROM Resource_Category__c WHERE Id = :parentId], 'Parent is gone');
+        Map<Id, Resource_Category__c> rows = new Map<Id, Resource_Category__c>([
+            SELECT Parent_Category__c, Display_Order__c, Path__c, Depth__c FROM Resource_Category__c
+        ]);
+        System.assertEquals(grand, rows.get(subA).Parent_Category__c, 'Sub A moved up');
+        System.assertEquals(grand, rows.get(subB).Parent_Category__c, 'Sub B moved up');
+        System.assert(rows.get(subA).Display_Order__c < rows.get(subB).Display_Order__c, 'Order kept');
+        System.assertEquals('/' + grand + '/' + subB + '/', rows.get(leaf).Path__c, 'Grandchild path rewritten');
+        System.assertEquals(3, rows.get(leaf).Depth__c);
+        System.assertEquals(1, [SELECT COUNT() FROM Resource__c WHERE Category__c = :leaf], 'Content untouched');
     }
 
     @IsTest
@@ -486,7 +598,7 @@ private class ResourceAdminControllerTest {
 
         for (Id target : new List<Id>{ parentId, subId }) {
             try {
-                ResourceAdminController.deleteCategory(target);
+                ResourceAdminController.deleteCategory(target, 'block');
                 System.assert(false, 'A category with resources must not delete');
             } catch (AuraHandledException e) {
                 System.assert(e.getMessage().contains('resource'), e.getMessage());
@@ -517,7 +629,7 @@ private class ResourceAdminControllerTest {
             'A guide option targeting a subtopic slug counts against the parent');
 
         try {
-            ResourceAdminController.deleteCategory(catId);
+            ResourceAdminController.deleteCategory(catId, 'block');
             System.assert(false, 'A guide-linked category must not delete');
         } catch (AuraHandledException e) {
             System.assert(e.getMessage().contains('Help Guide Builder'), e.getMessage());
@@ -543,7 +655,7 @@ private class ResourceAdminControllerTest {
 
         for (Id target : new List<Id>{ alsoId, alsoSubId }) {
             try {
-                ResourceAdminController.deleteCategory(target);
+                ResourceAdminController.deleteCategory(target, 'block');
                 System.assert(false, 'A category with secondary placements must not delete');
             } catch (AuraHandledException e) {
                 System.assert(e.getMessage().contains('also shown in it'), e.getMessage());
@@ -642,10 +754,11 @@ private class ResourceAdminControllerTest {
         System.assertEquals('Alpha', found.categoryName, 'Home category');
         System.assertEquals(new List<String>{ 'Beta' }, found.secondaryCategoryNames);
 
-        for (ResourceAdminController.CategoryRow row : ResourceAdminController.listCategories()) {
-            if (row.id == b) {
-                System.assertEquals(0, row.resourceCount, 'Nothing lives in Beta');
-                System.assertEquals(1, row.secondaryCount, 'One resource is also shown in Beta');
+        for (CategoryTreeService.TreeNode node : ResourceAdminController.getCategoryTree().roots) {
+            if (node.id == String.valueOf(b)) {
+                System.assertEquals(0, node.itemCount, 'Nothing lives in Beta');
+                System.assertEquals(1, node.secondaryItemCount, 'One resource is also shown in Beta');
+                System.assertEquals(1, node.descendantItemCount, 'Shown-here counts roll up');
             }
         }
     }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>false</isExposed>
+    <description>Pure tree model for the Help Center / Resource Center category trees (any depth): build/index, ancestors, descendants, subtree height, move validation mirroring CategoryTreeService, flattening for c-ds-tree and c-admin-tree-editor, picker options, crumbs.</description>
+</LightningComponentBundle>

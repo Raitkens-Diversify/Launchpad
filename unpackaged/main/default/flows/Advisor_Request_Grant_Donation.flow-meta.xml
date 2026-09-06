@@ -8,7 +8,7 @@
         <locationX>490</locationX>
         <locationY>866</locationY>
         <assignmentItems>
-            <assignToReference>varCase.FinServ__FinancialAccount__c</assignToReference>
+            <assignToReference>varCase.Wizard_Financial_Account__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>Get_Financial_Account.Id</elementReference>
@@ -67,7 +67,7 @@
             <assignToReference>varCase.ContactId</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>Get_Financial_Account.FinServ__PrimaryOwner__r.PersonContactId</elementReference>
+                <elementReference>Get_Financial_Account.Primary_Owner__r.PersonContactId</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
@@ -127,7 +127,7 @@
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>varCase.FinServ__Household__c</assignToReference>
+            <assignToReference>varCase.Household__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>varHousehold.Id</elementReference>
@@ -143,7 +143,7 @@
         <locationX>182</locationX>
         <locationY>866</locationY>
         <assignmentItems>
-            <assignToReference>varCase.FinServ__FinancialAccount__c</assignToReference>
+            <assignToReference>varCase.Wizard_Financial_Account__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>Get_Financial_Account.Id</elementReference>
@@ -202,7 +202,7 @@
             <assignToReference>varCase.ContactId</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>Get_Financial_Account.FinServ__PrimaryOwner__r.PersonContactId</elementReference>
+                <elementReference>Get_Financial_Account.Primary_Owner__r.PersonContactId</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
@@ -262,7 +262,7 @@
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>varCase.FinServ__Household__c</assignToReference>
+            <assignToReference>varCase.Household__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>varHousehold.Id</elementReference>
@@ -281,7 +281,7 @@
             <assignToReference>varSelectedFinancialAccount</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>varFinancialAccount.Id</elementReference>
+                <elementReference>varFinAcctCustom.Id</elementReference>
             </value>
         </assignmentItems>
         <connector>
@@ -317,7 +317,7 @@
             <name>FA</name>
             <conditionLogic>and</conditionLogic>
             <conditions>
-                <leftValueReference>varFinancialAccount.Id</leftValueReference>
+                <leftValueReference>varFinAcctCustom.Id</leftValueReference>
                 <operator>IsNull</operator>
                 <rightValue>
                     <booleanValue>false</booleanValue>
@@ -367,7 +367,7 @@
             <name>Yes_MemberRecordNumChanged</name>
             <conditionLogic>and</conditionLogic>
             <conditions>
-                <leftValueReference>varFinancialAccount.FinServ__PrimaryOwner__r.Member_Record_Number__c</leftValueReference>
+                <leftValueReference>varFinAcctCustom.Primary_Owner__r.Member_Record_Number__c</leftValueReference>
                 <operator>NotEqualTo</operator>
                 <rightValue>
                     <elementReference>Member_Record_Number</elementReference>
@@ -380,6 +380,28 @@
         </rules>
     </decisions>
     <description>CCC: Updating the DAFFinAcc_Record_ChoiceSet filter to Registration_Type__c = &#39;Donor Advised Fund&#39;</description>
+    <dynamicChoiceSets>
+        <name>DAF_FinAcct_Choices</name>
+        <dataType>String</dataType>
+        <displayField>Name</displayField>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Household__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>varHousehold.Id</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Registration_Type__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Donor Advised Fund</stringValue>
+            </value>
+        </filters>
+        <object>Financial_Account__c</object>
+        <valueField>Id</valueField>
+    </dynamicChoiceSets>
     <dynamicChoiceSets>
         <name>DAFFinAcc_Record_ChoiceSet</name>
         <dataType>String</dataType>
@@ -414,7 +436,7 @@
     <formulas>
         <name>forEnoughCash</name>
         <dataType>Boolean</dataType>
-        <expression>IF({!Get_Financial_Account.FinServ__CashBalance__c} &gt;= {!Donation_Amount}, true, false)</expression>
+        <expression>IF({!Get_Financial_Account.Cash_Balance__c} &gt;= {!Donation_Amount}, true, false)</expression>
     </formulas>
     <interviewLabel>Advisor Request - Grant Donation {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Advisor Request - Grant Donation</label>
@@ -462,7 +484,7 @@
             </value>
         </filters>
         <getFirstRecordOnly>true</getFirstRecordOnly>
-        <object>FinServ__FinancialAccount__c</object>
+        <object>Financial_Account__c</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <recordUpdates>
@@ -478,7 +500,7 @@
             <field>Id</field>
             <operator>EqualTo</operator>
             <value>
-                <elementReference>Get_Financial_Account.FinServ__PrimaryOwner__r.Id</elementReference>
+                <elementReference>Get_Financial_Account.Primary_Owner__c</elementReference>
             </value>
         </filters>
         <inputAssignments>
@@ -563,7 +585,7 @@
                 </fields>
                 <fields>
                     <name>Financial_Account_Donation_is_From</name>
-                    <choiceReferences>DAFFinAcc_Record_ChoiceSet</choiceReferences>
+                    <choiceReferences>DAF_FinAcct_Choices</choiceReferences>
                     <extensionName>flowruntime:choiceLookup</extensionName>
                     <fieldText>Financial Account Donation is From:</fieldText>
                     <fieldType>ComponentChoice</fieldType>
@@ -587,7 +609,7 @@
                     <visibilityRule>
                         <conditionLogic>and</conditionLogic>
                         <conditions>
-                            <leftValueReference>varFinancialAccount.Id</leftValueReference>
+                            <leftValueReference>varFinAcctCustom.Id</leftValueReference>
                             <operator>IsNull</operator>
                             <rightValue>
                                 <booleanValue>true</booleanValue>
@@ -742,6 +764,7 @@
                     <dataType>Currency</dataType>
                     <fieldText>Donation Amount:</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <scale>0</scale>
                     <styleProperties>
@@ -758,6 +781,7 @@
                     <dataType>Boolean</dataType>
                     <fieldText>Donation is for the Church of Jesus Christ of Latter-Day Saints?</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -772,10 +796,11 @@
                     <name>Member_Record_Number</name>
                     <dataType>String</dataType>
                     <defaultValue>
-                        <elementReference>Get_Financial_Account.FinServ__PrimaryOwner__r.Member_Record_Number__c</elementReference>
+                        <elementReference>Get_Financial_Account.Primary_Owner__r.Member_Record_Number__c</elementReference>
                     </defaultValue>
                     <fieldText>Member Record Number:</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -801,6 +826,7 @@
                     <dataType>String</dataType>
                     <fieldText>Name of Charity:</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -826,6 +852,7 @@
                     <dataType>String</dataType>
                     <fieldText>Charity Contact Information:</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -851,6 +878,7 @@
                     <dataType>String</dataType>
                     <fieldText>Charity TIN:</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -875,6 +903,7 @@
                     <name>Purpose_of_Grant</name>
                     <fieldText>Purpose of Grant:</fieldText>
                     <fieldType>LargeTextArea</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -889,6 +918,7 @@
                     <name>Additional_Case_Notes</name>
                     <fieldText>Additional Case Notes</fieldText>
                     <fieldType>LargeTextArea</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -981,6 +1011,14 @@
         <isInput>false</isInput>
         <isOutput>true</isOutput>
         <objectType>Case</objectType>
+    </variables>
+    <variables>
+        <name>varFinAcctCustom</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Financial_Account__c</objectType>
     </variables>
     <variables>
         <name>varFinancialAccount</name>

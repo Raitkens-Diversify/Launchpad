@@ -3,16 +3,29 @@
         <!-- Topics sidebar hides on the article view — the article gets its own
              page layout (breadcrumb + article + Suggested Articles), like Hulu. -->
         <template if:false={showViewer}>
-        <aside class="nexs__nav">
-            <c-ds-topic-nav heading="All topics"
-                            items={navItems}
-                            onnavselect={handleNavSelect}></c-ds-topic-nav>
+        <!-- Phone widths only (CSS): the sidebar becomes a drawer behind this button. -->
+        <button type="button" class="nexs__nav-toggle"
+                aria-expanded={navToggleExpanded}
+                onclick={handleNavToggle}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true">
+                <path d="M3 6h18M3 12h18M3 18h18"></path>
+            </svg>
+            {navToggleLabel}
+        </button>
+        <aside class={navClass} onkeydown={handleNavKeydown}>
+            <c-ds-tree heading="All topics"
+                       roots={navRoots}
+                       active-key={navActiveKey}
+                       show-counts
+                       onnavselect={handleNavSelect}></c-ds-tree>
         </aside>
         </template>
 
         <main class="nexs__main">
-            <!-- Breadcrumb (all views): Help Center › topic [› article] -->
+            <!-- Breadcrumb (all views): Help Center › ancestors… › topic [› article] -->
             <c-ds-breadcrumbs items={crumbItems}
+                              collapse-at="4"
                               oncrumbselect={handleCrumbSelect}></c-ds-breadcrumbs>
 
             <!-- Article detail (inline) -->
@@ -58,6 +71,16 @@
 
             <!-- Collapsible sections of article links -->
             <template if:false={showViewer}>
+                <!-- Topic title + its subtopics, so the content column shows the
+                     branch too (the sidebar is the only other place it lives). -->
+                <template if:true={showTitle}>
+                    <h1 class="nexs__title">{selectedCategoryLabel}</h1>
+                </template>
+                <template if:true={showSubtopics}>
+                    <c-ds-subnav items={subtopicItems}
+                                 onnavselect={handleNavSelect}></c-ds-subnav>
+                </template>
+
                 <template if:true={loadingArticles}>
                     <lightning-spinner alternative-text="Loading articles" size="small"></lightning-spinner>
                 </template>
@@ -67,6 +90,25 @@
                         Showing results for <strong>{corrected}</strong>.
                         <a href="#" class="nexs__fuzzy-link" onclick={handleSearchOriginal}>Search for &ldquo;{searchTerm}&rdquo; instead</a>
                     </p>
+                </template>
+
+                <!-- Search scope: the whole Help Center, or the topic (and everything
+                     under it) the reader was browsing when they searched. -->
+                <template if:true={showScopeBar}>
+                    <div class="nexs__scope">
+                        <template if:true={searchScope}>
+                            <span class="nexs__scope-chip">
+                                Within <strong>{scopeLabel}</strong>
+                                <button type="button" class="nexs__scope-clear"
+                                        aria-label="Search the whole Help Center"
+                                        title="Search the whole Help Center"
+                                        onclick={handleScopeOff}>&times;</button>
+                            </span>
+                        </template>
+                        <template if:false={searchScope}>
+                            <button type="button" class="nexs__scope-btn" onclick={handleScopeOn}>{scopeOfferLabel}</button>
+                        </template>
+                    </div>
                 </template>
 
                 <template if:true={hasSections}>

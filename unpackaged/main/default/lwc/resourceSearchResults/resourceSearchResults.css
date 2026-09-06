@@ -2,7 +2,7 @@
     display: block;
 }
 .rsr {
-    max-width: var(--rc-content-max, 1040px);
+    max-width: var(--rc-content-wide, 1440px);
     margin: 0 auto;
     padding: var(--ds-space-2xl, 32px) var(--ds-space-lg, 16px);
 }
@@ -12,6 +12,87 @@
     font-size: 1.5rem;
     color: var(--slds-g-color-on-surface-3, #09243f);
 }
+
+/* Facet rail beside the results (the category tree), stacked on phones. */
+.rsr__layout {
+    display: flex;
+    gap: var(--ds-space-xl, 24px);
+    align-items: flex-start;
+}
+.rsr__facets {
+    flex: 0 0 300px;
+    padding-right: var(--ds-space-xl, 24px);
+    border-right: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+.rsr__body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.rsr__all {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0 0 var(--ds-space-sm, 8px);
+    padding: 10px var(--ds-space-lg, 16px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-md, 8px);
+    font-family: inherit;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-align: left;
+    color: var(--slds-g-color-on-surface-2, #374151);
+    cursor: pointer;
+}
+.rsr__all:hover,
+.rsr__all--active {
+    background: var(--slds-g-color-accent-1, #0f406f);
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+}
+.rsr__all:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+
+/* Active scope chip above the results. */
+.rsr__scope {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ds-space-md, 12px);
+    margin: 0 0 var(--ds-space-lg, 16px);
+    font-size: 0.875rem;
+}
+.rsr__scope-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-sm, 8px);
+    padding: 4px 6px 4px 12px;
+    border-radius: 999px;
+    background: var(--slds-g-color-accent-1, #0f406f);
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+}
+.rsr__scope-clear {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.18);
+    color: inherit;
+    font: inherit;
+    line-height: 1;
+    cursor: pointer;
+}
+.rsr__scope-clear:hover,
+.rsr__scope-clear:focus-visible {
+    background: rgba(255, 255, 255, 0.32);
+    outline: none;
+}
+.rsr__scope-note {
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
 .rsr__section + .rsr__section {
     margin-top: var(--ds-space-xl, 24px);
 }
@@ -27,9 +108,6 @@
     display: grid;
     gap: var(--ds-space-lg, 16px);
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-}
-@media (max-width: 640px) {
-    .rsr__grid { grid-template-columns: 1fr; }
 }
 .rsr__notice {
     margin: 0 0 var(--ds-space-md, 12px);
@@ -47,4 +125,19 @@
        gives it room, since an absolutely positioned child adds no height. */
     position: relative;
     min-height: 4rem;
+}
+
+@media (max-width: 768px) {
+    .rsr__layout {
+        flex-direction: column;
+    }
+    .rsr__facets {
+        flex-basis: auto;
+        width: 100%;
+        padding-right: 0;
+        border-right: none;
+    }
+}
+@media (max-width: 640px) {
+    .rsr__grid { grid-template-columns: 1fr; }
 }

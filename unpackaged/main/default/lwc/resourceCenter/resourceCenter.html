@@ -8,6 +8,7 @@
          onresourceselect={handleResourceSelect}
          onarticleselect={handleArticleSelect}
          onrcsearch={handleSearch}
+         onsearchscope={handleSearchScope}
          onrchome={handleHome}
          onhelphome={handleHelpCenter}
          onguideopen={handleGuideOpen}
@@ -51,7 +52,7 @@
                     <c-resource-detail slug={slug} help-center-base-url={helpCenterBaseUrl}></c-resource-detail>
                 </template>
                 <template if:true={isSearch}>
-                    <c-resource-search-results term={term}
+                    <c-resource-search-results term={term} scope={scope}
                         help-center-base-url={helpCenterBaseUrl}></c-resource-search-results>
                 </template>
                 <template if:true={isGuide}>

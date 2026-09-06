@@ -66,6 +66,8 @@ export default class ResourceCenter extends NavigationMixin(LightningElement) {
     view = 'home'; // home | category | detail | search | guide
     slug;
     term;
+    /** Search view only: category slug the resource hits are scoped to (any depth). */
+    scope;
 
     // Host-owned glue for the header c-ds-search-bar (non-home views).
     headerSuggestions = [];
@@ -99,6 +101,9 @@ export default class ResourceCenter extends NavigationMixin(LightningElement) {
             }
             if (params.rcterm) {
                 this.term = params.rcterm;
+            }
+            if (params.rcscope) {
+                this.scope = params.rcscope;
             }
             this._restored = true;
         }
@@ -136,7 +141,11 @@ export default class ResourceCenter extends NavigationMixin(LightningElement) {
     handleArticleSelect(event) {
         goToArticle(this, this.linkCtx, { urlName: event.detail.urlName });
     }
-    handleSearch(event) { this.setState('search', undefined, event.detail.term); }
+    handleSearch(event) { this.setState('search', undefined, event.detail.term, event.detail.scope); }
+    /** The results view's category facet asks; the scope lives here (and in the URL). */
+    handleSearchScope(event) {
+        this.setState('search', undefined, this.term, event.detail.slug || undefined);
+    }
     handleDownload(event) {
         if (event.detail && event.detail.id) {
             trackDownload({ resourceId: event.detail.id }).catch(() => {});
@@ -201,10 +210,11 @@ export default class ResourceCenter extends NavigationMixin(LightningElement) {
 
     // ---- State + URL sync ----------------------------------------------------
 
-    setState(view, slug, term) {
+    setState(view, slug, term, scope) {
         this.view = view;
         this.slug = slug;
         this.term = term;
+        this.scope = view === 'search' ? scope : undefined;
         this.syncUrl();
     }
 
@@ -220,6 +230,7 @@ export default class ResourceCenter extends NavigationMixin(LightningElement) {
             state[prefix + 'rcview'] = this.view;
             state[prefix + 'rcslug'] = this.slug || null;
             state[prefix + 'rcterm'] = this.term || null;
+            state[prefix + 'rcscope'] = this.scope || null;
             this[NavigationMixin.Navigate]({
                 type: this._pageRef.type,
                 attributes: this._pageRef.attributes,

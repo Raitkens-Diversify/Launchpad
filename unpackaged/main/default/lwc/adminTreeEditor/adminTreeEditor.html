@@ -1,0 +1,102 @@
+<template>
+    <span class="ate__sr-only" aria-live="polite">{announcement}</span>
+    <template if:true={showToolbar}>
+        <div class="ate__toolbar">
+            <button type="button" class="ate__tool" onclick={handleExpandAll}>Expand all</button>
+            <button type="button" class="ate__tool" onclick={handleCollapseAll}>Collapse all</button>
+            <span class="ate__depth-note">{maxDepthNote}</span>
+        </div>
+    </template>
+    <ul class="ate__list" role="tree">
+        <template for:each={rows} for:item="r">
+            <li key={r.key}
+                role="treeitem"
+                aria-level={r.level}
+                aria-setsize={r.setSize}
+                aria-posinset={r.posInSet}
+                aria-expanded={r.ariaExpanded}
+                class={r.rowClass}
+                style={r.style}
+                draggable={r.dragEnabled}
+                data-key={r.key}
+                data-index={r.index}
+                data-parent={r.parentKey}
+                onmouseup={handleRowMouseUp}
+                ondragstart={handleDragStart}
+                ondragover={handleDragOver}
+                ondragleave={handleDragLeave}
+                ondrop={handleDrop}
+                ondragend={handleDragEnd}>
+                <template if:true={r.hasChildren}>
+                    <button type="button" class={r.toggleClass}
+                            aria-label={r.toggleLabel}
+                            title={r.toggleLabel}
+                            data-key={r.key}
+                            onclick={handleToggle}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true">
+                            <path d="M9 6l6 6-6 6"></path>
+                        </svg>
+                    </button>
+                </template>
+                <template if:false={r.hasChildren}>
+                    <span class="ate__toggle ate__toggle--leaf" aria-hidden="true"></span>
+                </template>
+                <template if:true={editable}>
+                    <button type="button" class="ate__grip"
+                            title="Drag to move"
+                            aria-label={r.gripLabel}
+                            disabled={busy}
+                            data-key={r.key}
+                            onmousedown={handleGripMouseDown}
+                            onkeydown={handleGripKeydown}>⋮⋮</button>
+                </template>
+                <template if:true={r.renaming}>
+                    <input type="text" class="ate__rename"
+                           value={renameValue}
+                           aria-label="New name"
+                           maxlength="80"
+                           oninput={handleRenameInput}
+                           onkeydown={handleRenameKeydown}
+                           onblur={handleRenameBlur} />
+                </template>
+                <template if:false={r.renaming}>
+                    <span class="ate__label" data-key={r.key} ondblclick={handleLabelDoubleClick}>{r.label}</span>
+                </template>
+                <template if:true={r.sublabel}>
+                    <span class="ate__sublabel" title={r.sublabel}>{r.sublabel}</span>
+                </template>
+                <span class="ate__count" title={r.ownTitle}>{r.ownBadge}</span>
+                <template if:true={r.totalBadge}>
+                    <span class="ate__count ate__count--total" title={r.totalTitle}>{r.totalBadge}</span>
+                </template>
+                <template if:true={r.inactive}>
+                    <span class="ate__status">Inactive</span>
+                </template>
+                <template if:true={editable}>
+                    <span class="ate__actions">
+                        <lightning-button-icon icon-name="utility:edit" size="small"
+                            alternative-text={editLabel} title={editLabel}
+                            disabled={busy}
+                            data-key={r.key} data-label={r.label}
+                            onclick={handleEditClick}></lightning-button-icon>
+                        <template if:true={r.showAddChild}>
+                            <lightning-button-icon icon-name="utility:add" size="small"
+                                alternative-text={addChildLabel} title={addChildLabel}
+                                disabled={busy}
+                                data-key={r.key}
+                                onclick={handleAddChildClick}></lightning-button-icon>
+                        </template>
+                        <template if:true={r.showRemove}>
+                            <lightning-button-icon icon-name="utility:delete" size="small"
+                                alternative-text={removeLabel} title={removeLabel}
+                                disabled={busy}
+                                data-key={r.key} data-label={r.label}
+                                onclick={handleRemoveClick}></lightning-button-icon>
+                        </template>
+                    </span>
+                </template>
+            </li>
+        </template>
+    </ul>
+</template>

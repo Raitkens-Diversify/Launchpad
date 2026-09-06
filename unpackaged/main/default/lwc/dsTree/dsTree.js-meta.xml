@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>false</isExposed>
+    <description>Shared N-level topic sidebar for the Help Center and Resource Center: a flat role=tree list from c/treeUtil with the active path expanded, siblings visible, chevron peeking, keyboard roving and a grandparent rebase past depth 4. Emits navselect.</description>
+</LightningComponentBundle>

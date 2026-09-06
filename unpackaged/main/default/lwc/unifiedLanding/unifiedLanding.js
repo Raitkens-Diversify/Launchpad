@@ -3,13 +3,14 @@ import { NavigationMixin } from 'lightning/navigation';
 import diversifyLogo from '@salesforce/resourceUrl/DiversifyLogoV2';
 import unifiedTypeahead from '@salesforce/apex/UnifiedSearchService.typeahead';
 import getSupportSettings from '@salesforce/apex/NexSKnowledgeController.getSupportSettings';
-import getCategories from '@salesforce/apex/NexSKnowledgeController.getCategories';
+import getHelpTopicTree from '@salesforce/apex/NexSKnowledgeController.getCategoryTree';
 import getFallbackArticles from '@salesforce/apex/NexSKnowledgeController.getFallbackArticles';
-import getTopLevelCategories from '@salesforce/apex/ResourceCenterService.getTopLevelCategories';
+import getResourceTree from '@salesforce/apex/ResourceCenterService.getCategoryTree';
 import getFeaturedResources from '@salesforce/apex/ResourceCenterService.getFeaturedResources';
 import getEvents from '@salesforce/apex/ResourceCenterService.getEvents';
 import { topicIconPath } from 'c/nexsTopicIcons';
 import { iconPath } from 'c/rcIcons';
+import { indexTree, findNode } from 'c/treeUtil';
 import { toContentItem } from 'c/rcConstants';
 import {
     linkContext,
@@ -21,6 +22,13 @@ import {
 import { createSuggestionFetcher } from 'c/dsSearchBar';
 import { createSearchLogger, logSearchEntry, APP_LANDING } from 'c/searchLogUtil';
 import { registerTourScope } from 'c/tourDom';
+
+/** A directory row: the main topic alone. Dropping the branch removes the
+    c-ds-tree chevron (no peeking subtopics on the home page); the rolled-up
+    count stays, so the badge still says what the whole branch holds. */
+function topLevel(node) {
+    return { ...node, children: [], hasChildren: false };
+}
 
 /**
  * unifiedLanding — the shared front door for the Help Center + Resource Center
@@ -110,17 +118,22 @@ export default class UnifiedLanding extends NavigationMixin(LightningElement) {
         }
     }
 
-    @wire(getCategories)
+    /** Both directories list main topics only (see topLevel()); the branch
+        lives on the topic's own page, where c-ds-subnav and the sidebar show it. */
+    @wire(getHelpTopicTree)
     wiredTopics({ data }) {
         if (data) {
-            this.helpTopics = data;
+            this.helpTopics = data.roots || [];
         }
     }
 
-    @wire(getTopLevelCategories)
+    _resourceTree = indexTree([]);
+
+    @wire(getResourceTree)
     wiredResourceCategories({ data }) {
         if (data) {
-            this.resourceCategories = data;
+            this.resourceCategories = data.roots || [];
+            this._resourceTree = indexTree(this.resourceCategories);
         }
     }
 
@@ -171,29 +184,21 @@ export default class UnifiedLanding extends NavigationMixin(LightningElement) {
         return this.upcomingCount > 0;
     }
 
-    /** Help topics as dsTopicNav items, keys namespaced `hc:` (opaque to the nav). */
-    get helpTopicItems() {
-        return (this.helpTopics || []).map((t) => ({
-            key: `hc:${t.name}`,
-            label: t.label,
-            iconPath: topicIconPath(t.name)
-        }));
+    /** Help topic roots for c-ds-tree (keys are Data Category API names). */
+    get helpTopicRoots() {
+        return (this.helpTopics || []).map((t) => topLevel({ ...t, iconPath: topicIconPath(t.id) }));
     }
 
-    /** Resource categories as dsTopicNav items, keys namespaced `rc:`. */
-    get resourceCategoryItems() {
-        return (this.resourceCategories || []).map((c) => ({
-            key: `rc:${c.slug}`,
-            label: c.name,
-            iconPath: iconPath(c.iconName)
-        }));
+    /** Resource category roots for c-ds-tree (keys are record Ids; routed by slug). */
+    get resourceCategoryRoots() {
+        return (this.resourceCategories || []).map((c) => topLevel({ ...c, iconPath: iconPath(c.iconName) }));
     }
 
     get hasHelpTopics() {
-        return this.helpTopicItems.length > 0;
+        return this.helpTopicRoots.length > 0;
     }
     get hasResourceCategories() {
-        return this.resourceCategoryItems.length > 0;
+        return this.resourceCategoryRoots.length > 0;
     }
 
     /** Featured strip: Featured/popular articles then Featured resources.
@@ -306,12 +311,18 @@ export default class UnifiedLanding extends NavigationMixin(LightningElement) {
 
     // ---- Topic directory -----------------------------------------------------
 
-    handleTopicNav(event) {
-        const key = event.detail.key || '';
-        if (key.startsWith('hc:')) {
-            goToArticle(this, this.linkCtx, { topic: key.slice(3) });
-        } else if (key.startsWith('rc:')) {
-            goToResource(this, this.linkCtx, { slug: key.slice(3), view: 'category' });
+    /** Any depth: the tree hands back the topic's API name, which ?topic= takes as-is. */
+    handleHelpTopicNav(event) {
+        if (event.detail.key) {
+            goToArticle(this, this.linkCtx, { topic: event.detail.key });
+        }
+    }
+
+    /** Resource categories route by slug; the tree key is the record Id. */
+    handleResourceNav(event) {
+        const node = findNode(this._resourceTree, event.detail.key);
+        if (node) {
+            goToResource(this, this.linkCtx, { slug: node.slug, view: 'category' });
         }
     }
 

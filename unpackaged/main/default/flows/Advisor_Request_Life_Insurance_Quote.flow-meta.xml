@@ -43,13 +43,6 @@
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>varCase.AccountId</assignToReference>
-            <operator>Assign</operator>
-            <value>
-                <elementReference>varHousehold.Id</elementReference>
-            </value>
-        </assignmentItems>
-        <assignmentItems>
             <assignToReference>varCase.Origin</assignToReference>
             <operator>Assign</operator>
             <value>
@@ -68,6 +61,13 @@
             <operator>Assign</operator>
             <value>
                 <elementReference>Life_Insurance_Type</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varCase.Household__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>varHousehold.Id</elementReference>
             </value>
         </assignmentItems>
         <connector>

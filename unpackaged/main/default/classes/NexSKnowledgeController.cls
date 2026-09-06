@@ -741,12 +741,12 @@ public with sharing class NexSKnowledgeController {
 
     /**
      * Every top-level Help Topic an article version is filed under: each
-     * selection (topic or subtopic) mapped to its topic, deduped, in taxonomy
-     * order (unknown names trail). The group-name field isn't filterable in
-     * SOQL, so the group is filtered in Apex.
+     * selection (at any depth) mapped to the root of its branch, deduped, in
+     * taxonomy order (unknown names trail). The group-name field isn't
+     * filterable in SOQL, so the group is filtered in Apex.
      */
     private static List<String> topLevelTopicsFor(Id versionId) {
-        loadTaxonomy();
+        CategoryTreeService.Tree tree = taxonomy();
         Set<String> found = new Set<String>();
         for (Knowledge__DataCategorySelection sel : [
             SELECT DataCategoryGroupName, DataCategoryName
@@ -754,15 +754,16 @@ public with sharing class NexSKnowledgeController {
             WHERE ParentId = :versionId
         ]) {
             if (sel.DataCategoryGroupName == DATA_CATEGORY_GROUP) {
-                found.add(childToTopicCache.containsKey(sel.DataCategoryName)
-                    ? childToTopicCache.get(sel.DataCategoryName)
-                    : sel.DataCategoryName);
+                // Any depth: the root of the filing's branch (the filing itself
+                // when it is a top-level topic or unknown to the tree).
+                List<CategoryTreeService.TreeNode> up = tree.ancestorsOf(sel.DataCategoryName);
+                found.add(up.isEmpty() ? sel.DataCategoryName : up[0].id);
             }
         }
         List<String> ordered = new List<String>();
-        for (String topic : topicOrderCache) {
-            if (found.remove(topic)) {
-                ordered.add(topic);
+        for (CategoryTreeService.TreeNode root : tree.roots) {
+            if (found.remove(root.id)) {
+                ordered.add(root.id);
             }
         }
         ordered.addAll(found);
@@ -810,6 +811,17 @@ public with sharing class NexSKnowledgeController {
         return result;
     }
 
+    /**
+     * The whole Help_Topics tree (any depth) with published-article counts —
+     * the reader sidebar (c-ds-tree) and the landing counts. getCategories()
+     * stays as the flat top-level list for its existing consumers.
+     */
+    @AuraEnabled(cacheable=true)
+    public static CategoryTreeService.TreeDTO getCategoryTree() {
+        assertAccessible();
+        return HelpTopicTreeProvider.load(true).toDTO();
+    }
+
     public class SupportSettings {
         @AuraEnabled public String supportEmail;
         @AuraEnabled public String supportRequestUrl;
@@ -845,78 +857,30 @@ public with sharing class NexSKnowledgeController {
 
     // ---- Taxonomy helpers (transaction-cached describe) -----------------------
 
-    /** Subtopic (child category) name → its top-level topic name. */
-    private static Map<String, String> childToTopicCache;
-    /** Topic name → its subtopics, in taxonomy order. */
-    private static Map<String, List<CategoryInfo>> topicChildrenCache;
-    /** Top-level topic names in taxonomy order (Map iteration order is not insertion order). */
-    private static List<String> topicOrderCache;
-
-    private static void loadTaxonomy() {
-        if (childToTopicCache != null) {
-            return;
-        }
-        childToTopicCache = new Map<String, String>();
-        topicChildrenCache = new Map<String, List<CategoryInfo>>();
-        topicOrderCache = new List<String>();
-
-        List<Schema.DescribeDataCategoryGroupResult> groups =
-            Schema.describeDataCategoryGroups(new List<String>{ 'KnowledgeArticleVersion' });
-        List<Schema.DataCategoryGroupSobjectTypePair> pairs =
-            new List<Schema.DataCategoryGroupSobjectTypePair>();
-        for (Schema.DescribeDataCategoryGroupResult g : groups) {
-            if (g.getName() == DATA_CATEGORY_GROUP) {
-                Schema.DataCategoryGroupSobjectTypePair pair =
-                    new Schema.DataCategoryGroupSobjectTypePair();
-                pair.setSobject(g.getSobject());
-                pair.setDataCategoryGroupName(g.getName());
-                pairs.add(pair);
-            }
-        }
-        if (pairs.isEmpty()) {
-            return;
-        }
-
-        for (Schema.DescribeDataCategoryGroupStructureResult structure :
-                Schema.describeDataCategoryGroupStructures(pairs, false)) {
-            for (Schema.DataCategory root : structure.getTopCategories()) {
-                for (Schema.DataCategory topic : root.getChildCategories()) {
-                    List<CategoryInfo> children = new List<CategoryInfo>();
-                    for (Schema.DataCategory sub : topic.getChildCategories()) {
-                        children.add(new CategoryInfo(sub.getName(), sub.getLabel()));
-                        childToTopicCache.put(sub.getName(), topic.getName());
-                    }
-                    topicChildrenCache.put(topic.getName(), children);
-                    topicOrderCache.add(topic.getName());
-                }
-            }
-        }
+    /** The Help_Topics tree, any depth — one describe per transaction. */
+    private static CategoryTreeService.Tree taxonomy() {
+        return HelpTopicTreeProvider.load(false);
     }
 
     /**
-     * Fill section/sectionOrder on a topic-scoped list: an article filed under
-     * one of the topic's subtopics gets that subtopic's label as its section
-     * header (taxonomy order preserved). Articles filed on the topic itself keep
-     * section = null and fall back to record-type grouping client-side.
-     * An article filed under several of the topic's subtopics is listed once,
-     * under the earliest subtopic in taxonomy order — the section is a single
-     * header per row, so the choice has to be deterministic.
+     * Fill section/sectionOrder on a topic-scoped list: an article filed
+     * anywhere under one of the topic's DIRECT children gets that child's
+     * label as its section header (taxonomy order preserved) — a grandchild
+     * filing groups under the child it hangs from. Articles filed on the topic
+     * itself keep section = null and fall back to record-type grouping
+     * client-side. An article filed under several of the topic's subtopics
+     * is listed once, under the earliest child in taxonomy order — the
+     * section is a single header per row, so the choice has to be
+     * deterministic.
      */
     private static void applySections(List<ArticleSummary> summaries, String topic) {
         if (String.isBlank(topic) || summaries.isEmpty()) {
             return;
         }
-        loadTaxonomy();
-        List<CategoryInfo> children = topicChildrenCache.get(topic);
-        if (children == null || children.isEmpty()) {
+        CategoryTreeService.Tree tree = taxonomy();
+        CategoryTreeService.TreeNode node = tree.get(topic);
+        if (node == null || node.children.isEmpty()) {
             return;
-        }
-
-        Map<String, Integer> orderByName = new Map<String, Integer>();
-        Map<String, String> labelByName = new Map<String, String>();
-        for (Integer i = 0; i < children.size(); i++) {
-            orderByName.put(children[i].name, i);
-            labelByName.put(children[i].name, children[i].label);
         }
 
         Map<Id, ArticleSummary> byId = new Map<Id, ArticleSummary>();
@@ -929,16 +893,27 @@ public with sharing class NexSKnowledgeController {
             FROM Knowledge__DataCategorySelection
             WHERE ParentId IN :byId.keySet()
         ]) {
-            if (sel.DataCategoryGroupName == DATA_CATEGORY_GROUP
-                && labelByName.containsKey(sel.DataCategoryName)) {
+            if (sel.DataCategoryGroupName != DATA_CATEGORY_GROUP) {
+                continue;
+            }
+            CategoryTreeService.TreeNode child = childOf(tree, sel.DataCategoryName, topic);
+            if (child != null) {
                 ArticleSummary s = byId.get(sel.ParentId);
-                Integer order = orderByName.get(sel.DataCategoryName);
-                if (s.section == null || order < s.sectionOrder) {
-                    s.section = labelByName.get(sel.DataCategoryName);
-                    s.sectionOrder = order;
+                if (s.section == null || child.sortOrder < s.sectionOrder) {
+                    s.section = child.label;
+                    s.sectionOrder = child.sortOrder;
                 }
             }
         }
+    }
+
+    /** The direct child of `topic` that `name` is, or sits under; null otherwise. */
+    private static CategoryTreeService.TreeNode childOf(CategoryTreeService.Tree tree, String name, String topic) {
+        CategoryTreeService.TreeNode cursor = tree.get(name);
+        while (cursor != null && cursor.parentId != topic) {
+            cursor = cursor.parentId == null ? null : tree.get(cursor.parentId);
+        }
+        return cursor;
     }
 
     // ---- Helpers -------------------------------------------------------------

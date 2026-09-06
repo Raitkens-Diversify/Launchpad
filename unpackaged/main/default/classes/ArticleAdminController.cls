@@ -1004,37 +1004,29 @@ public with sharing class ArticleAdminController {
 
     private static List<CategoryNode> treeCache;
 
+    /** The picker's {name,label,children} tree, any depth (HelpTopicTreeProvider describe). */
     private static List<CategoryNode> describeCategoryTree() {
         if (treeCache != null) {
             return treeCache;
         }
         treeCache = new List<CategoryNode>();
-        List<Schema.DescribeDataCategoryGroupResult> groups =
-            Schema.describeDataCategoryGroups(new List<String>{ 'KnowledgeArticleVersion' });
-        List<Schema.DataCategoryGroupSobjectTypePair> pairs =
-            new List<Schema.DataCategoryGroupSobjectTypePair>();
-        for (Schema.DescribeDataCategoryGroupResult g : groups) {
-            if (g.getName() == GROUP_NAME) {
-                Schema.DataCategoryGroupSobjectTypePair pair =
-                    new Schema.DataCategoryGroupSobjectTypePair();
-                pair.setSobject(g.getSobject());
-                pair.setDataCategoryGroupName(g.getName());
-                pairs.add(pair);
-            }
+        // Parallel stacks: source node / destination node (iterative, any depth).
+        List<CategoryTreeService.TreeNode> src = new List<CategoryTreeService.TreeNode>();
+        List<CategoryNode> dst = new List<CategoryNode>();
+        for (CategoryTreeService.TreeNode r : HelpTopicTreeProvider.load(false).roots) {
+            CategoryNode node = new CategoryNode(r.id, r.label);
+            treeCache.add(node);
+            src.add(r);
+            dst.add(node);
         }
-        if (pairs.isEmpty()) {
-            return treeCache;
-        }
-        for (Schema.DescribeDataCategoryGroupStructureResult structure :
-                Schema.describeDataCategoryGroupStructures(pairs, false)) {
-            for (Schema.DataCategory root : structure.getTopCategories()) {
-                for (Schema.DataCategory topic : root.getChildCategories()) {
-                    CategoryNode node = new CategoryNode(topic.getName(), topic.getLabel());
-                    for (Schema.DataCategory sub : topic.getChildCategories()) {
-                        node.children.add(new CategoryNode(sub.getName(), sub.getLabel()));
-                    }
-                    treeCache.add(node);
-                }
+        while (!src.isEmpty()) {
+            CategoryTreeService.TreeNode t = src.remove(src.size() - 1);
+            CategoryNode n = dst.remove(dst.size() - 1);
+            for (CategoryTreeService.TreeNode c : t.children) {
+                CategoryNode child = new CategoryNode(c.id, c.label);
+                n.children.add(child);
+                src.add(c);
+                dst.add(child);
             }
         }
         return treeCache;
@@ -1042,22 +1034,16 @@ public with sharing class ArticleAdminController {
 
     private static Set<String> validCategoryNames() {
         Set<String> names = new Set<String>();
-        for (CategoryNode topic : describeCategoryTree()) {
-            names.add(topic.name);
-            for (CategoryNode sub : topic.children) {
-                names.add(sub.name);
-            }
+        for (CategoryTreeService.TreeNode n : HelpTopicTreeProvider.load(false).ordered) {
+            names.add(n.id);
         }
         return names;
     }
 
     private static Map<String, String> categoryLabelMap() {
         Map<String, String> labels = new Map<String, String>();
-        for (CategoryNode topic : describeCategoryTree()) {
-            labels.put(topic.name, topic.label);
-            for (CategoryNode sub : topic.children) {
-                labels.put(sub.name, sub.label);
-            }
+        for (CategoryTreeService.TreeNode n : HelpTopicTreeProvider.load(false).ordered) {
+            labels.put(n.id, n.label);
         }
         return labels;
     }

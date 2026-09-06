@@ -364,6 +364,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>false</editable>
+        <field>Resource_Category__c.Depth__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>true</editable>
         <field>Resource_Category__c.Description__c</field>
         <readable>true</readable>
@@ -386,6 +391,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Resource_Category__c.Parent_Category__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Resource_Category__c.Path__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

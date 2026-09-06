@@ -55,16 +55,18 @@
                 <div class="landing-directories">
                     <template if:true={hasHelpTopics}>
                         <section class="landing-section" data-tour-id="landing-topics">
-                            <c-ds-topic-nav heading="Browse help topics"
-                                items={helpTopicItems}
-                                onnavselect={handleTopicNav}></c-ds-topic-nav>
+                            <c-ds-tree heading="Browse help topics"
+                                roots={helpTopicRoots}
+                                show-counts
+                                onnavselect={handleHelpTopicNav}></c-ds-tree>
                         </section>
                     </template>
                     <template if:true={hasResourceCategories}>
                         <section class="landing-section" data-tour-id="landing-resources">
-                            <c-ds-topic-nav heading="Browse resources"
-                                items={resourceCategoryItems}
-                                onnavselect={handleTopicNav}></c-ds-topic-nav>
+                            <c-ds-tree heading="Browse resources"
+                                roots={resourceCategoryRoots}
+                                show-counts
+                                onnavselect={handleResourceNav}></c-ds-tree>
                         </section>
                     </template>
                 </div>

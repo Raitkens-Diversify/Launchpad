@@ -1,5 +1,5 @@
 import { LightningElement, api, wire, track } from 'lwc';
-import getCategories from '@salesforce/apex/NexSKnowledgeController.getCategories';
+import getCategoryTree from '@salesforce/apex/NexSKnowledgeController.getCategoryTree';
 import getArticlesByCategory from '@salesforce/apex/NexSKnowledgeController.getArticlesByCategory';
 import searchRanked from '@salesforce/apex/NexSKnowledgeController.searchRanked';
 import getFallbackArticles from '@salesforce/apex/NexSKnowledgeController.getFallbackArticles';
@@ -13,6 +13,10 @@ import { highlightSegments } from 'c/nexsHighlight';
 // One shared analytics path (dedup + App__c tagging live there).
 import { createSearchLogger, logResultClick, APP_HELP_CENTER } from 'c/searchLogUtil';
 import { ORDER_SENTINEL } from 'c/searchConstants';
+// The Help_Topics tree (any depth): nav rows, ancestor crumbs, scope labels.
+import { indexTree, findNode, ancestorsOf } from 'c/treeUtil';
+
+const TOPIC_CRUMB = 'topic:';
 
 // Fallback section order for articles filed on the topic itself (no subtopic):
 // grouped by article-type label, always after the named subtopic sections.
@@ -88,7 +92,16 @@ export default class NexsArticleBrowser extends LightningElement {
     _disableFuzzy = false; // set by the "search for {original} instead" link
     @track fallbackArticles = [];
 
+    /** Every topic at any depth as {name, label}, in tree order (roots first
+        under each branch) — what selection, landing and lookups key off. */
     @track categories = [];
+    /** Top-level nodes of the Help_Topics tree for c-ds-tree (icons added). */
+    navRoots = [];
+    _tree = indexTree([]);
+    navOpen = false; // phone-width topic drawer
+    _focusTree = false;
+    /** Category API name a search is scoped to (BELOW = its subtree); null = all. */
+    searchScope = null;
     @track articles = [];
     @track sections = [];
     selectedCategory;
@@ -106,13 +119,16 @@ export default class NexsArticleBrowser extends LightningElement {
     _lastSearchLogId = null; // Article_Search__c Id of the current search, for click correlation
     _searchLogger = createSearchLogger(APP_HELP_CENTER);
 
-    @wire(getCategories)
+    @wire(getCategoryTree)
     wiredCategories({ data, error }) {
         if (data) {
-            this.categories = data;
+            const roots = data.roots || [];
+            this._tree = indexTree(roots);
+            this.navRoots = roots.map((r) => ({ ...r, iconPath: topicIconPath(r.id) }));
+            this.categories = this._tree.ordered.map((n) => ({ name: n.id, label: n.label }));
             if (!this._initialApplied) {
                 this._initialApplied = true;
-                this.applyInitialState(data);
+                this.applyInitialState(this.categories);
             }
         } else if (error) {
             // eslint-disable-next-line no-console
@@ -151,24 +167,54 @@ export default class NexsArticleBrowser extends LightningElement {
         }
     }
 
-    /** Sidebar items for the shared c-ds-topic-nav (main topics only — the
-        Help Center renders subtopics as content sections, never in the nav). */
-    get navItems() {
-        return this.categories.map((c) => ({
-            key: c.name,
+    /** The c-ds-tree active row: the selected topic while browsing it. */
+    get navActiveKey() {
+        return this.mode === 'category' ? this.selectedCategory : null;
+    }
+
+    get navClass() {
+        return this.navOpen ? 'nexs__nav nexs__nav--open' : 'nexs__nav';
+    }
+
+    get navToggleLabel() {
+        return this.navOpen ? 'Hide topics' : 'Browse topics';
+    }
+
+    get navToggleExpanded() {
+        return this.navOpen ? 'true' : 'false';
+    }
+
+    /** The browse view's title: the topic being read (search has its own banner). */
+    get showTitle() {
+        return this.mode === 'category' && !this.showViewer && Boolean(this.selectedCategory);
+    }
+
+    /** The selected topic's direct children for c-ds-subnav — the tree is
+        unpruned, so an empty subtopic lists too (count-less), as in the
+        sidebar. Counts are the subtree roll-up the sidebar badge shows. */
+    get subtopicItems() {
+        const node = findNode(this._tree, this.selectedCategory);
+        return ((node && node.children) || []).map((c) => ({
+            key: c.id,
             label: c.label,
-            iconPath: topicIconPath(c.name),
-            active: c.name === this.selectedCategory && this.mode === 'category',
-            expanded: false,
-            children: []
+            count: c.descendantItemCount
         }));
     }
 
-    /** Crumb trail for the shared c-ds-breadcrumbs — three states: list view
-        (current heading), viewer while the title loads (clickable heading,
-        no leaf), viewer with title. */
+    get showSubtopics() {
+        return this.showTitle && this.subtopicItems.length > 0;
+    }
+
+    /** Crumb trail for the shared c-ds-breadcrumbs — Help Center › ancestors…
+        › topic, then three states: list view (current heading), viewer while
+        the title loads (clickable heading, no leaf), viewer with title. */
     get crumbItems() {
         const crumbs = [{ label: 'Help Center', key: 'home' }];
+        if (this.mode === 'category' && this.selectedCategory) {
+            ancestorsOf(this._tree, this.selectedCategory).forEach((a) => {
+                crumbs.push({ label: a.label, key: TOPIC_CRUMB + a.id });
+            });
+        }
         if (!this.showViewer) {
             crumbs.push({ label: this.panelHeading });
         } else {
@@ -275,10 +321,55 @@ export default class NexsArticleBrowser extends LightningElement {
         this.selectCategory(key, match ? match.label : key);
     }
 
+    /** Phone-width drawer: open moves focus into the tree, close returns it. */
+    handleNavToggle() {
+        this.navOpen = !this.navOpen;
+        this._focusTree = this.navOpen;
+    }
+
+    handleNavKeydown(event) {
+        if (event.key === 'Escape' && this.navOpen) {
+            this.navOpen = false;
+            const toggle = this.template.querySelector('.nexs__nav-toggle');
+            if (toggle) {
+                toggle.focus();
+            }
+        }
+    }
+
+    // ---- Search scope ("Search within {topic}") ---------------------------------
+
+    get scopeLabel() {
+        const node = findNode(this._tree, this.searchScope);
+        return node ? node.label : this.searchScope;
+    }
+
+    /** Offer / show the scope only on a results list that has a topic to scope to. */
+    get showScopeBar() {
+        return this.mode === 'search' && !this.showViewer
+            && Boolean(this.searchScope || this.selectedCategory);
+    }
+
+    get scopeOfferLabel() {
+        return `Search within ${this.selectedCategoryLabel}`;
+    }
+
+    handleScopeOn() {
+        this.searchScope = this.selectedCategory;
+        this.runSearch();
+    }
+
+    handleScopeOff() {
+        this.searchScope = null;
+        this.runSearch();
+    }
+
     selectCategory(name, label) {
         this.selectedCategory = name;
         this.selectedCategoryLabel = label || name;
         this.mode = 'category';
+        this.navOpen = false;
+        this.searchScope = null;
         this.selectedArticleId = null;
         this.articleTitle = '';
         this._lastSearchLogId = null; // leaving search mode — don't attribute clicks to a stale search
@@ -375,7 +466,7 @@ export default class NexsArticleBrowser extends LightningElement {
         try {
             const result = await searchRanked({
                 term: this.searchTerm,
-                category: null,
+                category: this.searchScope || null, // BELOW: the whole subtree
                 disableFuzzy: this._disableFuzzy
             });
             this.articles = (result && result.articles) || [];
@@ -534,6 +625,13 @@ export default class NexsArticleBrowser extends LightningElement {
     }
 
     renderedCallback() {
+        if (this._focusTree) {
+            this._focusTree = false;
+            const tree = this.template.querySelector('c-ds-tree');
+            if (tree && typeof tree.focusActive === 'function') {
+                tree.focusActive();
+            }
+        }
         if (!this._pendingScrollTop) {
             return;
         }
@@ -578,14 +676,18 @@ export default class NexsArticleBrowser extends LightningElement {
 
     // "Help Center" crumb: let a hosting home view take over; the internal
     // back-to-list is the fallback when nothing is listening (standalone use).
-    // The topic crumb ('back') returns from the article to its topic list.
+    // The topic crumb ('back') returns from the article to its topic list; an
+    // ancestor crumb ('topic:<name>') opens that topic's own list.
     handleCrumbSelect(event) {
-        const key = event.detail.key;
+        const key = event.detail.key || '';
         if (key === 'home') {
             this.dispatchEvent(new CustomEvent('home'));
             this.handleBack();
         } else if (key === 'back') {
             this.handleBack();
+        } else if (key.startsWith(TOPIC_CRUMB)) {
+            this.handleBack();
+            this.openCategory(key.slice(TOPIC_CRUMB.length));
         }
     }
 }

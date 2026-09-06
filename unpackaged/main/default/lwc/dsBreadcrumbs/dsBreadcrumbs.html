@@ -6,12 +6,20 @@
                     <template if:true={c.showSep}>
                         <span class="crumbs__sep" aria-hidden="true">›</span>
                     </template>
+                    <template if:true={c.ellipsis}>
+                        <button type="button" class="crumbs__more"
+                                aria-label={c.moreLabel}
+                                title={c.moreLabel}
+                                onclick={handleReveal}>…</button>
+                    </template>
                     <template if:true={c.clickable}>
                         <a href="#" class="crumbs__link" data-key={c.key}
                            onclick={handleClick}>{c.label}</a>
                     </template>
                     <template if:false={c.clickable}>
-                        <span class="crumbs__current" aria-current="page">{c.label}</span>
+                        <template if:false={c.ellipsis}>
+                            <span class="crumbs__current" aria-current="page">{c.label}</span>
+                        </template>
                     </template>
                 </li>
             </template>

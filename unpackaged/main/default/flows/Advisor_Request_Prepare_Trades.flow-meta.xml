@@ -18,11 +18,11 @@
             <assignToReference>varCase.ContactId</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>Get_Financial_Account.FinServ__PrimaryOwner__r.PersonContactId</elementReference>
+                <elementReference>Get_Financial_Account.Primary_Owner__r.PersonContactId</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>varCase.FinServ__FinancialAccount__c</assignToReference>
+            <assignToReference>varCase.Wizard_Financial_Account__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>Get_Financial_Account.Id</elementReference>
@@ -78,7 +78,7 @@
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>varCase.FinServ__Household__c</assignToReference>
+            <assignToReference>varCase.Household__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>varHousehold.Id</elementReference>
@@ -88,7 +88,7 @@
             <assignToReference>varCase.Wizard_Financial_Account__c</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>Get_Financial_Account.Wizard_Financial_Account__c</elementReference>
+                <elementReference>Get_Financial_Account.Id</elementReference>
             </value>
         </assignmentItems>
         <connector>
@@ -111,11 +111,11 @@
             <assignToReference>varCase.ContactId</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>Get_Financial_Account.FinServ__PrimaryOwner__r.PersonContactId</elementReference>
+                <elementReference>Get_Financial_Account.Primary_Owner__r.PersonContactId</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>varCase.FinServ__FinancialAccount__c</assignToReference>
+            <assignToReference>varCase.Wizard_Financial_Account__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>Get_Financial_Account.Id</elementReference>
@@ -171,7 +171,7 @@
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>varCase.FinServ__Household__c</assignToReference>
+            <assignToReference>varCase.Household__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>varHousehold.Id</elementReference>
@@ -181,7 +181,7 @@
             <assignToReference>varCase.Wizard_Financial_Account__c</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>Get_Financial_Account.Wizard_Financial_Account__c</elementReference>
+                <elementReference>Get_Financial_Account.Id</elementReference>
             </value>
         </assignmentItems>
         <connector>
@@ -231,10 +231,10 @@
         <locationX>182</locationX>
         <locationY>650</locationY>
         <assignmentItems>
-            <assignToReference>varFinancialAccount</assignToReference>
+            <assignToReference>varFinAcctCustom.Id</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>Get_Financial_Account</elementReference>
+                <elementReference>Get_Financial_Account.Id</elementReference>
             </value>
         </assignmentItems>
         <connector>
@@ -250,7 +250,7 @@
             <assignToReference>varSelectedFinancialAccount</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>varFinancialAccount.Id</elementReference>
+                <elementReference>varFinAcctCustom.Id</elementReference>
             </value>
         </assignmentItems>
         <connector>
@@ -263,7 +263,7 @@
         <locationX>314</locationX>
         <locationY>350</locationY>
         <assignmentItems>
-            <assignToReference>varSelectedFinancialAccount</assignToReference>
+            <assignToReference>varFinAcctCustom.Id</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>Select_Financial_Account.selectedChoiceValues</elementReference>
@@ -318,7 +318,7 @@
             <name>FA</name>
             <conditionLogic>and</conditionLogic>
             <conditions>
-                <leftValueReference>varFinancialAccount.Id</leftValueReference>
+                <leftValueReference>varFinAcctCustom.Id</leftValueReference>
                 <operator>IsNull</operator>
                 <rightValue>
                     <booleanValue>false</booleanValue>
@@ -331,6 +331,21 @@
         </rules>
     </decisions>
     <description>Removing Advisor Request Item field.</description>
+    <dynamicChoiceSets>
+        <name>FinAcctCustom_Choices</name>
+        <dataType>String</dataType>
+        <displayField>Name</displayField>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Household__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>varHousehold.Id</elementReference>
+            </value>
+        </filters>
+        <object>Financial_Account__c</object>
+        <valueField>Id</valueField>
+    </dynamicChoiceSets>
     <dynamicChoiceSets>
         <name>FinancialAccounts_Record_ChoiceSet</name>
         <dataType>String</dataType>
@@ -427,7 +442,7 @@
             <field>Wizard_Financial_Account__c</field>
             <operator>EqualTo</operator>
             <value>
-                <elementReference>Get_Financial_Account.Wizard_Financial_Account__c</elementReference>
+                <elementReference>Get_Financial_Account.Id</elementReference>
             </value>
         </filters>
         <getFirstRecordOnly>true</getFirstRecordOnly>
@@ -452,7 +467,7 @@
             </value>
         </filters>
         <getFirstRecordOnly>true</getFirstRecordOnly>
-        <object>FinServ__FinancialAccount__c</object>
+        <object>Financial_Account__c</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <recordLookups>
@@ -469,7 +484,7 @@
             <field>Wizard_Financial_Account__c</field>
             <operator>EqualTo</operator>
             <value>
-                <elementReference>Get_Financial_Account.Wizard_Financial_Account__c</elementReference>
+                <elementReference>Get_Financial_Account.Id</elementReference>
             </value>
         </filters>
         <getFirstRecordOnly>true</getFirstRecordOnly>
@@ -517,6 +532,7 @@
                     <name>Reason_for_the_Trade</name>
                     <fieldText>Advisor Notes Related to Trade (including details about systematic withdrawals, contributions, and other relevant expected account activity):</fieldText>
                     <fieldType>LargeTextArea</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -565,7 +581,7 @@
                     <inputParameters>
                         <name>wizFinId</name>
                         <value>
-                            <elementReference>Get_Financial_Account.Wizard_Financial_Account__c</elementReference>
+                            <elementReference>Get_Financial_Account.Id</elementReference>
                         </value>
                     </inputParameters>
                     <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
@@ -689,6 +705,7 @@
                     <name>Reason_for_the_Trade_NonDMS</name>
                     <fieldText>Reason for the Trade:</fieldText>
                     <fieldType>LargeTextArea</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -703,6 +720,7 @@
                     <name>Additional_Case_Notes</name>
                     <fieldText>Additional Case Notes:</fieldText>
                     <fieldType>LargeTextArea</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -921,6 +939,14 @@
         <isInput>false</isInput>
         <isOutput>true</isOutput>
         <objectType>Case</objectType>
+    </variables>
+    <variables>
+        <name>varFinAcctCustom</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Financial_Account__c</objectType>
     </variables>
     <variables>
         <name>varFinancialAccount</name>

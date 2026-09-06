@@ -18,11 +18,11 @@
             <assignToReference>varCase.ContactId</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>Get_Financial_Account.FinServ__PrimaryOwner__r.PersonContactId</elementReference>
+                <elementReference>varFinAcctCustom.Primary_Owner__r.PersonContactId</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>varCase.FinServ__FinancialAccount__c</assignToReference>
+            <assignToReference>varCase.Wizard_Financial_Account__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>Get_Financial_Account.Id</elementReference>
@@ -85,7 +85,7 @@
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>varCase.FinServ__Household__c</assignToReference>
+            <assignToReference>varCase.Household__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>varHousehold.Id</elementReference>
@@ -120,7 +120,7 @@
             <assignToReference>varSelectedFinancialAccount</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>varFinancialAccount.Id</elementReference>
+                <elementReference>varFinAcctCustom.Id</elementReference>
             </value>
         </assignmentItems>
         <connector>
@@ -140,7 +140,7 @@
             <name>HH</name>
             <conditionLogic>and</conditionLogic>
             <conditions>
-                <leftValueReference>varFinancialAccount.Id</leftValueReference>
+                <leftValueReference>varFinAcctCustom.Id</leftValueReference>
                 <operator>IsNull</operator>
                 <rightValue>
                     <booleanValue>true</booleanValue>
@@ -153,6 +153,21 @@
         </rules>
     </decisions>
     <description>CCC: Removing Advisor Request Item field.</description>
+    <dynamicChoiceSets>
+        <name>FinAcctCustom_Choices</name>
+        <dataType>String</dataType>
+        <displayField>Name</displayField>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Household__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>varHousehold.Id</elementReference>
+            </value>
+        </filters>
+        <object>Financial_Account__c</object>
+        <valueField>Id</valueField>
+    </dynamicChoiceSets>
     <dynamicChoiceSets>
         <name>FinancialAccount_Record_ChoiceSet</name>
         <dataType>String</dataType>
@@ -230,7 +245,7 @@
             </value>
         </filters>
         <getFirstRecordOnly>true</getFirstRecordOnly>
-        <object>FinServ__FinancialAccount__c</object>
+        <object>Financial_Account__c</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <screens>
@@ -265,6 +280,7 @@
                     <name>Account_Maintenance_or_Forms_Needed</name>
                     <fieldText>Account Maintenance or Forms Needed:</fieldText>
                     <fieldType>LargeTextArea</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -279,6 +295,7 @@
                     <name>Additional_Case_Notes</name>
                     <fieldText>Additional Case Notes</fieldText>
                     <fieldType>LargeTextArea</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -430,7 +447,7 @@
                 </fields>
                 <fields>
                     <name>FinancialAccount_Lookup</name>
-                    <choiceReferences>FinancialAccount_Record_ChoiceSet</choiceReferences>
+                    <choiceReferences>FinAcctCustom_Choices</choiceReferences>
                     <extensionName>flowruntime:choiceLookup</extensionName>
                     <fieldText>Financial Account:</fieldText>
                     <fieldType>ComponentChoice</fieldType>
@@ -454,7 +471,7 @@
                     <visibilityRule>
                         <conditionLogic>or</conditionLogic>
                         <conditions>
-                            <leftValueReference>varFinancialAccount.Id</leftValueReference>
+                            <leftValueReference>varFinAcctCustom.Id</leftValueReference>
                             <operator>IsNull</operator>
                             <rightValue>
                                 <booleanValue>true</booleanValue>
@@ -551,6 +568,14 @@
         <isCollection>false</isCollection>
         <isInput>false</isInput>
         <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>varFinAcctCustom</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Financial_Account__c</objectType>
     </variables>
     <variables>
         <name>varFinancialAccount</name>

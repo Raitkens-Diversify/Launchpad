@@ -3,6 +3,16 @@
         <div class="acfm__panel">
             <h2 class="acfm__title">{header}</h2>
             <p class="acfm__message">{message}</p>
+            <template if:true={hasChoices}>
+                <lightning-radio-group class="acfm__choices"
+                                       name="choice"
+                                       label={choiceLabel}
+                                       options={choiceOptions}
+                                       value={defaultChoice}
+                                       type="radio"
+                                       disabled={busy}
+                                       onchange={handleChoiceChange}></lightning-radio-group>
+            </template>
             <template if:true={hasPrompt}>
                 <lightning-textarea class="acfm__prompt"
                                     label={promptLabel}

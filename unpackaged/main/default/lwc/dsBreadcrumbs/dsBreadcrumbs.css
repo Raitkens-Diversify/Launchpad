@@ -46,3 +46,20 @@
     font-weight: 600;
     color: var(--slds-g-color-on-surface-3, #09243f);
 }
+/* Collapsed middle on phone widths: a tappable ellipsis reveals the hidden levels. */
+.crumbs__more {
+    padding: 0 6px;
+    background: none;
+    border: 1px solid var(--slds-g-color-border-2, #b6bcc5);
+    border-radius: 999px;
+    font: inherit;
+    line-height: 1.4;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    cursor: pointer;
+}
+.crumbs__more:hover,
+.crumbs__more:focus-visible {
+    color: var(--slds-g-color-accent-1, #0f406f);
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+    outline: none;
+}

@@ -8,6 +8,7 @@
 
         <template if:true={detail}>
             <c-ds-breadcrumbs items={crumbItems}
+                              collapse-at="4"
                               oncrumbselect={handleCrumb}></c-ds-breadcrumbs>
 
             <h1 class="rd__title">{detail.name}</h1>
