@@ -43,10 +43,10 @@
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>varCase.FinServ__FinancialAccount__c</assignToReference>
+            <assignToReference>varCase.Wizard_Financial_Account__c</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>varFromFinancialAccount.Id</elementReference>
+                <elementReference>varFromFinAcctCustom.Id</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
@@ -95,14 +95,14 @@
             <assignToReference>varCase.From_Account__c</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>varFromFinancialAccount.Id</elementReference>
+                <elementReference>varFromFinAcctCustom.Id</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
             <assignToReference>varCase.To_Account__c</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>varToFinancialAccount.Id</elementReference>
+                <elementReference>varToFinAcctCustom.Id</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
@@ -155,7 +155,7 @@
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>varCase.FinServ__Household__c</assignToReference>
+            <assignToReference>varCase.Household__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>varHousehold.Id</elementReference>
@@ -171,10 +171,10 @@
         <locationX>182</locationX>
         <locationY>350</locationY>
         <assignmentItems>
-            <assignToReference>varFromFinancialAccount</assignToReference>
+            <assignToReference>varFromFinAcctCustom.Id</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>Get_Financial_Account_FromAccount</elementReference>
+                <elementReference>forSelectedFinancialAccount</elementReference>
             </value>
         </assignmentItems>
         <connector>
@@ -187,10 +187,10 @@
         <locationX>182</locationX>
         <locationY>674</locationY>
         <assignmentItems>
-            <assignToReference>varToFinancialAccount</assignToReference>
+            <assignToReference>varToFinAcctCustom.Id</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>Get_Financial_Account_ToAccount</elementReference>
+                <elementReference>Get_Financial_Account_ToAccount.Id</elementReference>
             </value>
         </assignmentItems>
         <connector>
@@ -254,6 +254,21 @@
     </decisions>
     <description>CCC: Removing Advisor Request Item field.</description>
     <dynamicChoiceSets>
+        <name>FinAcctCustom_Choices</name>
+        <dataType>String</dataType>
+        <displayField>Name</displayField>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Household__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>varHousehold.Id</elementReference>
+            </value>
+        </filters>
+        <object>Financial_Account__c</object>
+        <valueField>Id</valueField>
+    </dynamicChoiceSets>
+    <dynamicChoiceSets>
         <name>FinancialAccount_Record_ChoiceSet</name>
         <dataType>String</dataType>
         <displayField>Name</displayField>
@@ -307,6 +322,28 @@
         <valueField>Id</valueField>
     </dynamicChoiceSets>
     <dynamicChoiceSets>
+        <name>ToFinAcctCustom_Choices</name>
+        <dataType>String</dataType>
+        <displayField>Name</displayField>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Household__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>varHousehold.Id</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Id</field>
+            <operator>NotEqualTo</operator>
+            <value>
+                <elementReference>varFromFinancialAccount.Id</elementReference>
+            </value>
+        </filters>
+        <object>Financial_Account__c</object>
+        <valueField>Id</valueField>
+    </dynamicChoiceSets>
+    <dynamicChoiceSets>
         <name>TypeOfConversion_Picklist_ChoiceSet</name>
         <dataType>Picklist</dataType>
         <displayField xsi:nil="true"/>
@@ -325,12 +362,12 @@ false)</expression>
     <formulas>
         <name>forEnoughCash</name>
         <dataType>Boolean</dataType>
-        <expression>IF({!Get_Financial_Account_FromAccount.FinServ__CashBalance__c} &gt;= {!Amount}, true, false)</expression>
+        <expression>IF({!Get_Financial_Account_FromAccount.Cash_Balance__c} &gt;= {!Amount}, true, false)</expression>
     </formulas>
     <formulas>
         <name>forSelectedFinancialAccount</name>
         <dataType>String</dataType>
-        <expression>IF(ISBLANK({!Financial_Accounts_Funds_Coming_From_NoInput.defaultValue}), {!Financial_Account_Funds_Coming_From.selectedChoiceValues}, {!varFinancialAccount.Id})</expression>
+        <expression>IF(ISBLANK({!Financial_Accounts_Funds_Coming_From_NoInput.defaultValue}), {!Financial_Account_Funds_Coming_From.selectedChoiceValues}, {!varFinAcctCustom.Id} )</expression>
     </formulas>
     <formulas>
         <name>forSetOrChangeWithholdings</name>
@@ -349,8 +386,8 @@ false)</expression>
         <name>forWithholdingsPopulatedOnFA</name>
         <dataType>Boolean</dataType>
         <expression>IF(
-    NOT(ISBLANK({!varFromFinancialAccount.State_Withholding__c})) || 
-    NOT(ISBLANK({!varFromFinancialAccount.Federal_Withholding__c})),
+    NOT(ISBLANK({!varFromFinAcctCustom.State_Withholding__c})) || 
+    NOT(ISBLANK({!varFromFinAcctCustom.Federal_Withholding__c})),
     true,
     false
 )</expression>
@@ -397,7 +434,7 @@ false)</expression>
             <field>Id</field>
             <operator>EqualTo</operator>
             <value>
-                <elementReference>varFromFinancialAccount.FinServ__PrimaryOwner__r.PersonContactId</elementReference>
+                <elementReference>varFromFinAcctCustom.Primary_Owner__r.PersonContactId</elementReference>
             </value>
         </filters>
         <getFirstRecordOnly>true</getFirstRecordOnly>
@@ -422,7 +459,7 @@ false)</expression>
             </value>
         </filters>
         <getFirstRecordOnly>true</getFirstRecordOnly>
-        <object>FinServ__FinancialAccount__c</object>
+        <object>Financial_Account__c</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <recordLookups>
@@ -443,7 +480,7 @@ false)</expression>
             </value>
         </filters>
         <getFirstRecordOnly>true</getFirstRecordOnly>
-        <object>FinServ__FinancialAccount__c</object>
+        <object>Financial_Account__c</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <recordUpdates>
@@ -459,7 +496,7 @@ false)</expression>
             <field>Id</field>
             <operator>EqualTo</operator>
             <value>
-                <elementReference>varFromFinancialAccount.Id</elementReference>
+                <elementReference>varFromFinAcctCustom.Id</elementReference>
             </value>
         </filters>
         <inputAssignments>
@@ -474,7 +511,7 @@ false)</expression>
                 <elementReference>varStateWithholding</elementReference>
             </value>
         </inputAssignments>
-        <object>FinServ__FinancialAccount__c</object>
+        <object>Financial_Account__c</object>
     </recordUpdates>
     <screens>
         <name>FA_Selection_From_FA</name>
@@ -517,7 +554,7 @@ false)</expression>
                     <inputParameters>
                         <name>defaultValue</name>
                         <value>
-                            <elementReference>varFinancialAccount.Name</elementReference>
+                            <elementReference>varFinAcctCustom.Name</elementReference>
                         </value>
                     </inputParameters>
                     <inputParameters>
@@ -540,7 +577,7 @@ false)</expression>
                     <visibilityRule>
                         <conditionLogic>and</conditionLogic>
                         <conditions>
-                            <leftValueReference>varFinancialAccount.Id</leftValueReference>
+                            <leftValueReference>varFinAcctCustom.Id</leftValueReference>
                             <operator>IsNull</operator>
                             <rightValue>
                                 <booleanValue>false</booleanValue>
@@ -550,7 +587,7 @@ false)</expression>
                 </fields>
                 <fields>
                     <name>Financial_Account_Funds_Coming_From</name>
-                    <choiceReferences>FinancialAccount_Record_ChoiceSet</choiceReferences>
+                    <choiceReferences>FinAcctCustom_Choices</choiceReferences>
                     <extensionName>flowruntime:choiceLookup</extensionName>
                     <fieldText>Financial Account Funds Coming From:</fieldText>
                     <fieldType>ComponentChoice</fieldType>
@@ -574,7 +611,7 @@ false)</expression>
                     <visibilityRule>
                         <conditionLogic>and</conditionLogic>
                         <conditions>
-                            <leftValueReference>varFinancialAccount.Id</leftValueReference>
+                            <leftValueReference>varFinAcctCustom.Id</leftValueReference>
                             <operator>IsNull</operator>
                             <rightValue>
                                 <booleanValue>true</booleanValue>
@@ -690,7 +727,7 @@ false)</expression>
                     <inputParameters>
                         <name>defaultValue</name>
                         <value>
-                            <elementReference>varFromFinancialAccount.Name</elementReference>
+                            <elementReference>varFromFinAcctCustom.Name</elementReference>
                         </value>
                     </inputParameters>
                     <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
@@ -707,7 +744,7 @@ false)</expression>
                 </fields>
                 <fields>
                     <name>Financial_Account_Funds_Going_To</name>
-                    <choiceReferences>ToFA_Record_ChoiceSet</choiceReferences>
+                    <choiceReferences>ToFinAcctCustom_Choices</choiceReferences>
                     <extensionName>flowruntime:choiceLookup</extensionName>
                     <fieldText>Financial Account Funds Going To:</fieldText>
                     <fieldType>ComponentChoice</fieldType>
@@ -897,6 +934,7 @@ false)</expression>
                     <dataType>Currency</dataType>
                     <fieldText>Amount:</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <scale>2</scale>
                     <styleProperties>
@@ -913,6 +951,7 @@ false)</expression>
                     <dataType>Boolean</dataType>
                     <fieldText>Do You Want to Set Up Withholdings?</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -941,6 +980,7 @@ false)</expression>
                     </defaultValue>
                     <fieldText>Do Withholdings Need to Change?</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -965,10 +1005,11 @@ false)</expression>
                     <name>State_Withholding_FA</name>
                     <dataType>Number</dataType>
                     <defaultValue>
-                        <elementReference>varFromFinancialAccount.State_Withholding__c</elementReference>
+                        <elementReference>varFromFinAcctCustom.State_Withholding__c</elementReference>
                     </defaultValue>
                     <fieldText>State % Withholding from FA:</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <scale>2</scale>
                     <styleProperties>
@@ -1001,10 +1042,11 @@ false)</expression>
                     <name>Federal_Withholding_FA</name>
                     <dataType>Number</dataType>
                     <defaultValue>
-                        <elementReference>varFromFinancialAccount.Federal_Withholding__c</elementReference>
+                        <elementReference>varFromFinAcctCustom.Federal_Withholding__c</elementReference>
                     </defaultValue>
                     <fieldText>Federal % Withholding from FA:</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <scale>2</scale>
                     <styleProperties>
@@ -1039,6 +1081,7 @@ false)</expression>
                     <dataType>String</dataType>
                     <fieldText>Type of Conversion:</fieldText>
                     <fieldType>DropdownBox</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -1057,6 +1100,7 @@ false)</expression>
                     </defaultValue>
                     <fieldText>Close the Account?</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -1083,6 +1127,7 @@ false)</expression>
                     <dataType>String</dataType>
                     <fieldText>Partial Conversion Type:</fieldText>
                     <fieldType>DropdownBox</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -1109,6 +1154,7 @@ false)</expression>
                     <dataType>String</dataType>
                     <fieldText>How will the Client Sign?</fieldText>
                     <fieldType>DropdownBox</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -1123,6 +1169,7 @@ false)</expression>
                     <name>Additional_Case_Notes</name>
                     <fieldText>Additional Case Notes</fieldText>
                     <fieldType>LargeTextArea</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -1224,8 +1271,16 @@ false)</expression>
         <isOutput>false</isOutput>
         <scale>2</scale>
         <value>
-            <elementReference>varFromFinancialAccount.Federal_Withholding__c</elementReference>
+            <elementReference>varFromFinAcctCustom.Federal_Withholding__c</elementReference>
         </value>
+    </variables>
+    <variables>
+        <name>varFinAcctCustom</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Financial_Account__c</objectType>
     </variables>
     <variables>
         <name>varFinancialAccount</name>
@@ -1234,6 +1289,14 @@ false)</expression>
         <isInput>true</isInput>
         <isOutput>false</isOutput>
         <objectType>FinServ__FinancialAccount__c</objectType>
+    </variables>
+    <variables>
+        <name>varFromFinAcctCustom</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Financial_Account__c</objectType>
     </variables>
     <variables>
         <name>varFromFinancialAccount</name>
@@ -1259,8 +1322,16 @@ false)</expression>
         <isOutput>false</isOutput>
         <scale>2</scale>
         <value>
-            <elementReference>varFromFinancialAccount.State_Withholding__c</elementReference>
+            <elementReference>varFromFinAcctCustom.State_Withholding__c</elementReference>
         </value>
+    </variables>
+    <variables>
+        <name>varToFinAcctCustom</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Financial_Account__c</objectType>
     </variables>
     <variables>
         <name>varToFinancialAccount</name>

@@ -414,7 +414,7 @@
                     <inputParameters>
                         <name>defaultValue</name>
                         <value>
-                            <elementReference>varFinancialAccount.Name</elementReference>
+                            <elementReference>varFinAcctCustom.Name</elementReference>
                         </value>
                     </inputParameters>
                     <inputParameters>
@@ -437,7 +437,7 @@
                     <visibilityRule>
                         <conditionLogic>and</conditionLogic>
                         <conditions>
-                            <leftValueReference>varFinancialAccount.Id</leftValueReference>
+                            <leftValueReference>varFinAcctCustom.Id</leftValueReference>
                             <operator>IsNull</operator>
                             <rightValue>
                                 <booleanValue>false</booleanValue>

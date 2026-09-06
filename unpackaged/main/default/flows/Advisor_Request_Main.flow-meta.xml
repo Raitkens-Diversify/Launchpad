@@ -3,7 +3,7 @@
     <actionCalls>
         <name>Navigate_to_Case</name>
         <label>Navigate to Case</label>
-        <locationX>2558</locationX>
+        <locationX>2690</locationX>
         <locationY>1682</locationY>
         <actionName>c:cmp_NavigateToRecord</actionName>
         <actionType>component</actionType>
@@ -23,7 +23,7 @@
     <assignments>
         <name>Set_Financial_Account</name>
         <label>Set Financial Account</label>
-        <locationX>2690</locationX>
+        <locationX>2822</locationX>
         <locationY>458</locationY>
         <assignmentItems>
             <assignToReference>varFinancialAccount</assignToReference>
@@ -39,7 +39,7 @@
     <assignments>
         <name>Set_Household</name>
         <label>Set Household</label>
-        <locationX>1898</locationX>
+        <locationX>2030</locationX>
         <locationY>566</locationY>
         <assignmentItems>
             <assignToReference>varHousehold</assignToReference>
@@ -55,7 +55,7 @@
     <assignments>
         <name>Set_HouseholdofFA</name>
         <label>Set Household</label>
-        <locationX>2690</locationX>
+        <locationX>2822</locationX>
         <locationY>674</locationY>
         <assignmentItems>
             <assignToReference>varHousehold</assignToReference>
@@ -71,7 +71,7 @@
     <assignments>
         <name>Set_HouseholdofPA</name>
         <label>Set Household</label>
-        <locationX>2162</locationX>
+        <locationX>2294</locationX>
         <locationY>890</locationY>
         <assignmentItems>
             <assignToReference>varHousehold</assignToReference>
@@ -87,7 +87,7 @@
     <assignments>
         <name>Set_Person_Account</name>
         <label>Set Person Account</label>
-        <locationX>2162</locationX>
+        <locationX>2294</locationX>
         <locationY>566</locationY>
         <assignmentItems>
             <assignToReference>varPersonAccount.Id</assignToReference>
@@ -103,7 +103,7 @@
     <assignments>
         <name>Set_Selected_Case_Request</name>
         <label>Set Selected Case Request</label>
-        <locationX>2558</locationX>
+        <locationX>2690</locationX>
         <locationY>1274</locationY>
         <assignmentItems>
             <assignToReference>varFASelectedRequest</assignToReference>
@@ -133,7 +133,7 @@
     <decisions>
         <name>Account_or_Financial_Account</name>
         <label>Account or Financial Account?</label>
-        <locationX>2558</locationX>
+        <locationX>2690</locationX>
         <locationY>242</locationY>
         <defaultConnectorLabel>Neither Account or FA</defaultConnectorLabel>
         <rules>
@@ -170,7 +170,7 @@
     <decisions>
         <name>Household_or_Person_Account</name>
         <label>Household or Person Account?</label>
-        <locationX>2162</locationX>
+        <locationX>2294</locationX>
         <locationY>458</locationY>
         <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
         <rules>
@@ -207,7 +207,7 @@
     <decisions>
         <name>Which_Case_Request</name>
         <label>Which Case Request?</label>
-        <locationX>2558</locationX>
+        <locationX>2690</locationX>
         <locationY>1382</locationY>
         <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
         <rules>
@@ -495,6 +495,21 @@
             </connector>
             <label>Tax Return</label>
         </rules>
+        <rules>
+            <name>Life_Insurance_Quote</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>forSelectedCaseRequest</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <stringValue>Life Insurance Quote</stringValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Life_Insurance_Quote_Subflow</targetReference>
+            </connector>
+            <label>Life Insurance Quote</label>
+        </rules>
     </decisions>
     <description>CCC: Removing Deposit Check outcome and subflow</description>
     <dynamicChoiceSets>
@@ -586,7 +601,7 @@
     <recordLookups>
         <name>Get_Account</name>
         <label>Get Account</label>
-        <locationX>2162</locationX>
+        <locationX>2294</locationX>
         <locationY>350</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
@@ -607,7 +622,7 @@
     <recordLookups>
         <name>Get_ACR</name>
         <label>Get ACR</label>
-        <locationX>2162</locationX>
+        <locationX>2294</locationX>
         <locationY>674</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
@@ -628,7 +643,7 @@
     <recordLookups>
         <name>Get_Financial_Account</name>
         <label>Get Financial Account</label>
-        <locationX>2690</locationX>
+        <locationX>2822</locationX>
         <locationY>350</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
@@ -649,7 +664,7 @@
     <recordLookups>
         <name>Get_Household_of_FA</name>
         <label>Get Household</label>
-        <locationX>2690</locationX>
+        <locationX>2822</locationX>
         <locationY>566</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
@@ -670,7 +685,7 @@
     <recordLookups>
         <name>Get_Household_of_PA</name>
         <label>Get Household</label>
-        <locationX>2162</locationX>
+        <locationX>2294</locationX>
         <locationY>782</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
@@ -691,7 +706,7 @@
     <recordLookups>
         <name>Get_Wizard_Flow_Values</name>
         <label>Get Wizard Flow Values</label>
-        <locationX>2558</locationX>
+        <locationX>2690</locationX>
         <locationY>134</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
@@ -704,7 +719,7 @@
     <screens>
         <name>Case_Request_Selection</name>
         <label>Case Request Selection</label>
-        <locationX>2558</locationX>
+        <locationX>2690</locationX>
         <locationY>1166</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
@@ -891,7 +906,7 @@
         <showHeader>false</showHeader>
     </screens>
     <start>
-        <locationX>2432</locationX>
+        <locationX>2564</locationX>
         <locationY>0</locationY>
         <connector>
             <targetReference>Get_Wizard_Flow_Values</targetReference>
@@ -908,6 +923,12 @@
         </connector>
         <flowName>Draft_and_Submit_Form</flowName>
         <inputAssignments>
+            <name>varFinAcctCustom</name>
+            <value>
+                <elementReference>varFinancialAccountCustom</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
             <name>varHousehold</name>
             <value>
                 <elementReference>varHousehold</elementReference>
@@ -923,6 +944,23 @@
             <assignToReference>varCase</assignToReference>
             <name>varCase</name>
         </outputAssignments>
+    </subflows>
+    <subflows>
+        <name>Life_Insurance_Quote_Subflow</name>
+        <label>Life Insurance Quote</label>
+        <locationX>5066</locationX>
+        <locationY>1490</locationY>
+        <connector>
+            <targetReference>Navigate_to_Case</targetReference>
+        </connector>
+        <flowName>Advisor_Request_Life_Insurance_Quote</flowName>
+        <inputAssignments>
+            <name>varHousehold</name>
+        </inputAssignments>
+        <inputAssignments>
+            <name>varWizardFlowValues</name>
+        </inputAssignments>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
     </subflows>
     <subflows>
         <name>Subflow_401k_Rollover</name>
@@ -1126,9 +1164,9 @@
         </connector>
         <flowName>Advisor_Request_Grant_Donation</flowName>
         <inputAssignments>
-            <name>varFinancialAccount</name>
+            <name>varFinAcctCustom</name>
             <value>
-                <elementReference>varFinancialAccount</elementReference>
+                <elementReference>varFinancialAccountCustom</elementReference>
             </value>
         </inputAssignments>
         <inputAssignments>
@@ -1254,9 +1292,9 @@
         </connector>
         <flowName>Advisor_Request_Prepare_Trades</flowName>
         <inputAssignments>
-            <name>varFinancialAccount</name>
+            <name>varFinAcctCustom</name>
             <value>
-                <elementReference>varFinancialAccount</elementReference>
+                <elementReference>varFinancialAccountCustom</elementReference>
             </value>
         </inputAssignments>
         <inputAssignments>
@@ -1350,9 +1388,9 @@
         </connector>
         <flowName>Advisor_Request_Roth_Conversion</flowName>
         <inputAssignments>
-            <name>varFinancialAccount</name>
+            <name>varFinAcctCustom</name>
             <value>
-                <elementReference>varFinancialAccount</elementReference>
+                <elementReference>varFinancialAccountCustom</elementReference>
             </value>
         </inputAssignments>
         <inputAssignments>
@@ -1465,12 +1503,6 @@
             <targetReference>Navigate_to_Case</targetReference>
         </connector>
         <flowName>Advisor_Request_Trade_Error_Checklist</flowName>
-        <inputAssignments>
-            <name>varFinancialAccount</name>
-            <value>
-                <elementReference>varFinancialAccount</elementReference>
-            </value>
-        </inputAssignments>
         <inputAssignments>
             <name>varHousehold</name>
             <value>

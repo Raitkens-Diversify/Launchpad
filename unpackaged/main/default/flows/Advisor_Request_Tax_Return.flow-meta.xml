@@ -70,6 +70,13 @@
                 <elementReference>Tax_Return_Type</elementReference>
             </value>
         </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varCase.Household__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>varHousehold.Id</elementReference>
+            </value>
+        </assignmentItems>
         <connector>
             <targetReference>Create_Case</targetReference>
         </connector>

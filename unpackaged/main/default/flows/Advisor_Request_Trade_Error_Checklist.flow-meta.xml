@@ -123,6 +123,13 @@
                 <elementReference>Additional_Case_Notes</elementReference>
             </value>
         </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varCase.Household__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>varHousehold.Id</elementReference>
+            </value>
+        </assignmentItems>
         <connector>
             <targetReference>Create_Case</targetReference>
         </connector>
@@ -140,7 +147,7 @@
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>varTEIA.Financial_Account__c</assignToReference>
+            <assignToReference>varTEIA.Financial_Account_custom__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>Loop_through_Financial_Accounts</elementReference>
@@ -210,7 +217,7 @@
             <assignToReference>varColumns</assignToReference>
             <operator>Add</operator>
             <value>
-                <stringValue>FinServ__FinancialAccountNumber__c</stringValue>
+                <stringValue>Account_Number__c</stringValue>
             </value>
         </assignmentItems>
         <connector>
@@ -306,14 +313,14 @@
         </connector>
         <filterLogic>and</filterLogic>
         <filters>
-            <field>FinServ__Household__c</field>
+            <field>Household__c</field>
             <operator>EqualTo</operator>
             <value>
                 <elementReference>varHousehold.Id</elementReference>
             </value>
         </filters>
         <getFirstRecordOnly>false</getFirstRecordOnly>
-        <object>FinServ__FinancialAccount__c</object>
+        <object>Financial_Account__c</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <screens>
@@ -451,6 +458,7 @@
                     <name>What_Caused_the_Trade_Error</name>
                     <fieldText>What Caused the Trade Error?</fieldText>
                     <fieldType>LargeTextArea</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -466,6 +474,7 @@
                     <dataType>Date</dataType>
                     <fieldText>When did the Trade Error occur?</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -481,6 +490,7 @@
                     <dataType>Date</dataType>
                     <fieldText>What date should the Trades have occurred?</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -496,6 +506,7 @@
                     <dataType>String</dataType>
                     <fieldText>Who is the Responsible Party?</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -510,6 +521,7 @@
                     <name>Additional_Case_Notes</name>
                     <fieldText>Additional Case Notes</fieldText>
                     <fieldType>LargeTextArea</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <styleProperties>
                         <verticalAlignment>

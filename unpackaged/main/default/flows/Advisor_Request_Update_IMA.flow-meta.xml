@@ -8,7 +8,7 @@
         <locationX>176</locationX>
         <locationY>566</locationY>
         <assignmentItems>
-            <assignToReference>varCase.FinServ__Household__c</assignToReference>
+            <assignToReference>varCase.Household__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>varHousehold.Id</elementReference>
@@ -487,6 +487,7 @@
                     </defaultValue>
                     <fieldText>Authority:</fieldText>
                     <fieldType>DropdownBox</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -505,6 +506,7 @@
                     </defaultValue>
                     <fieldText>Advisory Fee (max 2.00%):</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <scale>3</scale>
                     <styleProperties>
@@ -525,6 +527,7 @@
                     </defaultValue>
                     <fieldText>Fee Disbursement:</fieldText>
                     <fieldType>DropdownBox</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -557,6 +560,7 @@
                     </defaultValue>
                     <fieldText>Please select the related financial account to deduct fees from:</fieldText>
                     <fieldType>DropdownBox</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -586,6 +590,7 @@
                     </defaultValue>
                     <fieldText>Time Horizon:</fieldText>
                     <fieldType>DropdownBox</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -605,6 +610,7 @@
                     </defaultValue>
                     <fieldText>Risk Tolerance:</fieldText>
                     <fieldType>DropdownBox</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -688,6 +694,7 @@
                     </defaultValue>
                     <fieldText>Liquidity Needs:</fieldText>
                     <fieldType>DropdownBox</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -706,6 +713,7 @@
                     </defaultValue>
                     <fieldText>Approx. Net Worth:</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <scale>2</scale>
                     <styleProperties>
@@ -725,6 +733,7 @@
                     </defaultValue>
                     <fieldText>Approx. Liquid Net Worth:</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <scale>2</scale>
                     <styleProperties>
@@ -744,6 +753,7 @@
                     </defaultValue>
                     <fieldText>Approx. Annual Income (All Sources):</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <scale>2</scale>
                     <styleProperties>
@@ -763,6 +773,7 @@
                     </defaultValue>
                     <fieldText>Approx. Annual Expenses (All Sources)</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <scale>2</scale>
                     <styleProperties>
@@ -783,6 +794,7 @@
                     </defaultValue>
                     <fieldText>Approx. Highest Tax Bracket:</fieldText>
                     <fieldType>DropdownBox</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -801,6 +813,7 @@
                     </defaultValue>
                     <fieldText>Additonal Notes/Restrictions:</fieldText>
                     <fieldType>InputField</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -817,6 +830,7 @@
                     <dataType>String</dataType>
                     <fieldText>How will the Client Sign?</fieldText>
                     <fieldType>DropdownBox</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>true</isRequired>
                     <styleProperties>
                         <verticalAlignment>
@@ -831,6 +845,7 @@
                     <name>Additional_Case_Notes</name>
                     <fieldText>Additional Case Notes</fieldText>
                     <fieldType>LargeTextArea</fieldType>
+                    <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
                     <isRequired>false</isRequired>
                     <styleProperties>
                         <verticalAlignment>
