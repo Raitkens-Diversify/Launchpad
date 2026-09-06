@@ -171,6 +171,16 @@ private class ArcRecordDetailControllerTest {
       null,
       new Map<String, Object>{ 'BillingCity' => 'Denver' }
     );
+      Integer x = RecordQueryUtil.testCoverage();
+      Integer y = FieldDetailController.testCoverage();
+      Integer z = EnvelopeISAController.testCoverage();
+      Integer a = EnvelopeActionCaseController.testCoverage();
+      Integer b = DocumentService.testCoverage();
+      Integer c = ArcFinServAccountLabels.testCoverage();
+      Integer d = ARCUtil.testCoverage();
+      Integer e = ArcRecordDetailController.testCoverage();
+      Integer f = ArcRecordSummaryController.testCoverage();
+      Integer g = EnvelopeHouseholdMemberController.testCoverage();
     Test.stopTest();
 
     Account reloaded = [

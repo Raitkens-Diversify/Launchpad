@@ -96,8 +96,7 @@ public with sharing class DocumentService {
             SELECT Id,
             Household__c,
             Trust__c,
-            Business__c,
-            Financial_Account__c
+            Business__c
             FROM Required_Documents__c
             WHERE Id IN :requiredDocumentIds
         ];
@@ -116,9 +115,9 @@ public with sharing class DocumentService {
             if (doc.Business__c != null) {
                 linkedIds.add(doc.Business__c);
             }
-            if (doc.Financial_Account__c != null) {
+            /*if (doc.Financial_Account__c != null) {
                 linkedIds.add(doc.Financial_Account__c);
-            }
+            }*/
         }
         
         if (linkedIds.isEmpty()) {

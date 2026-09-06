@@ -996,7 +996,7 @@ return result;
             SELECT Id
             FROM Required_Documents__c
             WHERE Person__c IN :ids OR Business__c IN :ids OR Trust__c IN :ids
-                OR Financial_Account__c IN :ids
+                //OR Financial_Account__c IN :ids
         ];
         Set<Id> documentIds = new Map<Id, Required_Documents__c>(documents).keySet();
 
