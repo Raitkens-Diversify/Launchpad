@@ -75,7 +75,7 @@ const RECORD_VF_PAGE = 'Egnyte_integration_page';
 /** Any object other than Account -- see EgnyteVfEmbedController.resolveRecordVfPage. */
 const GENERIC_RECORD_VF_PAGE = 'Egnyte_record_page';
 const ACCOUNT_KEY_PREFIX = '001';
-const DEFAULT_DOMAIN = 'https://arc-launchpad.diversify.com';
+const DEFAULT_DOMAIN = 'https://arc.diversify.com';
 const IFRAME_TITLE = 'Egnyte';
 /**
  * Height of the outer frame. Deliberately less than the canvas app's own fixed
