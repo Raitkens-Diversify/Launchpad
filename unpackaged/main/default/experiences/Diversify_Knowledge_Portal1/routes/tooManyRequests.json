@@ -1,9 +1,9 @@
 {
-  "activeViewId" : "92424025-f237-423e-8cbe-e91a404d52e0",
+  "activeViewId" : "5ddcccab-0470-4d69-9471-fd4053cb5e94",
   "appPageId" : "d5e3c47c-ae25-4c7a-848f-ab2b98f65f4d",
   "configurationTags" : [ "allow-in-static-site", "too-many-requests" ],
   "devName" : "Too_Many_Requests",
-  "id" : "23148de4-81a3-4863-8281-5235ff6552d8",
+  "id" : "760f38d7-385c-4f8f-b572-6cfe5d103cb1",
   "label" : "Too Many Requests",
   "routeType" : "too-many-requests",
   "type" : "route",
