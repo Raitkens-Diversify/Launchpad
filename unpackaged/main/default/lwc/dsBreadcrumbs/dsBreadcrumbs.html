@@ -7,10 +7,29 @@
                         <span class="crumbs__sep" aria-hidden="true">›</span>
                     </template>
                     <template if:true={c.ellipsis}>
-                        <button type="button" class="crumbs__more"
-                                aria-label={c.moreLabel}
-                                title={c.moreLabel}
-                                onclick={handleReveal}>…</button>
+                        <span class="crumbs__more-wrap" onkeydown={handleMenuKeydown}>
+                            <button type="button" class="crumbs__more"
+                                    aria-label={c.moreLabel}
+                                    title={c.moreLabel}
+                                    aria-haspopup="menu"
+                                    aria-expanded={c.menuExpanded}
+                                    onclick={handleMoreToggle}>…</button>
+                            <template if:true={c.menuOpen}>
+                                <ul class="crumbs__menu" role="menu" aria-label="Hidden levels">
+                                    <template for:each={c.hidden} for:item="h">
+                                        <li key={h.renderKey} role="none">
+                                            <template if:true={h.clickable}>
+                                                <a href="#" role="menuitem" class="crumbs__menu-link"
+                                                   data-key={h.key} onclick={handleClick}>{h.label}</a>
+                                            </template>
+                                            <template if:false={h.clickable}>
+                                                <span role="menuitem" class="crumbs__menu-text">{h.label}</span>
+                                            </template>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </template>
+                        </span>
                     </template>
                     <template if:true={c.clickable}>
                         <a href="#" class="crumbs__link" data-key={c.key}

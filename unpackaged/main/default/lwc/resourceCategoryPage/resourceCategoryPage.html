@@ -34,50 +34,24 @@
                 <template if:true={detail.description}>
                     <p class="rc-cat__desc">{detail.description}</p>
                 </template>
-                <template if:true={showSubtopics}>
-                    <c-ds-subnav label="In this category"
-                                 items={subtopicItems}
-                                 onnavselect={handleNavSelect}></c-ds-subnav>
+                <!-- The branch: one card per direct subcategory, same at every depth. -->
+                <template if:true={showSectionCards}>
+                    <c-ds-section-cards label="In this category"
+                                        noun="resource"
+                                        items={sectionCardItems}
+                                        onnavselect={handleSlugSelect}></c-ds-section-cards>
                 </template>
 
-                <template if:true={useSections}>
-                    <ul class="rc-sections">
-                        <template for:each={sectionView} for:item="sec">
-                            <li key={sec.key} class="rc-section">
-                                <button class="rc-section__head" type="button"
-                                        data-key={sec.key}
-                                        aria-expanded={sec.ariaExpanded}
-                                        onclick={handleSectionToggle}>
-                                    <span class="rc-section__title">{sec.title}</span>
-                                    <span class="rc-section__meta">
-                                        <span class="rc-section__count">{sec.countLabel}</span>
-                                        <lightning-icon icon-name={sec.iconName}
-                                                        size="x-small"
-                                                        alternative-text="Toggle section"></lightning-icon>
-                                    </span>
-                                </button>
-                                <div class={sec.bodyClass}>
-                                    <div class="rc-grid">
-                                        <template for:each={sec.items} for:item="r">
-                                            <c-ds-content-card key={r.id} item={r}
-                                                oncontentselect={handleContentSelect}></c-ds-content-card>
-                                        </template>
-                                    </div>
-                                </div>
-                            </li>
-                        </template>
-                    </ul>
-                </template>
-
-                <template if:false={useSections}>
-                    <template if:true={hasGridResources}>
-                        <div class="rc-grid">
-                            <template for:each={gridItems} for:item="r">
-                                <c-ds-content-card key={r.id} item={r}
-                                    oncontentselect={handleContentSelect}></c-ds-content-card>
-                            </template>
-                        </div>
-                    </template>
+                <!-- Own resources, or the ones inherited from the children. The
+                     cards' composed contentselect reaches this listener. -->
+                <template if:true={showList}>
+                    <c-ds-item-list variant="cards"
+                                    noun="resource"
+                                    heading={ownHeading}
+                                    items={ownItems}
+                                    groups={inheritedGroups}
+                                    oncontentselect={handleContentSelect}
+                                    onnavselect={handleSlugSelect}></c-ds-item-list>
                 </template>
 
                 <template if:true={isEmpty}>

@@ -1,0 +1,24 @@
+<template>
+    <template if:true={hasItems}>
+        <ul class="ds-sc__grid" aria-label={label}>
+            <template for:each={cards} for:item="c">
+                <li key={c.key} class="ds-sc__cell">
+                    <a href="#" class="ds-sc__card" data-key={c.key} onclick={handleSelect}>
+                        <span class="ds-sc__title">{c.label}</span>
+                        <template if:true={c.description}>
+                            <span class="ds-sc__desc">{c.description}</span>
+                        </template>
+                        <span class="ds-sc__counts">{c.counts}</span>
+                        <template if:true={c.hasPreview}>
+                            <ul class="ds-sc__preview" aria-hidden="true">
+                                <template for:each={c.preview} for:item="p">
+                                    <li key={p.key} class="ds-sc__preview-item">{p.title}</li>
+                                </template>
+                            </ul>
+                        </template>
+                    </a>
+                </li>
+            </template>
+        </ul>
+    </template>
+</template>

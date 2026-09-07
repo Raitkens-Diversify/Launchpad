@@ -1,0 +1,71 @@
+<template>
+    <!-- Own content: the node's directly attached items. -->
+    <template if:true={hasOwn}>
+        <section class="ds-il__section">
+            <template if:true={heading}>
+                <h2 class="ds-il__heading">{heading}</h2>
+            </template>
+            <template if:true={isRows}>
+                <ul class="ds-il__rows">
+                    <template for:each={ownRows} for:item="a">
+                        <li key={a.key} class="ds-il__row">
+                            <a href="#" class="ds-il__link"
+                               data-id={a.id} data-routekey={a.routeKey}
+                               onclick={handleItemClick}
+                               onmouseenter={handleItemHover}
+                               onfocus={handleItemHover}>{a.title}</a>
+                            <template if:true={a.featured}>
+                                <c-ds-badge label="Featured" variant="info"></c-ds-badge>
+                            </template>
+                        </li>
+                    </template>
+                </ul>
+            </template>
+            <template if:false={isRows}>
+                <div class="ds-il__grid">
+                    <template for:each={ownRows} for:item="r">
+                        <c-ds-content-card key={r.key} item={r}></c-ds-content-card>
+                    </template>
+                </div>
+            </template>
+        </section>
+    </template>
+
+    <!-- Inherited content: grouped by the direct child it hangs from. -->
+    <template if:true={hasGroups}>
+        <template for:each={groupView} for:item="g">
+            <section key={g.key} class="ds-il__group">
+                <h3 class="ds-il__group-title">
+                    <a href="#" class="ds-il__group-link" data-key={g.key} onclick={handleNav}>{g.label}</a>
+                    <span class="ds-il__group-count">{g.countLabel}</span>
+                </h3>
+                <template if:true={isRows}>
+                    <ul class="ds-il__rows">
+                        <template for:each={g.rows} for:item="a">
+                            <li key={a.key} class="ds-il__row">
+                                <a href="#" class="ds-il__link"
+                                   data-id={a.id} data-routekey={a.routeKey}
+                                   onclick={handleItemClick}
+                                   onmouseenter={handleItemHover}
+                                   onfocus={handleItemHover}>{a.title}</a>
+                                <template if:true={a.featured}>
+                                    <c-ds-badge label="Featured" variant="info"></c-ds-badge>
+                                </template>
+                            </li>
+                        </template>
+                    </ul>
+                </template>
+                <template if:false={isRows}>
+                    <div class="ds-il__grid">
+                        <template for:each={g.rows} for:item="r">
+                            <c-ds-content-card key={r.key} item={r}></c-ds-content-card>
+                        </template>
+                    </div>
+                </template>
+                <template if:true={g.showMore}>
+                    <a href="#" class="ds-il__more" data-key={g.key} onclick={handleNav}>{g.moreLabel}</a>
+                </template>
+            </section>
+        </template>
+    </template>
+</template>

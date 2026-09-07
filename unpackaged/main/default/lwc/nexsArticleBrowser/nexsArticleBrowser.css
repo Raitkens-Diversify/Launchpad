@@ -204,7 +204,7 @@
 
 /* Browse-view topic title, matching .rc-cat__title in the Resource Center. */
 .nexs__title {
-    margin: 0 0 var(--slds-g-spacing-3, 12px);
+    margin: 0 0 var(--slds-g-spacing-4, 16px);
     font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
     font-size: 1.75rem;
     font-weight: 400;
@@ -262,7 +262,8 @@
     gap: var(--slds-g-spacing-3, 12px);
 }
 
-/* ---- Collapsible sections (Hulu-style card of link rows) ---- */
+/* ---- Search results: collapsible section (Hulu-style card of link rows).
+   Category browse renders c-ds-section-cards + c-ds-item-list instead. ---- */
 .nexs__sections {
     list-style: none;
     margin: 0;

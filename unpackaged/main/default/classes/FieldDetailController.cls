@@ -695,6 +695,28 @@ public with sharing class FieldDetailController {
         }
     }
 
+    // A MULTIPICKLIST field's SObject.get() value is the platform's raw semicolon-delimited
+    // String (e.g. "Aggressive;Moderate"), never a List<String> -- every other value type is
+    // returned unchanged. lightning-dual-listbox (envelopeFieldControl's MULTIPICKLIST control)
+    // requires an array and throws calling .forEach() on a bare string, so both record-value reads
+    // below must split before handing a MULTIPICKLIST value to the client. Mirrors
+    // WizardEnvelopeStateService.typedAccountValue's split of stored proposal text: tolerates the
+    // '; ' a writer joins with and the bare ';' the platform itself uses.
+    @TestVisible
+    private static Object coerceMultipicklistValue(Schema.SObjectField field, Object rawValue) {
+        if (rawValue == null || field == null
+            || field.getDescribe().getType() != Schema.DisplayType.MULTIPICKLIST) {
+            return rawValue;
+        }
+        List<String> selected = new List<String>();
+        for (String part : String.valueOf(rawValue).split(';')) {
+            if (String.isNotBlank(part)) {
+                selected.add(part.trim());
+            }
+        }
+        return selected;
+    }
+
     // Live record values for the fields a type's interview edits, so record-backed entities
     // prefill from the record rather than only the envelope-state blob. The read set is driven by
     // the same Envelope_Field__mdt rows that drive the form, so it always matches the interview.
@@ -741,7 +763,7 @@ public with sharing class FieldDetailController {
             for (String fieldApi : fieldApis) {
                 Object value = record.get(fieldApi);
                 if (value != null) {
-                    values.put(fieldApi, value);
+                    values.put(fieldApi, coerceMultipicklistValue(fieldMap.get(fieldApi), value));
                 }
             }
             result.put(record.Id, values);
@@ -806,7 +828,9 @@ public with sharing class FieldDetailController {
         for (SObject record : Database.query(soql)) {
             Map<String, Object> values = new Map<String, Object>();
             for (String proposedField : sourceByProposed.keySet()) {
-                values.put(proposedField, record.get(sourceByProposed.get(proposedField)));
+                String source = sourceByProposed.get(proposedField);
+                values.put(proposedField,
+                    coerceMultipicklistValue(accountFields.get(source), record.get(source)));
             }
             result.put(record.Id, values);
         }

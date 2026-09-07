@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>false</isExposed>
+    <description>Shared card grid of a category&#39;s direct children (title, description, &quot;N sections · M articles&quot; count line, title preview) for nexsArticleBrowser and resourceCategoryPage. Whole card is the link; emits navselect like c-ds-tree.</description>
+</LightningComponentBundle>

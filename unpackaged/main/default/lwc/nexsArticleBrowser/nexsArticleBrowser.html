@@ -71,14 +71,14 @@
 
             <!-- Collapsible sections of article links -->
             <template if:false={showViewer}>
-                <!-- Topic title + its subtopics, so the content column shows the
-                     branch too (the sidebar is the only other place it lives). -->
+                <!-- Topic title + its direct children as section cards, so the
+                     content column shows the branch too (same at every depth). -->
                 <template if:true={showTitle}>
                     <h1 class="nexs__title">{selectedCategoryLabel}</h1>
                 </template>
-                <template if:true={showSubtopics}>
-                    <c-ds-subnav items={subtopicItems}
-                                 onnavselect={handleNavSelect}></c-ds-subnav>
+                <template if:true={showSectionCards}>
+                    <c-ds-section-cards items={sectionCardItems}
+                                        onnavselect={handleNavSelect}></c-ds-section-cards>
                 </template>
 
                 <template if:true={loadingArticles}>
@@ -111,6 +111,18 @@
                     </div>
                 </template>
 
+                <!-- Category browse: the topic's own articles, or the ones
+                     inherited from its children grouped under linked headings. -->
+                <template if:true={showList}>
+                    <c-ds-item-list heading={ownHeading}
+                                    items={ownArticles}
+                                    groups={inheritedGroups}
+                                    onitemselect={handleListSelect}
+                                    onitemhover={handleListHover}
+                                    onnavselect={handleNavSelect}></c-ds-item-list>
+                </template>
+
+                <!-- Search results: one open section of highlighted rows. -->
                 <template if:true={hasSections}>
                     <ul class="nexs__sections">
                         <template for:each={sectionView} for:item="sec">

@@ -2,6 +2,9 @@ import { LightningElement, api, wire } from 'lwc';
 import { iconPath } from 'c/rcIcons';
 import { toContentItem, rcRootCrumbs, CRUMB_HELP_HOME, CRUMB_RC_HOME } from 'c/rcConstants';
 import { indexTree, findNode } from 'c/treeUtil';
+
+const PREVIEW_MAX = 3;
+const GENERAL_SECTION = 'general';
 import getCategoryBySlug from '@salesforce/apex/ResourceCenterService.getCategoryBySlug';
 import getCategoryTree from '@salesforce/apex/ResourceCenterService.getCategoryTree';
 
@@ -24,13 +27,15 @@ import getCategoryTree from '@salesforce/apex/ResourceCenterService.getCategoryT
  * the Resources tab land on the same browse shape as Help Articles instead
  * of a bespoke landing page.
  *
- * Pages (any depth):
- *  - A category WITH subcategories: collapsible sections, one per direct
- *    child holding that child's whole subtree (first open), then its own
- *    resources trailing in "General resources"; a single section renders
- *    the plain card grid.
- *  - A leaf category: flat card grid of its own resources. Every category is
- *    its own page — deep links land here directly.
+ * Pages (any depth), the same shape at every level:
+ *  - Section cards (c-ds-section-cards), one per direct subcategory from
+ *    CategoryDetail.subcategories (description, "N sections · M resources",
+ *    a preview of its first resources), keyed by slug.
+ *  - Then the category's own resources as cards (c-ds-item-list, cards
+ *    variant) — or, when it has none of its own, the resources inherited
+ *    from its children grouped under linked child headings, capped with a
+ *    "View all" link. A leaf goes straight to its own resources. Every
+ *    category is its own page — deep links land here directly.
  *
  * Emits (composed) `categoryselect { slug }`, `rchome`, and
  * `resourceselect { slug }` — translated from c-ds-content-card's
@@ -56,7 +61,6 @@ export default class ResourceCategoryPage extends LightningElement {
     detail;
     error;
     loading = true;
-    openKeys = new Set();
     navRoots = [];
     _navTree = indexTree([]);
     navOpen = false;
@@ -96,61 +100,71 @@ export default class ResourceCategoryPage extends LightningElement {
         this.error = undefined;
         this.loading = false;
         this.navOpen = false;
-        const sections = data.sections || [];
-        // Help Center convention: first section open, rest collapsed.
-        this.openKeys = new Set(sections.length ? [sections[0].key] : []);
     }
 
     // ---- View model ----------------------------------------------------------
 
+    /** One per direct child holding that child's whole subtree (server-built),
+        plus the trailing 'general' section of the category's own resources. */
     get sections() {
         return (this.detail && this.detail.sections) || [];
     }
 
-    /** Section chrome only earns its place on a branch with 2+ groups; leaf
-        pages and single-section branches render the plain grid. */
-    get useSections() {
-        return Boolean(this.detail && this.detail.hasChildren) && this.sections.length > 1;
+    sectionFor(slug) {
+        const section = this.sections.find((s) => s.key === slug);
+        return (section && section.resources) || [];
     }
 
-    get gridResources() {
-        if (this.sections.length === 1) {
-            return this.sections[0].resources;
+    /** Section cards: EVERY active direct subcategory (CategoryDetail.subcategories
+        is unpruned, unlike the sidebar tree, so an empty one still cards and
+        reads "0 resources"), keyed by slug — the routing key. */
+    get sectionCardItems() {
+        return ((this.detail && this.detail.subcategories) || []).map((t) => ({
+            key: t.slug,
+            label: t.name,
+            description: t.description,
+            sectionCount: t.subcategoryCount || 0,
+            descendantItemCount: t.resourceCount || 0,
+            preview: this.sectionFor(t.slug).slice(0, PREVIEW_MAX).map((r) => ({ id: r.id, title: r.name }))
+        }));
+    }
+
+    get showSectionCards() {
+        return this.sectionCardItems.length > 0;
+    }
+
+    /** Resources shown on the category itself (home + "Also show in"). */
+    get ownItems() {
+        return ((this.detail && this.detail.resources) || []).map(toContentItem);
+    }
+
+    get ownHeading() {
+        return this.detail ? `Resources in ${this.detail.name}` : '';
+    }
+
+    /** Inherited resources grouped by the child they hang from — only when
+        the category has nothing of its own, so a branch never dead-ends. */
+    get inheritedGroups() {
+        if (this.ownItems.length) {
+            return [];
         }
-        return (this.detail && this.detail.resources) || [];
+        return this.sections
+            .filter((s) => s.key !== GENERAL_SECTION && (s.resources || []).length > 0)
+            .map((s) => ({ key: s.key, label: s.title, items: s.resources.map(toContentItem) }));
     }
 
-    get hasGridResources() {
-        return this.gridResources.length > 0;
+    get showList() {
+        return this.ownItems.length > 0 || this.inheritedGroups.length > 0;
     }
 
-    get gridItems() {
-        return this.gridResources.map(toContentItem);
-    }
-
+    /** True empty: nothing on the category and nothing anywhere under it. */
     get isEmpty() {
-        return Boolean(this.detail) && !this.useSections && !this.hasGridResources;
+        return Boolean(this.detail) && !this.showList;
     }
 
     /** Tree keys are category Ids; the routed key is the slug. */
     get activeKey() {
         return this.detail ? this.detail.id : null;
-    }
-
-    /** This category's direct children for c-ds-subnav, keyed like the
-        sidebar so one handleNavSelect serves both. The reader tree prunes
-        empty branches server-side, so only subcategories with content list. */
-    get subtopicItems() {
-        const node = findNode(this._navTree, this.activeKey);
-        return ((node && node.children) || []).map((c) => ({
-            key: c.id,
-            label: c.label,
-            count: c.descendantItemCount
-        }));
-    }
-
-    get showSubtopics() {
-        return this.subtopicItems.length > 0;
     }
 
     get crumbItems() {
@@ -162,23 +176,6 @@ export default class ResourceCategoryPage extends LightningElement {
             crumbs.push({ label: this.detail.name });
         }
         return crumbs;
-    }
-
-    get sectionView() {
-        return this.sections.map((s) => {
-            const open = this.openKeys.has(s.key);
-            const count = s.resources.length;
-            return {
-                ...s,
-                items: s.resources.map(toContentItem),
-                ariaExpanded: open ? 'true' : 'false',
-                iconName: open ? 'utility:chevrondown' : 'utility:chevronright',
-                bodyClass: open
-                    ? 'rc-section__body'
-                    : 'rc-section__body rc-section__body--collapsed',
-                countLabel: count === 1 ? '1 resource' : `${count} resources`
-            };
-        });
     }
 
     get navClass() {
@@ -195,21 +192,18 @@ export default class ResourceCategoryPage extends LightningElement {
 
     // ---- Handlers --------------------------------------------------------------
 
-    handleSectionToggle(event) {
-        const key = event.currentTarget.dataset.key;
-        const next = new Set(this.openKeys);
-        if (next.has(key)) {
-            next.delete(key);
-        } else {
-            next.add(key);
-        }
-        this.openKeys = next;
-    }
-
+    /** Sidebar rows are keyed by category Id; resolve to the routed slug. */
     handleNavSelect(event) {
         const node = findNode(this._navTree, event.detail.key);
         if (node) {
             this.fireCategorySelect(node.slug);
+        }
+    }
+
+    /** Section cards and inherited-group headings are keyed by slug already. */
+    handleSlugSelect(event) {
+        if (event.detail.key) {
+            this.fireCategorySelect(event.detail.key);
         }
     }
 

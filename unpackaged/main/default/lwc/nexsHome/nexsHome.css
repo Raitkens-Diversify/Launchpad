@@ -187,7 +187,7 @@
     font-weight: 600;
     color: var(--slds-g-color-on-surface-3, #09243f);
 }
-/* What's underneath: "12 articles · 3 subtopics" from the tree's counts. */
+/* What's underneath: "3 sections · 12 articles" (c/treeUtil.countLine). */
 .home-topics__meta {
     margin-top: -4px;
     font-size: 0.8125rem;

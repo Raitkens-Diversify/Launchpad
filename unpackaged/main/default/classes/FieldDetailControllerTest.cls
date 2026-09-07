@@ -488,6 +488,49 @@ private class FieldDetailControllerTest {
         }
     }
 
+    @IsTest
+    static void getRecordValuesForTypeSplitsMultipicklistIntoAList() {
+        Account person = person();
+        person.Investment_Objectives__c = 'Growth;Balanced';
+        update person;
+
+        Test.startTest();
+        Map<Id, Map<String, Object>> result =
+            FieldDetailController.getRecordValuesForType('Account', 'Client - Individual', new List<Id>{ person.Id });
+        Test.stopTest();
+
+        Map<String, Object> values = result.get(person.Id);
+        Object value = values.get('Investment_Objectives__c');
+        Assert.isTrue(value instanceof List<Object>,
+            'A MULTIPICKLIST value is served as a list, not the raw semicolon-delimited string');
+        Assert.areEqual(new List<String>{ 'Growth', 'Balanced' }, (List<Object>) value,
+            'lightning-dual-listbox needs its selected values as a list, in field order');
+    }
+
+    @IsTest
+    static void coerceMultipicklistValueOnlySplitsMultipicklistFields() {
+        Schema.SObjectField multiselect = Account.Investment_Objectives__c;
+        Schema.SObjectField single = Account.Name;
+
+        Assert.areEqual(new List<String>{ 'Growth', 'Balanced' },
+            FieldDetailController.coerceMultipicklistValue(multiselect, 'Growth;Balanced'),
+            'Splits on ; and trims each part');
+        // Real records read back "A; B" (a writer's own join) as often as the platform's bare
+        // "A;B" -- both must resolve to the same two trimmed values.
+        Assert.areEqual(new List<String>{ 'Growth', 'Balanced' },
+            FieldDetailController.coerceMultipicklistValue(multiselect, 'Growth; Balanced'),
+            'Tolerates a space after the delimiter same as WizardEnvelopeStateService.typedAccountValue');
+        Assert.areEqual(new List<String>(),
+            FieldDetailController.coerceMultipicklistValue(multiselect, ''),
+            'A blank multiselect value splits to an empty list, not a list with one blank entry');
+        Assert.areEqual(null, FieldDetailController.coerceMultipicklistValue(multiselect, null),
+            'Null stays null -- callers rely on this to omit or preserve "currently empty"');
+        Assert.areEqual('Acme', FieldDetailController.coerceMultipicklistValue(single, 'Acme'),
+            'A non-MULTIPICKLIST field value is returned unchanged');
+        Assert.areEqual('Acme', FieldDetailController.coerceMultipicklistValue(null, 'Acme'),
+            'An unresolved field (null) passes the value through unchanged rather than throwing');
+    }
+
     // ------------------------------------------------------------------ getOriginalAccountValues
 
     @IsTest

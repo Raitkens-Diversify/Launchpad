@@ -46,7 +46,11 @@
     font-weight: 600;
     color: var(--slds-g-color-on-surface-3, #09243f);
 }
-/* Collapsed middle on phone widths: a tappable ellipsis reveals the hidden levels. */
+/* Collapsed middle on phone widths: the ellipsis opens a menu of the hidden levels. */
+.crumbs__more-wrap {
+    position: relative;
+    display: inline-flex;
+}
 .crumbs__more {
     padding: 0 6px;
     background: none;
@@ -61,5 +65,37 @@
 .crumbs__more:focus-visible {
     color: var(--slds-g-color-accent-1, #0f406f);
     border-color: var(--slds-g-color-accent-1, #0f406f);
+    outline: none;
+}
+.crumbs__more[aria-expanded="true"] {
+    color: var(--slds-g-color-accent-1, #0f406f);
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+}
+.crumbs__menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 5;
+    min-width: 180px;
+    margin: 0;
+    padding: 6px 0;
+    list-style: none;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-md, 8px);
+    box-shadow: var(--ds-shadow-drop, 0 8px 24px rgba(9, 36, 63, 0.12));
+}
+.crumbs__menu-link,
+.crumbs__menu-text {
+    display: block;
+    padding: 8px 12px;
+    white-space: nowrap;
+    color: var(--slds-g-color-on-surface-2, #374151);
+    text-decoration: none;
+}
+.crumbs__menu-link:hover,
+.crumbs__menu-link:focus-visible {
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    color: var(--slds-g-color-accent-1, #0f406f);
     outline: none;
 }

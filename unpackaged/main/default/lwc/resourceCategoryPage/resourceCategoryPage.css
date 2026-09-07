@@ -20,20 +20,15 @@
     min-width: 0;
 }
 .rc-cat__title {
-    margin: 0;
+    margin: 0 0 var(--ds-space-lg, 16px);
     font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
     font-size: 1.75rem;
     color: var(--slds-g-color-on-surface-3, #09243f);
 }
 .rc-cat__desc {
-    margin: var(--ds-space-sm, 8px) 0 var(--ds-space-lg, 16px);
+    margin: calc(-1 * var(--ds-space-sm, 8px)) 0 var(--ds-space-lg, 16px);
     font-size: 1rem;
     color: var(--slds-g-color-on-surface-2, #374151);
-}
-.rc-grid {
-    display: grid;
-    gap: var(--ds-space-lg, 16px);
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
 }
 .rc-cat__empty,
 .rc-cat__status {
@@ -42,60 +37,8 @@
     color: var(--slds-g-color-on-surface-1, #4b5563);
 }
 
-/* ---- Collapsible subtopic sections (mirrors the Help Center's topic view) ---- */
-.rc-sections {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--ds-space-md, 12px);
-}
-.rc-section {
-    background: var(--slds-g-color-surface-container-1, #ffffff);
-    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
-    border-radius: var(--ds-radius-md, 8px);
-    overflow: hidden;
-}
-.rc-section__head {
-    width: 100%;
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--ds-space-md, 12px);
-    padding: 18px var(--ds-space-xl, 24px);
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-family: inherit;
-    text-align: left;
-}
-.rc-section__title {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--slds-g-color-on-surface-3, #09243f);
-}
-.rc-section__meta {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--ds-space-sm, 8px);
-}
-.rc-section__count {
-    font-size: var(--div-font-scale-base, 1rem);
-    color: var(--slds-g-color-on-surface-1, #4b5563);
-    white-space: nowrap;
-}
-.rc-section__head lightning-icon {
-    --slds-c-icon-color-foreground-default: var(--slds-g-color-on-surface-1, #4b5563);
-}
-.rc-section__body {
-    padding: var(--ds-space-lg, 16px) var(--ds-space-xl, 24px) var(--ds-space-xl, 24px);
-    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
-}
-.rc-section__body--collapsed {
-    display: none;
-}
+/* Section cards and the resource lists are c-ds-section-cards /
+   c-ds-item-list (cards variant) — their chrome lives there. */
 
 /* Drawer toggle: hidden on desktop, the sidebar's only entry on phones. */
 .rc-cat__nav-toggle {
@@ -139,7 +82,4 @@
     .rc-cat__nav--open {
         display: block;
     }
-}
-@media (max-width: 640px) {
-    .rc-grid { grid-template-columns: 1fr; }
 }

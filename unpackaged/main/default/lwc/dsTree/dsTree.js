@@ -1,5 +1,5 @@
 import { LightningElement, api } from 'lwc';
-import { indexTree, findNode, flattenTree, expandedForActive, ancestorsOf } from 'c/treeUtil';
+import { indexTree, findNode, flattenTree, expandedForActive, ancestorsOf, REBASE_DEPTH } from 'c/treeUtil';
 
 /**
  * dsTree — the shared N-level "All topics" sidebar for the Help Center and
@@ -20,7 +20,14 @@ import { indexTree, findNode, flattenTree, expandedForActive, ancestorsOf } from
  *                  is NOT the key — pass the id the host routes by; both
  *                  apps pass whatever they put in `key` today).
  * @api showCounts  render descendantItemCount badges.
- * @api rebaseDepth depth (1-based) at which the view rebases; default 4.
+ * @api rebaseDepth depth (1-based) at which the view rebases; default
+ *                  c/treeUtil.REBASE_DEPTH (4) — the one place the threshold lives.
+ *
+ * Rows deeper than the top level are text-only and get progressively LIGHTER
+ * weight per depth (never smaller type): ds-tree__row--d2/--d3/--d4 (capped).
+ * A node carrying `meta` (a host-computed count line such as "3 sections ·
+ * 12 articles") renders it muted under the label — the landing directories
+ * use that instead of the count badge.
  *
  * Emits `navselect { key }` from any row, including the "back" row.
  * Keyboard: roving tabindex; ArrowUp/Down move, ArrowRight expands or enters,
@@ -30,7 +37,7 @@ export default class DsTree extends LightningElement {
     // Named `heading`, not `title` — @api title would double as the global
     // HTML title attribute and tooltip the whole nav.
     @api heading = 'All topics';
-    @api rebaseDepth = 4;
+    @api rebaseDepth = REBASE_DEPTH;
 
     _roots = [];
     _activeKey;
@@ -83,7 +90,7 @@ export default class DsTree extends LightningElement {
     /** The node the list is rebased at (null = whole tree). */
     get base() {
         const active = this.activeNode;
-        const rebaseAt = Number(this.rebaseDepth) || 4;
+        const rebaseAt = Number(this.rebaseDepth) || REBASE_DEPTH;
         if (!active || active.depth < rebaseAt) {
             return null;
         }
@@ -132,8 +139,10 @@ export default class DsTree extends LightningElement {
                 iconPath: top ? r.iconPath : undefined,
                 showIcon: top && Boolean(r.iconPath),
                 count: this._showCounts && r.descendantItemCount > 0 ? String(r.descendantItemCount) : null,
+                meta: r.meta || null,
                 toggleLabel: `${r.expanded ? 'Collapse' : 'Expand'} ${r.label}`,
                 rowClass: `ds-tree__row ${top ? 'ds-tree__row--top' : 'ds-tree__row--nested'}`
+                    + (top ? '' : ` ds-tree__row--d${Math.min(depth, 4)}`)
                     + (active ? ' ds-tree__row--active' : ''),
                 toggleClass: `ds-tree__toggle${r.expanded ? ' ds-tree__toggle--open' : ''}`,
                 style: top ? '' : `padding-left: ${64 + 16 * (depth - 2)}px`

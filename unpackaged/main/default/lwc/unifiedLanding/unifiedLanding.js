@@ -24,8 +24,9 @@ import { createSearchLogger, logSearchEntry, APP_LANDING } from 'c/searchLogUtil
 import { registerTourScope } from 'c/tourDom';
 
 /** A directory row: the main topic alone. Dropping the branch removes the
-    c-ds-tree chevron (no peeking subtopics on the home page); the rolled-up
-    count stays, so the badge still says what the whole branch holds. */
+    c-ds-tree chevron (no peeking subtopics on the home page), and the home
+    page shows NO counts (user decision 2026-09-06) — the count line and the
+    branch belong on the topic's own page. */
 function topLevel(node) {
     return { ...node, children: [], hasChildren: false };
 }
@@ -119,7 +120,7 @@ export default class UnifiedLanding extends NavigationMixin(LightningElement) {
     }
 
     /** Both directories list main topics only (see topLevel()); the branch
-        lives on the topic's own page, where c-ds-subnav and the sidebar show it. */
+        lives on the topic's own page, where the section cards and the sidebar show it. */
     @wire(getHelpTopicTree)
     wiredTopics({ data }) {
         if (data) {

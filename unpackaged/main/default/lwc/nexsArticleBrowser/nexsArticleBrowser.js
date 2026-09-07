@@ -12,30 +12,29 @@ import { topicIconPath } from 'c/nexsTopicIcons';
 import { highlightSegments } from 'c/nexsHighlight';
 // One shared analytics path (dedup + App__c tagging live there).
 import { createSearchLogger, logResultClick, APP_HELP_CENTER } from 'c/searchLogUtil';
-import { ORDER_SENTINEL } from 'c/searchConstants';
-// The Help_Topics tree (any depth): nav rows, ancestor crumbs, scope labels.
+// The Help_Topics tree (any depth): nav rows, ancestor crumbs, scope labels,
+// section cards and the own/inherited article split.
 import { indexTree, findNode, ancestorsOf } from 'c/treeUtil';
 
 const TOPIC_CRUMB = 'topic:';
+const PREVIEW_MAX = 3;
 
-// Fallback section order for articles filed on the topic itself (no subtopic):
-// grouped by article-type label, always after the named subtopic sections.
-// Keyed on RecordType.DeveloperName (stable API name) — labels are renameable
-// in Setup and silently broke this ordering when used as keys.
-const TYPE_ORDER = { FAQ: 1, How_To: 2, Troubleshooting: 3 };
-const FALLBACK_SECTION = 'Articles';
-// Subtopics use their taxonomy index (0..n); the shared sentinel means "sorts
-// after all real taxonomy" (same value ResourceCenterService uses).
-const FALLBACK_ORDER_BASE = ORDER_SENTINEL;
+/** An ArticleSummary as a c-ds-item-list row. */
+function rowOf(a) {
+    return { id: a.id, title: a.title, routeKey: a.urlName, featured: Boolean(a.featured) };
+}
 
 /**
  * nexsArticleBrowser
  *
- * Hulu-style help browser: persistent left Data Category nav, a prominent
- * search bar, and a main panel that groups the category's articles into
- * collapsible sections (by subtopic, falling back to article type). Selecting
- * an article shows
- * nexsArticleViewer inline. A "Need more help?" contact band sits at the bottom.
+ * Hulu-style help browser: persistent left Data Category nav (c-ds-tree), a
+ * prominent search bar, and a main panel that shows the topic's branch as
+ * section cards (c-ds-section-cards: one per direct child, any depth) over
+ * the topic's own articles — or, when it has none of its own, the articles
+ * inherited from its children grouped under linked child headings
+ * (c-ds-item-list). Search results keep their single collapsible section.
+ * Selecting an article shows nexsArticleViewer inline. A "Need more help?"
+ * contact band sits at the bottom.
  *
  * Dual-context note: the viewer renders inline (a state swap) rather than
  * navigating, so this one component is drop-in for both the Experience Cloud
@@ -189,20 +188,61 @@ export default class NexsArticleBrowser extends LightningElement {
         return this.mode === 'category' && !this.showViewer && Boolean(this.selectedCategory);
     }
 
-    /** The selected topic's direct children for c-ds-subnav — the tree is
-        unpruned, so an empty subtopic lists too (count-less), as in the
-        sidebar. Counts are the subtree roll-up the sidebar badge shows. */
-    get subtopicItems() {
-        const node = findNode(this._tree, this.selectedCategory);
-        return ((node && node.children) || []).map((c) => ({
-            key: c.id,
-            label: c.label,
-            count: c.descendantItemCount
+    /** The selected topic's node in the Help_Topics index (null until both
+        the tree and a selection exist). */
+    get selectedNode() {
+        return findNode(this._tree, this.selectedCategory);
+    }
+
+    /** Articles the topic list holds under one direct child: the list comes
+        back BELOW the topic with `section` = that child's label (a grandchild
+        filing groups under the child it hangs from). */
+    articlesUnder(child) {
+        return (this.articles || []).filter((a) => a.section != null && a.section === child.label);
+    }
+
+    /** Section cards: the topic's direct children (tree nodes — the card
+        prints countLine() from them) plus a preview of the first titles
+        under each. The Help_Topics tree is unpruned, so an empty subtopic
+        still cards, reading "0 articles", as it does in the sidebar. */
+    get sectionCardItems() {
+        const node = this.selectedNode;
+        return ((node && node.children) || []).map((child) => ({
+            ...child,
+            key: child.id,
+            preview: this.articlesUnder(child).slice(0, PREVIEW_MAX).map((a) => ({ id: a.id, title: a.title }))
         }));
     }
 
-    get showSubtopics() {
-        return this.showTitle && this.subtopicItems.length > 0;
+    get showSectionCards() {
+        return this.showTitle && this.sectionCardItems.length > 0;
+    }
+
+    /** Articles filed on the topic itself (no subtopic section). */
+    get ownArticles() {
+        return (this.articles || []).filter((a) => a.section == null).map(rowOf);
+    }
+
+    get ownHeading() {
+        return `Articles in ${this.selectedCategoryLabel}`;
+    }
+
+    /** Inherited articles grouped by the direct child each hangs from —
+        offered only when the topic has nothing of its own, so a branch page
+        never dead-ends on "No articles here yet" while content sits below. */
+    get inheritedGroups() {
+        if (this.ownArticles.length) {
+            return [];
+        }
+        const node = this.selectedNode;
+        return ((node && node.children) || [])
+            .map((child) => ({ key: child.id, label: child.label, items: this.articlesUnder(child).map(rowOf) }))
+            .filter((g) => g.items.length > 0);
+    }
+
+    get showList() {
+        return this.showTitle && !this.loadingArticles
+            && (this.ownArticles.length > 0 || this.inheritedGroups.length > 0);
     }
 
     /** Crumb trail for the shared c-ds-breadcrumbs — Help Center › ancestors…
@@ -240,9 +280,10 @@ export default class NexsArticleBrowser extends LightningElement {
         return !this.loadingArticles && this.sections.length > 0;
     }
 
-    // Category browse with nothing filed yet.
+    // Category browse with nothing filed on the topic OR anywhere under it —
+    // the list is BELOW-scoped, so empty means the whole subtree is empty.
     get showEmpty() {
-        return !this.loadingArticles && this.mode === 'category' && this.sections.length === 0;
+        return !this.loadingArticles && this.mode === 'category' && (this.articles || []).length === 0;
     }
 
     // Search that returned nothing — never blank; show fallback articles + CTA.
@@ -373,6 +414,11 @@ export default class NexsArticleBrowser extends LightningElement {
         this.selectedArticleId = null;
         this.articleTitle = '';
         this._lastSearchLogId = null; // leaving search mode — don't attribute clicks to a stale search
+        // Routed hosts mirror the topic into ?topic= so Back/Forward walk the
+        // tree too (mirror of articleopen). Non-routed hosts don't listen.
+        this.dispatchEvent(new CustomEvent('topicchange', {
+            detail: { name, label: this.selectedCategoryLabel }
+        }));
         this.loadArticles();
     }
 
@@ -528,43 +574,11 @@ export default class NexsArticleBrowser extends LightningElement {
 
     buildSections() {
         const rows = this.articles || [];
-        if (!rows.length) {
-            this.sections = [];
-            return;
-        }
-
-        // Search results stay as one open "Results" section.
-        if (this.mode === 'search') {
-            this.sections = [{ key: 'results', title: this.panelHeading, open: true, articles: rows }];
-            return;
-        }
-
-        // Category browse: group by article-type label.
-        // Category browse: group by subtopic (Hulu-style section headers from
-        // the Data Category taxonomy); articles without one fall back to their
-        // article-type label, after the named sections.
-        const groups = new Map();
-        for (const a of rows) {
-            const title = a.section || a.recordTypeLabel || FALLBACK_SECTION;
-            const order = a.section != null && a.sectionOrder != null
-                ? a.sectionOrder
-                : FALLBACK_ORDER_BASE + (TYPE_ORDER[a.recordType] || 99);
-            if (!groups.has(title)) {
-                groups.set(title, { title, order, articles: [] });
-            }
-            groups.get(title).articles.push(a);
-        }
-
-        const sections = [...groups.values()].map((g) => ({
-            key: g.title,
-            title: g.title,
-            order: g.order,
-            articles: g.articles
-        }));
-        sections.sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
-
-        // First section open, the rest collapsed.
-        this.sections = sections.map((s, i) => ({ ...s, open: i === 0 }));
+        // Search results stay as one open "Results" section; category browse
+        // renders c-ds-section-cards + c-ds-item-list straight from `articles`.
+        this.sections = rows.length && this.mode === 'search'
+            ? [{ key: 'results', title: this.panelHeading, open: true, articles: rows }]
+            : [];
     }
 
     handleSectionToggle(event) {
@@ -579,10 +593,23 @@ export default class NexsArticleBrowser extends LightningElement {
     handleArticleClick(event) {
         event.preventDefault(); // rows are anchors; don't jump the page
         const { id, urlname } = event.currentTarget.dataset;
+        this.openArticleRow(id, urlname);
+    }
+
+    /** c-ds-item-list rows (category browse). */
+    handleListSelect(event) {
+        this.openArticleRow(event.detail.id, event.detail.routeKey);
+    }
+
+    handleListHover(event) {
+        this.prefetch(event.detail.id);
+    }
+
+    openArticleRow(id, urlName) {
         this.logResultClick(id);
         if (this.navigateOnArticleSelect) {
             this.dispatchEvent(
-                new CustomEvent('articleselect', { detail: { articleId: id, urlName: urlname } })
+                new CustomEvent('articleselect', { detail: { articleId: id, urlName } })
             );
             return;
         }
@@ -603,7 +630,10 @@ export default class NexsArticleBrowser extends LightningElement {
     // Warm the article body cache on hover/focus so the click feels instant.
     // getArticle is cacheable, so the viewer's later call is served from cache.
     handlePrefetch(event) {
-        const id = event.currentTarget.dataset.id;
+        this.prefetch(event.currentTarget.dataset.id);
+    }
+
+    prefetch(id) {
         if (!id || this._prefetched.has(id)) {
             return;
         }

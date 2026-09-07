@@ -87,6 +87,14 @@
     font-size: 0.875rem;
     font-weight: 500;
 }
+/* Deeper levels get lighter weight, never smaller type (capped at --d4). */
+.ds-tree__row--d3 .ds-tree__item {
+    font-weight: 400;
+}
+.ds-tree__row--d4 .ds-tree__item {
+    font-weight: 400;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
 .ds-tree__row:hover .ds-tree__item,
 .ds-tree__row--active .ds-tree__item {
     background: var(--slds-g-color-accent-1, #0f406f);
@@ -122,9 +130,25 @@
     width: 20px;
     height: 20px;
 }
-.ds-tree__label {
+.ds-tree__text {
     flex: 1 1 auto;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.ds-tree__label {
+    min-width: 0;
+}
+/* Host-supplied count line ("3 sections · 12 articles"), muted under the label. */
+.ds-tree__meta {
+    font-size: 0.8125rem;
+    font-weight: 400;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ds-tree__row:hover .ds-tree__meta,
+.ds-tree__row--active .ds-tree__meta {
+    color: rgba(255, 255, 255, 0.82);
 }
 .ds-tree__count {
     flex: none;

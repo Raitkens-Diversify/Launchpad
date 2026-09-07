@@ -7,26 +7,15 @@ import { createSuggestionFetcher } from 'c/dsSearchBar';
 import { createSearchLogger, APP_HELP_CENTER } from 'c/searchLogUtil';
 // Shared Help_Topics icon paths (rendered with stroke=currentColor).
 import { topicIconPath } from 'c/nexsTopicIcons';
+// The shared "N sections · M articles" count line (same string as every
+// other reader surface).
+import { countLine } from 'c/treeUtil';
 // This component owns the guided tour's data-tour-id targets; registering the
 // template lets the tour engine find them in every sandbox mode (walking in
 // from outside is severed by platform shadow roots on core pages).
 import { registerTourScope } from 'c/tourDom';
 
 const MAX_POPULAR = 6;
-
-/** "12 articles · 3 subtopics" for a top-level tree node ('' when empty). */
-function topicMeta(node) {
-    const articles = node.descendantItemCount || 0;
-    const subs = (node.children || []).length;
-    const parts = [];
-    if (articles) {
-        parts.push(`${articles} ${articles === 1 ? 'article' : 'articles'}`);
-    }
-    if (subs) {
-        parts.push(`${subs} ${subs === 1 ? 'subtopic' : 'subtopics'}`);
-    }
-    return parts.join(' · ');
-}
 
 /**
  * nexsHome
@@ -72,15 +61,15 @@ export default class NexsHome extends LightningElement {
         this._searchLogger.dispose();
     }
 
-    /** Top-level topics only (the grid stays flat); each carries a "what's
-        underneath" line built from the tree's rolled-up counts. */
+    /** Top-level topics only (the grid stays flat); each carries the shared
+        "N sections · M articles" line built from the tree's rolled-up counts. */
     @wire(getCategoryTree)
     wiredCategories({ data, error }) {
         if (data) {
             this.categories = (data.roots || []).map((r) => ({
                 name: r.id,
                 label: r.label,
-                meta: topicMeta(r)
+                meta: countLine(r, 'article')
             }));
         } else if (error) {
             // eslint-disable-next-line no-console

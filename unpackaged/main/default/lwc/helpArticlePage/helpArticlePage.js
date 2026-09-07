@@ -123,6 +123,39 @@ export default class HelpArticlePage extends NavigationMixin(LightningElement) {
         return readParams(this._pageRef).name || null;
     }
 
+    /** Read from the live URL, not the cached page ref — this host writes
+        ?topic= itself and the CurrentPageReference wire never re-emits. */
+    currentTopic() {
+        return readParams(null).topic || null;
+    }
+
+    /** Browse navigation → ?topic=, so Back/Forward walk the topic tree too
+        (mirror of handleArticleOpen). The first topic after a bare mount is
+        canonicalised with replaceState — no extra history entry for landing
+        on the default topic; later changes push. */
+    handleTopicChange(event) {
+        const topic = event.detail && event.detail.name;
+        if (!topic || !this._isSite) {
+            return; // core app: Lightning owns the history stack
+        }
+        try {
+            if (this.currentTopic() === topic) {
+                return; // deep-link mount or popstate-driven open — URL is right
+            }
+            const url = new URL(window.location.href);
+            const bare = !url.searchParams.has('topic') && !url.searchParams.has('name')
+                && !url.searchParams.has('article');
+            url.searchParams.set('topic', topic);
+            if (bare) {
+                window.history.replaceState({}, '', url.toString());
+            } else {
+                window.history.pushState({}, '', url.toString());
+            }
+        } catch (e) {
+            // URL sync is best-effort — never break browsing.
+        }
+    }
+
     handleArticleOpen(event) {
         const urlName = event.detail.urlName;
         if (!urlName) {
@@ -167,8 +200,11 @@ export default class HelpArticlePage extends NavigationMixin(LightningElement) {
             return;
         }
         const name = this.currentUrlName();
+        const topic = this.currentTopic();
         if (name) {
             browser.openArticleByUrlName(name);
+        } else if (topic) {
+            browser.openCategory(topic); // the topic this history entry was on
         } else {
             browser.searchFor(''); // back to the browse list
         }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>false</isExposed>
+    <description>Shared topic-page content list for nexsArticleBrowser and resourceCategoryPage: the node&#39;s own items under a quiet heading, or inherited items grouped by child with linked headings, a per-group cap and &quot;View all N&quot; links. Rows or cards.</description>
+</LightningComponentBundle>

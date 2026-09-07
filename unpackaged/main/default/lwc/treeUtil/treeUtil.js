@@ -19,6 +19,9 @@
  */
 
 export const DEFAULT_MAX_DEPTH = 5;
+/** Sidebar depth (1-based) at which c-ds-tree re-roots the panel on the
+    active branch — the ONE place this threshold lives (visibleRows, dsTree). */
+export const REBASE_DEPTH = 4;
 
 // Mirror of CategoryTreeService's messages — change both together.
 export const MSG = Object.freeze({
@@ -354,7 +357,7 @@ export function flattenTree(tree, expandedKeys, roots = tree.roots) {
  * `upKey` (its parent's key) for a single "back up" row; the breadcrumb
  * carries the rest of the chain.
  */
-export function visibleRows(tree, activeKey, { rebaseDepth = 4 } = {}) {
+export function visibleRows(tree, activeKey, { rebaseDepth = REBASE_DEPTH } = {}) {
     const expanded = expandedForActive(tree, activeKey);
     const active = tree.byId.get(activeKey);
     if (!active || active.depth < rebaseDepth) {
@@ -383,6 +386,29 @@ export function optionsFor(tree, excludeKey, maxDepth = DEFAULT_MAX_DEPTH) {
             label: `${'— '.repeat(n.depth - 1)}${n.label}`,
             depth: n.depth
         }));
+}
+
+/** "1 article" / "3 articles" — the reader-facing count with its noun. */
+export function pluralize(n, noun) {
+    const count = Number(n) || 0;
+    return `${count} ${count === 1 ? noun : noun + 's'}`;
+}
+
+/**
+ * The count line every reader surface prints for a node: "N articles" for a
+ * leaf, "N sections · M articles" for a node with children. Sections are the
+ * node's direct children (`children.length`, or a tile's `sectionCount`);
+ * the item count is the whole subtree (descendantItemCount, falling back to
+ * itemCount). `noun` names the content ('article' / 'resource').
+ */
+export function countLine(node, noun = 'article') {
+    if (!node) {
+        return '';
+    }
+    const sections = node.sectionCount != null ? node.sectionCount : (node.children || []).length;
+    const items = node.descendantItemCount != null ? node.descendantItemCount : (node.itemCount || 0);
+    const itemsText = pluralize(items, noun);
+    return sections > 0 ? `${pluralize(sections, 'section')} · ${itemsText}` : itemsText;
 }
 
 /**

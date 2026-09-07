@@ -13,8 +13,10 @@ import { truncateMiddle } from 'c/treeUtil';
  * loading). Any length: category trees hand over the whole ancestor chain.
  *
  * @api collapseAt: on phone widths (≤ 640px) a trail longer than this
- * collapses to "first › … › parent › current"; tapping the ellipsis reveals
- * the hidden middle (c/treeUtil.truncateMiddle). 0 (default) never collapses.
+ * collapses to "first › … › parent › current"; the ellipsis is a button that
+ * opens a small menu of the hidden ancestors, each a link emitting
+ * `crumbselect` (c/treeUtil.truncateMiddle picks what hides). Escape or a
+ * click elsewhere closes it. 0 (default) never collapses.
  *
  * Styling: no :host token redeclaration — the --slds-g-* and --ds-* custom
  * properties inherit from the host page's :host block, with the same literal
@@ -26,9 +28,11 @@ export default class DsBreadcrumbs extends LightningElement {
 
     _items = [];
     narrow = false;
-    revealed = false;
+    menuOpen = false;
     _mql;
     _onMedia;
+    _onDocClick;
+    _focusMenu = false;
 
     @api
     get items() {
@@ -36,7 +40,7 @@ export default class DsBreadcrumbs extends LightningElement {
     }
     set items(value) {
         this._items = value || [];
-        this.revealed = false;
+        this.closeMenu();
     }
 
     connectedCallback() {
@@ -47,7 +51,7 @@ export default class DsBreadcrumbs extends LightningElement {
         this.narrow = Boolean(this._mql.matches);
         this._onMedia = (event) => {
             this.narrow = Boolean(event.matches);
-            this.revealed = false;
+            this.closeMenu();
         };
         if (typeof this._mql.addEventListener === 'function') {
             this._mql.addEventListener('change', this._onMedia);
@@ -57,6 +61,7 @@ export default class DsBreadcrumbs extends LightningElement {
     }
 
     disconnectedCallback() {
+        this.closeMenu();
         if (!this._mql || !this._onMedia) {
             return;
         }
@@ -71,7 +76,7 @@ export default class DsBreadcrumbs extends LightningElement {
 
     get itemView() {
         const max = Number(this.collapseAt) || 0;
-        const shown = this.narrow && !this.revealed && max ? truncateMiddle(this._items, max) : this._items;
+        const shown = this.narrow && max ? truncateMiddle(this._items, max) : this._items;
         return shown.map((c, i) => {
             if (c.ellipsis) {
                 const n = c.hidden.length;
@@ -80,7 +85,14 @@ export default class DsBreadcrumbs extends LightningElement {
                     ellipsis: true,
                     showSep: i > 0,
                     clickable: false,
-                    moreLabel: `Show ${n} more ${n === 1 ? 'level' : 'levels'}`
+                    moreLabel: `Show ${n} more ${n === 1 ? 'level' : 'levels'}`,
+                    menuExpanded: this.menuOpen ? 'true' : 'false',
+                    menuOpen: this.menuOpen,
+                    hidden: c.hidden.map((h, j) => ({
+                        ...h,
+                        renderKey: h.key || `hidden-${j}`,
+                        clickable: Boolean(h.key)
+                    }))
                 };
             }
             return {
@@ -94,12 +106,68 @@ export default class DsBreadcrumbs extends LightningElement {
 
     handleClick(event) {
         event.preventDefault();
+        this.closeMenu();
         this.dispatchEvent(new CustomEvent('crumbselect', {
             detail: { key: event.currentTarget.dataset.key }
         }));
     }
 
-    handleReveal() {
-        this.revealed = true;
+    // ---- Hidden-ancestor menu ------------------------------------------------
+
+    handleMoreToggle(event) {
+        event.stopPropagation();
+        if (this.menuOpen) {
+            this.closeMenu();
+        } else {
+            this.openMenu();
+        }
+    }
+
+    openMenu() {
+        this.menuOpen = true;
+        this._focusMenu = true;
+        if (typeof document !== 'undefined' && !this._onDocClick) {
+            this._onDocClick = () => this.closeMenu();
+            document.addEventListener('click', this._onDocClick);
+        }
+    }
+
+    closeMenu() {
+        this.menuOpen = false;
+        if (this._onDocClick && typeof document !== 'undefined') {
+            document.removeEventListener('click', this._onDocClick);
+            this._onDocClick = null;
+        }
+    }
+
+    /** Escape closes and returns focus to the ellipsis; arrows walk the items. */
+    handleMenuKeydown(event) {
+        const links = [...this.template.querySelectorAll('.crumbs__menu-link')];
+        const i = links.indexOf(this.template.activeElement);
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            this.closeMenu();
+            const more = this.template.querySelector('.crumbs__more');
+            if (more) {
+                more.focus();
+            }
+        } else if (event.key === 'ArrowDown' && links.length) {
+            event.preventDefault();
+            links[(i + 1) % links.length].focus();
+        } else if (event.key === 'ArrowUp' && links.length) {
+            event.preventDefault();
+            links[(i - 1 + links.length) % links.length].focus();
+        }
+    }
+
+    renderedCallback() {
+        if (!this._focusMenu) {
+            return;
+        }
+        this._focusMenu = false;
+        const first = this.template.querySelector('.crumbs__menu-link');
+        if (first) {
+            first.focus();
+        }
     }
 }

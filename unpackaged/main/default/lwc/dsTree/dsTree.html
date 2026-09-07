@@ -52,7 +52,12 @@
                                 </svg>
                             </span>
                         </template>
-                        <span class="ds-tree__label">{r.label}</span>
+                        <span class="ds-tree__text">
+                            <span class="ds-tree__label">{r.label}</span>
+                            <template if:true={r.meta}>
+                                <span class="ds-tree__meta">{r.meta}</span>
+                            </template>
+                        </span>
                         <template if:true={r.count}>
                             <span class="ds-tree__count">{r.count}</span>
                         </template>
