@@ -16,7 +16,7 @@
     </values>
     <values>
         <field>Network_Name__c</field>
-        <value xsi:type="xsd:string">ARC</value>
+        <value xsi:type="xsd:string">Arc</value>
     </values>
     <values>
         <field>Resources_Path__c</field>

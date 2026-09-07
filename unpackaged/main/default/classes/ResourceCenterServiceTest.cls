@@ -462,20 +462,22 @@ private class ResourceCenterServiceTest {
         // reason the table exists: ARC hosts the Help & Resources components on
         // its own pages (help-center / article / learning / events), and a
         // link to the shared /help site would be a different login. Seeded
-        // with the real ARC row shape (customMetadata/Help_Surface.ARC).
-        ResourceCenterService.surfaceOverride = 'ARC';
+        // with the real ARC row shape (customMetadata/Help_Surface.ARC). The
+        // network is named "Arc" while the row says "ARC": the lookup must be
+        // case-insensitive (prod regression 2026-09-06 — a login page).
+        ResourceCenterService.surfaceOverride = 'Arc';
         ResourceCenterService.surfaceRows = new Map<String, Help_Surface__mdt>{
-            'ARC' => new Help_Surface__mdt(
+            ResourceCenterService.surfaceKey('ARC') => new Help_Surface__mdt(
                 Network_Name__c = 'ARC', Home_Path__c = 'help-center', Article_Path__c = 'article',
                 Resources_Path__c = 'learning', Events_Path__c = 'events')
         };
-        ResourceCenterService.siteBaseOverride.put('ARC', 'https://x.my.site.com/ARC');
+        ResourceCenterService.siteBaseOverride.put('Arc', 'https://x.my.site.com/ARC');
 
         Test.startTest();
         ResourceCenterService.LinkContext ctx = ResourceCenterService.getLinkContext();
         Test.stopTest();
 
-        Assert.areEqual('ARC', ctx.surface);
+        Assert.areEqual('Arc', ctx.surface);
         Assert.areEqual('https://x.my.site.com/ARC', ctx.helpBase, 'The CURRENT site root, not /help');
         Assert.areEqual('https://x.my.site.com/ARC/help-center', ctx.homeBase);
         Assert.areEqual('https://x.my.site.com/ARC/article', ctx.articleBase);
@@ -484,10 +486,31 @@ private class ResourceCenterServiceTest {
     }
 
     @isTest
+    static void eventsUrlForResolvesANetworkWithoutASiteContext() {
+        // The scheduled announcement sweep has no Network context: it names
+        // the network and gets that site's Events page (row path + SecureUrl).
+        ResourceCenterService.surfaceRows = new Map<String, Help_Surface__mdt>{
+            ResourceCenterService.surfaceKey('Arc') => new Help_Surface__mdt(
+                Network_Name__c = 'Arc', Events_Path__c = 'events')
+        };
+        ResourceCenterService.siteBaseOverride.put('Arc', 'https://arc.example');
+        ResourceCenterService.siteBaseOverride.put('Bare', 'https://bare.example');
+
+        Assert.areEqual('https://arc.example/events', ResourceCenterService.eventsUrlFor('Arc'));
+        // (The site seam is keyed exactly; the row lookup is case-folded and a
+        // real Site query matches MasterLabel case-insensitively anyway.)
+        Assert.areEqual('https://bare.example/events', ResourceCenterService.eventsUrlFor('Bare'),
+            'No row → the default page name on the resolved site');
+        Assert.isNull(ResourceCenterService.eventsUrlFor('No Such Network'),
+            'Unresolvable site → null, never a throw');
+        Assert.isNull(ResourceCenterService.eventsUrlFor(' '));
+    }
+
+    @isTest
     static void linkContextBlankPathsMeanRootAndDefaults() {
         ResourceCenterService.surfaceOverride = 'Diversify Help Center';
         ResourceCenterService.surfaceRows = new Map<String, Help_Surface__mdt>{
-            'Diversify Help Center' => new Help_Surface__mdt(Network_Name__c = 'Diversify Help Center')
+            ResourceCenterService.surfaceKey('Diversify Help Center') => new Help_Surface__mdt(Network_Name__c = 'Diversify Help Center')
         };
         ResourceCenterService.siteBaseOverride.put('Diversify Help Center', 'https://x.my.site.com/help');
 

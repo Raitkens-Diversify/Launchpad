@@ -1121,7 +1121,7 @@ public with sharing class ResourceCenterService {
         if (ctx.surface == INTERNAL_SURFACE) {
             return ctx; // bases stay null — navigate in-Lightning
         }
-        Help_Surface__mdt route = surfaceRoutes().get(ctx.surface);
+        Help_Surface__mdt route = surfaceRoutes().get(surfaceKey(ctx.surface));
         String base = route == null ? null : currentSiteBaseUrl(ctx.surface);
         if (base == null) {
             route = null;               // shared site, default page names
@@ -1138,11 +1138,39 @@ public with sharing class ResourceCenterService {
         return ctx;
     }
 
+    /**
+     * Absolute URL of a network's Events page — its Help_Surface__mdt row's
+     * Events_Path__c on its own site's SecureUrl — or null when either the
+     * site can't be resolved or the name is blank. For callers with NO site
+     * context (WebinarAnnouncementService's scheduled sweep builds the Arc
+     * banner link with it); getLinkContext stays the in-site entry point.
+     */
+    public static String eventsUrlFor(String networkName) {
+        if (String.isBlank(networkName)) {
+            return null;
+        }
+        String base = currentSiteBaseUrl(networkName.trim());
+        if (base == null) {
+            return null;
+        }
+        Help_Surface__mdt route = surfaceRoutes().get(surfaceKey(networkName));
+        return pageUrl(base, route == null ? null : route.Events_Path__c, 'events');
+    }
+
     /** Test seams: force the surface / a site root without a real Network. */
     @TestVisible private static String surfaceOverride;
     @TestVisible private static Map<String, String> siteBaseOverride = new Map<String, String>();
-    /** Help_Surface__mdt by Network name; @TestVisible so tests can seed it. */
+    /** Help_Surface__mdt by Network name, keyed through surfaceKey();
+        @TestVisible so tests can seed it (seed with surfaceKey() keys). */
     @TestVisible private static Map<String, Help_Surface__mdt> surfaceRows;
+
+    /** Map key for a network name: trimmed, case-folded. Network.Name is
+        "Arc" in every org while the metadata row was authored as "ARC" — a
+        case-sensitive Map silently dropped the route and sent Arc visitors
+        to the shared /help site (another domain in prod = a login page). */
+    @TestVisible private static String surfaceKey(String networkName) {
+        return networkName == null ? null : networkName.trim().toLowerCase();
+    }
 
     private static Map<String, Help_Surface__mdt> surfaceRoutes() {
         if (surfaceRows == null) {
@@ -1152,7 +1180,7 @@ public with sharing class ResourceCenterService {
                 FROM Help_Surface__mdt
             ]) {
                 if (String.isNotBlank(row.Network_Name__c)) {
-                    surfaceRows.put(row.Network_Name__c.trim(), row);
+                    surfaceRows.put(surfaceKey(row.Network_Name__c), row);
                 }
             }
         }

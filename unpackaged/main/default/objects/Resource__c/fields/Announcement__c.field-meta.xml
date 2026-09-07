@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Announcement__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>The Announcement__c the scheduled sweep pushed for this webinar (WebinarAnnouncementService). Null until pushed; the sweep keeps the linked record&#39;s text current and flips its Is_Active__c as the webinar becomes / stops being announceable. Set by Apex only.</description>
+    <label>Arc Announcement</label>
+    <referenceTo>Announcement__c</referenceTo>
+    <relationshipLabel>Resources</relationshipLabel>
+    <relationshipName>Resources</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

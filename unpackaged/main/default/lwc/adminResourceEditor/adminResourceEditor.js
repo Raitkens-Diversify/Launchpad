@@ -9,6 +9,7 @@ import getResourceCategoryTree from '@salesforce/apex/ResourceAdminController.ge
 import getFiles from '@salesforce/apex/ResourceAdminController.getFiles';
 import removeFile from '@salesforce/apex/ResourceAdminController.removeFile';
 import { messageFrom, toast } from 'c/messageUtil';
+import { formatDateTime } from 'c/dsDateBlock';
 import { FILE_TYPES, DEFAULT_TYPE, TYPE_VIDEO, TYPE_EXTERNAL_LINK, TYPE_WEBINAR } from 'c/rcConstants';
 
 /**
@@ -24,6 +25,12 @@ import { FILE_TYPES, DEFAULT_TYPE, TYPE_VIDEO, TYPE_EXTERNAL_LINK, TYPE_WEBINAR 
  * (labelled "Recording"). Lifecycle validation mirrors the server
  * (ResourceAdminController.saveResource ↔ the two Resource__c validation
  * rules) so the admin sees a friendly toast, but the server stays authoritative.
+ *
+ * Arc announcement (2026-09-06): "Announce on Arc" (checked by default for a
+ * NEW webinar) plus an optional "Announce at"; blank means 8:00 AM Mountain
+ * on the event day. The scheduled sweep (WebinarAnnouncementService) does the
+ * pushing; this form only stores the intent and shows the server's status
+ * line (Scheduled / Pending / Live / Ended) — it never derives the time itself.
  */
 const TYPE_OPTIONS = [
     { label: 'PDF (uploaded file)', value: 'PDF' },
@@ -61,6 +68,11 @@ export default class AdminResourceEditor extends LightningElement {
     registrationUrl = '';
     durationMinutes = null;
     presenter = '';
+    announceOnArc = false;
+    announceAt = null;          // ISO-8601 string; null = the 8:00 AM default
+    announcementStatus = null;  // Scheduled | Pending | Live | Ended (server-derived)
+    effectiveAnnounceAt = null; // what the server will actually use
+    announceTouched = false;    // the admin decided; stop defaulting
     featured = false;
     active = true;
     displayOrder;
@@ -107,6 +119,11 @@ export default class AdminResourceEditor extends LightningElement {
         this.durationMinutes = r.durationMinutes === null || r.durationMinutes === undefined
             ? null : Number(r.durationMinutes);
         this.presenter = r.presenter || '';
+        this.announceOnArc = r.announceOnArc === true;
+        this.announceAt = r.announceAt || null;
+        this.announcementStatus = r.announcementStatus || null;
+        this.effectiveAnnounceAt = r.effectiveAnnounceAt || null;
+        this.announceTouched = true;
         this.featured = r.featured === true;
         this.active = r.active !== false;
         this.displayOrder = r.displayOrder;
@@ -202,6 +219,26 @@ export default class AdminResourceEditor extends LightningElement {
         return this.isWebinar ? RECORDING_FORMATS : ACCEPTED_FORMATS;
     }
 
+    /** The server's verdict on the announcement, in words (nothing when off). */
+    get announcementNote() {
+        if (!this.announceOnArc) {
+            return '';
+        }
+        const when = this.effectiveAnnounceAt ? formatDateTime(this.effectiveAnnounceAt) : null;
+        switch (this.announcementStatus) {
+            case 'Live':
+                return 'Live on the Arc home page. It comes down when the event ends.';
+            case 'Pending':
+                return 'Due now — it goes live on Arc within 15 minutes.';
+            case 'Ended':
+                return 'The event has ended; the announcement is down.';
+            case 'Scheduled':
+                return when ? `Goes live on Arc ${when}.` : 'Goes live on Arc at the scheduled time.';
+            default:
+                return 'Goes live on Arc at 8:00 AM Mountain on the day of the event unless you pick a time. Save to see the exact time.';
+        }
+    }
+
     get hasFiles() {
         return this.files.length > 0;
     }
@@ -256,6 +293,10 @@ export default class AdminResourceEditor extends LightningElement {
     }
     handleTypeChange(event) {
         this.resourceType = event.detail.value;
+        // New webinars announce themselves on Arc unless the admin says otherwise.
+        if (this.isNew && this.isWebinar && !this.announceTouched) {
+            this.announceOnArc = true;
+        }
     }
     handleCategoryChange(event) {
         this.categorySelection = event.detail.names;
@@ -285,6 +326,13 @@ export default class AdminResourceEditor extends LightningElement {
     }
     handlePresenterChange(event) {
         this.presenter = event.target.value;
+    }
+    handleAnnounceChange(event) {
+        this.announceOnArc = event.target.checked;
+        this.announceTouched = true;
+    }
+    handleAnnounceAtChange(event) {
+        this.announceAt = event.target.value || null;
     }
     handleFeaturedChange(event) {
         this.featured = event.target.checked;
@@ -358,6 +406,11 @@ export default class AdminResourceEditor extends LightningElement {
                 toast(this, 'error', 'Duration must be between 1 and 999 minutes.');
                 return false;
             }
+            if (this.announceOnArc && this.announceAt
+                && new Date(this.announceAt).getTime() >= new Date(this.eventDatetime).getTime()) {
+                toast(this, 'error', 'The Arc announcement must go out before the event starts.');
+                return false;
+            }
         }
         return true;
     }
@@ -387,6 +440,8 @@ export default class AdminResourceEditor extends LightningElement {
                     registrationUrl: this.isWebinar ? this.registrationUrl || null : null,
                     durationMinutes: this.isWebinar ? this.durationMinutes : null,
                     presenter: this.isWebinar ? this.presenter || null : null,
+                    announceOnArc: this.isWebinar ? this.announceOnArc === true : false,
+                    announceAt: this.isWebinar && this.announceOnArc ? this.announceAt || null : null,
                     featured: this.featured,
                     active: this.active,
                     displayOrder: this.displayOrder,
@@ -394,6 +449,9 @@ export default class AdminResourceEditor extends LightningElement {
                 })
             });
             this.recordId = id;
+            if (this.isWebinar) {
+                await this.refreshAnnouncement();
+            }
             let saved = 'Resource saved.';
             if (wasNew && this.needsFile) {
                 saved = 'Saved — now upload the file below.';
@@ -405,6 +463,17 @@ export default class AdminResourceEditor extends LightningElement {
             toast(this, 'error', messageFrom(e));
         } finally {
             this.saving = false;
+        }
+    }
+
+    /** Re-read the server-derived announcement status after a save. */
+    async refreshAnnouncement() {
+        try {
+            const r = await getResource({ resourceId: this.recordId });
+            this.announcementStatus = (r && r.announcementStatus) || null;
+            this.effectiveAnnounceAt = (r && r.effectiveAnnounceAt) || null;
+        } catch (e) {
+            // the status line is auxiliary — never fail a save over it
         }
     }
 

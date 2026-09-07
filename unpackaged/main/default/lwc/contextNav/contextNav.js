@@ -48,8 +48,10 @@ const TABS = Object.freeze({
 const C_PREFIX = 'c__';
 /** Article route: name / article (legacy) / topic (any depth). Resources:
     rcview / rcslug / rcterm / rcscope (search scoped to a category subtree).
-    Events: view ('upcoming' | 'calendar') / month ('YYYY-MM'). */
-const PARAM_NAMES = ['name', 'article', 'topic', 'rcview', 'rcslug', 'rcterm', 'rcscope', 'view', 'month'];
+    Events: view ('upcoming' | 'calendar') / month ('YYYY-MM') / event (a
+    webinar slug — the calendar opens on its month with its popover open; the
+    Arc announcement banner deep-links with it). */
+const PARAM_NAMES = ['name', 'article', 'topic', 'rcview', 'rcslug', 'rcterm', 'rcscope', 'view', 'month', 'event'];
 
 const INTERNAL_CTX = Object.freeze({ surface: INTERNAL, helpBase: null, resourceBase: null });
 

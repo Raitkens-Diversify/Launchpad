@@ -26,7 +26,10 @@ import { buildIcsEvent } from './ics';
  *
  * URL contract: the default Calendar view carries ?month=YYYY-MM (no view
  * param); the list is ?view=upcoming. The pre-2026-09-02 ?view=calendar form
- * still resolves. In the
+ * still resolves. ?event=<slug> (2026-09-06) deep-links ONE webinar: the
+ * calendar opens on its month (an explicit ?month= wins) with its detail
+ * popover already open — the Arc announcement banner links here. It is
+ * consumed once; a month step or tab switch rewrites the URL without it. In the
  * core app the same state arrives c__-prefixed on the Help_Center_Events tab;
  * c/contextNav.readParams reads whichever form the surface uses. URL sync is
  * SITE-ONLY (the helpArticlePage rule): Lightning owns its own history stack,
@@ -67,6 +70,9 @@ export default class EventsPage extends NavigationMixin(LightningElement) {
     selectedId = null;
     anchorRect = null;
 
+    /** ?event= slug still to open (cleared once opened or found missing). */
+    _pendingEvent = null;
+    _monthExplicit = false;
     _pageRef;
     _isSite = false;
     _restored = false;
@@ -117,16 +123,60 @@ export default class EventsPage extends NavigationMixin(LightningElement) {
         const view = params && params.view;
         const month = params && params.month;
         this.view = VIEWS.includes(view) ? view : DEFAULT_VIEW;
-        this.month = MONTH_RE.test(month || '') ? month : this.todayMonth;
+        this._monthExplicit = MONTH_RE.test(month || '');
+        this.month = this._monthExplicit ? month : this.todayMonth;
+        this._pendingEvent = params && params.event ? String(params.event) : null;
+        this.applyPendingMonth();
     }
 
     @wire(getEvents)
     wiredEvents({ data, error }) {
         if (data) {
             this.events = data;
+            this.applyPendingMonth();
         }
         if (data || error) {
             this.loaded = true;
+        }
+    }
+
+    // ---- ?event= deep link ---------------------------------------------------
+
+    pendingItem() {
+        return this._pendingEvent
+            ? this.allItems.find((e) => e.slug === this._pendingEvent) || null
+            : null;
+    }
+
+    /** Without an explicit month, the deep-linked event's month is shown. */
+    applyPendingMonth() {
+        if (!this._pendingEvent || this._monthExplicit) {
+            return;
+        }
+        const item = this.pendingItem();
+        const month = item ? (localDateKey(item.eventDatetime) || '').slice(0, 7) : '';
+        if (MONTH_RE.test(month)) {
+            this.month = month;
+        }
+    }
+
+    /** Open the deep-linked event once the feed and the calendar are both on screen. */
+    renderedCallback() {
+        if (!this._pendingEvent || !this.loaded) {
+            return;
+        }
+        if (!this.isCalendarView) {
+            this._pendingEvent = null; // the list has nothing to open
+            return;
+        }
+        const item = this.pendingItem();
+        const cal = this.template.querySelector('c-ds-calendar');
+        if (!cal || typeof cal.select !== 'function') {
+            return;
+        }
+        this._pendingEvent = null;
+        if (item) {
+            cal.select(item.id); // false when off the shown month — the calendar is the answer then
         }
     }
 
@@ -151,6 +201,7 @@ export default class EventsPage extends NavigationMixin(LightningElement) {
             const url = new URL(window.location.href);
             url.searchParams.delete('view');
             url.searchParams.delete('month');
+            url.searchParams.delete('event'); // the deep link is consumed, never replayed by Back
             if (wantView) {
                 url.searchParams.set('view', wantView);
             }

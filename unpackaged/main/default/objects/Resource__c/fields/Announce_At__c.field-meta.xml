@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Announce_At__c</fullName>
+    <description>Webinar only. When the Arc announcement goes live (UTC). Blank means 8:00 AM in the org&#39;s time zone on the event&#39;s local date — or the day before when the event starts earlier than that (WebinarAnnouncementService.effectiveAnnounceAt). Must be before Event_Datetime__c; ResourceAdminController.saveResource enforces it.</description>
+    <label>Announce at</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>DateTime</type>
+</CustomField>

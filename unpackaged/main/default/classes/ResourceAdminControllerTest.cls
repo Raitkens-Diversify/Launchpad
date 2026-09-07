@@ -886,6 +886,54 @@ private class ResourceAdminControllerTest {
         System.assertEquals(null, saved.Event_Datetime__c, 'Stale event data never survives a type switch');
         System.assertEquals(null, saved.Presenter__c);
         System.assertEquals(null, saved.Event_Duration_Minutes__c);
+        Resource__c flags = [SELECT Announce_On_Arc__c, Announce_At__c FROM Resource__c WHERE Id = :id];
+        System.assertEquals(false, flags.Announce_On_Arc__c, 'Announcement flag clears with the type');
+        System.assertEquals(null, flags.Announce_At__c);
+    }
+
+    @IsTest
+    static void announcementFieldsRoundTripAndMustPrecedeTheEvent() {
+        Id catId = makeCategory('Ann Cat', 'ann-cat', null);
+        ResourceAdminController.ResourceInput w = input('Announced Webinar', 'announced-webinar', catId);
+        w.resourceType = 'Webinar';
+        w.eventDatetime = System.now().addDays(3);
+        w.registrationUrl = 'https://example.com/register';
+        w.announceOnArc = true;
+        w.announceAt = w.eventDatetime.addMinutes(5);
+        try {
+            ResourceAdminController.saveResource(JSON.serialize(w));
+            System.assert(false, 'Announcing after the event starts must fail');
+        } catch (AuraHandledException e) {
+            System.assert(e.getMessage().contains('before the event'), e.getMessage());
+        }
+
+        w.announceAt = null; // the 8:00 AM default
+        Id id = ResourceAdminController.saveResource(JSON.serialize(w));
+        ResourceAdminController.ResourceDetail detail = ResourceAdminController.getResource(id);
+        System.assertEquals(true, detail.announceOnArc);
+        System.assertEquals(null, detail.announceAt);
+        System.assertNotEquals(null, detail.effectiveAnnounceAt, 'The default time is reported');
+        System.assert(detail.effectiveAnnounceAt < w.eventDatetime, 'Default precedes the event');
+        System.assertEquals('Scheduled', detail.announcementStatus);
+
+        w.id = id;
+        w.announceAt = w.eventDatetime.addDays(-1);
+        ResourceAdminController.saveResource(JSON.serialize(w));
+        detail = ResourceAdminController.getResource(id);
+        System.assertEquals(w.announceAt, detail.announceAt);
+        System.assertEquals(w.announceAt, detail.effectiveAnnounceAt, 'An explicit time is the effective time');
+
+        w.announceOnArc = false;
+        ResourceAdminController.saveResource(JSON.serialize(w));
+        detail = ResourceAdminController.getResource(id);
+        System.assertEquals(false, detail.announceOnArc);
+        System.assertEquals(null, detail.announcementStatus, 'No status line when not flagged');
+
+        // Non-webinars never carry the flag, whatever the input says.
+        ResourceAdminController.ResourceInput pdf = input('Plain', 'plain-ann', catId);
+        pdf.announceOnArc = true;
+        Id pdfId = ResourceAdminController.saveResource(JSON.serialize(pdf));
+        System.assertEquals(false, ResourceAdminController.getResource(pdfId).announceOnArc);
     }
 
     @IsTest

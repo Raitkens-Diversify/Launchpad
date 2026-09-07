@@ -79,6 +79,12 @@ public with sharing class ResourceAdminController {
         @AuraEnabled public String registrationUrl;
         @AuraEnabled public Decimal durationMinutes;
         @AuraEnabled public String presenter;
+        // Arc announcement (WebinarAnnouncementService): the flag, the explicit
+        // time, the time it will actually use, and Scheduled/Pending/Live/Ended.
+        @AuraEnabled public Boolean announceOnArc;
+        @AuraEnabled public Datetime announceAt;
+        @AuraEnabled public Datetime effectiveAnnounceAt;
+        @AuraEnabled public String announcementStatus;
         @AuraEnabled public List<ArticleLink> relatedArticles = new List<ArticleLink>();
         @AuraEnabled public List<FileInfo> files = new List<FileInfo>();
         /** "Also show in" categories (never the home category). */
@@ -102,6 +108,8 @@ public with sharing class ResourceAdminController {
         @AuraEnabled public String registrationUrl;
         @AuraEnabled public Decimal durationMinutes;
         @AuraEnabled public String presenter;
+        @AuraEnabled public Boolean announceOnArc;
+        @AuraEnabled public Datetime announceAt;             // null = the 8:00 AM default
         @AuraEnabled public List<String> relatedArticleKaIds;
         /** "Also show in" category Ids: null = untouched, empty = clear all. Home is stripped. */
         @AuraEnabled public List<String> secondaryCategoryIds;
@@ -205,7 +213,8 @@ public with sharing class ResourceAdminController {
             SELECT Id, Name, Slug__c, Description__c, Resource_Type__c, Category__c,
                    External_URL__c, Video_Embed_URL__c, Is_Featured__c, Is_Active__c,
                    Display_Order__c, Event_Datetime__c, Registration_URL__c,
-                   Event_Duration_Minutes__c, Presenter__c
+                   Event_Duration_Minutes__c, Presenter__c,
+                   Announce_On_Arc__c, Announce_At__c, Announcement__c, Announcement__r.Is_Active__c
             FROM Resource__c
             WHERE Id = :resourceId
             LIMIT 1
@@ -230,6 +239,13 @@ public with sharing class ResourceAdminController {
         detail.registrationUrl = r.Registration_URL__c;
         detail.durationMinutes = r.Event_Duration_Minutes__c;
         detail.presenter = r.Presenter__c;
+        detail.announceOnArc = r.Announce_On_Arc__c == true;
+        detail.announceAt = r.Announce_At__c;
+        detail.effectiveAnnounceAt = WebinarLifecycle.isWebinar(r.Resource_Type__c)
+            ? WebinarAnnouncementService.effectiveAnnounceAt(r.Event_Datetime__c, r.Announce_At__c)
+            : null;
+        detail.announcementStatus = WebinarAnnouncementService.statusFor(
+            r, r.Announcement__c == null ? null : r.Announcement__r.Is_Active__c, System.now());
         detail.relatedArticles = relatedArticlesFor(resourceId);
         detail.files = filesFor(resourceId);
         detail.secondaryCategoryIds = secondaryCategoryIdsFor(resourceId);
@@ -315,6 +331,10 @@ public with sharing class ResourceAdminController {
             && (input.durationMinutes < 1 || input.durationMinutes > MAX_DURATION_MINUTES)) {
             throw auraError('Duration must be between 1 and ' + MAX_DURATION_MINUTES + ' minutes.');
         }
+        if (isWebinar && input.announceAt != null && input.eventDatetime != null
+            && input.announceAt >= input.eventDatetime) {
+            throw auraError('The Arc announcement must go out before the event starts.');
+        }
 
         Resource__c record = new Resource__c(
             Name = input.name.trim(),
@@ -331,7 +351,9 @@ public with sharing class ResourceAdminController {
             Event_Datetime__c = isWebinar ? input.eventDatetime : null,
             Registration_URL__c = isWebinar ? requireHttps(input.registrationUrl, 'Registration URL') : null,
             Event_Duration_Minutes__c = isWebinar ? input.durationMinutes : null,
-            Presenter__c = isWebinar ? input.presenter : null
+            Presenter__c = isWebinar ? input.presenter : null,
+            Announce_On_Arc__c = isWebinar && input.announceOnArc == true,
+            Announce_At__c = isWebinar ? input.announceAt : null
         );
 
         Savepoint sp = Database.setSavepoint();

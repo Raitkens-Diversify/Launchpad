@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Announce_On_Arc__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Webinar only. When checked, WebinarAnnouncementService pushes an Announcement__c (the Arc home-page banner) once Announce_At__c — or its 8:00 AM org-time default — is reached, and retires it when the event ends. The admin console checks this by default for new webinars.</description>
+    <label>Announce on Arc</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

@@ -107,6 +107,19 @@
                                              max-length="120"
                                              value={presenter}
                                              onchange={handlePresenterChange}></lightning-input>
+                            <lightning-input type="checkbox"
+                                             label="Announce on Arc"
+                                             field-level-help="Posts this webinar to the Arc home-page announcement banner, linking to its spot on the Events calendar. It comes down when the event ends."
+                                             checked={announceOnArc}
+                                             onchange={handleAnnounceChange}></lightning-input>
+                            <template if:true={announceOnArc}>
+                                <lightning-input label="Announce at"
+                                                 type="datetime"
+                                                 field-level-help="When the announcement goes live. Leave blank for 8:00 AM Mountain on the day of the event (the day before, for a session that starts earlier than that)."
+                                                 value={announceAt}
+                                                 onchange={handleAnnounceAtChange}></lightning-input>
+                                <p class="are__help are__help--note">{announcementNote}</p>
+                            </template>
                         </section>
                     </template>
 

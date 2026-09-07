@@ -21,6 +21,9 @@ import { localDateKey, formatDateKey } from 'c/dsDateBlock';
  *   styling — the first width query in JS on these surfaces; keep it the only
  *   one unless another component genuinely needs a different DOM per width.
  * @api label: accessible name of the grid (default 'Calendar').
+ * @api select(id): programmatic chip selection for deep links — emits the
+ *   same eventselect a click would (expanding a "+N more" day first when the
+ *   chip is collapsed); false when the id is not on the rendered month.
  *
  * Emits (plain, non-bubbling — the host listens on the element):
  *   monthchange { month: 'YYYY-MM', reason: 'prev' | 'next' | 'today' }
@@ -115,6 +118,8 @@ export default class DsCalendar extends LightningElement {
         once the host re-renders the month that contains it. */
     _pendingFocusKey = null;
     _focusAfterRender = null;
+    /** An event id to emit eventselect for once its (just expanded) day renders. */
+    _selectAfterRender = null;
     _narrow = false;
     _mq = null;
     _mqHandler = null;
@@ -181,6 +186,53 @@ export default class DsCalendar extends LightningElement {
             this._focusAfterRender = null;
             this.focusCell(key);
         }
+        if (this._selectAfterRender) {
+            const id = this._selectAfterRender;
+            this._selectAfterRender = null;
+            const chip = this.chipFor(id);
+            if (chip) {
+                this.emitChip(chip);
+            }
+        }
+    }
+
+    // ---- programmatic selection ---------------------------------------------
+
+    @api
+    select(id) {
+        const found = (this.events || []).find((ev) => ev && ev.id === id);
+        const key = found ? localDateKey(found.dateIso) : null;
+        if (!key) {
+            return false;
+        }
+        const onScreen = this.isList ? monthOf(key) === this.monthKey : this.gridKeys.includes(key);
+        if (!onScreen) {
+            return false;
+        }
+        const chip = this.chipFor(id);
+        if (chip) {
+            this.emitChip(chip);
+            return true;
+        }
+        // Behind "+N more": expand the day, then emit once the chip exists.
+        this._activeKey = key;
+        this._expandedKey = key;
+        this._selectAfterRender = id;
+        return true;
+    }
+
+    chipFor(id) {
+        return this.template.querySelector(`.ds-cal__chip[data-id="${id}"]`);
+    }
+
+    emitChip(chip) {
+        const { id, key } = chip.dataset;
+        if (key) {
+            this._activeKey = key;
+        }
+        this.dispatchEvent(new CustomEvent('eventselect', {
+            detail: { id, anchorRect: rectOf(chip) }
+        }));
     }
 
     // ---- month / today -------------------------------------------------------
@@ -470,13 +522,7 @@ export default class DsCalendar extends LightningElement {
 
     handleChipClick(event) {
         event.stopPropagation();
-        const { id, key } = event.currentTarget.dataset;
-        if (key) {
-            this._activeKey = key;
-        }
-        this.dispatchEvent(new CustomEvent('eventselect', {
-            detail: { id, anchorRect: rectOf(event.currentTarget) }
-        }));
+        this.emitChip(event.currentTarget);
     }
 
     handleMoreClick(event) {
