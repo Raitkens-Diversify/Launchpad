@@ -3306,6 +3306,254 @@ function strategyTotals(strategies, expectedValue, options) {
 }
 
 /**
+ * Round a target weight for display: up to four decimal places, trailing zeros dropped, so a weight
+ * reads as 12.5 rather than 12.5000.
+ *
+ * Four decimals is a correctness rule, not a styling choice. $10,000.00 of a $100,005 account is
+ * 9.9995%, and rounding that to 10 made two rows carrying different dollars display the same
+ * weight. Only DERIVED weights pass through here — a value the advisor typed is never reformatted.
+ *
+ * Lives here rather than in the allocation table because two surfaces now state weights (the
+ * interview's table and the Review & Submit summary), and the same reasoning that put roundCurrency
+ * and formatMoney here applies: a figure must not be rounded two different ways depending on which
+ * screen is showing it.
+ * @param {number|string} value  percentage points
+ * @returns {number}
+ */
+function roundWeight(value) {
+    return Math.round(Number(value) * 10000) / 10000;
+}
+
+// A row with no strategy chosen yet, and any figure that cannot be known. Never a fictional 0 or
+// $0.00 — an absent figure and a zero one mean different things on a summary nobody can edit.
+const TRADE_EM_DASH = '—';
+
+// An exception sleeve's weight cell holds a word, not a figure: its dollars are the base the other
+// rows' weights are shares of, so it has no weight to state. Matches the allocation table's read-out.
+const TRADE_EXCLUDED_WEIGHT = 'Excluded';
+
+// Shown in place of the allocation table when no sleeve has been recorded.
+const TRADE_NO_ROWS_NOTE = 'No allocations recorded.';
+
+// Says where the account value came from when it was inherited rather than typed — the same sentence
+// the interview's footer shows under its own input.
+const TRADE_FALLBACK_NOTE = 'Inherited from Source of Funds.';
+
+/**
+ * A Trade Instructions value projected for read-only display — the figures, in the precision, that
+ * the interview section showed for the same inputs.
+ *
+ * Every number is resolved through the helpers the interview itself uses (`resolveExpectedValue`,
+ * `strategyTotals`, `dollarsForPercentRow` / `percentForDollarRow`, `formatMoney`, `roundWeight`),
+ * so Review & Submit can never price or round a figure differently from the screen the advisor
+ * entered it on. Nothing here is derived a second way.
+ *
+ * Display rules, all of them the allocation table's own:
+ *  - a DERIVED target weight shows up to four decimals with trailing zeros dropped; a weight the
+ *    advisor RECORDED is printed as recorded and never reformatted;
+ *  - dollars always show grouped at cents. This is the one deliberate divergence from the
+ *    interview, whose *editable* dollar cell holds the raw typed number — that raw form exists only
+ *    to satisfy the controlled-input echo invariant, and there is no input here to echo. The value
+ *    is identical; only its grouping differs;
+ *  - an exception sleeve states no weight at all, decided before any division;
+ *  - a figure that cannot be known is an em dash.
+ *
+ * `options` is load-bearing, not cosmetic — the same warning `strategyTotals` carries. Without it an
+ * excluded row is priced as a model row and the ledger reconciles against the wrong base.
+ *
+ * Deliberately NOT memoized, and it must never rebuild its inputs: `trade.strategies` and `options`
+ * are handed straight through to `normalizeStrategyRows` / `strategyTotals` / `optionRulesByValue`,
+ * which are memoized on array IDENTITY. Spreading either here would defeat all three memos on every
+ * call.
+ *
+ * @param {{expectedAccountValue, strategies, advisorNotes}|null} trade  the draft value; an
+ *        untouched one reads as an empty table rather than as an error
+ * @param {number|string|null} fallbackAccountValue  the value the section falls back to (a
+ *        Financial Account's Source of Funds amount); never written back
+ * @param {Array<{label, value, excluded, allowedBasis}>} options  shaped strategy options
+ * @returns {{expectedValue: number|null, expectedDisplay: string, usingFallback: boolean,
+ *            expectedNote: string, hasRows: boolean, emptyNote: string,
+ *            rows: Array<{key, strategy, weight, excluded, dollars, note, noteIsError}>,
+ *            hasLedger: boolean,
+ *            ledger: Array<{key, label, value, isSubtotal, isTotal}>,
+ *            advisorNotes: string, isComplete: boolean, isOverFunded: boolean}}
+ */
+function summarizeTradeInstructions(trade, fallbackAccountValue, options) {
+    // Identity-preserving reads: these two arrays are the memo keys upstream, so they are passed
+    // through untouched rather than copied.
+    const strategies = trade?.strategies;
+    const expectedValue = resolveExpectedValue(
+        trade?.expectedAccountValue,
+        fallbackAccountValue
+    );
+    const rows = normalizeStrategyRows(strategies);
+    const totals = strategyTotals(strategies, expectedValue, options);
+    const rules = optionRulesByValue(options);
+    // The denominator both derived figures share: the expected value less the exception sleeves.
+    // Null once exhausted, which the row helpers read as "nothing to state" rather than as a $0 pool.
+    const base =
+        totals.allocationBase !== null && totals.allocationBase > 0
+            ? totals.allocationBase
+            : null;
+    // strategyTotals has already decided which rows are outstanding, on the row's EFFECTIVE basis.
+    // Reusing its verdict is what keeps a row's note and the sums it is excluded from in agreement.
+    const outstanding = new Set(totals.incompleteRows.map((row) => row.id));
+    const summaryRows = rows.map((row) => {
+        const rule = rules.get(row.strategy) || basisForOption(null);
+        const isDollar = row.type === STRATEGY_BASIS.DOLLAR;
+        const recorded = tradeNumberOrNull(
+            isDollar ? row.fundingAmount : row.fundingPercent
+        );
+        const weightNumber = rule.excluded
+            ? null
+            : isDollar
+              ? percentForDollarRow(recorded, base)
+              : recorded;
+        const dollarNumber = isDollar
+            ? recorded
+            : dollarsForPercentRow(recorded, base);
+        // A recorded weight prints as recorded; only a derived one is rounded for display.
+        const weightText =
+            weightNumber === null
+                ? TRADE_EM_DASH
+                : `${isDollar ? roundWeight(weightNumber) : weightNumber}%`;
+        const note = tradeRowNote(row, rule, recorded, outstanding.has(row.id));
+        return {
+            key: row.id,
+            strategy: row.strategy
+                ? optionLabel(options, row.strategy)
+                : TRADE_EM_DASH,
+            weight: rule.excluded ? TRADE_EXCLUDED_WEIGHT : weightText,
+            excluded: rule.excluded === true,
+            dollars:
+                dollarNumber === null
+                    ? TRADE_EM_DASH
+                    : `$${formatMoney(dollarNumber)}`,
+            note: note ? note.text : '',
+            noteIsError: note ? note.isError : false
+        };
+    });
+    const ledger = tradeLedgerLines(totals, expectedValue);
+    const typed = tradeNumberOrNull(trade?.expectedAccountValue);
+    const usingFallback = expectedValue !== null && typed === null;
+    return {
+        expectedValue,
+        expectedDisplay:
+            expectedValue === null
+                ? TRADE_EM_DASH
+                : `$${formatMoney(expectedValue)}`,
+        usingFallback,
+        expectedNote: usingFallback ? TRADE_FALLBACK_NOTE : '',
+        hasRows: summaryRows.length > 0,
+        emptyNote: summaryRows.length > 0 ? '' : TRADE_NO_ROWS_NOTE,
+        rows: summaryRows,
+        hasLedger: ledger.length > 0,
+        ledger,
+        advisorNotes: String(trade?.advisorNotes || '').trim(),
+        isComplete: totals.isComplete,
+        isOverFunded: totals.isOverFunded
+    };
+}
+
+// A finite number, or null for anything else — blanks included. Keeps NaN out of the summary.
+function tradeNumberOrNull(value) {
+    if (value === '' || value === null || value === undefined) {
+        return null;
+    }
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+}
+
+/**
+ * A summary row's note: that a reclassified strategy needs its value re-entered in the rule's unit,
+ * or what the row still owes. Same wording and same conditions as the allocation table's inline
+ * flags, judged on the committed value (a summary has no keystroke buffer), so the review names a
+ * problem exactly as the interview did.
+ * @returns {{text: string, isError: boolean}|null}  null for a row with nothing to say
+ */
+function tradeRowNote(row, rule, recorded, isOutstanding) {
+    // A stale draft: the strategy's rule now dictates the other unit, so the recorded number would
+    // silently change meaning. The table shows this cell empty behind the same red flag.
+    if (rule.locked && rule.unit !== row.type && recorded !== null) {
+        return {
+            text:
+                rule.unit === STRATEGY_BASIS.DOLLAR
+                    ? 'This strategy is now recorded in dollars — re-enter the amount.'
+                    : 'This strategy is now traded to a target weight — re-enter as a percentage.',
+            isError: true
+        };
+    }
+    if (!isOutstanding) {
+        return null;
+    }
+    if (!row.strategy) {
+        // A wholly blank row carries no flag — the section's own status names it.
+        return recorded === null
+            ? null
+            : { text: 'Select a strategy.', isError: false };
+    }
+    return { text: 'Enter a value.', isError: false };
+}
+
+/**
+ * The ledger footer as display lines: account value, less what is excluded, less what the sleeves
+ * allocate, equals the remaining balance.
+ *
+ * Follows the interview footer's own visibility rules. The Excluded and Left-to-allocate lines
+ * appear only where a sleeve is actually excluded — with none, the base equals the account value on
+ * the line above, and restating the same figure reads as an error rather than as a step. The whole
+ * block stays hidden until something subtracts from the account, since a remaining balance is
+ * meaningless before then.
+ * @returns {Array<{key: string, label: string, value: string, isSubtotal: boolean, isTotal: boolean}>}
+ *          empty when there is no dollar arithmetic to show
+ */
+function tradeLedgerLines(totals, expectedValue) {
+    const hasExcluded = totals.excludedAmount > 0;
+    const hasAllocated = totals.allocatedAmount > 0;
+    if (expectedValue === null || (!hasExcluded && !hasAllocated)) {
+        return [];
+    }
+    const line = (key, label, value, extra = {}) => ({
+        key,
+        label,
+        value,
+        isSubtotal: false,
+        isTotal: false,
+        ...extra
+    });
+    const lines = [
+        line('accountValue', 'Account value', `$${formatMoney(expectedValue)}`)
+    ];
+    if (hasExcluded) {
+        lines.push(
+            line('excluded', 'Excluded', `−$${formatMoney(totals.excludedAmount)}`)
+        );
+        lines.push(
+            line(
+                'modelBase',
+                'Left to allocate',
+                `$${formatMoney(totals.allocationBase)}`,
+                { isSubtotal: true }
+            )
+        );
+    }
+    if (hasAllocated) {
+        lines.push(
+            line('allocated', 'Allocated', `−$${formatMoney(totals.allocatedAmount)}`)
+        );
+    }
+    lines.push(
+        line(
+            'remaining',
+            'Remaining balance',
+            `$${formatMoney(totals.remainingBalance)}`,
+            { isTotal: true }
+        )
+    );
+    return lines;
+}
+
+/**
  * Format a shaped field's value (output of shapeVisibleFields) as a read-only display string for
  * summary views: picklist values resolve to their labels, multi-select labels join with ', ',
  * booleans render Yes/No, currency/number/percent/date values format for display, and other types
@@ -3439,8 +3687,10 @@ export {
     percentForDollarRow,
     excludedStrategyIds,
     roundCurrency,
+    roundWeight,
     formatMoney,
     resolveExpectedValue,
+    summarizeTradeInstructions,
     TRADE_DRAFTS_KEY,
     collectTradeDrafts,
     withTradeDraft,

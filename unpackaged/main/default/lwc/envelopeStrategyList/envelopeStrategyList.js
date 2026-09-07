@@ -8,6 +8,7 @@ import {
     normalizeStrategyRows,
     percentForDollarRow,
     roundCurrency,
+    roundWeight,
     strategyRowsEqual,
     STRATEGY_BASIS
 } from 'c/envelopeFormSchema';
@@ -622,8 +623,12 @@ export default class EnvelopeStrategyList extends LightningElement {
     // Only DERIVED weights pass through here (a typed value is never reformatted), and four
     // decimals is what keeps the display honest: $10,000.00 of a $100,005 account is 9.9995%, and
     // rounding that to 10 made two rows with different dollars show the same weight.
+    //
+    // Delegated to the shared rounder rather than kept here: the Review & Submit summary states the
+    // same derived weights, and the rule must not be able to drift between the two surfaces (the
+    // same reason roundCurrency and formatMoney live there).
     _round(value) {
-        return Math.round(Number(value) * 10000) / 10000;
+        return roundWeight(value);
     }
 
     // Grouped dollars at two decimals, no currency symbol — the '$' sits beside the box. Shared

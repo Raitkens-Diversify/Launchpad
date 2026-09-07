@@ -12,7 +12,8 @@
  * a live describe of Order__c on launchpad, not the permission set's field
  * list alone: it still carries a stale FLS entry for Funding_Basis__c, a
  * field that does not actually exist on this object. Nothing here is
- * editable.
+ * editable. Strategy renders as a link that opens arcStrategyQuickView,
+ * same popup-instead-of-navigate reasoning as everything else in this file.
  */
 import { LightningElement, api, wire } from "lwc";
 import {
@@ -23,9 +24,9 @@ import {
 
 const OBJECT_API_NAME = "Order__c";
 
-/** Label/path pairs for the plain rows, in the order they render. */
+/** Label/path pairs for the plain rows, in the order they render. Strategy
+ *  is a lookup and renders as its own link row instead -- see below. */
 const DETAIL_FIELDS = [
-  { label: "Strategy", path: "Strategy__r.Name" },
   { label: "Initial Funding Amount", path: "Initial_Funding_Amount__c" },
   {
     label: "Initial Funding Percentage",
@@ -42,6 +43,8 @@ const DETAIL_FIELDS = [
 
 const FIELDS = [
   `${OBJECT_API_NAME}.Name`,
+  `${OBJECT_API_NAME}.Strategy__c`,
+  `${OBJECT_API_NAME}.Strategy__r.Name`,
   ...DETAIL_FIELDS.map((field) => `${OBJECT_API_NAME}.${field.path}`)
 ];
 
@@ -105,6 +108,28 @@ export default class ArcOrderQuickView extends LightningElement {
           : value
       };
     });
+  }
+
+  // ---- Strategy: a lookup link that opens arcStrategyQuickView -----------
+
+  get strategyId() {
+    return this.fieldValue("Strategy__c");
+  }
+
+  get strategyName() {
+    return this.fieldValue("Strategy__r.Name");
+  }
+
+  get hasStrategy() {
+    return Boolean(this.strategyId);
+  }
+
+  handleStrategyClick(event) {
+    event.preventDefault();
+    if (!this.strategyId) {
+      return;
+    }
+    this.refs.strategyQuickView?.open(this.strategyId);
   }
 
   handleClose() {

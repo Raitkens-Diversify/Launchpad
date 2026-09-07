@@ -27,7 +27,7 @@
           <template lwc:if={isLoading}>
             <div class="quick-view__loading">
               <lightning-spinner
-                alternative-text="Loading order"
+                alternative-text="Loading strategy"
                 size="small"
               ></lightning-spinner>
             </div>
@@ -39,17 +39,6 @@
 
           <template lwc:elseif={hasDetail}>
             <dl class="quick-view__fields">
-              <template lwc:if={hasStrategy}>
-                <div class="quick-view__field">
-                  <dt>Strategy</dt>
-                  <dd>
-                    <a href="#" onclick={handleStrategyClick}
-                      >{strategyName}</a
-                    >
-                  </dd>
-                </div>
-              </template>
-
               <template for:each={detailRows} for:item="row">
                 <div class="quick-view__field" key={row.label}>
                   <dt>{row.label}</dt>
@@ -62,8 +51,4 @@
       </div>
     </section>
   </template>
-
-  <c-arc-strategy-quick-view
-    lwc:ref="strategyQuickView"
-  ></c-arc-strategy-quick-view>
 </template>

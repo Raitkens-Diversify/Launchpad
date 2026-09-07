@@ -14,6 +14,11 @@
   overflow-y: auto;
   background: var(--slds-g-color-surface-2, #f3f4f6);
   font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+  /* Self-declared, because the platform injects --slds-g-* hooks per scope and the --ds-* triads
+     are not injected at all, so inheritance cannot be relied on. Same block envelopeStrategyList
+     and envelopeTradeInstructions carry — they own the interview side of these same figures. */
+  --ds-warning-text: #b8860b;
+  --ds-error-text: #a83232;
 }
 
 .review {
@@ -299,4 +304,211 @@
   align-items: center;
   gap: var(--slds-g-spacing-4, 16px);
   flex: none;
+}
+/* --- Related Parties ------------------------------------------------------------------------- */
+
+/* One column per slot, not three: a slot holds up to four names, each of which can carry its own
+   badges, which three narrow columns cannot fit. */
+.review__fields_parties {
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--slds-g-spacing-4, 16px);
+}
+
+.review__parties {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-1, 4px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.review__party {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--slds-g-spacing-2, 8px);
+}
+
+/* The same "New" pill the member card shows, so a party still pending creation reads identically
+   in the interview, on Review Missing Items and here. */
+.review__party-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--slds-g-spacing-1, 4px) var(--slds-g-spacing-2, 8px);
+  border-radius: var(--slds-g-radius-border-2, 8px);
+  background: var(--slds-g-color-info-container-1, #e0f2fe);
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
+  font-weight: var(--slds-g-font-weight-5, 500);
+  line-height: 17px;
+  white-space: nowrap;
+  color: var(--slds-g-color-on-info-1, #0369a1);
+}
+
+.review__party-missing {
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
+  line-height: 17px;
+  color: var(--ds-warning-text, #b8860b);
+}
+
+/* A slot holding nobody states a condition, so it is set as prose and never mistaken for a name. */
+.review__state {
+  font-size: var(--slds-g-font-scale-2, 16px);
+  line-height: 22px;
+  font-style: italic;
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+.review__state_missing {
+  color: var(--ds-warning-text, #b8860b);
+}
+
+/* --- Trade Instructions ---------------------------------------------------------------------- */
+
+/* The interview's blocks, stacked, read-only. */
+.review__trade {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-5, 24px);
+}
+
+/* Wide content scrolls inside its own container; the page body must never scroll sideways. */
+.review__table-scroll {
+  overflow-x: auto;
+}
+
+.review__table {
+  width: 100%;
+  /* Below this the three columns stop being readable, so the wrapper scrolls rather than letting a
+     figure wrap mid-number. */
+  min-width: 420px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+/* The section heading already names this table on screen, so the caption is for assistive tech. */
+.review__table-caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.review__table th,
+.review__table td {
+  padding: var(--slds-g-spacing-2, 8px) var(--slds-g-spacing-3, 12px);
+  vertical-align: top;
+}
+
+/* Column labels once for the table, at the same treatment as the interview's column strip. */
+.review__table thead th {
+  padding-top: 0;
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
+  line-height: 17px;
+  font-weight: var(--slds-g-font-weight-7, 700);
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+  border-bottom: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+
+.review__table tbody tr + tr th,
+.review__table tbody tr + tr td {
+  border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+
+/* The strategy name: the only elastic column, at the summary grid's value weight so the row reads
+   as an answer rather than a label. */
+.review__table-name {
+  font-size: var(--slds-g-font-scale-1, 14px);
+  line-height: 19px;
+  font-weight: var(--slds-g-font-weight-6, 600);
+  color: var(--slds-g-color-on-surface-2, #374151);
+  word-break: break-word;
+}
+
+/* Figures right-align in fixed columns on tabular numerals, so the weight and dollar columns
+   reconcile visually against the ledger below them. */
+.review__table-figure {
+  width: 148px;
+  text-align: right;
+  font-size: var(--slds-g-font-scale-1, 14px);
+  line-height: 19px;
+  color: var(--slds-g-color-on-surface-2, #374151);
+  font-variant-numeric: tabular-nums;
+}
+
+.review__figure,
+.review__ledger-figure {
+  font-variant-numeric: tabular-nums;
+}
+
+/* An excluded sleeve's weight cell holds the word "Excluded", not a figure: the column's numeric
+   rhythm is wrong for a word, and the muted italic marks it as a state rather than a value.
+   Mirrors the interview table's own treatment of the same cell. */
+.review__table-figure_excluded {
+  font-variant-numeric: normal;
+  font-style: italic;
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* The row's note: amber where the row is simply unfinished, red where a reclassified strategy
+   means its value has to be re-entered in the rule's unit. */
+.review__table-note {
+  display: block;
+  margin-top: var(--slds-g-spacing-1, 4px);
+  font-size: var(--slds-g-font-scale-neg-1, 12px);
+  line-height: 17px;
+  font-weight: var(--slds-g-font-weight-4, 400);
+  color: var(--ds-warning-text, #b8860b);
+}
+
+.review__table-note_error {
+  color: var(--ds-error-text, #a83232);
+}
+
+/* The ledger: the interview footer's subtraction, in the same order, right-aligned against a fixed
+   figure column so it reads straight down the page. */
+.review__ledger {
+  display: flex;
+  flex-direction: column;
+  gap: var(--slds-g-spacing-1, 4px);
+}
+
+.review__ledger-line {
+  display: grid;
+  grid-template-columns: 170px 130px;
+  gap: var(--slds-g-spacing-4, 16px);
+  font-size: var(--slds-g-font-size-base, 13px);
+  line-height: 18px;
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* "Left to allocate" is a subtotal partway down the subtraction; the remaining balance is its
+   result. Both ruled off; only the result carries the weight. */
+.review__ledger-line_subtotal,
+.review__ledger-line_total {
+  padding-top: var(--slds-g-spacing-1, 4px);
+  border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+  color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+.review__ledger-line_total {
+  font-weight: var(--slds-g-font-weight-7, 700);
+}
+
+/* Says where an inherited account value came from, matching the interview's footer hint. */
+.review__field-note {
+  font-size: var(--slds-g-font-size-base, 13px);
+  line-height: 18px;
+  color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* Advisor notes are prose, so the value keeps its line breaks instead of collapsing to one line. */
+.review__notes {
+  font-weight: var(--slds-g-font-weight-4, 400);
+  white-space: pre-wrap;
 }

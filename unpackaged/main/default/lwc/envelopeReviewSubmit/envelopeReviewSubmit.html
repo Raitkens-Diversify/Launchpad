@@ -52,14 +52,148 @@
                                     <template for:each={item.sections} for:item="section">
                                         <div key={section.key} class="review__section">
                                             <h3 class="review__section-title">{section.title}</h3>
-                                            <div class="review__fields">
-                                                <template for:each={section.fields} for:item="field">
-                                                    <div key={field.key} class="review__field">
-                                                        <span class="review__field-label">{field.label}</span>
-                                                        <span class="review__field-value">{field.value}</span>
+
+                                            <!-- Metadata sections, and the synthetic type section: a
+                                                 plain label/value grid. -->
+                                            <template lwc:if={section.isFields}>
+                                                <div class="review__fields">
+                                                    <template for:each={section.fields} for:item="field">
+                                                        <div key={field.key} class="review__field">
+                                                            <span class="review__field-label">{field.label}</span>
+                                                            <span class="review__field-value">{field.value}</span>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </template>
+
+                                            <!-- Related Parties: one slot per requirement, in
+                                                 requirement order. A slot holds up to four parties,
+                                                 each with its own badges, so the summary grid drops
+                                                 to a single column here rather than stacking names
+                                                 in three narrow ones. -->
+                                            <template lwc:elseif={section.isParties}>
+                                                <div class="review__fields review__fields_parties">
+                                                    <template for:each={section.slots} for:item="slot">
+                                                        <div key={slot.key} class="review__field">
+                                                            <span class="review__field-label">{slot.label}</span>
+                                                            <template lwc:if={slot.hasParties}>
+                                                                <ul class="review__parties">
+                                                                    <template for:each={slot.parties} for:item="party">
+                                                                        <li key={party.key} class="review__party">
+                                                                            <span class="review__field-value">{party.name}</span>
+                                                                            <!-- Still to be created on
+                                                                                 submit — the same pill
+                                                                                 the member card shows,
+                                                                                 so the state reads the
+                                                                                 same on both screens. -->
+                                                                            <template lwc:if={party.isNew}>
+                                                                                <span class="review__party-badge">New</span>
+                                                                            </template>
+                                                                            <template lwc:if={party.missingLabel}>
+                                                                                <span class="review__party-missing">{party.missingLabel}</span>
+                                                                            </template>
+                                                                        </li>
+                                                                    </template>
+                                                                </ul>
+                                                            </template>
+                                                            <!-- An empty or affirmed-away slot states
+                                                                 its condition rather than a name, so
+                                                                 it is never read as an answer. -->
+                                                            <template lwc:else>
+                                                                <span class={slot.stateClass}>{slot.stateLabel}</span>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </template>
+
+                                            <!-- Trade Instructions, read-only: the expected value,
+                                                 the allocation table, the ledger that reconciles it,
+                                                 and the advisor's notes — the interview's blocks in
+                                                 the interview's order, every figure resolved by the
+                                                 same helpers. -->
+                                            <template lwc:elseif={section.isTrade}>
+                                                <div class="review__trade">
+                                                    <div class="review__field">
+                                                        <span class="review__field-label">Expected Account Value</span>
+                                                        <span class="review__field-value review__figure">{section.expectedValue}</span>
+                                                        <template lwc:if={section.expectedNote}>
+                                                            <span class="review__field-note">{section.expectedNote}</span>
+                                                        </template>
                                                     </div>
-                                                </template>
-                                            </div>
+
+                                                    <template lwc:if={section.hasRows}>
+                                                        <!-- The one block that can outgrow the 790px
+                                                             column, so it scrolls inside its own
+                                                             container rather than widening the page.
+                                                             A real table, not a grid: every cell here
+                                                             is static text, so the header/cell
+                                                             association is what makes three bare
+                                                             figures per row legible to a screen
+                                                             reader. -->
+                                                        <div class="review__table-scroll">
+                                                            <table class="review__table">
+                                                                <!-- The section heading above already
+                                                                     names this table on screen. -->
+                                                                <caption class="review__table-caption">Allocations</caption>
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th scope="col">Strategy</th>
+                                                                        <th scope="col" class="review__table-figure">Target weight</th>
+                                                                        <th scope="col" class="review__table-figure">Dollars</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <template for:each={section.rows} for:item="row">
+                                                                        <tr key={row.key}>
+                                                                            <!-- The row's note sits under
+                                                                                 the strategy name rather
+                                                                                 than on its own line under
+                                                                                 the figures: a colspan note
+                                                                                 row would need a second
+                                                                                 <tr> and a second key per
+                                                                                 allocation, and it reads as
+                                                                                 the row's either way. -->
+                                                                            <th scope="row" class="review__table-name">
+                                                                                {row.strategy}
+                                                                                <template lwc:if={row.note}>
+                                                                                    <span class={row.noteClass}>{row.note}</span>
+                                                                                </template>
+                                                                            </th>
+                                                                            <td class={row.weightClass}>{row.weight}</td>
+                                                                            <td class="review__table-figure">{row.dollars}</td>
+                                                                        </tr>
+                                                                    </template>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </template>
+                                                    <template lwc:else>
+                                                        <p class="review__empty-note">{section.emptyNote}</p>
+                                                    </template>
+
+                                                    <!-- Account value, less what is excluded, less
+                                                         what the sleeves allocate, equals the
+                                                         remaining balance. -->
+                                                    <template lwc:if={section.hasLedger}>
+                                                        <div class="review__ledger">
+                                                            <template for:each={section.ledger} for:item="line">
+                                                                <div key={line.key} class={line.lineClass}>
+                                                                    <span>{line.label}</span>
+                                                                    <span class="review__ledger-figure">{line.value}</span>
+                                                                </div>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+
+                                                    <template lwc:if={section.advisorNotes}>
+                                                        <div class="review__field">
+                                                            <span class="review__field-label">Advisor Notes Related to Trade</span>
+                                                            <span class="review__field-value review__notes">{section.advisorNotes}</span>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </template>
                                         </div>
                                     </template>
                                 </template>

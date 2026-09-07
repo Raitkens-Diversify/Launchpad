@@ -1,10 +1,11 @@
-/* Same dialog frame as arcOrderTicketQuickView -- z-index is higher because
-   this popup opens from a row inside that one and has to render above it,
-   not behind it. */
+/* Same dialog frame as arcOrderTicketQuickView/arcOrderQuickView -- highest
+   z-index of the three, since this one can open from either of them
+   (Orders table on the ticket popup, or the Strategy field on the order
+   popup nested inside it) and has to render above whichever it came from. */
 .quick-view {
   position: fixed;
   inset: 0;
-  z-index: 9500;
+  z-index: 9800;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -99,14 +100,4 @@
   margin: 0;
   font-size: 0.875rem;
   color: var(--div-color-gray-900, #030712);
-}
-
-.quick-view__field dd a {
-  color: var(--div-color-blue-700, #1a76bb);
-  text-decoration: none;
-}
-
-.quick-view__field dd a:hover,
-.quick-view__field dd a:focus {
-  text-decoration: underline;
 }

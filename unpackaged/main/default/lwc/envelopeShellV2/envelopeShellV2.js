@@ -96,7 +96,8 @@ import {
   strategyTotals,
   normalizeStrategyRows,
   STRATEGY_BASIS,
-  resolveExpectedValue
+  resolveExpectedValue,
+  summarizeTradeInstructions
 } from "c/envelopeFormSchema";
 
 // The cases-group action types that carry Trade Instructions, and what each files. Change Management
@@ -1242,6 +1243,11 @@ export default class EnvelopeShellV2 extends LightningElement {
           // carry it — which is exactly the state this org was in before this line was restored.
           excluded: record.excluded === true
         }));
+        // reviewItems is a plain assigned array, not a getter, so reassigning strategyOptions does
+        // not rebuild it. Without this, options landing after the user opened Review would leave
+        // the Trade Instructions summary naming sleeves by raw record Id and pricing excluded rows
+        // as model rows.
+        this._refreshReviewItemsIfOpen();
       })
       .catch(() => {
         // Non-fatal: sleeves can't pick a strategy until (if) this resolves.
@@ -1275,6 +1281,10 @@ export default class EnvelopeShellV2 extends LightningElement {
       this._registrationAttributesReady = getRegistrationTypeAttributes()
         .then((map) => {
           this._registrationAttributes = map || {};
+          // Same reason as _prefetchStrategyOptions: an account's related-party slots are resolved
+          // from these attributes, so a Review opened before they land would list the single-owner
+          // default rather than the registration's real slots.
+          this._refreshReviewItemsIfOpen();
         })
         .catch(() => {
           // Non-fatal: every registration then resolves to the single-owner default.
@@ -5303,12 +5313,33 @@ export default class EnvelopeShellV2 extends LightningElement {
     });
   }
 
+  // Rebuild the summary only while the user is actually looking at it. Re-entering the view
+  // rebuilds anyway, so a late prefetch has nothing to correct once the user has left.
+  _refreshReviewItemsIfOpen() {
+    if (this.activeView === "review") {
+      this.reviewItems = this._buildReviewItems();
+    }
+  }
+
   // Project the model into Review & Submit rows: one row per action, in sortedItems order. Each
   // row leads with a synthetic type section (Household Member Type for members, Investment &
   // Service Agreement Type for account-like rows), followed by the entity type's metadata
   // sections shaped against the action's saved form data — the same visible-field set as the
   // interview, keeping only fields that have a value (blank fields and the sections they empty
-  // are dropped). The bespoke Trade Instructions section is interview-only and omitted here.
+  // are dropped) — then the interview's two bespoke sections: Related Parties and, on a
+  // trade-carrying interview, Trade Instructions.
+  //
+  // Section order mirrors the interview's group order (envelopeActionDetails._sectionGroups:
+  // layout parents → Related Parties → "Other" → Trade), with "Other" elided because the
+  // flattened metadata sections here already are the union of layout parents and leftovers and
+  // _otherCustomSections() is empty today. The next custom section added to "Other" belongs
+  // between Related Parties and Trade.
+  //
+  // Every variant flag and class string is precomputed here rather than in the page's own view
+  // model: envelopeReviewSubmit's `items` getter runs on every render (the confirm checkbox, each
+  // accordion toggle, the documents fetch resolving), and deriving per-section/per-row state there
+  // would hand LWC fresh object identities each time. This method runs only from
+  // _refreshReviewItems — on openReview() and once more if late schemas land.
   _buildReviewItems() {
     const items = [];
     this.sortedItems.forEach((entity) => {
@@ -5319,12 +5350,17 @@ export default class EnvelopeShellV2 extends LightningElement {
         ? applyLookupOptions(this._schemaForEntity(entity), this._lookupOptions)
         : null;
       const isMember = entity.groupId === "householdMembers";
-      entity.actions.forEach((action) => {
+      // Resolved once per entity, outside the actions loop: a trade value belongs to the entity
+      // (read from actions[0]), so resolving it per action would repeat the same table on every
+      // action row. Attached at index 0 only, the same shape sortedItems uses for its verdict.
+      const tradeSection = this._reviewTradeSection(entity);
+      entity.actions.forEach((action, index) => {
         const sections = [];
         if (isMember && entity.typeLabel) {
           sections.push({
             key: "type",
             title: "Household Member Type",
+            isFields: true,
             fields: [
               {
                 key: "memberType",
@@ -5337,11 +5373,12 @@ export default class EnvelopeShellV2 extends LightningElement {
           sections.push({
             key: "type",
             title: "Investment or Service Type",
+            isFields: true,
             fields: [{ key: "isaType", label: "ISA Type", value: action.title }]
           });
         }
         const draft = action.formData || {};
-        (schema || []).forEach((section, index) => {
+        (schema || []).forEach((section, sectionIndex) => {
           const fields = shapeVisibleFields(
             section.fields,
             draft,
@@ -5354,9 +5391,21 @@ export default class EnvelopeShellV2 extends LightningElement {
             }))
             .filter((field) => field.value !== "");
           if (fields.length) {
-            sections.push({ key: `sec-${index}`, title: section.name, fields });
+            sections.push({
+              key: `sec-${sectionIndex}`,
+              title: section.name,
+              isFields: true,
+              fields
+            });
           }
         });
+        const partiesSection = this._reviewRelatedPartiesSection(entity, draft);
+        if (partiesSection) {
+          sections.push(partiesSection);
+        }
+        if (tradeSection && index === 0) {
+          sections.push(tradeSection);
+        }
         items.push({
           key: action.id,
           icon: entity.iconVariant,
@@ -5368,6 +5417,134 @@ export default class EnvelopeShellV2 extends LightningElement {
       });
     });
     return items;
+  }
+
+  // The Related Parties section of a Review & Submit row, or null for an entity with no configured
+  // parties. Every slot the entity's type/registration configures is listed, in requirement order
+  // — including one the advisor left empty, which reads "None" rather than being dropped: this is
+  // the last screen before an irreversible submit, so an unfilled ownership slot is worth saying
+  // out loud.
+  //
+  // Requirement order, never the stored value's own key order: a role can map back to a different
+  // subsection than the party was added under. A key held in the value but no longer in the
+  // requirement set (the registration changed after parties were added) is not shown — the
+  // interview does not show it either, so the review agrees with what the advisor can still edit.
+  _reviewRelatedPartiesSection(entity, draft) {
+    const requirements = resolveRelatedPartyRequirements(
+      entity,
+      draft,
+      this._registrationAttributes
+    );
+    if (!requirements.length) {
+      return null;
+    }
+    const value = draft[RELATED_PARTIES_FIELD_KEY] || {};
+    const waived = waivedRelatedPartyKeys(requirements, draft);
+    // Which slots are genuinely still owed, judged by the same function the submit blocker and the
+    // Missing Items screen read. Not `parties.length < min`: roles sharing a `group` pool against
+    // the group's highest minimum, so a satisfied sibling must not leave its empty partner marked
+    // outstanding.
+    const unmet = new Set(
+      unmetRelatedPartyRequirements(requirements, value, waived).map(
+        (requirement) => requirement.key
+      )
+    );
+    return {
+      key: "relatedParties",
+      title: "Related Parties",
+      isParties: true,
+      slots: requirements.map((requirement) => {
+        const parties = value[requirement.key] || [];
+        const isWaived = waived.has(requirement.key);
+        return {
+          key: requirement.key,
+          label: requirement.title,
+          hasParties: parties.length > 0,
+          parties: parties.map((party) => ({
+            key: party.id,
+            name: party.name,
+            isNew: Boolean(party.isNew),
+            // A party still waiting on its person record: worth saying here, or the summary would
+            // present a name as though the record behind it already existed.
+            missingLabel: party.missingLabel || ""
+          })),
+          // Read only when the slot holds nobody. An affirmation is read back in the rule table's
+          // own words rather than restated here. An offered slot left empty simply says so; one
+          // that is genuinely still owed says that too, since reaching this screen with an unmet
+          // requirement should not look like a deliberate blank.
+          stateLabel: isWaived
+            ? requirement.waiver.label
+            : unmet.has(requirement.key)
+              ? "None — still required"
+              : "None",
+          stateClass: unmet.has(requirement.key)
+            ? "review__state review__state_missing"
+            : "review__state"
+        };
+      })
+    };
+  }
+
+  // The Trade Instructions section of a Review & Submit row, or null for an interview that carries
+  // none.
+  //
+  // Gated by _tradeSourceFor, which is the SUBMIT gate rather than the interview's section gate
+  // (envelopeActionDetails._tradeSection). The two differ in that _tradeSourceFor also requires a
+  // persisted record id, and that difference matters here: mirroring the interview would print a
+  // full allocation table, priced to the cent, for an entity that _persistTradeInstructions skips
+  // and _collectSubmitBlockers never checks — the last screen before an irreversible submit
+  // showing figures that go nowhere. Sharing the submit gate keeps this page's promise, that what
+  // it shows is what gets filed.
+  _reviewTradeSection(entity) {
+    const source = this._tradeSourceFor(entity);
+    if (!source) {
+      return null;
+    }
+    // source.trade is EMPTY_TRADE for an interview the advisor never touched, which summarizes as
+    // an empty table rather than nothing at all — a DMS account with no allocation must not read
+    // as though it had no trade instructions to give. It also blocks the submit, so normally the
+    // Review button is never enabled for it in the first place (see isReviewable).
+    const summary = summarizeTradeInstructions(
+      source.trade,
+      source.fallbackAccountValue,
+      this.strategyOptions
+    );
+    return {
+      key: "trade",
+      title: "Trade Instructions",
+      isTrade: true,
+      expectedValue: summary.expectedDisplay,
+      expectedNote: summary.expectedNote,
+      hasRows: summary.hasRows,
+      emptyNote: summary.emptyNote,
+      // The helper reports semantics (excluded, noteIsError); the class vocabulary is this page's,
+      // so the mapping lives here and envelopeFormSchema stays free of it.
+      rows: summary.rows.map((row) => ({
+        key: row.key,
+        strategy: row.strategy,
+        weight: row.weight,
+        weightClass: row.excluded
+          ? "review__table-figure review__table-figure_excluded"
+          : "review__table-figure",
+        dollars: row.dollars,
+        note: row.note,
+        noteClass: row.noteIsError
+          ? "review__table-note review__table-note_error"
+          : "review__table-note"
+      })),
+      hasLedger: summary.hasLedger,
+      ledger: summary.ledger.map((line) => ({
+        key: line.key,
+        label: line.label,
+        value: line.value,
+        lineClass: line.isTotal
+          ? "review__ledger-line review__ledger-line_total"
+          : line.isSubtotal
+            ? "review__ledger-line review__ledger-line_subtotal"
+            : "review__ledger-line"
+      })),
+      advisorNotes: summary.advisorNotes
+    };
   }
 
   _showToast(title, message, variant, mode) {

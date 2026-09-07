@@ -132,7 +132,17 @@
                               >{order.name}</a
                             >
                           </td>
-                          <td>{order.strategyName}</td>
+                          <td>
+                            <template lwc:if={order.hasStrategy}>
+                              <a
+                                href="#"
+                                data-strategy-id={order.strategyId}
+                                onclick={handleStrategyClick}
+                                >{order.strategyName}</a
+                              >
+                            </template>
+                            <template lwc:else>{order.strategyName}</template>
+                          </td>
                           <td>{order.fundingPercentage}</td>
                           <td>{order.fundingAmount}</td>
                         </tr>
@@ -153,4 +163,7 @@
   </template>
 
   <c-arc-order-quick-view lwc:ref="orderQuickView"></c-arc-order-quick-view>
+  <c-arc-strategy-quick-view
+    lwc:ref="strategyQuickView"
+  ></c-arc-strategy-quick-view>
 </template>

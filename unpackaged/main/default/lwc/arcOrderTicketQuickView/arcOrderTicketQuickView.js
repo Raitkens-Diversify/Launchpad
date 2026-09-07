@@ -47,6 +47,12 @@ const ORDER_COLUMNS = [
   { label: "Initial Funding Amount", path: "Initial_Funding_Amount__c" }
 ];
 
+/**
+ * Fetched alongside ORDER_COLUMNS but not rendered as its own column --
+ * the Strategy cell links on this id, opening arcStrategyQuickView.
+ */
+const ORDER_STRATEGY_ID_PATH = "Strategy__c";
+
 /** Label/path pairs for the plain (non-lookup) rows, in record-page order. */
 const DETAIL_FIELDS = [
   { label: "Status", path: "Status__c" },
@@ -146,7 +152,10 @@ export default class ArcOrderTicketQuickView extends NavigationMixin(
     recordId: "$_recordId",
     objectApiName: ORDERS_OBJECT_API_NAME,
     parentFieldApiName: ORDERS_PARENT_FIELD_API_NAME,
-    fieldApiNames: ORDER_COLUMNS.map((column) => column.path),
+    fieldApiNames: [
+      ...ORDER_COLUMNS.map((column) => column.path),
+      ORDER_STRATEGY_ID_PATH
+    ],
     linkFieldApiName: null
   })
   wiredOrders({ data, error }) {
@@ -204,12 +213,14 @@ export default class ArcOrderTicketQuickView extends NavigationMixin(
   get orderRows() {
     const currencyCode = this._ordersResult?.currencyCode || "USD";
     return (this._ordersResult?.rows || []).map((row) => {
-      const [name, strategyName, fundingPercentage, fundingAmount] =
+      const [name, strategyName, fundingPercentage, fundingAmount, strategyId] =
         row.cells || [];
       return {
         id: row.id,
         name: name || "—",
+        strategyId: strategyId || "",
         strategyName: strategyName || "—",
+        hasStrategy: Boolean(strategyId),
         fundingPercentage: formatPercentCell(fundingPercentage),
         fundingAmount: formatCurrencyCell(fundingAmount, currencyCode)
       };
@@ -233,6 +244,15 @@ export default class ArcOrderTicketQuickView extends NavigationMixin(
       return;
     }
     this.refs.orderQuickView?.open(recordId);
+  }
+
+  handleStrategyClick(event) {
+    event.preventDefault();
+    const recordId = event.currentTarget.dataset.strategyId;
+    if (!recordId) {
+      return;
+    }
+    this.refs.strategyQuickView?.open(recordId);
   }
 
   // ---- Lookups: plain links that close the popup and navigate -------------
