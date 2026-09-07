@@ -1,11 +1,9 @@
 import { LightningElement, api, wire } from "lwc";
 import { CurrentPageReference } from "lightning/navigation";
 import { getObjectInfo } from "lightning/uiObjectInfoApi";
-import { refreshApex } from "@salesforce/apex";
 import { resolveRecordIdFromPageReference } from "c/recordNavigationUtils";
 import getRecordFeed from "@salesforce/apex/ArcCaseFeedController.getRecordFeed";
 import getRecordHistory from "@salesforce/apex/ArcCaseFeedController.getRecordHistory";
-import postFeedComment from "@salesforce/apex/ArcCaseFeedController.postFeedComment";
 
 /**
  * arcCaseFeedTabs
@@ -126,15 +124,11 @@ export default class ArcCaseFeedTabs extends LightningElement {
   @wire(getObjectInfo, { objectApiName: "$objectApiName" })
   objectInfo;
 
-  /** The whole wire result, kept so a posted comment can refreshApex it. */
-  _feedResult;
-
   @wire(getRecordFeed, {
     recordId: "$activeRecordId",
     pageSize: "$feedPageSize"
   })
   wiredFeed(result) {
-    this._feedResult = result;
     const { data, error } = result;
 
     if (data) {
@@ -240,7 +234,6 @@ export default class ArcCaseFeedTabs extends LightningElement {
         createdDate: comment.createdDate,
         body: comment.body
       }));
-      const draft = this._drafts[entry.id] || "";
 
       return {
         id: entry.id,
@@ -253,55 +246,9 @@ export default class ArcCaseFeedTabs extends LightningElement {
         header: this.headerFor(entry.type),
         hasHeader: Boolean(this.headerFor(entry.type)),
         comments,
-        hasComments: comments.length > 0,
-        draft,
-        composerError: this._composerErrors[entry.id] || "",
-        composerDisabled: !draft.trim() || this._postingEntryId === entry.id
+        hasComments: comments.length > 0
       };
     });
-  }
-
-  // ---- comment composer -----------------------------------------------------
-
-  /** Unsent comment text per post id. Reassigned, never mutated, so the
-   *  template re-renders on every keystroke's change event. */
-  _drafts = {};
-  /** Failure message per post id, cleared by the next attempt. */
-  _composerErrors = {};
-  /** The post whose comment is in flight; disables just that button. */
-  _postingEntryId;
-
-  handleDraftChange(event) {
-    const entryId = event.target.dataset.entryId;
-    this._drafts = { ...this._drafts, [entryId]: event.target.value };
-  }
-
-  async handleCommentPost(event) {
-    const entryId = event.currentTarget.dataset.entryId;
-    const body = (this._drafts[entryId] || "").trim();
-
-    if (!entryId || !body || this._postingEntryId) {
-      return;
-    }
-
-    this._postingEntryId = entryId;
-    this._composerErrors = { ...this._composerErrors, [entryId]: "" };
-
-    try {
-      await postFeedComment({ feedItemId: entryId, body });
-      this._drafts = { ...this._drafts, [entryId]: "" };
-      // The feed wire is cacheable; refreshing it is what makes the new
-      // comment appear under the post it was written on.
-      await refreshApex(this._feedResult);
-    } catch (error) {
-      this._composerErrors = {
-        ...this._composerErrors,
-        [entryId]:
-          error?.body?.message || "Could not post the comment right now."
-      };
-    } finally {
-      this._postingEntryId = undefined;
-    }
   }
 
   headerFor(type) {

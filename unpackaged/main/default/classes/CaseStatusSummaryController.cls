@@ -95,16 +95,11 @@ public with sharing class CaseStatusSummaryController {
      * The tile's centre summary line: the case type, the account's registration
      * and custody details, then the client, the advisor and the amount.
      *
-     * Case_Branch_Name__c / Case_Home_Office_Name__c hold this text on orgs whose
-     * Case trigger writes it. Nothing writes it here -- every Case in this org has
-     * both fields null -- so the line rendered blank while the rest of the tile
-     * worked off live queries. It is assembled from the same fields, in the same
-     * order, as Case_TriggerHandler.populateBranchAndHomeNames does elsewhere, so
-     * both render identically. A stored value still wins, which keeps this correct
-     * if that trigger is ever brought across.
-     *
-     * The literal '</br>' is a part, not markup: joinNonNull turns it into
-     * ' | </br> | ', which caseOverviewTile rewrites into a line break.
+     * Case_Branch_Name__c / Case_Home_Office_Name__c hold this text once
+     * Case_TriggerHandler.populateBranchAndHomeNames writes it; a stored value
+     * always wins here. This is the from-scratch fallback for a Case whose
+     * trigger hasn't (yet) populated it, assembled from the same fields, in the
+     * same order, so both render identically.
      */
     private static String resolveMembership(Case c, String membershipField) {
         Boolean isHomeOffice = (membershipField == 'Case_Home_Office_Name__c');
@@ -136,7 +131,6 @@ public with sharing class CaseStatusSummaryController {
             //parts.add(fa.Custodian__c);
             parts.add(fa.Managed_Account_Platform__c);
             parts.add(fa.BD_or_RIA__c);
-            parts.add('</br>');
         }
 
         // Branch reads owner then advisor; home office reads advisor then owner.

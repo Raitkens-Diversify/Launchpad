@@ -163,7 +163,6 @@ public class Case_TriggerHandler {
                 branchParts.add(fa.Custodian__c);
                 branchParts.add(fa.Managed_Account_Platform__c);
                 branchParts.add(fa.BD_or_RIA__c);
-                branchParts.add('</br>');
                 branchParts.add(fullName(fa.Primary_Owner__r));
             }
             if (team != null)
@@ -180,7 +179,6 @@ public class Case_TriggerHandler {
                 homeParts.add(fa.Custodian__c);
                 homeParts.add(fa.Managed_Account_Platform__c);
                 homeParts.add(fa.BD_or_RIA__c);
-                homeParts.add('</br>');
             }
             if (team != null)
                 homeParts.add(fullName(team.Primary_Financial_Advisor__r));

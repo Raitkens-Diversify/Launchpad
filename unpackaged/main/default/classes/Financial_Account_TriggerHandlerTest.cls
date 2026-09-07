@@ -64,6 +64,7 @@ private class Financial_Account_TriggerHandlerTest {
         Assert.areEqual(null,
             [SELECT Custodian__c FROM Financial_Account__c WHERE Id = :fa.Id].Custodian__c,
             'A non-DPI account should not have its custodian defaulted.');
+        delete fa;
     }
 
     @IsTest

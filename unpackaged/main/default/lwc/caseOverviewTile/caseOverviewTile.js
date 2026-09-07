@@ -174,18 +174,15 @@ export default class CaseOverviewTile extends NavigationMixin(LightningElement) 
             .then((result) => {
                 this.data = result;
                 /*
-                 * membership comes from Case_Branch_Name__c / Case_Home_Office_Name__c,
-                 * and nothing populates either field in this org — so it arrives null.
-                 * Calling .replace() on it threw, and because the catch below swallowed
+                 * membership comes from Case_Branch_Name__c / Case_Home_Office_Name__c
+                 * and can arrive null (a Case the trigger hasn't populated it for yet).
+                 * Assigning it unguarded threw, and because the catch below swallowed
                  * the error and swapped in the empty state, the whole tile went wrong at
                  * once: the badge fell through to "On Track" for a case that was actually
                  * in an HO pit stop, and the owner line, the task ratio and the milestones
                  * were all blank because the assignments after this one never ran.
                  */
-                this.membership = (this.data.membership || '').replace(
-                    /\s*\|\s*<\/br>\s*\|\s*/g,
-                    ' </br> '
-                );
+                this.membership = this.data.membership || '';
                 this.ownerDetails = this.data.formattedOwnerDetail || '';
                 this.mileStoneDetails = this.processMilestones(
                     this.data.wrappedMilestones
