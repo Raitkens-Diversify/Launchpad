@@ -1737,6 +1737,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Required_Documents__c.Retirement_Plan__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Service__c.Primary_Owner__c</field>
         <readable>true</readable>
     </fieldPermissions>

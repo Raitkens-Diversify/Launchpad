@@ -525,7 +525,29 @@ public with sharing class WizardEnvelopeStateService {
         
         Id recordId = (Id) data.get('Id');
         Service__c serviceRecord = new Service__c(Id = recordId);
-        
+
+        // Owner changes on a service create or remove the owner's profile document, mirroring the
+        // account owner path. The prior owners are read before the update so an owner being cleared
+        // or reassigned can be checked for orphaning once the new values are in place.
+        Boolean touchesOwners =
+            data.containsKey('Primary_Owner__c') ||
+            data.containsKey('Secondary_Owner__c');
+        Set<Id> priorServiceOwners = new Set<Id>();
+        if (touchesOwners) {
+            for (Service__c existing : [
+                SELECT Primary_Owner__c, Secondary_Owner__c
+                FROM Service__c
+                WHERE Id = :recordId
+            ]) {
+                if (existing.Primary_Owner__c != null) {
+                    priorServiceOwners.add(existing.Primary_Owner__c);
+                }
+                if (existing.Secondary_Owner__c != null) {
+                    priorServiceOwners.add(existing.Secondary_Owner__c);
+                }
+            }
+        }
+
         // Server-side backstop for the wizard's configured format rules (the client filters
         // format-invalid values out of autosave payloads before they get here).
         WizardFieldValidator.enforce('Service__c', data);
@@ -555,6 +577,58 @@ public with sharing class WizardEnvelopeStateService {
         } catch (DmlException e) {
             throw new AuraHandledException('Update failed: ' + e.getDmlMessage(0));
         }
+
+        if (touchesOwners) {
+            reconcileServiceOwnerProfiles(recordId, priorServiceOwners);
+        }
+    }
+
+    // Keeps a service's owners' profile documents in step with its Primary/Secondary owner lookups
+    // after saveServiceInfo writes them: an owner just set earns its profile, and a prior owner no
+    // longer named — and owning nothing else — loses it. The profile itself is one per owner, shared
+    // across everything it owns, so EnvelopeProfileDocumentService is create-once and orphan-aware.
+    private static void reconcileServiceOwnerProfiles(Id serviceId, Set<Id> priorOwners) {
+        Set<Id> currentOwners = new Set<Id>();
+        for (Service__c svc : [
+            SELECT Primary_Owner__c, Secondary_Owner__c
+            FROM Service__c
+            WHERE Id = :serviceId
+        ]) {
+            if (svc.Primary_Owner__c != null) {
+                currentOwners.add(svc.Primary_Owner__c);
+            }
+            if (svc.Secondary_Owner__c != null) {
+                currentOwners.add(svc.Secondary_Owner__c);
+            }
+        }
+
+        if (!currentOwners.isEmpty()) {
+            EnvelopeProfileDocumentService.ensureProfileDocuments(
+                currentOwners,
+                envelopeForService(serviceId)
+            );
+        }
+
+        Set<Id> removed = new Set<Id>(priorOwners);
+        removed.removeAll(currentOwners);
+        if (!removed.isEmpty()) {
+            EnvelopeProfileDocumentService.removeOrphanedProfiles(removed);
+        }
+    }
+
+    // The envelope a service belongs to, so a new owner's profile lands on the same envelope the
+    // rest of its contents do. Null when the service is on no envelope yet — the profile is still
+    // created, just not linked.
+    private static Id envelopeForService(Id serviceId) {
+        for (Envelope_Content__c ec : [
+            SELECT Envelope__c
+            FROM Envelope_Content__c
+            WHERE Service__c = :serviceId AND Envelope__c != NULL
+            LIMIT 1
+        ]) {
+            return ec.Envelope__c;
+        }
+        return null;
     }
     
     // String-to-field-type coercion for the record-write save paths (saveAccountInfo /
@@ -655,8 +729,10 @@ return result;
             try {
                 // Resolve the household from the envelope's Household-record-type content row so the
                 // service is stamped with the household and reloads via getHouseholdMembersAndAccounts.
+                // Also pull the household's advisor team and name to seed the Case (mirrors how
+                // EnvelopeISAController.createOrUpdateFinancialAccountWithEnvelope reads them).
                 List<Envelope_Content__c> householdContent = [
-                    SELECT Account__c
+                    SELECT Account__c, Account__r.Name, Account__r.Financial_Advisor_Team__c
                     FROM Envelope_Content__c
                     WHERE Envelope__c = :envelopeId
                     AND Account__c != null
@@ -664,19 +740,49 @@ return result;
                     LIMIT 1
                 ];
                 Id householdId = householdContent.isEmpty() ? null : householdContent[0].Account__c;
-                
+                String householdName = householdContent.isEmpty() ? null : householdContent[0].Account__r.Name;
+                Id financialAdvisorTeamId = householdContent.isEmpty()
+                    ? null
+                    : householdContent[0].Account__r.Financial_Advisor_Team__c;
+
                 Service__c service = new Service__c(
                     Name = serviceNickname,
                     Household__c = householdId
                 );
                 insert service;
-                
-                // create new Envelope_Content
+
+                // Open a Case for the new service so it enters the wizard/case workflow like a
+                // financial account does. Type/Subject follow the legacy Wizard_RIA_Add_a_New_Service
+                // flow (Financial Planning); the Case is linked both ways to the Service.
+                Id caseRecordType = Schema.SObjectType.Case.getRecordTypeInfosByName()
+                    .get('Account Opening').getRecordTypeId();
+                Case caseRecord = new Case(
+                    Subject = 'New Financial Planning & Consulting for ' + householdName,
+                    Origin = 'Wizard',
+                    Type = 'Financial Planning',
+                    Status = 'New',
+                    Household__c = householdId,
+                    Financial_Advisor_Team__c = financialAdvisorTeamId,
+                    Service__c = service.Id,
+                    Submitted__c = false,
+                    RecordTypeId = caseRecordType
+                );
+                insert caseRecord;
+
+                // Stamp the Case back onto the Service (both directions linked).
+                service.Case__c = caseRecord.Id;
+                update service;
+
+                // create new Envelope_Content rows for both the Service and its Case
                 Envelope_Content__c envelopeContent = new Envelope_Content__c(
                     Envelope__c = envelopeId,
                     Service__c = service.Id
                 );
-                insert envelopeContent;                
+                Envelope_Content__c envelopeContentCase = new Envelope_Content__c(
+                    Envelope__c = envelopeId,
+                    Case__c = caseRecord.Id
+                );
+                insert new List<Envelope_Content__c>{ envelopeContent, envelopeContentCase };
                 return service.Id;
             }
             catch (Exception e) {

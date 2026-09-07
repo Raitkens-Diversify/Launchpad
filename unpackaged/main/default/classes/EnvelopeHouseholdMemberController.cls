@@ -116,44 +116,24 @@ public with sharing class EnvelopeHouseholdMemberController {
       }
 
       // ---------------------------------------
-      // Required Document / Signee Logic
+      // Signee Logic
       // Only for NEW members
       // ---------------------------------------
+      // The profile document itself (client / Business / Trust) is no longer created here. A
+      // member earns its profile when it becomes an owner of an account, DPI or service — see
+      // EnvelopeProfileDocumentService, called from the ownership save paths (saveAccountRoles and
+      // WizardEnvelopeStateService.saveServiceInfo). Adding a member to the household no longer
+      // creates any Required_Documents__c on its own.
       if (isNewRecord) {
         // ------------------------------------------------------------------
-        // Standalone Client
-        // ------------------------------------------------------------------
-        if (memberType == 'client' && relatedAccountId == null) {
-          Required_Documents__c reqDoc = new Required_Documents__c();
-
-          String fullName = ((accountRecord.FirstName != null
-              ? accountRecord.FirstName + ' '
-              : '') +
-            (accountRecord.LastName != null ? accountRecord.LastName : ''))
-            .trim();
-
-          reqDoc.Name = fullName + ' - client profile';
-          reqDoc.Person__c = accountRecord.Id;
-
-          insert reqDoc;
-
-          if (envelopeId != null) {
-            insert new Envelope_Content__c(
-              Envelope__c = envelopeId,
-              Required_Document__c = reqDoc.Id
-            );
-          }
-
-          insert new Signee__c(
-            Required_Document__c = reqDoc.Id,
-            Account__c = accountRecord.Id
-          );
-        } // ------------------------------------------------------------------
         // Business / Trust related Person
         // (Authorized Person, Beneficial Owner, Control Person,
         // Trustee, Grantor)
         // ------------------------------------------------------------------
-        else if (memberType == 'client' && relatedAccountId != null) {
+        // A person added as a related party to a Business or Trust signs that entity's profile.
+        // The profile exists only once the entity is an owner, so when it is not there yet this
+        // adds no signees; the entity gets its profile — and its own signees — when it becomes one.
+        if (memberType == 'client' && relatedAccountId != null) {
           Account relatedAccount = [
             SELECT Id, RecordType.DeveloperName
             FROM Account
@@ -193,43 +173,7 @@ public with sharing class EnvelopeHouseholdMemberController {
           if (!signees.isEmpty()) {
             insert signees;
           }
-        } // ------------------------------------------------------------------
-        // Business
-        // ------------------------------------------------------------------
-        else if (memberType == 'business') {
-          Required_Documents__c reqDoc = new Required_Documents__c(
-            Name = accountRecord.Name + ' - Business Profile',
-            Business__c = accountRecord.Id
-          );
-
-          insert reqDoc;
-
-          if (envelopeId != null) {
-            insert new Envelope_Content__c(
-              Envelope__c = envelopeId,
-              Required_Document__c = reqDoc.Id
-            );
-          }
-        } // ------------------------------------------------------------------
-        // Trust
-        // ------------------------------------------------------------------
-        else if (memberType == 'trust') {
-          Required_Documents__c reqDoc = new Required_Documents__c(
-            Name = accountRecord.Name + ' - Trust Profile',
-            Trust__c = accountRecord.Id
-          );
-
-          insert reqDoc;
-
-          if (envelopeId != null) {
-            insert new Envelope_Content__c(
-              Envelope__c = envelopeId,
-              Required_Document__c = reqDoc.Id
-            );
-          }
         }
-        // A retirement plan has no branch here on purpose: Required_Documents__c carries no lookup
-        // to a plan, so it can hold no document profile for one.
       }
     /*} catch (DmlException e) {
         system.debug('DmlException Save' +e);
@@ -1326,6 +1270,9 @@ public with sharing class EnvelopeHouseholdMemberController {
     // Keyed so a repeated (person, role) pair collapses to a single record.
     Map<String, Financial_Account_Role__c> toInsert = new Map<String, Financial_Account_Role__c>();
     Set<Id> partyAccountIds = new Set<Id>();
+    // The parties this payload names in an owner role (Primary / Joint Owner). They earn a profile
+    // document once the DML below settles — see EnvelopeProfileDocumentService.ensureProfileDocuments.
+    Set<Id> signingOwnerIds = new Set<Id>();
     List<String> unusableRoles = new List<String>();
     List<String> rejectedRoles = new List<String>();
     Map<String, Integer> countByRole = new Map<String, Integer>();
@@ -1349,6 +1296,9 @@ public with sharing class EnvelopeHouseholdMemberController {
         continue;
       }
       partyAccountIds.add(partyAccountId);
+      if (SIGNING_ACCOUNT_ROLES.contains(entry.role)) {
+        signingOwnerIds.add(partyAccountId);
+      }
       if (!roleValues.contains(entry.role)) {
         if (!rejectedRoles.contains(entry.role)) {
           rejectedRoles.add(entry.role);
@@ -1440,6 +1390,13 @@ public with sharing class EnvelopeHouseholdMemberController {
     syncAccountOwnerLookups(financialAccountId);
     refreshAccountSignees(financialAccountId);
 
+    // Becoming an owner of this account (or DPI) earns the owner its profile document. Create-once,
+    // so an owner that already has one from another account/service is untouched.
+    EnvelopeProfileDocumentService.ensureProfileDocuments(
+      signingOwnerIds,
+      envelopeId
+    );
+
     // An owner left holding no role on this account also leaves the envelope, so the Household
     // Outline stops showing it. Read back rather than diffed from the payload, for the same reason as
     // above: a person removed from one role but still holding another is not a removal. A party still
@@ -1454,6 +1411,10 @@ public with sharing class EnvelopeHouseholdMemberController {
       ]) {
         removedOwners.remove(remaining.Account__c);
       }
+      // Removing the owner's last ownership anywhere also removes its profile. Run before the unlink
+      // below so the owner Account still exists to be judged; the profile is kept when the owner
+      // still owns another account, DPI or service.
+      EnvelopeProfileDocumentService.removeOrphanedProfiles(removedOwners);
       WizardEnvelopeStateService.unlinkDroppedPartiesAndDeleteIfUnused(
         removedOwners,
         envelopeId

@@ -541,6 +541,10 @@
         <fields>Financial_Advisor_Team__c</fields>
         <relatedList>Account.Bill_To__c</relatedList>
     </relatedLists>
+    <relatedLists>
+        <fields>NAME</fields>
+        <relatedList>Required_Documents__c.Retirement_Plan__c</relatedList>
+    </relatedLists>
     <showEmailCheckbox>false</showEmailCheckbox>
     <showHighlightsPanel>true</showHighlightsPanel>
     <showInteractionLogPanel>true</showInteractionLogPanel>
