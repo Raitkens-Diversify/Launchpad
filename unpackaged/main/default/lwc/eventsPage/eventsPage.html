@@ -34,10 +34,6 @@
                                                 <a class="ev__cta" href={ev.cta.primaryHref}
                                                    target="_blank" rel="noopener noreferrer">{ev.cta.primaryLabel}</a>
                                             </template>
-                                            <template if:true={ev.cta.canAddToCalendar}>
-                                                <button type="button" class="ev__link" data-id={ev.id}
-                                                        onclick={handleAddToCalendar}>Add to calendar</button>
-                                            </template>
                                         </div>
                                     </div>
                                 </article>
@@ -123,10 +119,6 @@
                         </template>
                         <template if:true={selectedEvent.cta.note}>
                             <p class="ev__note">{selectedEvent.cta.note}</p>
-                        </template>
-                        <template if:true={selectedEvent.cta.canAddToCalendar}>
-                            <button type="button" class="ev__link" data-id={selectedEvent.id}
-                                    onclick={handleAddToCalendar}>Add to calendar</button>
                         </template>
                     </div>
                 </div>

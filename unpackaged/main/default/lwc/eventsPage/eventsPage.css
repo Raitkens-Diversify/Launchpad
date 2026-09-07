@@ -228,26 +228,6 @@
     color: var(--slds-g-color-on-surface-1, #4b5563);
 }
 
-/* Secondary action: quiet text button, sized to the primary's hit height. */
-.ev__link {
-    background: none;
-    border: none;
-    padding: var(--ds-space-sm, 8px) 0;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: var(--slds-g-font-scale-1, 14px);
-    font-weight: 500;
-    color: var(--ds-medium-blue, #1a76bb);
-}
-.ev__link:hover {
-    text-decoration: underline;
-}
-.ev__link:focus-visible {
-    outline: 2px solid var(--ds-medium-blue, #1a76bb);
-    outline-offset: 2px;
-    border-radius: var(--ds-radius-sm, 6px);
-}
-
 /* Empty state is a card too — a grey fill would vanish into the page. */
 .ev__empty {
     margin: var(--ds-space-2xl, 32px) 0 0;

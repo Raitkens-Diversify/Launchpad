@@ -5,24 +5,23 @@ import getEvents from '@salesforce/apex/ResourceCenterService.getEvents';
 import { formatTime, formatDateTime, formatMonthYear, localDateKey } from 'c/dsDateBlock';
 import { eventCta, formatDurationMinutes, HELP_HOME_LABEL, CRUMB_HELP_HOME } from 'c/rcConstants';
 import { linkContext, readParams, isSiteRef, goToResource, goToHome } from 'c/contextNav';
-import { downloadBlob } from 'c/csvUtil';
-import { buildIcsEvent } from './ics';
 
 /**
  * eventsPage — the /help/events route host, in two views behind a tab strip:
  *   Calendar  — (default) c-ds-calendar over EVERY webinar, past and future;
  *               a chip opens c-ds-popover with the same CTA the list rows carry.
- *   Upcoming  — the agenda list: upcoming webinars grouped by month (Sign up +
- *               a client-generated .ics "Add to calendar"), then past webinars
- *               that have a recording ("Watch recording" → resource detail).
+ *   Upcoming  — the agenda list: upcoming webinars grouped by month (Sign up),
+ *               then past webinars that have a recording ("Watch recording" →
+ *               resource detail).
  * Both views read one feed, ResourceCenterService.getEvents — never throws, so
  * an error surfaces as the same friendly empty state as an eventless org. The
  * feed is the whole active set and the client groups it by month; a
  * range-fetching overload is the upgrade path if volume ever warrants it.
  *
  * CTA per row / popover comes from c/rcConstants.eventCta — the ONE place
- * Sign up / Watch recording / "Recording coming soon" / Add to calendar are
- * decided (it routes through resourceAction, so status→verb lives there).
+ * Sign up / Watch recording / "Recording coming soon" are decided (it routes
+ * through resourceAction, so status→verb lives there). "Add to calendar"
+ * (.ics download) was removed 2026-09-06 at the user's request.
  *
  * URL contract: the default Calendar view carries ?month=YYYY-MM (no view
  * param); the list is ?view=upcoming. The pre-2026-09-02 ?view=calendar form
@@ -113,8 +112,8 @@ export default class EventsPage extends NavigationMixin(LightningElement) {
 
     restoreFrom(params) {
         this.applyParams(params);
-        if (params && (params.view || params.month)) {
-            this._restored = true;
+        if (params && (params.view || params.month || params.event)) {
+            this._restored = true; // a deep link is inbound state too: never re-applied by a late emit
         }
     }
 
@@ -381,20 +380,6 @@ export default class EventsPage extends NavigationMixin(LightningElement) {
 
     handlePopoverClose() {
         this.closePopover();
-    }
-
-    handleAddToCalendar(event) {
-        const id = event.currentTarget.dataset.id;
-        const item = this.allItems.find((e) => e.id === id);
-        const ics = buildIcsEvent(item);
-        if (!ics) {
-            return;
-        }
-        // downloadBlob (the org's one download mechanic) handles Locker's MIME
-        // allowlist — text/calendar may fall back, but the .ics filename is
-        // what calendar apps key on.
-        downloadBlob(`${item.slug || 'event'}.ics`,
-            new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
     }
 
     handleWatch(event) {

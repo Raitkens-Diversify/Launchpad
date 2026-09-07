@@ -80,7 +80,7 @@
     <sendWelcomeEmail>true</sendWelcomeEmail>
     <site>Arc</site>
     <siteArchiveStatus>NotArchived</siteArchiveStatus>
-    <status>DownForMaintenance</status>
+    <status>Live</status>
     <tabs>
         <defaultTab>home</defaultTab>
         <standardTab>Chatter</standardTab>

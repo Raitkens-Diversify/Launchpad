@@ -6,8 +6,8 @@ import { typeMeta } from 'c/resourceTypeIcons';
  * option orders) and the ONE resource call-to-action rule (`resourceAction`),
  * plus `eventCta` — the events-surface layer over that rule for the
  * ResourceCenterService.WebinarItem shape (events list rows + the calendar
- * popover both consume it, so Sign up / Watch / "Recording coming soon" /
- * Add to calendar are decided in exactly one place).
+ * popover both consume it, so Sign up / Watch / "Recording coming soon" are
+ * decided in exactly one place).
  *
  * Server-side mirrors — change both together, and only when the picklist /
  * lifecycle changes:
@@ -130,12 +130,11 @@ export function toContentItem(r) {
  *                    { kind: 'watch',  label: 'Watch recording' } — Recorded (in-app detail)
  *                    null                                         — nothing to do
  *   note             'Recording coming soon' for Past, else null (never a dead button)
- *   canAddToCalendar true only while Upcoming
  * Consumers: eventsPage (list rows + the calendar detail popover).
  */
 export function eventCta(item) {
     if (!item) {
-        return { primary: null, note: null, canAddToCalendar: false };
+        return { primary: null, note: null };
     }
     const status = item.status || item.webinarStatus;
     const { action, href } = resourceAction({
@@ -151,8 +150,7 @@ export function eventCta(item) {
     }
     return {
         primary,
-        note: status === WEBINAR_STATUS_PAST ? 'Recording coming soon' : null,
-        canAddToCalendar: status === WEBINAR_STATUS_UPCOMING
+        note: status === WEBINAR_STATUS_PAST ? 'Recording coming soon' : null
     };
 }
 
