@@ -17,11 +17,25 @@ private class EnvelopeAccountAddendumServiceTest {
     return owner;
   }
 
+  private static Id newHousehold() {
+    Account household = new Account(
+      Name = 'Test Household',
+      RecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
+        .get('Household')
+        .getRecordTypeId()
+    );
+    insert household;
+    return household.Id;
+  }
+
   private static Financial_Account__c newAccount(String platform) {
+    // A Household is required: the Financial_Account_Trigger stamps the household for DMS platforms
+    // and updates it, which fails on a household-less account.
     Financial_Account__c fa = new Financial_Account__c(
       Name = 'Acct 1',
       BD_or_RIA__c = 'RIA',
-      Managed_Account_Platform__c = platform
+      Managed_Account_Platform__c = platform,
+      Household__c = newHousehold()
     );
     insert fa;
     return fa;
@@ -140,10 +154,15 @@ private class EnvelopeAccountAddendumServiceTest {
   // A BD account gets no addendum even with a platform set.
   @isTest
   static void testBdAccountGetsNoAddendum() {
+    // Brokerage + account number set to avoid an unrelated after-insert trigger path
+    // (setReportAcctNumber_AfterInsert) that mutates read-only records for BD accounts without them.
     Financial_Account__c fa = new Financial_Account__c(
       Name = 'Acct 1',
       BD_or_RIA__c = 'BD',
-      Managed_Account_Platform__c = 'DMS'
+      Managed_Account_Platform__c = 'DMS',
+      Brokerage__c = true,
+      Account_Number__c = '00012345',
+      Household__c = newHousehold()
     );
     insert fa;
     Account owner = newOwner('Jane', 'Doe');

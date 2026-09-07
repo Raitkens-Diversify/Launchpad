@@ -108,29 +108,13 @@ private class EnvelopeHouseholdMemberControllerTest {
       'A single Envelope_Content linking the Account should be created.'
     );
 
-    List<Required_Documents__c> reqDocs = [
-      SELECT Id, Name, Person__c
-      FROM Required_Documents__c
-      WHERE Person__c = :accId
-    ];
+    // Adding a client to the household no longer creates its profile document. A member earns its
+    // profile only once it becomes an owner of an account, DPI or service — see
+    // EnvelopeProfileDocumentService and testOwnerEarnsClientProfile below.
     System.assertEquals(
-      1,
-      reqDocs.size(),
-      'A Required Document should be created for a new client.'
-    );
-    System.assertEquals(
-      'Jane Doe - client profile',
-      reqDocs[0].Name,
-      'Required Document name should be derived from the person name.'
-    );
-    System.assertEquals(
-      1,
-      [
-        SELECT COUNT()
-        FROM Envelope_Content__c
-        WHERE Envelope__c = :env.Id AND Required_Document__c = :reqDocs[0].Id
-      ],
-      'A linking Envelope_Content for the Required Document should be created.'
+      0,
+      [SELECT COUNT() FROM Required_Documents__c WHERE Person__c = :accId],
+      'Adding a client should NOT create a profile document at member-add time.'
     );
   }
 
@@ -254,9 +238,9 @@ private class EnvelopeHouseholdMemberControllerTest {
       'Re-saving must not create a duplicate Account Envelope_Content.'
     );
     System.assertEquals(
-      1,
+      0,
       [SELECT COUNT() FROM Required_Documents__c WHERE Person__c = :accId],
-      'Required Documents must not be re-created on update.'
+      'A member save (insert or update) must not create a profile document.'
     );
   }
 

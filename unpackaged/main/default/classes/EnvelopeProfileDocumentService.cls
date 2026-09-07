@@ -113,6 +113,146 @@ public with sharing class EnvelopeProfileDocumentService {
 
     linkDocsToEnvelope(new List<Id>(docIdByOwner.values()), envelopeId);
     ensureSelfSignees(eligibleById, docIdByOwner);
+
+    // A Business profile is signed by its Authorized Persons and a Trust profile by its Trustees, so
+    // any that already exist become signees the moment the profile does. (When one is added later,
+    // saveRelatedParties calls this again.) An owner with neither profile is simply skipped.
+    syncFiduciarySignees(eligibleById.keySet());
+  }
+
+  // The fiduciary role that signs each entity profile, keyed by the Required_Documents__c lookup the
+  // profile hangs off: a business's "Business Client Consents and Disclosures" is signed by its
+  // Authorized Persons, a trust's "Trust Client Consents and Disclosures" by its Trustees, and a
+  // retirement plan's "Retirement Plan Client Consents and Disclosures" by its Authorized Persons. A
+  // person profile is self-signed (handled in ensureSelfSignees) and is not here.
+  private static final Map<String, String> SIGNING_ROLE_BY_ENTITY_LOOKUP = new Map<String, String>{
+    'Business__c' => 'Authorized Person',
+    'Trust__c' => 'Trustee',
+    'Retirement_Plan__c' => 'Authorized Person'
+  };
+
+  // Ensures every person holding an entity profile's signing fiduciary role is a signee on that
+  // profile — a business's Authorized Persons on its profile, a trust's Trustees on its. Additive and
+  // idempotent: it adds the ones that are missing and leaves existing signees alone, so it is safe to
+  // call after the profile is created and after the entity's related parties change. An id with no
+  // Business or Trust profile — a person, or an entity not yet an owner — matches nothing and is
+  // skipped.
+  public static void syncFiduciarySignees(Set<Id> entityAccountIds) {
+    if (entityAccountIds == null || entityAccountIds.isEmpty()) {
+      return;
+    }
+
+    // The Business/Trust profile documents grouped by entity, plus the fiduciary role that signs each
+    // entity (Authorized Person for a business, Trustee for a trust).
+    Map<Id, List<Id>> docsByEntity = new Map<Id, List<Id>>();
+    Map<Id, String> roleByEntity = new Map<Id, String>();
+    Set<Id> docIds = new Set<Id>();
+    for (Required_Documents__c doc : [
+      SELECT Id, Business__c, Trust__c, Retirement_Plan__c
+      FROM Required_Documents__c
+      WHERE
+        Business__c IN :entityAccountIds
+        OR Trust__c IN :entityAccountIds
+        OR Retirement_Plan__c IN :entityAccountIds
+    ]) {
+      Id entityId;
+      String role;
+      if (doc.Business__c != null) {
+        entityId = doc.Business__c;
+        role = SIGNING_ROLE_BY_ENTITY_LOOKUP.get('Business__c');
+      } else if (doc.Trust__c != null) {
+        entityId = doc.Trust__c;
+        role = SIGNING_ROLE_BY_ENTITY_LOOKUP.get('Trust__c');
+      } else if (doc.Retirement_Plan__c != null) {
+        entityId = doc.Retirement_Plan__c;
+        role = SIGNING_ROLE_BY_ENTITY_LOOKUP.get('Retirement_Plan__c');
+      } else {
+        continue;
+      }
+      if (!docsByEntity.containsKey(entityId)) {
+        docsByEntity.put(entityId, new List<Id>());
+      }
+      docsByEntity.get(entityId).add(doc.Id);
+      roleByEntity.put(entityId, role);
+      docIds.add(doc.Id);
+    }
+    if (docIds.isEmpty()) {
+      return;
+    }
+
+    // The people holding each entity's signing role, from its active fiduciary relationships. Roles__c
+    // is a multi-select, so the role is matched against every value the relationship carries.
+    Map<Id, Set<Id>> signersByEntity = new Map<Id, Set<Id>>();
+    for (Account_Account_Relationship__c relation : [
+      SELECT Account__c, Related_Account__c, Roles__c
+      FROM Account_Account_Relationship__c
+      WHERE
+        Account__c IN :docsByEntity.keySet()
+        AND Related_Account__c != NULL
+        AND Active__c = TRUE
+    ]) {
+      String requiredRole = roleByEntity.get(relation.Account__c);
+      if (requiredRole == null || !rolesContain(relation.Roles__c, requiredRole)) {
+        continue;
+      }
+      if (!signersByEntity.containsKey(relation.Account__c)) {
+        signersByEntity.put(relation.Account__c, new Set<Id>());
+      }
+      signersByEntity.get(relation.Account__c).add(relation.Related_Account__c);
+    }
+    if (signersByEntity.isEmpty()) {
+      return;
+    }
+
+    // Existing signees, so only the missing ones are added.
+    Set<String> alreadySigning = new Set<String>();
+    for (Signee__c signee : [
+      SELECT Account__c, Required_Document__c
+      FROM Signee__c
+      WHERE Required_Document__c IN :docIds
+    ]) {
+      alreadySigning.add(
+        String.valueOf(signee.Account__c) +
+        '|' +
+        String.valueOf(signee.Required_Document__c)
+      );
+    }
+
+    List<Signee__c> toInsert = new List<Signee__c>();
+    for (Id entityId : docsByEntity.keySet()) {
+      Set<Id> persons = signersByEntity.get(entityId);
+      if (persons == null) {
+        continue;
+      }
+      for (Id docId : docsByEntity.get(entityId)) {
+        for (Id personId : persons) {
+          String key = String.valueOf(personId) + '|' + String.valueOf(docId);
+          if (!alreadySigning.contains(key)) {
+            alreadySigning.add(key);
+            toInsert.add(
+              new Signee__c(Required_Document__c = docId, Account__c = personId)
+            );
+          }
+        }
+      }
+    }
+    if (!toInsert.isEmpty()) {
+      insert toInsert;
+    }
+  }
+
+  // True when a multi-select Roles__c value carries the given role. Split on the ';' separator the
+  // field stores, trimming each entry so a stray space cannot hide a match.
+  private static Boolean rolesContain(String roles, String role) {
+    if (String.isBlank(roles)) {
+      return false;
+    }
+    for (String value : roles.split(';')) {
+      if (value.trim() == role) {
+        return true;
+      }
+    }
+    return false;
   }
 
   // Deletes the profile of any owner in the set that no longer owns anything — no account or DPI

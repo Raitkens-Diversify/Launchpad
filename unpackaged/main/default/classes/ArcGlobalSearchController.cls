@@ -114,11 +114,28 @@ public with sharing class ArcGlobalSearchController {
     // (contains), not just at the start of a word — e.g. "cme" still finds
     // "Acme Test Account".
     String findExpr = '*' + cleanTerm + '*';
+    // Account's own RETURNING clause is scoped to the running user's active
+    // Financial Advisor Team membership, the same rule
+    // ArcRecordSearchController.appendMandatoryFilter applies to the
+    // Contacts tabs -- this header search is a second, independent path to
+    // the same Account data (this is dynamic SOSL, run through
+    // Search.query(String), which has no bind-variable support the way
+    // inline static SOSL or Database.queryWithBinds do, so the team ids are
+    // inlined as quoted Id literals rather than bound). An Id is never
+    // attacker-controlled text, so inlining it carries none of the
+    // injection risk that inlining raw user input would.
+    String accountTeamFilter = idInClause(
+      ArcRecordSearchController.resolveFinancialAdvisorTeamIds()
+    );
     String sosl =
       'FIND \'' +
       findExpr +
       '\' IN ALL FIELDS RETURNING ' +
-      'Account(Id, Name, Type LIMIT ' +
+      'Account(Id, Name, Type WHERE Financial_Advisor_Team__c IN ' +
+      accountTeamFilter +
+      ' OR Financial_Advisor_Team__pc IN ' +
+      accountTeamFilter +
+      ' LIMIT ' +
       SOSL_LIMIT +
       '), ' +
       'Case(Id, CaseNumber, Subject, Status LIMIT ' +
@@ -323,5 +340,24 @@ public with sharing class ArcGlobalSearchController {
       return '';
     }
     return input.replaceAll('[^a-zA-Z0-9 ]', ' ').trim();
+  }
+
+  /**
+   * A dynamic-SOSL-safe "IN (...)" literal for a set of Ids -- always at
+   * least one entry, since an empty "IN ()" is invalid SOQL/SOSL syntax. A
+   * user on no team gets a single Id that can never match a real
+   * Financial_Advisor_Team__c value, which is the same "matches nothing"
+   * outcome ArcRecordSearchController's own IN :emptySet binding produces
+   * for the Contacts tabs -- not a bypass for someone on no team.
+   */
+  private static String idInClause(Set<Id> ids) {
+    List<String> quoted = new List<String>();
+    for (Id recordId : ids) {
+      quoted.add('\'' + recordId + '\'');
+    }
+    if (quoted.isEmpty()) {
+      quoted.add('\'000000000000000AAA\'');
+    }
+    return '(' + String.join(quoted, ', ') + ')';
   }
 }

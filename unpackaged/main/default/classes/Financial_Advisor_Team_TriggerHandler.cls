@@ -69,9 +69,15 @@ public without sharing class Financial_Advisor_Team_TriggerHandler {
                 system.debug('fatIds'+ fatIds);
         system.debug('pfaIds'+ pfaIds);
 
-        // Query existing Financial Advisor Team Members for the relevant teams and advisors
-        List<Financial_Advisor_Team_Member__c> fatmList = [SELECT Id,Financial_Advisor_Team__c,User__c FROM  Financial_Advisor_Team_Member__c 
-                                                           WHERE Financial_Advisor_Team__c IN : fatIds AND User__c IN : pfaIds];
+        // Query existing ACTIVE Financial Advisor Team Members for the relevant teams and advisors.
+        // Active__c = true is deliberate: without it, a person's old, deliberately
+        // deactivated membership row on this team gets matched here and resurrected
+        // (Active__c/Primary__c set back to true below) instead of leaving it alone,
+        // producing a second active row alongside whatever active membership already
+        // exists for them -- confirmed live (143 team/user pairs currently hold
+        // duplicate active rows in this org).
+        List<Financial_Advisor_Team_Member__c> fatmList = [SELECT Id,Financial_Advisor_Team__c,User__c FROM  Financial_Advisor_Team_Member__c
+                                                           WHERE Financial_Advisor_Team__c IN : fatIds AND User__c IN : pfaIds AND Active__c = true];
         
         // Map to organize Financial Advisor Team Members by team and user
         Map<String,List<Financial_Advisor_Team_Member__c>> keyAndFatmListMap = new Map<String,List<Financial_Advisor_Team_Member__c>>();

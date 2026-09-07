@@ -153,4 +153,87 @@ public class Financial_Advisor_Team_Trigger_Test {
                 System.assertEquals(False, teamMembers.get(teamMember.Id).Primary__c, 'There should be Primary__c set false.');
 
     }
+
+    /**
+     * Regression test for the duplicate-active-member bug: an advisor's own OLD,
+     * deliberately deactivated membership row on a team must not be resurrected
+     * just because that same team's Primary Financial Advisor is (re)set to them
+     * while a separate, already-active row for them also exists on that team.
+     * Before the Active__c = true filter was added to
+     * createAndUpdateFinancialAdvisorTeamMember's lookup query, this scenario
+     * left two active rows for the same (team, user) pair -- confirmed live
+     * against 143 such duplicate pairs in this org.
+     */
+    @isTest
+    static void testReactivatingPrimaryAdvisorDoesNotResurrectInactiveMember() {
+        User advisor = new User(
+            FirstName = 'advisor3',
+            LastName = 'example',
+            Alias = 'ade3',
+            Email = 'advisor3@example.com',
+            Username = 'advisor3434@example.com',
+            ProfileId = [SELECT Id FROM Profile WHERE Name = 'Standard User' LIMIT 1].Id,
+            TimeZoneSidKey = 'America/New_York',
+            LocaleSidKey = 'en_US',
+            EmailEncodingKey = 'UTF-8',
+            LanguageLocaleKey = 'en_US'
+        );
+        insert advisor;
+
+        Financial_Advisor_Team__c team = new Financial_Advisor_Team__c(Name = 'Default Team');
+        insert team;
+
+        // An old, already-deactivated membership row for this advisor on this team --
+        // e.g. they left the team previously. This must stay untouched.
+        Financial_Advisor_Team_Member__c oldInactiveMember = new Financial_Advisor_Team_Member__c(
+            Financial_Advisor_Team__c = team.Id,
+            User__c = advisor.Id,
+            Active__c = false,
+            Primary__c = false,
+            Role__c = 'Branch Member'
+        );
+        insert oldInactiveMember;
+
+        // A currently-active membership row for the same advisor on the same team.
+        Financial_Advisor_Team_Member__c currentActiveMember = new Financial_Advisor_Team_Member__c(
+            Financial_Advisor_Team__c = team.Id,
+            User__c = advisor.Id,
+            Active__c = true,
+            Primary__c = false,
+            Role__c = 'Associate Advisor'
+        );
+        insert currentActiveMember;
+
+        // Setting this advisor as Primary Financial Advisor must not resurrect the
+        // old inactive row into a second active one.
+        Financial_Advisor_Team__c updatedTeam = new Financial_Advisor_Team__c(
+            Id = team.Id,
+            Primary_Financial_Advisor__c = advisor.Id
+        );
+        Test.startTest();
+        update updatedTeam;
+        Test.stopTest();
+
+        Financial_Advisor_Team_Member__c refreshedOldMember = [
+            SELECT Active__c, Primary__c
+            FROM Financial_Advisor_Team_Member__c
+            WHERE Id = :oldInactiveMember.Id
+        ];
+        System.assertEquals(
+            false,
+            refreshedOldMember.Active__c,
+            'The old, deliberately deactivated membership row must not be reactivated.'
+        );
+
+        List<Financial_Advisor_Team_Member__c> activeMembers = [
+            SELECT Id
+            FROM Financial_Advisor_Team_Member__c
+            WHERE Financial_Advisor_Team__c = :team.Id AND User__c = :advisor.Id AND Active__c = true
+        ];
+        System.assertEquals(
+            1,
+            activeMembers.size(),
+            'The advisor should have exactly one active membership row on this team, not a duplicate.'
+        );
+    }
 }

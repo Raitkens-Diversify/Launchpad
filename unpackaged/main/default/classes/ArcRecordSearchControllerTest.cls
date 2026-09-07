@@ -503,6 +503,73 @@ private class ArcRecordSearchControllerTest {
     Assert.isFalse(subjects.contains('NoTeamMine'), 'my own unlinked case belongs to My Open Cases, not here');
   }
 
+  /**
+   * Every Contacts tab is scoped to the running user's own Financial Advisor
+   * Team membership -- an advisor must never see another team's contact, nor
+   * one linked to no team at all, regardless of which of the seven Contacts
+   * tabs (AllAccounts included) they are on.
+   */
+  @IsTest
+  static void searchRecordsAccountOnlyReturnsContactsLinkedToMyActiveTeams() {
+    insert new Financial_Advisor_Team__c(Name = 'Default Team');
+
+    Financial_Advisor_Team__c myTeam = new Financial_Advisor_Team__c(Name = 'My Contacts Team');
+    Financial_Advisor_Team__c inactiveTeam = new Financial_Advisor_Team__c(Name = 'Former Contacts Team');
+    Financial_Advisor_Team__c otherTeam = new Financial_Advisor_Team__c(Name = 'Other Contacts Team');
+    insert new List<Financial_Advisor_Team__c>{ myTeam, inactiveTeam, otherTeam };
+
+    insert new List<Financial_Advisor_Team_Member__c>{
+      new Financial_Advisor_Team_Member__c(
+        Financial_Advisor_Team__c = myTeam.Id,
+        User__c = UserInfo.getUserId(),
+        Role__c = 'Financial Advisor',
+        Active__c = true
+      ),
+      // My own membership, but inactive -- that team's contacts are not "my
+      // team's" any more, proving Active__c is checked and not mere
+      // membership.
+      new Financial_Advisor_Team_Member__c(
+        Financial_Advisor_Team__c = inactiveTeam.Id,
+        User__c = UserInfo.getUserId(),
+        Role__c = 'Financial Advisor',
+        Active__c = false
+      )
+    };
+
+    // Type='Prospect' satisfies Type_OR_Classification_Required -- pre-existing
+    // validation, unrelated to this test's own subject.
+    insert new List<Account>{
+      new Account(Name = 'MyTeamContact', Financial_Advisor_Team__c = myTeam.Id, Type = 'Prospect'),
+      new Account(Name = 'InactiveTeamContact', Financial_Advisor_Team__c = inactiveTeam.Id, Type = 'Prospect'),
+      new Account(Name = 'OtherTeamContact', Financial_Advisor_Team__c = otherTeam.Id, Type = 'Prospect'),
+      new Account(Name = 'NoTeamContact', Type = 'Prospect')
+    };
+
+    Test.startTest();
+    ArcRecordSearchController.SearchResult result = ArcRecordSearchController.searchRecords(
+      'Account',
+      new List<String>{ 'Name' },
+      null,
+      null,
+      null,
+      null,
+      null,
+      25,
+      'AllAccounts'
+    );
+    Test.stopTest();
+
+    Set<String> names = new Set<String>();
+    for (ArcRecordSearchController.SearchRow row : result.rows) {
+      names.add(row.cells[0]);
+    }
+    Assert.areEqual(1, result.rows.size(), 'only the contact linked to my active team: ' + names);
+    Assert.isTrue(names.contains('MyTeamContact'), 'linked to my active team');
+    Assert.isFalse(names.contains('InactiveTeamContact'), 'inactive membership does not count');
+    Assert.isFalse(names.contains('OtherTeamContact'), 'another team\'s contact');
+    Assert.isFalse(names.contains('NoTeamContact'), 'unlinked contacts stay out');
+  }
+
   @IsTest
   static void searchRecordsMyOpenTasksOnlyReturnsOpenTasksOwnedByTheRunningUser() {
     User otherOwner = createTestUser('TaskOtherOwner');

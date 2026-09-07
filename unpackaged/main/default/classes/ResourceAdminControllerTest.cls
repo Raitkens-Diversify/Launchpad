@@ -399,6 +399,35 @@ private class ResourceAdminControllerTest {
             System.assert(e.getMessage().contains('https'), e.getMessage());
         }
 
+        // Zoom Clips (2026-09-07): the clip page → its embed form; the embed
+        // form passes through; Zoom's whole embed snippet (either shape) → its src.
+        System.assertEquals('https://us06web.zoom.us/clips/embed/vcp6K_Y5QLKorTAxxKGeFA',
+            ResourceAdminController.normalizeVideoUrl('https://us06web.zoom.us/clips/vcp6K_Y5QLKorTAxxKGeFA?from=share'));
+        System.assertEquals('https://us06web.zoom.us/clips/embed/vcp6K_Y5QLKorTAxxKGeFA',
+            ResourceAdminController.normalizeVideoUrl('https://us06web.zoom.us/clips/embed/vcp6K_Y5QLKorTAxxKGeFA'));
+        System.assertEquals('https://us06web.zoom.us/clips/embed/vcp6K_Y5QLKorTAxxKGeFA',
+            ResourceAdminController.normalizeVideoUrl('<iframe width="640" height="360"  src="https://us06web.zoom.us/clips/embed/vcp6K_Y5QLKorTAxxKGeFA" '
+                + 'frameborder="0" allowfullscreen="allowfullscreen" allow="autoplay; picture-in-picture; fullscreen"></iframe>'));
+        System.assertEquals('https://us06web.zoom.us/clips/embed/vcp6K_Y5QLKorTAxxKGeFA',
+            ResourceAdminController.normalizeVideoUrl('<div style="position: relative; width: 100%; height: 0; padding-bottom: 56.25%;">'
+                + '<iframe src="https://us06web.zoom.us/clips/embed/vcp6K_Y5QLKorTAxxKGeFA" frameborder="0" allowfullscreen="allowfullscreen" '
+                + 'allow="autoplay; picture-in-picture; fullscreen" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>'));
+        System.assertEquals('https://www.youtube.com/embed/QwZT7T-TXT0',
+            ResourceAdminController.normalizeVideoUrl('<iframe src=\'https://www.youtube.com/watch?v=QwZT7T-TXT0\'></iframe>'),
+            'A snippet\'s src still goes through the page → embed conversion');
+        try {
+            ResourceAdminController.normalizeVideoUrl('https://us06web.zoom.us/rec/share/EhGX-Dus7z1y6w9zK0dc8ogsUtx_LdTmrxxpEGTb4Flx6g6Gjr_UVVHGn-bki0dR.jLilN1x8zULDR3ae?startTime=1788465615000');
+            System.assert(false, 'a Zoom recording share link must be rejected — it never frames');
+        } catch (AuraHandledException e) {
+            System.assert(e.getMessage().contains('Clip'), e.getMessage());
+        }
+        try {
+            ResourceAdminController.normalizeVideoUrl('<p>not an embed</p>');
+            System.assert(false, 'stray HTML must be rejected');
+        } catch (AuraHandledException e) {
+            System.assert(e.getMessage().contains('embed'), e.getMessage());
+        }
+
         // Malformed JSON gets the friendly transport error, not a raw JSONException.
         try {
             ResourceAdminController.saveResource('{not json');

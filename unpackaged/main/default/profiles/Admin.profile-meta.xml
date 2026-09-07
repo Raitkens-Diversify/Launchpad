@@ -819,6 +819,18 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>EnvelopeBusinessAuthorizedSigneeTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>EnvelopeCourtesyAgreementService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>EnvelopeCourtesyAgreementServiceTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>EnvelopeFormAccountController</apexClass>
         <enabled>true</enabled>
     </classAccesses>

@@ -1060,6 +1060,30 @@ public with sharing class ResourceAdminController {
             return null;
         }
         String clean = url.trim();
+        // A pasted embed snippet (Zoom's "Embed" button hands out a whole
+        // <iframe …>, sometimes inside a responsive <div>): keep only its src —
+        // the detail page supplies the responsive 16:9 wrapper itself.
+        Matcher snippet = Pattern.compile(
+            '(?is)<iframe\\b[^>]*\\bsrc\\s*=\\s*["\']([^"\']+)["\'][^>]*>').matcher(clean);
+        if (snippet.find()) {
+            clean = snippet.group(1).trim();
+        } else if (clean.startsWith('<')) {
+            throw auraError('Paste the video\'s embed URL (or the embed code containing an <iframe>), not other HTML.');
+        }
+        // Zoom: only Clips embed. A cloud-recording share link (/rec/share, /rec/play)
+        // sets X-Frame-Options and never loads in a frame — say so instead of
+        // saving a player that shows a blank box.
+        Matcher zoomRec = Pattern.compile(
+            '(?i)^https://[\\w\\-]+\\.zoom\\.us/rec/(?:share|play)/.*$').matcher(clean);
+        if (zoomRec.matches()) {
+            throw auraError('Zoom recording share links can\'t be embedded. In Zoom, open the recording, '
+                + 'create a Clip (or open the existing Clip), choose Share > Embed, and paste that embed code or URL.');
+        }
+        Matcher zoomClip = Pattern.compile(
+            '(?i)^https://([\\w\\-]+\\.zoom\\.us)/clips/(?!embed/)([\\w\\-]+).*$').matcher(clean);
+        if (zoomClip.matches()) {
+            return 'https://' + zoomClip.group(1) + '/clips/embed/' + zoomClip.group(2);
+        }
         Matcher watch = Pattern.compile(
             '(?i)^https://(?:www\\.|m\\.)?youtube\\.com/watch\\?(?:.*&)?v=([\\w\\-]+).*$').matcher(clean);
         if (watch.matches()) {

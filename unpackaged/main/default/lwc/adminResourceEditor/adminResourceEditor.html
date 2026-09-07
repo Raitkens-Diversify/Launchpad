@@ -77,12 +77,16 @@
                                                   value={audience}
                                                   onchange={handleAudienceChange}></lightning-checkbox-group>
                         <template if:true={showEmbedInput}>
-                            <lightning-input label={embedLabel}
-                                             field-level-help={embedHelp}
-                                             value={videoEmbedUrl}
-                                             type="url"
-                                             required={embedRequired}
-                                             onchange={handleVideoUrlChange}></lightning-input>
+                            <!-- A textarea, not type="url": Zoom's Embed button hands
+                                 out a whole <div><iframe …> snippet, and the browser's
+                                 URL validation refused it. The server keeps only the
+                                 iframe's src (ResourceAdminController.normalizeVideoUrl). -->
+                            <lightning-textarea label={embedLabel}
+                                                field-level-help={embedHelp}
+                                                value={videoEmbedUrl}
+                                                placeholder="Paste the embed code or the link"
+                                                required={embedRequired}
+                                                onchange={handleVideoUrlChange}></lightning-textarea>
                         </template>
                         <template if:true={isExternal}>
                             <lightning-input label="External URL"

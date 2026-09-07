@@ -269,7 +269,7 @@ export default class EventsPage extends NavigationMixin(LightningElement) {
     }
 
     get crumbItems() {
-        return [{ label: HELP_HOME_LABEL, key: CRUMB_HELP_HOME }, { label: 'Events' }];
+        return [{ label: HELP_HOME_LABEL, key: CRUMB_HELP_HOME }, { label: 'Event Center' }];
     }
 
     get allItems() {

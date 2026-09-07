@@ -44,7 +44,7 @@ private class EnvelopeProfileDocumentServiceTest {
     ];
     System.assertEquals(1, docs.size(), 'An owner should earn one client profile.');
     System.assertEquals(
-      'Jane Doe - client profile',
+      'Jane Doe - Individual Client Consents and Disclosures',
       docs[0].Name,
       'The profile name is derived from the owner name.'
     );

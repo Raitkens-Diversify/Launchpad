@@ -11,7 +11,7 @@
     <filters>
         <field>ACCOUNT.RECORDTYPE</field>
         <operation>equals</operation>
-        <value>Account.FinServ__IndustriesHousehold,Account.Household</value>
+        <value>Account.Household</value>
     </filters>
     <label>ARC All Households</label>
 </ListView>

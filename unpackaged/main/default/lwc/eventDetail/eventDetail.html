@@ -25,7 +25,8 @@
                 <template if:true={showEmbed}>
                     <div class="evd__player">
                         <iframe class="evd__player-frame" src={detail.videoEmbedUrl}
-                                title={detail.name} allow="fullscreen"
+                                title={detail.name}
+                                allow="autoplay; picture-in-picture; fullscreen"
                                 allowfullscreen></iframe>
                     </div>
                 </template>

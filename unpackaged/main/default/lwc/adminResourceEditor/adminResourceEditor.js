@@ -224,12 +224,12 @@ export default class AdminResourceEditor extends LightningElement {
         return this.isVideo;
     }
     get embedLabel() {
-        return this.isWebinar ? 'Recording embed URL' : 'Video Embed URL';
+        return this.isWebinar ? 'Recording embed (code or link)' : 'Video embed (code or link)';
     }
     get embedHelp() {
         return this.isWebinar
-            ? 'Optional. Paste the recording’s YouTube/Vimeo link after the session; uploading a video file below works too. Either one marks the webinar Recorded.'
-            : 'The embeddable player URL (e.g. a YouTube or Vimeo embed link).';
+            ? 'Optional. After the session, paste the whole embed code from Zoom (open the Clip > Share > Embed) — or just its link, or a YouTube/Vimeo link. A plain recording share link can’t be framed. Uploading a video file below works too. Either one marks the webinar Recorded.'
+            : 'Paste the whole embed code (Zoom Clip > Share > Embed) or the link — YouTube and Vimeo links work too. Only the player address is kept; the page adds the responsive frame.';
     }
 
     /** Saved file-backed types upload their file; saved webinars upload their recording. */
@@ -417,7 +417,7 @@ export default class AdminResourceEditor extends LightningElement {
             return false;
         }
         if (this.isVideo && !this.videoEmbedUrl.trim()) {
-            toast(this, 'error', 'Video resources need a Video Embed URL.');
+            toast(this, 'error', 'Video resources need an embed code or link.');
             return false;
         }
         if (this.isExternal && !this.externalUrl.trim()) {

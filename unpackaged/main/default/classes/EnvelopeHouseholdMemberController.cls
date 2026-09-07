@@ -1163,6 +1163,13 @@ public with sharing class EnvelopeHouseholdMemberController {
       droppedParties,
       envelopeId
     );
+
+    // A business's Authorized Persons sign its Consents and Disclosures profile, and a trust's
+    // Trustees sign its. The roles were just reconciled above, so bring the signees into line: a
+    // no-op when this entity has no such profile yet.
+    EnvelopeProfileDocumentService.syncFiduciarySignees(
+      new Set<Id>{ entityAccountId }
+    );
     return rejectedRoles;
   }
 
@@ -1397,6 +1404,15 @@ public with sharing class EnvelopeHouseholdMemberController {
       envelopeId
     );
 
+    // The owner set drives an RIA account's managed-account-platform addendum and who signs it, so
+    // reconcile it whenever ownership changes (the account's platform fields are the other input,
+    // handled from saveAccountInfo).
+    EnvelopeAccountAddendumService.reconcile(financialAccountId, envelopeId);
+
+    // Courtesy Account agreements are grouped by owner set across the whole envelope, so an ownership
+    // change on any account can reshape them — reconcile the envelope's agreements.
+    EnvelopeCourtesyAgreementService.reconcile(envelopeId);
+
     // An owner left holding no role on this account also leaves the envelope, so the Household
     // Outline stops showing it. Read back rather than diffed from the payload, for the same reason as
     // above: a person removed from one role but still holding another is not a removal. A party still
@@ -1580,12 +1596,37 @@ public with sharing class EnvelopeHouseholdMemberController {
   // at account creation, from the two owner lookups — which V2 never wrote, so the documents got no
   // signees at all, and which could never have covered more than two owners anyway. Driving them off
   // the roles means the signee list follows every owner change, including removals.
+  // True when the name ends with any of the given suffixes. Used to tell an account's platform
+  // addenda apart from its other required documents by name.
+  private static Boolean endsWithAny(String value, Set<String> suffixes) {
+    if (value == null) {
+      return false;
+    }
+    for (String suffix : suffixes) {
+      if (value.endsWith(suffix)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   private static void refreshAccountSignees(Id financialAccountId) {
-    List<Required_Documents__c> docs = [
-      SELECT Id
+    // Managed-account-platform addenda hang off the same Financial_Account__c lookup but sign only
+    // the owners who have not yet signed that addendum, not every owner — so they are excluded here
+    // and owned by EnvelopeAccountAddendumService instead. Every other account document (the
+    // account-opening doc) is signed by all owners, which is what this rebuilds.
+    Set<String> addendumSuffixes = EnvelopeAccountAddendumService.addendumSuffixes();
+    List<Required_Documents__c> docs = new List<Required_Documents__c>();
+    for (Required_Documents__c doc : [
+      SELECT Id, Name
       FROM Required_Documents__c
       WHERE Financial_Account__c = :financialAccountId
-    ];
+    ]) {
+      if (doc.Name != null && endsWithAny(doc.Name, addendumSuffixes)) {
+        continue;
+      }
+      docs.add(doc);
+    }
     if (docs.isEmpty()) {
       return;
     }

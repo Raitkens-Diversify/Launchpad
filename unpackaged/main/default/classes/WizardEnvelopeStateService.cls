@@ -215,10 +215,11 @@ public with sharing class WizardEnvelopeStateService {
             data.containsKey('BD_or_RIA__c') ||
             data.containsKey('Managed_Account_Platform__c')
         ) {
-            EnvelopeAccountAddendumService.reconcile(
-                recordId,
-                envelopeForAccount(recordId)
-            );
+            Id accountEnvelopeId = envelopeForAccount(recordId);
+            EnvelopeAccountAddendumService.reconcile(recordId, accountEnvelopeId);
+            // A platform change to or from 'Courtesy Account' changes which accounts need an
+            // agreement, so reconcile the envelope's Courtesy Account agreements too.
+            EnvelopeCourtesyAgreementService.reconcile(accountEnvelopeId);
         }
     }
 
@@ -830,7 +831,11 @@ return result;
 
     @AuraEnabled
     public static List<Id> removeFinancialAccounts(List<Id> accountIds, Id envelopeId) {
-        return deleteRecordsAndEnvelopeContent(accountIds, envelopeId);
+        List<Id> result = deleteRecordsAndEnvelopeContent(accountIds, envelopeId);
+        // Removing a Courtesy account can drop an owner group below a three-account boundary, so
+        // reconcile the envelope's Courtesy Account agreements after the accounts are gone.
+        EnvelopeCourtesyAgreementService.reconcile(envelopeId);
+        return result;
     }
 
     @AuraEnabled

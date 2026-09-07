@@ -13,7 +13,7 @@
     <filters>
         <field>ACCOUNT.RECORDTYPE</field>
         <operation>equals</operation>
-        <value>Account.FinServ__IndustriesBusiness</value>
+        <value>Account.Business</value>
     </filters>
     <label>All Businesses</label>
 </ListView>

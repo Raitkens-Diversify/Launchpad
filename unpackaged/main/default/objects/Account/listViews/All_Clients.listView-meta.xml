@@ -16,9 +16,9 @@
     <columns>ACCOUNT.LAST_UPDATE</columns>
     <filterScope>Everything</filterScope>
     <filters>
-        <field>ACCOUNT.TYPE</field>
+        <field>ACCOUNT.RECORDTYPE</field>
         <operation>equals</operation>
-        <value>Active Client</value>
+        <value>PersonAccount.PersonAccount</value>
     </filters>
     <label>All Clients</label>
 </ListView>

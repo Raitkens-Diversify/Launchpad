@@ -444,6 +444,27 @@ public with sharing class ArcRecordSearchController {
         binds.put('mandatoryNotDeliveredStatus', 'Delivered');
         clauses.add('Status__c != :mandatoryNotDeliveredStatus');
       }
+      return;
+    }
+
+    if (objectApiName == 'Account') {
+      // Every Contacts tab (All Contacts, Individuals, Clients, Households,
+      // Businesses, Retirement Plans, Trusts & Estates) is scoped to the
+      // running user's own Financial Advisor Team membership -- an advisor
+      // must never see another team's contact here, the same rule
+      // Case/My_teams_open_cases applies above. An empty team set is valid:
+      // IN :emptySet matches nothing, which is right for someone on no team.
+      //
+      // Checked on both the plain Account field and its Person Account
+      // mirror: Financial_Advisor_Team__c is populated directly on the
+      // overwhelming majority of Person Accounts too (confirmed live), but a
+      // handful carry the value only on the __pc side, so both are read
+      // rather than trusting one to always be the one populated.
+      Set<Id> mandatoryTeamIds = resolveFinancialAdvisorTeamIds();
+      binds.put('mandatoryTeamIds', mandatoryTeamIds);
+      clauses.add(
+        '(Financial_Advisor_Team__c IN :mandatoryTeamIds OR Financial_Advisor_Team__pc IN :mandatoryTeamIds)'
+      );
     }
   }
 
@@ -477,8 +498,14 @@ public with sharing class ArcRecordSearchController {
     return ids;
   }
 
-  /** The Financial Advisor Teams the running user is an active member of. */
-  private static Set<Id> resolveFinancialAdvisorTeamIds() {
+  /**
+   * The Financial Advisor Teams the running user is an active member of.
+   *
+   * Public: also reused by ArcGlobalSearchController, so the header search's
+   * Account results are scoped by the exact same rule as the Contacts tabs
+   * rather than a second, independently-maintained copy of this query.
+   */
+  public static Set<Id> resolveFinancialAdvisorTeamIds() {
     Set<Id> teamIds = new Set<Id>();
     for (Financial_Advisor_Team_Member__c membership : [
       SELECT Financial_Advisor_Team__c
