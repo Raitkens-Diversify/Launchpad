@@ -13,8 +13,8 @@ import getCaseDetail from "@salesforce/apex/ArcCaseDetailController.getCaseDetai
 import getCaseTasks from "@salesforce/apex/ArcCaseDetailController.getCaseTasks";
 import getRelatedRecordsBatch from "@salesforce/apex/ArcRelatedListController.getRelatedRecordsBatch";
 import addCaseComment from "@salesforce/apex/ArcCaseCommentController.addComment";
+import getTaskLinksForCaseComments from "@salesforce/apex/TaskCommentController.getTaskLinksForCaseComments";
 import getCaseFieldSections from "@salesforce/apex/ArcCaseDetailController.getCaseFieldSections";
-import getCaseInformationFieldNames from "@salesforce/apex/ArcCaseDetailController.getCaseInformationFieldNames";
 import getRelatedHouseholdCases from "@salesforce/apex/ArcCaseDetailController.getRelatedHouseholdCases";
 
 // The right rail's 7 c-arc-related-list cards, batched into one Apex call
@@ -97,7 +97,16 @@ const MASTER_RECORD_TYPE_ID = "012000000000000AAA";
  * do on the Lightning layout.
  */
 const DESCRIPTION_FIELDS = ["Subject", "Description"];
-const CASE_INFO_TRAILING_FIELDS = ["Additional_Case_Notes__c"];
+/**
+ * Case Information carries only Additional Case Notes (requested 2026-09-07):
+ * the rest of the case's populated fields were noise beside the Financial
+ * Account Details block above it. Still drawn by lightning-record-form so the
+ * inline-edit pencil stays.
+ */
+const CASE_INFO_FIELDS = ["Additional_Case_Notes__c"];
+
+/** A blank value in a fixed-layout section, so the grid keeps its shape. */
+const EMPTY_VALUE = "\u2013";
 /*
  * "Rep Codes on the Case", copied field-for-field from
  * Case_Record_Page.flexipage's own section of that name. On Lightning the
@@ -233,7 +242,7 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
   detail;
   tasks = [];
   fieldSections = [];
-  caseInfoFields = [];
+  caseInfoFields = CASE_INFO_FIELDS;
   descriptionFields = DESCRIPTION_FIELDS;
   repCodeFields = REP_CODE_FIELDS;
   systemFields = SYSTEM_FIELDS;
@@ -344,15 +353,6 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
     }
   }
 
-  @wire(getCaseInformationFieldNames, { caseId: "$_recordId" })
-  wiredCaseInfoFields({ data, error }) {
-    if (data) {
-      this.caseInfoFields = [...data, ...CASE_INFO_TRAILING_FIELDS];
-    } else if (error) {
-      this.caseInfoFields = [];
-    }
-  }
-
   /*
    * The whole result is held, not just its data. This is the function form of
    * @wire, so refreshApex has nothing to work with unless the wrapper object
@@ -372,6 +372,11 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
   /** The rail's six related-list cards, fetched in one Apex call. */
   relatedListsByKey = {};
   _relatedListsResult;
+  _relatedListsRefreshedOnce = false;
+
+  /** CaseComment Id -> { taskId, taskSubject } for comments mirrored from a task. */
+  taskLinksByCaseCommentId = {};
+  _caseCommentsDecorated;
 
   // Header Actions dropdown.
   isActionsMenuOpen = false;
@@ -392,13 +397,85 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
     this._relatedListsResult = result;
     if (result.data) {
       this.relatedListsByKey = result.data;
+      this.loadTaskLinksForCaseComments(result.data.caseComments);
+      /*
+       * getRelatedRecordsBatch is cacheable, so landing here from the Task
+       * page right after leaving a task comment can serve the rail from the
+       * client cache -- without the CaseComment the trigger just mirrored.
+       * One refresh per visit brings the cards in line with the org.
+       */
+      if (!this._relatedListsRefreshedOnce) {
+        this._relatedListsRefreshedOnce = true;
+        refreshApex(result);
+      }
     } else if (result.error) {
       this.relatedListsByKey = {};
     }
   }
 
+  /**
+   * Which Case Comments were mirrored from a task, so the card can show the
+   * task and link to it. Failing here only costs the Task column.
+   */
+  loadTaskLinksForCaseComments(caseComments) {
+    const ids = (caseComments?.rows || []).map((row) => row.id).filter(Boolean);
+    if (!ids.length) {
+      this.taskLinksByCaseCommentId = {};
+      return;
+    }
+    getTaskLinksForCaseComments({ caseCommentIds: ids })
+      .then((links) => {
+        const byId = {};
+        (links || []).forEach((link) => {
+          if (link?.caseCommentId) {
+            byId[link.caseCommentId] = link;
+          }
+        });
+        this.taskLinksByCaseCommentId = byId;
+      })
+      .catch(() => {
+        this.taskLinksByCaseCommentId = {};
+      });
+  }
+
+  /**
+   * The Case Comments card's rows with a trailing "Task" cell: the subject of
+   * the task a mirrored comment came from (blank for a comment left on the
+   * case itself). Memoised on the two inputs so the card is not re-applied on
+   * every render.
+   */
   get caseCommentsResult() {
-    return this.relatedListsByKey.caseComments;
+    const base = this.relatedListsByKey.caseComments;
+    if (!base) {
+      return base;
+    }
+    const links = this.taskLinksByCaseCommentId || {};
+    const cached = this._caseCommentsDecorated;
+    if (cached && cached.base === base && cached.links === links) {
+      return cached.value;
+    }
+    const value = {
+      ...base,
+      types: [...(base.types || []), "STRING"],
+      rows: (base.rows || []).map((row) => {
+        const link = links[row.id];
+        return {
+          ...row,
+          cells: [...(row.cells || []), link ? link.taskSubject || "Task" : ""]
+        };
+      })
+    };
+    this._caseCommentsDecorated = { base, links, value };
+    return value;
+  }
+
+  /** The "Task" cell of a mirrored case comment opens the task it was left on. */
+  handleCaseCommentTaskNavigate(event) {
+    event.preventDefault();
+    const link = this.taskLinksByCaseCommentId?.[event.detail?.recordId];
+    if (link?.taskId) {
+      this.navigateToRecord(link.taskId, "Task");
+    }
   }
 
   get orderTicketsResult() {
@@ -575,10 +652,6 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
     return !this.isCaseFinished;
   }
 
-  get hasCaseInfoFields() {
-    return this.caseInfoFields.length > 0;
-  }
-
   get hasFieldSections() {
     return this.fieldSections.length > 0;
   }
@@ -633,6 +706,82 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
      household id but no readable name. */
   get householdLinkLabel() {
     return this.detail?.householdName || "View Household";
+  }
+
+  get hasFinancialAccountLink() {
+    return Boolean(this.detail?.financialAccountId);
+  }
+
+  get financialAccountLinkLabel() {
+    return this.detail?.financialAccountName || "View Financial Account";
+  }
+
+  get hasFinancialAccountDetails() {
+    return this.hasFinancialAccountLink;
+  }
+
+  /**
+   * Financial Account Details in the Lightning case page's arrangement. Its
+   * two columns read account, primary owner, joint owner, platform on the
+   * left and rep code, custodian, registration type, product type on the
+   * right, so the rows are interleaved for a two-column grid. Every row is
+   * kept, blank ones as a dash, so the grid holds its shape.
+   */
+  get financialAccountFacts() {
+    const detail = this.detail;
+    if (!detail?.financialAccountId) {
+      return [];
+    }
+    const account = detail.financialAccount || {};
+    const link = (key, label, value, recordId, objectApiName) => ({
+      key,
+      label,
+      value: value || EMPTY_VALUE,
+      isLink: Boolean(recordId && value),
+      recordId,
+      objectApiName
+    });
+    const text = (key, label, value) => ({
+      key,
+      label,
+      value: value || EMPTY_VALUE,
+      isLink: false
+    });
+
+    return [
+      link(
+        "account",
+        "Financial Account",
+        detail.financialAccountName,
+        detail.financialAccountId,
+        "Financial_Account__c"
+      ),
+      text("repCode", "Rep Code", account.repCode),
+      link(
+        "primaryOwner",
+        "Primary Owner",
+        account.primaryOwnerName,
+        account.primaryOwnerId,
+        "Account"
+      ),
+      text("custodian", "Custodian", account.custodian),
+      link(
+        "jointOwner",
+        "Joint Owner",
+        account.jointOwnerName,
+        account.jointOwnerId,
+        "Account"
+      ),
+      text("registrationType", "Registration Type", account.registrationType),
+      text("platform", "Managed Account Platform", account.managedAccountPlatform),
+      text("productType", "Product Type", account.productType)
+    ];
+  }
+
+  handleFinancialAccountFactClick(event) {
+    event.preventDefault();
+    const { recordId, objectApiName } = event.currentTarget.dataset;
+    this.navigateToRecord(recordId, objectApiName);
   }
 
   get hasHouseholdSummary() {
@@ -890,6 +1039,14 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
   handleHouseholdClick(event) {
     event.preventDefault();
     this.navigateToRecord(this.detail.householdId, "Account");
+  }
+
+  handleFinancialAccountClick(event) {
+    event.preventDefault();
+    this.navigateToRecord(
+      this.detail.financialAccountId,
+      "Financial_Account__c"
+    );
   }
 
   navigateToRecord(recordId, objectApiName) {

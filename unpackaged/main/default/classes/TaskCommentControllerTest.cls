@@ -20,6 +20,16 @@ private class TaskCommentControllerTest {
 
         List<CaseComment> caseComments = [SELECT Id FROM CaseComment WHERE ParentId = :parentCase.Id];
         Assert.areEqual(1, caseComments.size(), 'A Case parent gets a mirrored CaseComment.');
+
+        List<TaskCommentController.TaskCommentLink> links =
+            TaskCommentController.getTaskLinksForCaseComments(new List<Id>{ caseComments[0].Id });
+        Assert.areEqual(1, links.size(), 'The mirrored CaseComment links back to its task.');
+        Assert.areEqual(caseComments[0].Id, links[0].caseCommentId);
+        Assert.areEqual(String.valueOf(task.Id), links[0].taskId);
+        Assert.areEqual('Follow up', links[0].taskSubject);
+
+        Assert.areEqual(0, TaskCommentController.getTaskLinksForCaseComments(new List<Id>()).size(),
+            'No ids, no links.');
     }
 
     @isTest

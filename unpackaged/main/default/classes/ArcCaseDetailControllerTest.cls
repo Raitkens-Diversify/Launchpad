@@ -20,6 +20,78 @@ private class ArcCaseDetailControllerTest {
   }
 
   @IsTest
+  static void getCaseDetailReturnsTheFinancialAccountAndItsDetails() {
+    Account owner = new Account(Name = 'Test Primary Owner', Type = 'Prospect');
+    insert owner;
+
+    Financial_Account__c account = new Financial_Account__c(
+      Name = 'Test Roth IRA',
+      Primary_Owner__c = owner.Id,
+      Custodian__c = 'FIDELITY',
+      Registration_Type__c = 'Roth IRA',
+      Managed_Account_Platform__c = 'AMS',
+      Product_Type__c = 'Mutual Fund'
+    );
+    insert account;
+
+    Case record = new Case(
+      Subject = 'Account Opening',
+      Status = 'New',
+      Wizard_Financial_Account__c = account.Id
+    );
+    insert record;
+
+    Test.startTest();
+    ArcCaseDetailController.CaseDetailResult result = ArcCaseDetailController.getCaseDetail(
+      record.Id
+    );
+    Test.stopTest();
+
+    Assert.areEqual(account.Id, result.financialAccountId);
+    Assert.areEqual('Test Roth IRA', result.financialAccountName);
+
+    ArcCaseDetailController.FinancialAccountSummary details = result.financialAccount;
+    Assert.isNotNull(details, 'The linked account\'s details ride along with the case.');
+    Assert.areEqual(owner.Id, details.primaryOwnerId);
+    Assert.areEqual('Test Primary Owner', details.primaryOwnerName);
+    Assert.isNull(details.jointOwnerId);
+    Assert.isNull(details.jointOwnerName);
+    Assert.areEqual('FIDELITY', details.custodian);
+    Assert.areEqual('Roth IRA', details.registrationType);
+    Assert.areEqual('AMS', details.managedAccountPlatform);
+    Assert.areEqual('Mutual Fund', details.productType);
+    Assert.isNull(details.repCode, 'No rep code on the account, so none reported.');
+  }
+
+  @IsTest
+  static void buildFinancialAccountSummaryReturnsNullForAnUnknownAccount() {
+    Financial_Account__c account = new Financial_Account__c(Name = 'Gone');
+    insert account;
+    delete account;
+
+    Assert.isNull(
+      ArcCaseDetailController.buildFinancialAccountSummary(account.Id),
+      'A deleted or unreadable account yields no section rather than an error.'
+    );
+  }
+
+  @IsTest
+  static void getCaseDetailReturnsNoFinancialAccountWhenTheCaseHasNone() {
+    Case record = new Case(Subject = 'Plain Case', Status = 'New');
+    insert record;
+
+    Test.startTest();
+    ArcCaseDetailController.CaseDetailResult result = ArcCaseDetailController.getCaseDetail(
+      record.Id
+    );
+    Test.stopTest();
+
+    Assert.isNull(result.financialAccountId);
+    Assert.isNull(result.financialAccountName);
+    Assert.isNull(result.financialAccount);
+  }
+
+  @IsTest
   static void getCaseDetailLinksAnUnsubmittedCaseToItsOpenEnvelope() {
     Envelope__c envelope = new Envelope__c(Name = 'Test Envelope', Status__c = 'In Progress');
     insert envelope;

@@ -55,6 +55,15 @@ public with sharing class ArcCaseDetailController {
     public String householdName;
     @AuraEnabled
     public Id householdId;
+    // Wizard_Financial_Account__c: the account this case opens or services,
+    // linked from the header so a reader can step to it in one click.
+    @AuraEnabled
+    public Id financialAccountId;
+    @AuraEnabled
+    public String financialAccountName;
+    /** Null when the case has no financial account, or the user cannot read it. */
+    @AuraEnabled
+    public FinancialAccountSummary financialAccount;
     @AuraEnabled
     public String financialAdvisorTeamName;
     @AuraEnabled
@@ -90,6 +99,28 @@ public with sharing class ArcCaseDetailController {
     // predates the Envelope_Content__c join.
     @AuraEnabled
     public Id openEnvelopeId;
+  }
+
+  /** The linked Financial Account's own details, for the section of that name. */
+  public class FinancialAccountSummary {
+    @AuraEnabled
+    public Id primaryOwnerId;
+    @AuraEnabled
+    public String primaryOwnerName;
+    @AuraEnabled
+    public Id jointOwnerId;
+    @AuraEnabled
+    public String jointOwnerName;
+    @AuraEnabled
+    public String managedAccountPlatform;
+    @AuraEnabled
+    public String repCode;
+    @AuraEnabled
+    public String custodian;
+    @AuraEnabled
+    public String registrationType;
+    @AuraEnabled
+    public String productType;
   }
 
   public class HouseholdSummary {
@@ -212,6 +243,8 @@ public with sharing class ArcCaseDetailController {
         Household__r.Approximate_Highest_Tax_Bracket__c,
         Household__r.Advisory_Fee__c,
         Household__c,
+        Wizard_Financial_Account__c,
+        Wizard_Financial_Account__r.Name,
         Financial_Advisor_Team__r.Name,
         Financial_Advisor_Team__c,
         CreatedDate,
@@ -256,6 +289,13 @@ public with sharing class ArcCaseDetailController {
     result.accountName = record.Account != null ? record.Account.Name : null;
     result.accountId = record.AccountId;
     result.householdId = record.Household__c;
+    result.financialAccountId = record.Wizard_Financial_Account__c;
+    result.financialAccountName = record.Wizard_Financial_Account__r != null
+      ? record.Wizard_Financial_Account__r.Name
+      : null;
+    result.financialAccount = record.Wizard_Financial_Account__c == null
+      ? null
+      : buildFinancialAccountSummary(record.Wizard_Financial_Account__c);
     result.financialAdvisorTeamName = record.Financial_Advisor_Team__r != null
       ? record.Financial_Advisor_Team__r.Name
       : null;
@@ -488,6 +528,59 @@ public with sharing class ArcCaseDetailController {
     info.ownerName = record.Owner != null ? record.Owner.Name : null;
     info.createdDate = record.CreatedDate;
     return info;
+  }
+
+  /**
+   * Queried on its own rather than through the Case so a reader who cannot see
+   * one of these fields loses this section and not the page: user-mode SOQL
+   * throws on an unreadable field, and this is the one part of the page that
+   * reads another object's fields.
+   */
+  @TestVisible
+  private static FinancialAccountSummary buildFinancialAccountSummary(
+    Id financialAccountId
+  ) {
+    List<Financial_Account__c> matches;
+    try {
+      matches = [
+        SELECT
+          Primary_Owner__c,
+          Primary_Owner__r.Name,
+          Joint_Owner__c,
+          Joint_Owner__r.Name,
+          Managed_Account_Platform__c,
+          Rep_Code__r.Name,
+          Custodian__c,
+          Registration_Type__c,
+          Product_Type__c
+        FROM Financial_Account__c
+        WHERE Id = :financialAccountId
+        WITH USER_MODE
+        LIMIT 1
+      ];
+    } catch (QueryException unreadable) {
+      return null;
+    }
+    if (matches.isEmpty()) {
+      return null;
+    }
+
+    Financial_Account__c account = matches[0];
+    FinancialAccountSummary summary = new FinancialAccountSummary();
+    summary.primaryOwnerId = account.Primary_Owner__c;
+    summary.primaryOwnerName = account.Primary_Owner__r != null
+      ? account.Primary_Owner__r.Name
+      : null;
+    summary.jointOwnerId = account.Joint_Owner__c;
+    summary.jointOwnerName = account.Joint_Owner__r != null
+      ? account.Joint_Owner__r.Name
+      : null;
+    summary.managedAccountPlatform = account.Managed_Account_Platform__c;
+    summary.repCode = account.Rep_Code__r != null ? account.Rep_Code__r.Name : null;
+    summary.custodian = account.Custodian__c;
+    summary.registrationType = account.Registration_Type__c;
+    summary.productType = account.Product_Type__c;
+    return summary;
   }
 
   @TestVisible

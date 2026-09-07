@@ -796,6 +796,12 @@ const SCREENS = {
         value: "Whitfield Household",
         link: true
       },
+      {
+        key: "f5",
+        label: "Financial Account",
+        value: "Whitfield - Joint",
+        link: true
+      },
       { key: "f3", label: "Case Owner", value: "Alex Morgan" },
       { key: "f4", label: "Financial Advisor Team", value: "Morgan Advisors" }
     ],

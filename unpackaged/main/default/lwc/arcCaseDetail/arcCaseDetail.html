@@ -123,6 +123,16 @@
               </dd>
             </div>
           </template>
+          <template lwc:if={hasFinancialAccountLink}>
+            <div class="arc-case-detail__key-fact">
+              <dt>Financial Account</dt>
+              <dd>
+                <a href="#" onclick={handleFinancialAccountClick}
+                  >{financialAccountLinkLabel}</a
+                >
+              </dd>
+            </div>
+          </template>
           <template lwc:if={detail.ownerName}>
             <div class="arc-case-detail__key-fact">
               <dt>Case Owner</dt>
@@ -201,30 +211,62 @@
           </template>
 
           <!--
+            The linked Financial Account's details, read from that record. Its
+            lookups route through this site's own record pages, which is why this
+            is a hand-built grid rather than a lightning-record-form on the
+            account: the form's lookup links would leave the site's routing.
+          -->
+          <template lwc:if={hasFinancialAccountDetails}>
+            <details class="case-section" open>
+              <summary class="case-section__summary">
+                Financial Account Details
+              </summary>
+              <div class="case-section__body">
+                <dl class="case-section__grid">
+                  <template for:each={financialAccountFacts} for:item="fact">
+                    <div key={fact.key} class="case-section__field">
+                      <dt>{fact.label}</dt>
+                      <dd>
+                        <template lwc:if={fact.isLink}>
+                          <a
+                            href="#"
+                            data-record-id={fact.recordId}
+                            data-object-api-name={fact.objectApiName}
+                            onclick={handleFinancialAccountFactClick}
+                            >{fact.value}</a
+                          >
+                        </template>
+                        <template lwc:else>{fact.value}</template>
+                      </dd>
+                    </div>
+                  </template>
+                </dl>
+              </div>
+            </details>
+          </template>
+
+          <!--
             Case Information, Description Information and System Information, the
             three sections the Lightning page's Details tab carries.
 
             Rendered by lightning-record-form rather than a hand-built list so
             each field arrives the way the platform draws it: real label,
-            formatted currency and date, a lookup as a link, and an inline-edit
-            pencil on the fields the user is allowed to change. An explicit field
-            list is passed instead of layout-type="Full", which renders every
-            field of every case type including the blank ones.
+            formatted currency and date, and an inline-edit pencil on the fields
+            the user is allowed to change. Case Information is down to Additional
+            Case Notes alone; see CASE_INFO_FIELDS.
           -->
-          <template lwc:if={hasCaseInfoFields}>
-            <details class="case-section" open>
-              <summary class="case-section__summary">Case Information</summary>
-              <div class="case-section__body">
-                <lightning-record-form
-                  record-id={detail.id}
-                  object-api-name="Case"
-                  fields={caseInfoFields}
-                  columns="2"
-                  mode="view"
-                ></lightning-record-form>
-              </div>
-            </details>
-          </template>
+          <details class="case-section" open>
+            <summary class="case-section__summary">Case Information</summary>
+            <div class="case-section__body">
+              <lightning-record-form
+                record-id={detail.id}
+                object-api-name="Case"
+                fields={caseInfoFields}
+                columns="1"
+                mode="view"
+              ></lightning-record-form>
+            </div>
+          </details>
 
           <!-- Same record-form treatment as the sections around it: the
                platform draws the help-text icons and puts the inline-edit

@@ -35,4 +35,39 @@ public with sharing class TaskCommentController {
         return [SELECT Id, OwnerName__c, CreatedDate, CreatedById, CommentBody__c
                 FROM Task_Comment__c WHERE Id = :comment.Id];
     }
+
+    /**
+     * The task behind each given CaseComment, for the Case page's Case Comments
+     * card to link a mirrored comment back to the task it was left on. A
+     * CaseComment that did not come from a task simply has no entry.
+     */
+    @AuraEnabled(cacheable=true)
+    public static List<TaskCommentLink> getTaskLinksForCaseComments(List<Id> caseCommentIds) {
+        List<TaskCommentLink> links = new List<TaskCommentLink>();
+        if (caseCommentIds == null || caseCommentIds.isEmpty()) {
+            return links;
+        }
+        Set<String> keys = new Set<String>();
+        for (Id caseCommentId : caseCommentIds) {
+            keys.add(String.valueOf(caseCommentId));
+        }
+        for (Task_Comment__c c : [
+            SELECT CaseCommentId__c, Task_ID__c, Task_Subject__c
+            FROM Task_Comment__c
+            WHERE CaseCommentId__c IN :keys
+        ]) {
+            TaskCommentLink link = new TaskCommentLink();
+            link.caseCommentId = c.CaseCommentId__c;
+            link.taskId = c.Task_ID__c;
+            link.taskSubject = c.Task_Subject__c;
+            links.add(link);
+        }
+        return links;
+    }
+
+    public class TaskCommentLink {
+        @AuraEnabled public String caseCommentId;
+        @AuraEnabled public String taskId;
+        @AuraEnabled public String taskSubject;
+    }
 }
