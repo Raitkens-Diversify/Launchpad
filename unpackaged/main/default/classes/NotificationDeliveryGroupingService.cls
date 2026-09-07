@@ -1,8 +1,9 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-06-18
+ * Date: 2026-09-07
  *
  * Groups queued digest logs into delivery requests by recipient, channel, and source type.
+ * Immediate logs are also split by channel so email failures cannot roll back in-app sends.
  */
 public without sharing class NotificationDeliveryGroupingService {
   public static List<NotificationDigestModels.DigestDeliveryRequest> buildDeliveryRequestsForRuleIds(
@@ -108,7 +109,9 @@ public without sharing class NotificationDeliveryGroupingService {
       '|' +
       logRecord.Source_Record_Id__c +
       '|' +
-      logRecord.Frequency__c;
+      logRecord.Frequency__c +
+      '|' +
+      resolveImmediateGroupChannel(logRecord.Channel__c);
   }
 
   public static String buildImmediateGroupKey(NotificationCenterDeliveryItem deliveryItem) {
@@ -116,6 +119,16 @@ public without sharing class NotificationDeliveryGroupingService {
       '|' +
       deliveryItem.sourceRecordId +
       '|' +
-      deliveryItem.frequency;
+      deliveryItem.frequency +
+      '|' +
+      resolveImmediateGroupChannel(deliveryItem.channel);
+  }
+
+  private static String resolveImmediateGroupChannel(String channelValue) {
+    String resolvedChannel = NotificationChannelUtils.resolveSingleChannel(
+      channelValue,
+      null
+    );
+    return String.isBlank(resolvedChannel) ? '' : resolvedChannel;
   }
 }

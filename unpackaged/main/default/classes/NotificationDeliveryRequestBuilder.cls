@@ -1,8 +1,9 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-06-17
+ * Date: 2026-09-07
  *
  * Builds unified delivery requests from log ids and legacy digest requests.
+ * Immediate requests are one channel per job so in-app and email do not share a transaction.
  */
 public without sharing class NotificationDeliveryRequestBuilder {
   public static NotificationDeliveryModels.DeliveryRequest fromLogId(Id logId) {
@@ -180,12 +181,10 @@ public without sharing class NotificationDeliveryRequestBuilder {
       request.logIds.add(logRecord.Id);
     }
 
-    if (logs.size() == 1) {
-      request.channel = NotificationChannelUtils.resolveSingleChannel(
-        firstLog.Channel__c,
-        null
-      );
-    }
+    request.channel = NotificationChannelUtils.resolveSingleChannel(
+      firstLog.Channel__c,
+      null
+    );
 
     return request;
   }
@@ -205,9 +204,7 @@ public without sharing class NotificationDeliveryRequestBuilder {
       request.logIds.add(deliveryItem.logId);
     }
 
-    if (deliveryItems.size() == 1) {
-      request.channel = deliveryItemChannel(firstItem);
-    }
+    request.channel = deliveryItemChannel(firstItem);
 
     return request;
   }

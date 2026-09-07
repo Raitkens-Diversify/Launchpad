@@ -1,11 +1,11 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-07-27
+ * Date: 2026-09-07
  */
 @IsTest
 private class NotificationDeliveryRequestBuilderTest {
   @IsTest
-  static void fromLogsGroupsImmediateChannelsForSameRecipientSource() {
+  static void fromLogsSplitsImmediateChannelsForSameRecipientSource() {
     Id recipientId = UserInfo.getUserId();
     String sourceRecordId = '500000000000001AAA';
 
@@ -36,19 +36,34 @@ private class NotificationDeliveryRequestBuilderTest {
       true
     );
 
-    System.assertEquals(1, requests.size());
-    System.assertEquals(2, requests[0].logIds.size());
-    System.assertEquals(recipientId, requests[0].recipientId);
-    System.assertEquals(null, requests[0].channel);
+    System.assertEquals(2, requests.size());
+
+    Map<String, NotificationDeliveryModels.DeliveryRequest> requestByChannel = new Map<String, NotificationDeliveryModels.DeliveryRequest>();
+    for (NotificationDeliveryModels.DeliveryRequest request : requests) {
+      System.assertEquals(1, request.logIds.size());
+      System.assertEquals(recipientId, request.recipientId);
+      requestByChannel.put(request.channel, request);
+    }
+
+    System.assertEquals(
+      emailLog.Id,
+      requestByChannel.get(NotificationConstants.CHANNEL_EMAIL).logIds[0]
+    );
+    System.assertEquals(
+      inAppLog.Id,
+      requestByChannel.get(NotificationConstants.CHANNEL_IN_APP).logIds[0]
+    );
   }
 
   @IsTest
-  static void fromDeliveryItemsGroupsWithoutQuery() {
+  static void fromDeliveryItemsSplitsImmediateChannelsWithoutQuery() {
     Id recipientId = UserInfo.getUserId();
     String sourceRecordId = '500000000000002AAA';
+    Id emailLogId = UserInfo.getUserId();
+    Id inAppLogId = UserInfo.getOrganizationId();
 
     NotificationCenterDeliveryItem emailItem = new NotificationCenterDeliveryItem();
-    emailItem.logId = UserInfo.getUserId();
+    emailItem.logId = emailLogId;
     emailItem.recipientId = recipientId;
     emailItem.channel = NotificationConstants.CHANNEL_EMAIL;
     emailItem.frequency = NotificationConstants.FREQUENCY_IMMEDIATE;
@@ -56,7 +71,7 @@ private class NotificationDeliveryRequestBuilderTest {
     emailItem.sourceRecordId = sourceRecordId;
 
     NotificationCenterDeliveryItem inAppItem = new NotificationCenterDeliveryItem();
-    inAppItem.logId = UserInfo.getUserId();
+    inAppItem.logId = inAppLogId;
     inAppItem.recipientId = recipientId;
     inAppItem.channel = NotificationConstants.CHANNEL_IN_APP;
     inAppItem.frequency = NotificationConstants.FREQUENCY_IMMEDIATE;
@@ -67,8 +82,22 @@ private class NotificationDeliveryRequestBuilderTest {
       new List<NotificationCenterDeliveryItem>{ emailItem, inAppItem }
     );
 
-    System.assertEquals(1, requests.size());
-    System.assertEquals(2, requests[0].logIds.size());
+    System.assertEquals(2, requests.size());
+
+    Map<String, NotificationDeliveryModels.DeliveryRequest> requestByChannel = new Map<String, NotificationDeliveryModels.DeliveryRequest>();
+    for (NotificationDeliveryModels.DeliveryRequest request : requests) {
+      System.assertEquals(1, request.logIds.size());
+      requestByChannel.put(request.channel, request);
+    }
+
+    System.assertEquals(
+      emailLogId,
+      requestByChannel.get(NotificationConstants.CHANNEL_EMAIL).logIds[0]
+    );
+    System.assertEquals(
+      inAppLogId,
+      requestByChannel.get(NotificationConstants.CHANNEL_IN_APP).logIds[0]
+    );
   }
 
   @IsTest

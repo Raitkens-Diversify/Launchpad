@@ -59,15 +59,21 @@ export default class HelpArticlePage extends NavigationMixin(LightningElement) {
     _isSite = false;
     _pageRef;
 
+    /** `name|topic` of the route this host has already adopted. Undefined
+        until the first emit. See applyRoute(). */
+    _routeSig;
+
     @wire(CurrentPageReference)
     handlePageRef(ref) {
         this._pageRef = ref;
         this._isSite = isSiteRef(ref);
         // Deep-link state can arrive after connectedCallback in the core app,
-        // where it rides the page reference rather than the query string.
-        if (!this.initialUrlName && !this.initialCategory) {
-            this.applyParams(readParams(ref));
-        }
+        // where it rides the page reference rather than the query string —
+        // and it can arrive AGAIN, naming a different article, without this
+        // host being re-mounted: c/contextNav reaches the core-app tab with
+        // standard__navItemPage state, and the LWR router can reuse the route
+        // host. Every emit is considered; only a changed route acts.
+        this.applyRoute(readParams(ref));
     }
 
     handleResourcesLink() {
@@ -84,7 +90,7 @@ export default class HelpArticlePage extends NavigationMixin(LightningElement) {
     }
 
     connectedCallback() {
-        this.applyParams(readParams(this._pageRef));
+        this.applyRoute(readParams(this._pageRef));
         linkContext().then((ctx) => {
             this.linkCtx = ctx;
         });
@@ -92,17 +98,52 @@ export default class HelpArticlePage extends NavigationMixin(LightningElement) {
         window.addEventListener('popstate', this._popstateHandler);
     }
 
-    /** ?name= is canonical; ?article= is the accepted legacy alias, and
-        ?topic= opens browse mode with no article named.
+    /** The identity of a route: ?name= is canonical, ?article= is the accepted
+        legacy alias, ?topic= opens browse mode with no article named. */
+    routeSigOf(params) {
+        return (params.name || params.article || '') + '|' + (params.topic || '');
+    }
 
-        Merges rather than overwrites: the CurrentPageReference wire is
-        provisioned BEFORE connectedCallback, so an internal deep link is
-        already applied by the time the query-string read runs. First value
-        wins. */
-    applyParams(params) {
-        this.initialUrlName =
-            this.initialUrlName || params.name || params.article || undefined;
-        this.initialCategory = this.initialCategory || params.topic || undefined;
+    /**
+     * Adopt a route, from the page reference or the URL.
+     *
+     * Before the first render there is no browser to drive, so the target
+     * rides the mount-time initial-* props. Afterwards those props are inert —
+     * nexsArticleBrowser applies them once, when its taxonomy wire first
+     * resolves — so a later route change has to go through the browser's @api
+     * (the same way nexsLanding and handlePopState drive it).
+     *
+     * Keyed on the LAST APPLIED route rather than on what is on screen: the
+     * core app never syncs the URL, so its tab page reference stays on the
+     * article it was deep-linked with while the reader browses on, and a
+     * repeat emit of that stale reference must not yank them back.
+     */
+    applyRoute(params) {
+        const sig = this.routeSigOf(params);
+        if (sig === this._routeSig) {
+            return;
+        }
+        this._routeSig = sig;
+        const browser = this.browserEl;
+        if (!browser) {
+            this.initialUrlName = params.name || params.article || undefined;
+            this.initialCategory = params.topic || undefined;
+            return;
+        }
+        if (params.name || params.article) {
+            browser.openArticleByUrlName(params.name || params.article);
+        } else if (params.topic) {
+            browser.openCategory(params.topic);
+        } else {
+            browser.searchFor(''); // back to the browse list
+        }
+    }
+
+    /** Record the route this host just mirrored into the URL itself, so a
+        later page-reference emit that only echoes it is a no-op. Site-only:
+        in the core app nothing writes the URL. */
+    markRouteApplied() {
+        this._routeSig = this.routeSigOf(readParams(null));
     }
 
     disconnectedCallback() {
@@ -119,12 +160,16 @@ export default class HelpArticlePage extends NavigationMixin(LightningElement) {
 
     // ---- URL sync ------------------------------------------------------------
 
+    /** Read from the live URL, not the cached page ref — this host writes
+        ?name= itself and the CurrentPageReference wire never re-emits after a
+        history.pushState, while readParams gives page-reference state
+        precedence over the query string. Reading the cached ref here left
+        every URL decision anchored to the article the page was mounted with. */
     currentUrlName() {
-        return readParams(this._pageRef).name || null;
+        return readParams(null).name || null;
     }
 
-    /** Read from the live URL, not the cached page ref — this host writes
-        ?topic= itself and the CurrentPageReference wire never re-emits. */
+    /** Same contract as currentUrlName, for the browse route. */
     currentTopic() {
         return readParams(null).topic || null;
     }
@@ -140,6 +185,7 @@ export default class HelpArticlePage extends NavigationMixin(LightningElement) {
         }
         try {
             if (this.currentTopic() === topic) {
+                this.markRouteApplied();
                 return; // deep-link mount or popstate-driven open — URL is right
             }
             const url = new URL(window.location.href);
@@ -151,6 +197,7 @@ export default class HelpArticlePage extends NavigationMixin(LightningElement) {
             } else {
                 window.history.pushState({}, '', url.toString());
             }
+            this.markRouteApplied();
         } catch (e) {
             // URL sync is best-effort — never break browsing.
         }
@@ -166,12 +213,14 @@ export default class HelpArticlePage extends NavigationMixin(LightningElement) {
         }
         try {
             if (this.currentUrlName() === urlName) {
+                this.markRouteApplied();
                 return; // deep-link mount or popstate-driven open — URL is right
             }
             const url = new URL(window.location.href);
             url.searchParams.delete('article'); // never carry the legacy form forward
             url.searchParams.set('name', urlName);
             window.history.pushState({}, '', url.toString());
+            this.markRouteApplied();
         } catch (e) {
             // URL sync is best-effort — never break reading the article.
         }
@@ -189,6 +238,7 @@ export default class HelpArticlePage extends NavigationMixin(LightningElement) {
             url.searchParams.delete('name');
             url.searchParams.delete('article');
             window.history.pushState({}, '', url.toString());
+            this.markRouteApplied();
         } catch (e) {
             // best-effort
         }
@@ -201,6 +251,7 @@ export default class HelpArticlePage extends NavigationMixin(LightningElement) {
         }
         const name = this.currentUrlName();
         const topic = this.currentTopic();
+        this.markRouteApplied();
         if (name) {
             browser.openArticleByUrlName(name);
         } else if (topic) {

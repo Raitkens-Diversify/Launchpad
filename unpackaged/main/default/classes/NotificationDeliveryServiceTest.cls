@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-06-17
+ * Date: 2026-09-07
  *
  * Tests for unified notification delivery.
  */
@@ -869,13 +869,17 @@ private class NotificationDeliveryServiceTest {
     );
     NotificationTestDataFactory.insertRecords(new List<SObject>{ emailLog, inAppLog });
 
-    NotificationDeliveryModels.DeliveryRequest request = NotificationDeliveryRequestBuilder.fromLogs(
+    List<NotificationDeliveryModels.DeliveryRequest> requests = NotificationDeliveryRequestBuilder.fromLogs(
       new List<Notification_Log__c>{ emailLog, inAppLog },
       true
-    )[0];
+    );
+    System.assertEquals(2, requests.size());
 
     Test.startTest();
-    new NotificationDeliveryService().deliver(request);
+    NotificationDeliveryService deliveryService = new NotificationDeliveryService();
+    for (NotificationDeliveryModels.DeliveryRequest request : requests) {
+      deliveryService.deliver(request);
+    }
     Test.stopTest();
 
     List<Notification_Log__c> updatedLogs = [
@@ -887,6 +891,135 @@ private class NotificationDeliveryServiceTest {
     for (Notification_Log__c updatedLog : updatedLogs) {
       System.assertEquals(NotificationConstants.STATUS_SENT, updatedLog.Status__c);
     }
+  }
+
+  @IsTest
+  static void mixedImmediateRequestKeepsInAppSentWhenEmailFlushFails() {
+    NotificationCustomNotificationService.testSkipSend = true;
+    NotificationGovernorLimitService.testForceInsufficientEmailBudget = true;
+    NotificationDeliveryService.skipRetryEnqueueForTest = true;
+
+    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+
+    Case caseRecord = new Case(
+      Subject = 'Mixed channel email isolation',
+      AccountId = context.household.Id
+    );
+    NotificationTestDataFactory.insertRecord(caseRecord);
+
+    Notification_Log__c emailLog = new Notification_Log__c(
+      Recipient__c = context.recipientUser.Id,
+      Household__c = context.household.Id,
+      Source_Type__c = NotificationConstants.OBJECT_TYPE_CASE,
+      Source_Record_Id__c = String.valueOf(caseRecord.Id),
+      Channel__c = NotificationConstants.CHANNEL_EMAIL,
+      Status__c = NotificationConstants.STATUS_PENDING,
+      Frequency__c = NotificationConstants.FREQUENCY_IMMEDIATE,
+      Title__c = 'Email item',
+      Body__c = 'Email body'
+    );
+    Notification_Log__c inAppLog = new Notification_Log__c(
+      Recipient__c = context.recipientUser.Id,
+      Household__c = context.household.Id,
+      Source_Type__c = NotificationConstants.OBJECT_TYPE_CASE,
+      Source_Record_Id__c = String.valueOf(caseRecord.Id),
+      Channel__c = NotificationConstants.CHANNEL_IN_APP,
+      Status__c = NotificationConstants.STATUS_PENDING,
+      Frequency__c = NotificationConstants.FREQUENCY_IMMEDIATE,
+      Title__c = 'In-app item',
+      Body__c = 'In-app body'
+    );
+    NotificationTestDataFactory.insertRecords(new List<SObject>{ emailLog, inAppLog });
+
+    NotificationDeliveryModels.DeliveryRequest mixedRequest = new NotificationDeliveryModels.DeliveryRequest();
+    mixedRequest.recipientId = context.recipientUser.Id;
+    mixedRequest.sourceType = NotificationConstants.OBJECT_TYPE_CASE;
+    mixedRequest.frequency = NotificationConstants.FREQUENCY_IMMEDIATE;
+    mixedRequest.logIds = new List<Id>{ inAppLog.Id, emailLog.Id };
+
+    Test.startTest();
+    new NotificationDeliveryService().deliver(mixedRequest);
+    Test.stopTest();
+
+    Notification_Log__c updatedInAppLog = [
+      SELECT Status__c, Error_Message__c
+      FROM Notification_Log__c
+      WHERE Id = :inAppLog.Id
+    ];
+    Notification_Log__c updatedEmailLog = [
+      SELECT Status__c, Error_Message__c
+      FROM Notification_Log__c
+      WHERE Id = :emailLog.Id
+    ];
+
+    System.assertEquals(NotificationConstants.STATUS_SENT, updatedInAppLog.Status__c);
+    System.assertEquals(null, updatedInAppLog.Error_Message__c);
+    System.assertNotEquals(NotificationConstants.STATUS_SENT, updatedEmailLog.Status__c);
+
+    NotificationGovernorLimitService.resetTestState();
+    NotificationDeliveryService.skipRetryEnqueueForTest = false;
+  }
+
+  @IsTest
+  static void handleFailureSkipsAlreadySentLogs() {
+    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+
+    Notification_Log__c sentInAppLog = new Notification_Log__c(
+      Recipient__c = context.recipientUser.Id,
+      Household__c = context.household.Id,
+      Source_Type__c = NotificationConstants.OBJECT_TYPE_CASE,
+      Source_Record_Id__c = String.valueOf(context.household.Id),
+      Channel__c = NotificationConstants.CHANNEL_IN_APP,
+      Status__c = NotificationConstants.STATUS_SENT,
+      Frequency__c = NotificationConstants.FREQUENCY_IMMEDIATE,
+      Title__c = 'Already sent',
+      Body__c = 'Already sent body'
+    );
+    Notification_Log__c queuedEmailLog = new Notification_Log__c(
+      Recipient__c = context.recipientUser.Id,
+      Household__c = context.household.Id,
+      Source_Type__c = NotificationConstants.OBJECT_TYPE_CASE,
+      Source_Record_Id__c = String.valueOf(context.household.Id),
+      Channel__c = NotificationConstants.CHANNEL_EMAIL,
+      Status__c = NotificationConstants.STATUS_QUEUED,
+      Frequency__c = NotificationConstants.FREQUENCY_IMMEDIATE,
+      Title__c = 'Queued email',
+      Body__c = 'Queued email body'
+    );
+    NotificationTestDataFactory.insertRecords(
+      new List<SObject>{ sentInAppLog, queuedEmailLog }
+    );
+
+    NotificationDeliveryModels.DeliveryRequest mixedRequest = new NotificationDeliveryModels.DeliveryRequest();
+    mixedRequest.logIds = new List<Id>{ sentInAppLog.Id, queuedEmailLog.Id };
+    NotificationDeliveryService.skipRetryEnqueueForTest = true;
+
+    NotificationDeliveryService.simulateFailureForTest(
+      mixedRequest,
+      new NotificationDeliveryService.NotificationDeliveryException(
+        'Organization-Wide Email Address has not be verified for use.'
+      )
+    );
+
+    Notification_Log__c updatedInAppLog = [
+      SELECT Status__c, Error_Message__c
+      FROM Notification_Log__c
+      WHERE Id = :sentInAppLog.Id
+    ];
+    Notification_Log__c updatedEmailLog = [
+      SELECT Status__c, Error_Message__c
+      FROM Notification_Log__c
+      WHERE Id = :queuedEmailLog.Id
+    ];
+
+    System.assertEquals(NotificationConstants.STATUS_SENT, updatedInAppLog.Status__c);
+    System.assertEquals(null, updatedInAppLog.Error_Message__c);
+    System.assertEquals(
+      'Organization-Wide Email Address has not be verified for use.',
+      updatedEmailLog.Error_Message__c
+    );
+
+    NotificationDeliveryService.skipRetryEnqueueForTest = false;
   }
 
   @IsTest

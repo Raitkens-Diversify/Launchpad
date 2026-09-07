@@ -40,6 +40,11 @@ public with sharing class ArticleSubmissionController {
         @AuraEnabled public List<String> categoryNames = new List<String>();
         @AuraEnabled public List<String> suggestedUrlNames = new List<String>();
         @AuraEnabled public List<Id> relatedResourceIds = new List<Id>();
+        /** The same Ids resolved to name / type / slug (getSubmission only — the
+            lists don't need labels). A resource the viewer cannot read, or one
+            since deleted, is carried by Id alone so the row is never lost. */
+        @AuraEnabled public List<ArticleAdminController.ResourceLink> relatedResources
+            = new List<ArticleAdminController.ResourceLink>();
         @AuraEnabled public String status;
         @AuraEnabled public String reviewNotes;
         @AuraEnabled public String promotedArticleId;
@@ -113,7 +118,39 @@ public with sharing class ArticleSubmissionController {
         if (s.CreatedById != UserInfo.getUserId() && !isReviewer()) {
             throw auraError('You can only open your own submissions.');
         }
-        return toDto(s);
+        SubmissionDTO dto = toDto(s);
+        dto.relatedResources = resolveResources(dto.relatedResourceIds);
+        return dto;
+    }
+
+    /**
+     * Ids → labelled links, in the stored order. The submission stores only
+     * Ids (Related_Resource_Ids__c); until 2026-09-07 the editor showed those
+     * raw Ids on every reload ("a2pTO0000031SuzYAE") because nothing resolved
+     * them. Unreadable or deleted resources keep a row with the Id as the name.
+     */
+    @TestVisible
+    private static List<ArticleAdminController.ResourceLink> resolveResources(List<Id> ids) {
+        List<ArticleAdminController.ResourceLink> out = new List<ArticleAdminController.ResourceLink>();
+        if (ids == null || ids.isEmpty()) {
+            return out;
+        }
+        Map<Id, Resource__c> byId = new Map<Id, Resource__c>();
+        if (Schema.sObjectType.Resource__c.isAccessible()) {
+            byId = new Map<Id, Resource__c>([
+                SELECT Id, Name, Slug__c, Resource_Type__c FROM Resource__c WHERE Id IN :ids
+            ]);
+        }
+        for (Id id : ids) {
+            Resource__c r = byId.get(id);
+            ArticleAdminController.ResourceLink link = new ArticleAdminController.ResourceLink();
+            link.resourceId = id;
+            link.name = r == null ? String.valueOf(id) : r.Name;
+            link.slug = r == null ? null : r.Slug__c;
+            link.resourceType = r == null ? 'resource' : r.Resource_Type__c;
+            out.add(link);
+        }
+        return out;
     }
 
     // ---- Contributor writes -----------------------------------------------------

@@ -73,13 +73,21 @@ export default class AdminSubmissionEditor extends LightningElement {
             label: u,
             sublabel: 'article'
         }));
-        // Labels for previously attached resources aren't stored on the
-        // submission; show the Ids until re-picked (promotion resolves them).
-        this.resourceItems = (s.relatedResourceIds || []).map((id) => ({
-            value: id,
-            label: id,
-            sublabel: 'resource'
-        }));
+        // The server resolves the stored Ids to names (relatedResources,
+        // 2026-09-07); an older DTO shape without it still lists the Ids.
+        const resolved = s.relatedResources || [];
+        this.resourceItems = resolved.length
+            ? resolved.map((r) => ({
+                  value: r.resourceId,
+                  label: r.name || r.resourceId,
+                  sublabel: r.resourceType || 'resource',
+                  slug: r.slug
+              }))
+            : (s.relatedResourceIds || []).map((id) => ({
+                  value: id,
+                  label: id,
+                  sublabel: 'resource'
+              }));
     }
 
     // ---- Derived ------------------------------------------------------------------

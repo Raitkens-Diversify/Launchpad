@@ -1,8 +1,10 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-08-26
+ * Date: 2026-09-07
  *
  * Unified notification delivery for immediate and digest channels.
+ * Immediate in-app and email are isolated so an email send failure cannot
+ * roll back a custom notification that already succeeded.
  */
 public without sharing class NotificationDeliveryService {
   public static Boolean skipRetryEnqueueForTest = false;
@@ -80,21 +82,105 @@ public without sharing class NotificationDeliveryService {
     NotificationDeliveryModels.DeliveryRequest request,
     List<Notification_Log__c> logs
   ) {
+    List<Notification_Log__c> nonEmailLogs = new List<Notification_Log__c>();
+    List<Notification_Log__c> emailLogs = new List<Notification_Log__c>();
+
+    for (Notification_Log__c logRecord : logs) {
+      if (isEmailChannel(logRecord.Channel__c)) {
+        emailLogs.add(logRecord);
+      } else {
+        nonEmailLogs.add(logRecord);
+      }
+    }
+
+    for (Notification_Log__c logRecord : nonEmailLogs) {
+      deliverSingleRequest(
+        buildSingleLogRequest(request, logRecord),
+        new List<Notification_Log__c>{ logRecord }
+      );
+    }
+
+    if (emailLogs.isEmpty()) {
+      return;
+    }
+
+    deliverImmediateEmailLogs(request, emailLogs);
+  }
+
+  private static Boolean isEmailChannel(String channelValue) {
+    return NotificationChannelUtils.resolveSingleChannel(channelValue, null) ==
+      NotificationConstants.CHANNEL_EMAIL;
+  }
+
+  private void deliverImmediateEmailLogs(
+    NotificationDeliveryModels.DeliveryRequest request,
+    List<Notification_Log__c> emailLogs
+  ) {
+    Exception deliveryError;
+
     NotificationEmailDeliveryService.beginBatch();
     try {
-      for (Notification_Log__c logRecord : logs) {
-        NotificationDeliveryModels.DeliveryRequest singleRequest = buildSingleLogRequest(
-          request,
-          logRecord
-        );
+      for (Notification_Log__c logRecord : emailLogs) {
         deliverSingleRequest(
-          singleRequest,
+          buildSingleLogRequest(request, logRecord),
           new List<Notification_Log__c>{ logRecord }
         );
       }
+    } catch (Exception error) {
+      deliveryError = error;
     } finally {
-      NotificationEmailDeliveryService.endBatch();
+      try {
+        NotificationEmailDeliveryService.endBatch();
+      } catch (Exception flushError) {
+        if (deliveryError == null) {
+          deliveryError = flushError;
+        }
+      }
     }
+
+    if (deliveryError != null) {
+      handleEmailDeliveryFailure(request, emailLogs, deliveryError);
+    }
+  }
+
+  private void handleEmailDeliveryFailure(
+    NotificationDeliveryModels.DeliveryRequest request,
+    List<Notification_Log__c> emailLogs,
+    Exception error
+  ) {
+    NotificationDeliveryModels.DeliveryRequest emailRequest = buildEmailOnlyRequest(
+      request,
+      emailLogs
+    );
+
+    if (isGovernorLimitFailure(error)) {
+      NotificationGovernorLimitService.logLimitException(
+        'NotificationDeliveryService.deliverImmediateEmailLogs',
+        error
+      );
+      deferImmediateDelivery(emailRequest);
+      return;
+    }
+
+    handleFailure(emailRequest, error);
+  }
+
+  private static NotificationDeliveryModels.DeliveryRequest buildEmailOnlyRequest(
+    NotificationDeliveryModels.DeliveryRequest request,
+    List<Notification_Log__c> emailLogs
+  ) {
+    NotificationDeliveryModels.DeliveryRequest emailRequest = new NotificationDeliveryModels.DeliveryRequest();
+    emailRequest.recipientId = request.recipientId;
+    emailRequest.sourceType = request.sourceType;
+    emailRequest.frequency = request.frequency;
+    emailRequest.attemptNumber = request.attemptNumber;
+    emailRequest.channel = NotificationConstants.CHANNEL_EMAIL;
+
+    for (Notification_Log__c logRecord : emailLogs) {
+      emailRequest.logIds.add(logRecord.Id);
+    }
+
+    return emailRequest;
   }
 
   private void deliverSingleRequest(
@@ -165,7 +251,7 @@ public without sharing class NotificationDeliveryService {
       return;
     }
 
-    List<Notification_Log__c> logs = repository.selectLogsForRetry(request.logIds);
+    List<Notification_Log__c> logs = selectRetryableLogs(request.logIds);
 
     if (logs.isEmpty()) {
       return;
@@ -176,6 +262,18 @@ public without sharing class NotificationDeliveryService {
       : error.getMessage();
 
     scheduleRetryOrFail(logs, errorMessage, request);
+  }
+
+  private List<Notification_Log__c> selectRetryableLogs(List<Id> logIds) {
+    List<Notification_Log__c> retryableLogs = new List<Notification_Log__c>();
+
+    for (Notification_Log__c logRecord : repository.selectLogsByIds(logIds)) {
+      if (NotificationLogDeliveryService.isDeliverableStatus(logRecord.Status__c)) {
+        retryableLogs.add(logRecord);
+      }
+    }
+
+    return retryableLogs;
   }
 
   public static void scheduleRetryOrFail(

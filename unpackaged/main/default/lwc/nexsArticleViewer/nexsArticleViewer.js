@@ -118,6 +118,11 @@ export default class NexsArticleViewer extends LightningElement {
     _articleId;
     _segHtml = new Map();
     _renderedArticleId;
+    // Stale-response guard. A reader who searches again and clicks a second
+    // result swaps articleId while the first getArticle is still in flight, and
+    // whichever resolved last used to win — putting them back on the previous
+    // result, and (via articleload) pushing its ?name= back into the URL.
+    _loadSeq = 0;
     // Articles already counted by this instance — one view per article per
     // mount, so unrelated re-renders don't inflate Article_View__c counts.
     _loggedViews = new Set();
@@ -128,8 +133,9 @@ export default class NexsArticleViewer extends LightningElement {
     }
     set articleId(value) {
         this._articleId = value;
+        this._loadSeq += 1; // any in-flight load is now stale
         if (value) {
-            this.load();
+            this.load(this._loadSeq);
         } else {
             this.article = undefined;
             this.error = undefined;
@@ -144,7 +150,7 @@ export default class NexsArticleViewer extends LightningElement {
         first body render so authored site links can be rewritten. */
     _linkCtx = null;
 
-    async load() {
+    async load(seq = ++this._loadSeq) {
         this.loading = true;
         this.error = undefined;
         this._renderedArticleId = undefined;
@@ -153,6 +159,9 @@ export default class NexsArticleViewer extends LightningElement {
                 getArticle({ articleId: this._articleId }),
                 linkContext() // memoized, never rejects
             ]);
+            if (seq !== this._loadSeq) {
+                return; // a newer article was requested while this was in flight
+            }
             this._linkCtx = ctx;
             const { segments, headings } = this.sanitizeAndIndex(detail.body, ctx, detail.id);
             this.appendLegacyEmbed(segments, detail);
@@ -186,13 +195,18 @@ export default class NexsArticleViewer extends LightningElement {
                 });
             }
         } catch (e) {
+            if (seq !== this._loadSeq) {
+                return; // a stale failure must not blank the article now on screen
+            }
             this.article = undefined;
             this.headings = [];
             this.segments = [];
             this._segHtml = new Map();
             this.error = e?.body?.message || 'Unable to load this article.';
         } finally {
-            this.loading = false;
+            if (seq === this._loadSeq) {
+                this.loading = false;
+            }
         }
     }
 

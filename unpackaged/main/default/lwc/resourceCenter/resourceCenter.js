@@ -13,6 +13,12 @@ import { rcRootCrumbs, CRUMB_HELP_HOME, CRUMB_RC_HOME } from 'c/rcConstants';
     the guideopen event and its crumbs all stay wired. */
 const SHOW_GET_HELP = false;
 
+/** The identity of a Resource Center route — what handlePageRef compares an
+    inbound page reference against to tell a real change from its own echo. */
+function routeSigOf(view, slug, term, scope) {
+    return [view || 'home', slug || '', term || '', scope || ''].join('|');
+}
+
 /**
  * resourceCenter — root orchestrator + branded chrome, matching the NexS Help
  * Center. The single component both the internal Lightning App tab and the LWR
@@ -90,32 +96,35 @@ export default class ResourceCenter extends NavigationMixin(LightningElement) {
 
     _pageRef;
     _isCommunity = false;
-    _restored = false;
+    /** `rcview|rcslug|rcterm|rcscope` of the route last adopted — including the
+        ones this host wrote itself, since syncUrl()'s Navigate makes the wire
+        re-emit. Comparing signatures keeps that echo a no-op WITHOUT going
+        deaf: a boolean latch here also swallowed genuine route changes, so a
+        second search's result click (or Back) left the previous resource on
+        screen while the URL moved on. */
+    _routeSig;
 
+    /** Restore on BOTH surfaces — internally the same state arrives
+        c__-prefixed on the tab's page reference. */
     @wire(CurrentPageReference)
     handlePageRef(ref) {
         this._pageRef = ref;
         this._isCommunity = isSiteRef(ref);
-        // Restore on BOTH surfaces — internally the same state arrives
-        // c__-prefixed on the tab's page reference. The _restored latch is
-        // load-bearing: the wire re-emits on every syncUrl() Navigate, and
-        // without it our own push would be read straight back in.
-        if (ref && !this._restored) {
-            const params = readParams(ref);
-            if (params.rcview) {
-                this.view = params.rcview;
-            }
-            if (params.rcslug) {
-                this.slug = params.rcslug;
-            }
-            if (params.rcterm) {
-                this.term = params.rcterm;
-            }
-            if (params.rcscope) {
-                this.scope = params.rcscope;
-            }
-            this._restored = true;
+        if (!ref) {
+            return;
         }
+        const params = readParams(ref);
+        const sig = routeSigOf(params.rcview, params.rcslug, params.rcterm, params.rcscope);
+        if (sig === this._routeSig) {
+            return; // our own syncUrl push, read straight back in
+        }
+        this._routeSig = sig;
+        // Adopt wholesale, not key by key: a dropped param means the route no
+        // longer carries it (Back out of a detail view returns to the landing).
+        this.view = params.rcview || 'home';
+        this.slug = params.rcslug || undefined;
+        this.term = params.rcterm || undefined;
+        this.scope = params.rcscope || undefined;
     }
 
     get isHome() { return this.view === 'home'; }
@@ -224,6 +233,9 @@ export default class ResourceCenter extends NavigationMixin(LightningElement) {
         this.slug = slug;
         this.term = term;
         this.scope = view === 'search' ? scope : undefined;
+        // Stamp the route before pushing it, so the wire re-emission syncUrl()
+        // triggers is recognised as our own and changes nothing.
+        this._routeSig = routeSigOf(this.view, this.slug, this.term, this.scope);
         this.syncUrl();
     }
 

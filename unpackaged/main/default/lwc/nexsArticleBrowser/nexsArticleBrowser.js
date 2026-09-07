@@ -148,21 +148,26 @@ export default class NexsArticleBrowser extends LightningElement {
             ? categories.find((c) => c.name === this.initialCategory)
             : null;
         const landing = initial || categories[0];
+        // A routed host can drive us to an article (openArticleById /
+        // openArticleByUrlName) before the taxonomy lands. Select the landing
+        // topic so the list behind is populated, but never clear the article
+        // it asked for — selectCategory blanks selectedArticleId.
+        const hostDriven = this._openSeq > 0;
+        const hostArticleId = this.selectedArticleId;
         if (landing) {
             this.selectCategory(landing.name, landing.label);
         }
+        if (hostDriven) {
+            if (hostArticleId) {
+                this.selectedArticleId = hostArticleId;
+            }
+            return; // the host owns the article slot
+        }
         if (this.initialArticleId) {
-            this.openArticle(this.initialArticleId);
+            this.openArticleById(this.initialArticleId);
         } else if (this.initialArticleUrlName) {
-            getArticleByUrlName({ urlName: this.initialArticleUrlName })
-                .then((detail) => {
-                    if (detail && detail.id) {
-                        this.openArticle(detail.id);
-                    }
-                })
-                .catch(() => {
-                    // Unknown/unpublished UrlName: stay on the browse landing.
-                });
+            // Through the guarded @api so overlapping lookups can't fight.
+            this.openArticleByUrlName(this.initialArticleUrlName);
         }
     }
 
@@ -422,18 +427,36 @@ export default class NexsArticleBrowser extends LightningElement {
         this.loadArticles();
     }
 
+    /**
+     * Stale-response guard shared by every path that writes `articles` — a
+     * search, a category load, or a scope change. A reader who searches again
+     * before the first list lands would otherwise get whichever request
+     * happened to resolve last, which is not necessarily the one on screen.
+     */
+    _articlesSeq = 0;
+
     async loadArticles() {
+        const seq = ++this._articlesSeq;
         this.loadingArticles = true;
         try {
-            this.articles = await getArticlesByCategory({ category: this.selectedCategory });
+            const rows = await getArticlesByCategory({ category: this.selectedCategory });
+            if (seq !== this._articlesSeq) {
+                return;
+            }
+            this.articles = rows;
             this.buildSections();
         } catch (e) {
+            if (seq !== this._articlesSeq) {
+                return;
+            }
             this.articles = [];
             this.sections = [];
             // eslint-disable-next-line no-console
             console.error('nexsArticleBrowser article load error', e);
         } finally {
-            this.loadingArticles = false;
+            if (seq === this._articlesSeq) {
+                this.loadingArticles = false;
+            }
         }
     }
 
@@ -444,8 +467,12 @@ export default class NexsArticleBrowser extends LightningElement {
     /** Open an article directly (e.g. a header-search suggestion). */
     @api
     openArticleById(articleId) {
+        this._openSeq += 1; // outruns any UrlName lookup still in flight
         this.openArticle(articleId);
     }
+
+    /** Stale-response guard for the UrlName → Id lookups below. */
+    _openSeq = 0;
 
     /** Open an article by UrlName after mount (routed host drives this on
         popstate; unknown/unpublished names stay on the current view). */
@@ -454,9 +481,12 @@ export default class NexsArticleBrowser extends LightningElement {
         if (!urlName) {
             return;
         }
+        // A routed host can ask for a second article before the first name
+        // resolves; only the newest lookup may open anything.
+        const seq = ++this._openSeq;
         getArticleByUrlName({ urlName })
             .then((detail) => {
-                if (detail && detail.id) {
+                if (seq === this._openSeq && detail && detail.id) {
                     this.openArticle(detail.id);
                 }
             })
@@ -508,6 +538,7 @@ export default class NexsArticleBrowser extends LightningElement {
     }
 
     async runSearch() {
+        const seq = ++this._articlesSeq;
         this.loadingArticles = true;
         try {
             const result = await searchRanked({
@@ -515,6 +546,9 @@ export default class NexsArticleBrowser extends LightningElement {
                 category: this.searchScope || null, // BELOW: the whole subtree
                 disableFuzzy: this._disableFuzzy
             });
+            if (seq !== this._articlesSeq) {
+                return; // a newer search or category load already rendered
+            }
             this.articles = (result && result.articles) || [];
             // Fuzzy banner only when the engine actually corrected and the user
             // hasn't opted out via "search instead".
@@ -544,6 +578,9 @@ export default class NexsArticleBrowser extends LightningElement {
                 this.fallbackArticles = [];
             }
         } catch (e) {
+            if (seq !== this._articlesSeq) {
+                return;
+            }
             this.articles = [];
             this.sections = [];
             this.fuzzy = false;
@@ -551,7 +588,9 @@ export default class NexsArticleBrowser extends LightningElement {
             // eslint-disable-next-line no-console
             console.error('nexsArticleBrowser search error', e);
         } finally {
-            this.loadingArticles = false;
+            if (seq === this._articlesSeq) {
+                this.loadingArticles = false;
+            }
         }
     }
 

@@ -203,7 +203,7 @@ function siteRelative(absolute) {
 }
 
 /** True when the target's route is the one already on screen (a query-only
-    change). Those keep the reload: see `navigate()`. */
+    change). Those keep the reload: see `navigate()` rung 1b. */
 function sameRoute(absolute, loc) {
     try {
         return trimEnd(new URL(absolute).pathname) === trimEnd((loc && loc.pathname) || '');
@@ -310,9 +310,14 @@ export function homeHref(ctx) {
  *         no mixin      → the composed CustomEvent of rung 3, so a host WITH a
  *                         mixin re-enters here and routes client-side
  *   1b. site, anything else → window.location.assign(absolute)
- *         (another site or origin; a same-route query-only target — the hosts'
- *         CurrentPageReference wires latch after the first restore and would
- *         not consume a router-driven state change; no mixin and no event)
+ *         (another site or origin; a same-route query-only target; no mixin
+ *         and no event). The same-route reload used to be load-bearing: the
+ *         route hosts applied their params once and would not consume a
+ *         router-driven state change. They now adopt a changed route
+ *         (helpArticlePage.applyRoute, resourceCenter.handlePageRef), so this
+ *         rung is belt-and-braces rather than the only thing keeping a
+ *         same-route hop honest. Routing those client-side instead is a
+ *         separate, deliberate change — not a side effect of that fix.
  *   2.  internal, NavigationMixin present → PageReference navigation
  *   3.  internal, no mixin → composed CustomEvent so an ancestor swaps in place
  *   4.  last resort → the same-site relative URL, exactly as before
