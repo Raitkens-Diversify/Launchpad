@@ -117,6 +117,75 @@
   text-decoration: underline;
 }
 
+.quick-view__related {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--div-color-border-1, #d1d5db);
+}
+
+.quick-view__related-title {
+  margin: 0 0 10px;
+  font-family: var(--div-font-family-base, "Inter", sans-serif);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--div-color-on-surface-2, #374151);
+}
+
+.quick-view__empty {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--div-color-neutral-500, #838a97);
+}
+
+/* Its own scroll pane, independent of .quick-view__body's: a ticket with a
+   dozen orders scrolls just this table instead of pushing the ticket's own
+   fields far out of view above it. */
+.quick-view__orders-scroll {
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.quick-view__orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.quick-view__orders-table th,
+.quick-view__orders-table td {
+  padding: 6px 10px 6px 0;
+  text-align: left;
+  vertical-align: top;
+}
+
+.quick-view__orders-table th {
+  position: sticky;
+  top: 0;
+  font-weight: 600;
+  color: var(--div-color-neutral-500, #838a97);
+  background: var(--div-color-white, #ffffff);
+  border-bottom: 1px solid var(--div-color-border-1, #d1d5db);
+}
+
+.quick-view__orders-table td {
+  color: var(--div-color-gray-900, #030712);
+  border-bottom: 1px solid var(--div-color-border-1, #d1d5db);
+}
+
+.quick-view__orders-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.quick-view__orders-table td a {
+  color: var(--div-color-blue-700, #1a76bb);
+  text-decoration: none;
+}
+
+.quick-view__orders-table td a:hover,
+.quick-view__orders-table td a:focus {
+  text-decoration: underline;
+}
+
 .quick-view__form-actions {
   display: flex;
   justify-content: flex-end;

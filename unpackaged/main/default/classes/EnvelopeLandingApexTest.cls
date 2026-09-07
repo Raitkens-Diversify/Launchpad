@@ -89,6 +89,76 @@ private class EnvelopeLandingApexTest {
     }
 
     // ---------------------------------------------------------------------------------------------
+    // getWizEnvelopeById (deep-link fallback, e.g. a Case's own envelope link)
+    // ---------------------------------------------------------------------------------------------
+
+    @IsTest
+    static void getWizEnvelopeByIdReadsTheHouseholdIdDirectlyWhenPopulated() {
+        Account household = new Account(
+            Name = 'Deep Link Household',
+            RecordTypeId = householdRecordTypeId(),
+            Type = 'Prospect'
+        );
+        insert household;
+
+        Envelope__c envelope = new Envelope__c(
+            Name = 'Deep Link Envelope',
+            Status__c = 'In Progress',
+            Household_Name__c = 'Deep Link Household',
+            Household__c = household.Id
+        );
+        insert envelope;
+
+        Test.startTest();
+        EnvelopeLandingApex.EnvelopeDeepLinkResult result = EnvelopeLandingApex.getWizEnvelopeById(
+            envelope.Id
+        );
+        Test.stopTest();
+
+        Assert.isNotNull(result, 'A matching envelope should resolve.');
+        Assert.areEqual(envelope.Id, result.id);
+        Assert.areEqual('Deep Link Envelope', result.name);
+        Assert.areEqual('Deep Link Household', result.householdName);
+        Assert.areEqual(household.Id, result.householdId);
+    }
+
+    @IsTest
+    static void getWizEnvelopeByIdFallsBackToTheEnvelopeContentHouseholdWhenUnpopulated() {
+        Account household = new Account(
+            Name = 'Junction-Only Household',
+            RecordTypeId = householdRecordTypeId(),
+            Type = 'Prospect'
+        );
+        insert household;
+
+        // Household__c left null on purpose -- only createWizEnvelopeV2 populates it; every
+        // create path inserts an Envelope_Content__c household row instead.
+        Envelope__c envelope = new Envelope__c(Name = 'Junction Envelope', Status__c = 'New');
+        insert envelope;
+        insert new Envelope_Content__c(Envelope__c = envelope.Id, Account__c = household.Id);
+
+        Test.startTest();
+        EnvelopeLandingApex.EnvelopeDeepLinkResult result = EnvelopeLandingApex.getWizEnvelopeById(
+            envelope.Id
+        );
+        Test.stopTest();
+
+        Assert.isNotNull(result);
+        Assert.areEqual(household.Id, result.householdId);
+    }
+
+    @IsTest
+    static void getWizEnvelopeByIdReturnsNullForANonMatchingOrMissingId() {
+        Test.startTest();
+        EnvelopeLandingApex.EnvelopeDeepLinkResult missing = EnvelopeLandingApex.getWizEnvelopeById(
+            null
+        );
+        Test.stopTest();
+
+        Assert.isNull(missing);
+    }
+
+    // ---------------------------------------------------------------------------------------------
     // getWizEnvelopes (legacy V1 list)
     // ---------------------------------------------------------------------------------------------
 

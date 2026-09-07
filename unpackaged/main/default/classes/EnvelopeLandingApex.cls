@@ -1,4 +1,60 @@
 public with sharing class EnvelopeLandingApex {
+    // What c/envelopeApp's deep link (/envelope?id=<envelopeId>) needs to open straight into
+    // shellV2, for a caller that already knows the exact Id it wants.
+    public class EnvelopeDeepLinkResult {
+        @AuraEnabled public Id id;
+        @AuraEnabled public String name;
+        @AuraEnabled public String householdName;
+        @AuraEnabled public Id householdId;
+    }
+
+    /**
+     * A single envelope by Id, for a deep link that did not come from this user's own
+     * getWizEnvelopes() list -- e.g. a Case's own "not yet submitted" banner, which resolves its
+     * envelope via Envelope_Content__c.Case__c and can legitimately point at a household outside
+     * the viewer's own teams. getWizEnvelopes' team/owner filter is a business "my envelopes"
+     * scope, not an access check, so it is not reused here; WITH USER_MODE is the only gate.
+     */
+    @AuraEnabled
+    public static EnvelopeDeepLinkResult getWizEnvelopeById(Id envelopeId) {
+        if (envelopeId == null) {
+            return null;
+        }
+
+        List<Envelope__c> matches = [
+            SELECT Id, Name, Household_Name__c, Household__c
+            FROM Envelope__c
+            WHERE Id = :envelopeId
+            WITH USER_MODE
+            LIMIT 1
+        ];
+        if (matches.isEmpty()) {
+            return null;
+        }
+
+        Envelope__c envelope = matches[0];
+        EnvelopeDeepLinkResult result = new EnvelopeDeepLinkResult();
+        result.id = envelope.Id;
+        result.name = envelope.Name;
+        result.householdName = envelope.Household_Name__c;
+        result.householdId = envelope.Household__c;
+
+        if (result.householdId == null) {
+            List<Envelope_Content__c> links = [
+                SELECT Account__c
+                FROM Envelope_Content__c
+                WHERE Envelope__c = :envelopeId AND Account__c != null
+                WITH USER_MODE
+                LIMIT 1
+            ];
+            if (!links.isEmpty()) {
+                result.householdId = links[0].Account__c;
+            }
+        }
+
+        return result;
+    }
+
     @AuraEnabled
     public static List<Envelope__c> exgetWizEnvelopes() {
         // User currentUser = [SELECT Id, Email, FirstName, LastName FROM User WHERE Id = :UserInfo.getUserId()];

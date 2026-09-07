@@ -19,6 +19,82 @@ private class ArcCaseDetailControllerTest {
     System.assertEquals('New', result.status);
   }
 
+  @IsTest
+  static void getCaseDetailLinksAnUnsubmittedCaseToItsOpenEnvelope() {
+    Envelope__c envelope = new Envelope__c(Name = 'Test Envelope', Status__c = 'In Progress');
+    insert envelope;
+
+    Case record = new Case(Subject = 'Wizard Case', Status = 'New', Submitted__c = false);
+    insert record;
+
+    insert new Envelope_Content__c(Envelope__c = envelope.Id, Case__c = record.Id);
+
+    Test.startTest();
+    ArcCaseDetailController.CaseDetailResult result = ArcCaseDetailController.getCaseDetail(
+      record.Id
+    );
+    Test.stopTest();
+
+    Assert.areEqual(false, result.submitted);
+    Assert.areEqual(envelope.Id, result.openEnvelopeId);
+  }
+
+  @IsTest
+  static void getCaseDetailOmitsTheEnvelopeLinkOnceTheCaseIsSubmitted() {
+    Envelope__c envelope = new Envelope__c(Name = 'Test Envelope', Status__c = 'In Progress');
+    insert envelope;
+
+    Case record = new Case(Subject = 'Wizard Case', Status = 'New', Submitted__c = true);
+    insert record;
+
+    insert new Envelope_Content__c(Envelope__c = envelope.Id, Case__c = record.Id);
+
+    Test.startTest();
+    ArcCaseDetailController.CaseDetailResult result = ArcCaseDetailController.getCaseDetail(
+      record.Id
+    );
+    Test.stopTest();
+
+    Assert.areEqual(true, result.submitted);
+    Assert.isNull(result.openEnvelopeId, 'A submitted case has nothing left to resume.');
+  }
+
+  @IsTest
+  static void getCaseDetailLeavesTheEnvelopeLinkNullWhenTheJoinedEnvelopeIsAlreadyComplete() {
+    Envelope__c envelope = new Envelope__c(Name = 'Test Envelope', Status__c = 'Complete');
+    insert envelope;
+
+    Case record = new Case(Subject = 'Wizard Case', Status = 'New', Submitted__c = false);
+    insert record;
+
+    insert new Envelope_Content__c(Envelope__c = envelope.Id, Case__c = record.Id);
+
+    Test.startTest();
+    ArcCaseDetailController.CaseDetailResult result = ArcCaseDetailController.getCaseDetail(
+      record.Id
+    );
+    Test.stopTest();
+
+    Assert.isNull(
+      result.openEnvelopeId,
+      'A completed envelope has nothing left to resume, even if the case itself lags behind.'
+    );
+  }
+
+  @IsTest
+  static void getCaseDetailLeavesTheEnvelopeLinkNullWhenThereIsNoJoinedEnvelope() {
+    Case record = new Case(Subject = 'Wizard Case', Status = 'New', Submitted__c = false);
+    insert record;
+
+    Test.startTest();
+    ArcCaseDetailController.CaseDetailResult result = ArcCaseDetailController.getCaseDetail(
+      record.Id
+    );
+    Test.stopTest();
+
+    Assert.isNull(result.openEnvelopeId);
+  }
+
   // getCaseDetail's Household-summary branch (formatAddress/formatCurrency/
   // formatPercent) is exercised through a direct DB round trip in
   // getCaseDetailReturnsHouseholdSummaryWhenPopulated below (Household__c,

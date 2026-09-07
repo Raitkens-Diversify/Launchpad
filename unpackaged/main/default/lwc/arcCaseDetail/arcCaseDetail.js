@@ -597,6 +597,29 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
     this.navigateToRecord(this.detail.advertisingItemId, "Advertising_Item__c");
   }
 
+  /*
+   * Mirrors the red "This case has not yet been submitted." banner
+   * Case_Record_Page shows internally (a flexipage:richText gated on
+   * Record.Submitted__c = false) -- same condition, same wording.
+   */
+  get isUnsubmitted() {
+    return this.detail?.submitted === false;
+  }
+
+  get hasEnvelopeLink() {
+    return this.isUnsubmitted && Boolean(this.detail?.openEnvelopeId);
+  }
+
+  /* The on-track badge/milestone tile has nothing to show for a case that is
+     still a wizard draft, so it's hidden alongside the banner. */
+  get showCaseOverviewTile() {
+    return !this.isUnsubmitted;
+  }
+
+  handleTakeToEnvelopeClick() {
+    this.navigateToRecord(this.detail?.openEnvelopeId, "Envelope__c");
+  }
+
   get hasHouseholdLink() {
     return Boolean(this.detail?.householdId);
   }

@@ -89,9 +89,68 @@
                 </div>
               </template>
             </dl>
+
+            <section class="quick-view__related">
+              <h3 class="quick-view__related-title"
+                >Orders ({ordersCountLabel})</h3
+              >
+
+              <template lwc:if={isLoadingOrders}>
+                <div class="quick-view__loading">
+                  <lightning-spinner
+                    alternative-text="Loading orders"
+                    size="small"
+                  ></lightning-spinner>
+                </div>
+              </template>
+
+              <template lwc:elseif={ordersErrorMessage}>
+                <p class="quick-view__error" role="alert"
+                  >{ordersErrorMessage}</p
+                >
+              </template>
+
+              <template lwc:elseif={hasOrders}>
+                <div class="quick-view__orders-scroll">
+                  <table class="quick-view__orders-table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Order</th>
+                        <th scope="col">Strategy</th>
+                        <th scope="col">Initial Funding %</th>
+                        <th scope="col">Initial Funding Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template for:each={orderRows} for:item="order">
+                        <tr key={order.id}>
+                          <td>
+                            <a
+                              href="#"
+                              data-record-id={order.id}
+                              onclick={handleOrderRowClick}
+                              >{order.name}</a
+                            >
+                          </td>
+                          <td>{order.strategyName}</td>
+                          <td>{order.fundingPercentage}</td>
+                          <td>{order.fundingAmount}</td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+              </template>
+
+              <template lwc:else>
+                <p class="quick-view__empty">No orders yet.</p>
+              </template>
+            </section>
           </template>
         </div>
       </div>
     </section>
   </template>
+
+  <c-arc-order-quick-view lwc:ref="orderQuickView"></c-arc-order-quick-view>
 </template>

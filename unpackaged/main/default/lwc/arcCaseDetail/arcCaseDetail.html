@@ -150,6 +150,20 @@
         </template>
       </header>
 
+      <template lwc:if={isUnsubmitted}>
+        <div class="arc-case-detail__unsubmitted-banner" role="alert">
+          <p>This case has not yet been submitted.</p>
+          <template lwc:if={hasEnvelopeLink}>
+            <lightning-button
+              class="arc-case-detail__unsubmitted-banner-button"
+              variant="brand"
+              label="Take me to the envelope"
+              onclick={handleTakeToEnvelopeClick}
+            ></lightning-button>
+          </template>
+        </div>
+      </template>
+
       <div class="arc-case-detail__body">
         <div class="arc-case-detail__main">
           <!--
@@ -157,13 +171,19 @@
             Case_Record_Page): on-track badge, the case summary line, the
             completed/total main-track ratio, and the milestone track.
 
-            Rendered unconditionally, as the Lightning page renders it. It used to be
-            gated on detail.totalMainTrackTasks, a Case rollup that is empty on every
-            case in this org — so the tile was suppressed even when it had data of its
-            own to show. It fetches its own figures through
+            Otherwise rendered unconditionally, as the Lightning page renders it. It
+            used to be gated on detail.totalMainTrackTasks, a Case rollup that is
+            empty on every case in this org — so the tile was suppressed even when it
+            had data of its own to show. It fetches its own figures through
             CaseStatusSummaryController and owns its loading and empty states.
+
+            Hidden specifically while the case is unsubmitted: there is no milestone
+            progress to track yet, only a wizard draft, so the tile would just show
+            an empty/zero track under the "not yet submitted" banner.
           -->
-          <c-case-overview-tile record-id={detail.id}></c-case-overview-tile>
+          <template lwc:if={showCaseOverviewTile}>
+            <c-case-overview-tile record-id={detail.id}></c-case-overview-tile>
+          </template>
 
           <!--
             All three tracks together, or none. The Lightning page shows every

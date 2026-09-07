@@ -82,6 +82,14 @@ public with sharing class ArcCaseDetailController {
     public CaseProgress progress;
     @AuraEnabled
     public HouseholdSummary household;
+    @AuraEnabled
+    public Boolean submitted;
+    // The wizard envelope this case's own Envelope_Content__c row still
+    // points at, so the not-yet-submitted banner can link straight back into
+    // it. Null once submitted (nothing left to resume) or when the case
+    // predates the Envelope_Content__c join.
+    @AuraEnabled
+    public Id openEnvelopeId;
   }
 
   public class HouseholdSummary {
@@ -179,6 +187,7 @@ public with sharing class ArcCaseDetailController {
         CaseNumber,
         Subject,
         Status,
+        Submitted__c,
         RecordTypeId,
         RecordType.Name,
         Advertising_Item__c,
@@ -270,7 +279,37 @@ public with sharing class ArcCaseDetailController {
       result.household = buildHouseholdSummary(household);
     }
 
+    result.submitted = record.Submitted__c;
+    result.openEnvelopeId = record.Submitted__c == false
+      ? findOpenEnvelopeId(record.Id)
+      : null;
+
     return result;
+  }
+
+  /**
+   * The envelope this case still belongs to, for the not-yet-submitted
+   * banner's link back into the wizard. Case carries no lookup to
+   * Envelope__c itself -- the join lives on the Envelope_Content__c row the
+   * wizard created alongside this case (see EnvelopeActionCaseController) --
+   * so this follows that same join rather than matching by household, which
+   * would be ambiguous for a household with more than one envelope open at
+   * once. Also requires the envelope itself still be open ('New'/'In
+   * Progress', the same states EnvelopeLandingApex treats as unsubmitted) so
+   * a case that outlived its own envelope's completion doesn't link to a
+   * wizard that has nothing left to resume.
+   */
+  private static Id findOpenEnvelopeId(Id caseId) {
+    List<Envelope_Content__c> links = [
+      SELECT Envelope__c
+      FROM Envelope_Content__c
+      WHERE Case__c = :caseId AND Envelope__r.Status__c IN ('New', 'In Progress')
+      WITH USER_MODE
+      ORDER BY Envelope__r.LastModifiedDate DESC
+      LIMIT 1
+    ];
+
+    return links.isEmpty() ? null : links[0].Envelope__c;
   }
 
   @AuraEnabled(cacheable=true)

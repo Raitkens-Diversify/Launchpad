@@ -5,6 +5,7 @@ import { loadStyle } from "lightning/platformResourceLoader";
 import ToastContainer from "lightning/toastContainer";
 import envelopeWizardStyles from "@salesforce/resourceUrl/envelopeWizardStyles";
 import getWizEnvelopes from "@salesforce/apex/EnvelopeLandingApex.getWizEnvelopes";
+import getWizEnvelopeById from "@salesforce/apex/EnvelopeLandingApex.getWizEnvelopeById";
 
 export default class EnvelopeApp extends LightningElement {
   /** Hides the top bar's Diversify logo for sites/pages with their own header/branding. */
@@ -104,25 +105,49 @@ export default class EnvelopeApp extends LightningElement {
         const envelope = (result.envelopes || []).find(
           (candidate) => candidate.Id === envelopeId
         );
-        if (!envelope) {
-          return;
+        if (envelope) {
+          const record = (result.envelopeRecords || []).find(
+            (candidate) => candidate.Envelope__c === envelopeId
+          );
+          this._openEnvelope(
+            envelopeId,
+            envelope.Name,
+            envelope.Household_Name__c,
+            record ? record.Account__c : envelope.Household__c
+          );
+          return null;
         }
 
-        const record = (result.envelopeRecords || []).find(
-          (candidate) => candidate.Envelope__c === envelopeId
-        );
-
-        this.createdEnvelopeId = envelopeId;
-        this.createdEnvelopeTitle = envelope.Name || "";
-        this.createdHouseholdName = envelope.Household_Name__c || "";
-        this.createdHouseholdId = record ? record.Account__c : (envelope.Household__c || null);
-        this._resetShellChrome();
-        this.currentView = "shellV2";
+        // Not in this user's own team/owner-scoped envelope list -- that list is a
+        // business "my envelopes" view, not an access check, so a link from
+        // elsewhere in the site (e.g. a case's own "not yet submitted" banner) can
+        // legitimately point at an envelope that list never fetched. Fall back to a
+        // direct single-record lookup rather than silently landing on the list.
+        return getWizEnvelopeById({ envelopeId });
+      })
+      .then((fallback) => {
+        if (fallback) {
+          this._openEnvelope(
+            fallback.id,
+            fallback.name,
+            fallback.householdName,
+            fallback.householdId
+          );
+        }
       })
       .catch((error) => {
         // eslint-disable-next-line no-console
         console.error("[envelopeApp] Failed to open envelope from URL", error);
       });
+  }
+
+  _openEnvelope(envelopeId, title, householdName, householdId) {
+    this.createdEnvelopeId = envelopeId;
+    this.createdEnvelopeTitle = title || "";
+    this.createdHouseholdName = householdName || "";
+    this.createdHouseholdId = householdId || null;
+    this._resetShellChrome();
+    this.currentView = "shellV2";
   }
 
   disconnectedCallback() {
