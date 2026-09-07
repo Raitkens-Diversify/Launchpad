@@ -1,9 +1,9 @@
 {
-  "activeViewId" : "c6314ee8-3681-46a2-967c-69d0a69de76c",
+  "activeViewId" : "286c4d9d-f0fc-4b4d-9984-8a6da03dab67",
   "appPageId" : "d5e3c47c-ae25-4c7a-848f-ab2b98f65f4d",
   "configurationTags" : [ ],
   "devName" : "Article_Detail",
-  "id" : "7d14edbe-a37e-4827-87a1-f2ac4ba0cd9a",
+  "id" : "7a7fe112-d8b6-4f7b-8eb7-c70d8676bfb0",
   "label" : "Article Detail",
   "routeType" : "article",
   "type" : "route",
