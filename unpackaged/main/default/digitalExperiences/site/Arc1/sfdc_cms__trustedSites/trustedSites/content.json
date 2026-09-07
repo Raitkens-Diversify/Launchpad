@@ -10,6 +10,10 @@
       "isActive" : true,
       "source" : "https://dfpginvestments--launchpad--c.sandbox.vf.force.com/resource/1785204546000/DiversifyLogoV2?",
       "sourceName" : "launchpad"
+    }, {
+      "isActive" : true,
+      "source" : "https://arc.diversify.com",
+      "sourceName" : "ARC Egnyte"
     } ]
   },
   "urlName" : "trustedsites"
