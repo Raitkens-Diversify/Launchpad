@@ -1,4 +1,6 @@
-import { LightningElement, api } from 'lwc';
+import { LightningElement, api, wire } from 'lwc';
+import { getPicklistValues } from 'lightning/uiObjectInfoApi';
+import AUDIENCE_FIELD from '@salesforce/schema/Resource__c.Audience__c';
 import { slugify } from 'c/slugUtil';
 import { resourceDetailUrl, copyText } from 'c/rcLinkUtil';
 import getResourceLinkBase from '@salesforce/apex/ResourceCenterService.getResourceLinkBase';
@@ -31,7 +33,17 @@ import { FILE_TYPES, DEFAULT_TYPE, TYPE_VIDEO, TYPE_EXTERNAL_LINK, TYPE_WEBINAR 
  * on the event day. The scheduled sweep (WebinarAnnouncementService) does the
  * pushing; this form only stores the intent and shows the server's status
  * line (Scheduled / Pending / Live / Ended) — it never derives the time itself.
+ *
+ * Content fields (2026-09-07): Summary (one sentence, 160 chars — the subtitle
+ * everywhere a card or row shows one), Description as rich text (bullets for a
+ * webinar agenda; the toolbar is limited to text formatting + lists + links),
+ * and Audience as a checkbox group over the Audience__c picklist values
+ * (read live via getPicklistValues, never a client-side copy).
  */
+/** The object's master record type — Resource__c has no record types. */
+const MASTER_RECORD_TYPE_ID = '012000000000000AAA';
+/** Rich-text toolbar: authored copy, not layout. */
+const RICH_TEXT_FORMATS = ['bold', 'italic', 'underline', 'strike', 'list', 'indent', 'link', 'clean'];
 const TYPE_OPTIONS = [
     { label: 'PDF (uploaded file)', value: 'PDF' },
     { label: 'Form (uploaded file)', value: 'Form' },
@@ -58,7 +70,10 @@ export default class AdminResourceEditor extends LightningElement {
     categoryTree = [];
     name = '';
     slug = '';
-    description = '';
+    description = '';   // rich text (HTML)
+    summary = '';
+    audience = [];      // Audience__c selections
+    audienceOptions = [];
     resourceType = DEFAULT_TYPE;
     categorySelection = [];   // home category (single)
     secondarySelection = [];  // "Also show in" — never contains the home
@@ -82,6 +97,17 @@ export default class AdminResourceEditor extends LightningElement {
     slugTouched = false;
     slugError = '';
     linkBase = null; // enables the header "Copy link" action
+
+    @wire(getPicklistValues, { recordTypeId: MASTER_RECORD_TYPE_ID, fieldApiName: AUDIENCE_FIELD })
+    wiredAudience({ data }) {
+        this.audienceOptions = data && data.values
+            ? data.values.map((v) => ({ label: v.label, value: v.value }))
+            : [];
+    }
+
+    get richTextFormats() {
+        return RICH_TEXT_FORMATS;
+    }
 
     async connectedCallback() {
         getResourceLinkBase()
@@ -109,6 +135,8 @@ export default class AdminResourceEditor extends LightningElement {
         this.name = r.name || '';
         this.slug = r.slug || '';
         this.description = r.description || '';
+        this.summary = r.summary || '';
+        this.audience = r.audience || [];
         this.resourceType = r.resourceType || DEFAULT_TYPE;
         this.categorySelection = r.categoryId ? [r.categoryId] : [];
         this.secondarySelection = (r.secondaryCategoryIds || []).filter((id) => id !== r.categoryId);
@@ -291,6 +319,12 @@ export default class AdminResourceEditor extends LightningElement {
     handleDescriptionChange(event) {
         this.description = event.target.value;
     }
+    handleSummaryChange(event) {
+        this.summary = event.target.value;
+    }
+    handleAudienceChange(event) {
+        this.audience = [...((event.detail && event.detail.value) || [])];
+    }
     handleTypeChange(event) {
         this.resourceType = event.detail.value;
         // New webinars announce themselves on Arc unless the admin says otherwise.
@@ -429,7 +463,9 @@ export default class AdminResourceEditor extends LightningElement {
                     id: this.recordId || null,
                     name: this.name,
                     slug: this.slug,
-                    description: this.description,
+                    description: this.description || null,
+                    summary: this.summary || null,
+                    audience: this.audience,
                     resourceType: this.resourceType,
                     categoryId: this.homeCategoryId,
                     secondaryCategoryIds: this.secondarySelection.filter((id) => id !== this.homeCategoryId),

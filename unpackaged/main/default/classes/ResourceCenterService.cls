@@ -98,7 +98,9 @@ public with sharing class ResourceCenterService {
         @AuraEnabled public String name;
         @AuraEnabled public String slug;
         @AuraEnabled public String resourceType;
+        /** Plain text (ResourceCenterService.plainText) — the card subtitle when summary is blank. */
         @AuraEnabled public String description;
+        @AuraEnabled public String summary;
         @AuraEnabled public Integer displayOrder;
         @AuraEnabled public Boolean featured;
         @AuraEnabled public String categorySlug;
@@ -119,7 +121,13 @@ public with sharing class ResourceCenterService {
         @AuraEnabled public String name;
         @AuraEnabled public String slug;
         @AuraEnabled public String resourceType;
+        /** Plain text (see plainText); the detail page renders descriptionHtml. */
         @AuraEnabled public String description;
+        /** Description__c as authored (rich text since 2026-09-07). */
+        @AuraEnabled public String descriptionHtml;
+        @AuraEnabled public String summary;
+        /** Audience__c values (multi-select), empty when unset. */
+        @AuraEnabled public List<String> audience = new List<String>();
         @AuraEnabled public String videoEmbedUrl;
         @AuraEnabled public String externalUrl;
         @AuraEnabled public Decimal downloadCount;
@@ -142,7 +150,10 @@ public with sharing class ResourceCenterService {
         @AuraEnabled public Id id;
         @AuraEnabled public String slug;
         @AuraEnabled public String name;
+        /** Plain text (see plainText); rows and the popover prefer summary. */
         @AuraEnabled public String description;
+        @AuraEnabled public String summary;
+        @AuraEnabled public List<String> audience = new List<String>();
         /** WebinarLifecycle.UPCOMING | PAST | RECORDED. */
         @AuraEnabled public String status;
         @AuraEnabled public Datetime eventDatetime;
@@ -426,7 +437,7 @@ public with sharing class ResourceCenterService {
         // the ORDER BY stays authoritative (inactive homes stay hidden, like
         // everywhere user-facing).
         List<Resource__c> resources = [
-            SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Display_Order__c,
+            SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Summary__c, Audience__c, Display_Order__c,
                    Is_Featured__c, External_URL__c, Video_Embed_URL__c,
                    Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c,
                    Category__c, Category__r.Slug__c
@@ -515,7 +526,7 @@ public with sharing class ResourceCenterService {
     public static List<ResourceCard> getFeaturedResources() {
         assertResourcesReadable();
         return toCards([
-            SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Display_Order__c,
+            SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Summary__c, Audience__c, Display_Order__c,
                    Is_Featured__c, External_URL__c, Video_Embed_URL__c, Category__r.Slug__c,
                    Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c
             FROM Resource__c
@@ -557,7 +568,7 @@ public with sharing class ResourceCenterService {
             // One instant for both queries and the derivation (see WebinarLifecycle).
             Datetime now = System.now();
             List<Resource__c> upcoming = [
-                SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Video_Embed_URL__c,
+                SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Summary__c, Audience__c, Video_Embed_URL__c,
                        Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c
                 FROM Resource__c
                 WHERE Resource_Type__c = :webinarType AND Is_Active__c = true
@@ -566,7 +577,7 @@ public with sharing class ResourceCenterService {
                 LIMIT :cap
             ];
             List<Resource__c> recent = [
-                SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Video_Embed_URL__c,
+                SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Summary__c, Audience__c, Video_Embed_URL__c,
                        Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c
                 FROM Resource__c
                 WHERE Resource_Type__c = :webinarType AND Is_Active__c = true
@@ -616,7 +627,9 @@ public with sharing class ResourceCenterService {
         w.id = r.Id;
         w.slug = r.Slug__c;
         w.name = r.Name;
-        w.description = r.Description__c;
+        w.description = plainText(r.Description__c);
+        w.summary = r.Summary__c;
+        w.audience = splitMulti(r.Audience__c);
         w.status = WebinarLifecycle.statusFor(r, hasFile, now);
         w.eventDatetime = r.Event_Datetime__c;
         w.durationMinutes = r.Event_Duration_Minutes__c == null
@@ -664,7 +677,7 @@ public with sharing class ResourceCenterService {
             // One instant for both queries and the derivation (see WebinarLifecycle).
             Datetime now = System.now();
             List<Resource__c> upcoming = [
-                SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Video_Embed_URL__c,
+                SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Summary__c, Audience__c, Video_Embed_URL__c,
                        Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c
                 FROM Resource__c
                 WHERE Resource_Type__c = :webinarType AND Is_Active__c = true
@@ -673,7 +686,7 @@ public with sharing class ResourceCenterService {
                 LIMIT :EVENTS_FEED_LIMIT
             ];
             List<Resource__c> past = [
-                SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Video_Embed_URL__c,
+                SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Summary__c, Audience__c, Video_Embed_URL__c,
                        Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c
                 FROM Resource__c
                 WHERE Resource_Type__c = :webinarType AND Is_Active__c = true
@@ -709,7 +722,7 @@ public with sharing class ResourceCenterService {
             throw new AuraHandledException('No resource specified.');
         }
         List<Resource__c> rows = [
-            SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Video_Embed_URL__c,
+            SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Summary__c, Audience__c, Video_Embed_URL__c,
                    External_URL__c, Download_Count__c, Category__c, Category__r.Name, Category__r.Slug__c,
                    Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c
             FROM Resource__c
@@ -726,7 +739,10 @@ public with sharing class ResourceCenterService {
         d.name = r.Name;
         d.slug = r.Slug__c;
         d.resourceType = r.Resource_Type__c;
-        d.description = r.Description__c;
+        d.description = plainText(r.Description__c);
+        d.descriptionHtml = r.Description__c;
+        d.summary = r.Summary__c;
+        d.audience = splitMulti(r.Audience__c);
         d.videoEmbedUrl = r.Video_Embed_URL__c;
         d.externalUrl = r.External_URL__c;
         d.downloadCount = r.Download_Count__c;
@@ -774,7 +790,7 @@ public with sharing class ResourceCenterService {
             return new List<ResourceCard>();
         }
         Map<Id, Resource__c> byId = new Map<Id, Resource__c>([
-            SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Display_Order__c,
+            SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Summary__c, Audience__c, Display_Order__c,
                    Is_Featured__c, External_URL__c, Video_Embed_URL__c, Category__r.Slug__c,
                    Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c
             FROM Resource__c
@@ -850,7 +866,7 @@ public with sharing class ResourceCenterService {
         }
         String sosl =
             'FIND \'' + findExpr + '\' IN ALL FIELDS RETURNING Resource__c(' +
-            'Id, Name, Slug__c, Resource_Type__c, Description__c, Display_Order__c, ' +
+            'Id, Name, Slug__c, Resource_Type__c, Description__c, Summary__c, Audience__c, Display_Order__c, ' +
             'Is_Featured__c, External_URL__c, Video_Embed_URL__c, Category__c, Category__r.Slug__c, ' +
             'Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c ' +
             'WHERE Is_Active__c = true) LIMIT ' + MAX_SEARCH_RESULTS;
@@ -966,7 +982,7 @@ public with sharing class ResourceCenterService {
                 cr.type = 'resource';
                 cr.id = card.id;
                 cr.title = card.name;
-                cr.subtitle = card.description;
+                cr.subtitle = String.isNotBlank(card.summary) ? card.summary : card.description;
                 cr.slug = card.slug;
                 cr.resourceType = card.resourceType;
                 out.results.add(cr);
@@ -1379,7 +1395,8 @@ public with sharing class ResourceCenterService {
             c.name = r.Name;
             c.slug = r.Slug__c;
             c.resourceType = r.Resource_Type__c;
-            c.description = r.Description__c;
+            c.description = plainText(r.Description__c);
+            c.summary = r.Summary__c;
             c.displayOrder = r.Display_Order__c == null ? null : Integer.valueOf(r.Display_Order__c);
             c.featured = r.Is_Featured__c;
             c.categorySlug = r.Category__r != null ? r.Category__r.Slug__c : null;
@@ -1407,6 +1424,48 @@ public with sharing class ResourceCenterService {
      * UnifiedSearchService derive webinar recording presence from the same
      * rule the public pages serve.
      */
+    /**
+     * Rich text → one line of plain text, for every surface that shows a
+     * description as text rather than markup: card subtitles, search hits
+     * and scoring, the events page rows and popover, and the Arc announcement
+     * body. Description__c has been rich text since 2026-09-07 (the event
+     * detail page renders the markup; webinar agendas are authored as
+     * bullets), so list items are joined with "; " to stay readable in a
+     * subtitle. Plain text passes through trimmed; null/blank → null.
+     */
+    public static String plainText(String html) {
+        if (String.isBlank(html)) {
+            return null;
+        }
+        if (!html.contains('<') && !html.contains('&')) {
+            return html.trim();
+        }
+        String s = html
+            .replaceAll('(?i)</li\\s*>', '; ')
+            .replaceAll('(?i)<br\\s*/?>|</p\\s*>|</div\\s*>|</h[1-6]\\s*>|</ul\\s*>|</ol\\s*>', ' ')
+            .stripHtmlTags()
+            .unescapeHtml4()
+            .replace('\u00A0', ' ')
+            .replaceAll('\\s+', ' ')
+            .trim();
+        // The last bullet's separator, and any doubled ones from empty items.
+        s = s.replaceAll('(\\s*;)+\\s*$', '').replaceAll(';(\\s*;)+', ';').trim();
+        return String.isBlank(s) ? null : s;
+    }
+
+    /** Multi-select picklist value → its selections ("A;B" → [A, B]); empty for null. */
+    public static List<String> splitMulti(String value) {
+        List<String> out = new List<String>();
+        if (String.isNotBlank(value)) {
+            for (String v : value.split(';')) {
+                if (String.isNotBlank(v)) {
+                    out.add(v.trim());
+                }
+            }
+        }
+        return out;
+    }
+
     public static Map<Id, FileInfo> fileInfoByResource(Set<Id> resourceIds) {
         Map<Id, FileInfo> out = new Map<Id, FileInfo>();
         Map<Id, Datetime> latestByResource = new Map<Id, Datetime>();

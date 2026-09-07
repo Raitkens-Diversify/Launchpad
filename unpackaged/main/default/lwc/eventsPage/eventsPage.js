@@ -2,6 +2,9 @@ import { LightningElement, api, wire } from 'lwc';
 import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import diversifyLogo from '@salesforce/resourceUrl/DiversifyLogoV2';
 import getEvents from '@salesforce/apex/ResourceCenterService.getEvents';
+import getResourceBySlug from '@salesforce/apex/ResourceCenterService.getResourceBySlug';
+import trackDownload from '@salesforce/apex/ResourceCenterService.trackDownload';
+import { messageFrom } from 'c/messageUtil';
 import { formatTime, formatDateTime, formatMonthYear, localDateKey } from 'c/dsDateBlock';
 import { eventCta, formatDurationMinutes, HELP_HOME_LABEL, CRUMB_HELP_HOME } from 'c/rcConstants';
 import { linkContext, readParams, isSiteRef, goToResource, goToHome } from 'c/contextNav';
@@ -22,6 +25,16 @@ import { linkContext, readParams, isSiteRef, goToResource, goToHome } from 'c/co
  * Sign up / Watch recording / "Recording coming soon" are decided (it routes
  * through resourceAction, so status→verb lives there). "Add to calendar"
  * (.ics download) was removed 2026-09-06 at the user's request.
+ *
+ * Detail modal (2026-09-07): the calendar popover is the quick peek (title,
+ * when, meta, the one-sentence blurb, the CTA, "View details"); the full
+ * event page — the SAME c-event-detail the Resource Center route renders —
+ * opens in a c-ds-modal-v2 from "View details", from a row title, and from
+ * "Watch recording" (the player is inside, so nobody leaves the page). The
+ * modal loads ResourceCenterService.getResourceBySlug imperatively on open
+ * (rich-text agenda, audience, recording file — the feed rows carry none of
+ * that); a sibling card inside it swaps the modal to that event; the footer's
+ * "Open full page" goes to the Resource Center route through c/contextNav.
  *
  * URL contract: the default Calendar view carries ?month=YYYY-MM (no view
  * param); the list is ?view=upcoming. The pre-2026-09-02 ?view=calendar form
@@ -68,6 +81,12 @@ export default class EventsPage extends NavigationMixin(LightningElement) {
     month = null;
     selectedId = null;
     anchorRect = null;
+
+    /** Detail modal: the slug being shown (null = closed), its loaded detail, and status. */
+    modalSlug = null;
+    modalDetail = null;
+    modalLoading = false;
+    modalError = null;
 
     /** ?event= slug still to open (cleared once opened or found missing). */
     _pendingEvent = null;
@@ -269,11 +288,14 @@ export default class EventsPage extends NavigationMixin(LightningElement) {
     }
 
     /** "10:00 AM · 45 min · Jane Doe" + the shared CTA, with the flags the
-        template needs (it cannot compare strings). */
+        template needs (it cannot compare strings). The blurb is the authored
+        one-sentence summary when there is one, else the server's plain-text
+        description (Description__c is rich text; the detail page renders it). */
     decorate(item) {
         const cta = eventCta(item);
         return {
             ...item,
+            description: item.summary || item.description,
             meta: [
                 formatTime(item.eventDatetime),
                 formatDurationMinutes(item.durationMinutes),
@@ -382,11 +404,94 @@ export default class EventsPage extends NavigationMixin(LightningElement) {
         this.closePopover();
     }
 
+    /** Watch recording opens the modal — the player is inside c-event-detail. */
     handleWatch(event) {
-        goToResource(this, this.linkCtx, { slug: event.currentTarget.dataset.slug });
+        this.openEvent(event.currentTarget.dataset.slug);
+    }
+
+    handleTitle(event) {
+        this.openEvent(event.currentTarget.dataset.slug);
+    }
+
+    /** The popover's "View details": the quick peek hands off to the full page. */
+    handleViewDetails(event) {
+        const slug = event.currentTarget.dataset.slug;
+        this.closePopover();
+        this.openEvent(slug);
     }
 
     handleBrandHome() {
         goToHome(this, this.linkCtx);
+    }
+
+    // ---- Detail modal --------------------------------------------------------
+
+    get modalOpen() {
+        return Boolean(this.modalSlug);
+    }
+
+    /** The feed knows the name before the detail lands, so the header never flashes empty. */
+    get modalTitle() {
+        if (this.modalDetail && this.modalDetail.name) {
+            return this.modalDetail.name;
+        }
+        const item = this.allItems.find((e) => e.slug === this.modalSlug);
+        return item ? item.name : 'Event details';
+    }
+
+    get showModalDetail() {
+        return Boolean(this.modalDetail) && !this.modalLoading && !this.modalError;
+    }
+
+    openEvent(slug) {
+        if (!slug) {
+            return;
+        }
+        this.modalSlug = slug;
+        this.modalDetail = null;
+        this.modalError = null;
+        this.modalLoading = true;
+        getResourceBySlug({ slug })
+            .then((detail) => {
+                if (this.modalSlug !== slug) {
+                    return; // a later open won
+                }
+                this.modalDetail = detail;
+                this.modalLoading = false;
+            })
+            .catch((e) => {
+                if (this.modalSlug !== slug) {
+                    return;
+                }
+                this.modalError = messageFrom(e, "This event couldn't be loaded.");
+                this.modalLoading = false;
+            });
+    }
+
+    handleModalClose() {
+        this.modalSlug = null;
+        this.modalDetail = null;
+        this.modalError = null;
+        this.modalLoading = false;
+    }
+
+    /** A sibling card inside the modal: show that event in place. */
+    handleModalSibling(event) {
+        event.stopPropagation();
+        this.openEvent(event.detail.slug);
+    }
+
+    /** The recording download inside the modal: count it, as the shell would. */
+    handleModalDownload(event) {
+        event.stopPropagation();
+        if (event.detail && event.detail.id) {
+            trackDownload({ resourceId: event.detail.id }).catch(() => {});
+        }
+    }
+
+    handleOpenFullPage() {
+        const slug = this.modalSlug;
+        this.handleModalClose();
+        goToResource(this, this.linkCtx, { slug });
     }
 }

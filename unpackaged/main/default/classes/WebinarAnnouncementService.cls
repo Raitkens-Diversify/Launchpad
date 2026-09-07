@@ -167,7 +167,9 @@ public with sharing class WebinarAnnouncementService {
         return changed;
     }
 
-    /** "Tue, Sep 8 at 9:00 AM MDT · 60 min · Led by Kelby and Aubrie. <description>", ≤ 500 chars. */
+    /** "Tue, Sep 8 at 9:00 AM MDT · 60 min · Led by Kelby and Aubrie. <summary, else the
+        description as plain text>", ≤ 500 chars. Description__c is rich text — never
+        put its markup in an announcement body. */
     public static String bodyFor(Resource__c r) {
         List<String> parts = new List<String>();
         if (r.Event_Datetime__c != null) {
@@ -180,8 +182,10 @@ public with sharing class WebinarAnnouncementService {
             parts.add('Led by ' + r.Presenter__c.trim());
         }
         String body = parts.isEmpty() ? '' : String.join(parts, ' · ') + '.';
-        if (String.isNotBlank(r.Description__c)) {
-            body = (String.isBlank(body) ? '' : body + ' ') + r.Description__c.trim();
+        String blurb = String.isNotBlank(r.Summary__c)
+            ? r.Summary__c.trim() : ResourceCenterService.plainText(r.Description__c);
+        if (String.isNotBlank(blurb)) {
+            body = (String.isBlank(body) ? '' : body + ' ') + blurb;
         }
         return truncate(body, BODY_MAX);
     }
@@ -221,7 +225,7 @@ public with sharing class WebinarAnnouncementService {
     public static SweepResult sweep(Datetime now) {
         SweepResult out = new SweepResult();
         List<Resource__c> rows = [
-            SELECT Id, Name, Slug__c, Description__c, Resource_Type__c, Is_Active__c,
+            SELECT Id, Name, Slug__c, Description__c, Summary__c, Resource_Type__c, Is_Active__c,
                    Event_Datetime__c, Event_Duration_Minutes__c, Presenter__c,
                    Announce_On_Arc__c, Announce_At__c, Announcement__c,
                    Announcement__r.Name, Announcement__r.Body__c,

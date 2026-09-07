@@ -1,0 +1,148 @@
+<template>
+    <template if:true={detail}>
+        <header class="evd__head">
+            <p class="evd__eyebrow">
+                <span class="evd__type">{typeLabel}</span>
+                <template for:each={audienceChips} for:item="a">
+                    <span key={a.key} class="evd__eyebrow-item">
+                        <span class="evd__eyebrow-sep" aria-hidden="true">·</span>
+                        <c-ds-badge label={a.label} variant="info" size="sm"></c-ds-badge>
+                    </span>
+                </template>
+            </p>
+            <template if:true={showTitle}>
+                <h1 class="evd__title">{detail.name}</h1>
+            </template>
+            <template if:true={detail.summary}>
+                <p class="evd__summary">{detail.summary}</p>
+            </template>
+        </header>
+
+        <div class="evd__body">
+            <div class="evd__content">
+                <!-- Recording: embed URL first, else the attached file (the
+                     same two players resourceDetail gives the Video type). -->
+                <template if:true={showEmbed}>
+                    <div class="evd__player">
+                        <iframe class="evd__player-frame" src={detail.videoEmbedUrl}
+                                title={detail.name} allow="fullscreen"
+                                allowfullscreen></iframe>
+                    </div>
+                </template>
+                <template if:true={showFileVideo}>
+                    <div class="evd__player">
+                        <video class="evd__player-frame" controls preload="metadata"
+                               src={fileVideoSrc} title={detail.name}></video>
+                    </div>
+                </template>
+
+                <template if:true={hasDescription}>
+                    <section class="evd__section">
+                        <h2 class="evd__h2">{coverHeading}</h2>
+                        <!-- Description__c is rich text (bullets authored in the
+                             admin console). Injected as manual DOM (the
+                             nexsArticleViewer idiom) so the list typography
+                             here applies under native shadow DOM on LWR. -->
+                        <div class="evd__rich" lwc:dom="manual"></div>
+                    </section>
+                </template>
+
+                <template if:true={hasPresenters}>
+                    <section class="evd__section">
+                        <h2 class="evd__h2">Presenters</h2>
+                        <ul class="evd__people">
+                            <template for:each={presenters} for:item="p">
+                                <li key={p.name} class="evd__person">
+                                    <span class="evd__avatar" aria-hidden="true">{p.initials}</span>
+                                    <span class="evd__person-name">{p.name}</span>
+                                </li>
+                            </template>
+                        </ul>
+                    </section>
+                </template>
+
+                <template if:true={audienceLine}>
+                    <p class="evd__for">
+                        <span class="evd__for-label">Who this is for</span>
+                        <span class="evd__for-value">{audienceLine}</span>
+                    </p>
+                </template>
+            </div>
+
+            <aside class={cardClass} aria-label="Event details">
+                <div class="evd__when">
+                    <c-ds-date-block value={detail.eventDatetime}></c-ds-date-block>
+                    <div class="evd__when-text">
+                        <p class="evd__date">{fullDate}</p>
+                        <p class="evd__time">{primaryTime}</p>
+                        <template if:true={otherTimes}>
+                            <p class="evd__zones">{otherTimes}</p>
+                        </template>
+                    </div>
+                </div>
+
+                <dl class="evd__facts">
+                    <template if:true={duration}>
+                        <div class="evd__fact">
+                            <dt class="evd__fact-label">Duration</dt>
+                            <dd class="evd__fact-value">{duration}</dd>
+                        </div>
+                    </template>
+                    <template if:true={recordedOn}>
+                        <div class="evd__fact">
+                            <dt class="evd__fact-label">Recorded on</dt>
+                            <dd class="evd__fact-value">{recordedOn}</dd>
+                        </div>
+                    </template>
+                </dl>
+
+                <template if:true={isLive}>
+                    <p class="evd__live" role="status">
+                        <span class="evd__live-dot" aria-hidden="true"></span>Live now
+                    </p>
+                </template>
+                <template if:true={isSoon}>
+                    <p class="evd__soon" role="status">Starting soon</p>
+                </template>
+
+                <template if:true={hasCtaLink}>
+                    <a class="evd__btn" href={ctaHref} target="_blank"
+                       rel="noopener noreferrer">{ctaLabel}</a>
+                </template>
+                <template if:true={ctaIsWatch}>
+                    <button type="button" class="evd__btn" onclick={handleWatch}>{ctaLabel}</button>
+                </template>
+                <template if:true={isEnded}>
+                    <p class="evd__ended">This event has ended</p>
+                </template>
+
+                <template if:true={downloadHref}>
+                    <p class="evd__calendar">
+                        <a class="evd__link" href={downloadHref} download
+                           onclick={handleDownload}>Download recording</a>
+                    </p>
+                </template>
+            </aside>
+        </div>
+
+        <template if:true={hasSiblings}>
+            <section class="evd__more" aria-label={moreHeading}>
+                <h2 class="evd__h2">{moreHeading}</h2>
+                <ul class="evd__more-list">
+                    <template for:each={siblings} for:item="s">
+                        <li key={s.id} class="evd__more-item">
+                            <button type="button" class="evd__more-card"
+                                    data-slug={s.slug} onclick={handleSibling}>
+                                <c-ds-date-block value={s.eventDatetime} variant="sm"></c-ds-date-block>
+                                <span class="evd__more-body">
+                                    <span class="evd__more-title">{s.name}</span>
+                                    <span class="evd__more-time">{s.time}</span>
+                                </span>
+                            </button>
+                        </li>
+                    </template>
+                </ul>
+            </section>
+        </template>
+    </template>
+</template>

@@ -65,7 +65,7 @@ const ALWAYS_SHOW = false;
  *  navId  — the sidebar entry to light, from STATIC_NAV_ITEMS. The preview
  *           expands whichever group holds it, so a child id is safe here.
  *  region — the part of the drawn page to light: "tiles", "charts", "list",
- *           "tabs", "path", "tracks", "current-task", "hero" or "header". Both
+ *           "tabs", "tracks", "current-task", "hero" or "header". Both
  *           navId and region light at once, which is the point: every step
  *           shows the thing AND where it lives in the rail.
  *
@@ -98,12 +98,12 @@ const STEPS = [
     body: "A case is one piece of business — an account opening, a maintenance request — and it carries every task that belongs to it. Cases live under Work in the sidebar."
   },
   {
-    key: "case-path",
+    key: "case-current-task",
     screen: "case",
     navId: "arc-nav-work-cases",
-    region: "path",
+    region: "current-task",
     title: "Where a case stands",
-    body: "Open a case and the path across the top tells you where it has got to. The highlighted step is the current one, so you can see at a glance what has happened and what comes next."
+    body: "Open a case and the Current Task card on the right side tells you where the case is currently at, as well as whose court the ball is in."
   },
   {
     key: "case-tracks",
@@ -111,7 +111,7 @@ const STEPS = [
     navId: "arc-nav-work-tasks",
     region: "tracks",
     title: "Main track and pit stops",
-    body: "Main track tasks are the ordinary steps that carry a case forward, and are yours to complete. A pit stop is work parked with someone else — the home office or the branch — so you can tell progress from waiting."
+    body: "Main track tasks are the ordinary steps that carry a case forward. Pit stop tasks are work outside of the standard main track tasks and could be waiting on either the branch or the home office."
   },
   {
     key: "tasks",
@@ -126,8 +126,8 @@ const STEPS = [
     screen: "isas",
     navId: "arc-nav-isas",
     region: "list",
-    title: "Accounts and agreements",
-    body: "Investments & Agreements holds your clients' accounts, their directly held investments, and the service agreements that go with them."
+    title: "Accounts and services",
+    body: "Investments & Services holds your clients' accounts, their directly held investments, and the services and approved products that go with them."
   },
   {
     key: "compliance",

@@ -410,11 +410,13 @@
             card-label="Case Comments"
             related-object-api-name="CaseComment"
             parent-field-api-name="ParentId"
-            columns="Comment:CommentBody:60%,By:CreatedBy.Name:18%,Added:CreatedDate:22%"
+            columns="Comment:CommentBody:46%,By:CreatedBy.Name:16%,Added:CreatedDate:20%,Task:taskSubject:18%"
+            secondary-link-column-path="taskSubject"
             disable-row-links
             collapsible
             use-preloaded-data
             preloaded-result={caseCommentsResult}
+            onsecondarynavigate={handleCaseCommentTaskNavigate}
           ></c-arc-related-list>
 
           <!-- Order tickets and related products have no page of their own in

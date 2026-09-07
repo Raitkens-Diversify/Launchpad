@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Description__c</fullName>
-    <description>Shown on the resource card and the detail view.</description>
+    <description>The full body shown on the detail page — rich text since 2026-09-07 (authors write bullets for a webinar&#39;s agenda). Every list surface (cards, search hits, the events page, the Arc announcement) reads the PLAIN-TEXT form via ResourceCenterService.plainText and prefers Summary__c when it is set. Converted from a 4000-char long text area; existing plain text renders unchanged.</description>
     <label>Description</label>
-    <length>4000</length>
+    <length>32768</length>
     <trackTrending>false</trackTrending>
-    <type>LongTextArea</type>
-    <visibleLines>5</visibleLines>
+    <type>Html</type>
+    <visibleLines>10</visibleLines>
 </CustomField>

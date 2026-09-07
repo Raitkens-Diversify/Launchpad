@@ -8,7 +8,7 @@
         <locationX>490</locationX>
         <locationY>866</locationY>
         <assignmentItems>
-            <assignToReference>varCase.FinServ__FinancialAccount__c</assignToReference>
+            <assignToReference>varCase.Wizard_Financial_Account__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>Get_Financial_Account.Id</elementReference>
@@ -150,7 +150,7 @@
         <locationX>182</locationX>
         <locationY>866</locationY>
         <assignmentItems>
-            <assignToReference>varCase.FinServ__FinancialAccount__c</assignToReference>
+            <assignToReference>varCase.Wizard_Financial_Account__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>Get_Financial_Account.Id</elementReference>

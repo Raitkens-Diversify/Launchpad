@@ -7,29 +7,26 @@ import {
     TYPE_VIDEO,
     TYPE_EXTERNAL_LINK,
     TYPE_WEBINAR,
-    WEBINAR_STATUS_UPCOMING,
-    WEBINAR_STATUS_PAST,
-    WEBINAR_STATUS_RECORDED,
     rcRootCrumbs,
     CRUMB_HELP_HOME,
-    CRUMB_RC_HOME,
-    formatDurationMinutes
+    CRUMB_RC_HOME
 } from 'c/rcConstants';
 import { linkContext, articleHref, fileHref } from 'c/contextNav';
-import { formatDateTime } from 'c/dsDateBlock';
 import { isScribeUrl } from 'c/scribeUrlUtil';
+import { sanitizeHtml } from 'c/richTextUtil';
 
 /**
  * resourceDetail — full resource view. File-backed types (PDF/Form/Template):
  * inline paged preview from Salesforce's SVGZ renditions (the download servlet
  * is Content-Disposition: attachment, so it can never render in a frame) +
  * explicit Download. Video: responsive 16:9 embed. External Link: opens in a
- * new tab. Webinar: event metadata plus the status-specific action — Upcoming
- * gets a "Sign up" link, Past says the recording is coming, Recorded plays the
- * recording through the SAME embed path as Video (or a native <video> when the
- * recording is the attached file). Status comes from the DTO (WebinarLifecycle)
- * and is never derived here. Shows Related Articles (reverse junction), linking
- * to the Help Center when helpCenterBaseUrl is provided.
+ * new tab. Webinar: the whole body is c-event-detail (2026-09-07 — header,
+ * agenda, presenters, the details card with viewer-zone times and the
+ * clock-derived CTA, sibling events); this host keeps the breadcrumb above
+ * it and Related Articles (reverse junction, linking to the Help Center when
+ * helpCenterBaseUrl is provided) below. Description__c is rich text: the
+ * non-event body injects `descriptionHtml` as manual DOM through
+ * c/richTextUtil.
  *
  * Preview paging: page count isn't queryable, so pages grow lazily — each
  * onload appends the next page until one errors (capped). Servlet paths go
@@ -93,37 +90,35 @@ export default class ResourceDetail extends LightningElement {
     get isFileBacked() {
         return this.hasFile && !this.showEmbed && !this.isExternal && !this.isWebinar;
     }
-    /** Embedded player: a Video, or a Webinar whose recording is an embed URL. */
+    /** Embedded player: a Video (a webinar's recording plays inside c-event-detail). */
     get showEmbed() {
         return !!this.detail && !!this.detail.videoEmbedUrl
-            && (this.detail.resourceType === TYPE_VIDEO || this.isWebinar);
+            && this.detail.resourceType === TYPE_VIDEO;
     }
     get isWebinar() {
         return !!this.detail && this.detail.resourceType === TYPE_WEBINAR;
     }
-    get isRecorded() {
-        return this.isWebinar && this.detail.webinarStatus === WEBINAR_STATUS_RECORDED;
+    get descriptionHtml() {
+        const html = this.detail && this.detail.descriptionHtml;
+        return html && html.trim() ? html : null;
     }
-    /** Recorded webinar with no embed: the newest attached file is the recording. */
-    get showFileVideo() {
-        return this.isRecorded && !this.showEmbed && this.hasFile;
+    get hasDescription() {
+        return !!this.descriptionHtml;
     }
-    get showSignUp() {
-        return this.isWebinar && this.detail.webinarStatus === WEBINAR_STATUS_UPCOMING
-            && !!this.detail.registrationUrl;
-    }
-    get showRecordingPending() {
-        return this.isWebinar && this.detail.webinarStatus === WEBINAR_STATUS_PAST;
-    }
-    get webinarMeta() {
-        if (!this.isWebinar) {
-            return [];
+
+    /** The HTML last injected into the manual container (re-inject only on change). */
+    _renderedHtml = null;
+
+    renderedCallback() {
+        const container = this.template.querySelector('.rd__desc');
+        const html = this.descriptionHtml;
+        if (container && this._renderedHtml !== html) {
+            container.innerHTML = sanitizeHtml(html);
+            this._renderedHtml = html;
         }
-        return [
-            { label: 'When', value: formatDateTime(this.detail.eventDatetime) },
-            { label: 'Presenter', value: this.detail.presenter },
-            { label: 'Duration', value: formatDurationMinutes(this.detail.durationMinutes) }
-        ].filter((m) => Boolean(m.value));
+        if (!container) {
+            this._renderedHtml = null;
+        }
     }
     get isExternal() {
         return this.detail && this.detail.resourceType === TYPE_EXTERNAL_LINK && !!this.detail.externalUrl;

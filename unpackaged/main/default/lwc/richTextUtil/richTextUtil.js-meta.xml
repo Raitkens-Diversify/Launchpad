@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>false</isExposed>
+    <description>sanitizeHtml(html): the one client-side pass (drop active content and on* handlers) over stored rich text before a component injects it as manual DOM. Consumed by eventDetail and resourceDetail for Resource__c.Description__c.</description>
+</LightningComponentBundle>

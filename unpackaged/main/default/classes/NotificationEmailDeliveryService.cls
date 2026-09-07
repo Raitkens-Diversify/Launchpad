@@ -1,10 +1,14 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-08-26
+ * Date: 2026-09-07
  *
  * Sends notification emails for immediate and digest delivery.
  * Batches Messaging.sendEmail so one transaction stays within the
  * 10-invocation governor limit (see Salesforce article 000385111).
+ *
+ * User recipients are addressed with setTargetObjectId so Salesforce
+ * delivers to the User record instead of an external to-address. That
+ * path is the reliable sandbox/production send for Salesforce users.
  */
 public without sharing class NotificationEmailDeliveryService {
   @TestVisible
@@ -129,7 +133,8 @@ public without sharing class NotificationEmailDeliveryService {
             toAddress,
             pendingEmail.subject,
             pendingEmail.body,
-            true
+            true,
+            pendingEmail.recipientId
           )
         );
         chunkEmails.add(pendingEmail);
@@ -303,14 +308,26 @@ public without sharing class NotificationEmailDeliveryService {
     return logsWithIds;
   }
 
+  @TestVisible
   private static Messaging.SingleEmailMessage buildEmailMessage(
     String toAddress,
     String subject,
     String body,
     Boolean useHtml
   ) {
+    return buildEmailMessage(toAddress, subject, body, useHtml, null);
+  }
+
+  @TestVisible
+  private static Messaging.SingleEmailMessage buildEmailMessage(
+    String toAddress,
+    String subject,
+    String body,
+    Boolean useHtml,
+    Id recipientId
+  ) {
     Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
-    email.setToAddresses(new List<String>{ toAddress });
+    applyRecipient(email, recipientId, toAddress);
     email.setSubject(subject);
     email.setSaveAsActivity(false);
     email.setUseSignature(false);
@@ -331,6 +348,26 @@ public without sharing class NotificationEmailDeliveryService {
     }
 
     return email;
+  }
+
+  @TestVisible
+  private static void applyRecipient(
+    Messaging.SingleEmailMessage email,
+    Id recipientId,
+    String toAddress
+  ) {
+    if (isUserRecipient(recipientId)) {
+      email.setTargetObjectId(recipientId);
+      email.setTreatTargetObjectAsRecipient(true);
+      return;
+    }
+
+    email.setToAddresses(new List<String>{ toAddress });
+  }
+
+  @TestVisible
+  private static Boolean isUserRecipient(Id recipientId) {
+    return recipientId != null && recipientId.getSobjectType() == User.SObjectType;
   }
 
   @TestVisible

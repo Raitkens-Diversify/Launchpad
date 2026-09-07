@@ -40,7 +40,7 @@ public with sharing class UnifiedSearchService {
     public class ResourceHit {
         @AuraEnabled public Id id;
         @AuraEnabled public String title;
-        @AuraEnabled public String subtitle;      // Description__c
+        @AuraEnabled public String subtitle;      // Summary__c, else Description__c as plain text
         @AuraEnabled public String slug;          // routing key
         @AuraEnabled public String resourceType;  // PDF/Form/Video/Template/External Link/Webinar
         @AuraEnabled public String externalUrl;
@@ -219,7 +219,7 @@ public with sharing class UnifiedSearchService {
         }
         String sosl =
             'FIND \'' + String.join(findParts, ' OR ') + '\' IN ALL FIELDS RETURNING Resource__c(' +
-            'Id, Name, Slug__c, Resource_Type__c, Description__c, Is_Featured__c, ' +
+            'Id, Name, Slug__c, Resource_Type__c, Description__c, Summary__c, Is_Featured__c, ' +
             'External_URL__c, Category__r.Slug__c, ' +
             'Video_Embed_URL__c, Event_Datetime__c, Registration_URL__c ' +
             'WHERE Is_Active__c = true) LIMIT ' + MAX_RESULTS;
@@ -258,7 +258,8 @@ public with sharing class UnifiedSearchService {
             ResourceHit hit = new ResourceHit();
             hit.id = r.Id;
             hit.title = r.Name;
-            hit.subtitle = r.Description__c;
+            hit.subtitle = String.isNotBlank(r.Summary__c)
+                ? r.Summary__c : ResourceCenterService.plainText(r.Description__c);
             hit.slug = r.Slug__c;
             hit.resourceType = r.Resource_Type__c;
             hit.externalUrl = r.External_URL__c;
@@ -280,7 +281,11 @@ public with sharing class UnifiedSearchService {
     private static Double scoreResource(
             List<String> qTokens, Map<String, Set<String>> tokenSynonyms, Resource__c r) {
         List<String> nameWords = tokenize(r.Name);
-        List<String> descWords = tokenize(r.Description__c);
+        // Rich text scores on its words, not its tags; the summary counts as description text.
+        List<String> descWords = tokenize(
+            (String.isBlank(r.Summary__c) ? '' : r.Summary__c + ' ')
+            + (ResourceCenterService.plainText(r.Description__c) == null
+                ? '' : ResourceCenterService.plainText(r.Description__c)));
         Double total = 0;
         for (String qt : qTokens) {
             Double best = Math.max(

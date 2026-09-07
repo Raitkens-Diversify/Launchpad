@@ -1,0 +1,419 @@
+:host {
+    display: block;
+    /* Self-declared tokens (ui-standards §1): the primary button here is the
+       one Arc's injected accent took off-brand on resourceDetail — the same
+       canonical block, so the card reads navy on every surface. */
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-border-2: #b6bcc5;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-accent-3: #071c31;
+    --slds-g-color-on-accent-1: #ffffff;
+    --ds-medium-blue: #1a76bb;
+    --ds-lightest-blue: #e2f8ff;
+
+    /* Card width and where it sticks (below the sticky chrome strip). */
+    --evd-card-width: 320px;
+    --evd-sticky-top: 96px;
+}
+
+/* ---- Header ------------------------------------------------------------ */
+
+.evd__head {
+    margin-bottom: var(--ds-space-xl, 24px);
+}
+.evd__eyebrow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ds-space-xs, 4px);
+    margin: 0 0 var(--ds-space-sm, 8px);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.evd__eyebrow-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-xs, 4px);
+}
+.evd__eyebrow-sep {
+    color: var(--slds-g-color-border-2, #b6bcc5);
+}
+.evd__title {
+    margin: 0;
+    font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+    font-size: 1.75rem;
+    line-height: 1.25;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.evd__summary {
+    margin: var(--ds-space-sm, 8px) 0 0;
+    max-width: 62ch;
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+
+/* ---- Two-column body ---------------------------------------------------- */
+
+.evd__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--evd-card-width, 320px);
+    gap: var(--ds-space-2xl, 32px);
+    align-items: start;
+}
+.evd__content {
+    min-width: 0;
+}
+.evd__section + .evd__section,
+.evd__player + .evd__section {
+    margin-top: var(--ds-space-xl, 24px);
+}
+.evd__h2 {
+    margin: 0 0 var(--ds-space-sm, 8px);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+/* Rich text from Description__c: bullets are the authored form. */
+.evd__rich {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+.evd__rich ul,
+.evd__rich ol {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+.evd__rich li {
+    margin: 0 0 var(--ds-space-xs, 4px);
+}
+.evd__rich li::marker {
+    color: var(--ds-medium-blue, #1a76bb);
+}
+.evd__rich p {
+    margin: 0 0 var(--ds-space-sm, 8px);
+}
+.evd__rich p:last-child {
+    margin-bottom: 0;
+}
+.evd__rich a {
+    color: var(--ds-medium-blue, #1a76bb);
+}
+
+/* Presenter chips: initials tile in the date tile's palette. */
+.evd__people {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ds-space-sm, 8px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.evd__person {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-sm, 8px);
+    padding: var(--ds-space-xs, 4px) var(--ds-space-md, 12px) var(--ds-space-xs, 4px) var(--ds-space-xs, 4px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: 999px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.evd__avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--ds-lightest-blue, #e2f8ff);
+    color: var(--ds-medium-blue, #1a76bb);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.evd__for {
+    margin: var(--ds-space-xl, 24px) 0 0;
+    font-size: 0.9375rem;
+    color: var(--slds-g-color-on-surface-2, #374151);
+}
+.evd__for-label {
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.evd__for-label::after {
+    content: ' — ';
+    font-weight: 400;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* Player: the same 16:9 recipe as resourceDetail's Video. */
+.evd__player {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%;
+    border-radius: var(--ds-radius-lg, 10px);
+    overflow: hidden;
+    background: #000;
+}
+.evd__player-frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #000;
+}
+
+/* ---- Details card --------------------------------------------------------- */
+
+.evd__card {
+    position: sticky;
+    top: var(--evd-sticky-top, 96px);
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-md, 12px);
+    padding: var(--ds-space-lg, 16px);
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+    box-shadow: var(--ds-shadow-rest, 0 1px 2px rgba(15, 23, 42, 0.06));
+}
+/* Past sessions mute the date tile through the tokens c-ds-date-block consumes. */
+.evd__card--recorded,
+.evd__card--ended {
+    --ds-lightest-blue: var(--slds-g-color-surface-container-2, #f3f4f6);
+    --ds-medium-blue: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.evd__when {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ds-space-md, 12px);
+}
+.evd__when-text {
+    min-width: 0;
+}
+.evd__date {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.evd__time {
+    margin: 2px 0 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.evd__zones {
+    margin: 2px 0 0;
+    font-size: 0.8125rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.evd__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ds-space-sm, 8px) var(--ds-space-xl, 24px);
+    margin: 0;
+    padding-top: var(--ds-space-md, 12px);
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+.evd__facts:empty {
+    display: none;
+}
+.evd__fact {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.evd__fact-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.evd__fact-value {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+
+.evd__live,
+.evd__soon {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-sm, 8px);
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--slds-g-color-accent-1, #0f406f);
+}
+.evd__live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ds-medium-blue, #1a76bb);
+    box-shadow: 0 0 0 0 rgba(26, 118, 187, 0.5);
+    animation: evd-pulse 1.6s ease-out infinite;
+}
+@keyframes evd-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(26, 118, 187, 0.5); }
+    100% { box-shadow: 0 0 0 8px rgba(26, 118, 187, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .evd__live-dot { animation: none; }
+}
+
+/* The ONE primary button on the page — the family's navy recipe, full width. */
+.evd__btn {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-align: center;
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+    background: var(--slds-g-color-accent-1, #0f406f);
+    border: none;
+    border-radius: var(--ds-radius-md, 8px);
+    padding: 10px 20px;
+    text-decoration: none;
+    cursor: pointer;
+}
+.evd__btn:hover {
+    background: var(--slds-g-color-accent-2, #0b2f51);
+}
+.evd__btn:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+.evd__ended {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-style: italic;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+/* Secondary text actions in the card (the recording download). */
+.evd__calendar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ds-space-sm, 8px);
+    margin: 0;
+    font-size: 0.875rem;
+}
+.evd__link {
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: 600;
+    color: var(--ds-medium-blue, #1a76bb);
+    text-decoration: none;
+    cursor: pointer;
+}
+.evd__link:hover {
+    text-decoration: underline;
+}
+/* ---- More in Webinars & Events ------------------------------------------- */
+
+.evd__more {
+    margin-top: var(--ds-space-2xl, 32px);
+    padding-top: var(--ds-space-lg, 16px);
+    border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+.evd__more-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--ds-space-md, 12px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.evd__more-card {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ds-space-md, 12px);
+    width: 100%;
+    padding: var(--ds-space-md, 12px);
+    text-align: left;
+    font-family: inherit;
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+    border-radius: var(--ds-radius-lg, 10px);
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.evd__more-card:hover,
+.evd__more-card:focus-visible {
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+    box-shadow: var(--ds-shadow-hover, 0 4px 14px rgba(15, 64, 111, 0.08));
+    outline: none;
+}
+.evd__more-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+.evd__more-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.evd__more-time {
+    font-size: 0.8125rem;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+
+/* ---- Tablet: the sibling grid narrows ------------------------------------- */
+@media (max-width: 1024px) {
+    .evd__more-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* ---- Phone: single column, the card first as a compact bar ---------------- */
+@media (max-width: 640px) {
+    .evd__body {
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--ds-space-lg, 16px);
+    }
+    .evd__card {
+        order: -1;
+        position: static;
+        gap: var(--ds-space-sm, 8px);
+        padding: var(--ds-space-md, 12px);
+    }
+    .evd__title {
+        font-size: 1.5rem;
+    }
+    .evd__time {
+        font-size: 1.125rem;
+    }
+    .evd__facts {
+        padding-top: var(--ds-space-sm, 8px);
+    }
+    .evd__more-list {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

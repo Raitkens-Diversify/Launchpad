@@ -148,7 +148,7 @@
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>varCase.To_Account__c</assignToReference>
+            <assignToReference>varCase.To_Financial_Account__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>varSelectedFinancialAccount</elementReference>

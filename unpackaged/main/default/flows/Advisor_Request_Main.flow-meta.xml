@@ -1132,12 +1132,6 @@
         </connector>
         <flowName>Advisor_Request_Donation_in_Kind</flowName>
         <inputAssignments>
-            <name>varFinancialAccount</name>
-            <value>
-                <elementReference>varFinancialAccount</elementReference>
-            </value>
-        </inputAssignments>
-        <inputAssignments>
             <name>varHousehold</name>
             <value>
                 <elementReference>varHousehold</elementReference>
@@ -1227,12 +1221,6 @@
             <targetReference>Navigate_to_Case</targetReference>
         </connector>
         <flowName>Advisor_Request_Move_Money_One_Time</flowName>
-        <inputAssignments>
-            <name>varFinancialAccountCustom</name>
-            <value>
-                <elementReference>varFinancialAccountCustom</elementReference>
-            </value>
-        </inputAssignments>
         <inputAssignments>
             <name>varHousehold</name>
             <value>

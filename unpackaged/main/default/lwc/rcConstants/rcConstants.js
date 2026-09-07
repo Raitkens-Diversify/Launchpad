@@ -105,7 +105,9 @@ export function resourceAction(r) {
  * search ResourceHit shape (title/subtitle). `href` is set only when the
  * action truly leaves the site (see resourceAction) — file-backed types keep
  * opening the detail view so download counts stay real; an External Link
- * without a URL degrades to open-in-app.
+ * without a URL degrades to open-in-app. The subtitle is the authored
+ * one-sentence `summary` when there is one (Summary__c, 2026-09-07), else the
+ * server's plain-text description.
  */
 export function toContentItem(r) {
     const { action, href } = resourceAction(r);
@@ -113,7 +115,7 @@ export function toContentItem(r) {
         kind: 'resource',
         id: r.id,
         title: r.name !== undefined ? r.name : r.title,
-        subtitle: r.description !== undefined ? r.description : r.subtitle,
+        subtitle: r.summary || (r.description !== undefined ? r.description : r.subtitle),
         routeKey: r.slug,
         resourceType: r.resourceType,
         action,

@@ -21,7 +21,11 @@
                                     <c-ds-date-block value={ev.eventDatetime}></c-ds-date-block>
                                     <div class="ev__main">
                                         <div class="ev__title-row">
-                                            <h3 class="ev__title">{ev.name}</h3>
+                                            <h3 class="ev__title">
+                                                <button type="button" class="ev__title-btn"
+                                                        data-slug={ev.slug}
+                                                        onclick={handleTitle}>{ev.name}</button>
+                                            </h3>
                                         </div>
                                         <template if:true={ev.meta}>
                                             <p class="ev__meta">{ev.meta}</p>
@@ -55,7 +59,11 @@
                                     <c-ds-date-block value={ev.eventDatetime}></c-ds-date-block>
                                     <div class="ev__main">
                                         <div class="ev__title-row">
-                                            <h3 class="ev__title">{ev.name}</h3>
+                                            <h3 class="ev__title">
+                                                <button type="button" class="ev__title-btn"
+                                                        data-slug={ev.slug}
+                                                        onclick={handleTitle}>{ev.name}</button>
+                                            </h3>
                                             <c-ds-badge label="Recording" variant="info" size="sm"></c-ds-badge>
                                         </div>
                                         <template if:true={ev.meta}>
@@ -120,9 +128,38 @@
                         <template if:true={selectedEvent.cta.note}>
                             <p class="ev__note">{selectedEvent.cta.note}</p>
                         </template>
+                        <button type="button" class="ev__link-btn" data-slug={selectedEvent.slug}
+                                onclick={handleViewDetails}>View details</button>
                     </div>
                 </div>
             </template>
         </c-ds-popover>
+
+        <!-- Detail modal: the same c-event-detail the Resource Center route
+             renders, loaded by slug on open. The header carries the name, so
+             the body hides its own h1. -->
+        <c-ds-modal-v2 is-open={modalOpen} title={modalTitle} size="large"
+                       onclose={handleModalClose}>
+            <div class="ev__modal"
+                 onresourceselect={handleModalSibling}
+                 onresourcedownload={handleModalDownload}>
+                <template if:true={modalLoading}>
+                    <div class="ev__modal-status">
+                        <lightning-spinner alternative-text="Loading event" size="small"></lightning-spinner>
+                    </div>
+                </template>
+                <template if:true={modalError}>
+                    <p class="ev__modal-status" role="alert">{modalError}</p>
+                </template>
+                <template if:true={showModalDetail}>
+                    <c-event-detail detail={modalDetail} link-ctx={linkCtx} hide-title></c-event-detail>
+                </template>
+            </div>
+            <div slot="footer" class="ev__modal-footer">
+                <button type="button" class="ev__link-btn" onclick={handleOpenFullPage}>Open full page</button>
+                <button type="button" class="ev__cta ev__cta--button ev__cta--quiet"
+                        onclick={handleModalClose}>Close</button>
+            </div>
+        </c-ds-modal-v2>
     </c-ds-chrome>
 </template>

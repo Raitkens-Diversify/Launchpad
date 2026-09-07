@@ -49,36 +49,59 @@
 
       <!-- ============ content ============ -->
       <div class="tp-main">
-        <!-- resources is full-bleed: it owns its own hero and has no crumb -->
+        <!-- The Resource Center is full-bleed. It draws its own header bar
+             inside the page (c/dsChrome with branding hidden): the search box
+             and the Get Help / Help Center links. Below it, the real landing is
+             a topic rail plus the first topic's resource cards. -->
         <template lwc:if={isResources}>
           <div class={heroClass}>
-            <span class="tp-hero__eyebrow">{config.eyebrow}</span>
-            <span class="tp-hero__title">{config.title}</span>
-            <span class="tp-hero__search">{config.searchPlaceholder}</span>
-            <span class="tp-hero__link">{config.helpLink}</span>
-          </div>
-          <div class="tp-pad">
-            <span class="tp-h2">{config.featuredLabel}</span>
-            <div class="tp-featured">
-              <div class="tp-featured__top">
-                <span class="tp-featured__play"></span>
-                <span class="tp-pill tp-pill--blue"
-                  >{config.featured.pill}</span
-                >
-              </div>
-              <span class="tp-featured__title">{config.featured.title}</span>
-              <span class="tp-featured__body">{config.featured.body}</span>
-              <span class="tp-btn tp-btn--brand">{config.featured.action}</span>
-            </div>
-            <span class="tp-h2">{config.categoryLabel}</span>
-            <div class={catsClass}>
-              <template for:each={config.categories} for:item="cat">
-                <div key={cat.key} class="tp-cat">
-                  <span class="tp-cat__icon"></span>
-                  <span class="tp-cat__label">{cat.label}</span>
-                  <span class="tp-cat__meta">{cat.meta}</span>
-                </div>
+            <span class="tp-rc__search">
+              <span class="tp-glyph tp-glyph--dim" style={searchIconStyle}></span>
+              <span class="tp-chrome__placeholder"
+                >{config.searchPlaceholder}</span
+              >
+            </span>
+            <span class="tp-rc__links">
+              <template for:each={config.links} for:item="link">
+                <span key={link} class="tp-rc__link">{link}</span>
               </template>
+            </span>
+          </div>
+          <div class="tp-rc">
+            <div class="tp-rc__nav">
+              <span class="tp-rc__nav-title">{config.topicsHeading}</span>
+              <template for:each={topics} for:item="topic">
+                <span key={topic.key} class={topic.className}
+                  >{topic.label}</span
+                >
+              </template>
+            </div>
+            <div class="tp-rc__main">
+              <div class="tp-crumbs">
+                <template for:each={crumbs} for:item="crumb">
+                  <span key={crumb.key} class="tp-crumbs__item">
+                    <span class={crumb.className}>{crumb.label}</span>
+                    <template lwc:if={crumb.showCaret}>
+                      <span class="tp-crumbs__caret">›</span>
+                    </template>
+                  </span>
+                </template>
+              </div>
+              <span class="tp-h1">{config.categoryTitle}</span>
+              <span class="tp-sub">{config.categoryDescription}</span>
+              <div class="tp-rc__grid">
+                <template for:each={config.cards} for:item="card">
+                  <div key={card.key} class="tp-rc__card">
+                    <span class="tp-rc__card-top">
+                      <span class="tp-rc__card-icon"></span>
+                      <span class="tp-pill tp-pill--blue">{card.badge}</span>
+                    </span>
+                    <span class="tp-rc__card-title">{card.title}</span>
+                    <span class="tp-rc__card-body">{card.body}</span>
+                    <span class="tp-btn tp-btn--sm">{card.action}</span>
+                  </div>
+                </template>
+              </div>
             </div>
           </div>
         </template>
@@ -169,18 +192,38 @@
               </div>
 
               <!-- The real dashboard continues into its Envelopes and Work
-                   tables; the Work one is what the tour's copy is about. -->
-              <span class="tp-h2 tp-h2--tight">{config.workTitle}</span>
+                   tables; the Work one (c/workTable) is what the tour's copy
+                   is about. Its title row carries the My / My Team scope
+                   toggle, the search box and Filter. -->
+              <div class="tp-head tp-head--work">
+                <span class="tp-h2 tp-h2--tight">{config.workTitle}</span>
+                <div class="tp-toolbar">
+                  <span class="tp-seg">
+                    <template for:each={workScopes} for:item="scope">
+                      <span key={scope.key} class={scope.className}
+                        >{scope.label}</span
+                      >
+                    </template>
+                  </span>
+                  <span class="tp-toolbar__search">{config.workSearch}</span>
+                  <span class="tp-btn tp-btn--sm">Filter</span>
+                </div>
+              </div>
               <div class="tp-table">
-                <div class="tp-tr tp-tr--head">
+                <div class="tp-tr tp-tr--head tp-tr--dense">
                   <template for:each={workColumns} for:item="col">
-                    <span key={col.key} class="tp-th">{col.label} ↓</span>
+                    <span key={col.key} class="tp-th" style={col.style}
+                      >{col.label}</span
+                    >
                   </template>
                 </div>
                 <template for:each={workRows} for:item="row">
-                  <div key={row.key} class="tp-tr">
+                  <div key={row.key} class="tp-tr tp-tr--dense">
                     <template for:each={row.cells} for:item="cell">
-                      <span key={cell.key} class={cell.cellClass}
+                      <span
+                        key={cell.key}
+                        class={cell.cellClass}
+                        style={cell.style}
                         >{cell.value}</span
                       >
                     </template>
@@ -191,6 +234,11 @@
 
             <!-- ---------- record (a case) ---------- -->
             <template lwc:elseif={isRecord}>
+              <!-- Header as c/arcCaseDetail lays it out: eyebrow and subject
+                   on the left; priority and type pills over a single Actions
+                   menu on the right; the four key facts underneath. The status
+                   path that used to sit below the facts is switched off on the
+                   real page (SHOW_STATUS_PATH = false), so it is not drawn. -->
               <div class="tp-card">
                 <div class="tp-head">
                   <div class="tp-head__text">
@@ -198,14 +246,15 @@
                     <span class="tp-h1">{config.title}</span>
                   </div>
                   <div class="tp-head__actions tp-head__actions--stack">
-                    <span class="tp-pill tp-pill--amber"
-                      >{config.priorityPill}</span
-                    >
                     <span class="tp-head__row">
-                      <template for:each={config.actions} for:item="action">
-                        <span key={action} class="tp-btn">{action}</span>
-                      </template>
+                      <span class="tp-pill tp-pill--amber"
+                        >{config.priorityPill}</span
+                      >
+                      <span class="tp-pill tp-pill--grey"
+                        >{config.typePill}</span
+                      >
                     </span>
+                    <span class="tp-btn">{config.actionsMenu} ⌄</span>
                   </div>
                 </div>
                 <div class="tp-facts">
@@ -216,17 +265,13 @@
                     </span>
                   </template>
                 </div>
-                <div class={pathClass}>
-                  <template for:each={pathSteps} for:item="step">
-                    <span key={step.key} class={step.className}
-                      >{step.label}</span
-                    >
-                  </template>
-                </div>
               </div>
 
               <div class="tp-cols">
                 <div class="tp-cols__main">
+                  <!-- c/caseOverviewTile: status badge, the case's branch
+                       name, the completed/total ring, the waiting-on line and
+                       the milestone track. -->
                   <div class="tp-overview">
                     <div class="tp-overview__top">
                       <span class="tp-pill tp-pill--ontrack"
@@ -244,59 +289,55 @@
                         >
                       </span>
                     </div>
-                    <span class="tp-assignee">{config.overview.assignee}</span>
-                    <div class="tp-progress">
-                      <span
-                        class="tp-progress__dot tp-progress__dot--done"
-                      ></span>
-                      <span class="tp-progress__line"></span>
-                      <span
-                        class="tp-progress__dot tp-progress__dot--goal"
-                      ></span>
-                    </div>
-                    <div class="tp-progress__labels">
-                      <span class="tp-progress__label"
-                        >{config.overview.startLabel}</span
-                      >
-                      <span class="tp-progress__label tp-progress__label--goal"
-                        >{config.overview.endLabel}</span
-                      >
+                    <span class="tp-assignee">{config.overview.waitingOn}</span>
+                    <div class="tp-milestones">
+                      <template for:each={milestones} for:item="stage">
+                        <span key={stage.key} class={stage.className}>
+                          <span class="tp-milestone__dot"></span>
+                          <span class="tp-milestone__label"
+                            >{stage.label}</span
+                          >
+                        </span>
+                      </template>
                     </div>
                   </div>
 
+                  <!-- The three task tracks, in the order the page stacks
+                       them: Branch Pit Stop, Main Track, Home Office Pit Stop.
+                       Each is a card with the same four columns; an empty one
+                       reads "No Tasks Found." exactly as the real card does. -->
                   <div class={tracksClass}>
-                    <div class="tp-track">
-                      <span class="tp-track__head">{config.pitStopTitle}</span>
-                      <template for:each={config.pitStops} for:item="row">
-                        <div key={row.key} class="tp-track__row">
-                          <span class="tp-track__subject">{row.subject}</span>
-                          <span class="tp-track__status tp-track__status--wait"
-                            >{row.status}</span
-                          >
-                          <span class="tp-track__owner">{row.owner}</span>
-                        </div>
-                      </template>
-                    </div>
-                    <div class="tp-track">
-                      <span class="tp-track__head"
-                        >{config.mainTrackTitle}</span
-                      >
-                      <div class="tp-track__row tp-track__row--head">
-                        <span class="tp-track__subject">Subject</span>
-                        <span class="tp-track__status">Status</span>
-                        <span class="tp-track__owner">Owner</span>
+                    <template for:each={tracks} for:item="track">
+                      <div key={track.key} class="tp-track">
+                        <span class="tp-track__head">{track.title}</span>
+                        <template lwc:if={track.hasRows}>
+                          <div class="tp-track__row tp-track__row--head">
+                            <span class="tp-track__subject">Subject</span>
+                            <span class="tp-track__status">Status</span>
+                            <span class="tp-track__owner">Owner</span>
+                            <span class="tp-track__date">Completed Date</span>
+                          </div>
+                          <template for:each={track.rows} for:item="row">
+                            <div key={row.key} class="tp-track__row">
+                              <span class="tp-track__subject"
+                                >{row.subject}</span
+                              >
+                              <span class="tp-track__status">{row.status}</span>
+                              <span class="tp-track__owner">{row.owner}</span>
+                              <span class="tp-track__date">{row.completed}</span>
+                            </div>
+                          </template>
+                        </template>
+                        <template lwc:else>
+                          <span class="tp-track__empty">No Tasks Found.</span>
+                        </template>
                       </div>
-                      <template for:each={config.mainTrack} for:item="row">
-                        <div key={row.key} class="tp-track__row">
-                          <span class="tp-track__subject">{row.subject}</span>
-                          <span class="tp-track__status">{row.status}</span>
-                          <span class="tp-track__owner">{row.owner}</span>
-                        </div>
-                      </template>
-                    </div>
+                    </template>
                   </div>
                 </div>
 
+                <!-- The right rail: c/caseCurrentTask first, then the related
+                     cards and the Feed / Related tab strip. -->
                 <div class="tp-cols__side">
                   <div class={currentTaskClass}>
                     <span class="tp-side__eyebrow"
@@ -315,9 +356,26 @@
                       >{config.currentTask.dueLabel}</span
                     >
                     <span class="tp-side__value">{config.currentTask.due}</span>
-                    <span class="tp-btn tp-btn--muted"
+                    <span class="tp-side__label"
+                      >{config.currentTask.descriptionLabel}</span
+                    >
+                    <span class="tp-side__desc"
+                      >{config.currentTask.description}</span
+                    >
+                    <span class="tp-btn tp-btn--brand"
                       >{config.currentTask.action}</span
                     >
+                  </div>
+                  <template for:each={config.sideCards} for:item="card">
+                    <div key={card} class="tp-side__mini">
+                      <span>{card}</span>
+                      <span class="tp-side__mini-chev">⌄</span>
+                    </div>
+                  </template>
+                  <div class="tp-side__tabs">
+                    <template for:each={sideTabs} for:item="tab">
+                      <span key={tab.key} class={tab.className}>{tab.label}</span>
+                    </template>
                   </div>
                 </div>
               </div>
@@ -339,7 +397,7 @@
               <div class={formClass}>
                 <span class="tp-form__title">{config.sectionTitle}</span>
                 <span class="tp-form__body">{config.sectionBody}</span>
-                <template for:each={config.rows} for:item="row">
+                <template for:each={settingsRows} for:item="row">
                   <div key={row.key} class="tp-form__row">
                     <span class="tp-form__label">{row.label}</span>
                     <template lwc:if={row.photo}>
@@ -352,7 +410,7 @@
                       </span>
                     </template>
                     <template lwc:else>
-                      <span class="tp-input">{row.value}</span>
+                      <span class={row.inputClass}>{row.value}</span>
                       <template lwc:if={row.second}>
                         <span class="tp-input">{row.second}</span>
                       </template>
@@ -362,23 +420,25 @@
               </div>
             </template>
 
-            <!-- ---------- list pages ---------- -->
+            <!-- ---------- list pages (c/arcRecordListView) ---------- -->
             <template lwc:else>
-              <div class="tp-head">
-                <div class="tp-head__text">
-                  <span class="tp-h1">{config.title}</span>
-                  <template lwc:if={config.subtitle}>
-                    <span class="tp-sub">{config.subtitle}</span>
+              <template lwc:if={hasListHead}>
+                <div class="tp-head">
+                  <div class="tp-head__text">
+                    <span class="tp-h1">{config.title}</span>
+                    <template lwc:if={config.subtitle}>
+                      <span class="tp-sub">{config.subtitle}</span>
+                    </template>
+                  </div>
+                  <template lwc:if={config.primaryAction}>
+                    <div class="tp-head__actions">
+                      <span class="tp-btn tp-btn--brand"
+                        >+ {config.primaryAction}</span
+                      >
+                    </div>
                   </template>
                 </div>
-                <template lwc:if={config.primaryAction}>
-                  <div class="tp-head__actions">
-                    <span class="tp-btn tp-btn--brand"
-                      >+ {config.primaryAction}</span
-                    >
-                  </div>
-                </template>
-              </div>
+              </template>
 
               <template lwc:if={hasTabs}>
                 <div class={tabsClass}>
@@ -388,11 +448,11 @@
                 </div>
               </template>
 
-              <!-- the toolbar every list page carries -->
+              <!-- the toolbar every list page carries: Table | Chart, then
+                   search, Group and Filter -->
               <div class="tp-toolbar">
                 <span class="tp-seg">
                   <span class="tp-seg__btn tp-seg__btn--on">Table</span>
-                  <span class="tp-seg__btn">Cards</span>
                   <span class="tp-seg__btn">Chart</span>
                 </span>
                 <span class="tp-toolbar__spacer"></span>
@@ -402,20 +462,22 @@
               </div>
 
               <div class={listClass}>
-                <div class="tp-tr tp-tr--head">
+                <div class={headRowClass}>
                   <template for:each={columns} for:item="col">
-                    <span key={col.key} class="tp-th">{col.label} ↓</span>
+                    <span key={col.key} class="tp-th" style={col.style}
+                      >{col.label}</span
+                    >
                   </template>
                 </div>
                 <template for:each={rows} for:item="row">
-                  <div key={row.key} class="tp-tr">
+                  <div key={row.key} class={rowClass}>
                     <template for:each={row.cells} for:item="cell">
-                      <span key={cell.key} class={cell.cellClass}>
-                        <template lwc:if={cell.isAvatar}>
-                          <span class="tp-rowavatar"></span>
-                          <span class="tp-td__link">{cell.value}</span>
-                        </template>
-                        <template lwc:elseif={cell.isPill}>
+                      <span
+                        key={cell.key}
+                        class={cell.cellClass}
+                        style={cell.style}
+                      >
+                        <template lwc:if={cell.isPill}>
                           <span class={cell.pillClass}>{cell.value}</span>
                         </template>
                         <template lwc:else>{cell.value}</template>

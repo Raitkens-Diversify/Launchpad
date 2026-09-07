@@ -1946,5 +1946,78 @@ private class WizardEnvelopeStateServiceTest {
             'Service should be marked as Submitted.'
         );
     }
-    
+
+    @IsTest
+    static void createServiceAgreementCreatesLinkedCase() {
+        // A new service must open a Case the same way a financial account does, linked both ways and
+        // pulled into the envelope. Build an isolated envelope with a Household-record-type content
+        // row so createServiceAgreement can resolve the household, its name, and its advisor team.
+        Id householdRecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
+            .get('Household')
+            .getRecordTypeId();
+
+        Financial_Advisor_Team__c team = new Financial_Advisor_Team__c(Name = 'Service Case Team');
+        insert team;
+
+        Account household = new Account(
+            Name = 'Service Case Household',
+            RecordTypeId = householdRecordTypeId,
+            Type = 'Prospect',
+            Financial_Advisor_Team__c = team.Id
+        );
+        insert household;
+
+        Envelope__c envelope = new Envelope__c(Name = 'Service Case Envelope');
+        insert envelope;
+        insert new Envelope_Content__c(Envelope__c = envelope.Id, Account__c = household.Id);
+
+        Test.startTest();
+        String serviceId = WizardEnvelopeStateService.createServiceAgreement(
+            envelope.Id, 'Planning Service'
+        );
+        Test.stopTest();
+
+        // The service is stamped with the household and points back at its Case.
+        Service__c createdService = [
+            SELECT Id, Name, Household__c, Case__c
+            FROM Service__c
+            WHERE Id = :serviceId
+        ];
+        System.assertEquals('Planning Service', createdService.Name);
+        System.assertEquals(household.Id, createdService.Household__c);
+        System.assertNotEquals(null, createdService.Case__c,
+            'The service should be linked back to its Case.');
+
+        // A single Case is opened for the service, linked to it and following the RIA-flow semantics.
+        List<Case> cases = [
+            SELECT Id, Service__c, Household__c, Financial_Advisor_Team__c, Type, Origin, Status, Submitted__c
+            FROM Case
+            WHERE Service__c = :serviceId
+        ];
+        System.assertEquals(1, cases.size(), 'A service should open exactly one Case.');
+        System.assertEquals(serviceId, cases[0].Service__c);
+        System.assertEquals(createdService.Case__c, cases[0].Id,
+            'The service and its Case should reference each other.');
+        System.assertEquals(household.Id, cases[0].Household__c);
+        System.assertEquals(team.Id, cases[0].Financial_Advisor_Team__c);
+        System.assertEquals('Financial Planning', cases[0].Type);
+        System.assertEquals('Wizard', cases[0].Origin);
+        System.assertEquals(false, cases[0].Submitted__c);
+
+        // Both the service and its Case are pulled into the envelope.
+        List<Envelope_Content__c> links = [
+            SELECT Id, Service__c, Case__c
+            FROM Envelope_Content__c
+            WHERE Envelope__c = :envelope.Id
+        ];
+        Boolean hasServiceLink = false;
+        Boolean hasCaseLink = false;
+        for (Envelope_Content__c ec : links) {
+            if (ec.Service__c == serviceId) { hasServiceLink = true; }
+            if (ec.Case__c == cases[0].Id) { hasCaseLink = true; }
+        }
+        System.assertEquals(true, hasServiceLink, 'A content row should link the new Service.');
+        System.assertEquals(true, hasCaseLink, 'A content row should link the new Case.');
+    }
+
 }

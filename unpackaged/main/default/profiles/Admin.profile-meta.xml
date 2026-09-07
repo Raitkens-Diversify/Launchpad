@@ -803,6 +803,14 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>EnvelopeAccountAddendumService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>EnvelopeAccountAddendumServiceTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>EnvelopeActionCaseController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -3831,6 +3839,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Case.Pre_Case_Template__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Case.To_Financial_Account__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

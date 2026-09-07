@@ -70,6 +70,12 @@
                 <default>false</default>
                 <label>TMS (Wrap)</label>
             </value>
+            <value>
+                <fullName>AF2</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>AF2</label>
+            </value>
         </valueSetDefinition>
     </valueSet>
 </CustomField>

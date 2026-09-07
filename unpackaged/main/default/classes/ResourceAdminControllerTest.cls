@@ -332,6 +332,46 @@ private class ResourceAdminControllerTest {
     }
 
     @IsTest
+    static void summaryAndAudienceRoundTripAndTheSummaryIsCapped() {
+        Id catId = makeCategory('Sum Cat', 'sum-cat', null);
+
+        ResourceAdminController.ResourceInput r = input('Arc Basics', 'arc-basics', catId);
+        r.description = '<ul><li>Logging in</li><li>Search</li></ul>';
+        r.summary = '  The essentials of Arc for Lite users.  ';
+        r.audience = new List<String>{ 'Lite users', ' ', 'Full users' };
+        Id resId = ResourceAdminController.saveResource(JSON.serialize(r));
+
+        Resource__c saved = [
+            SELECT Description__c, Summary__c, Audience__c FROM Resource__c WHERE Id = :resId
+        ];
+        System.assertEquals('<ul><li>Logging in</li><li>Search</li></ul>', saved.Description__c,
+            'Rich text is stored as authored');
+        System.assertEquals('The essentials of Arc for Lite users.', saved.Summary__c, 'Trimmed');
+        System.assertEquals('Lite users;Full users', saved.Audience__c, 'Blank selections drop out');
+
+        ResourceAdminController.ResourceDetail d = ResourceAdminController.getResource(resId);
+        System.assertEquals('The essentials of Arc for Lite users.', d.summary);
+        System.assertEquals(new List<String>{ 'Lite users', 'Full users' }, d.audience);
+
+        // Clearing: an empty selection and a blank summary null the fields.
+        r.id = resId;
+        r.summary = '   ';
+        r.audience = new List<String>();
+        ResourceAdminController.saveResource(JSON.serialize(r));
+        saved = [SELECT Summary__c, Audience__c FROM Resource__c WHERE Id = :resId];
+        System.assertEquals(null, saved.Summary__c);
+        System.assertEquals(null, saved.Audience__c);
+
+        r.summary = 'x'.repeat(161);
+        try {
+            ResourceAdminController.saveResource(JSON.serialize(r));
+            System.assert(false, 'A 161-character summary must fail');
+        } catch (AuraHandledException e) {
+            System.assert(e.getMessage().contains('160'), e.getMessage());
+        }
+    }
+
+    @IsTest
     static void videoUrlNormalizesAndBadJsonRejected() {
         Id catId = makeCategory('Vid Cat', 'vid-cat', null);
 

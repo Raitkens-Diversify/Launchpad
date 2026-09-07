@@ -167,6 +167,26 @@
     line-height: 1.35;
     color: var(--slds-g-color-on-surface-3, #09243f);
 }
+/* The title is the way into the detail modal — a button that reads as the title. */
+.ev__title-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.ev__title-btn:hover {
+    color: var(--slds-g-color-accent-1, #0f406f);
+    text-decoration: underline;
+}
+.ev__title-btn:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
 
 .ev__meta {
     margin: var(--ds-space-xs, 4px) 0 0;
@@ -220,6 +240,29 @@
     cursor: pointer;
     font-family: inherit;
 }
+/* The modal's Close: the family's quiet button. */
+.ev__cta--quiet {
+    background: var(--slds-g-color-surface-container-1, #ffffff);
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
+}
+.ev__cta--quiet:hover {
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+}
+/* Text actions: "View details" in the popover, "Open full page" in the modal. */
+.ev__link-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: 600;
+    color: var(--ds-medium-blue, #1a76bb);
+    cursor: pointer;
+}
+.ev__link-btn:hover {
+    text-decoration: underline;
+}
 
 /* No action yet (past, unrecorded) — a note, never a dead button. */
 .ev__note {
@@ -250,11 +293,35 @@
     font-weight: 500;
     color: var(--slds-g-color-on-surface-2, #374151);
 }
-/* The popover is where the full description lives — no clamp here. */
+/* The popover is the quick peek: the one-sentence blurb, unclamped; the
+   full agenda lives in the detail modal. */
 .ev__pop .ev__desc {
     display: block;
     -webkit-line-clamp: unset;
     overflow: visible;
+}
+
+/* Detail modal body: c-event-detail inherits the page tokens; inside a
+   scrolling modal body the card sticks to the top edge, and the card narrows
+   so the agenda keeps room at the modal's 750px. */
+.ev__modal {
+    --evd-sticky-top: 0px;
+    --evd-card-width: 280px;
+    min-height: 120px;
+}
+.ev__modal-status {
+    position: relative;
+    min-height: 120px;
+    padding: var(--ds-space-xl, 24px);
+    text-align: center;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.ev__modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-space-lg, 16px);
+    width: 100%;
 }
 
 @media (max-width: 640px) {

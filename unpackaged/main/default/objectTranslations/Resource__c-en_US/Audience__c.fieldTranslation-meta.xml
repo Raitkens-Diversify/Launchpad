@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+        <label><!-- Audience --></label>
+        <name>Audience__c</name>
+        <picklistValues>
+            <masterLabel>Full users</masterLabel>
+            <translation><!-- Full users --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Lite users</masterLabel>
+            <translation><!-- Lite users --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Retirement plan advisors</masterLabel>
+            <translation><!-- Retirement plan advisors --></translation>
+        </picklistValues>
+    </CustomFieldTranslation>

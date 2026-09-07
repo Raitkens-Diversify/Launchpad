@@ -57,10 +57,25 @@
                         <template if:true={slugError}>
                             <p class="are__field-error">{slugError}</p>
                         </template>
-                        <lightning-textarea label="Description"
-                                            field-level-help="Shown on the resource card and detail page."
-                                            value={description}
-                                            onchange={handleDescriptionChange}></lightning-textarea>
+                        <lightning-input label="Summary"
+                                         field-level-help="One sentence, up to 160 characters: under the title on the detail page, and the subtitle on cards, search results, the events page and the Arc announcement."
+                                         value={summary}
+                                         max-length="160"
+                                         onchange={handleSummaryChange}></lightning-input>
+                        <lightning-input-rich-text label="Description"
+                                                   label-visible
+                                                   value={description}
+                                                   formats={richTextFormats}
+                                                   onchange={handleDescriptionChange}></lightning-input-rich-text>
+                        <p class="are__help">
+                            The full body on the detail page. For a webinar, write the agenda as a
+                            bulleted list — it renders under &ldquo;What we&rsquo;ll cover&rdquo;.
+                            Presenters, times and time zones have their own slots; leave them out.
+                        </p>
+                        <lightning-checkbox-group label="Audience"
+                                                  options={audienceOptions}
+                                                  value={audience}
+                                                  onchange={handleAudienceChange}></lightning-checkbox-group>
                         <template if:true={showEmbedInput}>
                             <lightning-input label={embedLabel}
                                              field-level-help={embedHelp}

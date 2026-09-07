@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>false</isExposed>
+    <description>The Resource Center event (webinar) detail body under resourceDetail&#39;s breadcrumb: eyebrow + title + summary, agenda/presenters beside a sticky details card (viewer-zone times, clock-derived CTA, Add to calendar), then three sibling events.</description>
+</LightningComponentBundle>

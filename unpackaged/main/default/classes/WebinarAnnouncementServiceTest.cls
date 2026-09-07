@@ -35,7 +35,7 @@ private class WebinarAnnouncementServiceTest {
 
     private static Resource__c reload(Id id) {
         return [
-            SELECT Id, Name, Slug__c, Description__c, Resource_Type__c, Is_Active__c,
+            SELECT Id, Name, Slug__c, Description__c, Summary__c, Resource_Type__c, Is_Active__c,
                    Event_Datetime__c, Event_Duration_Minutes__c, Presenter__c,
                    Announce_On_Arc__c, Announce_At__c, Announcement__c,
                    Announcement__r.Name, Announcement__r.Body__c,
@@ -150,6 +150,15 @@ private class WebinarAnnouncementServiceTest {
         r.Description__c = null;
         Assert.areEqual('Tue, Sep 8 at 9:00 AM MDT.', WebinarAnnouncementService.bodyFor(r),
             'Blank parts drop out');
+
+        // Description__c is rich text: the body carries its plain form, and the
+        // authored one-sentence summary wins when there is one.
+        r.Description__c = '<ul><li>Logging in</li><li>Search</li></ul>';
+        Assert.areEqual('Tue, Sep 8 at 9:00 AM MDT. Logging in; Search',
+            WebinarAnnouncementService.bodyFor(r));
+        r.Summary__c = 'The essentials of Arc.';
+        Assert.areEqual('Tue, Sep 8 at 9:00 AM MDT. The essentials of Arc.',
+            WebinarAnnouncementService.bodyFor(r));
 
         // No resolvable site → no link, never an exception.
         WebinarAnnouncementService.surfaceOverride = 'No Such Network';

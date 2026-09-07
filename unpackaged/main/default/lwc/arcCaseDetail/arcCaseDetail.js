@@ -96,7 +96,11 @@ const MASTER_RECORD_TYPE_ID = "012000000000000AAA";
  * Information and System Information hold the same fields on every case, as they
  * do on the Lightning layout.
  */
-const DESCRIPTION_FIELDS = ["Subject", "Description"];
+const DESCRIPTION_FIELDS = [
+  "Subject",
+  "Description",
+  "Additional_Case_Notes__c"
+];
 /*
  * "Rep Codes on the Case", copied field-for-field from
  * Case_Record_Page.flexipage's own section of that name. On Lightning the

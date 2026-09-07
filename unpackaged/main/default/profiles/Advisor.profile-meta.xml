@@ -3283,6 +3283,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Case.To_Financial_Account__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Case_Template__c.AML_Approval__c</field>
         <readable>true</readable>
     </fieldPermissions>

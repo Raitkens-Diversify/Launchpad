@@ -207,8 +207,36 @@ public with sharing class WizardEnvelopeStateService {
         } catch (DmlException e) {
             throw new AuraHandledException('Update failed: ' + e.getDmlMessage(0));
         }
+
+        // The BD/RIA flag and the managed-account platform decide whether this account needs a
+        // platform addendum and which one, so a change to either reconciles it. The owners are the
+        // other input, handled from saveAccountRoles.
+        if (
+            data.containsKey('BD_or_RIA__c') ||
+            data.containsKey('Managed_Account_Platform__c')
+        ) {
+            EnvelopeAccountAddendumService.reconcile(
+                recordId,
+                envelopeForAccount(recordId)
+            );
+        }
     }
-    
+
+    // The envelope an account belongs to, so an addendum lands on the same envelope as the rest of
+    // its contents. Accounts link to the envelope through Envelope_Content__c.Wizard_Financial_Account__c.
+    // Null when the account is on no envelope yet — the addendum is still created, just not linked.
+    private static Id envelopeForAccount(Id financialAccountId) {
+        for (Envelope_Content__c ec : [
+            SELECT Envelope__c
+            FROM Envelope_Content__c
+            WHERE Wizard_Financial_Account__c = :financialAccountId AND Envelope__c != NULL
+            LIMIT 1
+        ]) {
+            return ec.Envelope__c;
+        }
+        return null;
+    }
+
     // saveAccountInfo's counterpart for the Case half of a mixed account interview: writes the
     // Case-targeted answers onto the Financial Account's wizard Case. `caseData` is keyed by real
     // Case field API names and carries the FINANCIAL ACCOUNT id under 'Id' — the Case is resolved

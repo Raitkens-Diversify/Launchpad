@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-08-26
+ * Date: 2026-09-07
  */
 @IsTest
 private class NotificationEmailDeliveryServiceTest {
@@ -39,6 +39,45 @@ private class NotificationEmailDeliveryServiceTest {
     System.assertEquals(
       true,
       NotificationEmailDeliveryService.shouldSendAsHtml(true, 'Plain text only')
+    );
+  }
+
+  @IsTest
+  static void buildEmailMessageUsesTargetObjectIdForUserRecipients() {
+    Messaging.SingleEmailMessage email = NotificationEmailDeliveryService.buildEmailMessage(
+      'unused@example.com',
+      'New task',
+      '<p>Body</p>',
+      true,
+      UserInfo.getUserId()
+    );
+
+    System.assertEquals(
+      UserInfo.getUserId(),
+      email.getTargetObjectId(),
+      'User recipients must be addressed through setTargetObjectId.'
+    );
+    System.assertEquals(
+      true,
+      email.getToAddresses() == null || email.getToAddresses().isEmpty(),
+      'User recipients should not use an external to-address list.'
+    );
+  }
+
+  @IsTest
+  static void buildEmailMessageUsesToAddressesWhenRecipientIsNotAUser() {
+    Messaging.SingleEmailMessage email = NotificationEmailDeliveryService.buildEmailMessage(
+      'advisor@example.com',
+      'New task',
+      'Body',
+      false,
+      null
+    );
+
+    System.assertEquals(null, email.getTargetObjectId());
+    System.assertEquals(
+      new List<String>{ 'advisor@example.com' },
+      email.getToAddresses()
     );
   }
 

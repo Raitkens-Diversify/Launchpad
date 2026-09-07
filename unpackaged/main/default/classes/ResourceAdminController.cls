@@ -25,6 +25,8 @@ public with sharing class ResourceAdminController {
     private static final Set<String> FILE_TYPES =
         new Set<String>{ 'PDF', 'Form', 'Template' };
     private static final Integer MAX_DURATION_MINUTES = 999;
+    /** Summary__c length — one sentence under the title (mirror: adminResourceEditor max-length). */
+    private static final Integer MAX_SUMMARY_LENGTH = 160;
 
     // ---- DTOs -------------------------------------------------------------------
 
@@ -66,7 +68,9 @@ public with sharing class ResourceAdminController {
         @AuraEnabled public Id id;
         @AuraEnabled public String name;
         @AuraEnabled public String slug;
-        @AuraEnabled public String description;
+        @AuraEnabled public String description;      // rich text (HTML) as stored
+        @AuraEnabled public String summary;
+        @AuraEnabled public List<String> audience = new List<String>();
         @AuraEnabled public String resourceType;
         @AuraEnabled public Id categoryId;
         @AuraEnabled public String externalUrl;
@@ -95,7 +99,9 @@ public with sharing class ResourceAdminController {
         @AuraEnabled public Id id;                   // null = create
         @AuraEnabled public String name;
         @AuraEnabled public String slug;
-        @AuraEnabled public String description;
+        @AuraEnabled public String description;      // rich text (HTML) from lightning-input-rich-text
+        @AuraEnabled public String summary;          // ≤ MAX_SUMMARY_LENGTH
+        @AuraEnabled public List<String> audience;   // Audience__c selections; null/empty = none
         @AuraEnabled public String resourceType;
         @AuraEnabled public Id categoryId;
         @AuraEnabled public String externalUrl;
@@ -210,7 +216,7 @@ public with sharing class ResourceAdminController {
     public static ResourceDetail getResource(Id resourceId) {
         assertResourceAdmin();
         List<Resource__c> rows = [
-            SELECT Id, Name, Slug__c, Description__c, Resource_Type__c, Category__c,
+            SELECT Id, Name, Slug__c, Description__c, Summary__c, Audience__c, Resource_Type__c, Category__c,
                    External_URL__c, Video_Embed_URL__c, Is_Featured__c, Is_Active__c,
                    Display_Order__c, Event_Datetime__c, Registration_URL__c,
                    Event_Duration_Minutes__c, Presenter__c,
@@ -228,6 +234,8 @@ public with sharing class ResourceAdminController {
         detail.name = r.Name;
         detail.slug = r.Slug__c;
         detail.description = r.Description__c;
+        detail.summary = r.Summary__c;
+        detail.audience = ResourceCenterService.splitMulti(r.Audience__c);
         detail.resourceType = r.Resource_Type__c;
         detail.categoryId = r.Category__c;
         detail.externalUrl = r.External_URL__c;
@@ -335,11 +343,23 @@ public with sharing class ResourceAdminController {
             && input.announceAt >= input.eventDatetime) {
             throw auraError('The Arc announcement must go out before the event starts.');
         }
+        String summary = String.isBlank(input.summary) ? null : input.summary.trim();
+        if (summary != null && summary.length() > MAX_SUMMARY_LENGTH) {
+            throw auraError('Keep the summary to ' + MAX_SUMMARY_LENGTH + ' characters — one sentence.');
+        }
+        List<String> audience = new List<String>();
+        for (String a : input.audience == null ? new List<String>() : input.audience) {
+            if (String.isNotBlank(a)) {
+                audience.add(a.trim());
+            }
+        }
 
         Resource__c record = new Resource__c(
             Name = input.name.trim(),
             Slug__c = input.slug.trim(),
             Description__c = input.description,
+            Summary__c = summary,
+            Audience__c = audience.isEmpty() ? null : String.join(audience, ';'),
             Resource_Type__c = input.resourceType,
             Category__c = input.categoryId,
             External_URL__c = input.externalUrl,

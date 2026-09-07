@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Summary__c</fullName>
+    <description>One sentence under the title on the detail page, and the subtitle on cards, search hits, the events page and the Arc announcement when set (Description__c&#39;s plain text is the fallback). Authored, never derived by truncating the description.</description>
+    <externalId>false</externalId>
+    <label>Summary</label>
+    <length>160</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

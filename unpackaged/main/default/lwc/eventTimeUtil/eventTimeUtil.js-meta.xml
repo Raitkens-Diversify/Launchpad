@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>false</isExposed>
+    <description>Pure event-time helpers: viewer-zone detection, Intl-based multi-zone time labels (viewer + Mountain + Eastern), the derived upcoming / soon / live / recorded / ended state with a fixed clock, and the presenter text splitter. Consumed by eventDetail.</description>
+</LightningComponentBundle>

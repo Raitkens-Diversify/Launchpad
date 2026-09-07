@@ -1120,4 +1120,75 @@ private class ResourceCenterServiceTest {
         Assert.areEqual('flyers', d.categorySlug, 'Breadcrumb and link always use the home category.');
         Assert.areEqual('marketing', d.categoryAncestors[0].slug);
     }
+
+    // ---- Rich-text description (2026-09-07) -----------------------------------
+
+    @isTest
+    static void plainTextFlattensRichTextForListSurfaces() {
+        Assert.isNull(ResourceCenterService.plainText(null));
+        Assert.isNull(ResourceCenterService.plainText('   '));
+        Assert.areEqual('Plain words', ResourceCenterService.plainText('  Plain words '),
+            'Plain text passes through trimmed');
+        Assert.areEqual('Logging in; Arc navigation: side menu; Search',
+            ResourceCenterService.plainText(
+                '<ul><li>Logging in</li><li>Arc navigation: side menu</li><li>Search</li></ul>'),
+            'Bullets join with "; " and the last separator is dropped');
+        Assert.areEqual('Part 2 of 2. Bring questions & notes',
+            ResourceCenterService.plainText('<p>Part 2 of 2.</p><p>Bring&nbsp;questions &amp; notes</p>'),
+            'Paragraphs join with a space; entities are decoded');
+        Assert.areEqual('a b', ResourceCenterService.plainText('a<br>b'));
+        Assert.isNull(ResourceCenterService.plainText('<p></p><ul><li></li></ul>'), 'Markup only → null');
+
+        Assert.areEqual(new List<String>{ 'Lite users', 'Full users' },
+            ResourceCenterService.splitMulti('Lite users;Full users'));
+        Assert.isTrue(ResourceCenterService.splitMulti(null).isEmpty());
+        Assert.isTrue(ResourceCenterService.splitMulti(';').isEmpty());
+    }
+
+    @isTest
+    static void detailCarriesTheAuthoredHtmlAndListsCarryPlainText() {
+        Id catId = [SELECT Id FROM Resource_Category__c WHERE Slug__c = 'marketing'].Id;
+        Resource__c w = webinar('Arc Basics', 'arc-basics', catId, System.now().addDays(3), null,
+            'https://example.com/register');
+        w.Description__c = '<ul><li>Logging in</li><li>Search</li></ul>';
+        w.Summary__c = 'The essentials of Arc for Lite users.';
+        w.Audience__c = 'Lite users;Full users';
+        insert w;
+
+        ResourceCenterService.ResourceDetail d = ResourceCenterService.getResourceBySlug('arc-basics');
+        Assert.areEqual('<ul><li>Logging in</li><li>Search</li></ul>', d.descriptionHtml,
+            'The detail page renders the markup');
+        Assert.areEqual('Logging in; Search', d.description, 'and still carries the plain form');
+        Assert.areEqual('The essentials of Arc for Lite users.', d.summary);
+        Assert.areEqual(new List<String>{ 'Lite users', 'Full users' }, d.audience);
+
+        ResourceCenterService.EventsFeed feed = ResourceCenterService.getEvents();
+        ResourceCenterService.WebinarItem item;
+        for (ResourceCenterService.WebinarItem i : feed.upcoming) {
+            if (i.slug == 'arc-basics') {
+                item = i;
+            }
+        }
+        Assert.isNotNull(item);
+        Assert.areEqual('Logging in; Search', item.description, 'Feed rows never carry markup');
+        Assert.areEqual('The essentials of Arc for Lite users.', item.summary);
+        Assert.areEqual(2, item.audience.size());
+
+        Boolean found = false;
+        for (ResourceCenterService.ResourceCard c : ResourceCenterService.getCategoryBySlug('marketing').resources) {
+            if (c.slug == 'arc-basics') {
+                found = true;
+                Assert.areEqual('Logging in; Search', c.description);
+                Assert.areEqual('The essentials of Arc for Lite users.', c.summary);
+            }
+        }
+        Assert.isTrue(found, 'The card grid lists the webinar');
+
+        // A resource with no summary keeps its plain description as the subtitle.
+        ResourceCenterService.ResourceDetail pdf = ResourceCenterService.getResourceBySlug('brand-flyer');
+        Assert.areEqual('A printable flyer', pdf.description);
+        Assert.areEqual('A printable flyer', pdf.descriptionHtml);
+        Assert.isNull(pdf.summary);
+        Assert.isTrue(pdf.audience.isEmpty());
+    }
 }

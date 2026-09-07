@@ -16,10 +16,19 @@ trigger Task_Trigger on Task (before insert, before update, before delete, after
 		 if (Trigger.isInsert) {
 			handler.isAfterInsert(Trigger.newMap);
 			slaHandler.isAfterInsert(Trigger.newMap);
+			NotificationChangePublisher.publishInserts(
+				NotificationConstants.OBJECT_TYPE_TASK,
+				Trigger.newMap.values()
+			);
 		}
 		 else if (Trigger.isUpdate) {
 			handler.isAfterUpdate(Trigger.newMap,Trigger.oldMap);
 			slaHandler.isAfterUpdate(Trigger.newMap, Trigger.oldMap);
+			NotificationChangePublisher.publishUpdates(
+				NotificationConstants.OBJECT_TYPE_TASK,
+				Trigger.newMap,
+				Trigger.oldMap
+			);
 		}
 		 else if (Trigger.isDelete) {
 			handler.isAfterDelete(Trigger.oldMap);

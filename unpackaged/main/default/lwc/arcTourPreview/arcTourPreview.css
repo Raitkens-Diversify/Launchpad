@@ -338,15 +338,6 @@
   font-weight: 600;
 }
 
-.tp-btn--muted {
-  align-self: flex-start;
-  margin-top: 5px;
-  border-color: #b9b3ab;
-  background: #b9b3ab;
-  color: #ffffff;
-  font-weight: 600;
-}
-
 .tp-btn--sm {
   padding: 3px 6px;
 }
@@ -677,27 +668,30 @@
   color: var(--tp-faint);
 }
 
-.tp-td--avatar {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+/*
+ * Dense rows for the lists whose real tables carry nine (Cases, Work) or
+ * twelve (Tasks) columns. Tighter gutters and a 7px header let the first
+ * eight or so fit at their real widths; whatever runs past the edge is
+ * clipped by .tp-table, the way the real table scrolls sideways.
+ */
+.tp-tr--dense {
+  gap: 5px;
+  padding: 4px 6px;
 }
 
-.tp-td__link {
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  font-weight: 600;
-  color: var(--tp-link);
+.tp-tr--dense .tp-th {
+  font-size: 7px;
 }
 
-.tp-rowavatar {
-  flex: none;
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  background: var(--tp-link);
+.tp-tr--dense .tp-td {
+  font-size: 7.5px;
+}
+
+/* Every sortable header in the real table carries a faint arrow. */
+.tp-th::after {
+  content: " ↑";
+  color: var(--tp-faint);
+  font-weight: 400;
 }
 
 /* ---- pills -------------------------------------------------------------- */
@@ -759,7 +753,7 @@
 
 .tp-facts {
   display: flex;
-  gap: 10px;
+  gap: 14px;
   margin-top: 7px;
 }
 
@@ -787,52 +781,6 @@
   color: var(--tp-link);
 }
 
-/* The real path is a row of chevron-shaped segments, not pills. */
-.tp-path {
-  display: flex;
-  align-items: stretch;
-  gap: 2px;
-  margin-top: 8px;
-  padding: 3px;
-  border-radius: 6px;
-}
-
-.tp-path__step {
-  flex: 1;
-  padding: 4px 8px 4px 12px;
-  font-size: 7px;
-  font-weight: 600;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  background: var(--tp-hair);
-  color: var(--tp-muted);
-  clip-path: polygon(
-    0 0,
-    calc(100% - 6px) 0,
-    100% 50%,
-    calc(100% - 6px) 100%,
-    0 100%,
-    6px 50%
-  );
-}
-
-.tp-path__step:first-child {
-  clip-path: polygon(
-    0 0,
-    calc(100% - 6px) 0,
-    100% 50%,
-    calc(100% - 6px) 100%,
-    0 100%
-  );
-}
-
-.tp-path__step--current {
-  background: var(--tp-ink);
-  color: #ffffff;
-}
-
 .tp-cols {
   display: flex;
   gap: 7px;
@@ -850,6 +798,9 @@
 .tp-cols__side {
   flex: none;
   width: 138px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 /* The blue left border is the real overview tile's signature. */
@@ -873,7 +824,8 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  font-size: 9px;
+  text-align: center;
+  font-size: 8.5px;
   font-weight: 700;
   color: var(--tp-accent);
 }
@@ -899,8 +851,8 @@
 
 .tp-ratio__label {
   margin-top: 2px;
-  font-size: 5.5px;
-  letter-spacing: 0.04em;
+  font-size: 6.5px;
+  white-space: nowrap;
   color: var(--tp-muted);
 }
 
@@ -915,45 +867,52 @@
   color: var(--tp-accent);
 }
 
-.tp-progress {
+/* The tile's milestone track: one bullet per milestone, coloured by state. */
+.tp-milestones {
   display: flex;
-  align-items: center;
   gap: 4px;
   margin-top: 8px;
 }
 
-.tp-progress__dot {
-  flex: none;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.tp-progress__dot--done {
-  background: #16a34a;
-}
-
-.tp-progress__dot--goal {
-  border: 2px solid var(--tp-link);
-}
-
-.tp-progress__line {
+.tp-milestone {
   flex: 1;
-  height: 1.5px;
-  background: var(--tp-hair);
-}
-
-.tp-progress__labels {
+  min-width: 0;
   display: flex;
-  justify-content: space-between;
-  margin-top: 2px;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 5px;
+  border-radius: 4px;
+  background: var(--tp-hair);
   font-size: 6.5px;
+  font-weight: 600;
   color: var(--tp-muted);
 }
 
-.tp-progress__label--goal {
-  color: var(--tp-link);
-  font-weight: 700;
+.tp-milestone__dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #b9c2cc;
+}
+
+.tp-milestone__label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.tp-milestone--complete .tp-milestone__dot {
+  background: #16a34a;
+}
+
+.tp-milestone--current {
+  background: #eef4fb;
+  color: var(--tp-accent);
+}
+
+.tp-milestone--current .tp-milestone__dot {
+  background: var(--tp-link);
 }
 
 .tp-tracks {
@@ -1012,7 +971,8 @@
 }
 
 .tp-track__status,
-.tp-track__owner {
+.tp-track__owner,
+.tp-track__date {
   flex: 1;
   min-width: 0;
   overflow: hidden;
@@ -1021,9 +981,11 @@
   color: var(--tp-muted);
 }
 
-.tp-track__status--wait {
-  color: #b45309;
-  font-weight: 600;
+.tp-track__empty {
+  display: block;
+  padding: 5px 7px;
+  font-size: 7.5px;
+  color: var(--tp-muted);
 }
 
 .tp-side__card {
@@ -1061,120 +1023,181 @@
   color: var(--tp-muted);
 }
 
-/* ---- resource centre --------------------------------------------------- */
+.tp-side__desc {
+  margin-top: 2px;
+  min-height: 14px;
+  padding: 3px 5px;
+  border: 1px solid var(--tp-hair);
+  border-radius: 4px;
+  font-size: 7px;
+  color: var(--tp-muted);
+}
 
-.tp-hero {
-  flex: none;
+.tp-side__card .tp-btn--brand {
+  align-self: center;
+  margin-top: 7px;
+}
+
+/* The rail's related cards, drawn collapsed, and its Feed / Related tabs. */
+.tp-side__mini {
   display: flex;
-  flex-direction: column;
-  gap: 3px;
-  padding: 14px 16px 16px;
-  background: linear-gradient(120deg, #07243f 0%, #0f406f 100%);
-}
-
-.tp-hero__eyebrow {
-  font-size: 8px;
-  font-weight: 700;
-  color: var(--tp-lit-ring);
-}
-
-.tp-hero__title {
-  font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
-  font-size: 17px;
-  font-weight: 700;
-  color: #ffffff;
-}
-
-.tp-hero__search {
-  margin-top: 6px;
+  align-items: center;
+  justify-content: space-between;
   padding: 5px 8px;
-  border-radius: 999px;
+  border: 1px solid var(--tp-line);
+  border-radius: 6px;
   background: #ffffff;
   font-size: 8px;
+  font-weight: 700;
+}
+
+.tp-side__mini-chev {
   color: var(--tp-faint);
 }
 
-.tp-hero__link {
-  margin-top: 4px;
-  font-size: 7.5px;
-  font-weight: 600;
-  color: var(--tp-lit-ring);
+.tp-side__tabs {
+  display: flex;
+  gap: 9px;
+  padding: 2px 4px 0;
+  border-bottom: 1px solid var(--tp-line);
 }
 
-.tp-featured {
+/* ---- resource centre --------------------------------------------------- */
+
+/* The Resource Center's own header bar (c/dsChrome, branding hidden): the
+   search box and the Get Help / Help Center links. Flush to the frame. */
+.tp-hero {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 11px;
+  border-bottom: 1px solid var(--tp-line);
+  background: #ffffff;
+}
+
+.tp-rc__search {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  max-width: 260px;
+  height: 16px;
+  padding: 0 7px;
+  border: 1px solid var(--tp-line);
+  border-radius: 999px;
+  background: #ffffff;
+}
+
+.tp-rc__links {
+  margin-left: auto;
+  display: flex;
+  gap: 9px;
+}
+
+.tp-rc__link {
+  font-size: 7.5px;
+  font-weight: 600;
+  color: var(--tp-accent);
+}
+
+.tp-rc {
+  display: flex;
+  gap: 10px;
+  padding: 8px 11px;
+  min-height: 0;
+}
+
+.tp-rc__nav {
+  flex: none;
+  width: 108px;
   display: flex;
   flex-direction: column;
-  width: 172px;
-  padding: 8px 9px;
+  gap: 1px;
+}
+
+.tp-rc__nav-title {
+  margin-bottom: 3px;
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tp-muted);
+}
+
+.tp-rc__topic {
+  padding: 2.5px 6px;
+  border-radius: 4px;
+  font-size: 7.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tp-rc__topic--on {
+  background: var(--tp-lit-bg);
+  color: var(--tp-lit-ink);
+  font-weight: 700;
+}
+
+.tp-rc__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.tp-rc__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 5px;
+}
+
+.tp-rc__card {
+  /* A grid item's min-width is auto by default, so a nowrap description would
+     force the grid past the column and clip the last card. */
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 8px;
   border: 1px solid var(--tp-line);
   border-radius: 7px;
   background: #ffffff;
 }
 
-.tp-featured__top {
+.tp-rc__card-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.tp-featured__play {
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
+.tp-rc__card-icon {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
   background: #e0f2fe;
-  border: 1.5px solid var(--tp-link);
 }
 
-.tp-featured__title {
-  margin-top: 6px;
-  font-size: 9px;
+.tp-rc__card-title {
+  margin-top: 3px;
+  font-size: 8.5px;
   font-weight: 700;
 }
 
-.tp-featured__body {
-  margin: 1px 0 6px;
-  font-size: 7.5px;
-  color: var(--tp-muted);
-}
-
-.tp-featured .tp-btn {
-  align-self: flex-start;
-}
-
-.tp-cats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  padding: 4px;
-  border-radius: 7px;
-}
-
-.tp-cat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  padding: 9px 8px;
-  border: 1px solid var(--tp-line);
-  border-radius: 7px;
-  background: #ffffff;
-}
-
-.tp-cat__icon {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #e0f2fe;
-}
-
-.tp-cat__label {
-  font-size: 8px;
-  font-weight: 600;
-}
-
-.tp-cat__meta {
+.tp-rc__card-body {
   font-size: 7px;
   color: var(--tp-muted);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.tp-rc__card .tp-btn {
+  align-self: flex-start;
+  margin-top: 3px;
 }
 
 /* ---- settings form ----------------------------------------------------- */
@@ -1215,6 +1238,7 @@
 .tp-input {
   flex: 1;
   min-width: 0;
+  min-height: 17px;
   padding: 4px 7px;
   border: 1px solid var(--tp-line);
   border-radius: 5px;
@@ -1223,6 +1247,11 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+/* The Bio field is a text area on the real form. */
+.tp-input--area {
+  min-height: 26px;
 }
 
 /* ---- the highlight -----------------------------------------------------
@@ -1342,6 +1371,16 @@
 .tp-h2--tight {
   margin: 4px 0 3px;
   font-size: 11px;
+}
+
+/* The Work table's title row: heading left, scope toggle + search + Filter
+   right, as c/workTable lays them out. */
+.tp-head--work {
+  align-items: center;
+}
+
+.tp-head--work .tp-toolbar__search {
+  width: 96px;
 }
 
 @media (prefers-reduced-motion: reduce) {
