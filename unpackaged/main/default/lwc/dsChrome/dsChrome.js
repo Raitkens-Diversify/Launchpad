@@ -11,6 +11,11 @@ import { LightningElement, api } from 'lwc';
  *   @api logoUrl        — brand image (DiversifyLogoV2 static resource URL)
  *   @api brandLabel     — crumb text + footer brand ("Help Center", …)
  *   @api copyrightLine  — footer meta; sensible default
+ *   @api pageLabel      — page identity when the brand is hidden ("Resource
+ *                         Center"): a plain label where the logo + crumb would
+ *                         sit, so an embedding with its own site chrome (ARC)
+ *                         still says which page this is. Ignored while the
+ *                         brand crumb is shown (it already carries the name).
  *   @api hideBranding   — "the site supplies the brand chrome": hides logo +
  *                         divider + brand crumb AND the brand footer, and
  *                         collapses the header strip entirely while both the
@@ -30,6 +35,7 @@ import { LightningElement, api } from 'lwc';
 export default class DsChrome extends LightningElement {
     @api logoUrl;
     @api brandLabel = '';
+    @api pageLabel = '';
     @api copyrightLine = `© ${new Date().getFullYear()} Diversify Financial. Internal use only.`;
 
     // A Builder checkbox / content.json attribute can hand this over as the
@@ -45,6 +51,10 @@ export default class DsChrome extends LightningElement {
     get showBranding() {
         return !this._hideBranding;
     }
+    /** The page's own name stands in for the brand crumb when the site owns the brand. */
+    get showPageLabel() {
+        return !this.showBranding && !!this.pageLabel;
+    }
     /** The brand footer belongs to whoever owns the branding. */
     get showFooter() {
         return this.showBranding;
@@ -53,8 +63,15 @@ export default class DsChrome extends LightningElement {
         64px bar under the site header — collapse it. The slots stay mounted
         (inside the header) so slotchange keeps firing when a view swaps. */
     get headerClass() {
-        const empty = !this.showBranding && !this.hasSearch && !this.hasActions;
-        return empty ? 'ds-chrome__header ds-chrome__header--empty' : 'ds-chrome__header';
+        const empty = !this.showBranding && !this.showPageLabel && !this.hasSearch && !this.hasActions;
+        if (empty) {
+            return 'ds-chrome__header ds-chrome__header--empty';
+        }
+        // Embedded (the site owns the branding): the 64px logo row's height is
+        // dead space under the site's own header, so the strip sits tighter.
+        return this.showBranding
+            ? 'ds-chrome__header'
+            : 'ds-chrome__header ds-chrome__header--embedded';
     }
 
     // Track slot occupancy so an empty search slot doesn't eat flex space

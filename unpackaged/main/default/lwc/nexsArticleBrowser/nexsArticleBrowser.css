@@ -5,7 +5,11 @@
    components match the new look. No dsTokensV2 provider (absent in the org). */
 :host {
     display: block;
-    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    /* White page, matching the Resource Center (2026-09-07). Every surface on
+       it — the rail, sections, nav toggle, scope buttons — carries its own
+       1px border, so nothing loses definition; the grey token stays in use
+       for row and button hover states. */
+    background: var(--slds-g-color-surface-container-1, #ffffff);
 
     /* --- V2 / SLDS2 tokens (the "new design system") --- */
     --slds-g-spacing-1: 4px;

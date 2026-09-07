@@ -1,6 +1,6 @@
 import { LightningElement, api, wire } from 'lwc';
 import { typeMeta } from 'c/resourceTypeIcons';
-import { linkContext, resourceHref, isSameSite, goToResource } from 'c/contextNav';
+import { linkContext, resourceHref, isSameSite, goToResource, fileHref } from 'c/contextNav';
 import { isFileType, resourceAction } from 'c/rcConstants';
 import getResourcesForArticle from '@salesforce/apex/ResourceCenterService.getResourcesForArticle';
 import trackDownload from '@salesforce/apex/ResourceCenterService.trackDownload';
@@ -69,8 +69,10 @@ export default class ArticleResources extends LightningElement {
                 href = detailUrl;
                 target = '_blank';
             } else if (isFile) {
-                // No Resource Center page to link to — direct download fallback.
-                href = r.downloadUrl;
+                // No Resource Center page to link to — direct download fallback
+                // (site-native servlet path: a custom-domain site would
+                // otherwise save the login redirect as an .htm).
+                href = fileHref(this.linkCtx, r.downloadUrl);
                 download = true;
                 trackClick = true;
             }
@@ -137,7 +139,7 @@ export default class ArticleResources extends LightningElement {
         event.preventDefault();
         getResourceDownloadUrl({ contentDocumentId })
             .then((url) => {
-                window.location.href = url || fallbackUrl;
+                window.location.href = fileHref(this.linkCtx, url) || fallbackUrl;
             })
             .catch(() => {
                 if (fallbackUrl) {

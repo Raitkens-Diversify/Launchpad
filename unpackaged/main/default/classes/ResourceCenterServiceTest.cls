@@ -46,6 +46,20 @@ private class ResourceCenterServiceTest {
         return [SELECT Id FROM Resource__c WHERE Slug__c = :slug LIMIT 1].Id;
     }
 
+    /** The real ARC row shape, flagged default, on a seeded site root. */
+    private static Help_Surface__mdt arcRow(Boolean isDefault) {
+        return new Help_Surface__mdt(
+            DeveloperName = 'ARC', Network_Name__c = 'Arc', Is_Default__c = isDefault,
+            Home_Path__c = 'help-center', Article_Path__c = 'article',
+            Resources_Path__c = 'learning', Events_Path__c = 'events');
+    }
+    private static void seedArcAsDefault() {
+        ResourceCenterService.surfaceRows = new Map<String, Help_Surface__mdt>{
+            ResourceCenterService.surfaceKey('Arc') => arcRow(true)
+        };
+        ResourceCenterService.siteBaseOverride.put('Arc', 'https://arc.example');
+    }
+
     /**
      * Knowledge__kav DML and KbManagement.PublishingService calls require the
      * Knowledge User feature license, which no admin in this org carries.
@@ -426,17 +440,54 @@ private class ResourceCenterServiceTest {
     }
 
     @isTest
+    static void linkBasesResolveTheDefaultSurfaceInTheCoreApp() {
+        // No network in a test context (the Admin Console's Copy link runs in
+        // Lightning): both accessors resolve the Is_Default__c row's site —
+        // Arc — absolute, with that row's page names.
+        seedArcAsDefault();
+
+        Test.startTest();
+        String helpBase = ResourceCenterService.getHelpCenterLinkBase();
+        String resourceBase = ResourceCenterService.getResourceLinkBase();
+        Test.stopTest();
+
+        Assert.areEqual('https://arc.example/help-center', helpBase);
+        Assert.areEqual('https://arc.example/learning', resourceBase,
+            'The Resource Center page is /learning on Arc, never /resources');
+    }
+
+    @isTest
+    static void linkBasesAreNullWithoutADefaultSurface() {
+        // No row flagged default and no site context: nothing to link to —
+        // callers hide the copy button / fall back to a direct download.
+        ResourceCenterService.surfaceRows = new Map<String, Help_Surface__mdt>{
+            ResourceCenterService.surfaceKey('Arc') => arcRow(false)
+        };
+
+        Test.startTest();
+        String helpBase = ResourceCenterService.getHelpCenterLinkBase();
+        String resourceBase = ResourceCenterService.getResourceLinkBase();
+        Test.stopTest();
+
+        Assert.isNull(helpBase);
+        Assert.isNull(resourceBase);
+        Assert.isNull(ResourceCenterService.defaultSurface());
+    }
+
+    @isTest
     static void resourceLinkBaseIsWellFormedOrNull() {
-        // Site/SiteDetail can't be created in tests, so assert the contract:
-        // never throws; when the org has the configured LWR site, the base is
-        // the site's secure URL plus the Resources page path.
+        // Site/SiteDetail can't be created in tests, so assert the contract
+        // against whatever the org has: never throws; when it resolves, it is
+        // absolute and ends in the default row's Resources page path.
         Test.startTest();
         String base = ResourceCenterService.getResourceLinkBase();
         Test.stopTest();
         if (base != null) {
             Assert.isTrue(base.startsWith('https://'), 'Absolute URL expected: ' + base);
-            Assert.isTrue(base.endsWith('/resources'), 'Resources page path expected: ' + base);
-            Assert.isFalse(base.contains('//resources'), 'No double slash before the page path: ' + base);
+            Help_Surface__mdt dflt = ResourceCenterService.defaultSurface();
+            String page = dflt == null || String.isBlank(dflt.Resources_Path__c) ? 'resources' : dflt.Resources_Path__c;
+            Assert.isTrue(base.endsWith('/' + page), 'Resources page path expected: ' + base);
+            Assert.isFalse(base.contains('//' + page), 'No double slash before the page path: ' + base);
         }
     }
 
@@ -523,28 +574,54 @@ private class ResourceCenterServiceTest {
     }
 
     @isTest
-    static void linkContextFallsBackToTheSharedSiteForUnmappedNetworks() {
-        // No row for this network: the pre-table behavior — the shared Help
-        // Center site with the default page names (or null bases when even
-        // that can't be resolved; Site/SiteDetail can't be created in tests).
+    static void linkContextFallsBackToTheDefaultSurfaceForUnmappedNetworks() {
+        // No row for this network: the default surface (Arc) with ITS page
+        // names — never the retired /help site.
+        ResourceCenterService.surfaceOverride = 'Some Other Site';
+        seedArcAsDefault();
+
+        Test.startTest();
+        ResourceCenterService.LinkContext ctx = ResourceCenterService.getLinkContext();
+        String helpBase = ResourceCenterService.getHelpCenterLinkBase();
+        String resourceBase = ResourceCenterService.getResourceLinkBase();
+        Test.stopTest();
+
+        Assert.areEqual('Some Other Site', ctx.surface);
+        Assert.areEqual('https://arc.example', ctx.helpBase, 'Unmapped network → the default site root');
+        Assert.areEqual('https://arc.example/help-center', ctx.homeBase);
+        Assert.areEqual('https://arc.example/article', ctx.articleBase);
+        Assert.areEqual('https://arc.example/learning', ctx.resourceBase);
+        Assert.areEqual('https://arc.example/events', ctx.eventsBase);
+        Assert.areEqual(ctx.homeBase, helpBase, 'The standalone accessors agree');
+        Assert.areEqual(ctx.resourceBase, resourceBase);
+    }
+
+    @isTest
+    static void linkContextHasNoBasesWhenNothingResolves() {
         ResourceCenterService.surfaceOverride = 'Some Other Site';
         ResourceCenterService.surfaceRows = new Map<String, Help_Surface__mdt>();
 
         Test.startTest();
         ResourceCenterService.LinkContext ctx = ResourceCenterService.getLinkContext();
-        String shared = ResourceCenterService.getHelpCenterLinkBase();
         Test.stopTest();
 
         Assert.areEqual('Some Other Site', ctx.surface);
-        Assert.areEqual(shared, ctx.helpBase, 'Unmapped network → the shared site root');
-        if (ctx.helpBase != null) {
-            Assert.areEqual(ctx.helpBase, ctx.homeBase);
-            Assert.areEqual(ctx.helpBase + '/article', ctx.articleBase);
-            Assert.areEqual(ctx.helpBase + '/resources', ctx.resourceBase);
-            Assert.areEqual(ctx.helpBase + '/events', ctx.eventsBase);
-        } else {
-            Assert.isNull(ctx.resourceBase, 'No site, no bases');
-        }
+        Assert.isNull(ctx.helpBase, 'No row, no default → in-app');
+        Assert.isNull(ctx.resourceBase);
+    }
+
+    @isTest
+    static void defaultSurfaceIsTheFlaggedRowFirstByDeveloperName() {
+        Help_Surface__mdt other = new Help_Surface__mdt(
+            DeveloperName = 'Zeta', Network_Name__c = 'Zeta Site', Is_Default__c = true);
+        ResourceCenterService.surfaceRows = new Map<String, Help_Surface__mdt>{
+            ResourceCenterService.surfaceKey('Zeta Site') => other,
+            ResourceCenterService.surfaceKey('Arc') => arcRow(true),
+            ResourceCenterService.surfaceKey('Diversify Help Center') =>
+                new Help_Surface__mdt(DeveloperName = 'Help_Center', Network_Name__c = 'Diversify Help Center')
+        };
+        Assert.areEqual('ARC', ResourceCenterService.defaultSurface().DeveloperName,
+            'Two flagged rows → the first by DeveloperName');
     }
 
     @isTest
@@ -559,8 +636,8 @@ private class ResourceCenterServiceTest {
         Test.stopTest();
 
         if (ctx.helpBase != null) {
-            Assert.areEqual(helpBase, ctx.helpBase, 'Same help base either way');
-            Assert.areEqual(resourceBase, ctx.resourceBase, 'Same resource base either way');
+            Assert.areEqual(helpBase, ctx.homeBase, 'Same home page either way');
+            Assert.areEqual(resourceBase, ctx.resourceBase, 'Same resource page either way');
         }
     }
 
@@ -576,8 +653,7 @@ private class ResourceCenterServiceTest {
         if (base != null) {
             Assert.isTrue(base.startsWith('https://'), 'Absolute URL expected: ' + base);
             Assert.isFalse(base.endsWith('/'), 'No trailing slash: ' + base);
-            Assert.areEqual(base + '/resources', resourcesBase,
-                'Resources base is the site root plus the page path');
+            Assert.isTrue(resourcesBase.startsWith('https://'), 'Resources base is absolute too: ' + resourcesBase);
         }
     }
 
@@ -828,38 +904,42 @@ private class ResourceCenterServiceTest {
         Assert.areEqual('https://example.com/register', card.registrationUrl);
     }
 
-    // ---- Link bases are site-relative ON the Help Center site ----------------
+    // ---- Link bases ON a site use that site's own row ---------------------------
 
     @isTest
-    static void linkBasesAreSiteRelativeOnTheHelpSite() {
-        // Running on the shared site itself: a link built from the base must be
-        // a same-site hop, not a host-absolute one.
+    static void linkBasesUseTheCurrentSurfaceRowOnASite() {
+        // Running on a mapped site: its own pages, absolute (a same-site hop
+        // is contextNav's job, not these accessors'). The /help row keeps its
+        // shape while the site exists; Arc is the default beside it.
         ResourceCenterService.surfaceOverride = 'Diversify Help Center';
-        ResourceCenterService.helpSiteLabelOverride = 'Diversify Help Center';
+        ResourceCenterService.surfaceRows = new Map<String, Help_Surface__mdt>{
+            ResourceCenterService.surfaceKey('Diversify Help Center') => new Help_Surface__mdt(
+                DeveloperName = 'Help_Center', Network_Name__c = 'Diversify Help Center',
+                Article_Path__c = 'article', Resources_Path__c = 'resources', Events_Path__c = 'events'),
+            ResourceCenterService.surfaceKey('Arc') => arcRow(true)
+        };
+        ResourceCenterService.siteBaseOverride.put('Diversify Help Center', 'https://x.my.site.com/help');
+        ResourceCenterService.siteBaseOverride.put('Arc', 'https://arc.example');
 
         Test.startTest();
         String helpBase = ResourceCenterService.getHelpCenterLinkBase();
         String resourceBase = ResourceCenterService.getResourceLinkBase();
         Test.stopTest();
 
-        Assert.areEqual('/help', helpBase, 'Site-relative root on the help site');
-        Assert.areEqual('/help/resources', resourceBase);
+        Assert.areEqual('https://x.my.site.com/help', helpBase, 'Blank Home_Path__c = the site root');
+        Assert.areEqual('https://x.my.site.com/help/resources', resourceBase);
     }
 
     @isTest
-    static void linkBasesStayAbsoluteOffTheHelpSite() {
-        // Another site (ARC's sidebar links to the Help Center) still needs the
-        // full URL of the OTHER site — never a relative path.
-        ResourceCenterService.surfaceOverride = 'ARC';
-        ResourceCenterService.helpSiteLabelOverride = 'Diversify Help Center';
+    static void linkBasesFallToTheDefaultWhenTheCurrentSiteHasNoRow() {
+        ResourceCenterService.surfaceOverride = 'Some Other Site';
+        seedArcAsDefault();
 
         Test.startTest();
         String helpBase = ResourceCenterService.getHelpCenterLinkBase();
         Test.stopTest();
 
-        if (helpBase != null) {
-            Assert.isTrue(helpBase.startsWith('https://'), 'Absolute off-site: ' + helpBase);
-        }
+        Assert.areEqual('https://arc.example/help-center', helpBase, 'Absolute, the default surface');
     }
 
     // ---- ARC bridge (c/helpReturnLink) ---------------------------------------

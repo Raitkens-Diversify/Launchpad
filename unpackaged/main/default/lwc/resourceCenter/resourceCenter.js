@@ -8,6 +8,11 @@ import { createSearchLogger, logSearchEntry, APP_RESOURCE_CENTER } from 'c/searc
 import { linkContext, readParams, isSiteRef, goToHome, goToArticle } from 'c/contextNav';
 import { rcRootCrumbs, CRUMB_HELP_HOME, CRUMB_RC_HOME } from 'c/rcConstants';
 
+/** "Get Help" (the guided help_guide) is parked for now (2026-09-07): flip to
+    restore the chrome action. The guide view, its ?rcview=guide deep link,
+    the guideopen event and its crumbs all stay wired. */
+const SHOW_GET_HELP = false;
+
 /**
  * resourceCenter — root orchestrator + branded chrome, matching the NexS Help
  * Center. The single component both the internal Lightning App tab and the LWR
@@ -55,6 +60,10 @@ export default class ResourceCenter extends NavigationMixin(LightningElement) {
         Gating on the base alone hid the button in the core app entirely. */
     get showHelpCenterLink() {
         return !!this.helpCenterBaseUrl || !!this.linkCtx;
+    }
+
+    get showGetHelp() {
+        return SHOW_GET_HELP;
     }
 
     logoUrl = diversifyLogo;

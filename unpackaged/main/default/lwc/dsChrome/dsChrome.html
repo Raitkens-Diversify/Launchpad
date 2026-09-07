@@ -8,6 +8,9 @@
                     {brandLabel}
                 </button>
             </template>
+            <template if:true={showPageLabel}>
+                <span class="ds-chrome__label">{pageLabel}</span>
+            </template>
             <div class={searchClass}>
                 <slot name="search" onslotchange={handleSearchSlotChange}></slot>
             </div>

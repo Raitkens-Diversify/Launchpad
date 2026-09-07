@@ -1,5 +1,22 @@
 :host {
     display: block;
+    /* Self-declared tokens (ui-standards §1): the platform injects real
+       --slds-g-* hooks per component scope and injected values beat what an
+       ancestor's :host declares — on the Arc site the injected accent is Arc's
+       own branding, which took the Download button off-brand. Canonical values,
+       the same set eventsPage declares. */
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-border-2: #b6bcc5;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-accent-3: #071c31;
+    --slds-g-color-on-accent-1: #ffffff;
+    --ds-medium-blue: #1a76bb;
 }
 .rd {
     max-width: var(--rc-content-max, 1040px);

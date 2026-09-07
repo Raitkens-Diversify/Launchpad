@@ -15,7 +15,7 @@ import {
     CRUMB_RC_HOME,
     formatDurationMinutes
 } from 'c/rcConstants';
-import { linkContext, articleHref } from 'c/contextNav';
+import { linkContext, articleHref, fileHref } from 'c/contextNav';
 import { formatDateTime } from 'c/dsDateBlock';
 import { isScribeUrl } from 'c/scribeUrlUtil';
 
@@ -32,9 +32,13 @@ import { isScribeUrl } from 'c/scribeUrlUtil';
  * to the Help Center when helpCenterBaseUrl is provided.
  *
  * Preview paging: page count isn't queryable, so pages grow lazily — each
- * onload appends the next page until one errors (capped). A page-0 error falls
- * back to the THUMB720BY480 rendition (plain images), then to a friendly
- * "no preview" card (renditions can lag right after upload).
+ * onload appends the next page until one errors (capped). Servlet paths go
+ * through c/contextNav.fileHref (site-native `<sitePath>/sfsites/c/sfc/…` on
+ * a site, root-relative in the core app); a page-0 error first retries the
+ * root-relative form (the one *.my.site.com answers), then falls back to the
+ * THUMB720BY480 rendition (plain images), then to a friendly "no preview"
+ * card (renditions can lag right after upload). The Download href takes the
+ * same path so a custom-domain site never saves a login page as an .htm.
  *
  * Emits (composed): `rchome`, `categoryselect { slug }`. Downloads are tracked
  * directly via trackDownload when the Download button is clicked.
@@ -52,8 +56,17 @@ export default class ResourceDetail extends LightningElement {
     connectedCallback() {
         linkContext().then((ctx) => {
             this.linkCtx = ctx;
+            // The wire may have landed first with no surface known: rebuild
+            // the servlet URLs now that the site path is.
+            if (this.detail) {
+                this.resetPreview();
+            }
         });
     }
+
+    /** Candidate preview bases in retry order (site-native, then root-relative). */
+    _previewForms = [];
+    _formIndex = 0;
 
     detail;
     error;
@@ -163,8 +176,14 @@ export default class ResourceDetail extends LightningElement {
         this.previewFailed = false;
         this.usingImageFallback = false;
         this.previewPages = [];
+        this._previewForms = [];
+        this._formIndex = 0;
         const file = this.detail && this.detail.file;
         if (this.isFileBacked && file && file.previewUrl) {
+            const site = fileHref(this.linkCtx, file.previewUrl);
+            this._previewForms = site === file.previewUrl
+                ? [file.previewUrl]
+                : [site, file.previewUrl];
             this.previewPages = [this.page(0)];
         } else if (this.isFileBacked) {
             this.previewFailed = true;
@@ -174,10 +193,17 @@ export default class ResourceDetail extends LightningElement {
     page(index) {
         return {
             index,
-            key: `page-${index}`,
-            src: `${this.detail.file.previewUrl}&page=${index}`,
+            // The form index is in the key so a retry mounts a fresh <img>.
+            key: `form-${this._formIndex}-page-${index}`,
+            src: `${this._previewForms[this._formIndex]}&page=${index}`,
             alt: `${this.detail.name} — page ${index + 1}`
         };
+    }
+
+    /** Download href on this surface (see fileHref); null without a file. */
+    get downloadHref() {
+        const file = this.detail && this.detail.file;
+        return file ? fileHref(this.linkCtx, file.downloadUrl) : null;
     }
 
     handlePageLoad(event) {
@@ -198,13 +224,19 @@ export default class ResourceDetail extends LightningElement {
             this.previewPages = this.previewPages.slice(0, index);
             return;
         }
+        if (this._formIndex + 1 < this._previewForms.length) {
+            // The site-native servlet path did not answer: try the root form.
+            this._formIndex += 1;
+            this.previewPages = [this.page(0)];
+            return;
+        }
         const file = this.detail && this.detail.file;
         if (!this.usingImageFallback && file && file.imagePreviewUrl) {
             this.usingImageFallback = true;
             this.previewPages = [{
                 index: 0,
                 key: 'image-preview',
-                src: file.imagePreviewUrl,
+                src: fileHref(this.linkCtx, file.imagePreviewUrl),
                 alt: this.detail.name
             }];
             return;
@@ -261,7 +293,7 @@ export default class ResourceDetail extends LightningElement {
         // The href baked into `detail.file.downloadUrl` is only ever the
         // authenticated Shepherd URL (resolved during the cacheable wire) —
         // resolve the real, guest-safe URL fresh at click time instead.
-        const fallbackUrl = this.detail.file?.downloadUrl;
+        const fallbackUrl = this.downloadHref;
         const contentDocumentId = this.detail.file?.contentDocumentId;
         if (!contentDocumentId) {
             return;
@@ -270,7 +302,7 @@ export default class ResourceDetail extends LightningElement {
         event.preventDefault();
         getResourceDownloadUrl({ contentDocumentId })
             .then((url) => {
-                window.location.href = url || fallbackUrl;
+                window.location.href = fileHref(this.linkCtx, url) || fallbackUrl;
             })
             .catch(() => {
                 if (fallbackUrl) {

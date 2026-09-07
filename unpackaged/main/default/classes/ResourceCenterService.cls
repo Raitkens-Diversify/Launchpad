@@ -1027,72 +1027,85 @@ public with sharing class ResourceCenterService {
     // ---- Public API: shareable links -----------------------------------------
 
     /**
-     * Absolute base URL of the Resources page on the Help Center LWR site,
-     * e.g. https://…/help/resources — the page hosting c:resourceCenter, which
-     * routes on ?rcview/&rcslug. Shared by the Admin Console's "Copy link"
-     * actions and the article rail's resource links. Returns null when the site
-     * (or its Resources page prefix) can't be resolved; callers fall back
-     * gracefully (no copy button / direct file download).
-     *
-     * The site's URL path prefix comes from Resource_Center_Setting__mdt so the
-     * link survives a site rename without a code change.
+     * Absolute URL of the Resource Center page — the page hosting
+     * c:resourceCenter, which routes on ?rcview/&rcslug (e.g.
+     * https://arc.diversify.com/learning). Shared by the Admin Console's
+     * "Copy link" actions and the article rail's resource links. On a site
+     * with its own Help_Surface__mdt row it is THAT site's page; anywhere
+     * else (the core app, an unmapped network) it is the default surface's
+     * (the row flagged Is_Default__c — Arc). Null when no site resolves;
+     * callers fall back gracefully (no copy button / direct file download).
      */
     @AuraEnabled(cacheable=true)
     public static String getResourceLinkBase() {
-        String root = getHelpCenterLinkBase();
-        return root == null ? null : root + '/' + RESOURCES_PAGE_PATH;
+        SurfaceBase sb = resolveSurfaceBase();
+        return sb == null ? null : pageUrl(sb.base, sb.route.Resources_Path__c, RESOURCES_PAGE_PATH);
     }
 
     /**
-     * Help Center deep-link base — the shared site's root (its home page
-     * renders the unified landing). Article links append /article?name=<UrlName>
-     * (c/rcLinkUtil.articleUrl); the legacy /?article= form still resolves via
-     * the home route's shim, but is never built for new links.
+     * Help Center deep-link base — the home page of the same surface
+     * getResourceLinkBase resolves (the site's root when its row has no
+     * Home_Path__c). Article links append /article?name=<UrlName>
+     * (c/rcLinkUtil.articleUrl). Always absolute: the Admin Console's "Copy
+     * link" shares these with people on any surface. Callers that need
+     * per-page routing on the current site use getLinkContext() instead.
      *
-     * Site-absolute everywhere EXCEPT on the Help Center site itself (2026-09-04):
-     * a caller running on /help gets the site-relative root ('/help'), so a
-     * link built from it stays a same-site hop instead of a host-absolute one.
-     * Off-site callers stay absolute on purpose — the Admin Console's "Copy
-     * link" actions share these with people who may be external, and ARC's
-     * sidebar (arcNavigation) needs the other site's full URL. Callers that
-     * need per-page routing use getLinkContext() instead.
+     * 2026-09-07: no longer keyed to the /help site's URL prefix — that site
+     * is being retired; the default row (Arc) is the fallback everywhere.
      */
     @AuraEnabled(cacheable=true)
     public static String getHelpCenterLinkBase() {
-        if (onHelpSite()) {
-            return '/' + helpPrefix().removeStart('/').removeEnd('/');
-        }
-        return getSiteBaseUrl();
+        SurfaceBase sb = resolveSurfaceBase();
+        return sb == null ? null : pageUrl(sb.base, sb.route.Home_Path__c, '');
     }
 
-    /** Test seam: the Help Center site's MasterLabel without a real Site row. */
-    @TestVisible private static String helpSiteLabelOverride;
+    /** A resolved surface: its Help_Surface__mdt row and its site root. */
+    private class SurfaceBase {
+        Help_Surface__mdt route;
+        String base;
+        SurfaceBase(Help_Surface__mdt route, String base) {
+            this.route = route;
+            this.base = base;
+        }
+    }
 
-    /** True when the CURRENT network IS the shared Help Center site
-        (Network.Name == the site's MasterLabel, the same convention
-        currentSiteBaseUrl relies on). Never throws. */
-    private static Boolean onHelpSite() {
+    /**
+     * The current network's row + site root when both resolve, else the
+     * default surface's (Is_Default__c), else null. Never throws.
+     */
+    private static SurfaceBase resolveSurfaceBase() {
         String surface = surfaceOverride != null
             ? surfaceOverride
             : NexSArticleEngagementController.resolveSurface();
-        if (surface == null || surface == INTERNAL_SURFACE) {
-            return false;
-        }
-        String label = helpSiteLabelOverride;
-        if (label == null) {
-            try {
-                String prefix = helpPrefix();
-                List<Site> sites = [
-                    SELECT MasterLabel FROM Site
-                    WHERE UrlPathPrefix = :prefix AND SiteType = 'ChatterNetworkPicasso'
-                    LIMIT 1
-                ];
-                label = sites.isEmpty() ? null : sites[0].MasterLabel;
-            } catch (Exception e) {
-                return false;
+        if (surface != null && surface != INTERNAL_SURFACE) {
+            Help_Surface__mdt route = surfaceRoutes().get(surfaceKey(surface));
+            String base = route == null ? null : currentSiteBaseUrl(surface);
+            if (base != null) {
+                return new SurfaceBase(route, base);
             }
         }
-        return label != null && label == surface;
+        Help_Surface__mdt dflt = defaultSurface();
+        String dfltBase = dflt == null ? null : currentSiteBaseUrl(dflt.Network_Name__c);
+        return dfltBase == null ? null : new SurfaceBase(dflt, dfltBase);
+    }
+
+    /**
+     * The Help_Surface__mdt row flagged Is_Default__c (Arc): where links
+     * resolve with no site context or for a network with no row of its own.
+     * Several flagged rows → the first by DeveloperName; none → null.
+     */
+    @TestVisible private static Help_Surface__mdt defaultSurface() {
+        Help_Surface__mdt pick = null;
+        for (Help_Surface__mdt row : surfaceRoutes().values()) {
+            if (row.Is_Default__c != true || String.isBlank(row.Network_Name__c)) {
+                continue;
+            }
+            if (pick == null || (row.DeveloperName != null && pick.DeveloperName != null
+                && row.DeveloperName < pick.DeveloperName)) {
+                pick = row;
+            }
+        }
+        return pick;
     }
 
     /**
@@ -1106,8 +1119,8 @@ public with sharing class ResourceCenterService {
      * network's Help_Surface__mdt row names the page segments and the site's
      * own SecureUrl is the root — so a user on ARC stays on ARC (another site
      * means another login). A network with no row, or whose site can't be
-     * resolved, gets the shared Help Center site with the default page names,
-     * exactly what every caller received before the table existed.
+     * resolved, gets the DEFAULT surface (the row flagged Is_Default__c —
+     * Arc) with that row's page names.
      *
      * Never throws — an unresolvable site degrades to null bases, which the
      * client already treats as "handle it in-app".
@@ -1124,8 +1137,8 @@ public with sharing class ResourceCenterService {
         Help_Surface__mdt route = surfaceRoutes().get(surfaceKey(ctx.surface));
         String base = route == null ? null : currentSiteBaseUrl(ctx.surface);
         if (base == null) {
-            route = null;               // shared site, default page names
-            base = getSiteBaseUrl();
+            route = defaultSurface();   // the default surface's pages
+            base = route == null ? null : currentSiteBaseUrl(route.Network_Name__c);
         }
         if (base == null) {
             return ctx;                 // unresolvable everywhere — in-app
@@ -1176,7 +1189,8 @@ public with sharing class ResourceCenterService {
         if (surfaceRows == null) {
             surfaceRows = new Map<String, Help_Surface__mdt>();
             for (Help_Surface__mdt row : [
-                SELECT Network_Name__c, Home_Path__c, Article_Path__c, Resources_Path__c, Events_Path__c
+                SELECT DeveloperName, Network_Name__c, Is_Default__c,
+                       Home_Path__c, Article_Path__c, Resources_Path__c, Events_Path__c
                 FROM Help_Surface__mdt
             ]) {
                 if (String.isNotBlank(row.Network_Name__c)) {
@@ -1217,20 +1231,9 @@ public with sharing class ResourceCenterService {
         }
     }
 
-    /** Root SecureUrl of the shared LWR site, or null when unresolvable. */
-    private static String getSiteBaseUrl() {
-        return siteBaseUrlForPrefix(helpPrefix());
-    }
-
-    /** URL path prefix of the shared Help Center site (Resource_Center_Setting__mdt). */
-    private static String helpPrefix() {
-        Resource_Center_Setting__mdt setting = Resource_Center_Setting__mdt.getInstance('Default');
-        return setting == null || String.isBlank(setting.Site_Url_Path_Prefix__c)
-            ? 'help'
-            : setting.Site_Url_Path_Prefix__c.trim();
-    }
-
-    /** URL path prefix of the ARC site (Resource_Center_Setting__mdt); blank → 'ARC'. */
+    /** URL path prefix of the ARC site (Resource_Center_Setting__mdt); blank → 'ARC'.
+        Only getArcBridge (c/helpReturnLink on the retiring /help site) still
+        reads it — both go with that site (manifest/arc-only, Part B). */
     private static String arcPrefix() {
         Resource_Center_Setting__mdt setting = Resource_Center_Setting__mdt.getInstance('Default');
         Object v = setting == null ? null : setting.getPopulatedFieldsAsMap().get('Arc_Site_Url_Path_Prefix__c');

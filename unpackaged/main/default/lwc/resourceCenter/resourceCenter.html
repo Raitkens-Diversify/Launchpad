@@ -15,7 +15,10 @@
          onresourcedownload={handleDownload}>
 
         <!-- Shared brand shell — c-ds-chrome owns the chrome markup + CSS. -->
-        <c-ds-chrome logo-url={logoUrl} hide-branding={hideBranding} brand-label="Resource Center" onbrandclick={handleHome}>
+        <!-- page-label: with the brand hidden (ARC's own chrome) the strip still
+             says which page this is. -->
+        <c-ds-chrome logo-url={logoUrl} hide-branding={hideBranding} brand-label="Resource Center"
+                     page-label="Resource Center" onbrandclick={handleHome}>
             <!-- Search lives in the header on every view, matching the Help
                  Center's article browser (the hero that used to own it on the
                  landing went with resourceCenterHome). -->
@@ -33,9 +36,11 @@
                  slotted elements are styled by the host's stylesheet). Get Help
                  used to live on the deleted landing hero, so it is now reachable
                  from every view rather than only the front door. -->
-            <button type="button" class="rc-chrome__link" slot="actions" onclick={handleGuideOpen}>
-                Get Help
-            </button>
+            <template if:true={showGetHelp}>
+                <button type="button" class="rc-chrome__link" slot="actions" onclick={handleGuideOpen}>
+                    Get Help
+                </button>
+            </template>
             <template if:true={showHelpCenterLink}>
                 <button type="button" class="rc-chrome__link" slot="actions" onclick={handleHelpCenter}>
                     Help Center

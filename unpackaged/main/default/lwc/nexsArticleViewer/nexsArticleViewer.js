@@ -18,54 +18,65 @@ const BLOCKED_TAGS = 'script, style, iframe, object, embed, link, meta, form';
 
 /**
  * Authored links INTO the Help Center / Resource Center. Authors paste the
- * page URL they see (`https://<sandbox>.my.site.com/help/resources?rcview=…`),
- * which is host-absolute and site-absolute — wrong on every other org and on
- * the core-app article tab. Rewritten at render time through c/contextNav, so
- * the same body links correctly on the site (client-side), in Lightning
- * (tab URL) and after a domain change. Default site path when no site
- * context is available (the core app) — the shared Help Center's prefix.
+ * page URL they see (`https://<sandbox>.my.site.com/help/resources?rcview=…`
+ * or, on Arc, `…/learning?rcview=…`), which is host-absolute and
+ * site-absolute — wrong on every other org and on the core-app article tab.
+ * Rewritten at render time through c/contextNav, so the same body links
+ * correctly on the site (client-side), in Lightning (tab URL) and after a
+ * domain change. The current site's path is matched first; the retired
+ * /help site's path is always matched too, because article bodies authored
+ * before the move to Arc still carry it (2026-09-07).
  */
-const DEFAULT_SITE_PATH = '/help';
+const LEGACY_SITE_PATHS = ['/help'];
 const LINK_DATA_KIND = 'data-nexs-link';
 
 function escapeRegExp(s) {
     return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-/** Site path the ctx describes (`/help`), falling back to the shared one. */
-function sitePathOf(ctx) {
+/** Site paths an authored link may carry: the ctx's own site (`/help`, `/ARC`,
+    or '' for a custom-domain root) first, then the legacy ones. */
+function sitePathsOf(ctx) {
+    const paths = [];
     if (ctx && ctx.helpBase) {
         try {
-            const path = new URL(ctx.helpBase).pathname.replace(/\/$/, '');
-            if (path) {
-                return path;
-            }
+            paths.push(new URL(ctx.helpBase).pathname.replace(/\/$/, ''));
         } catch (e) {
             // fall through
         }
     }
-    return DEFAULT_SITE_PATH;
+    LEGACY_SITE_PATHS.forEach((p) => {
+        if (!paths.includes(p)) {
+            paths.push(p);
+        }
+    });
+    return paths;
 }
 
 /**
- * Parse an authored href into {kind, params} when it targets the Help Center
- * site's resources or article page (with or without a host); null otherwise.
+ * Parse an authored href into {kind, params} when it targets a Help & Resources
+ * page on one of the site paths — `resources` / `learning` (the Resource
+ * Center page's two names) or `article` — with or without a host; null otherwise.
  */
-function parseSiteLink(href, sitePath) {
+function parseSiteLink(href, sitePaths) {
     if (!href) {
         return null;
     }
-    const re = new RegExp(
-        `^(?:https?://[^/]+)?${escapeRegExp(sitePath)}/(resources|article)/?(?:\\?([^#]*))?(?:#.*)?$`,
-        'i'
-    );
-    const m = href.trim().match(re);
-    if (!m) {
-        return null;
+    const target = href.trim();
+    for (const sitePath of sitePaths) {
+        const re = new RegExp(
+            `^(?:https?://[^/]+)?${escapeRegExp(sitePath)}/(resources|learning|article)/?(?:\\?([^#]*))?(?:#.*)?$`,
+            'i'
+        );
+        const m = target.match(re);
+        if (m) {
+            // Authored HTML carries `&amp;`; DOMParser has already decoded it here.
+            const params = new URLSearchParams(m[2] || '');
+            const kind = m[1].toLowerCase();
+            return { kind: kind === 'learning' ? 'resources' : kind, params };
+        }
     }
-    // Authored HTML carries `&amp;`; DOMParser has already decoded it here.
-    const params = new URLSearchParams(m[2] || '');
-    return { kind: m[1].toLowerCase(), params };
+    return null;
 }
 
 /**
@@ -234,9 +245,9 @@ export default class NexsArticleViewer extends LightningElement {
      * tag them so handleBodyClick can route plain clicks in place.
      */
     rewriteSiteLinks(doc, ctx) {
-        const sitePath = sitePathOf(ctx);
+        const sitePaths = sitePathsOf(ctx);
         doc.body.querySelectorAll('a[href]').forEach((a) => {
-            const link = parseSiteLink(a.getAttribute('href'), sitePath);
+            const link = parseSiteLink(a.getAttribute('href'), sitePaths);
             if (!link) {
                 return;
             }

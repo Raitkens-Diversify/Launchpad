@@ -33,6 +33,15 @@
     display: none;
 }
 
+/* Embedded under another site's header (ARC): no logo row to make room for,
+   so drop the 64px floor and halve the vertical padding — that height was
+   reading as a band of empty white above the page. */
+.ds-chrome__header--embedded {
+    min-height: 0;
+    padding-top: var(--slds-g-spacing-2, 8px);
+    padding-bottom: var(--slds-g-spacing-2, 8px);
+}
+
 .ds-chrome__logo {
     height: 24px;
     width: auto;
@@ -60,6 +69,16 @@
 
 .ds-chrome__crumb:hover {
     color: var(--slds-g-color-accent-1, #0f406f);
+}
+
+/* Page identity when the site owns the brand (hideBranding + pageLabel): the
+   page name where the logo + crumb would sit, in the page-title face. */
+.ds-chrome__label {
+    font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    white-space: nowrap;
 }
 
 /* Right-aligned header search (inner views), Hulu-style. */

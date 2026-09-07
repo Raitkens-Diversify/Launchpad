@@ -1,5 +1,8 @@
 <template>
-    <c-ds-chrome logo-url={logoUrl} hide-branding={hideBranding} brand-label="Help Center" onbrandclick={handleBrandHome}>
+    <!-- page-label: with the brand hidden (Arc's own chrome) the strip still
+         says which page this is. -->
+    <c-ds-chrome logo-url={logoUrl} hide-branding={hideBranding} brand-label="Help Center"
+                 page-label="Help &amp; Resource Center Home" onbrandclick={handleBrandHome}>
         <template if:true={showHeaderSearch}>
             <div slot="search">
                 <c-ds-search-bar

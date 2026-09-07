@@ -176,6 +176,25 @@ export function isSameSite(ctx, loc = window.location) {
     return loc.origin === scope.origin && (path === scope.path || path.startsWith(scope.path + '/'));
 }
 
+/**
+ * Href for a Salesforce file-servlet path on the current surface. Apex bakes
+ * ROOT-relative Shepherd paths (`/sfc/servlet.shepherd/...`): right in the core
+ * app, and on *.my.site.com only because an Aura site at the domain root
+ * happens to answer them. An LWR site serves the servlet under its own path
+ * prefix — `<sitePath>/sfsites/c/sfc/...` — and on a custom domain
+ * (arc.diversify.com, where the LWR site IS the root) the root form redirects
+ * to a login: an <img> preview gets HTML (→ onerror, "no preview") and an
+ * <a download> saves that HTML as an .htm. Only `/sfc/` paths are rewritten;
+ * absolute URLs (ContentDistribution) and non-servlet paths pass through.
+ */
+export function fileHref(ctx, path) {
+    if (!path || isInternal(ctx) || !path.startsWith('/sfc/')) {
+        return path || null;
+    }
+    const scope = siteScope(ctx);
+    return scope ? `${scope.path}/sfsites/c${path}` : path;
+}
+
 /** `/help/article?name=x` from the absolute site URL — what standard__webPage
     wants (origin-relative, not basePath-relative). */
 function siteRelative(absolute) {
