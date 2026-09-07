@@ -1,13 +1,33 @@
 /**
- * Read-only popup card for one Order_Ticket__c record, opened from the Case
+ * View/edit popup card for one Order_Ticket__c record, opened from the Case
  * page's Order Tickets card via arcRelatedList's cancelable `rownavigate`
  * event -- the same interception c/arcRelatedProductQuickView uses on Product
  * Detail, and for the same reason: the object has no page of its own in this
  * site, so navigating lands on Invalid Page.
  *
- * Field set matches Order_Ticket_Record_Page.flexipage's own field items --
- * not guessed. View-only, unlike the related-product popup: nothing on an
- * order ticket was asked to be editable from the case page.
+ * Field set and edit/read-only split matches Order_Ticket_Record_Page.
+ * flexipage's own field items and behavior -- not guessed. Every field the
+ * internal record page lets a user type into becomes editable here too
+ * (Edit toggles the row into lightning-input-field, same pattern
+ * c/arcRelatedProductQuickView uses); Household Name and Financial Advisor
+ * Team Name stay display-only because they are formula fields on the object
+ * itself (never editable regardless of UI), and Created By/Last Modified By
+ * because the platform never allows editing those. The 3 lookups
+ * (Financial Account, Wizard Financial Account, Case) stay plain links in
+ * both modes -- reassigning which account/case a ticket belongs to was not
+ * asked for, matching the related-product popup's own precedent.
+ *
+ * This is ARC-only: nothing here touches Order_Ticket_Record_Page itself,
+ * the object's fields, or any shared/internal metadata -- only this
+ * Experience-Cloud-only component.
+ *
+ * Additional_Details__c is conditionally shown/editable, mirroring the
+ * record page's own three single-condition visibility rules for that field
+ * (each placing the field once, visible when a different one of
+ * Method_of_Cash_Raise__c/Method_to_Allocate__c/Frequency__c equals
+ * "Custom" -- together an OR across the three): visible when the record's
+ * saved value of any of those three is "Custom", or, while editing, when
+ * the in-progress (unsaved) value of any of those three is "Custom".
  *
  * Values render through getFieldDisplayValue first so dates, currencies and
  * picklists arrive already formatted for the reader's locale, with the raw
@@ -20,6 +40,7 @@ import {
   getFieldValue,
   getFieldDisplayValue
 } from "lightning/uiRecordApi";
+import LightningToast from "lightning/toast";
 import {
   buildRecordNavigationReference,
   buildExperienceRecordPath
@@ -53,32 +74,62 @@ const ORDER_COLUMNS = [
  */
 const ORDER_STRATEGY_ID_PATH = "Strategy__c";
 
-/** Label/path pairs for the plain (non-lookup) rows, in record-page order. */
+/**
+ * Label/path pairs for the plain (non-lookup) rows, in record-page order.
+ * `editable: false` marks the four rows that can never become an input --
+ * Household Name and Financial Advisor Team Name are formula fields on
+ * Order_Ticket__c itself (mirroring a lookup's own Name), and Created
+ * By/Last Modified By are platform-managed -- regardless of edit mode, all
+ * four always render as plain text.
+ */
 const DETAIL_FIELDS = [
-  { label: "Status", path: "Status__c" },
-  { label: "Type of Request", path: "Type_of_Request__c" },
-  { label: "Amount", path: "Amount__c" },
-  { label: "Frequency", path: "Frequency__c" },
-  { label: "Method of Cash Raise", path: "Method_of_Cash_Raise__c" },
-  { label: "Method to Allocate", path: "Method_to_Allocate__c" },
-  { label: "Expected Account Value", path: "Expected_Account_Value__c" },
+  { label: "Status", path: "Status__c", editable: true },
+  { label: "Type of Request", path: "Type_of_Request__c", editable: true },
+  { label: "Amount", path: "Amount__c", editable: true },
+  { label: "Frequency", path: "Frequency__c", editable: true },
+  { label: "Method of Cash Raise", path: "Method_of_Cash_Raise__c", editable: true },
+  { label: "Method to Allocate", path: "Method_to_Allocate__c", editable: true },
+  { label: "Expected Account Value", path: "Expected_Account_Value__c", editable: true },
   {
     label: "Expected Value / Initial Funding Reason",
-    path: "Expected_Value_Initial_Funding_Reason__c"
+    path: "Expected_Value_Initial_Funding_Reason__c",
+    editable: true
   },
-  { label: "Date of First Withdrawal", path: "Date_of_First_Withdrawal__c" },
-  { label: "End Date", path: "End_Date__c" },
-  { label: "Order Completed Date", path: "Order_Completed_Date__c" },
-  { label: "Household Name", path: "Household_Name__c" },
+  { label: "Date of First Withdrawal", path: "Date_of_First_Withdrawal__c", editable: true },
+  { label: "End Date", path: "End_Date__c", editable: true },
+  { label: "Order Completed Date", path: "Order_Completed_Date__c", editable: true },
+  { label: "Household Name", path: "Household_Name__c", editable: false },
   {
     label: "Financial Advisor Team Name",
-    path: "Financial_Advisor_Team_Name__c"
+    path: "Financial_Advisor_Team_Name__c",
+    editable: false
   },
-  { label: "Advisor Notes", path: "Advisor_Notes__c" },
-  { label: "Additional Details", path: "Additional_Details__c" },
-  { label: "Internal Trade Notes", path: "Internal_Trade_Notes__c" },
-  { label: "Created By", path: "CreatedBy.Name" },
-  { label: "Last Modified By", path: "LastModifiedBy.Name" }
+  { label: "Advisor Notes", path: "Advisor_Notes__c", editable: true },
+  {
+    label: "Additional Details",
+    path: "Additional_Details__c",
+    editable: true,
+    conditional: true
+  },
+  { label: "Internal Trade Notes", path: "Internal_Trade_Notes__c", editable: true },
+  { label: "Created By", path: "CreatedBy.Name", editable: false },
+  { label: "Last Modified By", path: "LastModifiedBy.Name", editable: false }
+];
+
+const CUSTOM_VALUE = "Custom";
+
+/**
+ * The three fields whose value governs Additional_Details__c's visibility --
+ * mirrors the record page's three separate single-condition visibilityRule
+ * placements of that field (Method_of_Cash_Raise__c, Method_to_Allocate__c,
+ * Frequency__c each independently showing it when set to "Custom"; together
+ * an OR across all three, since a record page field can only carry one
+ * placement per condition, not a combined OR expression).
+ */
+const ADDITIONAL_DETAILS_TRIGGER_FIELDS = [
+  "Method_of_Cash_Raise__c",
+  "Method_to_Allocate__c",
+  "Frequency__c"
 ];
 
 /** getRelatedRecords hands every cell over as a string; these two are the only types ORDER_COLUMNS carries. */
@@ -119,10 +170,21 @@ export default class ArcOrderTicketQuickView extends NavigationMixin(
   LightningElement
 ) {
   isOpen = false;
+  isEditing = false;
+  isSaving = false;
   errorMessage = "";
 
   _recordId;
   _record;
+
+  /**
+   * The three trigger fields' in-progress (unsaved) values while editing --
+   * seeded from the saved record when Edit is clicked, then kept current by
+   * handleFieldChange as the user types, so Additional Details can show/hide
+   * live the same way the internal record page's own visibility rules do,
+   * without waiting for a save round trip.
+   */
+  _liveTriggerValues = {};
 
   /** Raw getRelatedRecords result for the Orders section; undefined until the first response lands. */
   _ordersResult;
@@ -132,8 +194,17 @@ export default class ArcOrderTicketQuickView extends NavigationMixin(
   @api
   open(recordId) {
     this._recordId = recordId;
+    this.isEditing = false;
     this.errorMessage = "";
     this.isOpen = true;
+  }
+
+  get recordId() {
+    return this._recordId;
+  }
+
+  get objectApiName() {
+    return OBJECT_API_NAME;
   }
 
   @wire(getRecord, { recordId: "$_recordId", fields: FIELDS })
@@ -191,9 +262,32 @@ export default class ArcOrderTicketQuickView extends NavigationMixin(
     return name ? `Order Ticket: ${name}` : "Order Ticket";
   }
 
-  /** The plain rows, resolved to display values; empty values show as an em dash. */
+  /**
+   * True when Additional_Details__c should show at all, in either mode --
+   * the saved record's own field values while viewing, the in-progress
+   * (unsaved) edit values while editing, matching how the record page's
+   * three visibilityRule placements read live, un-committed picklist
+   * selections rather than only the last-saved value.
+   */
+  get isAdditionalDetailsVisible() {
+    return ADDITIONAL_DETAILS_TRIGGER_FIELDS.some((path) => {
+      const value = this.isEditing
+        ? this._liveTriggerValues[path]
+        : this.fieldValue(path);
+      return value === CUSTOM_VALUE;
+    });
+  }
+
+  /** DETAIL_FIELDS, minus Additional Details when its trigger condition isn't met. */
+  get visibleDetailFields() {
+    return DETAIL_FIELDS.filter(
+      (field) => !field.conditional || this.isAdditionalDetailsVisible
+    );
+  }
+
+  /** The plain (view-mode) rows, resolved to display values; empty values show as an em dash. */
   get detailRows() {
-    return DETAIL_FIELDS.map((field) => {
+    return this.visibleDetailFields.map((field) => {
       const value = this.fieldValue(field.path);
       return {
         label: field.label,
@@ -202,6 +296,86 @@ export default class ArcOrderTicketQuickView extends NavigationMixin(
           : value
       };
     });
+  }
+
+  /**
+   * The edit-mode rows: still every visible field, but each one also
+   * carries whether it renders as a lightning-input-field or stays plain
+   * text (Household Name, Financial Advisor Team Name, Created By, Last
+   * Modified By never become inputs -- see DETAIL_FIELDS).
+   */
+  get editableDetailRows() {
+    return this.visibleDetailFields.map((field) => {
+      const value = this.fieldValue(field.path);
+      return {
+        label: field.label,
+        path: field.path,
+        editable: field.editable,
+        value: value === undefined || value === null || value === ""
+          ? "—"
+          : value
+      };
+    });
+  }
+
+  get showEditButton() {
+    return !this.isEditing && this.hasDetail;
+  }
+
+  handleEditClick() {
+    this.isEditing = true;
+    this.errorMessage = "";
+    this._liveTriggerValues = Object.fromEntries(
+      ADDITIONAL_DETAILS_TRIGGER_FIELDS.map((path) => [
+        path,
+        this.fieldValue(path)
+      ])
+    );
+  }
+
+  handleCancelEdit() {
+    this.isEditing = false;
+    this.errorMessage = "";
+  }
+
+  /**
+   * Fires on every editable lightning-input-field's onchange, but only the
+   * three Additional Details trigger fields need to be tracked -- everything
+   * else is left to lightning-record-edit-form's own state until Save.
+   */
+  handleFieldChange(event) {
+    const fieldName = event.target?.fieldName;
+    if (!fieldName || !ADDITIONAL_DETAILS_TRIGGER_FIELDS.includes(fieldName)) {
+      return;
+    }
+    this._liveTriggerValues = {
+      ...this._liveTriggerValues,
+      [fieldName]: event.detail.value
+    };
+  }
+
+  handleSubmit() {
+    this.isSaving = true;
+    this.errorMessage = "";
+  }
+
+  handleSuccess() {
+    this.isSaving = false;
+    this.isEditing = false;
+    LightningToast.show(
+      { label: "Order Ticket saved", variant: "success" },
+      this
+    );
+  }
+
+  handleError(event) {
+    this.isSaving = false;
+    this.errorMessage =
+      event.detail?.detail || event.detail?.message || "Could not save.";
+  }
+
+  handleSave() {
+    this.template.querySelector("lightning-record-edit-form")?.submit();
   }
 
   // ---- Orders: read-only child list, row click opens arcOrderQuickView ----
@@ -325,6 +499,7 @@ export default class ArcOrderTicketQuickView extends NavigationMixin(
 
   handleClose() {
     this.isOpen = false;
+    this.isEditing = false;
   }
 
   /** Escape closes, matching the other quick-view dialogs. */

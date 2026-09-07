@@ -20,5 +20,10 @@
         <operation>equals</operation>
         <value>PersonAccount.PersonAccount</value>
     </filters>
+    <filters>
+        <field>ACCOUNT.TYPE</field>
+        <operation>equals</operation>
+        <value>Active Client</value>
+    </filters>
     <label>All Clients</label>
 </ListView>

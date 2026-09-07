@@ -12,6 +12,15 @@
         <header class="quick-view__header">
           <h2 class="quick-view__title">{headingLabel}</h2>
           <div class="quick-view__header-actions">
+            <template lwc:if={showEditButton}>
+              <button
+                type="button"
+                class="quick-view__button"
+                onclick={handleEditClick}
+              >
+                Edit
+              </button>
+            </template>
             <button
               type="button"
               class="quick-view__close"
@@ -82,13 +91,61 @@
                 </div>
               </template>
 
-              <template for:each={detailRows} for:item="row">
-                <div class="quick-view__field" key={row.label}>
-                  <dt>{row.label}</dt>
-                  <dd>{row.value}</dd>
-                </div>
+              <template lwc:if={isEditing}>
+                <lightning-record-edit-form
+                  record-id={recordId}
+                  object-api-name={objectApiName}
+                  onsubmit={handleSubmit}
+                  onsuccess={handleSuccess}
+                  onerror={handleError}
+                >
+                  <template for:each={editableDetailRows} for:item="row">
+                    <div class="quick-view__field" key={row.path}>
+                      <dt>{row.label}</dt>
+                      <dd>
+                        <template lwc:if={row.editable}>
+                          <lightning-input-field
+                            field-name={row.path}
+                            variant="label-hidden"
+                            onchange={handleFieldChange}
+                          ></lightning-input-field>
+                        </template>
+                        <template lwc:else>{row.value}</template>
+                      </dd>
+                    </div>
+                  </template>
+                </lightning-record-edit-form>
+              </template>
+              <template lwc:else>
+                <template for:each={detailRows} for:item="row">
+                  <div class="quick-view__field" key={row.label}>
+                    <dt>{row.label}</dt>
+                    <dd>{row.value}</dd>
+                  </div>
+                </template>
               </template>
             </dl>
+
+            <template lwc:if={isEditing}>
+              <div class="quick-view__form-actions">
+                <button
+                  type="button"
+                  class="quick-view__button"
+                  onclick={handleCancelEdit}
+                  disabled={isSaving}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  class="quick-view__button quick-view__button--primary"
+                  onclick={handleSave}
+                  disabled={isSaving}
+                >
+                  Save
+                </button>
+              </div>
+            </template>
 
             <section class="quick-view__related">
               <h3 class="quick-view__related-title"

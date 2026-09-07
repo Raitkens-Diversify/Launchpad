@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>61.0</apiVersion>
+    <isExposed>false</isExposed>
+    <description>Cascading subtopic pill rows for the Help Center / Resource Center topic pages: All (n) + one pill per child, a deeper row per selected level, More menu past 8. Emits navselect; the host routes. Rows come from c/treeUtil.filterRows.</description>
+</LightningComponentBundle>

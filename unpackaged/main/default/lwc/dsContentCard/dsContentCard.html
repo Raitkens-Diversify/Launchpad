@@ -13,6 +13,11 @@
         </div>
 
         <h3 class="ds-content-card__title" onclick={handleSelect}>{item.title}</h3>
+        <!-- Topic pages only: where the item lives relative to the selected
+             node; the tag's composed pathselect routes there. -->
+        <template if:true={item.pathLabel}>
+            <c-item-path-tag label={item.pathLabel} node-key={item.pathKey}></c-item-path-tag>
+        </template>
         <template if:true={item.subtitle}>
             <p class="ds-content-card__desc">{item.subtitle}</p>
         </template>

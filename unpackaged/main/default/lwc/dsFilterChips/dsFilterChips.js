@@ -11,12 +11,30 @@ import { LightningElement, api } from 'lwc';
  * @api chips: [{ value, label, count? }] — count omitted → no count pill
  * @api selected: value of the active chip
  * @api groupLabel: accessible name for the group (default 'Filters')
+ * @api label: optional visible lead-in ("Type") rendered before the chips
+ * @api compact: smaller chips (a secondary facet beside a primary pill row,
+ *      e.g. the topic pages' Type facet under the subtopic rows) — boolean
+ *      attribute, so `compact` alone turns it on
  * Emits `select` { value } on click (also when re-clicking the active chip).
  */
 export default class DsFilterChips extends LightningElement {
     @api chips = [];
     @api selected;
     @api groupLabel = 'Filters';
+    @api label;
+
+    _compact = false;
+    @api
+    get compact() {
+        return this._compact;
+    }
+    set compact(value) {
+        this._compact = value === '' ? true : Boolean(value);
+    }
+
+    get rootClass() {
+        return this._compact ? 'ds-chips ds-chips--compact' : 'ds-chips';
+    }
 
     get decorated() {
         return (this.chips || []).map((chip) => {

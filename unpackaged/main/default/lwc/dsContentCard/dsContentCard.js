@@ -19,10 +19,13 @@ import { typeMeta } from 'c/resourceTypeIcons';
  *   action: string?,        // primary-action label override (rcConstants.resourceAction
  *                           // sets it for lifecycle verbs like a webinar's "Sign up" /
  *                           // "Watch"); absent → typeMeta's verb
- *   href: string?           // true external link: the primary action renders as an
+ *   href: string?,          // true external link: the primary action renders as an
  *                           // <a target="_blank" rel="noopener noreferrer"> instead
  *                           // of a button (hosts pass it only when the content
  *                           // really leaves the site)
+ *   pathLabel: string?,     // topic pages: c-item-path-tag under the title ("Forms
+ *   pathKey: string?        // Required › Accounts"); its composed `pathselect
+ *                           // { key }` is the host's to route. Absent → no tag.
  * }
  *
  * Emits `contentselect { kind, routeKey, id }` (bubbles + composed so the

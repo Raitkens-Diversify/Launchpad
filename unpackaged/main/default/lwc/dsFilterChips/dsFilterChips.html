@@ -1,5 +1,8 @@
 <template>
-    <div class="ds-chips" role="group" aria-label={groupLabel}>
+    <div class={rootClass} role="group" aria-label={groupLabel}>
+        <template if:true={label}>
+            <span class="ds-chips__lead">{label}</span>
+        </template>
         <template for:each={decorated} for:item="chip">
             <button key={chip.value}
                     type="button"

@@ -78,6 +78,10 @@ public with sharing class ResourceCenterService {
         @AuraEnabled public List<CategoryTile> subcategories;
         @AuraEnabled public List<ResourceCard> resources;
         @AuraEnabled public List<ResourceSection> sections;
+        /** Every resource on the page (the whole subtree + "Also show in"
+            placements), flat, in display order, each once — what the
+            subtopic filter rows narrow client-side. */
+        @AuraEnabled public List<ResourceCard> allResources = new List<ResourceCard>();
     }
 
     /**
@@ -104,6 +108,11 @@ public with sharing class ResourceCenterService {
         @AuraEnabled public Integer displayOrder;
         @AuraEnabled public Boolean featured;
         @AuraEnabled public String categorySlug;
+        /** getCategoryBySlug only: the categories ON THAT PAGE the resource
+            belongs to (home first, then "Also show in" placements) — the
+            nodes the page's path tag and subtopic filters key off. Empty on
+            every other list. */
+        @AuraEnabled public List<Id> pageCategoryIds = new List<Id>();
         @AuraEnabled public String externalUrl;
         @AuraEnabled public String videoEmbedUrl;
         @AuraEnabled public Id contentDocumentId;
@@ -354,11 +363,19 @@ public with sharing class ResourceCenterService {
      * inactive category hides its subtree), any depth, with counts. Non-root
      * nodes with nothing to show anywhere below them are pruned — empty
      * subtopics stay out of the public nav; main topics always list.
+     *
+     * includeEmpty = true keeps them (the topic page's subtopic filter rows
+     * show an empty subtopic as a disabled pill and prune the sidebar copy
+     * client-side); null / false is the pruned nav tree every other caller
+     * has always had.
      */
     @AuraEnabled(cacheable=true)
-    public static CategoryTreeService.TreeDTO getCategoryTree() {
+    public static CategoryTreeService.TreeDTO getCategoryTree(Boolean includeEmpty) {
         assertCategoriesReadable();
         CategoryTreeService.Tree tree = ResourceCategoryTreeProvider.load(true);
+        if (includeEmpty == true) {
+            return tree.toDTO();
+        }
         for (CategoryTreeService.TreeNode n : tree.ordered) {
             if (n.children.isEmpty()) {
                 continue;
@@ -455,13 +472,22 @@ public with sharing class ResourceCenterService {
             }
             membershipsByResource.put(r.Id, memberships);
         }
-        for (Id secondaryCat : secondary.keySet()) {
-            for (Id resourceId : secondary.get(secondaryCat)) {
+        // Secondary placements in tree (pre-)order, so a card's memberships
+        // list reads home first, then its placements top-down.
+        for (String catId : tree.orderedIds()) {
+            if (!secondary.containsKey(catId)) {
+                continue;
+            }
+            for (Id resourceId : secondary.get(catId)) {
                 if (membershipsByResource.containsKey(resourceId)) {
-                    membershipsByResource.get(resourceId).add(secondaryCat);
+                    membershipsByResource.get(resourceId).add(catId);
                 }
             }
         }
+        for (ResourceCard card : allCards) {
+            card.pageCategoryIds = new List<Id>(membershipsByResource.get(card.id));
+        }
+        detail.allResources = allCards;
 
         // Sections: one per direct subcategory (in order) holding everything in
         // THAT child's subtree — a grandchild's resources group under the child

@@ -4,9 +4,9 @@ import { pluralize } from 'c/treeUtil';
 const DEFAULT_GROUP_CAP = 5;
 
 /**
- * dsItemList — the content list under a topic page's section cards, shared
- * by the Help Center (article link rows) and the Resource Center (resource
- * cards). Two modes, one component:
+ * dsItemList — the content list under a topic page's subtopic filter rows,
+ * shared by the Help Center (article link rows) and the Resource Center
+ * (resource cards). Two modes, one component:
  *
  *  - own:      `items` under `heading` ("Articles in {label}") — the node's
  *              directly attached content.
@@ -16,10 +16,12 @@ const DEFAULT_GROUP_CAP = 5;
  *              the child. A topic page must never dead-end while content
  *              exists below it; hosts pass groups when `items` is empty.
  *
- * @api variant 'rows' (default; `{id, title, routeKey, featured?}` as link
- *              rows) or 'cards' (`c-ds-content-card` items from
- *              rcConstants.toContentItem — the card's own composed
- *              `contentselect` reaches the host untouched).
+ * @api variant 'rows' (default; `{id, title, routeKey, featured?, pathLabel?,
+ *              pathKey?}` as link rows — pathLabel renders a c-item-path-tag
+ *              after the title) or 'cards' (`c-ds-content-card` items from
+ *              rcConstants.toContentItem, same optional path fields — the
+ *              card's own composed `contentselect` / the tag's `pathselect`
+ *              reach the host untouched).
  * @api noun    'article' | 'resource' — count wording.
  *
  * Events: rows emit `itemselect {id, routeKey}` on click and `itemhover

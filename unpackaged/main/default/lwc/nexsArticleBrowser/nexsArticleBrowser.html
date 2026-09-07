@@ -71,14 +71,14 @@
 
             <!-- Collapsible sections of article links -->
             <template if:false={showViewer}>
-                <!-- Topic title + its direct children as section cards, so the
-                     content column shows the branch too (same at every depth). -->
+                <!-- The page is the top-level topic; the cascading pill rows
+                     narrow it in place (same handler as the sidebar). -->
                 <template if:true={showTitle}>
-                    <h1 class="nexs__title">{selectedCategoryLabel}</h1>
+                    <h1 class="nexs__title">{browseTitle}</h1>
                 </template>
-                <template if:true={showSectionCards}>
-                    <c-ds-section-cards items={sectionCardItems}
-                                        onnavselect={handleNavSelect}></c-ds-section-cards>
+                <template if:true={showFilterRows}>
+                    <c-subtopic-filter-rows rows={filterRowsData}
+                                            onnavselect={handleNavSelect}></c-subtopic-filter-rows>
                 </template>
 
                 <template if:true={loadingArticles}>
@@ -111,15 +111,33 @@
                     </div>
                 </template>
 
-                <!-- Category browse: the topic's own articles, or the ones
-                     inherited from its children grouped under linked headings. -->
+                <!-- Category browse: the count line with the compact Type facet,
+                     then every article in the selected subtree, flat, each row
+                     tagged with where it lives relative to the selection. -->
+                <template if:true={showToolbar}>
+                    <div class="nexs__toolbar">
+                        <p class="nexs__count" aria-live="polite">{countLine}</p>
+                        <template if:true={showTypeChips}>
+                            <c-ds-filter-chips label="Type"
+                                               compact
+                                               group-label="Filter by type"
+                                               chips={typeChips}
+                                               selected={typeFilter}
+                                               onselect={handleTypeSelect}></c-ds-filter-chips>
+                        </template>
+                    </div>
+                </template>
                 <template if:true={showList}>
-                    <c-ds-item-list heading={ownHeading}
-                                    items={ownArticles}
-                                    groups={inheritedGroups}
+                    <c-ds-item-list items={browseRows}
                                     onitemselect={handleListSelect}
                                     onitemhover={handleListHover}
-                                    onnavselect={handleNavSelect}></c-ds-item-list>
+                                    onpathselect={handlePathSelect}></c-ds-item-list>
+                </template>
+                <template if:true={showTypeEmpty}>
+                    <p class="nexs__empty">
+                        {typeEmptyText}
+                        <button type="button" class="nexs__link-btn" onclick={handleTypeClear}>Show all types</button>
+                    </p>
                 </template>
 
                 <!-- Search results: one open section of highlighted rows. -->

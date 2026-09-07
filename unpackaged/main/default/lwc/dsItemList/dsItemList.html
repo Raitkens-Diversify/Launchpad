@@ -9,11 +9,16 @@
                 <ul class="ds-il__rows">
                     <template for:each={ownRows} for:item="a">
                         <li key={a.key} class="ds-il__row">
-                            <a href="#" class="ds-il__link"
-                               data-id={a.id} data-routekey={a.routeKey}
-                               onclick={handleItemClick}
-                               onmouseenter={handleItemHover}
-                               onfocus={handleItemHover}>{a.title}</a>
+                            <span class="ds-il__row-main">
+                                <a href="#" class="ds-il__link"
+                                   data-id={a.id} data-routekey={a.routeKey}
+                                   onclick={handleItemClick}
+                                   onmouseenter={handleItemHover}
+                                   onfocus={handleItemHover}>{a.title}</a>
+                                <template if:true={a.pathLabel}>
+                                    <c-item-path-tag label={a.pathLabel} node-key={a.pathKey}></c-item-path-tag>
+                                </template>
+                            </span>
                             <template if:true={a.featured}>
                                 <c-ds-badge label="Featured" variant="info"></c-ds-badge>
                             </template>

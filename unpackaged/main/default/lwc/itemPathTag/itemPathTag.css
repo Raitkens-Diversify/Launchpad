@@ -1,0 +1,37 @@
+/* Self-declared --slds-g-* block (canonical values, ui-standards §1). */
+:host {
+    display: inline-block;
+    max-width: 100%;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-accent-1: #0f406f;
+}
+
+/* Quiet by design: a small grey chip that only reveals it is a control on
+   hover — it must never compete with the title or the type chip. */
+.ipt {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 2px 8px;
+    border: none;
+    border-radius: 999px;
+    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    cursor: pointer;
+}
+.ipt:hover,
+.ipt:focus-visible {
+    color: var(--slds-g-color-accent-1, #0f406f);
+    text-decoration: underline;
+}
+.ipt:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 1px;
+}

@@ -276,8 +276,12 @@ private class NexSKnowledgeControllerTest {
                     Assert.areEqual('Creating Cases', s.section,
                         'Subtopic article carries its subtopic label as the section.');
                     Assert.areEqual(0, s.sectionOrder, 'First subtopic in taxonomy order.');
+                    Assert.areEqual(new List<String>{ 'Creating_Cases' }, s.categories,
+                        'categories names the subtopic the article is filed under.');
                 } else {
                     Assert.isNull(s.section, 'Topic-level article has no section.');
+                    Assert.areEqual(new List<String>{ 'Cases_and_Tasks' }, s.categories,
+                        'An article filed on the topic itself lists the topic.');
                 }
             }
         }

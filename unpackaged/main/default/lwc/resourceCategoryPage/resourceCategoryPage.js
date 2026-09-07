@@ -1,12 +1,16 @@
 import { LightningElement, api, wire } from 'lwc';
 import { iconPath } from 'c/rcIcons';
 import { toContentItem, rcRootCrumbs, CRUMB_HELP_HOME, CRUMB_RC_HOME } from 'c/rcConstants';
-import { indexTree, findNode } from 'c/treeUtil';
-
-const PREVIEW_MAX = 3;
-const GENERAL_SECTION = 'general';
+import { typeMeta } from 'c/resourceTypeIcons';
+import {
+    indexTree, findNode, ancestorsOf, rootOf, pruneEmpty, filterRows, inSubtree, pathTag, pluralize
+} from 'c/treeUtil';
 import getCategoryBySlug from '@salesforce/apex/ResourceCenterService.getCategoryBySlug';
 import getCategoryTree from '@salesforce/apex/ResourceCenterService.getCategoryTree';
+
+/** The Type facet's "everything" value. Chip values are typeMeta badges
+    ('PDF', 'Form', 'Link' …) so the facet reads like the cards' chips. */
+const TYPE_ALL = 'all';
 
 /**
  * resourceCategoryPage — the Resource Center's browse surface, mirroring the
@@ -27,15 +31,25 @@ import getCategoryTree from '@salesforce/apex/ResourceCenterService.getCategoryT
  * the Resources tab land on the same browse shape as Help Articles instead
  * of a bespoke landing page.
  *
- * Pages (any depth), the same shape at every level:
- *  - Section cards (c-ds-section-cards), one per direct subcategory from
- *    CategoryDetail.subcategories (description, "N sections · M resources",
- *    a preview of its first resources), keyed by slug.
- *  - Then the category's own resources as cards (c-ds-item-list, cards
- *    variant) — or, when it has none of its own, the resources inherited
- *    from its children grouped under linked child headings, capped with a
- *    "View all" link. A leaf goes straight to its own resources. Every
- *    category is its own page — deep links land here directly.
+ * The page (2026-09-07: filtering, not drilling). A topic page is the
+ * TOP-LEVEL topic of the routed node: its title, then cascading subtopic
+ * pill rows (c-subtopic-filter-rows — the topic's children, then the
+ * selected child's children, and so on), a count line with a compact Type
+ * facet, and every resource in the selected node's subtree as cards, flat,
+ * each with a path tag saying where it lives relative to the selection.
+ * The ROUTE is the one source of truth: a pill, a path tag, a sidebar row
+ * and a breadcrumb all emit `categoryselect { slug }` and the host routes;
+ * this component re-derives the rows, the list and the sidebar highlight
+ * from the slug it is handed back. Back/Forward therefore restore the pill
+ * state for free.
+ *
+ * Data: the detail wire is keyed on the top-level topic's slug, not the
+ * routed one — one fetch per main topic (CategoryDetail.allResources, the
+ * whole subtree flat, each card naming its page categories), narrowed
+ * client-side with c/treeUtil. Moving between subtopics of one topic never
+ * refetches. The tree wire asks for the FULL tree (includeEmpty) so an empty
+ * subtopic still shows as a disabled pill; the sidebar gets the pruned copy
+ * it always had.
  *
  * Emits (composed) `categoryselect { slug }`, `rchome`, and
  * `resourceselect { slug }` — translated from c-ds-content-card's
@@ -43,51 +57,72 @@ import getCategoryTree from '@salesforce/apex/ResourceCenterService.getCategoryT
  * unchanged.
  */
 export default class ResourceCategoryPage extends LightningElement {
-    /** Routed slug. Undefined on the Resource Center landing, where
-        effectiveSlug falls back to the first sidebar topic. */
+    /** Routed slug. Undefined on the Resource Center landing, where the
+        page falls back to the first sidebar topic. */
     @api
     get slug() {
         return this._slug;
     }
     set slug(value) {
         this._slug = value;
-        this.resolveEffectiveSlug();
+        this.navOpen = false;
+        this.resolveRoute();
     }
 
     _slug;
-    /** What the detail wire actually keys off — routed slug or the default. */
-    effectiveSlug;
+    /** What the detail wire keys off: the routed node's TOP-LEVEL topic (or
+        the routed slug itself while the tree is still loading / for a slug
+        the tree doesn't know, so the server's own error still surfaces). */
+    fetchSlug;
 
     detail;
     error;
     loading = true;
+    /** Sidebar roots: the pruned tree (empty subtopics hidden), icons added. */
     navRoots = [];
-    _navTree = indexTree([]);
+    /** The full tree (includeEmpty): pills, path tags, counts, crumbs. */
+    _tree = indexTree([]);
+    _bySlug = new Map();
+    typeFilter = TYPE_ALL;
     navOpen = false;
     _focusTree = false;
 
-    @wire(getCategoryTree)
+    @wire(getCategoryTree, { includeEmpty: true })
     wiredTree({ data }) {
         if (data) {
-            this.navRoots = (data.roots || []).map((r) => ({ ...r, iconPath: iconPath(r.iconName) }));
-            this._navTree = indexTree(this.navRoots);
-            this.resolveEffectiveSlug();
+            const roots = (data.roots || []).map((r) => ({ ...r, iconPath: iconPath(r.iconName) }));
+            this._tree = indexTree(roots);
+            this._bySlug = new Map(this._tree.ordered.map((n) => [n.slug, n]));
+            this.navRoots = pruneEmpty(roots);
+            this.resolveRoute();
         }
     }
 
-    /** A routed slug always wins; otherwise land on the first topic. The
-        tree wire is unparameterised, so it resolves even with no slug —
-        without this the detail wire would never fire and the page would
-        spin forever. */
-    resolveEffectiveSlug() {
-        const first = this.navRoots.length ? this.navRoots[0].slug : undefined;
-        this.effectiveSlug = this._slug || first;
+    /** Route → the slug to fetch. A routed slug always wins; otherwise land
+        on the first topic. The tree wire is unparameterised by the route, so
+        it resolves even with no slug — without this the detail wire would
+        never fire and the page would spin forever. */
+    resolveRoute() {
+        const first = this._tree.roots.length ? this._tree.roots[0] : null;
+        const selected = this._slug ? this._bySlug.get(this._slug) : first;
+        const root = selected ? rootOf(this._tree, selected.id) : null;
+        const next = root ? root.slug : (this._slug || (first ? first.slug : undefined));
+        if (next !== this.fetchSlug) {
+            // A new main topic: drop the old one's cards so the narrowed list
+            // never flashes another topic's resources while the wire reloads.
+            this.detail = undefined;
+            this.error = undefined;
+            this.loading = Boolean(next);
+            this.fetchSlug = next;
+        }
     }
 
-    @wire(getCategoryBySlug, { slug: '$effectiveSlug' })
+    @wire(getCategoryBySlug, { slug: '$fetchSlug' })
     wiredCategory({ data, error }) {
         if (data) {
-            this.applyDetail(data);
+            this.detail = data;
+            this.error = undefined;
+            this.loading = false;
         } else if (error) {
             this.detail = undefined;
             this.error = this.reduce(error);
@@ -95,87 +130,151 @@ export default class ResourceCategoryPage extends LightningElement {
         }
     }
 
-    applyDetail(data) {
-        this.detail = data;
-        this.error = undefined;
-        this.loading = false;
-        this.navOpen = false;
+    // ---- Route-derived state ----------------------------------------------------
+
+    /** The routed node (the first topic on the landing); null until the tree
+        lands or for a slug it doesn't carry. */
+    get selectedNode() {
+        const node = this._slug ? this._bySlug.get(this._slug) : this._tree.roots[0];
+        return node || null;
     }
 
-    // ---- View model ----------------------------------------------------------
-
-    /** One per direct child holding that child's whole subtree (server-built),
-        plus the trailing 'general' section of the category's own resources. */
-    get sections() {
-        return (this.detail && this.detail.sections) || [];
+    /** The top-level topic the page is titled after. */
+    get rootNode() {
+        const selected = this.selectedNode;
+        return selected ? rootOf(this._tree, selected.id) : null;
     }
 
-    sectionFor(slug) {
-        const section = this.sections.find((s) => s.key === slug);
-        return (section && section.resources) || [];
+    /** A pill (or deep link) has narrowed the page below its topic. */
+    get isNarrowed() {
+        const selected = this.selectedNode;
+        const root = this.rootNode;
+        return Boolean(selected && root && selected.id !== root.id);
     }
 
-    /** Section cards: EVERY active direct subcategory (CategoryDetail.subcategories
-        is unpruned, unlike the sidebar tree, so an empty one still cards and
-        reads "0 resources"), keyed by slug — the routing key. */
-    get sectionCardItems() {
-        return ((this.detail && this.detail.subcategories) || []).map((t) => ({
-            key: t.slug,
-            label: t.name,
-            description: t.description,
-            sectionCount: t.subcategoryCount || 0,
-            descendantItemCount: t.resourceCount || 0,
-            preview: this.sectionFor(t.slug).slice(0, PREVIEW_MAX).map((r) => ({ id: r.id, title: r.name }))
-        }));
+    get pageTitle() {
+        const root = this.rootNode;
+        return root ? root.label : (this.detail ? this.detail.name : '');
     }
 
-    get showSectionCards() {
-        return this.sectionCardItems.length > 0;
+    get pageDescription() {
+        const root = this.rootNode;
+        return root ? root.description : (this.detail ? this.detail.description : '');
     }
 
-    /** Resources shown on the category itself (home + "Also show in"). */
-    get ownItems() {
-        return ((this.detail && this.detail.resources) || []).map(toContentItem);
+    /** c-subtopic-filter-rows input: the selected path's rows, from the tree. */
+    get filterRowsData() {
+        const selected = this.selectedNode;
+        return selected ? filterRows(this._tree, selected.id) : [];
     }
 
-    get ownHeading() {
-        return this.detail ? `Resources in ${this.detail.name}` : '';
-    }
-
-    /** Inherited resources grouped by the child they hang from — only when
-        the category has nothing of its own, so a branch never dead-ends. */
-    get inheritedGroups() {
-        if (this.ownItems.length) {
-            return [];
-        }
-        return this.sections
-            .filter((s) => s.key !== GENERAL_SECTION && (s.resources || []).length > 0)
-            .map((s) => ({ key: s.key, label: s.title, items: s.resources.map(toContentItem) }));
-    }
-
-    get showList() {
-        return this.ownItems.length > 0 || this.inheritedGroups.length > 0;
-    }
-
-    /** True empty: nothing on the category and nothing anywhere under it. */
-    get isEmpty() {
-        return Boolean(this.detail) && !this.showList;
+    get showFilterRows() {
+        return this.filterRowsData.length > 0;
     }
 
     /** Tree keys are category Ids; the routed key is the slug. */
     get activeKey() {
-        return this.detail ? this.detail.id : null;
+        const selected = this.selectedNode;
+        return selected ? selected.id : null;
     }
 
     get crumbItems() {
         const crumbs = rcRootCrumbs();
-        if (this.detail) {
+        const selected = this.selectedNode;
+        if (selected) {
+            ancestorsOf(this._tree, selected.id).forEach((a) => {
+                crumbs.push({ label: a.label, key: a.slug });
+            });
+            crumbs.push({ label: selected.label });
+        } else if (this.detail) {
             (this.detail.ancestors || []).forEach((a) => {
                 crumbs.push({ label: a.name, key: a.slug });
             });
             crumbs.push({ label: this.detail.name });
         }
         return crumbs;
+    }
+
+    // ---- Items ------------------------------------------------------------------------
+
+    /** Every card on the main topic's page, as content items that remember
+        which page categories they belong to (home first). */
+    get allItems() {
+        const cards = (this.detail && this.detail.allResources) || [];
+        return cards.map((r) => ({ ...toContentItem(r), nodeKeys: r.pageCategoryIds || [] }));
+    }
+
+    /** …narrowed to the selected node's subtree (the subtopic filter). */
+    get subtreeItems() {
+        const selected = this.selectedNode;
+        if (!selected) {
+            return this.allItems;
+        }
+        return this.allItems.filter((item) => inSubtree(this._tree, item.nodeKeys, selected.id));
+    }
+
+    /** …then by type, with the path tag relative to the selection attached. */
+    get items() {
+        const selected = this.selectedNode;
+        return this.subtreeItems
+            .filter((item) => this.typeFilter === TYPE_ALL || this.typeOf(item) === this.typeFilter)
+            .map((item) => {
+                const { nodeKeys, ...card } = item;
+                const tag = selected ? pathTag(this._tree, nodeKeys, selected.id) : null;
+                return tag ? { ...card, pathLabel: tag.label, pathKey: tag.key } : card;
+            });
+    }
+
+    get hasItems() {
+        return this.items.length > 0;
+    }
+
+    typeOf(item) {
+        return typeMeta(item.resourceType).badge;
+    }
+
+    /** The Type facet: one chip per type present in the selected subtree
+        (counts live), All first; hidden when there is only one type. */
+    get typeChips() {
+        const counts = new Map();
+        this.subtreeItems.forEach((item) => {
+            const type = this.typeOf(item);
+            counts.set(type, (counts.get(type) || 0) + 1);
+        });
+        if (counts.size < 2) {
+            return [];
+        }
+        const types = [...counts.keys()].sort((a, b) => a.localeCompare(b));
+        return [
+            { value: TYPE_ALL, label: 'All', count: this.subtreeItems.length },
+            ...types.map((type) => ({ value: type, label: type, count: counts.get(type) }))
+        ];
+    }
+
+    get showTypeChips() {
+        return this.typeChips.length > 0;
+    }
+
+    /** "25 resources" / "4 resources in Accounts" / "2 Form resources in Accounts". */
+    get countLine() {
+        const noun = this.typeFilter === TYPE_ALL ? 'resource' : `${this.typeFilter} resource`;
+        const text = pluralize(this.items.length, noun);
+        return this.isNarrowed ? `${text} in ${this.selectedNode.label}` : text;
+    }
+
+    /** True empty: nothing in the selected subtree at all. */
+    get isEmpty() {
+        return Boolean(this.detail) && this.subtreeItems.length === 0;
+    }
+
+    /** The subtree has resources, just none of the chosen type. */
+    get isTypeEmpty() {
+        return Boolean(this.detail) && this.subtreeItems.length > 0 && this.items.length === 0;
+    }
+
+    get typeEmptyText() {
+        const where = this.isNarrowed ? ` in ${this.selectedNode.label}` : '';
+        return `No ${this.typeFilter} resources${where}.`;
     }
 
     get navClass() {
@@ -192,19 +291,27 @@ export default class ResourceCategoryPage extends LightningElement {
 
     // ---- Handlers --------------------------------------------------------------
 
-    /** Sidebar rows are keyed by category Id; resolve to the routed slug. */
+    /** Sidebar rows, pills and path tags are all keyed by category Id;
+        resolve to the routed slug and ask the host to route. */
     handleNavSelect(event) {
-        const node = findNode(this._navTree, event.detail.key);
+        const node = findNode(this._tree, event.detail.key);
         if (node) {
             this.fireCategorySelect(node.slug);
         }
     }
 
-    /** Section cards and inherited-group headings are keyed by slug already. */
-    handleSlugSelect(event) {
-        if (event.detail.key) {
-            this.fireCategorySelect(event.detail.key);
-        }
+    /** c-item-path-tag's composed pathselect (from inside a card). */
+    handlePathSelect(event) {
+        event.stopPropagation();
+        this.handleNavSelect(event);
+    }
+
+    handleTypeSelect(event) {
+        this.typeFilter = event.detail.value || TYPE_ALL;
+    }
+
+    handleTypeClear() {
+        this.typeFilter = TYPE_ALL;
     }
 
     /** Phone-width drawer: open moves focus into the tree, close returns it. */

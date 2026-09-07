@@ -6,7 +6,6 @@ public without sharing class Financial_Advisor_Team_TriggerHandler {
     }
     public void isBeforeUpdate(Map<Id, Financial_Advisor_Team__c> newMap, Map<Id, Financial_Advisor_Team__c> oldMap){
         createPublicGroup(newMap.values(), oldMap);
-        updateRepCode(newMap,oldMap);
     }
     public void isBeforeDelete(Map<Id, Financial_Advisor_Team__c> oldMap){}
     public void isAfterInsert(Map<Id, Financial_Advisor_Team__c> newMap){
@@ -14,6 +13,18 @@ public without sharing class Financial_Advisor_Team_TriggerHandler {
         createFinancialAdvisorTeamMember(newMap);
     }
     public void isAfterUpdate(Map<Id, Financial_Advisor_Team__c> newMap, Map<Id, Financial_Advisor_Team__c> oldMap){
+        // Moved from isBeforeUpdate: updateRepCode reparents Rep_Code__c
+        // records (a master-detail child of this object) onto one of the
+        // teams in newMap, which recalculates that team's own rollup
+        // summary fields -- from inside this object's own Before trigger,
+        // that recalculation lands on a record still "in trigger" for its
+        // own Before phase, which the platform blocks outright
+        // (SELF_REFERENCE_FROM_TRIGGER: "Object ... is currently in trigger
+        // Financial_Advisor_Team_Trigger, therefore it cannot recursively
+        // update itself"). By the After phase this object's own Before-phase
+        // processing for the current invocation has already completed, so
+        // the same reparenting DML no longer collides with it.
+        updateRepCode(newMap,oldMap);
         createAndUpdateFinancialAdvisorTeamMember(newMap,oldMap);
     }
     public void isAfterDelete(Map<Id, Financial_Advisor_Team__c> oldMap){}

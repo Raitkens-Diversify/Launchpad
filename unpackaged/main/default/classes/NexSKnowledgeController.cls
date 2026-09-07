@@ -18,6 +18,10 @@ public with sharing class NexSKnowledgeController {
 
     private static final String DATA_CATEGORY_GROUP = 'Help_Topics';
     private static final Integer MAX_RESULTS = 50;
+    /** getArticlesByCategory: the topic page fetches a main topic's whole
+        subtree once and narrows it client-side (subtopic filter rows), so the
+        browse list needs room for a whole branch, not a search page. */
+    @TestVisible private static final Integer BROWSE_LIMIT = 500;
     private static final Integer MAX_SUGGESTIONS = 6;
     private static final Integer MAX_TYPEAHEAD = 7;   // typeahead dropdown cap
     private static final Integer FALLBACK_COUNT = 5;  // zero-result fallback articles
@@ -79,6 +83,11 @@ public with sharing class NexSKnowledgeController {
         @AuraEnabled public String section;
         /** Subtopic position in the taxonomy, for section ordering. */
         @AuraEnabled public Integer sectionOrder;
+        /** getArticlesByCategory only: every Help_Topics category the article
+            is filed under AT OR BELOW the queried topic, in taxonomy order —
+            the nodes the topic page's path tag and subtopic filters key off.
+            An article filed on the topic itself lists the topic. */
+        @AuraEnabled public List<String> categories = new List<String>();
         /** Relevance score (searchRanked results only; null on browse paths).
             Exposed so cross-app aggregators can rank articles against other
             content types on one scale. */
@@ -577,7 +586,7 @@ public with sharing class NexSKnowledgeController {
             'FROM Knowledge__kav ' +
             'WHERE ' + publishedFilter() +
             dataCategoryClause(category) +
-            ' ORDER BY Featured__c DESC, Title ASC LIMIT ' + MAX_RESULTS;
+            ' ORDER BY Featured__c DESC, Title ASC LIMIT ' + BROWSE_LIMIT;
 
         try {
             List<ArticleSummary> summaries = toSummaries(Database.query(soql));
@@ -879,15 +888,20 @@ public with sharing class NexSKnowledgeController {
         }
         CategoryTreeService.Tree tree = taxonomy();
         CategoryTreeService.TreeNode node = tree.get(topic);
-        if (node == null || node.children.isEmpty()) {
+        if (node == null) {
             return;
         }
+        Set<String> subtree = tree.descendantIdsOf(topic);
+        subtree.add(topic);
 
         Map<Id, ArticleSummary> byId = new Map<Id, ArticleSummary>();
         for (ArticleSummary s : summaries) {
             byId.put(s.id, s);
         }
         // The group-name field isn't filterable in SOQL; filter in Apex.
+        // Selections arrive in no particular order; `categories` is put into
+        // taxonomy order below so the client's first entry is the topmost.
+        Map<Id, Set<String>> filedUnder = new Map<Id, Set<String>>();
         for (Knowledge__DataCategorySelection sel : [
             SELECT ParentId, DataCategoryGroupName, DataCategoryName
             FROM Knowledge__DataCategorySelection
@@ -896,12 +910,28 @@ public with sharing class NexSKnowledgeController {
             if (sel.DataCategoryGroupName != DATA_CATEGORY_GROUP) {
                 continue;
             }
+            if (subtree.contains(sel.DataCategoryName)) {
+                if (!filedUnder.containsKey(sel.ParentId)) {
+                    filedUnder.put(sel.ParentId, new Set<String>());
+                }
+                filedUnder.get(sel.ParentId).add(sel.DataCategoryName);
+            }
+            if (node.children.isEmpty()) {
+                continue;
+            }
             CategoryTreeService.TreeNode child = childOf(tree, sel.DataCategoryName, topic);
             if (child != null) {
                 ArticleSummary s = byId.get(sel.ParentId);
                 if (s.section == null || child.sortOrder < s.sectionOrder) {
                     s.section = child.label;
                     s.sectionOrder = child.sortOrder;
+                }
+            }
+        }
+        for (String catId : tree.orderedIds()) {
+            for (Id articleId : filedUnder.keySet()) {
+                if (filedUnder.get(articleId).contains(catId)) {
+                    byId.get(articleId).categories.add(catId);
                 }
             }
         }

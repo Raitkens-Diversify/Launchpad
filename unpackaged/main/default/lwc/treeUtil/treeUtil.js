@@ -4,8 +4,10 @@
  * ancestor/descendant questions, validates moves (self, own subtree, depth
  * counting the moved subtree's height — the same rules and wording as
  * CategoryTreeService.validateMove), flattens a tree into the rows the
- * presentational components render, and does the small breadcrumb and
- * parent-picker helpers. No LWC imports, no DOM.
+ * presentational components render, does the small breadcrumb and
+ * parent-picker helpers, and answers the topic pages' filter questions
+ * (subtopic pill rows, "is this item under the selected node", the path
+ * tag relative to it). No LWC imports, no DOM.
  *
  * Node shape (both apps): { id, label, slug, parentId, depth (1-based),
  *   path, sortOrder, itemCount, secondaryItemCount, descendantItemCount,
@@ -423,4 +425,132 @@ export function truncateMiddle(items, max) {
     const tail = list.slice(-2);
     const hidden = list.slice(1, list.length - 2);
     return [list[0], { ellipsis: true, hidden }, ...tail];
+}
+
+// ---- Topic-page filtering (subtopic pill rows + path tags) ---------------------
+
+/** The top-level ancestor of `key` (the node itself at depth 1); null when unknown. */
+export function rootOf(tree, key) {
+    const node = tree.byId.get(key);
+    if (!node) {
+        return null;
+    }
+    const chain = ancestorsOf(tree, key);
+    return chain.length ? chain[0] : node;
+}
+
+/**
+ * Nested roots without the non-root nodes whose whole subtree is empty —
+ * the server's public-nav prune (ResourceCenterService.getCategoryTree)
+ * applied client-side, for a host that fetched the full tree (includeEmpty)
+ * but still wants the sidebar to hide empty subtopics. Main topics always
+ * stay. Returns fresh nested nodes; the input is untouched.
+ */
+export function pruneEmpty(roots) {
+    const tree = indexTree(roots);
+    const strip = (node) => {
+        const children = node.children.filter((c) => c.descendantItemCount > 0).map(strip);
+        return { ...node, children, hasChildren: children.length > 0 };
+    };
+    return tree.roots.map(strip);
+}
+
+/**
+ * Labels of the nodes strictly below `baseKey` down to `key` (inclusive),
+ * top-down: on the Operations page an item in Operations › Forms Required ›
+ * Accounts reads ['Forms Required', 'Accounts']; once Forms Required is
+ * selected, ['Accounts']; at the node itself, []. Also [] when `key` is not
+ * under `baseKey` at all.
+ */
+export function relativeLabels(tree, key, baseKey) {
+    const node = tree.byId.get(key);
+    const base = tree.byId.get(baseKey);
+    if (!node || !base || key === baseKey || !node.path.startsWith(base.path)) {
+        return [];
+    }
+    return [...ancestorsOf(tree, key), node]
+        .filter((n) => n.depth > base.depth)
+        .map((n) => n.label);
+}
+
+/**
+ * The first of `keys` (an item's node memberships, most-authoritative first)
+ * that sits at or under `selectedKey`; null when none does — i.e. the item
+ * is outside the selected subtree.
+ */
+export function nodeUnder(tree, keys, selectedKey) {
+    const selected = tree.byId.get(selectedKey);
+    if (!selected) {
+        return null;
+    }
+    for (const key of keys || []) {
+        const n = tree.byId.get(key);
+        if (n && n.path.startsWith(selected.path)) {
+            return n;
+        }
+    }
+    return null;
+}
+
+/** True when any of an item's nodes is at or under the selected node. */
+export function inSubtree(tree, keys, selectedKey) {
+    return nodeUnder(tree, keys, selectedKey) !== null;
+}
+
+/**
+ * The path tag an item shows relative to the selected node: `{ key, label }`
+ * for c-item-path-tag (label = the relative labels joined with ›), or null
+ * when the item sits on the selected node itself (tag hidden) or outside it.
+ */
+export function pathTag(tree, keys, selectedKey) {
+    const node = nodeUnder(tree, keys, selectedKey);
+    if (!node || node.id === selectedKey) {
+        return null;
+    }
+    const labels = relativeLabels(tree, node.id, selectedKey);
+    return labels.length ? { key: node.id, label: labels.join(' › ') } : null;
+}
+
+/**
+ * The cascading subtopic rows for c-subtopic-filter-rows: one row per node on
+ * the path from the top-level topic to the selected node that has children —
+ * the topic's children first, then the selected child's children, and so on.
+ * Rows off the selected path never appear. Each row: `{ key, label, depth,
+ * allCount, selectedKey, pills: [{ key, label, count, selected, disabled }] }`
+ * where `selectedKey` is the child on the path (null = "All" on that row),
+ * `allCount` the row node's subtree count, and a pill is disabled when its
+ * subtree is empty (unless it IS the selected node — a deep link to an empty
+ * subtopic still shows where it landed).
+ */
+export function filterRows(tree, selectedKey) {
+    const selected = tree.byId.get(selectedKey);
+    if (!selected) {
+        return [];
+    }
+    const chain = [...ancestorsOf(tree, selectedKey), selected];
+    const rows = [];
+    chain.forEach((node, i) => {
+        if (!node.children.length) {
+            return;
+        }
+        const next = chain[i + 1] || null;
+        rows.push({
+            key: node.id,
+            label: node.label,
+            depth: rows.length + 1,
+            allCount: node.descendantItemCount || 0,
+            selectedKey: next ? next.id : null,
+            pills: node.children.map((c) => {
+                const isSelected = Boolean(next && next.id === c.id);
+                return {
+                    key: c.id,
+                    label: c.label,
+                    count: c.descendantItemCount || 0,
+                    selected: isSelected,
+                    disabled: !(c.descendantItemCount > 0) && !isSelected
+                };
+            })
+        });
+    });
+    return rows;
 }

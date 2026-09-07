@@ -256,6 +256,15 @@ public with sharing class CategoryTreeService {
             return ids;
         }
 
+        /** Every node id in pre-order (roots first, each branch top-down). */
+        public List<String> orderedIds() {
+            List<String> ids = new List<String>();
+            for (TreeNode n : ordered) {
+                ids.add(n.id);
+            }
+            return ids;
+        }
+
         /** Strict: a node is not its own descendant. */
         public Boolean isDescendant(String id, String ancestorId) {
             TreeNode n = byId.get(id);

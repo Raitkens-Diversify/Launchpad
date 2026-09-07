@@ -30,28 +30,52 @@
                                   collapse-at="4"
                                   oncrumbselect={handleCrumb}></c-ds-breadcrumbs>
 
-                <h1 class="rc-cat__title">{detail.name}</h1>
-                <template if:true={detail.description}>
-                    <p class="rc-cat__desc">{detail.description}</p>
-                </template>
-                <!-- The branch: one card per direct subcategory, same at every depth. -->
-                <template if:true={showSectionCards}>
-                    <c-ds-section-cards label="In this category"
-                                        noun="resource"
-                                        items={sectionCardItems}
-                                        onnavselect={handleSlugSelect}></c-ds-section-cards>
+                <!-- The page is the top-level topic; the pills narrow it. -->
+                <h1 class="rc-cat__title">{pageTitle}</h1>
+                <template if:true={pageDescription}>
+                    <p class="rc-cat__desc">{pageDescription}</p>
                 </template>
 
-                <!-- Own resources, or the ones inherited from the children. The
-                     cards' composed contentselect reaches this listener. -->
-                <template if:true={showList}>
-                    <c-ds-item-list variant="cards"
-                                    noun="resource"
-                                    heading={ownHeading}
-                                    items={ownItems}
-                                    groups={inheritedGroups}
-                                    oncontentselect={handleContentSelect}
-                                    onnavselect={handleSlugSelect}></c-ds-item-list>
+                <!-- Cascading subtopic rows: the route's node decides which rows
+                     show; a pill just asks the host to route (same handler as
+                     the sidebar). -->
+                <template if:true={showFilterRows}>
+                    <c-subtopic-filter-rows rows={filterRowsData}
+                                            onnavselect={handleNavSelect}></c-subtopic-filter-rows>
+                </template>
+
+                <template if:false={isEmpty}>
+                    <div class="rc-cat__toolbar">
+                        <p class="rc-cat__count" aria-live="polite">{countLine}</p>
+                        <!-- The secondary facet: compact chips behind a "Type" label so
+                             they never read as more subtopics. -->
+                        <template if:true={showTypeChips}>
+                            <c-ds-filter-chips label="Type"
+                                               compact
+                                               group-label="Filter by type"
+                                               chips={typeChips}
+                                               selected={typeFilter}
+                                               onselect={handleTypeSelect}></c-ds-filter-chips>
+                        </template>
+                    </div>
+
+                    <!-- Every resource in the selected subtree, flat. The cards'
+                         composed contentselect and the path tags' pathselect both
+                         reach these listeners. -->
+                    <template if:true={hasItems}>
+                        <c-ds-item-list variant="cards"
+                                        noun="resource"
+                                        items={items}
+                                        oncontentselect={handleContentSelect}
+                                        onpathselect={handlePathSelect}></c-ds-item-list>
+                    </template>
+
+                    <template if:true={isTypeEmpty}>
+                        <p class="rc-cat__empty">
+                            {typeEmptyText}
+                            <button type="button" class="rc-cat__link-btn" onclick={handleTypeClear}>Show all types</button>
+                        </p>
+                    </template>
                 </template>
 
                 <template if:true={isEmpty}>

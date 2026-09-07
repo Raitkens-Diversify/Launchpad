@@ -71,6 +71,13 @@
 .ds-il__row:hover {
     background: var(--slds-g-color-surface-container-2, #f3f4f6);
 }
+.ds-il__row-main {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    min-width: 0;
+}
 .ds-il__link {
     color: var(--ds-medium-blue, #1a76bb);
     font-size: 0.9375rem;

@@ -37,8 +37,42 @@
     color: var(--slds-g-color-on-surface-1, #4b5563);
 }
 
-/* Section cards and the resource lists are c-ds-section-cards /
-   c-ds-item-list (cards variant) — their chrome lives there. */
+/* The subtopic pill rows, the Type chips, the path tags and the cards are
+   shared components (c-subtopic-filter-rows, c-ds-filter-chips,
+   c-item-path-tag, c-ds-item-list) — their chrome lives there. */
+c-subtopic-filter-rows {
+    display: block;
+    margin-bottom: var(--ds-space-lg, 16px);
+}
+/* Count line left, the Type facet right; wraps at phone widths. */
+.rc-cat__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-space-sm, 8px) var(--ds-space-lg, 16px);
+    margin: 0 0 var(--ds-space-md, 12px);
+}
+.rc-cat__count {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.rc-cat__link-btn {
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    font-weight: 600;
+    color: var(--ds-medium-blue, #1a76bb);
+    text-decoration: underline;
+    cursor: pointer;
+}
+.rc-cat__link-btn:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
 
 /* Drawer toggle: hidden on desktop, the sidebar's only entry on phones. */
 .rc-cat__nav-toggle {

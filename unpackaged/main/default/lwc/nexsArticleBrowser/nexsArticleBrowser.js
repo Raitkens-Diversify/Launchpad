@@ -13,11 +13,14 @@ import { highlightSegments } from 'c/nexsHighlight';
 // One shared analytics path (dedup + App__c tagging live there).
 import { createSearchLogger, logResultClick, APP_HELP_CENTER } from 'c/searchLogUtil';
 // The Help_Topics tree (any depth): nav rows, ancestor crumbs, scope labels,
-// section cards and the own/inherited article split.
-import { indexTree, findNode, ancestorsOf } from 'c/treeUtil';
+// the subtopic pill rows and the per-article path tags.
+import {
+    indexTree, findNode, ancestorsOf, rootOf, filterRows, inSubtree, pathTag, pluralize
+} from 'c/treeUtil';
 
 const TOPIC_CRUMB = 'topic:';
-const PREVIEW_MAX = 3;
+/** The Type facet's "everything" value (chip values are record-type labels). */
+const TYPE_ALL = 'all';
 
 /** An ArticleSummary as a c-ds-item-list row. */
 function rowOf(a) {
@@ -28,13 +31,22 @@ function rowOf(a) {
  * nexsArticleBrowser
  *
  * Hulu-style help browser: persistent left Data Category nav (c-ds-tree), a
- * prominent search bar, and a main panel that shows the topic's branch as
- * section cards (c-ds-section-cards: one per direct child, any depth) over
- * the topic's own articles — or, when it has none of its own, the articles
- * inherited from its children grouped under linked child headings
- * (c-ds-item-list). Search results keep their single collapsible section.
- * Selecting an article shows nexsArticleViewer inline. A "Need more help?"
- * contact band sits at the bottom.
+ * prominent search bar, and a main panel that shows the TOP-LEVEL topic of
+ * the selected node — its title, cascading subtopic pill rows
+ * (c-subtopic-filter-rows: the topic's children, then the selected child's
+ * children, and so on), a count line with a compact Type facet, and every
+ * article in the selected node's subtree as one flat list (c-ds-item-list)
+ * with a path tag per row saying where it lives relative to the selection.
+ * Filtering, not drilling (2026-09-07; the section-card grid is gone): the
+ * selected topic is the one source of truth — a pill, a path tag, a sidebar
+ * row and a breadcrumb all land in selectCategory, and a routed host mirrors
+ * it into ?topic= so Back/Forward restore the pill state. The browse list is
+ * fetched ONCE per top-level topic (getArticlesByCategory on the root, BELOW
+ * scoped, every row naming its categories) and narrowed client-side with
+ * c/treeUtil; moving between subtopics of one topic never refetches. Search
+ * results keep their single collapsible section. Selecting an article shows
+ * nexsArticleViewer inline. A "Need more help?" contact band sits at the
+ * bottom.
  *
  * Dual-context note: the viewer renders inline (a state swap) rather than
  * navigating, so this one component is drop-in for both the Experience Cloud
@@ -101,8 +113,16 @@ export default class NexsArticleBrowser extends LightningElement {
     _focusTree = false;
     /** Category API name a search is scoped to (BELOW = its subtree); null = all. */
     searchScope = null;
+    /** Search results (searchRanked). Browse rows live in browseArticles. */
     @track articles = [];
     @track sections = [];
+    /** The browse list: every article under the top-level topic of the
+        selected node (`_browseRoot`), narrowed by the getters below. */
+    browseArticles = [];
+    _browseRoot = null;
+    _browseLoading = false;
+    _browseSeq = 0;
+    typeFilter = TYPE_ALL;
     selectedCategory;
     selectedCategoryLabel = '';
     selectedArticleId;
@@ -199,55 +219,108 @@ export default class NexsArticleBrowser extends LightningElement {
         return findNode(this._tree, this.selectedCategory);
     }
 
-    /** Articles the topic list holds under one direct child: the list comes
-        back BELOW the topic with `section` = that child's label (a grandchild
-        filing groups under the child it hangs from). */
-    articlesUnder(child) {
-        return (this.articles || []).filter((a) => a.section != null && a.section === child.label);
-    }
-
-    /** Section cards: the topic's direct children (tree nodes — the card
-        prints countLine() from them) plus a preview of the first titles
-        under each. The Help_Topics tree is unpruned, so an empty subtopic
-        still cards, reading "0 articles", as it does in the sidebar. */
-    get sectionCardItems() {
+    /** The top-level topic the browse page is titled after. */
+    get rootNode() {
         const node = this.selectedNode;
-        return ((node && node.children) || []).map((child) => ({
-            ...child,
-            key: child.id,
-            preview: this.articlesUnder(child).slice(0, PREVIEW_MAX).map((a) => ({ id: a.id, title: a.title }))
-        }));
+        return node ? rootOf(this._tree, node.id) : null;
     }
 
-    get showSectionCards() {
-        return this.showTitle && this.sectionCardItems.length > 0;
+    /** A pill (or deep link) has narrowed the page below its topic. */
+    get isNarrowed() {
+        const node = this.selectedNode;
+        const root = this.rootNode;
+        return Boolean(node && root && node.id !== root.id);
     }
 
-    /** Articles filed on the topic itself (no subtopic section). */
-    get ownArticles() {
-        return (this.articles || []).filter((a) => a.section == null).map(rowOf);
+    /** The browse view's h1: the top-level topic (the selected topic until
+        the tree lands). */
+    get browseTitle() {
+        const root = this.rootNode;
+        return root ? root.label : this.selectedCategoryLabel;
     }
 
-    get ownHeading() {
-        return `Articles in ${this.selectedCategoryLabel}`;
+    /** c-subtopic-filter-rows input: the selected path's rows, from the tree. */
+    get filterRowsData() {
+        const node = this.selectedNode;
+        return node ? filterRows(this._tree, node.id) : [];
     }
 
-    /** Inherited articles grouped by the direct child each hangs from —
-        offered only when the topic has nothing of its own, so a branch page
-        never dead-ends on "No articles here yet" while content sits below. */
-    get inheritedGroups() {
-        if (this.ownArticles.length) {
+    get showFilterRows() {
+        return this.showTitle && this.filterRowsData.length > 0;
+    }
+
+    /** The browse list narrowed to the selected node's subtree. A row from
+        an older server without `categories` is kept rather than dropped. */
+    get subtreeArticles() {
+        const node = this.selectedNode;
+        const rows = this.browseArticles || [];
+        if (!node) {
+            return rows;
+        }
+        return rows.filter((a) => !a.categories || inSubtree(this._tree, a.categories, node.id));
+    }
+
+    typeOf(a) {
+        return a.recordTypeLabel || a.recordType || 'Article';
+    }
+
+    /** …then by type, each row carrying its path tag relative to the selection. */
+    get browseRows() {
+        const node = this.selectedNode;
+        return this.subtreeArticles
+            .filter((a) => this.typeFilter === TYPE_ALL || this.typeOf(a) === this.typeFilter)
+            .map((a) => {
+                const tag = node ? pathTag(this._tree, a.categories || [], node.id) : null;
+                return tag ? { ...rowOf(a), pathLabel: tag.label, pathKey: tag.key } : rowOf(a);
+            });
+    }
+
+    /** The Type facet: one chip per record type present in the selected
+        subtree (live counts), All first; hidden when there is only one. */
+    get typeChips() {
+        const counts = new Map();
+        this.subtreeArticles.forEach((a) => {
+            const type = this.typeOf(a);
+            counts.set(type, (counts.get(type) || 0) + 1);
+        });
+        if (counts.size < 2) {
             return [];
         }
-        const node = this.selectedNode;
-        return ((node && node.children) || [])
-            .map((child) => ({ key: child.id, label: child.label, items: this.articlesUnder(child).map(rowOf) }))
-            .filter((g) => g.items.length > 0);
+        const types = [...counts.keys()].sort((a, b) => a.localeCompare(b));
+        return [
+            { value: TYPE_ALL, label: 'All', count: this.subtreeArticles.length },
+            ...types.map((type) => ({ value: type, label: type, count: counts.get(type) }))
+        ];
+    }
+
+    get showTypeChips() {
+        return this.typeChips.length > 0;
+    }
+
+    /** "12 articles" / "4 articles in Shortcuts" / "2 How-to articles in Shortcuts". */
+    get countLine() {
+        const noun = this.typeFilter === TYPE_ALL ? 'article' : `${this.typeFilter} article`;
+        const text = pluralize(this.browseRows.length, noun);
+        return this.isNarrowed ? `${text} in ${this.selectedCategoryLabel}` : text;
+    }
+
+    /** Count line + Type facet: whenever the selected subtree has anything. */
+    get showToolbar() {
+        return this.showTitle && !this.loadingArticles && this.subtreeArticles.length > 0;
     }
 
     get showList() {
-        return this.showTitle && !this.loadingArticles
-            && (this.ownArticles.length > 0 || this.inheritedGroups.length > 0);
+        return this.showToolbar && this.browseRows.length > 0;
+    }
+
+    /** The subtree has articles, just none of the chosen type. */
+    get showTypeEmpty() {
+        return this.showToolbar && this.browseRows.length === 0;
+    }
+
+    get typeEmptyText() {
+        const where = this.isNarrowed ? ` in ${this.selectedCategoryLabel}` : '';
+        return `No ${this.typeFilter} articles${where}.`;
     }
 
     /** Crumb trail for the shared c-ds-breadcrumbs — Help Center › ancestors…
@@ -286,9 +359,10 @@ export default class NexsArticleBrowser extends LightningElement {
     }
 
     // Category browse with nothing filed on the topic OR anywhere under it —
-    // the list is BELOW-scoped, so empty means the whole subtree is empty.
+    // the list is BELOW-scoped, so empty means the whole subtree is empty
+    // (a Type facet with no matches is showTypeEmpty, not this).
     get showEmpty() {
-        return !this.loadingArticles && this.mode === 'category' && (this.articles || []).length === 0;
+        return !this.loadingArticles && this.mode === 'category' && this.subtreeArticles.length === 0;
     }
 
     // Search that returned nothing — never blank; show fallback articles + CTA.
@@ -361,10 +435,25 @@ export default class NexsArticleBrowser extends LightningElement {
 
     // ---- Category nav --------------------------------------------------------
 
+    /** Sidebar rows, pills and path tags all hand back a topic API name. */
     handleNavSelect(event) {
         const key = event.detail.key;
         const match = (this.categories || []).find((c) => c.name === key);
         this.selectCategory(key, match ? match.label : key);
+    }
+
+    /** c-item-path-tag's composed pathselect (from inside a list row). */
+    handlePathSelect(event) {
+        event.stopPropagation();
+        this.handleNavSelect(event);
+    }
+
+    handleTypeSelect(event) {
+        this.typeFilter = event.detail.value || TYPE_ALL;
+    }
+
+    handleTypeClear() {
+        this.typeFilter = TYPE_ALL;
     }
 
     /** Phone-width drawer: open moves focus into the tree, close returns it. */
@@ -419,6 +508,7 @@ export default class NexsArticleBrowser extends LightningElement {
         this.selectedArticleId = null;
         this.articleTitle = '';
         this._lastSearchLogId = null; // leaving search mode — don't attribute clicks to a stale search
+        this.leaveSearch();
         // Routed hosts mirror the topic into ?topic= so Back/Forward walk the
         // tree too (mirror of articleopen). Non-routed hosts don't listen.
         this.dispatchEvent(new CustomEvent('topicchange', {
@@ -427,35 +517,67 @@ export default class NexsArticleBrowser extends LightningElement {
         this.loadArticles();
     }
 
+    /** Drop search state (and outrun a search still in flight) so the browse
+        view never shows a results section that lands late. */
+    leaveSearch() {
+        this._articlesSeq += 1;
+        this.articles = [];
+        this.sections = [];
+        this.fallbackArticles = [];
+    }
+
     /**
-     * Stale-response guard shared by every path that writes `articles` — a
-     * search, a category load, or a scope change. A reader who searches again
-     * before the first list lands would otherwise get whichever request
-     * happened to resolve last, which is not necessarily the one on screen.
+     * Stale-response guard for every path that writes `articles` — a search
+     * or a scope change. A reader who searches again before the first list
+     * lands would otherwise get whichever request happened to resolve last,
+     * which is not necessarily the one on screen.
      */
     _articlesSeq = 0;
 
+    /** The topic whose subtree the browse list holds: the selected topic's
+        top-level ancestor once the tree is known, the topic itself before. */
+    browseRootFor(name) {
+        const root = rootOf(this._tree, name);
+        return root ? root.id : name;
+    }
+
+    /**
+     * Fetch the browse list for the selected topic's top-level topic — once.
+     * Selecting another node under the same root just re-narrows what is
+     * already here (the getters key off selectedCategory), so pills, path
+     * tags and the sidebar never wait on the server.
+     */
     async loadArticles() {
-        const seq = ++this._articlesSeq;
+        const root = this.browseRootFor(this.selectedCategory);
+        if (root === this._browseRoot) {
+            this.loadingArticles = this._browseLoading;
+            return;
+        }
+        const seq = ++this._browseSeq;
+        this._browseRoot = root;
+        this.browseArticles = [];
+        this._browseLoading = true;
         this.loadingArticles = true;
         try {
-            const rows = await getArticlesByCategory({ category: this.selectedCategory });
-            if (seq !== this._articlesSeq) {
+            const rows = await getArticlesByCategory({ category: root });
+            if (seq !== this._browseSeq) {
                 return;
             }
-            this.articles = rows;
-            this.buildSections();
+            this.browseArticles = rows || [];
         } catch (e) {
-            if (seq !== this._articlesSeq) {
+            if (seq !== this._browseSeq) {
                 return;
             }
-            this.articles = [];
-            this.sections = [];
+            this.browseArticles = [];
+            this._browseRoot = null; // let the next selection retry
             // eslint-disable-next-line no-console
             console.error('nexsArticleBrowser article load error', e);
         } finally {
-            if (seq === this._articlesSeq) {
-                this.loadingArticles = false;
+            if (seq === this._browseSeq) {
+                this._browseLoading = false;
+                if (this.mode === 'category') {
+                    this.loadingArticles = false;
+                }
             }
         }
     }
@@ -526,6 +648,7 @@ export default class NexsArticleBrowser extends LightningElement {
         if (!term.trim()) {
             this.mode = 'category';
             this._lastSearchLogId = null;
+            this.leaveSearch();
             this.loadArticles();
             return;
         }
@@ -614,7 +737,7 @@ export default class NexsArticleBrowser extends LightningElement {
     buildSections() {
         const rows = this.articles || [];
         // Search results stay as one open "Results" section; category browse
-        // renders c-ds-section-cards + c-ds-item-list straight from `articles`.
+        // renders the pill rows + c-ds-item-list from browseArticles instead.
         this.sections = rows.length && this.mode === 'search'
             ? [{ key: 'results', title: this.panelHeading, open: true, articles: rows }]
             : [];

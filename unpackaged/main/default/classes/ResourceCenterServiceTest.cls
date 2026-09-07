@@ -123,8 +123,15 @@ private class ResourceCenterServiceTest {
         };
 
         Test.startTest();
-        CategoryTreeService.TreeDTO tree = ResourceCenterService.getCategoryTree();
+        CategoryTreeService.TreeDTO tree = ResourceCenterService.getCategoryTree(null);
+        CategoryTreeService.TreeDTO full = ResourceCenterService.getCategoryTree(true);
         Test.stopTest();
+
+        // includeEmpty: the same tree with the empty subtopic kept (the topic
+        // page's filter rows show it as a disabled pill).
+        Assert.areEqual(new List<String>{ 'flyers', 'empty-sub' }, childSlugs(rootsBySlug(full).get('marketing')),
+            'includeEmpty keeps an empty active subtopic, in display order.');
+        Assert.areEqual(0, rootsBySlug(full).get('marketing').children[1].descendantItemCount);
 
         Map<String, CategoryTreeService.TreeNode> bySlug = rootsBySlug(tree);
         Assert.isTrue(bySlug.containsKey('marketing'), 'Marketing is a nav topic.');
@@ -181,6 +188,13 @@ private class ResourceCenterServiceTest {
         // Marketing page: the Flyers section holds the whole Flyers subtree.
         Assert.areEqual(new List<String>{ 'brand-flyer', 'deep-poster' }, slugs(marketing.sections[0].resources),
             'A grandchild resource groups under the child it hangs from.');
+        // The flat list carries everything once, in display order, and each
+        // card names the page category it lives in (the filter rows' key).
+        Assert.areEqual(new List<String>{ 'brand-flyer', 'partner-site', 'deep-poster' }, slugs(marketing.allResources),
+            'allResources: the whole subtree flat, Display_Order__c then Name.');
+        Assert.areEqual(new List<Id>{ printId }, marketing.allResources[2].pageCategoryIds,
+            'A grandchild resource keys off its own (depth-3) category, not the child section.');
+        Assert.areEqual(new List<Id>{ categoryId('marketing') }, marketing.allResources[1].pageCategoryIds);
         Assert.areEqual(1, marketing.subcategories.size(), 'Tiles stay direct children only.');
         Assert.areEqual(2, marketing.subcategories[0].resourceCount, 'Tile count covers the subtree.');
         Assert.isTrue(marketing.hasChildren);
@@ -1034,7 +1048,7 @@ private class ResourceCenterServiceTest {
         link('partner-site', templates);
 
         Test.startTest();
-        CategoryTreeService.TreeDTO tree = ResourceCenterService.getCategoryTree();
+        CategoryTreeService.TreeDTO tree = ResourceCenterService.getCategoryTree(false);
         Test.stopTest();
 
         Assert.areEqual(new List<String>{ 'flyers', 'templates' }, childSlugs(rootsBySlug(tree).get('marketing')),
@@ -1063,6 +1077,11 @@ private class ResourceCenterServiceTest {
             'Templates lists the resource also shown there.');
         Assert.areEqual(0, marketing.resources.size(),
             'General is empty: the direct-filed resource is already in a named section.');
+        Assert.areEqual(new List<String>{ 'brand-flyer', 'partner-site' }, slugs(marketing.allResources),
+            'The flat list carries each card once even when it sits in two sections.');
+        Assert.areEqual(new List<Id>{ categoryId('flyers'), templates }, marketing.allResources[0].pageCategoryIds,
+            'Memberships: home first, then the Also-show-in placement.');
+        Assert.areEqual(new List<Id>{ categoryId('marketing'), categoryId('flyers') }, marketing.allResources[1].pageCategoryIds);
     }
 
     @isTest
@@ -1098,7 +1117,7 @@ private class ResourceCenterServiceTest {
         Test.startTest();
         List<ResourceCenterService.CategoryTile> tiles = ResourceCenterService.getTopLevelCategories();
         ResourceCenterService.CategoryDetail marketing = ResourceCenterService.getCategoryBySlug('marketing');
-        CategoryTreeService.TreeDTO tree = ResourceCenterService.getCategoryTree();
+        CategoryTreeService.TreeDTO tree = ResourceCenterService.getCategoryTree(null);
         Test.stopTest();
 
         Assert.areEqual(1, tiles.size(), 'The inactive category is still no tile.');

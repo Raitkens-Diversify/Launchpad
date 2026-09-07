@@ -347,6 +347,40 @@
     text-decoration: underline;
 }
 
+/* Subtopic pill rows (shared c-subtopic-filter-rows) sit right under the title. */
+c-subtopic-filter-rows {
+    display: block;
+    margin-bottom: var(--slds-g-spacing-4, 16px);
+}
+/* Count line left, the Type facet right; wraps at phone widths. */
+.nexs__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--slds-g-spacing-2, 8px) var(--slds-g-spacing-4, 16px);
+    margin: 0 0 var(--slds-g-spacing-3, 12px);
+}
+.nexs__count {
+    margin: 0;
+    font-size: var(--slds-g-font-scale-2, 0.875rem);
+    font-weight: 600;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+.nexs__link-btn {
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    font-weight: 600;
+    color: var(--ds-medium-blue, #1a76bb);
+    text-decoration: underline;
+    cursor: pointer;
+}
+.nexs__link-btn:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
 .nexs__empty {
     color: var(--slds-g-color-on-surface-1, #4b5563);
     font-size: var(--slds-g-font-scale-2, 0.875rem);

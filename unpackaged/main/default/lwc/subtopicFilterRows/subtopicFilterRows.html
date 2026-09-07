@@ -1,0 +1,44 @@
+<template>
+    <template if:true={hasRows}>
+        <div class="sfr">
+            <template for:each={rowViews} for:item="row">
+                <div key={row.key} class={row.cssClass} role="group" aria-label={row.groupLabel}>
+                    <!-- All first: selecting it routes to the row's own node,
+                         which clears every row below. -->
+                    <button type="button" class={row.allClass}
+                            aria-pressed={row.allPressed}
+                            data-key={row.key}
+                            onclick={handleSelect}>{row.allText}</button>
+                    <template for:each={row.pills} for:item="p">
+                        <button key={p.key} type="button" class={p.cssClass}
+                                aria-pressed={p.pressed}
+                                disabled={p.disabled}
+                                data-key={p.key}
+                                onclick={handleSelect}>{p.text}</button>
+                    </template>
+                    <template if:true={row.hasMore}>
+                        <div class="sfr__more" onkeydown={handleMenuKeydown}>
+                            <button type="button" class="sfr__pill sfr__pill--more"
+                                    aria-haspopup="menu"
+                                    aria-expanded={row.moreExpanded}
+                                    data-row={row.key}
+                                    onclick={handleMoreToggle}>{row.moreLabel} <span class="sfr__caret" aria-hidden="true">&#9662;</span></button>
+                            <template if:true={row.menuOpen}>
+                                <ul class="sfr__menu" role="menu" aria-label={row.groupLabel}>
+                                    <template for:each={row.hidden} for:item="p">
+                                        <li key={p.key} role="none">
+                                            <button type="button" role="menuitem" class={p.menuClass}
+                                                    disabled={p.disabled}
+                                                    data-key={p.key}
+                                                    onclick={handleSelect}>{p.text}</button>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </div>
+    </template>
+</template>

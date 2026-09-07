@@ -21,7 +21,26 @@
 .ds-chips {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: var(--ds-space-sm, 8px);
+}
+.ds-chips__lead {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+}
+/* Compact: the secondary facet next to a primary pill row (topic pages'
+   Type chips) — same recipe, a size down, so the two kinds don't read alike. */
+.ds-chips--compact .ds-chips__chip {
+    padding: 3px 10px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+.ds-chips--compact .ds-chips__count {
+    font-size: 0.625rem;
+    padding: 0 5px;
 }
 
 /* 999px radius: the blessed full-pill idiom (the 20px --ds-radius-pill
