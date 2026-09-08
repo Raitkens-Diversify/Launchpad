@@ -45,15 +45,10 @@ export default class NotificationCenterDashboard extends NavigationMixin(
   get kpiCards() {
     const queuedCount = this.dashboardStats.queuedCount || 0;
     const nextDigestRunLabel = this.dashboardStats.nextDigestRunLabel;
-    const digestTimezoneAbbreviation =
-      this.dashboardStats.digestTimezoneAbbreviation || "";
-    const digestTimezoneLabel = this.dashboardStats.digestTimezoneLabel || "";
     let queuedSub = "none queued";
 
     if (queuedCount > 0 && nextDigestRunLabel) {
-      queuedSub = digestTimezoneAbbreviation
-        ? `next: ${nextDigestRunLabel} ${digestTimezoneAbbreviation}`
-        : `next: ${nextDigestRunLabel}`;
+      queuedSub = `next: ${nextDigestRunLabel}`;
     } else if (queuedCount > 0) {
       queuedSub = "awaiting next digest run";
     }

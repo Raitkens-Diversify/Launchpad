@@ -264,6 +264,18 @@ private class NotificationTaskEmailContentServiceTest {
     System.assertEquals('New task', logRecord.Title__c);
     System.assert(!logRecord.Body__c.contains('<table'), 'In-app body should be plain text');
     System.assert(logRecord.Body__c.contains('In-app task'));
+    System.assert(
+      !logRecord.Body__c.contains(NotificationConstants.DISPLAY_NOT_APPLICABLE),
+      'In-app body should omit (n/a) fields'
+    );
+    System.assert(
+      !logRecord.Body__c.contains('Case Summary Name'),
+      'In-app body should hide Case Summary Name when unavailable'
+    );
+    System.assert(
+      !logRecord.Body__c.contains('Case Comments'),
+      'In-app body should hide Case Comments when unavailable'
+    );
   }
 
   @IsTest

@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-09-07
+ * Date: 2026-09-08
  *
  * Builds consolidated digest title/body for grouped notification logs.
  */
@@ -92,7 +92,44 @@ public with sharing class NotificationDigestMessageBuilder {
   }
 
   public static String buildEmailSubjectLabel(String sourceType) {
-    return normalizeSourceType(sourceType) + ' Digest';
+    return 'My ' + normalizeSourceType(sourceType) + ' Digest';
+  }
+
+  public static String buildImmediateEmailSubject(Notification_Log__c logRecord) {
+    String sourceType = logRecord == null ? null : logRecord.Source_Type__c;
+    String typeLabel = normalizeSourceType(sourceType);
+    NotificationChangeModels.ChangeContext changeContext = logRecord == null
+      ? null
+      : NotificationChangeModels.fromJson(logRecord.Change_Context__c);
+
+    Boolean isInsert =
+      changeContext == null ||
+      String.isBlank(changeContext.triggerType) ||
+      NotificationChangeModels.isInsertTriggerType(changeContext.triggerType);
+
+    if (!isInsert) {
+      return typeLabel + ' Updated';
+    }
+
+    String detail = resolveImmediateInsertDetail(sourceType, logRecord);
+
+    if (sourceType == NotificationConstants.OBJECT_TYPE_CASE) {
+      return String.isBlank(detail)
+        ? 'New Case Created'
+        : 'New Case Created: ' + detail;
+    }
+
+    if (sourceType == NotificationConstants.OBJECT_TYPE_TASK) {
+      return String.isBlank(detail) ? 'New Task' : 'New Task: ' + detail;
+    }
+
+    if (sourceType == NotificationConstants.OBJECT_TYPE_EVENT) {
+      return String.isBlank(detail) ? 'New Event' : 'New Event: ' + detail;
+    }
+
+    return String.isBlank(detail)
+      ? 'New ' + typeLabel
+      : 'New ' + typeLabel + ': ' + detail;
   }
 
   private static String buildTitle(
@@ -112,6 +149,100 @@ public with sharing class NotificationDigestMessageBuilder {
 
   private static String normalizeSourceType(String sourceType) {
     return String.isBlank(sourceType) ? 'Notification' : sourceType.trim();
+  }
+
+  private static String resolveImmediateInsertDetail(
+    String sourceType,
+    Notification_Log__c logRecord
+  ) {
+    Id sourceRecordId = parseSourceRecordId(logRecord);
+
+    if (sourceRecordId == null) {
+      return null;
+    }
+
+    if (sourceType == NotificationConstants.OBJECT_TYPE_CASE) {
+      return queryCaseSummary(sourceRecordId);
+    }
+
+    if (sourceType == NotificationConstants.OBJECT_TYPE_TASK) {
+      return queryTaskSubject(sourceRecordId);
+    }
+
+    if (sourceType == NotificationConstants.OBJECT_TYPE_EVENT) {
+      return queryEventSubject(sourceRecordId);
+    }
+
+    return null;
+  }
+
+  private static Id parseSourceRecordId(Notification_Log__c logRecord) {
+    if (logRecord == null || String.isBlank(logRecord.Source_Record_Id__c)) {
+      return null;
+    }
+
+    try {
+      return (Id) logRecord.Source_Record_Id__c;
+    } catch (Exception error) {
+      return null;
+    }
+  }
+
+  private static String queryCaseSummary(Id caseId) {
+    List<Case> cases = [
+      SELECT Subject, CaseNumber, Case_Branch_Name_DisplayName__c
+      FROM Case
+      WHERE Id = :caseId
+      LIMIT 1
+    ];
+
+    if (cases.isEmpty()) {
+      return null;
+    }
+
+    Case caseRecord = cases[0];
+
+    if (!String.isBlank(caseRecord.Case_Branch_Name_DisplayName__c)) {
+      return caseRecord.Case_Branch_Name_DisplayName__c.trim();
+    }
+
+    if (!String.isBlank(caseRecord.Subject)) {
+      return caseRecord.Subject.trim();
+    }
+
+    return String.isBlank(caseRecord.CaseNumber)
+      ? null
+      : caseRecord.CaseNumber.trim();
+  }
+
+  private static String queryTaskSubject(Id taskId) {
+    List<Task> tasks = [
+      SELECT Subject
+      FROM Task
+      WHERE Id = :taskId
+      LIMIT 1
+    ];
+
+    if (tasks.isEmpty() || String.isBlank(tasks[0].Subject)) {
+      return null;
+    }
+
+    return tasks[0].Subject.trim();
+  }
+
+  private static String queryEventSubject(Id eventId) {
+    List<Event> events = [
+      SELECT Subject
+      FROM Event
+      WHERE Id = :eventId
+      LIMIT 1
+    ];
+
+    if (events.isEmpty() || String.isBlank(events[0].Subject)) {
+      return null;
+    }
+
+    return events[0].Subject.trim();
   }
 
   private static String resolveSingleHouseholdName(List<Notification_Log__c> logs) {

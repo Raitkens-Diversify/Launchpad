@@ -595,20 +595,51 @@ public without sharing class NotificationEventEmailContentService {
 
   private static String buildPlainBody(EventEmailContext context) {
     List<String> lines = new List<String>();
-    lines.add('Subject: ' + displayEventSubject(context.eventRecord));
-    lines.add('Change Made: ' + buildChangeMadeSummary(context.changeContext));
-    lines.add('Assigned To: ' + displayAssignedTo(context.eventRecord));
-    lines.add('Attendees: ' + context.attendeeSummary);
-    lines.add('Start Date/Time: ' + displayStartDateTime(context.eventRecord));
-    lines.add('End Date/Time: ' + displayEndDateTime(context.eventRecord));
-    lines.add('Contact: ' + displayContactName(context.contactRecord));
-    lines.add(
-      'Household: ' +
-      (context.householdAccount == null
-        ? NotificationConstants.DISPLAY_NOT_APPLICABLE
-        : context.householdAccount.Name)
+    NotificationConstants.addPlainBodyLine(
+      lines,
+      'Subject',
+      displayEventSubject(context.eventRecord)
     );
-    lines.add('Description: ' + displayDescription(context.eventRecord));
+    NotificationConstants.addPlainBodyLine(
+      lines,
+      'Change Made',
+      buildChangeMadeSummary(context.changeContext)
+    );
+    NotificationConstants.addPlainBodyLine(
+      lines,
+      'Assigned To',
+      displayAssignedTo(context.eventRecord)
+    );
+    NotificationConstants.addPlainBodyLine(
+      lines,
+      'Attendees',
+      context.attendeeSummary
+    );
+    NotificationConstants.addPlainBodyLine(
+      lines,
+      'Start Date/Time',
+      displayStartDateTime(context.eventRecord)
+    );
+    NotificationConstants.addPlainBodyLine(
+      lines,
+      'End Date/Time',
+      displayEndDateTime(context.eventRecord)
+    );
+    NotificationConstants.addPlainBodyLine(
+      lines,
+      'Contact',
+      displayContactName(context.contactRecord)
+    );
+    NotificationConstants.addPlainBodyLine(
+      lines,
+      'Household',
+      context.householdAccount == null ? null : context.householdAccount.Name
+    );
+    NotificationConstants.addPlainBodyLine(
+      lines,
+      'Description',
+      displayDescription(context.eventRecord)
+    );
     return String.join(lines, '\n');
   }
 

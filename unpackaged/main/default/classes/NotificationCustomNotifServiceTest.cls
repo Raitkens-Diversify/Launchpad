@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-06-17
+ * Date: 2026-09-08
  */
 @IsTest
 private class NotificationCustomNotifServiceTest {
@@ -63,6 +63,26 @@ private class NotificationCustomNotifServiceTest {
     );
 
     System.assertEquals('Open the notification to view details.', body);
+  }
+
+  @IsTest
+  static void buildNotificationBody_omitsNotApplicableFields() {
+    Notification_Log__c logRecord = new Notification_Log__c(
+      Body__c =
+        'Subject: Schedule Lunch\n' +
+        'Change Made: Task created\n' +
+        'Case Summary Name: (n/a)\n' +
+        'Household: (n/a)\n' +
+        'Case Comments: (n/a)'
+    );
+
+    String body = NotificationCustomNotificationService.buildNotificationBody(
+      logRecord
+    );
+
+    System.assert(body.contains('Subject: Schedule Lunch'));
+    System.assert(!body.contains(NotificationConstants.DISPLAY_NOT_APPLICABLE));
+    System.assert(!body.contains('Case Summary Name'));
   }
 
   @IsTest

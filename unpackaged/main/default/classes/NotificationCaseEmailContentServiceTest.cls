@@ -84,6 +84,13 @@ private class NotificationCaseEmailContentServiceTest {
     System.assert(result.htmlBody.contains(household.Name));
     System.assert(result.htmlBody.contains('Case created'));
     System.assertEquals(String.valueOf(caseRecord.Id), result.targetRecordId);
+    System.assert(
+      result.plainBody.startsWith('Subject: Portfolio Service Request'),
+      'In-app Case Subject should be first so the alert does not cut it off'
+    );
+    System.assert(
+      !result.plainBody.contains(NotificationConstants.DISPLAY_NOT_APPLICABLE)
+    );
   }
 
   @IsTest

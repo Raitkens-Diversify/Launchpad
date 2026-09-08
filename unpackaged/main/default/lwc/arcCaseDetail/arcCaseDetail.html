@@ -298,24 +298,6 @@
             </template>
           </template>
 
-          <!-- All Tasks table, restored on request (2026-09-08) after
-               922fd5a3 dropped it along with three other sections. -->
-          <lightning-card title={allTasksLabel}>
-            <template lwc:if={hasTasks}>
-              <c-arc-data-table
-                aria-label="Tasks for this case"
-                key-field="id"
-                columns={taskColumns}
-                data={tasks}
-                placeholder="-"
-                enable-row-navigation
-              ></c-arc-data-table>
-            </template>
-            <template lwc:else>
-              <div class="slds-p-around_medium">No Tasks Found.</div>
-            </template>
-          </lightning-card>
-
           <template lwc:if={hasOpenHouseholdCases}>
             <lightning-card title={openHouseholdCasesLabel}>
               <!-- lightning-card renders the actions slot in the header,

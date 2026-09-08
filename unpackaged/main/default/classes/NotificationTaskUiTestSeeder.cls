@@ -6,7 +6,7 @@
  * ownership scenarios AC1 (NexS) and AC2 (Home Office).
  */
 public without sharing class NotificationTaskUiTestSeeder {
-  public static final Id DEFAULT_HOUSEHOLD_ID = SimpsonMapDemoDataSeeder.HOUSEHOLD_ID;
+  public static final Id DEFAULT_HOUSEHOLD_ID = '001Su00000qMUazIAG';
 
   public class SeedResult {
     public Id householdId;

@@ -508,23 +508,46 @@ public without sharing class NotificationCaseEmailContentService {
 
   private static String buildPlainBody(CaseEmailContext context) {
     List<String> lines = new List<String>();
-    lines.add(
-      'Case Summary Name: ' + displayCaseSummaryName(context.caseRecord)
+    NotificationConstants.addPlainBodyLine(
+      lines,
+      'Subject',
+      displaySubject(context.caseRecord)
     );
-    lines.add('Subject: ' + displaySubject(context.caseRecord));
-    lines.add('Change Made: ' + buildChangeMadeSummary(context.changeContext));
-    lines.add('Assigned To: ' + displayOwner(context.caseRecord));
-    lines.add(
-      'Financial Advisor Team: ' + displayFinancialAdvisorTeam(context.caseRecord)
+    NotificationConstants.addPlainBodyLine(
+      lines,
+      'Case Summary Name',
+      displayCaseSummaryName(context.caseRecord)
     );
-    lines.add('Due Date: ' + displayDueDate(context.caseRecord));
-    lines.add(
-      'Household: ' +
-      (context.householdAccount == null
-        ? NotificationConstants.DISPLAY_NOT_APPLICABLE
-        : context.householdAccount.Name)
+    NotificationConstants.addPlainBodyLine(
+      lines,
+      'Change Made',
+      buildChangeMadeSummary(context.changeContext)
     );
-    lines.add('Case Comments: ' + displayCaseComments(context));
+    NotificationConstants.addPlainBodyLine(
+      lines,
+      'Assigned To',
+      displayOwner(context.caseRecord)
+    );
+    NotificationConstants.addPlainBodyLine(
+      lines,
+      'Financial Advisor Team',
+      displayFinancialAdvisorTeam(context.caseRecord)
+    );
+    NotificationConstants.addPlainBodyLine(
+      lines,
+      'Due Date',
+      displayDueDate(context.caseRecord)
+    );
+    NotificationConstants.addPlainBodyLine(
+      lines,
+      'Household',
+      context.householdAccount == null ? null : context.householdAccount.Name
+    );
+    NotificationConstants.addPlainBodyLine(
+      lines,
+      'Case Comments',
+      displayCaseComments(context)
+    );
     return String.join(lines, '\n');
   }
 

@@ -111,7 +111,7 @@ public without sharing class NotificationRuleMixSeeder {
       LIMIT 1
     ];
 
-    return seedForUser(runningUser.Username, SimpsonMapDemoDataSeeder.HOUSEHOLD_ID);
+    return seedForUser(runningUser.Username, NotificationCaseUiTestSeeder.DEFAULT_HOUSEHOLD_ID);
   }
 
   public static void logResult(SeedResult result) {
@@ -313,6 +313,6 @@ public without sharing class NotificationRuleMixSeeder {
       return householdId;
     }
 
-    return SimpsonMapDemoDataSeeder.HOUSEHOLD_ID;
+    return NotificationCaseUiTestSeeder.DEFAULT_HOUSEHOLD_ID;
   }
 }

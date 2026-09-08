@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-09-07
+ * Date: 2026-09-08
  */
 @IsTest
 private class NotificationDigestMessageBuilderTest {
@@ -96,30 +96,30 @@ private class NotificationDigestMessageBuilderTest {
       ),
       message.title
     );
-    System.assert(message.title.contains('Case Digest'));
+    System.assert(message.title.contains('My Case Digest'));
     System.assert(message.title.contains(context.household.Name));
   }
 
   @IsTest
   static void buildEmailSubjectUsesSourceTypeAndDate() {
     System.assertEquals(
-      'Notification Digest - ' + Date.today().format(),
+      'My Notification Digest - ' + Date.today().format(),
       NotificationDigestMessageBuilder.buildEmailSubject()
     );
     System.assertEquals(
-      'Task Digest - ' + Date.today().format(),
+      'My Task Digest - ' + Date.today().format(),
       NotificationDigestMessageBuilder.buildEmailSubject(
         NotificationConstants.OBJECT_TYPE_TASK
       )
     );
     System.assertEquals(
-      'Case Digest - ' + Date.today().format(),
+      'My Case Digest - ' + Date.today().format(),
       NotificationDigestMessageBuilder.buildEmailSubject(
         NotificationConstants.OBJECT_TYPE_CASE
       )
     );
     System.assertEquals(
-      'Event Digest - ' + Date.today().format(),
+      'My Event Digest - ' + Date.today().format(),
       NotificationDigestMessageBuilder.buildEmailSubject(
         NotificationConstants.OBJECT_TYPE_EVENT
       )
@@ -127,21 +127,21 @@ private class NotificationDigestMessageBuilderTest {
   }
 
   @IsTest
-  static void buildEmailSubjectLabelUsesCapitalizedTypeDigest() {
+  static void buildEmailSubjectLabelUsesMyObjectDigest() {
     System.assertEquals(
-      'Task Digest',
+      'My Task Digest',
       NotificationDigestMessageBuilder.buildEmailSubjectLabel(
         NotificationConstants.OBJECT_TYPE_TASK
       )
     );
     System.assertEquals(
-      'Case Digest',
+      'My Case Digest',
       NotificationDigestMessageBuilder.buildEmailSubjectLabel(
         NotificationConstants.OBJECT_TYPE_CASE
       )
     );
     System.assertEquals(
-      'Event Digest',
+      'My Event Digest',
       NotificationDigestMessageBuilder.buildEmailSubjectLabel(
         NotificationConstants.OBJECT_TYPE_EVENT
       )
@@ -157,7 +157,7 @@ private class NotificationDigestMessageBuilderTest {
     );
 
     System.assertEquals(
-      'Task Digest — ' +
+      'My Task Digest — ' +
         context.household.Name +
         ' - ' +
         Date.today().format(),
@@ -184,11 +184,128 @@ private class NotificationDigestMessageBuilderTest {
     );
 
     System.assertEquals(
-      'Case Digest - ' + Date.today().format(),
+      'My Case Digest - ' + Date.today().format(),
       subject
     );
     System.assert(!subject.contains(context.household.Name));
     System.assert(!subject.contains(otherHousehold.Name));
+  }
+
+  @IsTest
+  static void buildImmediateEmailSubjectUsesNewAndUpdatedFormats() {
+    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+    Case caseRecord = new Case(
+      Subject = 'Portfolio review case',
+      AccountId = context.household.Id
+    );
+    Task taskRecord = new Task(
+      Subject = 'Follow up paperwork',
+      WhatId = context.household.Id,
+      Status = 'Not Started'
+    );
+    Event eventRecord = new Event(
+      Subject = 'Advisor check-in',
+      WhatId = context.household.Id,
+      StartDateTime = System.now().addDays(1),
+      EndDateTime = System.now().addDays(1).addHours(1)
+    );
+    NotificationTestDataFactory.insertRecords(
+      new List<SObject>{ caseRecord, taskRecord, eventRecord }
+    );
+
+    Case insertedCase = [
+      SELECT Subject, Case_Branch_Name_DisplayName__c
+      FROM Case
+      WHERE Id = :caseRecord.Id
+    ];
+    String expectedCaseSummary = String.isBlank(
+        insertedCase.Case_Branch_Name_DisplayName__c
+      )
+      ? insertedCase.Subject
+      : insertedCase.Case_Branch_Name_DisplayName__c;
+
+    System.assertEquals(
+      'New Case Created: ' + expectedCaseSummary,
+      NotificationDigestMessageBuilder.buildImmediateEmailSubject(
+        new Notification_Log__c(
+          Source_Type__c = NotificationConstants.OBJECT_TYPE_CASE,
+          Source_Record_Id__c = String.valueOf(caseRecord.Id),
+          Change_Context__c = new NotificationChangeModels.ChangeContext(
+              NotificationConstants.OBJECT_TYPE_CASE,
+              NotificationConstants.CHANGE_TYPE_INSERT
+            )
+            .toJson()
+        )
+      )
+    );
+    System.assertEquals(
+      'Case Updated',
+      NotificationDigestMessageBuilder.buildImmediateEmailSubject(
+        new Notification_Log__c(
+          Source_Type__c = NotificationConstants.OBJECT_TYPE_CASE,
+          Source_Record_Id__c = String.valueOf(caseRecord.Id),
+          Change_Context__c = new NotificationChangeModels.ChangeContext(
+              NotificationConstants.OBJECT_TYPE_CASE,
+              NotificationConstants.CHANGE_TYPE_UPDATE
+            )
+            .toJson()
+        )
+      )
+    );
+    System.assertEquals(
+      'New Task: Follow up paperwork',
+      NotificationDigestMessageBuilder.buildImmediateEmailSubject(
+        new Notification_Log__c(
+          Source_Type__c = NotificationConstants.OBJECT_TYPE_TASK,
+          Source_Record_Id__c = String.valueOf(taskRecord.Id),
+          Change_Context__c = new NotificationChangeModels.ChangeContext(
+              NotificationConstants.OBJECT_TYPE_TASK,
+              NotificationConstants.CHANGE_TYPE_INSERT
+            )
+            .toJson()
+        )
+      )
+    );
+    System.assertEquals(
+      'Task Updated',
+      NotificationDigestMessageBuilder.buildImmediateEmailSubject(
+        new Notification_Log__c(
+          Source_Type__c = NotificationConstants.OBJECT_TYPE_TASK,
+          Change_Context__c = new NotificationChangeModels.ChangeContext(
+              NotificationConstants.OBJECT_TYPE_TASK,
+              NotificationConstants.CHANGE_TYPE_UPDATE
+            )
+            .toJson()
+        )
+      )
+    );
+    System.assertEquals(
+      'New Event: Advisor check-in',
+      NotificationDigestMessageBuilder.buildImmediateEmailSubject(
+        new Notification_Log__c(
+          Source_Type__c = NotificationConstants.OBJECT_TYPE_EVENT,
+          Source_Record_Id__c = String.valueOf(eventRecord.Id),
+          Change_Context__c = new NotificationChangeModels.ChangeContext(
+              NotificationConstants.OBJECT_TYPE_EVENT,
+              NotificationConstants.CHANGE_TYPE_INSERT
+            )
+            .toJson()
+        )
+      )
+    );
+    System.assertEquals(
+      'Event Updated',
+      NotificationDigestMessageBuilder.buildImmediateEmailSubject(
+        new Notification_Log__c(
+          Source_Type__c = NotificationConstants.OBJECT_TYPE_EVENT,
+          Change_Context__c = new NotificationChangeModels.ChangeContext(
+              NotificationConstants.OBJECT_TYPE_EVENT,
+              NotificationConstants.CHANGE_TYPE_UPDATE
+            )
+            .toJson()
+        )
+      )
+    );
   }
 
   @IsTest
@@ -302,7 +419,7 @@ private class NotificationDigestMessageBuilderTest {
       NotificationDigestMessageBuilder.EMAIL_BODY_LIMIT
     );
 
-    System.assert(message.title.contains('Case Digest'));
+    System.assert(message.title.contains('My Case Digest'));
     System.assert(!String.isBlank(message.body));
   }
 

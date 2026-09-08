@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-06-17
+ * Date: 2026-09-08
  *
  * Sends Salesforce custom notifications for the Notification_Preference type.
  */
@@ -46,7 +46,7 @@ public with sharing class NotificationCustomNotificationService {
       return 'Open the notification to view details.';
     }
 
-    return item.Body__c;
+    return NotificationConstants.omitNotApplicablePlainBodyLines(item.Body__c);
   }
 
   public static void sendNotification(
@@ -172,7 +172,14 @@ public with sharing class NotificationCustomNotificationService {
       return value;
     }
 
-    return value.substring(0, maxLength);
+    String truncated = value.substring(0, maxLength);
+    Integer lastNewline = truncated.lastIndexOf('\n');
+
+    if (lastNewline > 0) {
+      return truncated.substring(0, lastNewline);
+    }
+
+    return truncated;
   }
 
   public class NotificationCustomNotificationException extends Exception {

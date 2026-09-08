@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-09-07
+ * Date: 2026-09-08
  *
  * Unified notification delivery for immediate and digest channels.
  * Immediate in-app and email are isolated so an email send failure cannot
@@ -580,8 +580,8 @@ public without sharing class NotificationDeliveryService {
       );
     }
 
-    return NotificationDigestMessageBuilder.buildEmailSubjectLabel(
-      logRecord.Source_Type__c
+    return NotificationDigestMessageBuilder.buildImmediateEmailSubject(
+      logRecord
     );
   }
 

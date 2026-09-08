@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-09-04
+ * Date: 2026-09-08
  */
 @IsTest
 private class NotificationConstantsTest {
@@ -202,5 +202,41 @@ private class NotificationConstantsTest {
     );
     System.assertEquals(false, NotificationConstants.isPitStopTask(new Task()));
     System.assertEquals(false, NotificationConstants.isPitStopTask(null));
+  }
+
+  @IsTest
+  static void omitNotApplicablePlainBodyLines_hidesNaFields() {
+    String body =
+      'Subject: Schedule Lunch\n' +
+      'Change Made: Task created\n' +
+      'Assigned To: Leslie Page\n' +
+      'Due Date: 8/28/2026\n' +
+      'Case Summary Name: (n/a)\n' +
+      'Household: (n/a)\n' +
+      'Case Comments: (n/a)';
+
+    String filtered = NotificationConstants.omitNotApplicablePlainBodyLines(body);
+
+    System.assert(filtered.contains('Subject: Schedule Lunch'));
+    System.assert(filtered.contains('Due Date: 8/28/2026'));
+    System.assert(!filtered.contains('Case Summary Name'));
+    System.assert(!filtered.contains('Household'));
+    System.assert(!filtered.contains('Case Comments'));
+    System.assert(!filtered.contains(NotificationConstants.DISPLAY_NOT_APPLICABLE));
+  }
+
+  @IsTest
+  static void addPlainBodyLine_skipsBlankAndNaValues() {
+    List<String> lines = new List<String>();
+    NotificationConstants.addPlainBodyLine(lines, 'Subject', 'Portfolio review');
+    NotificationConstants.addPlainBodyLine(
+      lines,
+      'Household',
+      NotificationConstants.DISPLAY_NOT_APPLICABLE
+    );
+    NotificationConstants.addPlainBodyLine(lines, 'Comments', null);
+
+    System.assertEquals(1, lines.size());
+    System.assertEquals('Subject: Portfolio review', lines[0]);
   }
 }

@@ -1,4 +1,4 @@
-/* Author: Hoang Long Vu To | Date: 2026-06-16 */
+/* Author: Hoang Long Vu To | Date: 2026-09-08 */
 
 .notification-item {
   cursor: pointer;
@@ -71,6 +71,9 @@
   font-size: var(--div-font-scale-base);
   line-height: 1.4;
   color: var(--slds-g-color-neutral-base-30, #444444);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .notification-item__meta {

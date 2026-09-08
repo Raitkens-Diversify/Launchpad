@@ -588,18 +588,41 @@ public without sharing class NotificationTaskEmailContentService {
 
   private static String buildPlainBody(TaskEmailContext context) {
     List<String> lines = new List<String>();
-    lines.add('Subject: ' + displayTaskLabel(context.taskRecord));
-    lines.add('Change Made: ' + buildChangeMadeSummary(context.changeContext));
-    lines.add('Assigned To: ' + displayAssignedTo(context.taskRecord));
-    lines.add('Due Date: ' + displayDueDate(context.taskRecord));
-    lines.add('Case Summary Name: ' + displayCaseLabel(context.caseRecord));
-    lines.add(
-      'Household: ' +
-      (context.householdAccount == null
-        ? NotificationConstants.DISPLAY_NOT_APPLICABLE
-        : context.householdAccount.Name)
+    NotificationConstants.addPlainBodyLine(
+      lines,
+      'Subject',
+      displayTaskLabel(context.taskRecord)
     );
-    lines.add('Case Comments: ' + displayCaseComments(context));
+    NotificationConstants.addPlainBodyLine(
+      lines,
+      'Change Made',
+      buildChangeMadeSummary(context.changeContext)
+    );
+    NotificationConstants.addPlainBodyLine(
+      lines,
+      'Assigned To',
+      displayAssignedTo(context.taskRecord)
+    );
+    NotificationConstants.addPlainBodyLine(
+      lines,
+      'Due Date',
+      displayDueDate(context.taskRecord)
+    );
+    NotificationConstants.addPlainBodyLine(
+      lines,
+      'Case Summary Name',
+      displayCaseLabel(context.caseRecord)
+    );
+    NotificationConstants.addPlainBodyLine(
+      lines,
+      'Household',
+      context.householdAccount == null ? null : context.householdAccount.Name
+    );
+    NotificationConstants.addPlainBodyLine(
+      lines,
+      'Case Comments',
+      displayCaseComments(context)
+    );
     return String.join(lines, '\n');
   }
 

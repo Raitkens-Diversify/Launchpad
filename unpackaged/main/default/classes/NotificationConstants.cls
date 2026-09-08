@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-06-03
+ * Date: 2026-09-08
  *
  * Shared constants for the household notification framework.
  */
@@ -9,6 +9,10 @@ public class NotificationConstants {
   public static final String OBJECT_TYPE_TASK = 'Task';
   public static final String OBJECT_TYPE_EVENT = 'Event';
   public static final String OBJECT_TYPE_NOTIFICATION_LOG = 'Notification_Log';
+
+  public static final String PROFILE_NEXS = UserInfoUtils.PROFILE_NEXS;
+  public static final String PROFILE_HOME_OFFICE = UserInfoUtils.PROFILE_HOME_OFFICE;
+  public static final String PROFILE_SYSTEM_ADMINISTRATOR = 'System Administrator';
 
   public static final String CHANGE_TYPE_INSERT = 'Insert';
   public static final String CHANGE_TYPE_UPDATE = 'Update';
@@ -131,6 +135,60 @@ public class NotificationConstants {
 
   /** Standard placeholder when a notification display value is unavailable. */
   public static final String DISPLAY_NOT_APPLICABLE = '(n/a)';
+
+  public static Boolean isOmittedDisplayValue(String value) {
+    return String.isBlank(value) || value.trim() == DISPLAY_NOT_APPLICABLE;
+  }
+
+  public static void addPlainBodyLine(
+    List<String> lines,
+    String label,
+    String value
+  ) {
+    if (lines == null || isOmittedDisplayValue(value)) {
+      return;
+    }
+
+    lines.add(label + ': ' + value);
+  }
+
+  public static String omitNotApplicablePlainBodyLines(String body) {
+    if (String.isBlank(body) || !body.contains(DISPLAY_NOT_APPLICABLE)) {
+      return body;
+    }
+
+    List<String> keptLines = new List<String>();
+
+    for (String line : body.split('\n', -1)) {
+      if (isNotApplicablePlainBodyLine(line)) {
+        continue;
+      }
+
+      keptLines.add(line);
+    }
+
+    return String.join(keptLines, '\n').trim();
+  }
+
+  private static Boolean isNotApplicablePlainBodyLine(String line) {
+    if (String.isBlank(line)) {
+      return false;
+    }
+
+    String trimmedLine = line.trim();
+
+    if (trimmedLine == DISPLAY_NOT_APPLICABLE) {
+      return true;
+    }
+
+    Integer colonIndex = trimmedLine.indexOf(':');
+
+    if (colonIndex < 0 || colonIndex == trimmedLine.length() - 1) {
+      return false;
+    }
+
+    return trimmedLine.substring(colonIndex + 1).trim() == DISPLAY_NOT_APPLICABLE;
+  }
 
   public static final Decimal CATEGORY_URGENT_MIN_PRIORITY = 40;
   public static final Decimal CATEGORY_SERVICE_MIN_PRIORITY = 10;
