@@ -177,19 +177,42 @@ export function isSameSite(ctx, loc = window.location) {
 }
 
 /**
+ * The origin that actually serves files for a core-app host (enhanced
+ * domains): `x.lightning.force.com` / `x.my.salesforce.com` →
+ * `https://x.file.force.com` (sandboxes keep their `--name.sandbox` part).
+ * Null for any other host, so callers keep the path as is.
+ */
+export function fileOrigin(hostname) {
+    const match = /^(.+)\.(lightning\.force|my\.salesforce)\.com$/.exec(hostname || '');
+    return match ? `https://${match[1]}.file.force.com` : null;
+}
+
+/**
  * Href for a Salesforce file-servlet path on the current surface. Apex bakes
- * ROOT-relative Shepherd paths (`/sfc/servlet.shepherd/...`): right in the core
- * app, and on *.my.site.com only because an Aura site at the domain root
- * happens to answer them. An LWR site serves the servlet under its own path
- * prefix — `<sitePath>/sfsites/c/sfc/...` — and on a custom domain
- * (arc.diversify.com, where the LWR site IS the root) the root form redirects
- * to a login: an <img> preview gets HTML (→ onerror, "no preview") and an
- * <a download> saves that HTML as an .htm. Only `/sfc/` paths are rewritten;
- * absolute URLs (ContentDistribution) and non-servlet paths pass through.
+ * ROOT-relative Shepherd paths (`/sfc/servlet.shepherd/...`), which only
+ * *.my.site.com answers directly (an Aura site at the domain root). Every
+ * other host needs a rewrite, or an <img> preview gets HTML (→ onerror, "no
+ * preview") and an <a download> saves that HTML as an .htm:
+ *   - an LWR site serves the servlet under its own path prefix —
+ *     `<sitePath>/sfsites/c/sfc/...` — and on a custom domain
+ *     (arc.diversify.com, where the LWR site IS the root) the root form
+ *     redirects to a login;
+ *   - the core app (2026-09-08): with enhanced domains the Lightning host does
+ *     not serve `/sfc/` at all — it answers the Lightning app shell / a 301 to
+ *     the file domain — so the servlet is addressed on `x.file.force.com`
+ *     directly, exactly where Lightning's own file previews and downloads go
+ *     (`fileOrigin`).
+ * Only `/sfc/` paths are rewritten; absolute URLs (ContentDistribution) and
+ * non-servlet paths pass through.
  */
 export function fileHref(ctx, path) {
-    if (!path || isInternal(ctx) || !path.startsWith('/sfc/')) {
+    if (!path || !path.startsWith('/sfc/')) {
         return path || null;
+    }
+    if (isInternal(ctx)) {
+        const origin = fileOrigin(typeof window !== 'undefined' && window.location
+            ? window.location.hostname : '');
+        return origin ? origin + path : path;
     }
     const scope = siteScope(ctx);
     return scope ? `${scope.path}/sfsites/c${path}` : path;
@@ -233,6 +256,15 @@ export function articleHref(ctx, urlName) {
     return isInternal(ctx)
         ? internalHref(TABS.article, { name: urlName })
         : pageBase(ctx, 'articleBase', '/article') + '?name=' + encodeURIComponent(urlName);
+}
+
+/** The Help Center's home: the article page with nothing named (2026-09-07:
+    the bare route IS the app home — the page with no params is a distinct
+    page from every topic). Internally the Help_Center_Article tab. */
+export function helpCenterHref(ctx) {
+    return isInternal(ctx)
+        ? internalHref(TABS.article, {})
+        : pageBase(ctx, 'articleBase', '/article');
 }
 
 /** Topic-browse deep link (no article named). */
@@ -327,6 +359,9 @@ export function homeHref(ctx) {
  */
 function navigate(cmp, options) {
     const { ctx, absolute, tab, state, fallbackEvent, relative } = options;
+    // `replace` swaps the current history entry instead of pushing one — for
+    // the legacy-URL shims, so Back never lands on a page that only redirects.
+    const replace = Boolean(options.replace);
 
     if (absolute) {
         if (isSameSite(ctx) && !sameRoute(absolute, window.location)) {
@@ -335,7 +370,7 @@ function navigate(cmp, options) {
                     cmp[NavigationMixin.Navigate]({
                         type: 'standard__webPage',
                         attributes: { url: siteRelative(absolute) }
-                    });
+                    }, replace);
                     return;
                 } catch (e) {
                     // Fall through — a reload is never a dead end.
@@ -351,7 +386,11 @@ function navigate(cmp, options) {
                 return;
             }
         }
-        window.location.assign(absolute);
+        if (replace && typeof window.location.replace === 'function') {
+            window.location.replace(absolute);
+        } else {
+            window.location.assign(absolute);
+        }
         return;
     }
 
@@ -367,7 +406,7 @@ function navigate(cmp, options) {
                 type: 'standard__navItemPage',
                 attributes: { apiName: tab },
                 state: pageState
-            });
+            }, replace);
             return;
         } catch (e) {
             // Fall through — an unavailable router is not a dead end.
@@ -386,16 +425,22 @@ function navigate(cmp, options) {
     }
 
     if (relative) {
-        window.location.assign(relative);
+        if (replace && typeof window.location.replace === 'function') {
+            window.location.replace(relative);
+        } else {
+            window.location.assign(relative);
+        }
     }
 }
 
-/** Open an article by UrlName, or open topic-browse when only topic is given. */
+/** Open an article by UrlName, or open topic-browse when only topic is given.
+    `replace: true` swaps the history entry (the legacy ?article= shim). */
 export function goToArticle(cmp, ctx, target) {
-    const { urlName, topic } = target || {};
+    const { urlName, topic, replace } = target || {};
     const absolute = urlName ? articleHref(ctx, urlName) : topicHref(ctx, topic);
     navigate(cmp, {
         ctx,
+        replace,
         absolute: isInternal(ctx) ? null : absolute,
         tab: TABS.article,
         state: { name: urlName, topic },
@@ -460,5 +505,17 @@ export function goToHome(cmp, ctx) {
         tab: TABS.home,
         state: {},
         relative: './'
+    });
+}
+
+/** The Help Center's own home (helpCenterHref) — the cross-app "Help Center"
+    links and the hub's tile want THIS, never the hub and never a topic. */
+export function goToHelpCenter(cmp, ctx) {
+    navigate(cmp, {
+        ctx,
+        absolute: isInternal(ctx) ? null : helpCenterHref(ctx),
+        tab: TABS.article,
+        state: {},
+        relative: './article'
     });
 }
