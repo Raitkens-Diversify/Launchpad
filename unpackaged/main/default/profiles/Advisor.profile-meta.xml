@@ -2670,7 +2670,7 @@
     <applicationVisibilities>
         <application>Resource_Center</application>
         <default>false</default>
-        <visible>false</visible>
+        <visible>true</visible>
     </applicationVisibilities>
     <applicationVisibilities>
         <application>Sales</application>
@@ -4103,6 +4103,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Financial_Account__c.Federal_Withholding__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Financial_Account__c.Fee_Schedule__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -21510,6 +21515,16 @@
         <allowEdit>false</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>false</modifyAllRecords>
+        <object>Resource_Category_Link__c</object>
+        <viewAllFields>false</viewAllFields>
+        <viewAllRecords>false</viewAllRecords>
+    </objectPermissions>
+    <objectPermissions>
+        <allowCreate>false</allowCreate>
+        <allowDelete>false</allowDelete>
+        <allowEdit>false</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
         <object>Resource_Category__c</object>
         <viewAllFields>false</viewAllFields>
         <viewAllRecords>false</viewAllRecords>
@@ -23593,7 +23608,7 @@
     </tabVisibilities>
     <tabVisibilities>
         <tab>Resource_Center</tab>
-        <visibility>Hidden</visibility>
+        <visibility>DefaultOn</visibility>
     </tabVisibilities>
     <tabVisibilities>
         <tab>Service__c</tab>

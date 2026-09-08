@@ -214,6 +214,7 @@
         <customTabListAdditionalFields>CASES.PRIORITY</customTabListAdditionalFields>
         <excludedStandardButtons>OpenListInQuip</excludedStandardButtons>
         <excludedStandardButtons>NewFromDocument</excludedStandardButtons>
+        <excludedStandardButtons>ImeDistributionAction</excludedStandardButtons>
         <excludedStandardButtons>NewCase</excludedStandardButtons>
         <excludedStandardButtons>MassAccept</excludedStandardButtons>
         <excludedStandardButtons>Accept</excludedStandardButtons>
@@ -225,7 +226,7 @@
         <excludedStandardButtons>PrintableListView</excludedStandardButtons>
         <excludedStandardButtons>MassAddToActionableList</excludedStandardButtons>
         <excludedStandardButtons>MassAssignRecordLabel</excludedStandardButtons>
-        <listViewButtons>New_AdHoc_Case</listViewButtons>
+        <excludedStandardButtons>SendToGrid</excludedStandardButtons>
         <lookupDialogsAdditionalFields>CASES.CASE_NUMBER</lookupDialogsAdditionalFields>
         <lookupDialogsAdditionalFields>CASES.SUBJECT</lookupDialogsAdditionalFields>
         <lookupDialogsAdditionalFields>NAME</lookupDialogsAdditionalFields>

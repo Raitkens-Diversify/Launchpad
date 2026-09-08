@@ -6621,6 +6621,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Financial_Account__c.Fee_Schedule__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Financial_Account__c.Fiduciary_Services__c</field>
         <readable>true</readable>
     </fieldPermissions>
