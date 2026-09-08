@@ -1174,6 +1174,12 @@ public with sharing class EnvelopeHouseholdMemberController {
     // An entity that owns an RIA account has one IMA per Authorized Person / Trustee, so a change to
     // its related parties reshapes those IMAs.
     EnvelopeIMAAgreementService.reconcile(envelopeId);
+
+    // A BD-owning entity's New Account Agreement is signed by those same related parties.
+    EnvelopeNewAccountAgreementService.reconcile(envelopeId);
+
+    // An entity that owns a qualifying DPI signs its Investment Representations document too.
+    EnvelopeDpiRepresentationsService.reconcile(envelopeId);
     return rejectedRoles;
   }
 
@@ -1421,6 +1427,13 @@ public with sharing class EnvelopeHouseholdMemberController {
     // ownership change reshapes them too.
     EnvelopeIMAAgreementService.reconcile(envelopeId);
 
+    // New Account Agreements are the BD-account counterpart, likewise owner-driven.
+    EnvelopeNewAccountAgreementService.reconcile(envelopeId);
+
+    // A DPI's Investment Representations document is signed by its owners (expanded to fiduciaries),
+    // so an ownership change reshapes it.
+    EnvelopeDpiRepresentationsService.reconcile(envelopeId);
+
     // An owner left holding no role on this account also leaves the envelope, so the Household
     // Outline stops showing it. Read back rather than diffed from the payload, for the same reason as
     // above: a person removed from one role but still holding another is not a removal. A party still
@@ -1623,14 +1636,22 @@ public with sharing class EnvelopeHouseholdMemberController {
     // the owners who have not yet signed that addendum, not every owner — so they are excluded here
     // and owned by EnvelopeAccountAddendumService instead. Every other account document (the
     // account-opening doc) is signed by all owners, which is what this rebuilds.
+    // Managed docs that hang off Financial_Account__c but manage their own signees are skipped: the
+    // platform addenda (owners not yet signed) and the DPI Investment Representations document
+    // (owners expanded to their fiduciaries).
     Set<String> addendumSuffixes = EnvelopeAccountAddendumService.addendumSuffixes();
+    Set<String> dpiRepDocNames = EnvelopeDpiRepresentationsService.docNames();
     List<Required_Documents__c> docs = new List<Required_Documents__c>();
     for (Required_Documents__c doc : [
       SELECT Id, Name
       FROM Required_Documents__c
       WHERE Financial_Account__c = :financialAccountId
     ]) {
-      if (doc.Name != null && endsWithAny(doc.Name, addendumSuffixes)) {
+      if (
+        doc.Name != null &&
+        (endsWithAny(doc.Name, addendumSuffixes) ||
+        dpiRepDocNames.contains(doc.Name))
+      ) {
         continue;
       }
       docs.add(doc);

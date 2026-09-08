@@ -315,4 +315,149 @@ public class Task_TriggerHandlerTest {
         ];
         System.assertNotEquals(null, restoredTask.Id);
     }
+
+    @isTest
+    public static void testPitStopCompletionReassignsByFaTeamPermission() {
+        // Financial_Advisor_Team_TriggerHandler.updateRepCode (fired through the dlrs
+        // rollup when a team member is inserted) looks up a team literally named
+        // 'Default Team' and throws "List has no rows" without one.
+        insert new Financial_Advisor_Team__c(Name = 'Default Team');
+
+        Financial_Advisor_Team__c fat = new Financial_Advisor_Team__c(Name = 'Pit Stop FAT');
+        insert fat;
+
+        insert new Financial_Advisor_Team_Member__c(
+            Financial_Advisor_Team__c = fat.Id,
+            User__c = UserInfo.getUserId(),
+            Primary__c = true
+        );
+
+        Task_Template__c tmpl = new Task_Template__c(
+            Assigned_To__c = 'FA Team Permission',
+            FA_Team_Permission__c = 'Advisor'
+        );
+        insert tmpl;
+
+        Case c = new Case(Subject = 'Pit Stop Case', Financial_Advisor_Team__c = fat.Id);
+        insert c;
+
+        Task blocked = new Task(
+            Subject = 'Blocked Main Track Task',
+            Status = 'Blocked',
+            WhatId = c.Id,
+            Full_Template_Order__c = 2,
+            Task_Template__c = tmpl.Id
+        );
+        Task pitStop = new Task(
+            Subject = 'Branch Pit Stop',
+            Status = 'Not Started',
+            WhatId = c.Id,
+            Branch_Pit_Stop__c = true
+        );
+        insert new List<Task>{ blocked, pitStop };
+
+        // Complete the pit stop by a plain DML update so the trigger, not the LWC
+        // controller, drives the reassignment.
+        Test.startTest();
+        pitStop.Status = 'Completed';
+        update pitStop;
+        Test.stopTest();
+
+        Task updated = [SELECT Status, OwnerId FROM Task WHERE Id = :blocked.Id];
+        Assert.areEqual('Not Started', updated.Status, 'Blocked task should be reactivated by the trigger');
+        Assert.areEqual(UserInfo.getUserId(), updated.OwnerId, 'Should reassign to the FAT primary member');
+
+        Case updatedCase = [SELECT Current_Task_Id__c FROM Case WHERE Id = :c.Id];
+        Assert.areEqual(blocked.Id, updatedCase.Current_Task_Id__c, 'Case current task should point to the reactivated task');
+    }
+
+    @isTest
+    public static void testPitStopCompletionReassignsByQueue() {
+        Map<String, Id> queues = createQueues(new List<String>{ 'Operations' });
+
+        Task_Template__c tmpl = new Task_Template__c(
+            Assigned_To__c = 'Queue',
+            Queue__c = 'Back Office Operations'
+        );
+        insert tmpl;
+
+        Case c = new Case(Subject = 'Pit Stop Queue Case');
+        insert c;
+
+        Task blocked = new Task(
+            Subject = 'Blocked Queue Task',
+            Status = 'Blocked',
+            WhatId = c.Id,
+            Full_Template_Order__c = 3,
+            Task_Template__c = tmpl.Id
+        );
+        Task pitStop = new Task(
+            Subject = 'Home Office Pit Stop',
+            Status = 'Not Started',
+            WhatId = c.Id,
+            Home_Office_Pit_Stop__c = true
+        );
+        insert new List<Task>{ blocked, pitStop };
+
+        Test.startTest();
+        pitStop.Status = 'Completed';
+        update pitStop;
+        Test.stopTest();
+
+        Task updated = [SELECT Status, OwnerId FROM Task WHERE Id = :blocked.Id];
+        Assert.areEqual('Not Started', updated.Status, 'Blocked task should be reactivated by the trigger');
+        Assert.areEqual(queues.get('Operations'), updated.OwnerId, 'Should reassign to the Operations queue');
+    }
+
+    @isTest
+    public static void testNonPitStopCompletionLeavesBlockedTask() {
+        Case c = new Case(Subject = 'Non Pit Stop Case');
+        insert c;
+
+        Task blocked = new Task(
+            Subject = 'Blocked Task',
+            Status = 'Blocked',
+            WhatId = c.Id,
+            Full_Template_Order__c = 2
+        );
+        // A completed task that is NOT a pit stop and carries no template item, so
+        // neither the new reactivation nor updateOwnerAndDueDateOnTask should touch
+        // the blocked task.
+        Task other = new Task(
+            Subject = 'Ordinary Task',
+            Status = 'Not Started',
+            WhatId = c.Id
+        );
+        insert new List<Task>{ blocked, other };
+
+        Test.startTest();
+        other.Status = 'Completed';
+        update other;
+        Test.stopTest();
+
+        Task stillBlocked = [SELECT Status FROM Task WHERE Id = :blocked.Id];
+        Assert.areEqual('Blocked', stillBlocked.Status, 'A non-pit-stop completion must not reactivate the blocked task');
+    }
+
+    private static Map<String, Id> createQueues(List<String> names) {
+        Map<String, Id> result = new Map<String, Id>();
+        System.runAs(new User(Id = UserInfo.getUserId())) {
+            List<Group> groups = new List<Group>();
+            for (String name : names) {
+                groups.add(new Group(Name = name, Type = 'Queue'));
+            }
+            insert groups;
+
+            List<QueueSObject> queueSobjects = new List<QueueSObject>();
+            for (Group g : groups) {
+                queueSobjects.add(new QueueSObject(QueueId = g.Id, SObjectType = 'Task'));
+            }
+            insert queueSobjects;
+
+            for (Group g : groups) {
+                result.put(g.Name, g.Id);
+            }
+        }
+        return result;
+    }
 }

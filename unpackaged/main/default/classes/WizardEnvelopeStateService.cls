@@ -213,7 +213,9 @@ public with sharing class WizardEnvelopeStateService {
         // other input, handled from saveAccountRoles.
         if (
             data.containsKey('BD_or_RIA__c') ||
-            data.containsKey('Managed_Account_Platform__c')
+            data.containsKey('Managed_Account_Platform__c') ||
+            data.containsKey('Product_Type__c') ||
+            data.containsKey('DPI__c')
         ) {
             Id accountEnvelopeId = envelopeForAccount(recordId);
             EnvelopeAccountAddendumService.reconcile(recordId, accountEnvelopeId);
@@ -223,6 +225,10 @@ public with sharing class WizardEnvelopeStateService {
             // A BD/RIA change decides whether an account's owners need an Investment Management
             // Agreement, so reconcile the envelope's IMAs too.
             EnvelopeIMAAgreementService.reconcile(accountEnvelopeId);
+            // The BD counterpart: a change to or from 'BD' reshapes the New Account Agreements.
+            EnvelopeNewAccountAgreementService.reconcile(accountEnvelopeId);
+            // A DPI's product type decides whether it needs an Investment Representations document.
+            EnvelopeDpiRepresentationsService.reconcile(accountEnvelopeId);
         }
     }
 
@@ -840,6 +846,10 @@ return result;
         EnvelopeCourtesyAgreementService.reconcile(envelopeId);
         // Removing an RIA account can leave owners without an IMA, so reconcile those too.
         EnvelopeIMAAgreementService.reconcile(envelopeId);
+        // Likewise a removed BD account for New Account Agreements.
+        EnvelopeNewAccountAgreementService.reconcile(envelopeId);
+        // And a removed DPI for its Investment Representations document.
+        EnvelopeDpiRepresentationsService.reconcile(envelopeId);
         return result;
     }
 

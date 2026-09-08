@@ -19,16 +19,26 @@ public class Task_TriggerHandler {
     
     public void isAfterInsert(Map<Id, Task> newMap){
         setIsSystemAssignedField(newMap.values());
+        NotificationChangePublisher.publishInserts(
+            NotificationConstants.OBJECT_TYPE_TASK,
+            newMap.values()
+        );
         //CaseTaskAutomationService.processAfterInsert(newMap);
     }
     
     public void isAfterUpdate(Map<Id, Task> newMap, Map<Id, Task> oldMap){
         updateOwnerAndDueDateOnTask(newMap.values(), oldMap);
+        reassignNextTaskAfterPitStopCompletion(newMap.values(), oldMap);
         setDateOfDeathOnCase(newMap.values(), oldMap);
         recalcOn3WayCall(newMap, oldMap);
         updateCaseStatus(newMap.values(), oldMap);
         setIsSystemAssignedField(newMap.values());
         updateCaseGroupOwnerField(newMap,oldMap);
+        NotificationChangePublisher.publishUpdates(
+            NotificationConstants.OBJECT_TYPE_TASK,
+            newMap,
+            oldMap
+        );
         //createCaseFeed(newMap.values(), oldMap);
         //CaseTaskAutomationService.processAfterUpdate(newMap, oldMap);
     }
@@ -354,10 +364,71 @@ public class Task_TriggerHandler {
             update updatedCaseMap.values();
         } 
         if(!updateTasksMap.isEmpty()){
-            update updateTasksMap.values();	           
+            update updateTasksMap.values();
         }
     }
-    
+
+    /**
+     * When a Branch or Home Office Pit Stop task is completed (Status moves to
+     * 'Completed'), re-activate the task the Pit Stop had parked in 'Blocked'
+     * status: for each affected Case, the first incomplete blocked task (by
+     * Full_Template_Order__c) is set back to 'Not Started', reassigned from its
+     * Task Template via TaskTemplateAssignmentService, and stamped on the Case as
+     * the Current_Task_Id__c. Mirrors CaseCurrentTaskController.reactivateNextTaskAfterPitStop
+     * so completions that do not go through the LWC also unblock the next task.
+     */
+    private static void reassignNextTaskAfterPitStopCompletion(List<Task> newList, Map<Id, Task> oldMap){
+        Set<Id> caseIds = new Set<Id>();
+        for(Task newTask : newList){
+            Task oldTask = oldMap.get(newTask.Id);
+            Boolean isPitStop = newTask.Branch_Pit_Stop__c == true || newTask.Home_Office_Pit_Stop__c == true;
+            Boolean newlyCompleted = newTask.Status == 'Completed' && newTask.Status != oldTask.Status;
+            Boolean isCaseWhatId = newTask.WhatId != null && String.valueOf(newTask.WhatId).startsWith('500');
+            if(isPitStop && newlyCompleted && isCaseWhatId){
+                caseIds.add(newTask.WhatId);
+            }
+        }
+
+        if(caseIds.isEmpty()){
+            return;
+        }
+
+        // First incomplete blocked task per Case, ordered by Full_Template_Order__c.
+        Map<Id, Task> nextTaskByCase = new Map<Id, Task>();
+        for(Task blockedTask : [
+            SELECT Id, WhatId, Full_Template_Order__c,
+                   Task_Template__r.Assigned_To__c,
+                   Task_Template__r.Queue__c,
+                   Task_Template__r.FA_Team_Permission__c
+            FROM Task
+            WHERE WhatId IN :caseIds
+            AND IsClosed = false
+            AND Status = 'Blocked'
+            ORDER BY Full_Template_Order__c ASC NULLS LAST
+        ]){
+            if(!nextTaskByCase.containsKey(blockedTask.WhatId)){
+                nextTaskByCase.put(blockedTask.WhatId, blockedTask);
+            }
+        }
+
+        if(nextTaskByCase.isEmpty()){
+            return;
+        }
+
+        List<Task> nextTasks = nextTaskByCase.values();
+        for(Task nextTask : nextTasks){
+            nextTask.Status = 'Not Started';
+        }
+        TaskTemplateAssignmentService.assignOwners(nextTasks);
+        update nextTasks;
+
+        List<Case> casesToUpdate = new List<Case>();
+        for(Id caseId : nextTaskByCase.keySet()){
+            casesToUpdate.add(new Case(Id = caseId, Current_Task_Id__c = nextTaskByCase.get(caseId).Id));
+        }
+        update casesToUpdate;
+    }
+
     private static void setDateOfDeathOnCase(List<Task> newList, Map<Id, Task> oldMap){
         List<Case> casesToUpdate = new List<Case>();
         for(Task task : newList){
