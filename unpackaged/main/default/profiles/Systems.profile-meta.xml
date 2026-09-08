@@ -4017,6 +4017,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Financial_Account__c.Account_Nickname__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Financial_Account__c.Courtesy_Account_Agreement_Signed_Date__c</field>
         <readable>true</readable>
     </fieldPermissions>

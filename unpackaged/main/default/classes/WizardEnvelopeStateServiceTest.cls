@@ -2060,4 +2060,37 @@ private class WizardEnvelopeStateServiceTest {
         System.assertEquals(true, hasCaseLink, 'A content row should link the new Case.');
     }
 
+    // ---------------------------------------------------------------------------------------------
+    // getHouseholdMembersAndAccounts — the account projection carries the nickname the advisor
+    // typed when adding the account, alongside the record Name the trigger rebuilds, so the
+    // Household Outline can keep titling the row by the nickname (2026-09-08).
+    // ---------------------------------------------------------------------------------------------
+    @IsTest
+    static void testGetHouseholdMembersAndAccounts_ProjectsNicknameBesideName() {
+        Account household = [SELECT Id FROM Account WHERE Name = 'Test Household' LIMIT 1];
+        Envelope__c env = [SELECT Id FROM Envelope__c LIMIT 1];
+
+        Financial_Account__c finAccount = [SELECT Id FROM Financial_Account__c WHERE Name = 'FA 1' LIMIT 1];
+        finAccount.Account_Nickname__c = 'Louie Wade - Individual';
+        update finAccount;
+        // An unsubmitted account is in scope only through its envelope link.
+        insert new Envelope_Content__c(Envelope__c = env.Id, Wizard_Financial_Account__c = finAccount.Id);
+
+        Test.startTest();
+        WizardEnvelopeStateService.HouseholdMembersAndAccountsWrapper wrapper =
+            WizardEnvelopeStateService.getHouseholdMembersAndAccounts(household.Id, env.Id);
+        Test.stopTest();
+
+        WizardEnvelopeStateService.AccountData projected;
+        for (WizardEnvelopeStateService.AccountData account : wrapper.accounts) {
+            if (account.Id == finAccount.Id) {
+                projected = account;
+            }
+        }
+        System.assertNotEquals(null, projected, 'The envelope-linked account is projected.');
+        System.assertEquals('Louie Wade - Individual', projected.nickname,
+                            'The nickname the advisor typed is read back.');
+        System.assertEquals('FA 1', projected.Name, 'The record Name still comes through beside it.');
+    }
+
 }

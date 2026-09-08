@@ -42,7 +42,8 @@
 .case-tile__title {
     font-size: 1.15rem;
     font-weight: 700;
-    color: #032d60;
+    /* Black, matching the Current Task tile's title (2026-09-08). */
+    color: var(--lwc-colorTextDefault, #181818);
     line-height: 1.2;
 }
 

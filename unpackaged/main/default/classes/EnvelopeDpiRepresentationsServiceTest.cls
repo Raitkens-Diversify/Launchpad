@@ -280,6 +280,54 @@ private class EnvelopeDpiRepresentationsServiceTest {
     System.assertEquals(1, docsForDpi(dpi, VA_DOC_NAME), 'Variable Annuities document created.');
   }
 
+  // ensureAlternativeInvestmentsDoc: the "Purchase Alternative Investments" action adds the document
+  // to a specific account (even one that is not a qualifying DPI), signed by its owners, linked to
+  // the envelope; idempotent.
+  @isTest
+  static void testEnsureAltDocForPurchaseAction() {
+    Envelope__c env = newEnvelope();
+    Account jane = newPerson('Jane', 'Doe');
+    Account bob = newPerson('Bob', 'Roe');
+    // Not a DPI and a non-qualifying product type — the action adds the document regardless.
+    Id acct = newDpi(env.Id, 'Broker Acct', 'Variable Life Insurance', false, new List<Id>{ jane.Id, bob.Id });
+
+    Test.startTest();
+    EnvelopeDpiRepresentationsService.ensureAlternativeInvestmentsDoc(acct, env.Id);
+    EnvelopeDpiRepresentationsService.ensureAlternativeInvestmentsDoc(acct, env.Id);
+    Test.stopTest();
+
+    System.assertEquals(1, docsForDpi(acct, AI_DOC_NAME), 'Alternative Investments doc created once.');
+    System.assertEquals(2, signeesForDpi(acct, AI_DOC_NAME), 'Both owners sign it.');
+    System.assertEquals(
+      1,
+      [
+        SELECT COUNT()
+        FROM Envelope_Content__c
+        WHERE Envelope__c = :env.Id AND Required_Document__r.Name = :AI_DOC_NAME
+      ],
+      'It is linked to the envelope.'
+    );
+  }
+
+  // ensureAlternativeInvestmentsDoc expands an entity owner to its fiduciaries, same as the scan.
+  @isTest
+  static void testEnsureAltDocEntityOwner() {
+    if (!rtAvailable('Business')) {
+      return;
+    }
+    Envelope__c env = newEnvelope();
+    Account acme = newEntity('Acme', 'Business');
+    Account ap = newPerson('Auth', 'Person');
+    makeParty(acme.Id, ap.Id, 'Authorized Person');
+    Id acct = newDpi(env.Id, 'Biz Broker', 'Variable Life Insurance', false, new List<Id>{ acme.Id });
+
+    Test.startTest();
+    EnvelopeDpiRepresentationsService.ensureAlternativeInvestmentsDoc(acct, env.Id);
+    Test.stopTest();
+
+    System.assertEquals(1, signeesForDpi(acct, AI_DOC_NAME), 'Signed by the business Authorized Person.');
+  }
+
   @isTest
   static void testIdempotentAndNullNoOp() {
     Envelope__c env = newEnvelope();

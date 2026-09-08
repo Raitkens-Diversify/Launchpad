@@ -85,6 +85,46 @@ public with sharing class EnvelopeDpiRepresentationsService {
     deleteDocs(docIdsToDelete);
   }
 
+  // Creates (or updates) the Alternative Investments document for one account in an envelope, outside
+  // the product-type-driven scan — used when the wizard's "Purchase Alternative Investments" account
+  // action is raised on a submitted account. The signees are the account's owners expanded to their
+  // fiduciaries, exactly as the DPI-scan documents; create-once and idempotent.
+  public static void ensureAlternativeInvestmentsDoc(
+    Id financialAccountId,
+    Id envelopeId
+  ) {
+    if (financialAccountId == null || envelopeId == null) {
+      return;
+    }
+    String docName = DOC_NAME_BY_PRODUCT_TYPE.get('Alternative Investment');
+
+    Set<Id> desired = signersByDpi(new Set<Id>{ financialAccountId })
+      .get(financialAccountId);
+    if (desired == null) {
+      desired = new Set<Id>();
+    }
+
+    List<Required_Documents__c> existing = docsInEnvelope(envelopeId);
+    Map<Id, Set<Id>> signeesByDoc = signeesByDoc(existing);
+    Required_Documents__c target = null;
+    for (Required_Documents__c doc : existing) {
+      if (
+        doc.Financial_Account__c == financialAccountId &&
+        doc.Name == docName &&
+        doc.DocuSign_Envelope__c == null
+      ) {
+        target = doc;
+        break;
+      }
+    }
+
+    if (target != null) {
+      reconcileDocSignees(target.Id, desired, signeesByDoc.get(target.Id));
+    } else {
+      createDoc(envelopeId, financialAccountId, docName, desired);
+    }
+  }
+
   // ------------------------------------------------------------------------
   // Signers
   // ------------------------------------------------------------------------

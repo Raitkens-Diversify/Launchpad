@@ -469,7 +469,12 @@ function mapHouseholdResponse(data) {
   const allAccounts = (data?.accounts || []).map((a) => ({
     id: a.Id,
     groupId: a.isDpi ? "dpisSponsor" : "accounts",
-    name: a.Name,
+    // The row is titled by what the advisor called the account when adding it (Account_Nickname__c),
+    // not by the record Name: Name starts out as the nickname but the Financial Account trigger
+    // rebuilds it (owner - registration type - account #) as soon as the interview captures a
+    // registration type, so before the nickname had its own field the outline silently switched
+    // to the owner's name. Records created before the field existed have no nickname and keep Name.
+    name: a.nickname || a.Name,
     meta: buildMeta([a.registrationType, a.custodian]),
     iconVariant: "account",
     isNew: !a.submitted,
@@ -3878,9 +3883,14 @@ export default class EnvelopeShellV2 extends LightningElement {
       return;
     }
     // A related-party change made in the interview reaches the model through this same merge, so
-    // mark it here for the relationship reconcile the save cycle runs.
+    // mark it here for the relationship reconcile the save cycle runs. A service agreement holds its
+    // owners in Service__c lookups rather than party records, so it is not a holdsRelatedPartyRecords
+    // entity — but its owner slots persist the same way (via saveServiceInfo in _persistRelatedParties),
+    // so an owner edit made in the interview must mark it dirty too.
     if (
-      holdsRelatedPartyRecords(found.entity) &&
+      (holdsRelatedPartyRecords(found.entity) ||
+        (found.entity?.groupId === "serviceAgreements" &&
+          isRecordId(found.entity.id))) &&
       this._relatedPartiesChanged(
         found.action.formData?.[RELATED_PARTIES_FIELD_KEY],
         values[RELATED_PARTIES_FIELD_KEY]

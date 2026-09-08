@@ -63,7 +63,8 @@ public with sharing class EnvelopeFormAccountController {
                     // Update existing Financial_Account__c record
                     finAccount = new Financial_Account__c(
                         Id = existingAccountId,
-                        Name = accountNickname
+                        Name = accountNickname,
+                        Account_Nickname__c = accountNickname
                     );
                     update finAccount;               
                     return existingAccountId;
@@ -71,6 +72,7 @@ public with sharing class EnvelopeFormAccountController {
                     // Create new Financial_Account__c record
                     finAccount = new Financial_Account__c(
                         Name = accountNickname,
+                        Account_Nickname__c = accountNickname,
                         Household__c = householdId,
                         Financial_Advisor_Team__c = financialAdvisorTeamId,
                         Submitted__c = false

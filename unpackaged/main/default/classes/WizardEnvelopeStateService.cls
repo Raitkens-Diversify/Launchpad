@@ -1298,7 +1298,7 @@ return result;
             }
             
             List<Financial_Account__c> finAccounts = [
-                SELECT ID, Name, Registration_Type__c, Rep_Code__c, Custodian__c, Primary_Owner__c, Product_Type__c, DPI__c, BD_or_RIA__c, Managed_Account_Platform__c, Submitted__c
+                SELECT ID, Name, Account_Nickname__c, Registration_Type__c, Rep_Code__c, Custodian__c, Primary_Owner__c, Product_Type__c, DPI__c, BD_or_RIA__c, Managed_Account_Platform__c, Submitted__c
                 FROM Financial_Account__c
                 WHERE Household__c = :householdId OR Id IN :envelopeFinAccountIds
                 WITH USER_MODE
@@ -2086,6 +2086,7 @@ return result;
         // Core identifiers
         act.Id = finAccount.Id;
         act.Name = finAccount.Name;
+        act.nickname = finAccount.Account_Nickname__c;
         act.registrationType = finAccount.Registration_Type__c;
         act.custodian = finAccount.Custodian__c ;
         act.selectedRepCode = finAccount.Rep_Code__c;
@@ -2237,6 +2238,11 @@ return result;
     
     public class AccountData {
         @AuraEnabled public Id Id { get; set; }
+        // What the advisor called the account when adding it in the wizard (Account_Nickname__c).
+        // Name starts out as the nickname but is rebuilt by the Financial Account trigger once a
+        // registration type is captured, so this is the only place the nickname survives - and it
+        // is what the Household Outline titles the row with.
+        @AuraEnabled public String nickname { get; set; }
         @AuraEnabled public String Name { get; set; }
         @AuraEnabled public String registrationType { get; set; }
         @AuraEnabled public String custodian { get; set; }

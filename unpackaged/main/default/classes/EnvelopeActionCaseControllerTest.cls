@@ -111,6 +111,38 @@ private class EnvelopeActionCaseControllerTest {
     // other unrecognized sourceId. This replaces the old assertion that a Case was created for it,
     // which stopped being true once the spec was retired and started failing with a
     // "List has no rows for assignment to SObject" query error on the now-empty caseId.
+    // Purchasing alternative investments creates the Case and also adds the account's Alternative
+    // Investments representations document to the envelope.
+    @isTest
+    static void purchaseAltsAddsAlternativeInvestmentsDocument() {
+        Test.startTest();
+        String caseId = EnvelopeActionCaseController.saveAccountActionCase(
+            faId(), new Map<String, Object>(), envelopeId(), 'Purchase Alternative Investments');
+        Test.stopTest();
+
+        Assert.areEqual(
+            'Purchase Alternative Investment',
+            [SELECT Type FROM Case WHERE Id = :caseId].Type,
+            'The action opens a Purchase Alternative Investment case.'
+        );
+
+        String docName = 'Investment Representations and Agreements - Alternative Investments';
+        List<Required_Documents__c> docs = [
+            SELECT Id
+            FROM Required_Documents__c
+            WHERE Financial_Account__c = :faId() AND Name = :docName
+        ];
+        Assert.areEqual(1, docs.size(),
+            'Purchase Alternative Investments adds the Alternative Investments document.');
+        Assert.areEqual(1,
+            [
+                SELECT COUNT()
+                FROM Envelope_Content__c
+                WHERE Envelope__c = :envelopeId() AND Required_Document__c = :docs[0].Id
+            ],
+            'The document is linked to the envelope.');
+    }
+
     @isTest
     static void thirdPartyMoneyMovementIsNoLongerARoutableAction() {
         Test.startTest();

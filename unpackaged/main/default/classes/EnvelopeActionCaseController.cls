@@ -19,6 +19,9 @@ public with sharing class EnvelopeActionCaseController {
         // (TradeInstructionController links Order_Ticket__c.Case__c to it), and is DMS by definition.
         Boolean opensTradeInstructions = false;
         Boolean recordsPreviousManagementStyle = false;
+        // Whether raising this action also adds the account's Alternative Investments representations
+        // document (signed by the account's owners) to the envelope.
+        Boolean requiresAltInvestmentsDoc = false;
 
         ActionCaseSpec(String caseType, String subject, String description) {
             this.caseType = caseType;
@@ -83,6 +86,7 @@ public with sharing class EnvelopeActionCaseController {
             'Purchase Alternative Investments',
             'Purchase Alternative Investments'
         );
+        purchaseAlts.requiresAltInvestmentsDoc = true;
         specs.put('Purchase Alternative Investments', purchaseAlts);
 
         return specs;
@@ -346,6 +350,16 @@ public with sharing class EnvelopeActionCaseController {
 
         insert newCase;
         linkToEnvelope(newCase.Id, envelopeId);
+
+        // Purchasing alternative investments adds the account's Alternative Investments representations
+        // document, signed by the account's owners (expanded to their fiduciaries), the same document
+        // a qualifying DPI earns from the product-type scan.
+        if (spec.requiresAltInvestmentsDoc && envelopeId != null) {
+            EnvelopeDpiRepresentationsService.ensureAlternativeInvestmentsDoc(
+                finAcc.Id,
+                (Id) envelopeId
+            );
+        }
         return newCase.Id;
     }
 
