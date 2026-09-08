@@ -4,7 +4,9 @@ import { publish, MessageContext } from "lightning/messageService";
 import CASE_STATUS_UPDATED from "@salesforce/messageChannel/CaseStatusUpdated__c";
 import { refreshApex } from "@salesforce/apex";
 import { getPicklistValues } from "lightning/uiObjectInfoApi";
+import { getRecord, getFieldValue } from "lightning/uiRecordApi";
 import CASE_STATUS_FIELD from "@salesforce/schema/Case.Status";
+import ADDITIONAL_CASE_NOTES_FIELD from "@salesforce/schema/Case.Additional_Case_Notes__c";
 import {
   resolveRecordIdFromPageReference
 } from "c/recordNavigationUtils";
@@ -704,43 +706,22 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
     this.navigateToRecord(recordId, objectApiName);
   }
 
-  /* ── Case Information: Additional Case Notes, saved in place ─────────── */
+  /*
+   * Additional Case Notes, read through the record API rather than the case
+   * controller: the section is display-only here, and this keeps the change
+   * to the page itself.
+   */
+  @wire(getRecord, {
+    recordId: "$_recordId",
+    fields: [ADDITIONAL_CASE_NOTES_FIELD]
+  })
+  caseNotesRecord;
 
-  isCaseNotesDirty = false;
-  isSavingCaseNotes = false;
-  caseNotesError = "";
-
-  get hasCaseNotesError() {
-    return Boolean(this.caseNotesError);
-  }
-
-  handleCaseNotesChange() {
-    this.isCaseNotesDirty = true;
-    this.caseNotesError = "";
-  }
-
-  handleCaseNotesSubmit() {
-    this.isSavingCaseNotes = true;
-    this.caseNotesError = "";
-  }
-
-  handleCaseNotesSaved() {
-    this.isSavingCaseNotes = false;
-    this.isCaseNotesDirty = false;
-  }
-
-  handleCaseNotesError(event) {
-    this.isSavingCaseNotes = false;
-    this.caseNotesError =
-      event.detail?.detail ||
-      event.detail?.message ||
-      "Could not save the notes.";
-  }
-
-  handleCaseNotesCancel() {
-    this.refs.caseNotesField?.reset();
-    this.isCaseNotesDirty = false;
-    this.caseNotesError = "";
+  /** The notes, or a dash when there are none. */
+  get additionalCaseNotes() {
+    const record = this.caseNotesRecord?.data;
+    const notes = record ? getFieldValue(record, ADDITIONAL_CASE_NOTES_FIELD) : null;
+    return notes || EMPTY_VALUE;
   }
 
   get openHouseholdCases() {

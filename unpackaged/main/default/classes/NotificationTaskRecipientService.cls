@@ -2,28 +2,20 @@
  * Author: Hoang Long Vu To
  * Date: 2026-09-07
  *
- * Resolves Task notification recipients by profile-specific eligibility rules.
+ * Resolves Task notification recipients by Assigned To.
  *
- * NexS, Advisor, and System Administrator users may qualify when a Task is assigned to them,
- * linked to a Case they own or submitted, linked to a Case on their FA team,
- * or linked to a Household where they are the primary advisor.
+ * Insert and Assigned To updates notify the Assigned To user when they have an
+ * eligible profile.
  *
- * Home Office users qualify when a Task is assigned to them or linked to a Case
- * they own or that is owned by a queue they belong to.
- *
- * NexS, Advisor, and System Administrator users also qualify when linked to a
- * Case they own, submitted, FA team serves, or a queue they belong to owns.
+ * No Task notification is sent when Assigned To is a queue, Assigned To is
+ * Unassigned, the Case modifier is the Assigned To user, or the Task creator
+ * is the Assigned To user.
  *
  * Notification_Rule__c records control delivery settings after eligibility passes.
  */
 public without sharing class NotificationTaskRecipientService {
   @TestVisible
   private static Map<Id, List<Id>> testRecipientOverrides;
-
-  private final Map<Id, Id> householdIdToTeamId = new Map<Id, Id>();
-  private final Map<Id, Set<Id>> teamIdToPrimaryAdvisorUserIds = new Map<Id, Set<Id>>();
-  private final Map<Id, Set<Id>> teamIdToActiveMemberUserIds = new Map<Id, Set<Id>>();
-  private final Map<Id, Set<Id>> queueIdToMemberUserIds = new Map<Id, Set<Id>>();
 
   public List<Id> resolveRecipients(Task taskRecord, Id householdId) {
     if (taskRecord == null || taskRecord.Id == null) {
@@ -40,59 +32,57 @@ public without sharing class NotificationTaskRecipientService {
       }
     }
 
-    TaskRecipientContext context = buildContext(taskRecord, householdId);
-    Set<Id> candidateUserIds = collectCandidateUserIds(context);
-    if (candidateUserIds.isEmpty()) {
-      return new List<Id>();
-    }
-
-    Map<Id, User> eligibleUsersById = NotificationRecipientUserRepository.selectEligibleUsersById(
-      candidateUserIds
-    );
-    List<Id> eligibleRecipientIds = new List<Id>();
-
-    for (Id userId : candidateUserIds) {
-      User eligibleUser = eligibleUsersById.get(userId);
-      if (eligibleUser == null) {
-        continue;
-      }
-
-      if (
-        isEligibleRecipient(
-          userId,
-          eligibleUser.Profile.Name,
-          eligibleUser.UserType,
-          context
-        )
-      ) {
-        eligibleRecipientIds.add(userId);
-      }
-    }
-
-    return eligibleRecipientIds;
+    return resolveAssigneeOnlyRecipients(taskRecord, null);
   }
 
   public List<Id> resolveAssigneeOnlyRecipients(
     Task taskRecord,
     NotificationChangeModels.ChangeContext changeContext
   ) {
-    if (taskRecord == null || !isUserId(taskRecord.OwnerId)) {
+    if (taskRecord == null) {
       return new List<Id>();
     }
 
-    Id actorUserId = resolveActorUserId(changeContext);
-    if (actorUserId != null && actorUserId == taskRecord.OwnerId) {
+    List<Id> testOverrideRecipientIds = resolveTestRecipientOverride(taskRecord);
+    if (testOverrideRecipientIds != null) {
+      return testOverrideRecipientIds;
+    }
+
+    if (shouldSuppressAssignedToNotification(taskRecord, changeContext)) {
       return new List<Id>();
     }
 
-    Map<Id, User> eligibleUsersById = NotificationRecipientUserRepository.selectEligibleUsersById(
-      new Set<Id>{ taskRecord.OwnerId }
+    if (!isUserId(taskRecord.OwnerId)) {
+      return new List<Id>();
+    }
+
+    return selectEligibleRecipientIds(new Set<Id>{ taskRecord.OwnerId });
+  }
+
+  public List<Id> applyActorSuppression(
+    Task taskRecord,
+    List<Id> recipientIds,
+    NotificationChangeModels.ChangeContext changeContext
+  ) {
+    if (recipientIds == null || recipientIds.isEmpty() || taskRecord == null) {
+      return new List<Id>();
+    }
+
+    if (shouldSuppressAssignedToNotification(taskRecord, changeContext)) {
+      return new List<Id>();
+    }
+
+    return excludeCreatorRecipients(
+      taskRecord,
+      excludeSuppressedUsers(taskRecord, changeContext, recipientIds)
     );
-    if (!eligibleUsersById.containsKey(taskRecord.OwnerId)) {
-      return new List<Id>();
-    }
+  }
 
-    return new List<Id>{ taskRecord.OwnerId };
+  public static List<Id> excludeCreatorRecipients(
+    Task taskRecord,
+    List<Id> recipientIds
+  ) {
+    return excludeCreator(taskRecord, recipientIds);
   }
 
   private static Id resolveActorUserId(
@@ -105,227 +95,144 @@ public without sharing class NotificationTaskRecipientService {
     return UserInfo.getUserId();
   }
 
-  private TaskRecipientContext buildContext(Task taskRecord, Id householdId) {
-    TaskRecipientContext context = new TaskRecipientContext();
-    context.taskRecord = taskRecord;
-    context.householdId = householdId;
-    context.hasHouseholdAssociation = householdId != null;
+  private List<Id> resolveTestRecipientOverride(Task taskRecord) {
+    if (!Test.isRunningTest() || testRecipientOverrides == null || taskRecord == null) {
+      return null;
+    }
+
+    if (taskRecord.Id != null && testRecipientOverrides.containsKey(taskRecord.Id)) {
+      return new List<Id>(testRecipientOverrides.get(taskRecord.Id));
+    }
+
+    if (taskRecord.WhatId != null && testRecipientOverrides.containsKey(taskRecord.WhatId)) {
+      return new List<Id>(testRecipientOverrides.get(taskRecord.WhatId));
+    }
+
+    return null;
+  }
+
+  private Boolean shouldSuppressAssignedToNotification(
+    Task taskRecord,
+    NotificationChangeModels.ChangeContext changeContext
+  ) {
+    Id actorUserId = resolveActorUserId(changeContext);
+    Id creatorUserId = resolveCreatorUserId(taskRecord);
+
+    if (isAssignedToQueue(taskRecord)) {
+      return true;
+    }
 
     if (isUserId(taskRecord.OwnerId)) {
-      context.assigneeUserId = taskRecord.OwnerId;
+      if (actorUserId != null && actorUserId == taskRecord.OwnerId) {
+        return true;
+      }
+
+      return isInsert(changeContext) &&
+        creatorUserId != null &&
+        creatorUserId == taskRecord.OwnerId;
     }
 
-    if (isCaseId(taskRecord.WhatId)) {
-      context.relatedCase = selectRelatedCase(taskRecord.WhatId);
-      context.hasCaseAssociation = context.relatedCase != null;
-
-      if (context.relatedCase != null) {
-        populateCaseContext(context, context.relatedCase);
-      }
-    } else if (isAccountId(taskRecord.WhatId)) {
-      context.hasHouseholdAssociation = true;
-      if (context.householdId == null) {
-        context.householdId = taskRecord.WhatId;
-      }
-    }
-
-    if (context.householdId != null) {
-      context.householdFinancialAdvisorTeamId = selectHouseholdFinancialAdvisorTeamId(
-        context.householdId
-      );
-
-      if (context.householdFinancialAdvisorTeamId != null) {
-        context.householdPrimaryAdvisorUserIds = selectPrimaryAdvisorUserIds(
-          context.householdFinancialAdvisorTeamId
-        );
-      }
-    }
-
-    return context;
+    return true;
   }
 
-  private void populateCaseContext(TaskRecipientContext context, Case relatedCase) {
-    context.caseSubmitterUserId = relatedCase.CreatedById;
-
-    if (isUserId(relatedCase.OwnerId)) {
-      context.caseOwnerUserId = relatedCase.OwnerId;
-    } else if (isQueueId(relatedCase.OwnerId)) {
-      context.caseOwnerIsQueue = true;
-      context.caseQueueMemberUserIds = selectQueueMemberUserIds(relatedCase.OwnerId);
-    }
-
-    if (relatedCase.Financial_Advisor_Team__c != null) {
-      context.caseFinancialAdvisorTeamId = relatedCase.Financial_Advisor_Team__c;
-      context.caseFaTeamMemberUserIds = selectActiveMemberUserIds(
-        relatedCase.Financial_Advisor_Team__c
-      );
-    }
+  public static Boolean isAssignedToQueue(Task taskRecord) {
+    return taskRecord != null && isQueueId(taskRecord.OwnerId);
   }
 
-  private static Set<Id> collectCandidateUserIds(TaskRecipientContext context) {
-    Set<Id> candidateUserIds = new Set<Id>();
-
-    if (context.assigneeUserId != null) {
-      candidateUserIds.add(context.assigneeUserId);
-    }
-
-    if (context.caseOwnerUserId != null) {
-      candidateUserIds.add(context.caseOwnerUserId);
-    }
-
-    if (context.caseSubmitterUserId != null) {
-      candidateUserIds.add(context.caseSubmitterUserId);
-    }
-
-    if (context.caseQueueMemberUserIds != null) {
-      candidateUserIds.addAll(context.caseQueueMemberUserIds);
-    }
-
-    if (context.caseFaTeamMemberUserIds != null) {
-      candidateUserIds.addAll(context.caseFaTeamMemberUserIds);
-    }
-
-    if (context.householdPrimaryAdvisorUserIds != null) {
-      candidateUserIds.addAll(context.householdPrimaryAdvisorUserIds);
-    }
-
-    return candidateUserIds;
-  }
-
-  private static Boolean isEligibleRecipient(
-    Id userId,
-    String profileName,
-    String userType,
-    TaskRecipientContext context
+  private List<Id> excludeSuppressedUsers(
+    Task taskRecord,
+    NotificationChangeModels.ChangeContext changeContext,
+    List<Id> recipientIds
   ) {
-    Boolean isAssignee = context.assigneeUserId == userId;
-    Boolean isCaseOwner = context.caseOwnerUserId == userId;
-    Boolean isCaseSubmitter = context.caseSubmitterUserId == userId;
-    Boolean isCaseQueueMember = context.caseQueueMemberUserIds != null &&
-      context.caseQueueMemberUserIds.contains(userId);
-    Boolean isCaseFaTeamMember = context.caseFaTeamMemberUserIds != null &&
-      context.caseFaTeamMemberUserIds.contains(userId);
-    Boolean isPrimaryAdvisorOnHousehold = context.householdPrimaryAdvisorUserIds != null &&
-      context.householdPrimaryAdvisorUserIds.contains(userId) &&
-      context.hasHouseholdAssociation;
+    Set<Id> suppressedUserIds = new Set<Id>();
+    Id actorUserId = resolveActorUserId(changeContext);
+    Id creatorUserId = resolveCreatorUserId(taskRecord);
 
-    if (UserInfoUtils.isHomeOfficeProfile(profileName)) {
-      return isAssignee ||
-        (context.hasCaseAssociation && (isCaseOwner || isCaseQueueMember));
+    if (actorUserId != null) {
+      suppressedUserIds.add(actorUserId);
+    }
+    if (creatorUserId != null) {
+      suppressedUserIds.add(creatorUserId);
     }
 
-    if (UserInfoUtils.isNexSProfile(profileName, userType)) {
-      return isAssignee ||
-        isPrimaryAdvisorOnHousehold ||
-        (context.hasCaseAssociation &&
-        (isCaseOwner || isCaseSubmitter || isCaseFaTeamMember || isCaseQueueMember));
-    }
-
-    if (UserInfoUtils.isAdvisorProfile(profileName)) {
-      return isAssignee ||
-        isPrimaryAdvisorOnHousehold ||
-        (context.hasCaseAssociation &&
-        (isCaseOwner || isCaseSubmitter || isCaseFaTeamMember || isCaseQueueMember));
-    }
-
-    if (UserInfoUtils.isSystemAdministratorProfile(profileName)) {
-      return isAssignee ||
-        isPrimaryAdvisorOnHousehold ||
-        (context.hasCaseAssociation &&
-        (isCaseOwner || isCaseSubmitter || isCaseFaTeamMember || isCaseQueueMember));
-    }
-
-    return false;
-  }
-
-  private Case selectRelatedCase(Id caseId) {
-    List<Case> cases = [
-      SELECT Id, OwnerId, CreatedById, Financial_Advisor_Team__c, AccountId
-      FROM Case
-      WHERE Id = :caseId
-      LIMIT 1
-    ];
-
-    return cases.isEmpty() ? null : cases[0];
-  }
-
-  private Id selectHouseholdFinancialAdvisorTeamId(Id householdId) {
-    if (householdIdToTeamId.containsKey(householdId)) {
-      return householdIdToTeamId.get(householdId);
-    }
-
-    List<Account> households = [
-      SELECT Financial_Advisor_Team__c
-      FROM Account
-      WHERE Id = :householdId
-      LIMIT 1
-    ];
-
-    Id teamId = households.isEmpty() ? null : households[0].Financial_Advisor_Team__c;
-    householdIdToTeamId.put(householdId, teamId);
-    return teamId;
-  }
-
-  private Set<Id> selectPrimaryAdvisorUserIds(Id teamId) {
-    if (teamIdToPrimaryAdvisorUserIds.containsKey(teamId)) {
-      return teamIdToPrimaryAdvisorUserIds.get(teamId);
-    }
-
-    Set<Id> primaryAdvisorUserIds = new Set<Id>();
-    Set<String> eligibleProfileNames = UserInfoUtils.notificationEligibleProfileNames();
-    String standardUserType = UserInfoUtils.USER_TYPE_STANDARD;
-
-    for (Financial_Advisor_Team_Member__c teamMember : [
-      SELECT User__c
-      FROM Financial_Advisor_Team_Member__c
-      WHERE
-        Financial_Advisor_Team__c = :teamId
-        AND Primary__c = TRUE
-        AND Active__c = TRUE
-        AND User__c != NULL
-        AND (
-          User__r.Profile.Name IN :eligibleProfileNames
-          OR User__r.UserType != :standardUserType
-        )
-    ]) {
-      primaryAdvisorUserIds.add(teamMember.User__c);
-    }
-
-    teamIdToPrimaryAdvisorUserIds.put(teamId, primaryAdvisorUserIds);
-    return primaryAdvisorUserIds;
-  }
-
-  private Set<Id> selectActiveMemberUserIds(Id teamId) {
-    if (teamIdToActiveMemberUserIds.containsKey(teamId)) {
-      return teamIdToActiveMemberUserIds.get(teamId);
-    }
-
-    Set<Id> activeMemberUserIds = NotificationRecipientUserRepository.selectEligibleActiveMemberUserIds(
-      teamId
-    );
-    teamIdToActiveMemberUserIds.put(teamId, activeMemberUserIds);
-    return activeMemberUserIds;
-  }
-
-  private Set<Id> selectQueueMemberUserIds(Id queueId) {
-    if (queueIdToMemberUserIds.containsKey(queueId)) {
-      return queueIdToMemberUserIds.get(queueId);
-    }
-
-    Set<Id> memberUserIds = new Set<Id>();
-
-    for (GroupMember queueMember : [
-      SELECT UserOrGroupId
-      FROM GroupMember
-      WHERE GroupId = :queueId
-    ]) {
-      if (isUserId(queueMember.UserOrGroupId)) {
-        memberUserIds.add(queueMember.UserOrGroupId);
+    List<Id> filteredRecipientIds = new List<Id>();
+    for (Id recipientId : recipientIds) {
+      if (!suppressedUserIds.contains(recipientId)) {
+        filteredRecipientIds.add(recipientId);
       }
     }
 
-    queueIdToMemberUserIds.put(queueId, memberUserIds);
-    return memberUserIds;
+    return filteredRecipientIds;
+  }
+
+  private static List<Id> excludeCreator(Task taskRecord, List<Id> recipientIds) {
+    Id creatorUserId = resolveCreatorUserId(taskRecord);
+    if (creatorUserId == null || recipientIds == null || recipientIds.isEmpty()) {
+      return recipientIds == null ? new List<Id>() : recipientIds;
+    }
+
+    List<Id> recipientIdsExcludingCreator = new List<Id>();
+    for (Id recipientId : recipientIds) {
+      if (recipientId != creatorUserId) {
+        recipientIdsExcludingCreator.add(recipientId);
+      }
+    }
+
+    return recipientIdsExcludingCreator;
+  }
+
+  private static Id resolveCreatorUserId(Task taskRecord) {
+    if (taskRecord == null) {
+      return null;
+    }
+
+    if (isUserId(taskRecord.CreatedById)) {
+      return taskRecord.CreatedById;
+    }
+
+    if (taskRecord.Id == null) {
+      return UserInfo.getUserId();
+    }
+
+    List<Task> createdByTasks = [
+      SELECT CreatedById
+      FROM Task
+      WHERE Id = :taskRecord.Id
+      LIMIT 1
+    ];
+    if (createdByTasks.isEmpty() || !isUserId(createdByTasks[0].CreatedById)) {
+      return UserInfo.getUserId();
+    }
+
+    return createdByTasks[0].CreatedById;
+  }
+
+  private static Boolean isInsert(
+    NotificationChangeModels.ChangeContext changeContext
+  ) {
+    return changeContext == null ||
+      String.isBlank(changeContext.triggerType) ||
+      NotificationConstants.CHANGE_TYPE_INSERT.equalsIgnoreCase(
+        changeContext.triggerType
+      );
+  }
+
+  private static List<Id> selectEligibleRecipientIds(Set<Id> userIds) {
+    if (userIds == null || userIds.isEmpty()) {
+      return new List<Id>();
+    }
+
+    Map<Id, User> eligibleUsersById = NotificationRecipientUserRepository.selectEligibleUsersById(
+      userIds
+    );
+    List<Id> eligibleRecipientIds = new List<Id>();
+    for (Id userId : userIds) {
+      if (eligibleUsersById.containsKey(userId)) {
+        eligibleRecipientIds.add(userId);
+      }
+    }
+
+    return eligibleRecipientIds;
   }
 
   @TestVisible
@@ -346,22 +253,5 @@ public without sharing class NotificationTaskRecipientService {
   @TestVisible
   private static Boolean isAccountId(Id recordId) {
     return recordId != null && String.valueOf(recordId).startsWith('001');
-  }
-
-  private class TaskRecipientContext {
-    public Task taskRecord;
-    public Id householdId;
-    public Boolean hasHouseholdAssociation = false;
-    public Boolean hasCaseAssociation = false;
-    public Id assigneeUserId;
-    public Case relatedCase;
-    public Id caseOwnerUserId;
-    public Boolean caseOwnerIsQueue = false;
-    public Set<Id> caseQueueMemberUserIds = new Set<Id>();
-    public Id caseSubmitterUserId;
-    public Id caseFinancialAdvisorTeamId;
-    public Set<Id> caseFaTeamMemberUserIds = new Set<Id>();
-    public Id householdFinancialAdvisorTeamId;
-    public Set<Id> householdPrimaryAdvisorUserIds = new Set<Id>();
   }
 }

@@ -297,6 +297,39 @@ private class NotificationPrepareContextFactoryTest {
   }
 
   @IsTest
+  static void buildTaskInsertReturnsNullWhenRecipientIsCreator() {
+    NotificationTestDataFactory.clearTestOverrides();
+    NotificationRecipientService.testRecipientOverrides = null;
+    NotificationTaskRecipientService.testRecipientOverrides = null;
+
+    Task taskRecord = new Task(
+      Subject = 'Prepare Creator Insert Task',
+      Status = 'Not Started',
+      Priority = 'Normal',
+      OwnerId = UserInfo.getUserId()
+    );
+    NotificationTestDataFactory.insertRecord(taskRecord);
+
+    NotificationChangeModels.ChangeContext changeContext = new NotificationChangeModels.ChangeContext(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      NotificationConstants.CHANGE_TYPE_INSERT
+    );
+    changeContext.changedByUserId = String.valueOf(UserInfo.getUserId());
+
+    NotificationRecipientPrepareModels.SourcePrepareContext prepareContext = NotificationPrepareContextFactory.build(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      String.valueOf(taskRecord.Id),
+      changeContext.toJson()
+    );
+
+    System.assertEquals(
+      null,
+      prepareContext,
+      'Task insert must not prepare notifications for the creator.'
+    );
+  }
+
+  @IsTest
   static void buildTaskUpdateReturnsNullWhenActorIsAssignee() {
     NotificationTestDataFactory.clearTestOverrides();
 

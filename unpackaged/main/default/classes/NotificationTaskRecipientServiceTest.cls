@@ -45,9 +45,67 @@ private class NotificationTaskRecipientServiceTest {
       null
     );
 
-    System.assert(
+    System.assertEquals(
+      false,
       recipientIds.contains(currentUser.Id),
-      'Task assignee should receive Task notifications.'
+      'Task creator should not receive Task notifications, even as assignee.'
+    );
+  }
+
+  @IsTest
+  static void resolveRecipientsExcludesTaskCreator() {
+    NotificationTaskRecipientService.testRecipientOverrides = null;
+
+    if (!UserInfoUtils.isCurrentUserNotificationEligible()) {
+      System.assert(true, 'Current user profile is outside notification scope.');
+      return;
+    }
+
+    Task taskRecord = new Task(
+      Subject = 'Creator Suppression Task',
+      Status = 'Not Started',
+      Priority = 'Normal',
+      OwnerId = UserInfo.getUserId()
+    );
+    NotificationTestDataFactory.insertRecord(taskRecord);
+
+    List<Id> recipientIds = new NotificationTaskRecipientService().resolveRecipients(
+      taskRecord,
+      null
+    );
+
+    System.assertEquals(
+      false,
+      recipientIds.contains(UserInfo.getUserId()),
+      'Task creator must not be a Task notification recipient.'
+    );
+  }
+
+  @IsTest
+  static void resolveAssigneeOnlyRecipientsOnInsertSkipsCreator() {
+    NotificationTaskRecipientService.testRecipientOverrides = null;
+
+    Task taskRecord = new Task(
+      Subject = 'Insert Creator Task',
+      Status = 'Not Started',
+      Priority = 'Normal',
+      OwnerId = UserInfo.getUserId()
+    );
+    NotificationTestDataFactory.insertRecord(taskRecord);
+
+    NotificationChangeModels.ChangeContext changeContext = new NotificationChangeModels.ChangeContext(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      NotificationConstants.CHANGE_TYPE_INSERT
+    );
+    changeContext.changedByUserId = String.valueOf(UserInfo.getUserId());
+
+    List<Id> recipientIds = new NotificationTaskRecipientService()
+      .resolveAssigneeOnlyRecipients(taskRecord, changeContext);
+
+    System.assertEquals(
+      0,
+      recipientIds.size(),
+      'Insert must not notify the Task creator.'
     );
   }
 
@@ -123,6 +181,49 @@ private class NotificationTaskRecipientServiceTest {
   }
 
   @IsTest
+  static void resolveAssigneeOnlyRecipientsOnInsertSkipsQueueOwner() {
+    NotificationTaskRecipientService.testRecipientOverrides = null;
+
+    List<Group> queues = [
+      SELECT Id
+      FROM Group
+      WHERE Type = 'Queue'
+      LIMIT 1
+    ];
+    if (queues.isEmpty()) {
+      System.assert(true, 'Org has no queues to validate queue-owner suppression.');
+      return;
+    }
+
+    Task taskRecord = new Task(
+      Subject = 'Queue Insert Recipient Task',
+      Status = 'Not Started',
+      Priority = 'Normal'
+    );
+    NotificationTestDataFactory.insertRecord(taskRecord);
+    taskRecord.OwnerId = queues[0].Id;
+
+    NotificationChangeModels.ChangeContext changeContext = new NotificationChangeModels.ChangeContext(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      NotificationConstants.CHANGE_TYPE_INSERT
+    );
+    changeContext.changedByUserId = String.valueOf(UserInfo.getUserId());
+
+    List<Id> recipientIds = new NotificationTaskRecipientService()
+      .resolveAssigneeOnlyRecipients(taskRecord, changeContext);
+
+    System.assertEquals(
+      0,
+      recipientIds.size(),
+      'Queue Assigned To must not receive Task insert notifications.'
+    );
+    System.assertEquals(
+      true,
+      NotificationTaskRecipientService.isAssignedToQueue(taskRecord)
+    );
+  }
+
+  @IsTest
   static void resolveAssigneeOnlyRecipientsSkipsQueueOwner() {
     NotificationTaskRecipientService.testRecipientOverrides = null;
 
@@ -155,6 +256,112 @@ private class NotificationTaskRecipientServiceTest {
       .resolveAssigneeOnlyRecipients(taskRecord, changeContext);
 
     System.assertEquals(0, recipientIds.size());
+  }
+
+  @IsTest
+  static void resolveAssigneeOnlyRecipientsOnInsertSkipsUnassignedQueue() {
+    NotificationTaskRecipientService.testRecipientOverrides = null;
+
+    List<Group> unassignedQueues = [
+      SELECT Id
+      FROM Group
+      WHERE Type = 'Queue' AND Name = 'Unassigned'
+      LIMIT 1
+    ];
+    if (unassignedQueues.isEmpty()) {
+      System.assert(true, 'Org has no Unassigned queue.');
+      return;
+    }
+
+    Task taskRecord = new Task(
+      Subject = 'Unassigned Queue Insert Task',
+      Status = 'Not Started',
+      Priority = 'Normal'
+    );
+    NotificationTestDataFactory.insertRecord(taskRecord);
+    taskRecord.OwnerId = unassignedQueues[0].Id;
+
+    NotificationChangeModels.ChangeContext changeContext = new NotificationChangeModels.ChangeContext(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      NotificationConstants.CHANGE_TYPE_INSERT
+    );
+    changeContext.changedByUserId = String.valueOf(UserInfo.getUserId());
+
+    NotificationTaskRecipientService service = new NotificationTaskRecipientService();
+    List<Id> recipientIds = service.resolveAssigneeOnlyRecipients(
+      taskRecord,
+      changeContext
+    );
+
+    System.assertEquals(0, recipientIds.size());
+    System.assertEquals(
+      0,
+      service.resolveAssigneeOnlyRecipients(taskRecord, changeContext).size()
+    );
+  }
+
+  @IsTest
+  static void applyActorSuppressionRemovesActorAndCreator() {
+    NotificationTaskRecipientService.testRecipientOverrides = null;
+
+    User actorUser = NotificationTestDataFactory.createStandardUser('actsuppr');
+    Task taskRecord = new Task(
+      Subject = 'Actor Suppression Task',
+      Status = 'Not Started',
+      Priority = 'Normal',
+      OwnerId = UserInfo.getUserId()
+    );
+    NotificationTestDataFactory.insertRecord(taskRecord);
+
+    NotificationChangeModels.ChangeContext changeContext = new NotificationChangeModels.ChangeContext(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      NotificationConstants.CHANGE_TYPE_INSERT
+    );
+    changeContext.changedByUserId = String.valueOf(actorUser.Id);
+
+    List<Id> recipientIds = new NotificationTaskRecipientService()
+      .applyActorSuppression(
+        taskRecord,
+        new List<Id>{ UserInfo.getUserId(), actorUser.Id },
+        changeContext
+      );
+
+    System.assertEquals(0, recipientIds.size());
+    System.assertEquals(
+      0,
+      new NotificationTaskRecipientService()
+        .applyActorSuppression(taskRecord, new List<Id>(), changeContext)
+        .size()
+    );
+  }
+
+  @IsTest
+  static void resolveAssigneeOnlyRecipientsUsesWhatIdOverride() {
+    NotificationTaskRecipientService.testRecipientOverrides = new Map<Id, List<Id>>();
+
+    Account household = new Account(Name = 'Override Household');
+    NotificationTestDataFactory.insertRecord(household);
+
+    Task taskRecord = new Task(
+      Subject = 'WhatId Override Task',
+      WhatId = household.Id,
+      Status = 'Not Started',
+      Priority = 'Normal'
+    );
+    NotificationTestDataFactory.insertRecord(taskRecord);
+
+    NotificationTaskRecipientService.testRecipientOverrides.put(
+      household.Id,
+      new List<Id>{ UserInfo.getUserId() }
+    );
+
+    List<Id> recipientIds = new NotificationTaskRecipientService()
+      .resolveAssigneeOnlyRecipients(taskRecord, null);
+
+    NotificationTaskRecipientService.testRecipientOverrides = null;
+
+    System.assertEquals(1, recipientIds.size());
+    System.assertEquals(UserInfo.getUserId(), recipientIds[0]);
   }
 
   @IsTest
@@ -294,9 +501,10 @@ private class NotificationTaskRecipientServiceTest {
       household.Id
     );
 
-    System.assert(
+    System.assertEquals(
+      false,
       recipientIds.contains(nexsUser.Id),
-      'NexS primary advisor should receive Task notifications for household tasks.'
+      'FA Team primary advisor must not receive Task notifications.'
     );
   }
 
@@ -372,13 +580,15 @@ private class NotificationTaskRecipientServiceTest {
       null
     );
 
-    System.assert(
+    System.assertEquals(
+      false,
       recipientIds.contains(nexsOwner.Id),
-      'NexS case owner should receive Task notifications for case-linked tasks.'
+      'Case owner must not receive Task notifications unless they are Assigned To.'
     );
-    System.assert(
+    System.assertEquals(
+      false,
       recipientIds.contains(nexsSubmitter.Id),
-      'NexS case submitter and FA team member should receive Task notifications.'
+      'FA Team case submitter must not receive Task notifications.'
     );
   }
 
@@ -445,9 +655,10 @@ private class NotificationTaskRecipientServiceTest {
       null
     );
 
-    System.assert(
+    System.assertEquals(
+      false,
       recipientIds.contains(advisorQueueMember.Id),
-      'Advisor queue member should receive Task notifications for queued case tasks.'
+      'Case queue members must not receive Task notifications.'
     );
   }
 
@@ -496,9 +707,10 @@ private class NotificationTaskRecipientServiceTest {
       null
     );
 
-    System.assert(
+    System.assertEquals(
+      false,
       recipientIds.contains(homeOfficeUser.Id),
-      'Home Office queue member should receive Task notifications for queued case tasks.'
+      'Home Office case queue members must not receive Task notifications.'
     );
   }
 

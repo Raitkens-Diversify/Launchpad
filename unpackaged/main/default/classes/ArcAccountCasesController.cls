@@ -45,6 +45,7 @@ public with sharing class ArcAccountCasesController {
         Case_Branch_Name_DisplayName__c,
         Current_Task_Subject_Assignee__c,
         Current_Task_Status__c,
+        Submitted__c,
         Milestone__c,
         Owner.Name,
         CreatedDate,
@@ -68,7 +69,11 @@ public with sharing class ArcAccountCasesController {
       row.caseNumber = record.CaseNumber;
       row.caseName = record.Case_Branch_Name_DisplayName__c;
       row.currentTaskSubjectAssignee = record.Current_Task_Subject_Assignee__c;
-      row.overallStatus = record.Current_Task_Status__c;
+      // Same reading as the Cases list: a draft says Unsubmitted, not Completed.
+      row.overallStatus = ArcRecordSearchController.caseOverallStatusForDisplay(
+        record.Submitted__c,
+        record.Current_Task_Status__c
+      );
       row.milestone = record.Milestone__c;
       row.ownerName = record.Owner?.Name;
       row.createdDate = record.CreatedDate;

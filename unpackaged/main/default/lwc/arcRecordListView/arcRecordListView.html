@@ -705,7 +705,15 @@
               </label>
             </header>
 
-            <template lwc:if={hasChartData}>
+            <template lwc:if={isChartLoading}>
+              <div class="arc-record-list-view__status">
+                <c-arc-loading-spinner
+                  alternative-text="Loading all records"
+                  size="medium"
+                ></c-arc-loading-spinner>
+              </div>
+            </template>
+            <template lwc:elseif={hasChartData}>
               <ul class="arc-record-list-view__chart-bars">
                 <template for:each={chartBars} for:item="bar">
                   <li key={bar.key} class="arc-record-list-view__chart-row">

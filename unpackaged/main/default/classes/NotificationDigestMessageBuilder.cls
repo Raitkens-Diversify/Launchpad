@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-06-17
+ * Date: 2026-09-07
  *
  * Builds consolidated digest title/body for grouped notification logs.
  */
@@ -16,7 +16,12 @@ public with sharing class NotificationDigestMessageBuilder {
     Integer itemCount = logs.size();
     NotificationDigestModels.ConsolidatedMessage message = new NotificationDigestModels.ConsolidatedMessage();
     message.itemCount = itemCount;
-    message.title = buildTitle(sourceType, itemCount, bodyLimit == EMAIL_BODY_LIMIT);
+    message.title = buildTitle(
+      sourceType,
+      itemCount,
+      bodyLimit == EMAIL_BODY_LIMIT,
+      logs
+    );
 
     if (bodyLimit == EMAIL_BODY_LIMIT) {
       message.body = NotificationDigestEmailTableBuilder.build(
@@ -65,23 +70,85 @@ public with sharing class NotificationDigestMessageBuilder {
   }
 
   public static String buildEmailSubject() {
-    return 'Email Digest - ' + Date.today().format();
+    return buildEmailSubject(null, null);
+  }
+
+  public static String buildEmailSubject(String sourceType) {
+    return buildEmailSubject(sourceType, null);
+  }
+
+  public static String buildEmailSubject(
+    String sourceType,
+    List<Notification_Log__c> logs
+  ) {
+    String typeLabel = buildEmailSubjectLabel(sourceType);
+    String householdName = resolveSingleHouseholdName(logs);
+
+    if (!String.isBlank(householdName)) {
+      return typeLabel + ' — ' + householdName + ' - ' + Date.today().format();
+    }
+
+    return typeLabel + ' - ' + Date.today().format();
+  }
+
+  public static String buildEmailSubjectLabel(String sourceType) {
+    return normalizeSourceType(sourceType) + ' Digest';
   }
 
   private static String buildTitle(
     String sourceType,
     Integer itemCount,
-    Boolean forEmail
+    Boolean forEmail,
+    List<Notification_Log__c> logs
   ) {
     if (forEmail == true) {
-      return buildEmailSubject();
+      return buildEmailSubject(sourceType, logs);
     }
 
-    String normalizedSourceType = String.isBlank(sourceType)
-      ? 'Notification'
-      : sourceType;
+    String normalizedSourceType = normalizeSourceType(sourceType);
     String countLabel = itemCount == 1 ? '1 update' : itemCount + ' updates';
     return normalizedSourceType + ' digest — ' + countLabel;
+  }
+
+  private static String normalizeSourceType(String sourceType) {
+    return String.isBlank(sourceType) ? 'Notification' : sourceType.trim();
+  }
+
+  private static String resolveSingleHouseholdName(List<Notification_Log__c> logs) {
+    Set<Id> householdIds = collectHouseholdIds(logs);
+
+    if (householdIds.size() != 1) {
+      return null;
+    }
+
+    List<Account> households = [
+      SELECT Name
+      FROM Account
+      WHERE Id IN :householdIds
+      LIMIT 1
+    ];
+
+    if (households.isEmpty() || String.isBlank(households[0].Name)) {
+      return null;
+    }
+
+    return households[0].Name.trim();
+  }
+
+  private static Set<Id> collectHouseholdIds(List<Notification_Log__c> logs) {
+    Set<Id> householdIds = new Set<Id>();
+
+    if (logs == null || logs.isEmpty()) {
+      return householdIds;
+    }
+
+    for (Notification_Log__c logRecord : logs) {
+      if (logRecord != null && logRecord.Household__c != null) {
+        householdIds.add(logRecord.Household__c);
+      }
+    }
+
+    return householdIds;
   }
 
   private static String resolveLineText(Notification_Log__c logRecord) {

@@ -95,6 +95,42 @@ private class NotificationChangePublisherTest {
   }
 
   @IsTest
+  static void publishInsertsSkipsQueueAssignedTasks() {
+    NotificationPublisher.resetForTest();
+
+    List<Group> queues = [
+      SELECT Id
+      FROM Group
+      WHERE Type = 'Queue'
+      LIMIT 1
+    ];
+    if (queues.isEmpty()) {
+      System.assert(true, 'Org has no queues to validate queue-owner suppression.');
+      return;
+    }
+
+    Task taskRecord = new Task(
+      Subject = 'Publisher Queue Insert Task',
+      Status = 'Not Started',
+      Priority = 'Normal'
+    );
+    NotificationTestDataFactory.insertRecord(taskRecord);
+    taskRecord.OwnerId = queues[0].Id;
+    NotificationPublisher.resetForTest();
+
+    NotificationChangePublisher.publishInserts(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      new List<SObject>{ taskRecord }
+    );
+
+    System.assertEquals(
+      0,
+      NotificationPublisher.testPublishedEventCount,
+      'Queue Assigned To must not publish Task insert notifications.'
+    );
+  }
+
+  @IsTest
   static void publishInsertsSkipsBranchPitStopTasks() {
     NotificationPublisher.resetForTest();
     NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();

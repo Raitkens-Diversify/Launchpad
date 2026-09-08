@@ -20,6 +20,9 @@ private class NotificationPrepareStartQueueableTest {
       WhatId = context.household.Id
     );
     NotificationTestDataFactory.insertRecord(taskRecord);
+    NotificationTaskRecipientService.testRecipientOverrides = new Map<Id, List<Id>>{
+      taskRecord.Id => new List<Id>{ context.recipientUser.Id }
+    };
 
     Test.startTest();
     System.runAs(NotificationTestDataFactory.runningUser()) {
@@ -60,6 +63,9 @@ private class NotificationPrepareStartQueueableTest {
       WhatId = context.household.Id
     );
     NotificationTestDataFactory.insertRecord(taskRecord);
+    NotificationTaskRecipientService.testRecipientOverrides = new Map<Id, List<Id>>{
+      taskRecord.Id => new List<Id>{ context.recipientUser.Id }
+    };
 
     Test.startTest();
     System.runAs(NotificationTestDataFactory.runningUser()) {
@@ -162,6 +168,9 @@ private class NotificationPrepareStartQueueableTest {
       WhatId = context.household.Id
     );
     NotificationTestDataFactory.insertRecord(taskRecord);
+    NotificationTaskRecipientService.testRecipientOverrides = new Map<Id, List<Id>>{
+      taskRecord.Id => new List<Id>{ context.recipientUser.Id }
+    };
 
     Test.startTest();
     System.runAs(NotificationTestDataFactory.runningUser()) {
@@ -199,6 +208,9 @@ private class NotificationPrepareStartQueueableTest {
       WhatId = context.household.Id
     );
     NotificationTestDataFactory.insertRecord(taskRecord);
+    NotificationTaskRecipientService.testRecipientOverrides = new Map<Id, List<Id>>{
+      taskRecord.Id => new List<Id>{ context.recipientUser.Id }
+    };
 
     NotificationCenterPrepareInvocable.EventInput input = new NotificationCenterPrepareInvocable.EventInput();
     input.sourceType = NotificationConstants.OBJECT_TYPE_TASK;

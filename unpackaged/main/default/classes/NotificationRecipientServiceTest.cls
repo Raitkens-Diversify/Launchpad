@@ -267,7 +267,11 @@ private class NotificationRecipientServiceTest {
       null
     );
 
-    System.assert(recipientIds.contains(currentUser.Id));
+    System.assertEquals(
+      false,
+      recipientIds.contains(currentUser.Id),
+      'Task creator should not be returned as a Task recipient.'
+    );
   }
 
   @IsTest

@@ -363,11 +363,9 @@
   grid-template-columns: 1fr;
 }
 
-.case-section__actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 8px;
+/* Notes keep their line breaks. */
+.case-section__notes {
+  white-space: pre-wrap;
 }
 
 .case-section__field dt {

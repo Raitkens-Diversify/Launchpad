@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-06-17
+ * Date: 2026-09-07
  */
 @IsTest
 private class NotificationDigestMessageBuilderTest {
@@ -90,17 +90,105 @@ private class NotificationDigestMessageBuilderTest {
     System.assert(message.body.contains('<table'));
     System.assert(message.body.contains('Email digest builder case'));
     System.assertEquals(
-      NotificationDigestMessageBuilder.buildEmailSubject(),
+      NotificationDigestMessageBuilder.buildEmailSubject(
+        NotificationConstants.OBJECT_TYPE_CASE,
+        new List<Notification_Log__c>{ logRecord }
+      ),
       message.title
+    );
+    System.assert(message.title.contains('Case Digest'));
+    System.assert(message.title.contains(context.household.Name));
+  }
+
+  @IsTest
+  static void buildEmailSubjectUsesSourceTypeAndDate() {
+    System.assertEquals(
+      'Notification Digest - ' + Date.today().format(),
+      NotificationDigestMessageBuilder.buildEmailSubject()
+    );
+    System.assertEquals(
+      'Task Digest - ' + Date.today().format(),
+      NotificationDigestMessageBuilder.buildEmailSubject(
+        NotificationConstants.OBJECT_TYPE_TASK
+      )
+    );
+    System.assertEquals(
+      'Case Digest - ' + Date.today().format(),
+      NotificationDigestMessageBuilder.buildEmailSubject(
+        NotificationConstants.OBJECT_TYPE_CASE
+      )
+    );
+    System.assertEquals(
+      'Event Digest - ' + Date.today().format(),
+      NotificationDigestMessageBuilder.buildEmailSubject(
+        NotificationConstants.OBJECT_TYPE_EVENT
+      )
     );
   }
 
   @IsTest
-  static void buildEmailSubjectUsesEmailDigestDateFormat() {
+  static void buildEmailSubjectLabelUsesCapitalizedTypeDigest() {
     System.assertEquals(
-      'Email Digest - ' + Date.today().format(),
-      NotificationDigestMessageBuilder.buildEmailSubject()
+      'Task Digest',
+      NotificationDigestMessageBuilder.buildEmailSubjectLabel(
+        NotificationConstants.OBJECT_TYPE_TASK
+      )
     );
+    System.assertEquals(
+      'Case Digest',
+      NotificationDigestMessageBuilder.buildEmailSubjectLabel(
+        NotificationConstants.OBJECT_TYPE_CASE
+      )
+    );
+    System.assertEquals(
+      'Event Digest',
+      NotificationDigestMessageBuilder.buildEmailSubjectLabel(
+        NotificationConstants.OBJECT_TYPE_EVENT
+      )
+    );
+  }
+
+  @IsTest
+  static void buildEmailSubjectIncludesHouseholdWhenLogsShareOneHousehold() {
+    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+    Notification_Log__c logRecord = new Notification_Log__c(
+      Household__c = context.household.Id,
+      Source_Type__c = NotificationConstants.OBJECT_TYPE_TASK
+    );
+
+    System.assertEquals(
+      'Task Digest — ' +
+        context.household.Name +
+        ' - ' +
+        Date.today().format(),
+      NotificationDigestMessageBuilder.buildEmailSubject(
+        NotificationConstants.OBJECT_TYPE_TASK,
+        new List<Notification_Log__c>{ logRecord }
+      )
+    );
+  }
+
+  @IsTest
+  static void buildEmailSubjectOmitsHouseholdWhenLogsSpanMultipleHouseholds() {
+    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+    Account otherHousehold = FscDataTestDataFactory.createHouseholdAccount(
+      'Other Digest Household'
+    );
+
+    String subject = NotificationDigestMessageBuilder.buildEmailSubject(
+      NotificationConstants.OBJECT_TYPE_CASE,
+      new List<Notification_Log__c>{
+        new Notification_Log__c(Household__c = context.household.Id),
+        new Notification_Log__c(Household__c = otherHousehold.Id)
+      }
+    );
+
+    System.assertEquals(
+      'Case Digest - ' + Date.today().format(),
+      subject
+    );
+    System.assert(!subject.contains(context.household.Name));
+    System.assert(!subject.contains(otherHousehold.Name));
   }
 
   @IsTest
@@ -214,7 +302,7 @@ private class NotificationDigestMessageBuilderTest {
       NotificationDigestMessageBuilder.EMAIL_BODY_LIMIT
     );
 
-    System.assert(message.title.contains('Email Digest'));
+    System.assert(message.title.contains('Case Digest'));
     System.assert(!String.isBlank(message.body));
   }
 

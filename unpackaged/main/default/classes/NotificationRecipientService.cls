@@ -53,11 +53,15 @@ public without sharing class NotificationRecipientService {
       Set<Id> recipientIdSet = new Set<Id>();
 
       if (
+        !NotificationTaskRecipientService.isAssignedToQueue(taskRecord) &&
         NotificationConstants.isPitStopTask(taskRecord) &&
         NotificationTaskPitStopService.isEligiblePitStopTask(taskRecord)
       ) {
         recipientIdSet.addAll(
-          NotificationTaskPitStopService.resolveRecipients(taskRecord)
+          NotificationTaskRecipientService.excludeCreatorRecipients(
+            taskRecord,
+            NotificationTaskPitStopService.resolveRecipients(taskRecord)
+          )
         );
       }
 
@@ -65,7 +69,7 @@ public without sharing class NotificationRecipientService {
         taskRecord
       )) {
         List<Id> normalRecipientIds = new NotificationTaskRecipientService()
-          .resolveRecipients(taskRecord, householdId);
+          .resolveAssigneeOnlyRecipients(taskRecord, null);
         recipientIdSet.addAll(
           filterNormalTaskRecipientsForPitStopTask(
             taskRecord,
@@ -74,7 +78,10 @@ public without sharing class NotificationRecipientService {
         );
       }
 
-      return new List<Id>(recipientIdSet);
+      return NotificationTaskRecipientService.excludeCreatorRecipients(
+        taskRecord,
+        new List<Id>(recipientIdSet)
+      );
     }
 
     if (householdId == null) {
@@ -234,7 +241,10 @@ public without sharing class NotificationRecipientService {
     ) {
       Set<Id> recipientIdSet = new Set<Id>(filteredOverrideRecipientIds);
       recipientIdSet.addAll(
-        NotificationTaskPitStopService.resolveRecipients(taskRecord)
+        NotificationTaskRecipientService.excludeCreatorRecipients(
+          taskRecord,
+          NotificationTaskPitStopService.resolveRecipients(taskRecord)
+        )
       );
       return new List<Id>(recipientIdSet);
     }

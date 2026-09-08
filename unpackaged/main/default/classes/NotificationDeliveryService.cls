@@ -539,10 +539,9 @@ public without sharing class NotificationDeliveryService {
     message.targetId = NotificationDigestContentService.resolveTargetId(logRecord);
 
     if (request.channel == NotificationConstants.CHANNEL_EMAIL) {
-      message.title = resolveDigestEmailSubject(
+      message.title = resolveEmailSubject(
         request.frequency,
-        logRecord,
-        message.title
+        logRecord
       );
     }
 
@@ -561,29 +560,29 @@ public without sharing class NotificationDeliveryService {
     message.targetId = NotificationDigestContentService.resolveTargetId(logRecord);
 
     if (channel == NotificationConstants.CHANNEL_EMAIL) {
-      message.title = resolveDigestEmailSubject(
-        frequency,
-        logRecord,
-        message.title
-      );
+      message.title = resolveEmailSubject(frequency, logRecord);
     }
 
     return message;
   }
 
-  private static String resolveDigestEmailSubject(
+  private static String resolveEmailSubject(
     String frequency,
-    Notification_Log__c logRecord,
-    String fallbackTitle
+    Notification_Log__c logRecord
   ) {
     if (
       frequency == NotificationConstants.FREQUENCY_DIGEST ||
       logRecord.Frequency__c == NotificationConstants.FREQUENCY_DIGEST
     ) {
-      return NotificationDigestMessageBuilder.buildEmailSubject();
+      return NotificationDigestMessageBuilder.buildEmailSubject(
+        logRecord.Source_Type__c,
+        new List<Notification_Log__c>{ logRecord }
+      );
     }
 
-    return buildDistinctEmailSubject(fallbackTitle, logRecord);
+    return NotificationDigestMessageBuilder.buildEmailSubjectLabel(
+      logRecord.Source_Type__c
+    );
   }
 
   private static Boolean hasCompleteMessageContent(Notification_Log__c logRecord) {
@@ -614,19 +613,6 @@ public without sharing class NotificationDeliveryService {
     }
 
     NotificationDigestContentService.enrichLogs(logsNeedingContent);
-  }
-
-  private static String buildDistinctEmailSubject(
-    String title,
-    Notification_Log__c logRecord
-  ) {
-    String normalizedTitle = String.isBlank(title) ? 'Notification' : title.trim();
-
-    if (!String.isBlank(logRecord.Source_Record_Id__c)) {
-      return normalizedTitle + ' [' + logRecord.Source_Record_Id__c + ']';
-    }
-
-    return normalizedTitle;
   }
 
   private static String resolveSuppressionReason(String frequency) {

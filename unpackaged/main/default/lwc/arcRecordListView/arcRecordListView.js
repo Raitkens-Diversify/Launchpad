@@ -174,6 +174,16 @@ const RECORD_TYPE_FILTER_VALUE_ALIASES = {
 };
 /** Bars past this are dropped -- a chart of 200 one-record bars reads as noise. */
 const CHART_MAX_BARS = 12;
+
+/*
+ * The Chart view counts every matching record, not just the table's first
+ * page: a chart drawn from the 100 rows the table happens to have loaded
+ * misreported the totals (2026-09-07). Pages come in at the server's maximum
+ * (ArcRecordSearchController.MAX_PAGE_SIZE) and stop at CHART_MAX_ROWS so a
+ * runaway list cannot loop for ever; the summary says when that cap was hit.
+ */
+const CHART_FETCH_PAGE_SIZE = 200;
+const CHART_MAX_ROWS = 50000;
 /* Navy through to the lighter brand blues, so a long series stays legible. */
 const CHART_COLOURS = [
   "#032d60",
@@ -626,6 +636,17 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   _lastLoadedServerRowCreatedDate = null;
   /** Guards handleLoadMoreRows against a double-fire while its own fetch is in flight. */
   _isLoadingMoreRows = false;
+
+  /**
+   * Every matching row for the Chart view, kept apart from tableRows so the
+   * table keeps its own paging. Tagged with the search generation it was
+   * loaded for; a newer search makes it stale and the chart reloads.
+   */
+  _chartRows = null;
+  _chartRowsGeneration = -1;
+  _chartRowsTruncated = false;
+  _chartLoadGeneration = -1;
+  isChartLoading = false;
 
   connectedCallback() {
     this.applyIconVariables();
@@ -1502,13 +1523,27 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     ) {
       return this.defaultChartFieldApiName;
     }
+    const rows = this.chartRows;
     const best = this.visibleColumnDefs.find((col) => {
-      const values = new Set(
-        this.visibleRows.map((r) => r[col.fieldApiName] || "")
-      );
-      return values.size > 1 && values.size < this.visibleRows.length;
+      const values = new Set(rows.map((r) => r[col.fieldApiName] || ""));
+      return values.size > 1 && values.size < rows.length;
     });
     return best?.fieldApiName || this.visibleColumnDefs[0]?.fieldApiName || "";
+  }
+
+  /**
+   * The rows the chart counts. In server-search mode that is every matching
+   * record, fetched by loadAllRowsForChart; until that finishes for the
+   * current search there is nothing to count. Otherwise the loaded rows.
+   */
+  get chartRows() {
+    if (!this.enableServerSearch) {
+      return this.visibleRows;
+    }
+    return this._chartRows &&
+      this._chartRowsGeneration === this._serverSearchGeneration
+      ? this._chartRows
+      : [];
   }
 
   get chartFieldOptions() {
@@ -1530,7 +1565,8 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     }
 
     const counts = new Map();
-    this.visibleRows.forEach((row) => {
+    const rows = this.chartRows;
+    rows.forEach((row) => {
       const raw = row[field];
       const label =
         raw === null || raw === undefined || raw === "" || raw === "-"
@@ -1542,7 +1578,7 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     const entries = [...counts.entries()].sort((a, b) => b[1] - a[1]);
     const capped = entries.slice(0, CHART_MAX_BARS);
     const max = capped.length ? capped[0][1] : 0;
-    const total = this.visibleRows.length || 1;
+    const total = rows.length || 1;
 
     return capped.map(([label, count], index) => ({
       key: label,
@@ -1556,9 +1592,84 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   }
 
   get chartSummary() {
+    if (this.isChartLoading) {
+      return "Loading every matching record\u2026";
+    }
     const shown = this.chartBars.length;
-    const rows = this.visibleRows.length;
-    return `${rows} record${rows === 1 ? "" : "s"} across ${shown} value${shown === 1 ? "" : "s"}`;
+    const rows = this.chartRows.length;
+    const scope = this._chartRowsTruncated ? ` (first ${CHART_MAX_ROWS})` : "";
+    return `${rows} record${rows === 1 ? "" : "s"}${scope} across ${shown} value${shown === 1 ? "" : "s"}`;
+  }
+
+  /** Loads the chart's full row set unless the current search already has one. */
+  ensureChartRows() {
+    if (!this.enableServerSearch) {
+      return;
+    }
+    if (
+      this._chartRows &&
+      this._chartRowsGeneration === this._serverSearchGeneration
+    ) {
+      return;
+    }
+    this.loadAllRowsForChart();
+  }
+
+  /**
+   * Fetches every row matching the current search, page after page at the
+   * server's maximum page size, for the Chart view. A search that starts
+   * meanwhile moves the generation on; this run then stops and drops what
+   * it had, and the run started for the new search takes over the spinner.
+   */
+  async loadAllRowsForChart() {
+    if (!this.enableServerSearch || !this.objectApiName) {
+      return;
+    }
+    const generation = this._serverSearchGeneration;
+    if (this.isChartLoading && this._chartLoadGeneration === generation) {
+      return;
+    }
+    this._chartLoadGeneration = generation;
+    this.isChartLoading = true;
+
+    const rows = [];
+    let afterId = null;
+    let afterCreatedDate = null;
+    let hasMore = true;
+    let truncated = false;
+
+    try {
+      while (hasMore) {
+        // eslint-disable-next-line no-await-in-loop
+        const batch = await this.fetchServerSearchBatch(
+          afterId,
+          afterCreatedDate,
+          CHART_FETCH_PAGE_SIZE
+        );
+        if (generation !== this._serverSearchGeneration) {
+          return;
+        }
+        rows.push(...batch.rows);
+        hasMore = batch.hasMore;
+        afterId = batch.lastRowId;
+        afterCreatedDate = batch.lastRowCreatedDate;
+        if (hasMore && rows.length >= CHART_MAX_ROWS) {
+          truncated = true;
+          break;
+        }
+      }
+      this._chartRows = rows;
+      this._chartRowsGeneration = generation;
+      this._chartRowsTruncated = truncated;
+    } catch (error) {
+      if (generation === this._serverSearchGeneration) {
+        this.errorMessage = this.reduceError(error);
+      }
+    } finally {
+      if (this._chartLoadGeneration === generation) {
+        this.isChartLoading = false;
+      }
+    }
   }
 
   get hasChartData() {
@@ -2310,6 +2421,8 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     this._hasMoreServerRows = false;
     this._lastLoadedServerRowId = null;
     this._lastLoadedServerRowCreatedDate = null;
+    // The chart's full set belonged to the old criteria too.
+    this._chartRows = null;
 
     try {
       const batch = await this.fetchServerSearchBatch(null, null);
@@ -2320,6 +2433,9 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
       this._hasMoreServerRows = batch.hasMore;
       this._lastLoadedServerRowId = batch.lastRowId;
       this._lastLoadedServerRowCreatedDate = batch.lastRowCreatedDate;
+      if (this.isChartView) {
+        this.ensureChartRows();
+      }
     } catch (error) {
       if (generation === this._serverSearchGeneration) {
         this.errorMessage = this.reduceError(error);
@@ -2382,8 +2498,12 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
     }
   }
 
-  /** One searchRecords round trip, mapped to table rows -- shared by a fresh search and load-more. */
-  async fetchServerSearchBatch(afterId, afterCreatedDate) {
+  /** One searchRecords round trip, mapped to table rows -- shared by a fresh search, load-more and the chart. */
+  async fetchServerSearchBatch(
+    afterId,
+    afterCreatedDate,
+    pageSize = SERVER_SEARCH_PAGE_SIZE
+  ) {
     const filters = this.activeFilters
       .filter((f) => f.fieldApiName && f.operandValue)
       .map((f) => ({
@@ -2411,7 +2531,7 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
       searchableFields,
       afterId,
       afterCreatedDate,
-      pageSize: SERVER_SEARCH_PAGE_SIZE,
+      pageSize,
       // The tab's own baked-in meaning (My Open Cases, My Team's Open
       // Tasks, etc.) is enforced server-side, keyed off this exact value
       // -- see ArcRecordSearchController.appendMandatoryFilter.
@@ -2430,12 +2550,11 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
       this.mapSearchRowToTableRow(row, selectedFieldApiNames)
     );
     // Apex's own contract only ever sets hasMore=true when it returned a
-    // full page (server-side "take" is exactly SERVER_SEARCH_PAGE_SIZE) --
+    // full page (server-side "take" is exactly the requested page size) --
     // enforcing that same invariant here guarantees a short/final batch can
     // never leave a trailing "load more" page button behind, regardless of
     // what result.hasMore claims.
-    const hasMore =
-      Boolean(result?.hasMore) && rows.length >= SERVER_SEARCH_PAGE_SIZE;
+    const hasMore = Boolean(result?.hasMore) && rows.length >= pageSize;
     // The compound cursor's own values, read from the raw (unmapped) last
     // row rather than the table row -- mapSearchRowToTableRow only carries
     // over the requested/visible columns, not createdDate.
@@ -2917,6 +3036,9 @@ export default class ArcRecordListView extends NavigationMixin(LightningElement)
   handleViewModeChange(event) {
     this.viewMode = event.currentTarget.dataset.mode;
     this.openPopover = "";
+    if (this.isChartView) {
+      this.ensureChartRows();
+    }
   }
 
   handleSearchInput(event) {

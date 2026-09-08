@@ -118,6 +118,32 @@ public with sharing class ArcRecordSearchController {
    * custom multi-field Apex type used as a list element, not to this type
    * or Apex's JSON support in general.
    */
+  private static final String CASE_OVERALL_STATUS_FIELD = 'Current_Task_Status__c';
+  private static final String CASE_SUBMITTED_FIELD = 'Submitted__c';
+
+  /**
+   * Case Overall Status as the reader should see it. The stored
+   * Current_Task_Status__c fell back to Completed for a case with no open
+   * task, which is every wizard draft before submission. Case_TriggerHandler
+   * now stamps Unsubmitted, but a case stamped before that keeps Completed
+   * until its next save, so the list reads Unsubmitted for any unsubmitted
+   * case whose stored status is Completed or blank. A draft with work under
+   * way (On Track, a pit stop) keeps that reading.
+   */
+  public static String caseOverallStatusForDisplay(Boolean submitted, String stored) {
+    Boolean readsAsDraft = submitted != true && (String.isBlank(stored) || stored == 'Completed');
+    return readsAsDraft ? 'Unsubmitted' : stored;
+  }
+
+  private static Boolean containsPath(List<String> paths, String path) {
+    for (String candidate : paths) {
+      if (candidate.equalsIgnoreCase(path)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   @AuraEnabled
   public static SearchResult searchRecords(
     String objectApiName,
@@ -195,17 +221,19 @@ public with sharing class ArcRecordSearchController {
     // half of the next page's cursor. Selecting it twice (a view that also
     // shows a "Created Date" column) throws "Duplicate field selected", so
     // it's only added here when the caller didn't already ask for it.
-    Boolean createdDateAlreadySelected = false;
-    for (String path : selected) {
-      if (path.equalsIgnoreCase('CreatedDate')) {
-        createdDateAlreadySelected = true;
-        break;
-      }
-    }
+    Boolean createdDateAlreadySelected = containsPath(selected, 'CreatedDate');
+
+    // Case Overall Status is shown, not echoed: see caseOverallStatusForDisplay.
+    // Submitted__c rides along for it, unless the view already shows that column.
+    Boolean showsCaseOverallStatus =
+      objectApiName == 'Case' && containsPath(selected, CASE_OVERALL_STATUS_FIELD);
+    Boolean needsSubmitted =
+      showsCaseOverallStatus && !containsPath(selected, CASE_SUBMITTED_FIELD);
 
     String soql =
       'SELECT Id, ' +
       (createdDateAlreadySelected ? '' : 'CreatedDate, ') +
+      (needsSubmitted ? CASE_SUBMITTED_FIELD + ', ' : '') +
       String.join(selected, ', ') +
       ' FROM ' +
       objectApiName +
@@ -233,6 +261,12 @@ public with sharing class ArcRecordSearchController {
         // response for an 8-field request, empty fields simply missing
         // rather than present-and-blank.
         String cellValue = readPath(record, path);
+        if (showsCaseOverallStatus && path.equalsIgnoreCase(CASE_OVERALL_STATUS_FIELD)) {
+          cellValue = caseOverallStatusForDisplay(
+            (Boolean) record.get(CASE_SUBMITTED_FIELD),
+            cellValue
+          );
+        }
         row.cells.add(cellValue == null ? '' : cellValue);
       }
       result.rows.add(row);

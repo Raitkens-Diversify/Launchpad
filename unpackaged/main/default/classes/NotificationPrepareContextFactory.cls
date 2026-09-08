@@ -3,6 +3,8 @@
  * Date: 2026-09-07
  *
  * Builds source prepare context for chunked notification recipient processing.
+ * Task insert and Assigned To updates resolve the Assigned To user only.
+ * FA Team members and queue Assigned To values never receive Task notifications.
  */
 public without sharing class NotificationPrepareContextFactory {
   public static NotificationRecipientPrepareModels.SourcePrepareContext build(
@@ -29,19 +31,40 @@ public without sharing class NotificationPrepareContextFactory {
     NotificationChangeModels.ChangeContext changeContext = NotificationChangeModels.fromJson(
       changeContextJson
     );
-    Boolean isAssigneeUpdate = isTaskAssigneeUpdate(
+    Boolean isTaskSource =
+      sourceType == NotificationConstants.OBJECT_TYPE_TASK &&
+      sourceRecord instanceof Task;
+    Boolean isTaskUpdate = isTaskAssigneeUpdate(
       sourceType,
       sourceRecord,
       changeContext
     );
 
-    List<Id> recipientIds = isAssigneeUpdate
-      ? new NotificationTaskRecipientService()
-          .resolveAssigneeOnlyRecipients((Task) sourceRecord, changeContext)
+    List<Id> recipientIds = isTaskSource
+      ? resolveTaskRecipientIds((Task) sourceRecord, changeContext, isTaskUpdate)
       : new NotificationRecipientService()
           .getRecipientsForSourceRecord(sourceType, sourceRecord, householdId);
 
-    if (recipientIds.isEmpty()) {
+    Set<Id> pitStopBypassRecipientIds = new Set<Id>();
+    if (
+      isTaskSource &&
+      !isTaskUpdate &&
+      !NotificationTaskRecipientService.isAssignedToQueue((Task) sourceRecord)
+    ) {
+      Task taskRecord = (Task) sourceRecord;
+      if (NotificationTaskPitStopService.isEligiblePitStopTask(taskRecord)) {
+        pitStopBypassRecipientIds.addAll(
+          NotificationTaskRecipientService.excludeCreatorRecipients(
+            taskRecord,
+            NotificationTaskPitStopService.resolveRecipients(taskRecord)
+          )
+        );
+      }
+    }
+
+    Set<Id> mergedRecipientIds = new Set<Id>(recipientIds);
+    mergedRecipientIds.addAll(pitStopBypassRecipientIds);
+    if (mergedRecipientIds.isEmpty()) {
       return null;
     }
 
@@ -56,19 +79,70 @@ public without sharing class NotificationPrepareContextFactory {
       sourceRecord,
       sourceType
     );
-    prepareContext.recipientIds = recipientIds;
+    prepareContext.recipientIds = new List<Id>(mergedRecipientIds);
+    prepareContext.pitStopBypassRecipientIds.addAll(pitStopBypassRecipientIds);
 
-    if (!isAssigneeUpdate && sourceRecord instanceof Task) {
-      Task taskRecord = (Task) sourceRecord;
+    return prepareContext;
+  }
 
-      if (NotificationTaskPitStopService.isEligiblePitStopTask(taskRecord)) {
-        prepareContext.pitStopBypassRecipientIds.addAll(
-          NotificationTaskPitStopService.resolveRecipients(taskRecord)
-        );
+  private static List<Id> resolveTaskRecipientIds(
+    Task taskRecord,
+    NotificationChangeModels.ChangeContext changeContext,
+    Boolean isTaskUpdate
+  ) {
+    List<Id> recipientIds = new NotificationTaskRecipientService()
+      .resolveAssigneeOnlyRecipients(taskRecord, changeContext);
+
+    if (isTaskUpdate) {
+      return recipientIds;
+    }
+
+    if (
+      !NotificationConstants.shouldResolveNormalTaskRecipientsForPitStopTask(
+        taskRecord
+      )
+    ) {
+      return new List<Id>();
+    }
+
+    return filterNormalTaskRecipientsForPitStopTask(taskRecord, recipientIds);
+  }
+
+  private static List<Id> filterNormalTaskRecipientsForPitStopTask(
+    Task taskRecord,
+    List<Id> recipientIds
+  ) {
+    if (
+      recipientIds == null ||
+      recipientIds.isEmpty() ||
+      !NotificationConstants.isPitStopTask(taskRecord)
+    ) {
+      return recipientIds == null ? new List<Id>() : recipientIds;
+    }
+
+    Map<Id, User> eligibleUsersById = NotificationRecipientUserRepository.selectEligibleUsersById(
+      new Set<Id>(recipientIds)
+    );
+    List<Id> filteredRecipientIds = new List<Id>();
+
+    for (Id recipientId : recipientIds) {
+      User eligibleUser = eligibleUsersById.get(recipientId);
+      if (eligibleUser == null) {
+        continue;
+      }
+
+      if (
+        NotificationConstants.shouldIncludeRecipientInNormalTaskNotifications(
+          taskRecord,
+          eligibleUser.Profile.Name,
+          eligibleUser.UserType
+        )
+      ) {
+        filteredRecipientIds.add(recipientId);
       }
     }
 
-    return prepareContext;
+    return filteredRecipientIds;
   }
 
   private static Boolean isTaskAssigneeUpdate(
@@ -135,6 +209,7 @@ public without sharing class NotificationPrepareContextFactory {
           Subject,
           WhatId,
           OwnerId,
+          CreatedById,
           Branch_Pit_Stop__c,
           Home_Office_Pit_Stop__c
         FROM Task

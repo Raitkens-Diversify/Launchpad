@@ -44,14 +44,18 @@ public with sharing class NotificationChangePublisher {
       ? changeDetector.detectInserts(objectType, notificationCenterRecords)
       : changeDetector.detectUpdates(objectType, notificationCenterNewMap, oldMap);
 
-    if (
-      oldMap != null &&
-      objectType == NotificationConstants.OBJECT_TYPE_TASK
-    ) {
-      contextByRecordId = filterTaskAssigneeUpdates(
-        contextByRecordId,
-        notificationCenterNewMap
-      );
+    if (objectType == NotificationConstants.OBJECT_TYPE_TASK) {
+      if (oldMap == null) {
+        contextByRecordId = filterTaskQueueInserts(
+          contextByRecordId,
+          notificationCenterRecords
+        );
+      } else {
+        contextByRecordId = filterTaskAssigneeUpdates(
+          contextByRecordId,
+          notificationCenterNewMap
+        );
+      }
     }
 
     if (contextByRecordId.isEmpty()) {
@@ -103,6 +107,43 @@ public with sharing class NotificationChangePublisher {
     }
 
     return notificationCenterNewMap;
+  }
+
+  @TestVisible
+  private static Map<Id, NotificationChangeModels.ChangeContext> filterTaskQueueInserts(
+    Map<Id, NotificationChangeModels.ChangeContext> contextByRecordId,
+    List<SObject> records
+  ) {
+    Map<Id, NotificationChangeModels.ChangeContext> filteredContextByRecordId = new Map<Id, NotificationChangeModels.ChangeContext>();
+
+    if (contextByRecordId == null || contextByRecordId.isEmpty()) {
+      return filteredContextByRecordId;
+    }
+
+    Map<Id, SObject> recordById = new Map<Id, SObject>();
+    if (records != null) {
+      for (SObject record : records) {
+        if (record != null && record.Id != null) {
+          recordById.put(record.Id, record);
+        }
+      }
+    }
+
+    for (Id recordId : contextByRecordId.keySet()) {
+      SObject record = recordById.get(recordId);
+      if (record == null) {
+        continue;
+      }
+
+      Id ownerId = (Id) record.get('OwnerId');
+      if (ownerId != null && !isUserId(ownerId)) {
+        continue;
+      }
+
+      filteredContextByRecordId.put(recordId, contextByRecordId.get(recordId));
+    }
+
+    return filteredContextByRecordId;
   }
 
   @TestVisible

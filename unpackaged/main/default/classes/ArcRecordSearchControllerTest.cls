@@ -848,4 +848,49 @@ private class ArcRecordSearchControllerTest {
       null
     );
   }
+
+  @IsTest
+  static void caseOverallStatusForDisplayCallsADraftUnsubmitted() {
+    Assert.areEqual(
+      'Unsubmitted',
+      ArcRecordSearchController.caseOverallStatusForDisplay(false, 'Completed'),
+      'The stored Completed fallback on an unsubmitted case reads Unsubmitted.'
+    );
+    Assert.areEqual('Unsubmitted', ArcRecordSearchController.caseOverallStatusForDisplay(false, null));
+    Assert.areEqual('Unsubmitted', ArcRecordSearchController.caseOverallStatusForDisplay(null, ''));
+    Assert.areEqual(
+      'On Track',
+      ArcRecordSearchController.caseOverallStatusForDisplay(false, 'On Track'),
+      'A case with work under way keeps its reading whatever the submitted flag says.'
+    );
+    Assert.areEqual('Completed', ArcRecordSearchController.caseOverallStatusForDisplay(true, 'Completed'));
+    Assert.areEqual('HO Pit Stop', ArcRecordSearchController.caseOverallStatusForDisplay(true, 'HO Pit Stop'));
+  }
+
+  @IsTest
+  static void searchRecordsShowsUnsubmittedForADraftCase() {
+    Case draft = new Case(Subject = 'Wizard draft', Status = 'New', Submitted__c = false);
+    insert draft;
+
+    Test.startTest();
+    // Submitted__c not requested: the controller selects it for itself.
+    ArcRecordSearchController.SearchResult withoutFlag = ArcRecordSearchController.searchRecords(
+      'Case',
+      new List<String>{ 'CaseNumber', 'Current_Task_Status__c' },
+      null, null, null, null, null, null, null
+    );
+    // Submitted__c requested as a column too: no duplicate-field error.
+    ArcRecordSearchController.SearchResult withFlag = ArcRecordSearchController.searchRecords(
+      'Case',
+      new List<String>{ 'CaseNumber', 'Current_Task_Status__c', 'Submitted__c' },
+      null, null, null, null, null, null, null
+    );
+    Test.stopTest();
+
+    Assert.areEqual(1, withoutFlag.rows.size());
+    Assert.areEqual(draft.Id, withoutFlag.rows[0].id);
+    Assert.areEqual('Unsubmitted', withoutFlag.rows[0].cells[1]);
+    Assert.areEqual(1, withFlag.rows.size());
+    Assert.areEqual('Unsubmitted', withFlag.rows[0].cells[1]);
+  }
 }

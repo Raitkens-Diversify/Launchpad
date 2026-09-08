@@ -81,7 +81,10 @@ private class NotificationDigestEmailTableBuilderTest {
     );
 
     System.assertEquals(
-      NotificationDigestMessageBuilder.buildEmailSubject(),
+      NotificationDigestMessageBuilder.buildEmailSubject(
+        NotificationConstants.OBJECT_TYPE_CASE,
+        new List<Notification_Log__c>{ logRecord }
+      ),
       message.title
     );
     System.assert(message.body.contains('<table'));

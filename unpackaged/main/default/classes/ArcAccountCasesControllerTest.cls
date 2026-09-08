@@ -89,4 +89,29 @@ private class ArcAccountCasesControllerTest {
     Assert.areEqual(0, result.rows.size());
     Assert.areEqual(false, result.hasMore);
   }
+
+  @IsTest
+  static void getCasesForAccountShowsUnsubmittedForADraft() {
+    Account account = new Account(Name = 'Draft Account', Type = 'Prospect');
+    insert account;
+
+    Case draft = new Case(
+      Subject = 'Wizard draft',
+      Status = 'New',
+      AccountId = account.Id,
+      Submitted__c = false
+    );
+    insert draft;
+
+    Test.startTest();
+    ArcAccountCasesController.CasesPage result = ArcAccountCasesController.getCasesForAccount(
+      account.Id,
+      null,
+      null
+    );
+    Test.stopTest();
+
+    Assert.areEqual(1, result.rows.size());
+    Assert.areEqual('Unsubmitted', result.rows[0].overallStatus);
+  }
 }

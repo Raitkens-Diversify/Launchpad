@@ -245,49 +245,20 @@
 
           <!--
             Case Information and System Information, from the Lightning page's
-            Details tab. Case Information is Additional Case Notes alone, drawn
-            as the field itself through lightning-input-field so the label and
-            an empty box show even when there are no notes; a view-mode record
-            form drew only the label and a pencil. The platform disables the
-            field for a user who cannot edit it. Save and Cancel appear once the
-            notes change.
+            Details tab. Case Information is Additional Case Notes alone,
+            read-only on ARC: the notes when there are any, a dash when not.
+            Editing was taken out on request (2026-09-07); the Arc profile has
+            no edit right on the field anyway.
           -->
           <details class="case-section" open>
             <summary class="case-section__summary">Case Information</summary>
             <div class="case-section__body">
-              <lightning-record-edit-form
-                record-id={detail.id}
-                object-api-name="Case"
-                onsubmit={handleCaseNotesSubmit}
-                onsuccess={handleCaseNotesSaved}
-                onerror={handleCaseNotesError}
-              >
-                <lightning-input-field
-                  lwc:ref="caseNotesField"
-                  field-name="Additional_Case_Notes__c"
-                  onchange={handleCaseNotesChange}
-                ></lightning-input-field>
-                <template lwc:if={hasCaseNotesError}>
-                  <p class="arc-case-detail__modal-error" role="alert">
-                    {caseNotesError}
-                  </p>
-                </template>
-                <template lwc:if={isCaseNotesDirty}>
-                  <div class="case-section__actions">
-                    <lightning-button
-                      label="Cancel"
-                      onclick={handleCaseNotesCancel}
-                      disabled={isSavingCaseNotes}
-                    ></lightning-button>
-                    <lightning-button
-                      variant="brand"
-                      type="submit"
-                      label="Save"
-                      disabled={isSavingCaseNotes}
-                    ></lightning-button>
-                  </div>
-                </template>
-              </lightning-record-edit-form>
+              <dl class="case-section__grid case-section__grid--single">
+                <div class="case-section__field">
+                  <dt>Additional Case Notes</dt>
+                  <dd class="case-section__notes">{additionalCaseNotes}</dd>
+                </div>
+              </dl>
             </div>
           </details>
 

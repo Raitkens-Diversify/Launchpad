@@ -211,6 +211,9 @@ private class NotificationCenterEventServiceTest {
       Priority = 'Normal'
     );
     NotificationTestDataFactory.insertRecord(taskRecord);
+    NotificationTaskRecipientService.testRecipientOverrides = new Map<Id, List<Id>>{
+      taskRecord.Id => new List<Id>{ UserInfo.getUserId() }
+    };
 
     NotificationChangeModels.ChangeContext changeContext = new NotificationChangeModels.ChangeContext(
       NotificationConstants.OBJECT_TYPE_TASK,
@@ -651,10 +654,10 @@ private class NotificationCenterEventServiceTest {
         AND Recipient__c = :currentUser.Id
     ];
 
-    System.assert(!logs.isEmpty(), 'Task assignee should receive a notification log.');
     System.assertEquals(
-      NotificationConstants.FREQUENCY_IMMEDIATE,
-      logs[0].Frequency__c
+      0,
+      logs.size(),
+      'Task creator must not receive a Task notification log.'
     );
   }
 
