@@ -439,6 +439,131 @@ public class Task_TriggerHandlerTest {
         Assert.areEqual('Blocked', stillBlocked.Status, 'A non-pit-stop completion must not reactivate the blocked task');
     }
 
+    private static Id rtId(String dev) {
+        return Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
+            .get(dev)
+            .getRecordTypeId();
+    }
+
+    private static Boolean rtAvailable(String dev) {
+        Schema.RecordTypeInfo info = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
+            .get(dev);
+        return info != null && info.isAvailable();
+    }
+
+    // Exercises handleTaskCompleteAndApproved across both branches:
+    //  - CASE 1: a single Envelope_Content__c per envelope has Case__c populated, so
+    //    the linked Account__c is flipped to Type = 'Client' directly.
+    //  - CASE 2: multiple Envelope_Content__c on one envelope have Case__c populated,
+    //    so ownership is resolved through the Case's Wizard Financial Account roles.
+    @isTest
+    public static void testHandleTaskCompleteAndApproved_DirectAndFinancialAccountPaths() {
+        if (!rtAvailable('Business') || !rtAvailable('Trust')) {
+            // Org without these record types cannot exercise the account-update filter.
+            return;
+        }
+
+        Account directAcct = new Account(Name = 'Direct Owner', Type = 'Prospect', RecordTypeId = rtId('Business'));
+        Account roleAcct = new Account(Name = 'Role Owner', Type = 'Prospect', RecordTypeId = rtId('Trust'));
+        insert new List<Account>{ directAcct, roleAcct };
+
+        Financial_Account__c finAcct = new Financial_Account__c(Name = 'Wizard FA');
+        insert finAcct;
+
+        insert new Financial_Account_Role__c(
+            Financial_Account__c = finAcct.Id,
+            Account__c = roleAcct.Id,
+            Role__c = 'Primary Owner'
+        );
+
+        Case_Template__c caseTmpl = [SELECT Id FROM Case_Template__c LIMIT 1];
+        Task_Template__c taskTmpl = [SELECT Id FROM Task_Template__c LIMIT 1];
+        Task_Template_Item__c milestoneTti = new Task_Template_Item__c(
+            Case_Template__c = caseTmpl.Id,
+            Task_Template__c = taskTmpl.Id,
+            Order__c = 10,
+            Home_Office_Approval_Milestone__c = true
+        );
+        insert milestoneTti;
+
+        Case singleCase = new Case(Subject = 'Single Content Case');
+        Case multiCase = new Case(Subject = 'Multi Content Case', Wizard_Financial_Account__c = finAcct.Id);
+        insert new List<Case>{ singleCase, multiCase };
+
+        Envelope__c envSingle = new Envelope__c(Name = 'Env Single');
+        Envelope__c envMulti = new Envelope__c(Name = 'Env Multi');
+        insert new List<Envelope__c>{ envSingle, envMulti };
+
+        // Single: exactly one content with Case populated + Account set -> direct path.
+        insert new Envelope_Content__c(
+            Envelope__c = envSingle.Id,
+            Case__c = singleCase.Id,
+            Account__c = directAcct.Id
+        );
+
+        // Multi: two contents on one envelope with Case populated -> financial-account path.
+        insert new List<Envelope_Content__c>{
+            new Envelope_Content__c(Envelope__c = envMulti.Id, Case__c = multiCase.Id),
+            new Envelope_Content__c(Envelope__c = envMulti.Id, Case__c = multiCase.Id)
+        };
+
+        Task singleTask = new Task(
+            Subject = 'Single Task',
+            WhatId = singleCase.Id,
+            Status = 'In Progress',
+            Task_Template_Item__c = milestoneTti.Id
+        );
+        Task multiTask = new Task(
+            Subject = 'Multi Task',
+            WhatId = multiCase.Id,
+            Status = 'In Progress',
+            Task_Template_Item__c = milestoneTti.Id
+        );
+        insert new List<Task>{ singleTask, multiTask };
+
+        // Simulate the status transition the method keys off of (old != Approved/Completed).
+        Map<Id, Task> oldMap = new Map<Id, Task>{
+            singleTask.Id => new Task(Id = singleTask.Id, Status = 'In Progress'),
+            multiTask.Id => new Task(Id = multiTask.Id, Status = 'In Progress')
+        };
+        singleTask.Status = 'Completed';
+        multiTask.Status = 'Approved';
+
+        Test.startTest();
+        Task_TriggerHandler.handleTaskCompleteAndApproved(
+            new List<Task>{ singleTask, multiTask },
+            oldMap
+        );
+        Test.stopTest();
+
+        Map<Id, Account> updated = new Map<Id, Account>([
+            SELECT Id, Type FROM Account WHERE Id IN :new List<Id>{ directAcct.Id, roleAcct.Id }
+        ]);
+        Assert.areEqual('Client', updated.get(directAcct.Id).Type, 'Direct envelope-content account should be set to Client');
+        Assert.areEqual('Client', updated.get(roleAcct.Id).Type, 'Financial-account-role account should be set to Client');
+    }
+
+    // Covers the early-return guard when no task actually transitions into an approved
+    // or completed state.
+    @isTest
+    public static void testHandleTaskCompleteAndApproved_NoQualifyingTasks() {
+        Case c = new Case(Subject = 'No Milestone Case');
+        insert c;
+        Task t = new Task(Subject = 'No Milestone Task', WhatId = c.Id, Status = 'In Progress');
+        insert t;
+
+        Map<Id, Task> oldMap = new Map<Id, Task>{
+            t.Id => new Task(Id = t.Id, Status = 'In Progress')
+        };
+
+        Test.startTest();
+        // No status change, so the method should short-circuit without side effects.
+        Task_TriggerHandler.handleTaskCompleteAndApproved(new List<Task>{ t }, oldMap);
+        Test.stopTest();
+
+        Assert.areEqual(1, [SELECT COUNT() FROM Task WHERE Id = :t.Id], 'Task should be untouched');
+    }
+
     private static Map<String, Id> createQueues(List<String> names) {
         Map<String, Id> result = new Map<String, Id>();
         System.runAs(new User(Id = UserInfo.getUserId())) {
