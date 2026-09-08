@@ -525,6 +525,37 @@ private class ResourceAdminControllerTest {
             'Link removed; the file no longer serves for this resource');
     }
 
+    // An uploaded file's link starts out InternalUsers, which Customer Community users cannot
+    // see; publishFiles flips it to AllUsers so the Arc detail page gets its Download (2026-09-08).
+    @IsTest
+    static void publishFilesMakesUploadedLinksVisibleToSiteUsers() {
+        Id catId = makeCategory('Vis Cat', 'vis-cat', null);
+        Id resId = ResourceAdminController.saveResource(JSON.serialize(input('Vis Guide', 'vis-guide', catId)));
+
+        ContentVersion cv = new ContentVersion(
+            Title = 'Vis v1', PathOnClient = 'vis.pdf',
+            VersionData = Blob.valueOf('pdf-bytes'), FirstPublishLocationId = resId);
+        insert cv;
+        Id docId = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :cv.Id].ContentDocumentId;
+        ContentDocumentLink before = [
+            SELECT Visibility FROM ContentDocumentLink WHERE LinkedEntityId = :resId AND ContentDocumentId = :docId
+        ];
+        System.assertNotEquals('AllUsers', before.Visibility, 'Fixture: an upload starts internal-only');
+
+        Test.startTest();
+        ResourceAdminController.publishFiles(resId, new List<Id>{ docId });
+        // Second call is a no-op rather than an error.
+        ResourceAdminController.publishFiles(resId, new List<Id>{ docId });
+        ResourceAdminController.publishFiles(resId, new List<Id>());
+        ResourceAdminController.publishFiles(resId, null);
+        Test.stopTest();
+
+        ContentDocumentLink after = [
+            SELECT Visibility FROM ContentDocumentLink WHERE LinkedEntityId = :resId AND ContentDocumentId = :docId
+        ];
+        System.assertEquals('AllUsers', after.Visibility, 'The link is visible to every user of the record');
+    }
+
     @IsTest
     static void articlePickerReturnsKaIds() {
         String kaId = publishArticle('Pickable Link Article', 'pickable-link-article');

@@ -847,6 +847,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>EnvelopeFormAccountNicknameTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>EnvelopeHouseholdMemberController</apexClass>
         <enabled>true</enabled>
     </classAccesses>

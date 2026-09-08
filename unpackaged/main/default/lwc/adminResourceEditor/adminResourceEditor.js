@@ -10,6 +10,7 @@ import isSlugAvailable from '@salesforce/apex/ResourceAdminController.isSlugAvai
 import getResourceCategoryTree from '@salesforce/apex/ResourceAdminController.getResourceCategoryTree';
 import getFiles from '@salesforce/apex/ResourceAdminController.getFiles';
 import removeFile from '@salesforce/apex/ResourceAdminController.removeFile';
+import publishFiles from '@salesforce/apex/ResourceAdminController.publishFiles';
 import { messageFrom, toast } from 'c/messageUtil';
 import { formatDateTime } from 'c/dsDateBlock';
 import { FILE_TYPES, DEFAULT_TYPE, TYPE_VIDEO, TYPE_EXTERNAL_LINK, TYPE_WEBINAR } from 'c/rcConstants';
@@ -524,10 +525,23 @@ export default class AdminResourceEditor extends LightningElement {
         }
     }
 
-    handleUploadFinished() {
-        toast(this, 'success', this.isWebinar
-            ? 'Recording uploaded — the webinar is now Recorded and watchable.'
-            : 'File uploaded — it is now what users download.');
+    // lightning-file-upload links the file as internal-only, which community (Arc) users cannot
+    // see: the detail page would show a title over an empty body. Flip the new links to AllUsers
+    // before announcing the upload, so the toast's "what users download" is true for site users.
+    async handleUploadFinished(event) {
+        const contentDocumentIds = ((event && event.detail && event.detail.files) || [])
+            .map((file) => file.documentId)
+            .filter(Boolean);
+        try {
+            if (contentDocumentIds.length) {
+                await publishFiles({ resourceId: this.recordId, contentDocumentIds });
+            }
+            toast(this, 'success', this.isWebinar
+                ? 'Recording uploaded — the webinar is now Recorded and watchable.'
+                : 'File uploaded — it is now what users download.');
+        } catch (e) {
+            toast(this, 'error', messageFrom(e));
+        }
         this.refreshFiles();
     }
 

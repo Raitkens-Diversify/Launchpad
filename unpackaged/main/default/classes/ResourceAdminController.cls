@@ -424,6 +424,48 @@ public with sharing class ResourceAdminController {
         return filesFor(resourceId);
     }
 
+    /**
+     * Post-upload: make the files just attached visible to EVERY user of the
+     * record, community users included (2026-09-08).
+     *
+     * lightning-file-upload links a file with Visibility = InternalUsers, which
+     * a Customer Community user (the Arc profiles) cannot see at all: the
+     * ContentDocumentLink query behind ResourceCenterService.fileInfoByResource
+     * returns nothing for them, the detail page renders a title and an empty
+     * body, and the Download / preview never appear. Internal testers never
+     * hit it, which is how every resource file in prod shipped internal-only.
+     * Mirrors UatFileService.normalizeVisibility. Idempotent.
+     */
+    @AuraEnabled
+    public static void publishFiles(Id resourceId, List<Id> contentDocumentIds) {
+        assertResourceAdmin();
+        if (resourceId == null || contentDocumentIds == null || contentDocumentIds.isEmpty()) {
+            return;
+        }
+        List<ContentDocumentLink> changed = new List<ContentDocumentLink>();
+        for (ContentDocumentLink link : [
+            SELECT Id, Visibility FROM ContentDocumentLink
+            WHERE LinkedEntityId = :resourceId AND ContentDocumentId IN :contentDocumentIds
+        ]) {
+            if (link.Visibility != FILE_VISIBILITY_ALL_USERS) {
+                link.Visibility = FILE_VISIBILITY_ALL_USERS;
+                changed.add(link);
+            }
+        }
+        if (changed.isEmpty()) {
+            return;
+        }
+        try {
+            update changed;
+        } catch (DmlException e) {
+            throw auraError('The file was uploaded but could not be made visible to site users: '
+                + e.getDmlMessage(0));
+        }
+    }
+
+    /** ContentDocumentLink.Visibility that community users can see. */
+    @TestVisible private static final String FILE_VISIBILITY_ALL_USERS = 'AllUsers';
+
     // ---- Category reads/writes --------------------------------------------------------
 
     /**
