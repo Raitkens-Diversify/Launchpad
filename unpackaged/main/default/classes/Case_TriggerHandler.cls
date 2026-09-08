@@ -200,6 +200,21 @@ public class Case_TriggerHandler {
         }
     }
     
+    private static final String UNSUBMITTED_STATUS = 'Unsubmitted';
+
+    /**
+     * What a case with no open task reads. A wizard case is a draft with no
+     * tasks at all until it is submitted; the no-open-tasks fallback used to
+     * call that "Completed", which is what the Cases list showed for every
+     * unsubmitted case. A submitted case, or one that has had tasks, keeps
+     * reading Completed.
+     */
+    private static String noOpenTaskStatus(Case c, Set<Id> casesWithTasks) {
+        return c.Submitted__c != true && !casesWithTasks.contains(c.Id)
+            ? UNSUBMITTED_STATUS
+            : 'Completed';
+    }
+
     private static void populateTaskDetails(List<Case> newCases, Map<Id, Case> oldMap) {
         Set<Id> currentTaskIds = new Set<Id>();
         Set<Id> caseIds = new Set<Id>();
@@ -207,6 +222,11 @@ public class Case_TriggerHandler {
         for (Case c : newCases) {
             if (c.Current_Task_Id__c != null) currentTaskIds.add(c.Current_Task_Id__c);
             if (c.Id != null) caseIds.add(c.Id);
+            // A new case has no tasks yet; say Unsubmitted from the start rather
+            // than nothing until its first update.
+            if (c.Id == null && c.Submitted__c != true) {
+                c.Current_Task_Status__c = UNSUBMITTED_STATUS;
+            }
         }
     
         if (caseIds.isEmpty()) return;
@@ -216,8 +236,13 @@ public class Case_TriggerHandler {
             FROM Task WHERE Id IN :currentTaskIds
         ]);
     
+        // Every task, not just the open ones: whether a case has ever had a task
+        // is what separates a wizard draft from a case whose work is done.
         Map<Id, List<Task>> openTasksPerCase = new Map<Id, List<Task>>();
-        for (Task t : [SELECT Id, WhatId FROM Task WHERE WhatId IN :caseIds AND Status != 'Completed']) {
+        Set<Id> casesWithTasks = new Set<Id>();
+        for (Task t : [SELECT Id, WhatId, Status FROM Task WHERE WhatId IN :caseIds]) {
+            casesWithTasks.add(t.WhatId);
+            if (t.Status == 'Completed') continue;
             if (!openTasksPerCase.containsKey(t.WhatId)) openTasksPerCase.put(t.WhatId, new List<Task>());
             openTasksPerCase.get(t.WhatId).add(t);
         }
@@ -228,7 +253,7 @@ public class Case_TriggerHandler {
                 c.Current_Task_Subject_Assignee__c = relatedTask.Owner.Name + ' | ' + relatedTask.Subject;
                 
                 if (!openTasksPerCase.containsKey(c.Id)) {
-                    c.Current_Task_Status__c = 'Completed';
+                    c.Current_Task_Status__c = noOpenTaskStatus(c, casesWithTasks);
                 } 
                 else if (relatedTask.Branch_Pit_Stop__c) {
                     c.Current_Task_Status__c = 'Branch Pit Stop';
@@ -240,7 +265,7 @@ public class Case_TriggerHandler {
             } else {
                 c.Current_Task_Subject_Assignee__c = null;
                 if (!openTasksPerCase.containsKey(c.Id) && c.Id != null) {
-                    c.Current_Task_Status__c = 'Completed';
+                    c.Current_Task_Status__c = noOpenTaskStatus(c, casesWithTasks);
                 }
             }
         }

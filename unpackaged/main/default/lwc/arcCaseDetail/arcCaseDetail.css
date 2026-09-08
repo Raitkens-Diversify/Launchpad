@@ -363,6 +363,13 @@
   grid-template-columns: 1fr;
 }
 
+.case-section__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
 .case-section__field dt {
   margin: 0;
   font-size: 12px;

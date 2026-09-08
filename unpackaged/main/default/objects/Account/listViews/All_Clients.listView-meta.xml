@@ -16,11 +16,6 @@
     <columns>ACCOUNT.LAST_UPDATE</columns>
     <filterScope>Everything</filterScope>
     <filters>
-        <field>ACCOUNT.RECORDTYPE</field>
-        <operation>equals</operation>
-        <value>PersonAccount.PersonAccount</value>
-    </filters>
-    <filters>
         <field>ACCOUNT.TYPE</field>
         <operation>equals</operation>
         <value>Active Client</value>

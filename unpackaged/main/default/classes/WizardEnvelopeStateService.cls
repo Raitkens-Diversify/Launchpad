@@ -1018,7 +1018,9 @@ return result;
             }
         }
         if (!toDelete.isEmpty()) {
-            delete toDelete;
+            // System mode: the relationship is owned by whoever added the client, not necessarily the
+            // team member removing them, so a sharing-context delete would fail with insufficient access.
+            Database.delete(toDelete, AccessLevel.SYSTEM_MODE);
         }
         return strandedParties;
     }
@@ -1061,7 +1063,9 @@ return result;
             ];
         }
         if (!links.isEmpty()) {
-            delete links;
+            // System mode: the link is owned by whoever added the client, not necessarily the team
+            // member removing them, so a sharing-context delete would fail with insufficient access.
+            Database.delete(links, AccessLevel.SYSTEM_MODE);
         }
     }
 
@@ -1120,6 +1124,11 @@ return result;
     // lookup pointing at Account clears rather than cascades (deleteConstraint SetNull), so without
     // this the rows would survive with null lookups and accumulate as orphans. Financial_Account_Role__c
     // is master-detail and cascades on its own.
+    // Every delete here runs in system mode. The records belong to whoever added the client, so a
+    // different team member removing them from the envelope isn't the owner and a sharing-context
+    // delete fails with INSUFFICIENT_ACCESS_OR_READONLY — on Account, which requires ownership to
+    // delete, and equally on the private related records (signees, links, relationships). Access is
+    // already governed by the envelope flow that reached this point.
     private static void deleteUnusedRecords(Set<Id> ids) {
         List<Required_Documents__c> documents = [
             SELECT Id
@@ -1135,7 +1144,7 @@ return result;
             WHERE Account__c IN :ids OR Required_Document__c IN :documentIds
         ];
         if (!signees.isEmpty()) {
-            delete signees;
+            Database.delete(signees, AccessLevel.SYSTEM_MODE);
         }
 
         // Whatever is left pointing at these records: the documents' envelope links, plus any link the
@@ -1151,10 +1160,10 @@ return result;
                 OR Required_Document__c IN :documentIds
         ];
         if (!links.isEmpty()) {
-            delete links;
+            Database.delete(links, AccessLevel.SYSTEM_MODE);
         }
         if (!documents.isEmpty()) {
-            delete documents;
+            Database.delete(documents, AccessLevel.SYSTEM_MODE);
         }
 
         // The household-membership relationships, which idsNoLongerInUse deliberately ignored.
@@ -1164,7 +1173,7 @@ return result;
             WHERE Account__c IN :ids OR Related_Account__c IN :ids
         ];
         if (!relations.isEmpty()) {
-            delete relations;
+            Database.delete(relations, AccessLevel.SYSTEM_MODE);
         }
 
         // A record that is already gone — deleted in another session, or named by an outline row the
@@ -1177,7 +1186,7 @@ return result;
             recordsToDelete.add(recordId.getSObjectType().newSObject(recordId));
         }
         if (!recordsToDelete.isEmpty()) {
-            delete recordsToDelete;
+            Database.delete(recordsToDelete, AccessLevel.SYSTEM_MODE);
         }
     }
 

@@ -1,9 +1,11 @@
-/* Preserve original table link styling */
-a.slds-truncate {
+/* Task subject link. Wraps: the cell used to clip it with an ellipsis. */
+.task-subject {
     color: #0070d2;
     text-decoration: none;
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
 
-a.slds-truncate:hover {
+.task-subject:hover {
     text-decoration: underline;
 }

@@ -32,18 +32,16 @@
                 <tbody>
                     <template for:each={tasks} for:item="task">
                         <tr key={task.Id}>
-                            <td class="slds-truncate">
-                                <div class="slds-grid" style="width:250px">
-                                    <div class="slds-grid slds-has-flexi-truncate">
-                                        <a  class="slds-truncate"
-                                            href="javascript:void(0);"
-                                            data-taskid={task.Id}
-                                            data-tasksub={task.Subject}
-                                            onclick={navigateToTask}>
-                                            {task.Subject}
-                                        </a>
-                                    </div>
-                                </div>
+                            <!-- slds-cell-wrap lets the subject run to as many lines as it
+                                 needs; it used to sit in a fixed 250px box under an ellipsis. -->
+                            <td class="slds-cell-wrap">
+                                <a  class="task-subject"
+                                    href="javascript:void(0);"
+                                    data-taskid={task.Id}
+                                    data-tasksub={task.Subject}
+                                    onclick={navigateToTask}>
+                                    {task.Subject}
+                                </a>
                             </td>
                             <td>{task.Status}</td>
                             <td>{task.Owner.Name}</td>

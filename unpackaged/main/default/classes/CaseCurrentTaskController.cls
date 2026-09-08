@@ -146,7 +146,10 @@ public with sharing class CaseCurrentTaskController {
         }
         return results;
     }
-    @AuraEnabled(cacheable=true)
+    // Not cacheable: the tile calls this imperatively after every reload, and a
+    // cacheable method is still served from the client cache on that path, so
+    // "Assign to Me" could show stale membership after a task changed hands.
+    @AuraEnabled
     public static Boolean isCurrentUserMemberOfQueue(Id ownerId) {
 
         List<Group> queues = [

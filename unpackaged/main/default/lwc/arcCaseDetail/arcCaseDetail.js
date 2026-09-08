@@ -21,19 +21,6 @@ import getRelatedHouseholdCases from "@salesforce/apex/ArcCaseDetailController.g
 // instead of each card independently fetching its own (7 round trips ->
 // 1). Field paths mirror each card's own `columns` attribute in the
 // template exactly -- keep the two in sync if a card's columns change.
-const TASK_COLUMNS = [
-  {
-    label: "Subject",
-    fieldName: "subject",
-    isLink: true,
-    linkObjectApiName: "Task"
-  },
-  { label: "Status", fieldName: "status" },
-  { label: "Owner", fieldName: "ownerName" },
-  { label: "Due Date", fieldName: "dueDate", type: "date" },
-  { label: "Completed", fieldName: "completedDate", type: "date" }
-];
-
 const RELATED_CASE_COLUMNS = [
   {
     label: "Case",
@@ -45,26 +32,6 @@ const RELATED_CASE_COLUMNS = [
   { label: "Status", fieldName: "status" },
   { label: "Owner", fieldName: "ownerName" },
   { label: "Created", fieldName: "createdDate", type: "date" }
-];
-
-/*
- * Household Information, in the order and under the labels the Lightning case
- * page uses. Declared as a list so the section renders one loop rather than a
- * template branch per field, and so a field the controller does not carry
- * simply drops out instead of leaving an empty row.
- */
-const HOUSEHOLD_FACTS = [
-  { key: "billingAddress", label: "Billing Address" },
-  { key: "liquidityNeeds", label: "Liquidity Needs" },
-  { key: "approximateNetWorth", label: "Approximate Net Worth" },
-  { key: "riskTolerance", label: "Risk Tolerance" },
-  { key: "approximateAnnualIncome", label: "Approximate Annual Income" },
-  { key: "investmentObjective", label: "Investment Objective (Ranked)" },
-  {
-    key: "approximateHighestTaxBracket",
-    label: "Approximate Highest Tax Bracket"
-  },
-  { key: "advisoryFee", label: "Advisory Fee" }
 ];
 
 const PRIORITY_CLASS_BY_VALUE = {
@@ -91,35 +58,10 @@ const TERMINAL_STATUSES = ["Closed", "Canceled"];
  */
 const MASTER_RECORD_TYPE_ID = "012000000000000AAA";
 
-/*
- * The two sections whose contents are fixed rather than derived: Description
- * Information and System Information hold the same fields on every case, as they
- * do on the Lightning layout.
- */
-const DESCRIPTION_FIELDS = ["Subject", "Description"];
-/**
- * Case Information carries only Additional Case Notes (requested 2026-09-07):
- * the rest of the case's populated fields were noise beside the Financial
- * Account Details block above it. Still drawn by lightning-record-form so the
- * inline-edit pencil stays.
- */
-const CASE_INFO_FIELDS = ["Additional_Case_Notes__c"];
-
 /** A blank value in a fixed-layout section, so the grid keeps its shape. */
 const EMPTY_VALUE = "\u2013";
-/*
- * "Rep Codes on the Case", copied field-for-field from
- * Case_Record_Page.flexipage's own section of that name. On Lightning the
- * section carries a visibility rule (System Administrator profile, plus one
- * named user); here it renders for everyone and field-level security decides
- * what a given user actually sees, since this site has no per-profile page
- * rules to hang it on.
- */
-const REP_CODE_FIELDS = [
-  "Maestro_Rep_ID__c",
-  "Rep_Code__c",
-  "Rep_Code_for_Transaction__c"
-];
+
+/** System Information holds the same audit fields on every case. */
 const SYSTEM_FIELDS = [
   "CreatedById",
   "CreatedDate",
@@ -236,15 +178,11 @@ const TYPES_SERVICES = new Set([
 ]);
 
 export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
-  taskColumns = TASK_COLUMNS;
   relatedCaseColumns = RELATED_CASE_COLUMNS;
 
   detail;
   tasks = [];
   fieldSections = [];
-  caseInfoFields = CASE_INFO_FIELDS;
-  descriptionFields = DESCRIPTION_FIELDS;
-  repCodeFields = REP_CODE_FIELDS;
   systemFields = SYSTEM_FIELDS;
   householdCases = { openCases: [], closedCases: [] };
   errorMessage = "";
@@ -615,14 +553,6 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
 
   /* ---- Content ---------------------------------------------------------- */
 
-  get hasTasks() {
-    return this.tasks.length > 0;
-  }
-
-  get allTasksLabel() {
-    return `Tasks (${this.tasks.length})`;
-  }
-
   /** A case with no tasks has nothing to be "currently on". */
   get hasAnyTasks() {
     return this.tasks.length > 0;
@@ -698,10 +628,6 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
     return Boolean(this.detail?.householdId);
   }
 
-  get household() {
-    return this.detail?.household;
-  }
-
   /* Label for the Household link in the header. Falls back when the case has a
      household id but no readable name. */
   get householdLinkLabel() {
@@ -716,22 +642,16 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
     return this.detail?.financialAccountName || "View Financial Account";
   }
 
-  get hasFinancialAccountDetails() {
-    return this.hasFinancialAccountLink;
-  }
-
   /**
    * Financial Account Details in the Lightning case page's arrangement. Its
    * two columns read account, primary owner, joint owner, platform on the
    * left and rep code, custodian, registration type, product type on the
-   * right, so the rows are interleaved for a two-column grid. Every row is
-   * kept, blank ones as a dash, so the grid holds its shape.
+   * right, so the rows are interleaved for a two-column grid. The section is
+   * on every case, and every row is kept, blank ones as a dash, so a case
+   * with no account still shows the same shape.
    */
   get financialAccountFacts() {
-    const detail = this.detail;
-    if (!detail?.financialAccountId) {
-      return [];
-    }
+    const detail = this.detail || {};
     const account = detail.financialAccount || {};
     const link = (key, label, value, recordId, objectApiName) => ({
       key,
@@ -784,23 +704,43 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
     this.navigateToRecord(recordId, objectApiName);
   }
 
-  get hasHouseholdSummary() {
-    return this.householdFacts.length > 0;
+  /* ── Case Information: Additional Case Notes, saved in place ─────────── */
+
+  isCaseNotesDirty = false;
+  isSavingCaseNotes = false;
+  caseNotesError = "";
+
+  get hasCaseNotesError() {
+    return Boolean(this.caseNotesError);
   }
 
-  /** Only the household fields that actually carry a value. */
-  get householdFacts() {
-    const household = this.household;
-    if (!household) {
-      return [];
-    }
-    return HOUSEHOLD_FACTS.filter((fact) => household[fact.key]).map(
-      (fact) => ({
-        key: fact.key,
-        label: fact.label,
-        value: household[fact.key]
-      })
-    );
+  handleCaseNotesChange() {
+    this.isCaseNotesDirty = true;
+    this.caseNotesError = "";
+  }
+
+  handleCaseNotesSubmit() {
+    this.isSavingCaseNotes = true;
+    this.caseNotesError = "";
+  }
+
+  handleCaseNotesSaved() {
+    this.isSavingCaseNotes = false;
+    this.isCaseNotesDirty = false;
+  }
+
+  handleCaseNotesError(event) {
+    this.isSavingCaseNotes = false;
+    this.caseNotesError =
+      event.detail?.detail ||
+      event.detail?.message ||
+      "Could not save the notes.";
+  }
+
+  handleCaseNotesCancel() {
+    this.refs.caseNotesField?.reset();
+    this.isCaseNotesDirty = false;
+    this.caseNotesError = "";
   }
 
   get openHouseholdCases() {

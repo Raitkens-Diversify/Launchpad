@@ -22,6 +22,18 @@ const MILESTONE_STAGES = [
 ];
 
 
+/*
+ * Re-read schedule after a CaseStatusUpdated message. The save that publishes
+ * the message returns before the server is finished with the case: the Task
+ * trigger's @future work, the pit stop flows and Batch_TaskUpdate stamp the
+ * next task's owner and the case's current task a beat later, so a single
+ * immediate reload showed the old rows and only a page reload caught up. The
+ * Refresh_Detail__e event that marks the end of that work needs
+ * lightning/empApi, which the LWR site does not deliver, so the tile re-reads
+ * a few more times instead.
+ */
+const SETTLE_DELAYS_MS = [2000, 5000, 10000];
+
 export default class CaseOverviewTile extends NavigationMixin(LightningElement) {
     _recordId;
     /*
@@ -92,7 +104,7 @@ export default class CaseOverviewTile extends NavigationMixin(LightningElement) 
             CASE_STATUS_UPDATED,
             (message) => {
                 if (message.recordId === this.recordId) {
-                    this.loadSummary(); // This refetches
+                    this.reloadUntilSettled();
                 }
             }
         );
@@ -204,11 +216,28 @@ export default class CaseOverviewTile extends NavigationMixin(LightningElement) 
         console.log('Event received:', message);
     }
     disconnectedCallback() {
-
+        this.clearSettleTimers();
         if (this.lmsSubscription) {
             lmsUnsubscribe(this.lmsSubscription);
             this.lmsSubscription = null;
         }
+    }
+
+    settleTimers = [];
+
+    /** Reloads now and again at each SETTLE_DELAYS_MS step; see that constant. */
+    reloadUntilSettled() {
+        this.clearSettleTimers();
+        this.loadSummary();
+        this.settleTimers = SETTLE_DELAYS_MS.map((delay) =>
+            // eslint-disable-next-line @lwc/lwc/no-async-operation
+            setTimeout(() => this.loadSummary(), delay)
+        );
+    }
+
+    clearSettleTimers() {
+        this.settleTimers.forEach((timer) => clearTimeout(timer));
+        this.settleTimers = [];
     }
 
     handleUnsubscribe() {

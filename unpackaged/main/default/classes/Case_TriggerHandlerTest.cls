@@ -317,7 +317,7 @@ public class Case_TriggerHandlerTest {
         Insert c;
         Test.stopTest();
         List<Task> lstTask = [Select Id, OwnerId from Task Where WhatId =: c.Id ];
-        //Assert.areEqual(lstTask.size(), 1);
+        Assert.areEqual(lstTask.size(), 1);
         
     }
     
@@ -460,7 +460,7 @@ public class Case_TriggerHandlerTest {
         Test.stopTest();
 
         Case insertedCase = [SELECT Custodian__c FROM Case WHERE Id = :testCase.Id];
-        //Assert.areEqual('Fidelity', insertedCase.Custodian__c);
+        Assert.areEqual('Fidelity', insertedCase.Custodian__c);
     }
 
     // A brand-new Account Opening Case (created when a new Financial Account is added in the
@@ -490,7 +490,6 @@ public class Case_TriggerHandlerTest {
             Status = 'New'
         );
         insert newAccountOpeningCase;
-        Integer x = Task_TriggerHandler.testCoverage();
         Test.stopTest();
 
         /*Assert.isNull(
@@ -548,4 +547,39 @@ public class Case_TriggerHandlerTest {
         );*/
     }
 
+    @isTest
+    private static void unsubmittedCaseWithNoTasksReadsUnsubmitted() {
+        Case draft = new Case(Origin = 'Web', Status = 'New', Subject = 'Wizard draft', Submitted__c = false);
+        insert draft;
+
+        System.assertEquals(
+            'Unsubmitted',
+            [SELECT Current_Task_Status__c FROM Case WHERE Id = :draft.Id].Current_Task_Status__c,
+            'A draft reads Unsubmitted from the moment it is created.'
+        );
+
+        draft.Description = 'touched';
+        update draft;
+
+        System.assertEquals(
+            'Unsubmitted',
+            [SELECT Current_Task_Status__c FROM Case WHERE Id = :draft.Id].Current_Task_Status__c,
+            'With no tasks at all, an update keeps it Unsubmitted rather than Completed.'
+        );
+    }
+
+    @isTest
+    private static void submittedCaseWithNoOpenTasksStillReadsCompleted() {
+        Case submitted = new Case(Origin = 'Web', Status = 'New', Subject = 'Submitted case', Submitted__c = true);
+        insert submitted;
+
+        submitted.Description = 'touched';
+        update submitted;
+
+        System.assertEquals(
+            'Completed',
+            [SELECT Current_Task_Status__c FROM Case WHERE Id = :submitted.Id].Current_Task_Status__c,
+            'Only an unsubmitted case with no tasks changes; a submitted one keeps the old reading.'
+        );
+    }
 }

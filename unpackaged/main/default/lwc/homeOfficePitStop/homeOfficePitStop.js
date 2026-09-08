@@ -18,6 +18,18 @@ const MILESTONES = [
     { field: 'Home_Office_Goal_Milestone__c',        label: 'Home Office Goal Milestone',        prefix: 'hgm' },
 ];
 
+/*
+ * Re-read schedule after a CaseStatusUpdated message. The save that publishes
+ * the message returns before the server is finished with the case: the Task
+ * trigger's @future work, the pit stop flows and Batch_TaskUpdate stamp the
+ * next task's owner and the case's current task a beat later, so a single
+ * immediate reload showed the old rows and only a page reload caught up. The
+ * Refresh_Detail__e event that marks the end of that work needs
+ * lightning/empApi, which the LWR site does not deliver, so the tile re-reads
+ * a few more times instead.
+ */
+const SETTLE_DELAYS_MS = [2000, 5000, 10000];
+
 export default class HomeOfficePitStop extends NavigationMixin(LightningElement) {
 
     @api recordId;
@@ -44,6 +56,7 @@ export default class HomeOfficePitStop extends NavigationMixin(LightningElement)
     disconnectedCallback() {
         this._unsubscribeFromEmpApi();
         this._unsubscribeFromLms();
+        this._clearSettleTimers();
     }
 
     get hasTasks() {
@@ -130,8 +143,25 @@ export default class HomeOfficePitStop extends NavigationMixin(LightningElement)
             return;
         }
         if (!this.recordId || this.recordId === message.recordId) {
-            this._loadTasks();
+            this._reloadUntilSettled();
         }
+    }
+
+    _settleTimers = [];
+
+    /** Reloads now and again at each SETTLE_DELAYS_MS step; see that constant. */
+    _reloadUntilSettled() {
+        this._clearSettleTimers();
+        this._loadTasks();
+        this._settleTimers = SETTLE_DELAYS_MS.map((delay) =>
+            // eslint-disable-next-line @lwc/lwc/no-async-operation
+            setTimeout(() => this._loadTasks(), delay)
+        );
+    }
+
+    _clearSettleTimers() {
+        this._settleTimers.forEach((timer) => clearTimeout(timer));
+        this._settleTimers = [];
     }
 
     navigateToTask(event) {
