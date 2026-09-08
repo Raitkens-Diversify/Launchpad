@@ -17,6 +17,11 @@
  * page size) -- and the combined, sorted list is paginated client-side by
  * arcDataTable itself, the same pattern this codebase already uses for
  * workTable.
+ *
+ * ISAs and Services are scoped the way every ARC list is (ArcListScope): owned
+ * by the running user, or on one of their active Financial Advisor Teams -- a
+ * Service reads its team from its Household / Primary Owner account, having
+ * none of its own. Approved Products are a catalog and are not scoped.
  */
 public with sharing class ArcAccountInvestmentsController {
   private static final Integer ROW_LIMIT = 200;
@@ -28,10 +33,15 @@ public with sharing class ArcAccountInvestmentsController {
       return rows;
     }
 
+    Id currentUserId = UserInfo.getUserId();
+    Set<Id> teamIds = ArcListScope.activeTeamIds();
+
     for (Financial_Account__c account : [
       SELECT Id, Name
       FROM Financial_Account__c
-      WHERE Household__c = :accountId OR Primary_Owner__c = :accountId
+      WHERE
+        (Household__c = :accountId OR Primary_Owner__c = :accountId)
+        AND (OwnerId = :currentUserId OR Financial_Advisor_Team__c IN :teamIds)
       WITH USER_MODE
       ORDER BY Name
       LIMIT :ROW_LIMIT
@@ -42,7 +52,14 @@ public with sharing class ArcAccountInvestmentsController {
     for (Service__c service : [
       SELECT Id, Name
       FROM Service__c
-      WHERE Household__c = :accountId OR Primary_Owner__c = :accountId
+      WHERE
+        (Household__c = :accountId OR Primary_Owner__c = :accountId)
+        AND (
+          OwnerId = :currentUserId
+          OR Household__r.Financial_Advisor_Team__c IN :teamIds
+          OR Primary_Owner__r.Financial_Advisor_Team__c IN :teamIds
+          OR Primary_Owner__r.Financial_Advisor_Team__pc IN :teamIds
+        )
       WITH USER_MODE
       ORDER BY Name
       LIMIT :ROW_LIMIT

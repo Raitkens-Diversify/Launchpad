@@ -10,8 +10,13 @@
  *   the describe before it is concatenated. Object and field names cannot be
  *   bind variables, so an unrecognised name is rejected outright rather than
  *   escaped — an allowlist drawn from the schema itself.
- * - `with sharing`, plus explicit CRUD/FLS checks on top.
+ * - `with sharing`, explicit CRUD/FLS checks, and the query itself at
+ *   AccessLevel.USER_MODE.
  * - One query, bounded by a named constant. No SOQL in a loop.
+ * - A list under a parent that is NOT itself scoped (an Approved Product, a
+ *   firm-wide catalog) is cut to the running user's owner-or-team rows --
+ *   see ArcListScope. Children of a scoped parent are left as the parent
+ *   decided.
  */
 public with sharing class ArcRelatedListController {
   /** A card on a record page, not a list view. */
@@ -216,12 +221,25 @@ public with sharing class ArcRelatedListController {
       selectList.add(linkField);
     }
 
+    // A related list is scoped when its parent is not. An Approved Product is
+    // a firm-wide catalog, so its Related Products span every team's clients
+    // and the owner-or-team rule (ArcListScope) is applied to the rows here;
+    // a child of a record that is itself scoped (a Case, a Financial Account,
+    // a Check Log) is left alone -- the parent already decided who sees it.
+    String parentObjectApiName = recordId.getSObjectType().getDescribe().getName();
+    Map<String, Object> binds = new Map<String, Object>{ 'recordId' => recordId };
+    String scope = ArcListScope.isScoped(parentObjectApiName)
+      ? null
+      : ArcListScope.clauseFor(objectType.getDescribe().getName(), binds);
+
     // Every token below came from the describe map above, never from the
-    // caller's string, so there is nothing here to inject through. The one
-    // caller-supplied value is the record id, which is bound.
+    // caller's string, so there is nothing here to inject through. The
+    // caller-supplied values (the record id, the scope's ids) are bound.
     // One past pageSize, so "more past this page" is known without a second
     // COUNT() query -- same trick the fixed-card path always used (there,
-    // pageSize is just always ROW_LIMIT=10).
+    // pageSize is just always ROW_LIMIT=10). The access level is passed to
+    // queryWithBinds rather than written into the string, the way
+    // ArcRecordSearchController does it.
     String soql =
       'SELECT Id, ' +
       String.join(selectList, ', ') +
@@ -230,7 +248,7 @@ public with sharing class ArcRelatedListController {
       ' WHERE ' +
       parentFieldApiName +
       ' = :recordId' +
-      ' WITH USER_MODE' +
+      (scope == null ? '' : ' AND ' + scope) +
       ' ORDER BY ' +
       resolveSortField(fieldMap) +
       ' DESC' +
@@ -249,7 +267,7 @@ public with sharing class ArcRelatedListController {
     }
     result.currencyCode = UserInfo.getDefaultCurrency();
 
-    for (SObject record : Database.query(soql)) {
+    for (SObject record : Database.queryWithBinds(soql, binds, AccessLevel.USER_MODE)) {
       RelatedRow row = new RelatedRow();
       row.id = record.Id;
       row.linkId = linkField == 'Id'

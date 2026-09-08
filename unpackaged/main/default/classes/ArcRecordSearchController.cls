@@ -394,12 +394,19 @@ public with sharing class ArcRecordSearchController {
   }
 
   /**
-   * Per-tab baked-in meaning that a user's own filter chips can never
-   * remove -- keyed by (objectApiName, listViewApiName) using each view's
-   * real ListView.DeveloperName, the same value arcRecordListView already
-   * tracks as selectedListViewApiName. Every clause here is additive
-   * (appended to the caller's own clauses list, ANDed with everything
-   * else), never a replacement.
+   * Two layers, both additive (appended to the caller's own clauses list,
+   * ANDed with everything else, never a replacement):
+   *
+   * 1. Every list, whatever the tab: rows the running user owns or that
+   *    belong to one of their active Financial Advisor Teams -- see
+   *    ArcListScope for the per-object shape of that rule and the objects it
+   *    leaves alone. This is where a portal list is scoped, so it does not
+   *    depend on listViewApiName.
+   *
+   * 2. Per-tab baked-in meaning that a user's own filter chips can never
+   *    remove -- keyed by (objectApiName, listViewApiName) using each view's
+   *    real ListView.DeveloperName, the same value arcRecordListView already
+   *    tracks as selectedListViewApiName.
    *
    * Both Case tabs are OPEN cases only (IsClosed = false), matching their
    * labels and the Task tabs below. Case/My_teams_open_cases is scoped by
@@ -415,7 +422,16 @@ public with sharing class ArcRecordSearchController {
     List<String> clauses,
     Map<String, Object> binds
   ) {
-    if (String.isBlank(objectApiName) || String.isBlank(listViewApiName)) {
+    if (String.isBlank(objectApiName)) {
+      return;
+    }
+
+    String scope = ArcListScope.clauseFor(objectApiName, binds);
+    if (scope != null) {
+      clauses.add(scope);
+    }
+
+    if (String.isBlank(listViewApiName)) {
       return;
     }
 
@@ -460,8 +476,8 @@ public with sharing class ArcRecordSearchController {
         // running user's own tasks under test. (The platform ListView this
         // replaces had a real bug of its own here: one of its four
         // "assignee" exclusions targeted Subject instead of the owner.)
-        Set<Id> teamUserIds = resolveFinancialAdvisorTeamUserIds();
-        teamUserIds.removeAll(resolveSystemTaskOwnerIds());
+        // Both resolved by ArcListScope.activeTeamUserIds.
+        Set<Id> teamUserIds = ArcListScope.activeTeamUserIds();
         binds.put('mandatoryClosed', false);
         binds.put('mandatoryTeamUserIds', teamUserIds);
         clauses.add('IsClosed = :mandatoryClosed');
@@ -480,99 +496,15 @@ public with sharing class ArcRecordSearchController {
       }
       return;
     }
-
-    if (objectApiName == 'Account') {
-      // Every Contacts tab (All Contacts, Individuals, Clients, Households,
-      // Businesses, Retirement Plans, Trusts & Estates) is scoped to the
-      // running user's own Financial Advisor Team membership -- an advisor
-      // must never see another team's contact here, the same rule
-      // Case/My_teams_open_cases applies above. An empty team set is valid:
-      // IN :emptySet matches nothing, which is right for someone on no team.
-      //
-      // Checked on both the plain Account field and its Person Account
-      // mirror: Financial_Advisor_Team__c is populated directly on the
-      // overwhelming majority of Person Accounts too (confirmed live), but a
-      // handful carry the value only on the __pc side, so both are read
-      // rather than trusting one to always be the one populated.
-      Set<Id> mandatoryTeamIds = resolveFinancialAdvisorTeamIds();
-      binds.put('mandatoryTeamIds', mandatoryTeamIds);
-      clauses.add(
-        '(Financial_Advisor_Team__c IN :mandatoryTeamIds OR Financial_Advisor_Team__pc IN :mandatoryTeamIds)'
-      );
-    }
-  }
-
-  /**
-   * Every user on any Financial Advisor Team the running user is an active
-   * member of -- resolved in two hops (my active memberships -> their
-   * team ids -> every active membership on those teams -> their user ids)
-   * rather than a single self-join query, since Financial_Advisor_Team__c
-   * has no direct "team roster" child relationship queryable in one shot
-   * without walking the same junction object twice. An empty result (no
-   * active team membership at all) is valid -- WHERE OwnerId IN
-   * :emptySet matches zero rows rather than throwing, which is exactly
-   * the right outcome for someone on no team.
-   */
-  /** Placeholder owners whose tasks are never a person's own work; see My_Team_s_Open_Tasks. */
-  private static final Set<String> SYSTEM_TASK_OWNER_NAMES = new Set<String>{
-    'Unassigned', 'Maestro', 'DMS'
-  };
-
-  /** Ids of the placeholder / system users a team task list leaves out. */
-  private static Set<Id> resolveSystemTaskOwnerIds() {
-    Set<Id> ids = new Set<Id>();
-    for (User systemUser : [
-      SELECT Id
-      FROM User
-      WHERE Name IN :SYSTEM_TASK_OWNER_NAMES OR Name LIKE '%systems%'
-      WITH USER_MODE
-    ]) {
-      ids.add(systemUser.Id);
-    }
-    return ids;
   }
 
   /**
    * The Financial Advisor Teams the running user is an active member of.
-   *
-   * Public: also reused by ArcGlobalSearchController, so the header search's
-   * Account results are scoped by the exact same rule as the Contacts tabs
-   * rather than a second, independently-maintained copy of this query.
+   * The rule lives in ArcListScope now, shared by every list; this stays
+   * public for the callers that already read it here.
    */
   public static Set<Id> resolveFinancialAdvisorTeamIds() {
-    Set<Id> teamIds = new Set<Id>();
-    for (Financial_Advisor_Team_Member__c membership : [
-      SELECT Financial_Advisor_Team__c
-      FROM Financial_Advisor_Team_Member__c
-      WHERE User__c = :UserInfo.getUserId() AND Active__c = true
-      WITH USER_MODE
-    ]) {
-      if (membership.Financial_Advisor_Team__c != null) {
-        teamIds.add(membership.Financial_Advisor_Team__c);
-      }
-    }
-    return teamIds;
-  }
-
-  private static Set<Id> resolveFinancialAdvisorTeamUserIds() {
-    Set<Id> teamIds = resolveFinancialAdvisorTeamIds();
-
-    Set<Id> userIds = new Set<Id>();
-    if (teamIds.isEmpty()) {
-      return userIds;
-    }
-
-    for (Financial_Advisor_Team_Member__c teammate : [
-      SELECT User__c
-      FROM Financial_Advisor_Team_Member__c
-      WHERE Financial_Advisor_Team__c IN :teamIds AND Active__c = true
-      WITH USER_MODE
-    ]) {
-      if (teammate.User__c != null) {
-        userIds.add(teammate.User__c);
-      }
-    }
-    return userIds;
+    return ArcListScope.activeTeamIds();
   }
 
   /**

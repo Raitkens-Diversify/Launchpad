@@ -684,6 +684,28 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
   }
 
   /**
+   * Case.Use_Old_Case_Layout__c. Case_Record_Page hides the overview tile, the
+   * three task tracks, the current-task panel and the pit-stop actions on a
+   * case that still uses the old layout; the same applies here, and the whole
+   * Actions menu goes with them (per the business, 2026-09-08).
+   */
+  get usesOldCaseLayout() {
+    return this.detail?.useOldCaseLayout === true;
+  }
+
+  get showActions() {
+    return !this.usesOldCaseLayout;
+  }
+
+  get showTaskTracks() {
+    return this.hasAnyTasks && !this.usesOldCaseLayout;
+  }
+
+  get showCurrentTask() {
+    return !this.usesOldCaseLayout;
+  }
+
+  /**
    * A finished case takes no new work, so the two pit-stop actions are hidden
    * once it is closed or cancelled rather than left to fail later.
    *
@@ -700,11 +722,12 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
   /*
    * Deliberately not also gated on hasAnyTasks. Requiring an existing task meant
    * a case with none offered no way to create its first pit stop task, so the
-   * only condition is that the case is not finished. Changed in the org and
-   * pulled back here, not the other way round.
+   * only conditions are that the case is not finished and does not use the old
+   * layout (Case_Record_Page gates both actions the same way). Changed in the
+   * org and pulled back here, not the other way round.
    */
   get canCreatePitStopTask() {
-    return !this.isCaseFinished;
+    return !this.isCaseFinished && !this.usesOldCaseLayout;
   }
 
   get hasFieldSections() {
@@ -740,9 +763,10 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
   }
 
   /* The on-track badge/milestone tile has nothing to show for a case that is
-     still a wizard draft, so it's hidden alongside the banner. */
+     still a wizard draft, so it's hidden alongside the banner -- and on the
+     old layout, as Case_Record_Page hides it. */
   get showCaseOverviewTile() {
-    return !this.isUnsubmitted;
+    return !this.isUnsubmitted && !this.usesOldCaseLayout;
   }
 
   handleTakeToEnvelopeClick() {

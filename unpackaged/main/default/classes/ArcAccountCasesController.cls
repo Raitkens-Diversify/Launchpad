@@ -11,6 +11,10 @@
  * FinServ__Household__c). For a Household record, only the second clause
  * ever matches; for everything else, the first does, and the second still
  * catches a case raised at the household level.
+ *
+ * Rows are scoped the way every ARC list is (ArcListScope): the running user
+ * owns the case, or it is linked to one of their active Financial Advisor
+ * Teams.
  */
 public with sharing class ArcAccountCasesController {
   /** Matches arcRecordListView's own table page size default. */
@@ -38,6 +42,8 @@ public with sharing class ArcAccountCasesController {
       ? DEFAULT_PAGE_SIZE
       : Math.min(Math.max(pageSize, 1), MAX_PAGE_SIZE);
     Integer queryLimit = effectivePageSize + 1;
+    Id currentUserId = UserInfo.getUserId();
+    Set<Id> teamIds = ArcListScope.activeTeamIds();
 
     List<Case> records = [
       SELECT
@@ -51,7 +57,9 @@ public with sharing class ArcAccountCasesController {
         CreatedDate,
         Financial_Advisor_Team__r.Name
       FROM Case
-      WHERE AccountId = :accountId OR Household__c = :accountId
+      WHERE
+        (AccountId = :accountId OR Household__c = :accountId)
+        AND (OwnerId = :currentUserId OR Financial_Advisor_Team__c IN :teamIds)
       WITH USER_MODE
       ORDER BY CreatedDate DESC
       LIMIT :queryLimit

@@ -3,7 +3,9 @@
  * Date: 2026-08-11
  *
  * Case work list for workTable. All row values come from Case fields.
- * Scope: My (Case OwnerId) or My Team (Case Financial_Advisor_Team__c membership).
+ * Scope: My (Case OwnerId) or My Team (cases the user owns, or linked to one of
+ * their Financial Advisor Teams -- the owner-or-team rule every ARC list uses,
+ * see ArcListScope).
  */
 public with sharing class WorkDatatableController {
   private static final Integer ROW_LIMIT = 500;
@@ -82,16 +84,15 @@ public with sharing class WorkDatatableController {
       );
     }
 
-    if (teamAccess.teamIds.isEmpty()) {
-      return new List<Case>();
-    }
-
+    // Team scope keeps the user's own cases too: a case they own that no team
+    // is linked to is still their work. An empty team set is fine -- IN
+    // :emptySet matches nothing and the owner half still applies.
     Set<Id> teamIds = teamAccess.teamIds;
 
     return Database.query(
       'SELECT ' +
         caseFields +
-        ' FROM Case WHERE Financial_Advisor_Team__c IN :teamIds' +
+        ' FROM Case WHERE (OwnerId = :currentUserId OR Financial_Advisor_Team__c IN :teamIds)' +
         ' AND IsClosed = FALSE WITH USER_MODE' +
         ' ORDER BY LastModifiedDate DESC LIMIT :ROW_LIMIT'
     );
@@ -146,15 +147,13 @@ public with sharing class WorkDatatableController {
       );
     }
 
-    if (teamAccess.teamIds.isEmpty()) {
-      return new List<Case>();
-    }
-
+    // Same owner-or-team scope as selectCases.
     Set<Id> teamIds = teamAccess.teamIds;
     return Database.query(
       'SELECT ' +
         caseFields +
-        ' FROM Case WHERE Id IN :matchedIds AND Financial_Advisor_Team__c IN :teamIds' +
+        ' FROM Case WHERE Id IN :matchedIds' +
+        ' AND (OwnerId = :currentUserId OR Financial_Advisor_Team__c IN :teamIds)' +
         ' AND IsClosed = FALSE WITH USER_MODE' +
         ' ORDER BY LastModifiedDate DESC LIMIT :ROW_LIMIT'
     );

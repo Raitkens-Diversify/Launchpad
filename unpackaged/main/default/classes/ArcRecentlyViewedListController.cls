@@ -195,6 +195,10 @@ public with sharing class ArcRecentlyViewedListController {
     }
 
     Set<Id> accountIds = new Set<Id>(orderedAccountIds);
+    // Scoped like every ARC list (ArcListScope): a contact the user no longer
+    // owns or shares a team with drops out of their recent list too.
+    Id currentUserId = UserInfo.getUserId();
+    Set<Id> teamIds = ArcListScope.activeTeamIds();
     Map<Id, Account> accountIdToRecord = new Map<Id, Account>(
       [
         SELECT
@@ -205,7 +209,13 @@ public with sharing class ArcRecentlyViewedListController {
           Household__r.Name,
           RecordType.DeveloperName
         FROM Account
-        WHERE Id IN :accountIds
+        WHERE
+          Id IN :accountIds
+          AND (
+            OwnerId = :currentUserId
+            OR Financial_Advisor_Team__c IN :teamIds
+            OR Financial_Advisor_Team__pc IN :teamIds
+          )
         WITH USER_MODE
       ]
     );
@@ -246,11 +256,15 @@ public with sharing class ArcRecentlyViewedListController {
       financialAccountIds.add(recentlyViewedRow.Id);
     }
 
+    Id currentUserId = UserInfo.getUserId();
+    Set<Id> teamIds = ArcListScope.activeTeamIds();
     Map<Id, Financial_Account__c> financialAccountIdToRecord = new Map<Id, Financial_Account__c>(
       [
         SELECT Id, Name, LastViewedDate, Household__c, Household__r.Name
         FROM Financial_Account__c
-        WHERE Id IN :financialAccountIds
+        WHERE
+          Id IN :financialAccountIds
+          AND (OwnerId = :currentUserId OR Financial_Advisor_Team__c IN :teamIds)
         WITH USER_MODE
       ]
     );
@@ -339,6 +353,9 @@ public with sharing class ArcRecentlyViewedListController {
       return new List<SObject>();
     }
 
+    Id currentUserId = UserInfo.getUserId();
+    Set<Id> teamIds = ArcListScope.activeTeamIds();
+
     if (objectApiName == 'Account') {
       return [
         SELECT
@@ -349,7 +366,13 @@ public with sharing class ArcRecentlyViewedListController {
           Household__r.Name,
           RecordType.DeveloperName
         FROM Account
-        WHERE LastViewedDate != NULL
+        WHERE
+          LastViewedDate != NULL
+          AND (
+            OwnerId = :currentUserId
+            OR Financial_Advisor_Team__c IN :teamIds
+            OR Financial_Advisor_Team__pc IN :teamIds
+          )
         WITH USER_MODE
         ORDER BY LastViewedDate DESC
         LIMIT :RECENTLY_VIEWED_MAX
@@ -360,7 +383,9 @@ public with sharing class ArcRecentlyViewedListController {
       return [
         SELECT Id, Name, LastViewedDate, Household__c, Household__r.Name
         FROM Financial_Account__c
-        WHERE LastViewedDate != NULL
+        WHERE
+          LastViewedDate != NULL
+          AND (OwnerId = :currentUserId OR Financial_Advisor_Team__c IN :teamIds)
         WITH USER_MODE
         ORDER BY LastViewedDate DESC
         LIMIT :RECENTLY_VIEWED_MAX

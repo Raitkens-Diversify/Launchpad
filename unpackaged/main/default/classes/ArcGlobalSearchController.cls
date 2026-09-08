@@ -114,43 +114,42 @@ public with sharing class ArcGlobalSearchController {
     // (contains), not just at the start of a word — e.g. "cme" still finds
     // "Acme Test Account".
     String findExpr = '*' + cleanTerm + '*';
-    // Account's own RETURNING clause is scoped to the running user's active
-    // Financial Advisor Team membership, the same rule
-    // ArcRecordSearchController.appendMandatoryFilter applies to the
-    // Contacts tabs -- this header search is a second, independent path to
-    // the same Account data (this is dynamic SOSL, run through
-    // Search.query(String), which has no bind-variable support the way
-    // inline static SOSL or Database.queryWithBinds do, so the team ids are
-    // inlined as quoted Id literals rather than bound). An Id is never
-    // attacker-controlled text, so inlining it carries none of the
-    // injection risk that inlining raw user input would.
-    String accountTeamFilter = idInClause(
-      ArcRecordSearchController.resolveFinancialAdvisorTeamIds()
-    );
+    // Every RETURNING clause is scoped the way the matching list tab is --
+    // ArcListScope's owner-or-team rule -- so the header search is not a
+    // second door to rows a tab would not show. This is dynamic SOSL run
+    // through Search.query(String), which has no bind-variable support the
+    // way inline static SOSL or Database.queryWithBinds do, so the ids are
+    // inlined as quoted literals (ArcListScope.literalClauseFor).
     String sosl =
       'FIND \'' +
       findExpr +
       '\' IN ALL FIELDS RETURNING ' +
-      'Account(Id, Name, Type WHERE Financial_Advisor_Team__c IN ' +
-      accountTeamFilter +
-      ' OR Financial_Advisor_Team__pc IN ' +
-      accountTeamFilter +
+      'Account(Id, Name, Type WHERE ' +
+      ArcListScope.literalClauseFor('Account') +
       ' LIMIT ' +
       SOSL_LIMIT +
       '), ' +
-      'Case(Id, CaseNumber, Subject, Status LIMIT ' +
+      'Case(Id, CaseNumber, Subject, Status WHERE ' +
+      ArcListScope.literalClauseFor('Case') +
+      ' LIMIT ' +
       SOSL_LIMIT +
       '), ' +
-      'Task(Id, Subject, Status LIMIT ' +
+      'Task(Id, Subject, Status WHERE ' +
+      ArcListScope.literalClauseFor('Task') +
+      ' LIMIT ' +
       SOSL_LIMIT +
       '), ' +
-      'Check_Log__c(Id, Name, Status__c LIMIT ' +
+      'Check_Log__c(Id, Name, Status__c WHERE ' +
+      ArcListScope.literalClauseFor('Check_Log__c') +
+      ' LIMIT ' +
       SOSL_LIMIT +
       ')';
 
     List<List<SObject>> searchResults;
     try {
-      searchResults = Search.query(sosl);
+      // The running user's field-level security and sharing, the same
+      // enforcement every list query runs under.
+      searchResults = Search.query(sosl, AccessLevel.USER_MODE);
     } catch (QueryException e) {
       AuraHandledException ahe = new AuraHandledException(
         'Search failed: ' + e.getMessage()
@@ -310,6 +309,7 @@ public with sharing class ArcGlobalSearchController {
       SELECT Id, Name, Exception_Reason__c
       FROM Compliance_Exception__c
       WHERE Name LIKE :likeTerm
+      WITH USER_MODE
       LIMIT :SOSL_LIMIT
     ];
   }
@@ -321,10 +321,16 @@ public with sharing class ArcGlobalSearchController {
    */
   private static List<SObject> queryFinancialAccounts(String cleanTerm) {
     String likeTerm = '%' + cleanTerm + '%';
+    // Scoped like the Financial Accounts list (ArcListScope).
+    Id currentUserId = UserInfo.getUserId();
+    Set<Id> teamIds = ArcListScope.activeTeamIds();
     return [
       SELECT Id, Name, Financial_Account_Type__c
       FROM Financial_Account__c
-      WHERE Name LIKE :likeTerm
+      WHERE
+        Name LIKE :likeTerm
+        AND (OwnerId = :currentUserId OR Financial_Advisor_Team__c IN :teamIds)
+      WITH USER_MODE
       LIMIT :SOSL_LIMIT
     ];
   }
@@ -340,24 +346,5 @@ public with sharing class ArcGlobalSearchController {
       return '';
     }
     return input.replaceAll('[^a-zA-Z0-9 ]', ' ').trim();
-  }
-
-  /**
-   * A dynamic-SOSL-safe "IN (...)" literal for a set of Ids -- always at
-   * least one entry, since an empty "IN ()" is invalid SOQL/SOSL syntax. A
-   * user on no team gets a single Id that can never match a real
-   * Financial_Advisor_Team__c value, which is the same "matches nothing"
-   * outcome ArcRecordSearchController's own IN :emptySet binding produces
-   * for the Contacts tabs -- not a bypass for someone on no team.
-   */
-  private static String idInClause(Set<Id> ids) {
-    List<String> quoted = new List<String>();
-    for (Id recordId : ids) {
-      quoted.add('\'' + recordId + '\'');
-    }
-    if (quoted.isEmpty()) {
-      quoted.add('\'000000000000000AAA\'');
-    }
-    return '(' + String.join(quoted, ', ') + ')';
   }
 }

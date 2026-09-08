@@ -130,37 +130,10 @@
                             </visibilityRule>
                         </valueListItems>
                         <valueListItems>
-                            <value>Account.Send_Required_Docs</value>
-                        </valueListItems>
-                        <valueListItems>
-                            <value>Account.IMA_Ex_A_Ex_B</value>
-                        </valueListItems>
-                        <valueListItems>
                             <value>Edit</value>
                         </valueListItems>
                         <valueListItems>
                             <value>Share</value>
-                        </valueListItems>
-                        <valueListItems>
-                            <value>Account.Add_Orion_HH_ID</value>
-                            <visibilityRule>
-                                <booleanFilter>1 OR 2 OR 3</booleanFilter>
-                                <criteria>
-                                    <leftValue>{!$User.Profile.Name}</leftValue>
-                                    <operator>EQUAL</operator>
-                                    <rightValue>System Administrator</rightValue>
-                                </criteria>
-                                <criteria>
-                                    <leftValue>{!$User.Profile.Name}</leftValue>
-                                    <operator>EQUAL</operator>
-                                    <rightValue>Systems</rightValue>
-                                </criteria>
-                                <criteria>
-                                    <leftValue>{!$User.Username}</leftValue>
-                                    <operator>EQUAL</operator>
-                                    <rightValue>jules@caliberwm.com</rightValue>
-                                </criteria>
-                            </visibilityRule>
                         </valueListItems>
                         <valueListItems>
                             <value>Account.Create_Household_Account</value>

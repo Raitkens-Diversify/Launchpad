@@ -316,6 +316,70 @@ private class ArcRelatedListControllerTest {
     );
   }
 
+  /**
+   * A related list is scoped when its parent is not: an Approved Product is a
+   * firm-wide catalog, so its Related Products (clients' holdings) are cut to
+   * the running user's own teams (ArcListScope). Children of a scoped parent
+   * -- the deposits under a check log above -- stay as the parent decided.
+   */
+  @IsTest
+  static void getRelatedRecordsPageScopesChildrenOfAnUnscopedParentToMyTeams() {
+    Financial_Advisor_Team__c myTeam = ArcRelatedTableTestData.createFinancialAdvisorTeam(
+      'Related Products My Team'
+    );
+    Financial_Advisor_Team__c otherTeam = ArcRelatedTableTestData.createFinancialAdvisorTeam(
+      'Related Products Other Team'
+    );
+    ArcRelatedTableTestData.createTeamMembership(myTeam.Id, UserInfo.getUserId());
+    User otherOwner = ArcRelatedTableTestData.createStandardUser('rlowner');
+
+    // A holding's own Financial_Advisor_Team__c is a read-only formula, so its
+    // team reaches it through the ARC Financial Account it sits on.
+    Financial_Account__c myAccount = new Financial_Account__c(
+      Name = 'My Team Account',
+      Financial_Advisor_Team__c = myTeam.Id
+    );
+    Financial_Account__c otherAccount = new Financial_Account__c(
+      Name = 'Other Team Account',
+      Financial_Advisor_Team__c = otherTeam.Id,
+      OwnerId = otherOwner.Id
+    );
+    insert new List<Financial_Account__c>{ myAccount, otherAccount };
+
+    Product__c product = new Product__c(Name = 'Scoped Fund');
+    insert product;
+    insert new List<Financial_Account_Related_Product__c>{
+      new Financial_Account_Related_Product__c(
+        Product__c = product.Id,
+        Wizard_Financial_Account__c = myAccount.Id,
+        Amount__c = 100
+      ),
+      new Financial_Account_Related_Product__c(
+        Product__c = product.Id,
+        Wizard_Financial_Account__c = otherAccount.Id,
+        Amount__c = 250
+      )
+    };
+
+    Test.startTest();
+    ArcRelatedListController.RelatedRecords result = ArcRelatedListController.getRelatedRecordsPage(
+      product.Id,
+      'Financial_Account_Related_Product__c',
+      'Product__c',
+      COLUMNS,
+      null,
+      0,
+      10
+    );
+    Test.stopTest();
+
+    Assert.areEqual(1, result.rows.size(), 'only my team\'s holding of this product lists');
+    Assert.isTrue(
+      result.rows[0].cells[1].startsWith('100'),
+      'the row on my team, not the other team\'s: ' + result.rows[0].cells
+    );
+  }
+
   @IsTest
   static void getRelatedRecordsBatchRefusesUnreadableJson() {
     Check_Log__c log = logWithDeposits();

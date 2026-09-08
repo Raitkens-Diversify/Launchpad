@@ -129,6 +129,26 @@ private class ArcCaseDetailControllerTest {
 
     Assert.areEqual(true, result.submitted);
     Assert.isNull(result.openEnvelopeId, 'A submitted case has nothing left to resume.');
+    Assert.areEqual(false, result.useOldCaseLayout, 'Default layout unless the flag is set.');
+  }
+
+  @IsTest
+  static void getCaseDetailReportsTheOldLayoutFlag() {
+    Case record = new Case(
+      Subject = 'Legacy Layout Case',
+      Status = 'New',
+      Submitted__c = true,
+      Use_Old_Case_Layout__c = true
+    );
+    insert record;
+
+    Test.startTest();
+    ArcCaseDetailController.CaseDetailResult result = ArcCaseDetailController.getCaseDetail(
+      record.Id
+    );
+    Test.stopTest();
+
+    Assert.areEqual(true, result.useOldCaseLayout);
   }
 
   @IsTest
@@ -457,6 +477,39 @@ private class ArcCaseDetailControllerTest {
     Assert.areEqual('Open Sibling', result.openCases[0].subject);
     Assert.areEqual(1, result.closedCases.size());
     Assert.areEqual('Closed Sibling', result.closedCases[0].subject);
+  }
+
+  /** Household siblings are scoped like every ARC list (ArcListScope). */
+  @IsTest
+  static void getRelatedHouseholdCasesDropsSiblingsOutsideMyOwnerOrTeamScope() {
+    Account household = new Account(Name = 'Scoped Sibling Household', Type = 'Prospect');
+    insert household;
+    User otherOwner = ArcRelatedTableTestData.createStandardUser('sibowner');
+
+    Case current = new Case(
+      Subject = 'Current Case',
+      Status = 'New',
+      Household__c = household.Id
+    );
+    insert current;
+    insert new List<Case>{
+      new Case(Subject = 'Mine Sibling', Status = 'New', Household__c = household.Id),
+      new Case(
+        Subject = 'Theirs Sibling',
+        Status = 'New',
+        Household__c = household.Id,
+        OwnerId = otherOwner.Id
+      )
+    };
+
+    Test.startTest();
+    ArcCaseDetailController.HouseholdCasesResult result = ArcCaseDetailController.getRelatedHouseholdCases(
+      current.Id
+    );
+    Test.stopTest();
+
+    Assert.areEqual(1, result.openCases.size(), 'someone else\'s unlinked sibling stays out');
+    Assert.areEqual('Mine Sibling', result.openCases[0].subject);
   }
 
   /**

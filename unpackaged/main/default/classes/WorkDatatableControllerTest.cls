@@ -52,6 +52,45 @@ private class WorkDatatableControllerTest {
     System.assertEquals('Work Datatable Team Scope', row.financialAdvisorTeamName);
   }
 
+  /**
+   * Team scope is owner-or-team (the ArcListScope rule): a case the user owns
+   * is their work even with no team linked, and someone else's unlinked case
+   * is not.
+   */
+  @IsTest
+  static void getWorkDataTeamScopeKeepsCasesTheUserOwnsWithNoTeam() {
+    Financial_Advisor_Team__c team = ArcRelatedTableTestData.createFinancialAdvisorTeam(
+      'Work Datatable Owner In Team Scope'
+    );
+    ArcRelatedTableTestData.createTeamMembership(team.Id, UserInfo.getUserId());
+    User otherOwner = ArcRelatedTableTestData.createStandardUser('wdowner');
+
+    Case mineUnlinked = new Case(Subject = 'Mine, no team', Status = 'New');
+    Case theirsUnlinked = new Case(
+      Subject = 'Theirs, no team',
+      Status = 'New',
+      OwnerId = otherOwner.Id
+    );
+    insert new List<Case>{ mineUnlinked, theirsUnlinked };
+
+    Test.startTest();
+    WorkDatatableModels.WorkDatatableData data = WorkDatatableController.getWorkData(
+      'Team'
+    );
+    Test.stopTest();
+
+    System.assertEquals(
+      true,
+      containsCaseId(data, mineUnlinked.Id),
+      'A case I own is my team\'s work even with no team link.'
+    );
+    System.assertEquals(
+      false,
+      containsCaseId(data, theirsUnlinked.Id),
+      'Someone else\'s unlinked case is not.'
+    );
+  }
+
   @IsTest
   static void getWorkDataMapsCompletedMainTrackStatus() {
     Case completedCase = new Case(

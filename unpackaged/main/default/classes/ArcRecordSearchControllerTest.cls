@@ -504,13 +504,15 @@ private class ArcRecordSearchControllerTest {
   }
 
   /**
-   * Every Contacts tab is scoped to the running user's own Financial Advisor
-   * Team membership -- an advisor must never see another team's contact, nor
-   * one linked to no team at all, regardless of which of the seven Contacts
-   * tabs (AllAccounts included) they are on.
+   * Every Contacts tab is scoped to contacts the running user owns or that
+   * are linked to one of their active Financial Advisor Teams (ArcListScope)
+   * -- an advisor must never see another team's contact, nor someone else's
+   * contact linked to no team at all, regardless of which of the seven
+   * Contacts tabs (AllAccounts included) they are on.
    */
   @IsTest
   static void searchRecordsAccountOnlyReturnsContactsLinkedToMyActiveTeams() {
+    User otherOwner = createTestUser('ContactOtherOwner');
     insert new Financial_Advisor_Team__c(Name = 'Default Team');
 
     Financial_Advisor_Team__c myTeam = new Financial_Advisor_Team__c(Name = 'My Contacts Team');
@@ -537,12 +539,25 @@ private class ArcRecordSearchControllerTest {
     };
 
     // Type='Prospect' satisfies Type_OR_Classification_Required -- pre-existing
-    // validation, unrelated to this test's own subject.
+    // validation, unrelated to this test's own subject. Everything not on my
+    // team is owned by someone else, so ownership cannot rescue it; my own
+    // unlinked contact is the one row ownership alone lets through.
     insert new List<Account>{
       new Account(Name = 'MyTeamContact', Financial_Advisor_Team__c = myTeam.Id, Type = 'Prospect'),
-      new Account(Name = 'InactiveTeamContact', Financial_Advisor_Team__c = inactiveTeam.Id, Type = 'Prospect'),
-      new Account(Name = 'OtherTeamContact', Financial_Advisor_Team__c = otherTeam.Id, Type = 'Prospect'),
-      new Account(Name = 'NoTeamContact', Type = 'Prospect')
+      new Account(Name = 'MyOwnUnlinkedContact', Type = 'Prospect'),
+      new Account(
+        Name = 'InactiveTeamContact',
+        Financial_Advisor_Team__c = inactiveTeam.Id,
+        Type = 'Prospect',
+        OwnerId = otherOwner.Id
+      ),
+      new Account(
+        Name = 'OtherTeamContact',
+        Financial_Advisor_Team__c = otherTeam.Id,
+        Type = 'Prospect',
+        OwnerId = otherOwner.Id
+      ),
+      new Account(Name = 'NoTeamContact', Type = 'Prospect', OwnerId = otherOwner.Id)
     };
 
     Test.startTest();
@@ -563,11 +578,12 @@ private class ArcRecordSearchControllerTest {
     for (ArcRecordSearchController.SearchRow row : result.rows) {
       names.add(row.cells[0]);
     }
-    Assert.areEqual(1, result.rows.size(), 'only the contact linked to my active team: ' + names);
+    Assert.areEqual(2, result.rows.size(), 'owned by me or linked to my active team: ' + names);
     Assert.isTrue(names.contains('MyTeamContact'), 'linked to my active team');
+    Assert.isTrue(names.contains('MyOwnUnlinkedContact'), 'my own contact, no team');
     Assert.isFalse(names.contains('InactiveTeamContact'), 'inactive membership does not count');
     Assert.isFalse(names.contains('OtherTeamContact'), 'another team\'s contact');
-    Assert.isFalse(names.contains('NoTeamContact'), 'unlinked contacts stay out');
+    Assert.isFalse(names.contains('NoTeamContact'), 'someone else\'s unlinked contact stays out');
   }
 
   @IsTest
@@ -630,13 +646,42 @@ private class ArcRecordSearchControllerTest {
       teamMember(otherTeam.Id, outsider.Id, true)
     };
 
+    // Every team task is stamped with its team: since 2026-09-08 the list's
+    // owner-or-team scope (ArcListScope) requires it, and a teammate's task
+    // that carries no team is no longer "my team's" -- see the last row.
     insert new List<Task>{
       new Task(Subject = 'Mine, open', Status = 'Not Started'),
-      new Task(Subject = 'Teammate, open', Status = 'Not Started', OwnerId = teammate.Id),
-      new Task(Subject = 'Teammate, closed', Status = 'Completed', OwnerId = teammate.Id),
-      new Task(Subject = 'Inactive teammate, open', Status = 'Not Started', OwnerId = inactiveTeammate.Id),
-      new Task(Subject = 'Outsider, open', Status = 'Not Started', OwnerId = outsider.Id),
-      new Task(Subject = 'Maestro on my team, open', Status = 'Not Started', OwnerId = systemTeammate.Id)
+      new Task(
+        Subject = 'Teammate, open',
+        Status = 'Not Started',
+        OwnerId = teammate.Id,
+        Financial_Advisor_Team__c = myTeam.Id
+      ),
+      new Task(
+        Subject = 'Teammate, closed',
+        Status = 'Completed',
+        OwnerId = teammate.Id,
+        Financial_Advisor_Team__c = myTeam.Id
+      ),
+      new Task(
+        Subject = 'Inactive teammate, open',
+        Status = 'Not Started',
+        OwnerId = inactiveTeammate.Id,
+        Financial_Advisor_Team__c = myTeam.Id
+      ),
+      new Task(
+        Subject = 'Outsider, open',
+        Status = 'Not Started',
+        OwnerId = outsider.Id,
+        Financial_Advisor_Team__c = otherTeam.Id
+      ),
+      new Task(
+        Subject = 'Maestro on my team, open',
+        Status = 'Not Started',
+        OwnerId = systemTeammate.Id,
+        Financial_Advisor_Team__c = myTeam.Id
+      ),
+      new Task(Subject = 'Teammate, open, no team', Status = 'Not Started', OwnerId = teammate.Id)
     };
 
     Test.startTest();
@@ -664,6 +709,10 @@ private class ArcRecordSearchControllerTest {
     Assert.isFalse(subjects.contains('Inactive teammate, open'), 'inactive membership does not count');
     Assert.isFalse(subjects.contains('Outsider, open'), 'another team is not my team');
     Assert.isFalse(subjects.contains('Maestro on my team, open'), 'system owners are excluded even on the roster');
+    Assert.isFalse(
+      subjects.contains('Teammate, open, no team'),
+      'a teammate\'s task with no team stamped is not my team\'s (owner-or-team scope)'
+    );
   }
 
   @IsTest
@@ -759,6 +808,9 @@ private class ArcRecordSearchControllerTest {
       Name = 'Zenith Advisors'
     );
     insert team;
+    // Zenith is one of my teams: every list is scoped to owned-or-team rows,
+    // and Case_TriggerHandler hands a team-linked case to the team on insert.
+    insert teamMember(team.Id, UserInfo.getUserId(), true);
 
     Case teamCase = new Case(
       Subject = 'Team Case',
@@ -791,6 +843,187 @@ private class ArcRecordSearchControllerTest {
     Assert.areEqual(1, result.rows.size());
     Assert.areEqual(teamCase.Id, result.rows[0].id);
     Assert.areEqual('Zenith Advisors', result.rows[0].cells[1]);
+  }
+
+  // ---- Owner-or-team scope on every tab (ArcListScope) ---------------------
+
+  /**
+   * Every Case tab -- All Cases included, which has no per-tab clause of its
+   * own -- is scoped to cases the running user owns or that are linked to one
+   * of their active teams. Another user's unlinked case never shows, whichever
+   * tab is open.
+   */
+  @IsTest
+  static void searchRecordsAllCasesOnlyReturnsCasesOwnedByMeOrLinkedToMyTeams() {
+    User otherOwner = createTestUser('AllCasesOtherOwner');
+    insert new Financial_Advisor_Team__c(Name = 'Default Team');
+    Financial_Advisor_Team__c myTeam = new Financial_Advisor_Team__c(Name = 'All Cases Team');
+    insert myTeam;
+    insert teamMember(myTeam.Id, UserInfo.getUserId(), true);
+
+    Case mineUnlinked = new Case(Subject = 'MineUnlinked', Status = 'New');
+    Case teamOwnedElsewhere = new Case(
+      Subject = 'TeamOwnedElsewhere',
+      Status = 'New',
+      Financial_Advisor_Team__c = myTeam.Id
+    );
+    Case theirsUnlinked = new Case(
+      Subject = 'TheirsUnlinked',
+      Status = 'New',
+      OwnerId = otherOwner.Id
+    );
+    insert new List<Case>{ mineUnlinked, teamOwnedElsewhere, theirsUnlinked };
+    // Case_TriggerHandler.setProjectManager resets a team-linked case's owner
+    // on insert, so the off-team owner is applied with an update.
+    teamOwnedElsewhere.OwnerId = otherOwner.Id;
+    update teamOwnedElsewhere;
+
+    Test.startTest();
+    ArcRecordSearchController.SearchResult result = ArcRecordSearchController.searchRecords(
+      'Case',
+      new List<String>{ 'Subject' },
+      null,
+      null,
+      null,
+      null,
+      null,
+      25,
+      'All_Cases'
+    );
+    Test.stopTest();
+
+    Set<String> subjects = new Set<String>();
+    for (ArcRecordSearchController.SearchRow row : result.rows) {
+      subjects.add(row.cells[0]);
+    }
+    Assert.areEqual(2, result.rows.size(), 'owned by me or linked to my team: ' + subjects);
+    Assert.isTrue(subjects.contains('MineUnlinked'), 'my own case, no team');
+    Assert.isTrue(subjects.contains('TeamOwnedElsewhere'), 'my team\'s case, owned off-team');
+    Assert.isFalse(subjects.contains('TheirsUnlinked'), 'someone else\'s unlinked case');
+  }
+
+  /**
+   * Tasks use the same two halves as every other object (per the business,
+   * 2026-09-08): a teammate's task counts only when it is stamped with one of
+   * my teams -- ownership by a teammate alone no longer qualifies.
+   */
+  @IsTest
+  static void searchRecordsAllTasksOnlyReturnsTasksOwnedByMeOrStampedWithMyTeams() {
+    User teammate = createTestUser('AllTasksTeammate');
+    User outsider = createTestUser('AllTasksOutsider');
+    insert new Financial_Advisor_Team__c(Name = 'Default Team');
+    Financial_Advisor_Team__c myTeam = new Financial_Advisor_Team__c(Name = 'All Tasks Team');
+    insert myTeam;
+    insert new List<Financial_Advisor_Team_Member__c>{
+      teamMember(myTeam.Id, UserInfo.getUserId(), true),
+      teamMember(myTeam.Id, teammate.Id, true)
+    };
+
+    insert new List<Task>{
+      new Task(Subject = 'Mine', Status = 'Not Started'),
+      new Task(
+        Subject = 'Teammate, my team',
+        Status = 'Not Started',
+        OwnerId = teammate.Id,
+        Financial_Advisor_Team__c = myTeam.Id
+      ),
+      new Task(Subject = 'Teammate, no team field', Status = 'Not Started', OwnerId = teammate.Id),
+      new Task(Subject = 'Outsider', Status = 'Not Started', OwnerId = outsider.Id)
+    };
+
+    Test.startTest();
+    ArcRecordSearchController.SearchResult result = ArcRecordSearchController.searchRecords(
+      'Task',
+      new List<String>{ 'Subject' },
+      null,
+      null,
+      null,
+      null,
+      null,
+      25,
+      'All'
+    );
+    Test.stopTest();
+
+    Set<String> subjects = new Set<String>();
+    for (ArcRecordSearchController.SearchRow row : result.rows) {
+      subjects.add(row.cells[0]);
+    }
+    Assert.areEqual(2, result.rows.size(), 'mine, and my team\'s: ' + subjects);
+    Assert.isTrue(subjects.contains('Mine'));
+    Assert.isTrue(subjects.contains('Teammate, my team'), 'stamped with my team');
+    Assert.isFalse(
+      subjects.contains('Teammate, no team field'),
+      'a teammate\'s unstamped task is not my team\'s'
+    );
+    Assert.isFalse(subjects.contains('Outsider'), 'not on any of my teams');
+  }
+
+  @IsTest
+  static void searchRecordsCheckLogsOnlyReturnLogsOwnedByMeOrLinkedToMyTeams() {
+    User otherOwner = createTestUser('CheckLogOtherOwner');
+    insert new Financial_Advisor_Team__c(Name = 'Default Team');
+    Financial_Advisor_Team__c myTeam = new Financial_Advisor_Team__c(Name = 'Check Log Team');
+    insert myTeam;
+    insert teamMember(myTeam.Id, UserInfo.getUserId(), true);
+
+    insert new List<Check_Log__c>{
+      new Check_Log__c(Status__c = 'Received', Notes__c = 'Mine'),
+      new Check_Log__c(
+        Status__c = 'Received',
+        Notes__c = 'MyTeam',
+        Financial_Advisor_Team__c = myTeam.Id,
+        OwnerId = otherOwner.Id
+      ),
+      new Check_Log__c(Status__c = 'Received', Notes__c = 'Theirs', OwnerId = otherOwner.Id)
+    };
+
+    Test.startTest();
+    ArcRecordSearchController.SearchResult result = ArcRecordSearchController.searchRecords(
+      'Check_Log__c',
+      new List<String>{ 'Notes__c' },
+      null,
+      null,
+      null,
+      null,
+      null,
+      25,
+      'All'
+    );
+    Test.stopTest();
+
+    Set<String> notes = new Set<String>();
+    for (ArcRecordSearchController.SearchRow row : result.rows) {
+      notes.add(row.cells[0]);
+    }
+    Assert.areEqual(2, result.rows.size(), 'owned by me or linked to my team: ' + notes);
+    Assert.isTrue(notes.contains('Mine'));
+    Assert.isTrue(notes.contains('MyTeam'), 'my team\'s log, owned off-team');
+    Assert.isFalse(notes.contains('Theirs'), 'someone else\'s unlinked log');
+  }
+
+  /** Approved Products is a catalog: ArcListScope leaves it unscoped. */
+  @IsTest
+  static void searchRecordsProductsAreNotScopedToOwnerOrTeam() {
+    User otherOwner = createTestUser('ProductOtherOwner');
+    insert new Product__c(Name = 'Everyone Sees This Fund', OwnerId = otherOwner.Id);
+
+    Test.startTest();
+    ArcRecordSearchController.SearchResult result = ArcRecordSearchController.searchRecords(
+      'Product__c',
+      new List<String>{ 'Name' },
+      null,
+      null,
+      null,
+      null,
+      null,
+      25,
+      'Approved_Products'
+    );
+    Test.stopTest();
+
+    Assert.areEqual(1, result.rows.size(), 'a product owned by someone else still lists');
+    Assert.areEqual('Everyone Sees This Fund', result.rows[0].cells[0]);
   }
 
   private static Financial_Advisor_Team_Member__c teamMember(Id teamId, Id userId, Boolean active) {

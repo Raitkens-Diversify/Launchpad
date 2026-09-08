@@ -108,6 +108,65 @@ private class ArcAccountInvestmentsControllerTest {
     Assert.areEqual('Zebra ISA', rows[2].name);
   }
 
+  /**
+   * Scoped like every ARC list (ArcListScope): an ISA or Service another user
+   * owns stays out unless one of my active teams is linked; Approved Products
+   * are a catalog and never scope.
+   */
+  @IsTest
+  static void getInvestmentsAndServicesOnlyReturnsRowsOwnedByMeOrLinkedToMyTeams() {
+    User otherOwner = ArcRelatedTableTestData.createStandardUser('invowner');
+    Financial_Advisor_Team__c myTeam = ArcRelatedTableTestData.createFinancialAdvisorTeam(
+      'Investments Team'
+    );
+    ArcRelatedTableTestData.createTeamMembership(myTeam.Id, UserInfo.getUserId());
+
+    Account household = new Account(Name = 'Scoped Household', Type = 'Prospect');
+    insert household;
+
+    insert new List<Financial_Account__c>{
+      new Financial_Account__c(Name = 'Mine ISA', Household__c = household.Id),
+      new Financial_Account__c(
+        Name = 'Team ISA',
+        Household__c = household.Id,
+        Financial_Advisor_Team__c = myTeam.Id,
+        OwnerId = otherOwner.Id
+      ),
+      new Financial_Account__c(
+        Name = 'Theirs ISA',
+        Household__c = household.Id,
+        OwnerId = otherOwner.Id
+      )
+    };
+    insert new List<Service__c>{
+      new Service__c(Name = 'Mine Service', Household__c = household.Id),
+      new Service__c(Name = 'Theirs Service', Household__c = household.Id, OwnerId = otherOwner.Id)
+    };
+    insert new Product__c(
+      Name = 'Theirs Product',
+      Account__c = household.Id,
+      OwnerId = otherOwner.Id
+    );
+
+    Test.startTest();
+    List<ArcAccountInvestmentsController.InvestmentRow> rows = ArcAccountInvestmentsController.getInvestmentsAndServices(
+      household.Id
+    );
+    Test.stopTest();
+
+    Set<String> names = new Set<String>();
+    for (ArcAccountInvestmentsController.InvestmentRow row : rows) {
+      names.add(row.name);
+    }
+    Assert.areEqual(4, rows.size(), 'owned by me, on my team, or a product: ' + names);
+    Assert.isTrue(names.contains('Mine ISA'));
+    Assert.isTrue(names.contains('Team ISA'), 'my team\'s ISA, owned off-team');
+    Assert.isFalse(names.contains('Theirs ISA'), 'someone else\'s unlinked ISA');
+    Assert.isTrue(names.contains('Mine Service'));
+    Assert.isFalse(names.contains('Theirs Service'), 'someone else\'s service on an unlinked household');
+    Assert.isTrue(names.contains('Theirs Product'), 'products are a catalog, never scoped');
+  }
+
   @IsTest
   static void getInvestmentsAndServicesReturnsEmptyForNullAccountId() {
     Test.startTest();

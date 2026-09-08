@@ -22,6 +22,22 @@ private class ArcRecentlyViewedListControllerTest {
     );
   }
 
+  /** Recently viewed is scoped like every ARC list (ArcListScope). */
+  @IsTest
+  static void enrichAccountRecordsByIds_dropsAccountsOutsideMyOwnerOrTeamScope() {
+    User otherOwner = ArcRelatedTableTestData.createStandardUser('rvowner');
+    Account mine = new Account(Name = 'Mine', Type = 'Prospect');
+    Account theirs = new Account(Name = 'Theirs', Type = 'Prospect', OwnerId = otherOwner.Id);
+    insert new List<Account>{ mine, theirs };
+
+    List<SObject> enrichedRecords = ArcRecentlyViewedListController.enrichAccountRecordsByIds(
+      new List<Id>{ mine.Id, theirs.Id }
+    );
+
+    System.assertEquals(1, enrichedRecords.size(), 'only the account I own or share a team with');
+    System.assertEquals(mine.Id, enrichedRecords[0].Id);
+  }
+
   @IsTest
   static void enrichAccountRecordsByIds_preservesOrder() {
     Account firstAccount = createPersonAccount(

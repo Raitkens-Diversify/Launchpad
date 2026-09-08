@@ -93,6 +93,11 @@ public with sharing class ArcCaseDetailController {
     public HouseholdSummary household;
     @AuraEnabled
     public Boolean submitted;
+    // Case.Use_Old_Case_Layout__c. Case_Record_Page hides the overview tile,
+    // the three task tracks, the current-task panel and the pit-stop actions
+    // when this is set; the ARC page hides the same, plus the Actions menu.
+    @AuraEnabled
+    public Boolean useOldCaseLayout;
     // The wizard envelope this case's own Envelope_Content__c row still
     // points at, so the not-yet-submitted banner can link straight back into
     // it. Null once submitted (nothing left to resume) or when the case
@@ -228,6 +233,7 @@ public with sharing class ArcCaseDetailController {
         Subject,
         Status,
         Submitted__c,
+        Use_Old_Case_Layout__c,
         RecordTypeId,
         RecordType.Name,
         Advertising_Item__c,
@@ -329,6 +335,7 @@ public with sharing class ArcCaseDetailController {
     }
 
     result.submitted = record.Submitted__c;
+    result.useOldCaseLayout = record.Use_Old_Case_Layout__c == true;
     result.openEnvelopeId = record.Submitted__c == false
       ? findOpenEnvelopeId(record.Id)
       : null;
@@ -508,11 +515,18 @@ public with sharing class ArcCaseDetailController {
     }
 
     Id householdId = matches[0].Household__c;
+    // Siblings are scoped like every ARC list (ArcListScope): owned by the
+    // user, or linked to one of their active teams.
+    Id currentUserId = UserInfo.getUserId();
+    Set<Id> teamIds = ArcListScope.activeTeamIds();
 
     for (Case record : [
       SELECT Id, CaseNumber, Subject, Status, IsClosed, Owner.Name, CreatedDate
       FROM Case
-      WHERE Household__c = :householdId AND Id != :caseId
+      WHERE
+        Household__c = :householdId
+        AND Id != :caseId
+        AND (OwnerId = :currentUserId OR Financial_Advisor_Team__c IN :teamIds)
       WITH USER_MODE
       ORDER BY CreatedDate DESC
       LIMIT 20

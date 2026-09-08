@@ -48,8 +48,9 @@
             -->
             <!-- One Actions menu instead of a row of four buttons. Items keep
                  their own conditions (the pit stops only while the case can
-                 take one) and route to the same handlers the buttons used. -->
-            <div class="arc-case-detail__actions">
+                 take one) and route to the same handlers the buttons used.
+                 The whole menu is off on the old layout (Use_Old_Case_Layout__c). -->
+            <div class="arc-case-detail__actions" lwc:if={showActions}>
               <div class="arc-case-detail__actions-menu-host">
                 <lightning-button
                   label="Actions"
@@ -201,8 +202,10 @@
             Found." and that absence is information. Gating them individually
             hid the fact that a track exists and is empty; gating them as a set
             still keeps all three off a case type that has no tracks at all.
+            All three are also off on the old layout (Use_Old_Case_Layout__c),
+            as they are on Case_Record_Page.
           -->
-          <template lwc:if={hasAnyTasks}>
+          <template lwc:if={showTaskTracks}>
             <c-branch-pit-stop record-id={detail.id}></c-branch-pit-stop>
             <c-main-track-tasks record-id={detail.id}></c-main-track-tasks>
             <c-home-office-pit-stop
@@ -349,7 +352,10 @@
         </div>
 
         <div class="arc-case-detail__side">
-          <c-case-current-task record-id={detail.id}></c-case-current-task>
+          <!-- Hidden on the old layout, as Case_Record_Page hides caseCurrentTask. -->
+          <template lwc:if={showCurrentTask}>
+            <c-case-current-task record-id={detail.id}></c-case-current-task>
+          </template>
 
           <template lwc:if={showAdvertisingItem}>
             <lightning-card title="Advertising Item Details">
