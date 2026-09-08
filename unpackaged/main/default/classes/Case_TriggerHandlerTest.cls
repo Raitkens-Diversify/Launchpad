@@ -297,11 +297,19 @@ public class Case_TriggerHandlerTest {
     @isTest
     private static void testFindWizardTemplate(){
         Id newAccountRecordTypeId = Schema.sObjectType.Case.getRecordTypeInfosByName().get('Account Opening').getRecordTypeId();
-        Case_Template__c caseTemplate= new Case_Template__c(Name = 'Account Opening' , AML_Approval__c = 'EXCLUDED' , SOF_Compliance__c = 'EXCLUDED',
+        // Type_of_Template__c is what setCaseTemplateForWizard queries on; a template
+        // without it is never a candidate. Every field getCaseTempId compares is
+        // EXCLUDED so this template matches any case: a field left blank is
+        // compared against the case's own value and drops the template when the
+        // case field is a checkbox ('false' is not blank).
+        Case_Template__c caseTemplate= new Case_Template__c(Name = 'Account Opening' , Type_of_Template__c = 'Fixed', AML_Approval__c = 'EXCLUDED' , SOF_Compliance__c = 'EXCLUDED',
                                                             SOF_Operations__c = 'EXCLUDED', Needs_Principal_Review__c = 'EXCLUDED', 
                                                             Check_in_Hand__c = 'EXCLUDED',  Need_DAO_Account_Number__c = 'EXCLUDED', 
                                                             Need_Non_DAO_Account_Number__c = 'EXCLUDED', Management_Style__c = 'EXCLUDED', BD_Brokerage__c = 'EXCLUDED',
-                                                            Reg_BI__c = 'EXCLUDED', Type__c = 'EXCLUDED',Address_Change_Proposed__c='EXCLUDED');
+                                                            Reg_BI__c = 'EXCLUDED', Type__c = 'EXCLUDED',Address_Change_Proposed__c='EXCLUDED',
+                                                            Compliance_Needed__c = 'EXCLUDED', Custodian__c = 'EXCLUDED', Previous_Management_Style__c = 'EXCLUDED',
+                                                            Charity_Sponsor__c = 'EXCLUDED', Enough_Cash__c = 'EXCLUDED', Live_SLOA_on_File__c = 'EXCLUDED',
+                                                            Money_Movement_Direction__c = 'EXCLUDED');
         
         Insert caseTemplate;
         
@@ -313,12 +321,30 @@ public class Case_TriggerHandlerTest {
         
         Insert taskTempItem; 
         Test.startTest();
-        case c = new Case(Origin= 'Wizard',RecordTypeId = newAccountRecordTypeId, Status = 'New'); 
+        // A wizard case is a draft until it is submitted: setCaseTemplateForWizard
+        // only matches templates on a case with Submitted__c = true, so the draft
+        // insert stamps nothing and creates no task, and the submission does both.
+        // This test's old shape -- an unsubmitted insert asserted to have a task,
+        // with the assert's arguments reversed -- predates that rule.
+        Case c = new Case(
+            Origin = 'Wizard',
+            Type = 'Account Opening',
+            RecordTypeId = newAccountRecordTypeId,
+            Status = 'New',
+            Submitted__c = false
+        );
         Insert c;
+        Assert.areEqual(0, [SELECT COUNT() FROM Task WHERE WhatId = :c.Id], 'A draft has no tasks yet.');
+
+        c.Submitted__c = true;
+        update c;
         Test.stopTest();
-        List<Task> lstTask = [Select Id, OwnerId from Task Where WhatId =: c.Id ];
-        Assert.areEqual(lstTask.size(), 1);
-        
+
+        Case stamped = [SELECT Case_Template__c FROM Case WHERE Id = :c.Id];
+        Assert.areEqual(caseTemplate.Id, stamped.Case_Template__c, 'Submission matches the Fixed template.');
+
+        List<Task> lstTask = [SELECT Id, OwnerId FROM Task WHERE WhatId = :c.Id];
+        Assert.areEqual(1, lstTask.size(), 'One task per template item.');
     }
     
     /*@isTest
@@ -440,11 +466,10 @@ public class Case_TriggerHandlerTest {
     }
 
     @isTest
-    private static void testSetCustodianPrefersFinServFinancialAccountWhenBothLinked(){
-        Account personAccount = [SELECT Id FROM Account WHERE FirstName = 'Test' LIMIT 1];
+    private static void testCustodianComesOnlyFromTheWizardFinancialAccount(){
         Financial_Account__c wfa = new Financial_Account__c(
             Name = 'Custodian Precedence WFA',
-            Custodian__c = 'Schwab'
+            Custodian__c = 'SCHWAB'
         );
         insert wfa;
 
@@ -453,14 +478,23 @@ public class Case_TriggerHandlerTest {
             Status = 'New',
             Origin = 'Service Request',
             Type = 'Move Money - One Time',
-            //FinServ__FinancialAccount__c = fa.Id,
             Wizard_Financial_Account__c = wfa.Id
         );
         insert testCase;
         Test.stopTest();
 
+        // This used to assert 'Fidelity' from a FinServ financial account that the
+        // handler preferred over the wizard account. That preference is gone:
+        // setCustodian reads only Wizard_Financial_Account__c, and while the
+        // Custodian removal is in progress its calls are commented out of the
+        // trigger altogether (live in launchpad 2026-09-06). Either way the case
+        // can only ever carry the wizard account's custodian, or nothing.
         Case insertedCase = [SELECT Custodian__c FROM Case WHERE Id = :testCase.Id];
-        Assert.areEqual('Fidelity', insertedCase.Custodian__c);
+        Assert.isTrue(
+            insertedCase.Custodian__c == null ||
+            insertedCase.Custodian__c.equalsIgnoreCase(wfa.Custodian__c),
+            'Custodian is the wizard account\'s or blank, never from anywhere else: ' + insertedCase.Custodian__c
+        );
     }
 
     // A brand-new Account Opening Case (created when a new Financial Account is added in the

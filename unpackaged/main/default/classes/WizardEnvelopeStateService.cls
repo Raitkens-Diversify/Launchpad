@@ -1018,9 +1018,10 @@ return result;
             }
         }
         if (!toDelete.isEmpty()) {
-            // System mode: the relationship is owned by whoever added the client, not necessarily the
-            // team member removing them, so a sharing-context delete would fail with insufficient access.
-            Database.delete(toDelete, AccessLevel.SYSTEM_MODE);
+            // Elevated: the relationship is owned by whoever added the client, not necessarily the team
+            // member removing them, so a with-sharing delete would fail with insufficient access. See
+            // ElevatedDml for why without sharing is required and SYSTEM_MODE alone isn't.
+            new ElevatedDml().remove(toDelete);
         }
         return strandedParties;
     }
@@ -1063,9 +1064,10 @@ return result;
             ];
         }
         if (!links.isEmpty()) {
-            // System mode: the link is owned by whoever added the client, not necessarily the team
-            // member removing them, so a sharing-context delete would fail with insufficient access.
-            Database.delete(links, AccessLevel.SYSTEM_MODE);
+            // Elevated: the link is owned by whoever added the client, not necessarily the team member
+            // removing them, so a with-sharing delete would fail with insufficient access. See
+            // ElevatedDml for why without sharing is required and SYSTEM_MODE alone isn't.
+            new ElevatedDml().remove(links);
         }
     }
 
@@ -1120,15 +1122,26 @@ return result;
         return unused;
     }
 
+    // Removal deletes records that belong to whoever added the client, so a different team member
+    // removing them isn't the owner and, with this class running `with sharing`, the delete is refused
+    // with INSUFFICIENT_ACCESS_OR_READONLY. AccessLevel.SYSTEM_MODE isn't enough on its own: it drops
+    // the running user's object and field permissions but leaves record sharing bound to the enclosing
+    // class's sharing keyword. Routing the deletes through this `without sharing` helper is what drops
+    // record sharing; SYSTEM_MODE inside it keeps object/FLS elevated too. Access is already governed by
+    // the envelope flow that reached this point.
+    private without sharing class ElevatedDml {
+        // Instance method, not static: Apex only allows static members on top-level classes.
+        private void remove(List<SObject> records) {
+            if (records != null && !records.isEmpty()) {
+                Database.delete(records, AccessLevel.SYSTEM_MODE);
+            }
+        }
+    }
+
     // Delete records nothing references, together with everything saveEntity created for them. Every
     // lookup pointing at Account clears rather than cascades (deleteConstraint SetNull), so without
     // this the rows would survive with null lookups and accumulate as orphans. Financial_Account_Role__c
     // is master-detail and cascades on its own.
-    // Every delete here runs in system mode. The records belong to whoever added the client, so a
-    // different team member removing them from the envelope isn't the owner and a sharing-context
-    // delete fails with INSUFFICIENT_ACCESS_OR_READONLY — on Account, which requires ownership to
-    // delete, and equally on the private related records (signees, links, relationships). Access is
-    // already governed by the envelope flow that reached this point.
     private static void deleteUnusedRecords(Set<Id> ids) {
         List<Required_Documents__c> documents = [
             SELECT Id
@@ -1144,7 +1157,7 @@ return result;
             WHERE Account__c IN :ids OR Required_Document__c IN :documentIds
         ];
         if (!signees.isEmpty()) {
-            Database.delete(signees, AccessLevel.SYSTEM_MODE);
+            new ElevatedDml().remove(signees);
         }
 
         // Whatever is left pointing at these records: the documents' envelope links, plus any link the
@@ -1160,10 +1173,10 @@ return result;
                 OR Required_Document__c IN :documentIds
         ];
         if (!links.isEmpty()) {
-            Database.delete(links, AccessLevel.SYSTEM_MODE);
+            new ElevatedDml().remove(links);
         }
         if (!documents.isEmpty()) {
-            Database.delete(documents, AccessLevel.SYSTEM_MODE);
+            new ElevatedDml().remove(documents);
         }
 
         // The household-membership relationships, which idsNoLongerInUse deliberately ignored.
@@ -1173,7 +1186,7 @@ return result;
             WHERE Account__c IN :ids OR Related_Account__c IN :ids
         ];
         if (!relations.isEmpty()) {
-            Database.delete(relations, AccessLevel.SYSTEM_MODE);
+            new ElevatedDml().remove(relations);
         }
 
         // A record that is already gone — deleted in another session, or named by an outline row the
@@ -1186,7 +1199,7 @@ return result;
             recordsToDelete.add(recordId.getSObjectType().newSObject(recordId));
         }
         if (!recordsToDelete.isEmpty()) {
-            Database.delete(recordsToDelete, AccessLevel.SYSTEM_MODE);
+            new ElevatedDml().remove(recordsToDelete);
         }
     }
 
