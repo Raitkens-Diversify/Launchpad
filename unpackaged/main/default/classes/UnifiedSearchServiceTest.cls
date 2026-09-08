@@ -394,4 +394,31 @@ private class UnifiedSearchServiceTest {
         Assert.areEqual('Recorded', bySlug.get('rollover-replay').webinarStatus);
         Assert.isNull(bySlug.get('rollover-checklist').webinarStatus, 'Non-webinars carry no lifecycle.');*/
     }
+
+    // A resource filed in a DEACTIVATED category is just as hidden as an inactive resource:
+    // the Help Center's search page and the hub both read this endpoint, so this is where
+    // "users can still find things in inactive categories" was true for both centers.
+    @isTest
+    static void resourcesInInactiveCategoriesNeverReturn() {
+        Resource_Category__c retired = new Resource_Category__c(
+            Name = 'Retired', Slug__c = 'retired', Display_Order__c = 9, Is_Active__c = false);
+        insert retired;
+        insert new Resource__c(
+            Name = 'Rollover Relic', Slug__c = 'rollover-relic', Category__c = retired.Id,
+            Resource_Type__c = 'PDF', Description__c = 'Old rollover form',
+            Is_Active__c = true, Is_Featured__c = true, Display_Order__c = 5);
+        Test.setFixedSearchResults(new List<Id>{ resourceId('rollover-relic'), resourceId('rollover-checklist') });
+
+        Test.startTest();
+        UnifiedSearchService.UnifiedResults res = UnifiedSearchService.search('rollover');
+        List<UnifiedSearchService.Suggestion> ahead = UnifiedSearchService.typeahead('Rollover Rel');
+        Test.stopTest();
+
+        Assert.areEqual(1, res.resources.size(), 'Only the resource in the active category returns.');
+        Assert.areEqual('rollover-checklist', res.resources[0].slug);
+        Assert.isFalse(res.meta.resourcesDegraded);
+        for (UnifiedSearchService.Suggestion s : ahead) {
+            Assert.areNotEqual('rollover-relic', s.routeKey, 'Typeahead hides it too.');
+        }
+    }
 }

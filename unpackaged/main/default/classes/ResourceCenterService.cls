@@ -551,14 +551,41 @@ public with sharing class ResourceCenterService {
     @AuraEnabled(cacheable=true)
     public static List<ResourceCard> getFeaturedResources() {
         assertResourcesReadable();
+        Set<Id> visible = visibleCategoryIds();
         return toCards([
             SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Summary__c, Audience__c, Display_Order__c,
-                   Is_Featured__c, External_URL__c, Video_Embed_URL__c, Category__r.Slug__c,
+                   Is_Featured__c, External_URL__c, Video_Embed_URL__c, Category__c, Category__r.Slug__c,
                    Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c
             FROM Resource__c
             WHERE Is_Featured__c = true AND Is_Active__c = true
+            AND (Category__c = null OR Category__c IN :visible)
             ORDER BY Display_Order__c NULLS LAST, Name ASC
             LIMIT 12
+        ]);
+    }
+
+    /** Resource Center home, "Recently added": rows per module. */
+    @TestVisible private static final Integer HOME_RECENT_LIMIT = 6;
+
+    /**
+     * Resource Center home, "Recently added": the newest active resources,
+     * webinars excluded (the home's "Upcoming events" module carries those
+     * from getEvents). Empty → the client hides the module.
+     */
+    @AuraEnabled(cacheable=true)
+    public static List<ResourceCard> getRecentResources() {
+        assertResourcesReadable();
+        String webinarType = WebinarLifecycle.TYPE_WEBINAR;
+        Set<Id> visible = visibleCategoryIds();
+        return toCards([
+            SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Summary__c, Audience__c, Display_Order__c,
+                   Is_Featured__c, External_URL__c, Video_Embed_URL__c, Category__c, Category__r.Slug__c,
+                   Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c
+            FROM Resource__c
+            WHERE Is_Active__c = true AND Resource_Type__c != :webinarType
+            AND (Category__c = null OR Category__c IN :visible)
+            ORDER BY CreatedDate DESC, Name ASC
+            LIMIT :HOME_RECENT_LIMIT
         ]);
     }
 
@@ -591,6 +618,7 @@ public with sharing class ResourceCenterService {
             }
             Integer cap = webinarAgendaLimit();
             String webinarType = WebinarLifecycle.TYPE_WEBINAR;
+            Set<Id> visible = visibleCategoryIds();
             // One instant for both queries and the derivation (see WebinarLifecycle).
             Datetime now = System.now();
             List<Resource__c> upcoming = [
@@ -598,6 +626,7 @@ public with sharing class ResourceCenterService {
                        Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c
                 FROM Resource__c
                 WHERE Resource_Type__c = :webinarType AND Is_Active__c = true
+                AND (Category__c = null OR Category__c IN :visible)
                 AND Event_Datetime__c > :now
                 ORDER BY Event_Datetime__c ASC
                 LIMIT :cap
@@ -607,6 +636,7 @@ public with sharing class ResourceCenterService {
                        Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c
                 FROM Resource__c
                 WHERE Resource_Type__c = :webinarType AND Is_Active__c = true
+                AND (Category__c = null OR Category__c IN :visible)
                 AND Event_Datetime__c <= :now
                 ORDER BY Event_Datetime__c DESC
                 LIMIT :cap
@@ -700,6 +730,7 @@ public with sharing class ResourceCenterService {
                 return out;
             }
             String webinarType = WebinarLifecycle.TYPE_WEBINAR;
+            Set<Id> visible = visibleCategoryIds();
             // One instant for both queries and the derivation (see WebinarLifecycle).
             Datetime now = System.now();
             List<Resource__c> upcoming = [
@@ -707,6 +738,7 @@ public with sharing class ResourceCenterService {
                        Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c
                 FROM Resource__c
                 WHERE Resource_Type__c = :webinarType AND Is_Active__c = true
+                AND (Category__c = null OR Category__c IN :visible)
                 AND Event_Datetime__c > :now
                 ORDER BY Event_Datetime__c ASC
                 LIMIT :EVENTS_FEED_LIMIT
@@ -716,6 +748,7 @@ public with sharing class ResourceCenterService {
                        Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c
                 FROM Resource__c
                 WHERE Resource_Type__c = :webinarType AND Is_Active__c = true
+                AND (Category__c = null OR Category__c IN :visible)
                 AND Event_Datetime__c <= :now
                 ORDER BY Event_Datetime__c DESC
                 LIMIT :EVENTS_FEED_LIMIT
@@ -759,6 +792,11 @@ public with sharing class ResourceCenterService {
             throw new AuraHandledException('Resource not found.');
         }
         Resource__c r = rows[0];
+        // A deep link into a deactivated category reads as not found, the same as
+        // an inactive resource — the shell shows the app home with its quiet notice.
+        if (!isReaderVisible(r)) {
+            throw new AuraHandledException('Resource not found.');
+        }
 
         ResourceDetail d = new ResourceDetail();
         d.id = r.Id;
@@ -815,12 +853,14 @@ public with sharing class ResourceCenterService {
         if (resourceIds.isEmpty()) {
             return new List<ResourceCard>();
         }
+        Set<Id> visible = visibleCategoryIds();
         Map<Id, Resource__c> byId = new Map<Id, Resource__c>([
             SELECT Id, Name, Slug__c, Resource_Type__c, Description__c, Summary__c, Audience__c, Display_Order__c,
-                   Is_Featured__c, External_URL__c, Video_Embed_URL__c, Category__r.Slug__c,
+                   Is_Featured__c, External_URL__c, Video_Embed_URL__c, Category__c, Category__r.Slug__c,
                    Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c
             FROM Resource__c
             WHERE Id IN :resourceIds AND Is_Active__c = true
+            AND (Category__c = null OR Category__c IN :visible)
         ]);
         List<Resource__c> ordered = new List<Resource__c>();
         for (Id rid : resourceIds) {
@@ -897,9 +937,10 @@ public with sharing class ResourceCenterService {
             'Event_Datetime__c, Registration_URL__c, Event_Duration_Minutes__c, Presenter__c ' +
             'WHERE Is_Active__c = true) LIMIT ' + MAX_SEARCH_RESULTS;
         List<List<SObject>> results = Search.query(sosl);
-        List<Resource__c> rows = results.isEmpty()
+        // SOSL cannot see the category tree, so the inactive-category rule is applied here.
+        List<Resource__c> rows = readerVisibleOnly(results.isEmpty()
             ? new List<Resource__c>()
-            : (List<Resource__c>) results[0];
+            : (List<Resource__c>) results[0]);
         if (String.isNotBlank(categorySlug)) {
             SearchScope scope = scopeFor(categorySlug);
             List<Resource__c> inScope = new List<Resource__c>();
@@ -955,6 +996,10 @@ public with sharing class ResourceCenterService {
             return new List<ResourceCard>();
         }
         String pattern = '%' + clean + '%';
+        // Filtered in SOQL (not after) so the LIMIT still yields a full list. A scope's
+        // categoryIds come from the active-only tree, so they are visible by construction;
+        // a secondary placement still needs its home category visible.
+        Set<Id> visible = visibleCategoryIds();
         List<Resource__c> rows;
         if (String.isNotBlank(categorySlug)) {
             SearchScope scope = scopeFor(categorySlug);
@@ -962,7 +1007,8 @@ public with sharing class ResourceCenterService {
                 SELECT Id, Name, Slug__c, Resource_Type__c
                 FROM Resource__c
                 WHERE Is_Active__c = true AND Name LIKE :pattern
-                AND (Category__c IN :scope.categoryIds OR Id IN :scope.secondaryResourceIds)
+                AND (Category__c IN :scope.categoryIds
+                     OR (Id IN :scope.secondaryResourceIds AND (Category__c = null OR Category__c IN :visible)))
                 ORDER BY Name ASC
                 LIMIT 7
             ];
@@ -971,6 +1017,7 @@ public with sharing class ResourceCenterService {
                 SELECT Id, Name, Slug__c, Resource_Type__c
                 FROM Resource__c
                 WHERE Is_Active__c = true AND Name LIKE :pattern
+                AND (Category__c = null OR Category__c IN :visible)
                 ORDER BY Name ASC
                 LIMIT 7
             ];
@@ -1572,5 +1619,52 @@ public with sharing class ResourceCenterService {
         if (!Schema.sObjectType.Resource__c.isAccessible()) {
             throw new AuraHandledException('You do not have access to resources.');
         }
+    }
+
+    // ---- Reader visibility (2026-09-08) ---------------------------------------
+    //
+    // An inactive category hides its whole subtree from readers when they BROWSE
+    // (ResourceCategoryTreeProvider.load(true)), but until now every other reader
+    // read — search, typeahead, unified search, Featured, Recently added, the
+    // events feed, an article's Downloads rail and a deep link by slug — filtered
+    // on the resource's own Is_Active__c only, so a resource filed in a
+    // deactivated category stayed one search away. These helpers give every
+    // reader path the same answer the tree gives: a resource is visible when it
+    // is active AND its home category (with every ancestor) is active. A resource
+    // with no home category is treated as visible — legacy rows predate the
+    // editor's home-category requirement and nothing hides them today.
+
+    /** Category Ids a reader may see, per the active-only tree. Cached per transaction. */
+    private static Set<Id> readerCategoryIdsCache;
+
+    public static Set<Id> visibleCategoryIds() {
+        if (readerCategoryIdsCache == null) {
+            readerCategoryIdsCache = new Set<Id>();
+            for (CategoryTreeService.TreeNode n : ResourceCategoryTreeProvider.load(true).ordered) {
+                readerCategoryIdsCache.add((Id) n.id);
+            }
+        }
+        return readerCategoryIdsCache;
+    }
+
+    /** Tests that change categories after a read in the same transaction reset the cache. */
+    @TestVisible private static void resetReaderVisibility() {
+        readerCategoryIdsCache = null;
+    }
+
+    /** Reader visibility of one row (its Category__c must have been selected). */
+    public static Boolean isReaderVisible(Resource__c r) {
+        return r != null && (r.Category__c == null || visibleCategoryIds().contains(r.Category__c));
+    }
+
+    /** The reader-visible rows of a SOSL/SOQL result, in order. */
+    public static List<Resource__c> readerVisibleOnly(List<Resource__c> rows) {
+        List<Resource__c> out = new List<Resource__c>();
+        for (Resource__c r : rows) {
+            if (isReaderVisible(r)) {
+                out.add(r);
+            }
+        }
+        return out;
     }
 }

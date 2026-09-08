@@ -2,10 +2,10 @@
   "appPageId" : "d5e3c47c-ae25-4c7a-848f-ab2b98f65f4d",
   "componentName" : "siteforce:sldsOneColLayout",
   "dataProviders" : [ ],
-  "id" : "df232e78-7aa2-4987-8d2c-98bf5615cdd1",
+  "id" : "361a0243-8777-43a7-83af-56f5c61f8b52",
   "label" : "Top Articles",
   "regions" : [ {
-    "id" : "9e691ad1-3238-4169-a656-37b30ecd013f",
+    "id" : "b8ad18ea-9039-4a39-a0c7-4f86f43f7483",
     "regionName" : "header",
     "type" : "region"
   }, {
@@ -17,16 +17,16 @@
         "topicList" : [ ]
       },
       "componentName" : "forceCommunity:topArticleList",
-      "id" : "84d6adf3-1672-4080-8359-f7f6eb74f9ae",
+      "id" : "7eacb625-60f0-4dc1-a1a7-517d52daf391",
       "renderPriority" : "NEUTRAL",
       "renditionMap" : { },
       "type" : "component"
     } ],
-    "id" : "a1bdecb4-bb22-4f8f-b381-09c72c719c3b",
+    "id" : "a9edf247-caf3-468a-bcb0-aac0f0d92e16",
     "regionName" : "content",
     "type" : "region"
   }, {
-    "id" : "b60054f7-221b-4681-8880-c19a373e9724",
+    "id" : "7268deab-cff6-4e33-9a5a-54700f33faca",
     "regionName" : "footer",
     "type" : "region"
   }, {
@@ -37,11 +37,11 @@
         "title" : "Top Articles"
       },
       "componentName" : "forceCommunity:seoAssistant",
-      "id" : "6fb5cd32-011b-4830-acb9-decc75251e2c",
+      "id" : "3d458672-696a-4d6c-bef9-2fcfb16b98ba",
       "renditionMap" : { },
       "type" : "component"
     } ],
-    "id" : "9ea2e71d-6b0f-41d9-8828-0d5ff6fb6277",
+    "id" : "79043419-24fb-443b-b062-840a78806bb2",
     "regionName" : "sfdcHiddenRegion",
     "type" : "region"
   } ],

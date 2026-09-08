@@ -220,12 +220,14 @@ public with sharing class UnifiedSearchService {
         String sosl =
             'FIND \'' + String.join(findParts, ' OR ') + '\' IN ALL FIELDS RETURNING Resource__c(' +
             'Id, Name, Slug__c, Resource_Type__c, Description__c, Summary__c, Is_Featured__c, ' +
-            'External_URL__c, Category__r.Slug__c, ' +
+            'External_URL__c, Category__c, Category__r.Slug__c, ' +
             'Video_Embed_URL__c, Event_Datetime__c, Registration_URL__c ' +
             'WHERE Is_Active__c = true) LIMIT ' + MAX_RESULTS;
         List<List<SObject>> results = Search.query(sosl);
-        List<Resource__c> rows = results.isEmpty()
-            ? new List<Resource__c>() : (List<Resource__c>) results[0];
+        // A resource filed in a deactivated category is hidden from readers everywhere
+        // (ResourceCenterService reader visibility); SOSL cannot see the tree, so here.
+        List<Resource__c> rows = ResourceCenterService.readerVisibleOnly(results.isEmpty()
+            ? new List<Resource__c>() : (List<Resource__c>) results[0]);
 
         List<ScoredResource> scored = new List<ScoredResource>();
         for (Resource__c r : rows) {

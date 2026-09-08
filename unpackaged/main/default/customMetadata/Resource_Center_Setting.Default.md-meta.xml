@@ -20,7 +20,7 @@
     </values>
     <values>
         <field>Support_Email__c</field>
-        <value xsi:type="xsd:string">cosmos-support@diversify.com</value>
+        <value xsi:type="xsd:string">ops@diversify.com</value>
     </values>
     <values>
         <field>Support_Request_URL__c</field>

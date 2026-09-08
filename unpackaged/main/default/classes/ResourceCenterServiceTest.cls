@@ -297,6 +297,33 @@ private class ResourceCenterServiceTest {
     }
 
     @isTest
+    static void recentResourcesNewestFirstWithoutWebinars() {
+        Id catId = [SELECT Id FROM Resource_Category__c WHERE Slug__c = 'marketing'].Id;
+        // A webinar (excluded: the events module owns it) and an inactive
+        // resource (excluded) alongside the two active setup rows.
+        insert new List<Resource__c>{
+            webinar('Home Webinar', 'home-webinar', catId, System.now().addDays(3), null, 'https://x.example'),
+            new Resource__c(
+                Name = 'Retired Guide', Slug__c = 'retired-guide', Category__c = catId,
+                Resource_Type__c = 'PDF', Is_Active__c = false)
+        };
+
+        Test.startTest();
+        List<ResourceCenterService.ResourceCard> recent = ResourceCenterService.getRecentResources();
+        Test.stopTest();
+
+        Assert.areEqual(2, recent.size(), 'The two active non-webinar resources.');
+        Set<String> slugs = new Set<String>();
+        for (ResourceCenterService.ResourceCard c : recent) {
+            slugs.add(c.slug);
+            Assert.areNotEqual('Webinar', c.resourceType, 'Webinars belong to the events module.');
+        }
+        Assert.isTrue(slugs.contains('brand-flyer') && slugs.contains('partner-site'),
+            'Both setup resources are recent.');
+        Assert.isTrue(recent.size() <= ResourceCenterService.HOME_RECENT_LIMIT, 'Capped.');
+    }
+
+    @isTest
     static void categoryNotFoundThrows() {
         try {
             ResourceCenterService.getCategoryBySlug('nope');
@@ -1020,6 +1047,68 @@ private class ResourceCenterServiceTest {
             out.add(c.slug);
         }
         return out;
+    }
+
+    // ---- Inactive categories hide their resources from every reader path (2026-09-08) ----
+    //
+    // Browsing already hid a deactivated category's subtree; search, typeahead, Featured,
+    // Recently added and the slug deep link filtered on the resource's own Is_Active__c only,
+    // so a resource filed under a deactivated category stayed one search away.
+
+    @isTest
+    static void inactiveCategoryHidesItsResourcesFromSearchAndLists() {
+        Id hiddenId = categoryId('hidden');                        // Is_Active__c = false (setup)
+        Id hiddenChildId = makeSub('Hidden Child', 'hidden-child', hiddenId, 1); // active, under an inactive parent
+        insert new List<Resource__c>{
+            new Resource__c(
+                Name = 'Brand Ghost', Slug__c = 'brand-ghost', Category__c = hiddenId,
+                Resource_Type__c = 'PDF', Is_Featured__c = true, Is_Active__c = true, Display_Order__c = 0),
+            new Resource__c(
+                Name = 'Brand Ghost Child', Slug__c = 'brand-ghost-child', Category__c = hiddenChildId,
+                Resource_Type__c = 'PDF', Is_Featured__c = true, Is_Active__c = true, Display_Order__c = 0)
+        };
+        Test.setFixedSearchResults(new List<Id>{
+            resourceId('brand-flyer'), resourceId('brand-ghost'), resourceId('brand-ghost-child') });
+
+        Test.startTest();
+        List<ResourceCenterService.ResourceCard> search = ResourceCenterService.searchResources('brand', null);
+        List<ResourceCenterService.ResourceCard> ahead = ResourceCenterService.typeahead('Brand', null);
+        List<ResourceCenterService.ResourceCard> featured = ResourceCenterService.getFeaturedResources();
+        List<ResourceCenterService.ResourceCard> recent = ResourceCenterService.getRecentResources();
+        Boolean deepLinkHidden = false;
+        try {
+            ResourceCenterService.getResourceBySlug('brand-ghost-child');
+        } catch (AuraHandledException e) {
+            deepLinkHidden = true;
+        }
+        Test.stopTest();
+
+        Assert.areEqual(new List<String>{ 'brand-flyer' }, slugs(search),
+            'Search drops the resources filed in the inactive category and in its active child.');
+        Assert.areEqual(new List<String>{ 'brand-flyer' }, slugs(ahead),
+            'Typeahead applies the same rule in SOQL.');
+        Assert.isFalse(new Set<String>(slugs(featured)).contains('brand-ghost'), 'Featured strip hides it.');
+        Assert.isFalse(new Set<String>(slugs(featured)).contains('brand-ghost-child'));
+        Assert.isFalse(new Set<String>(slugs(recent)).contains('brand-ghost'), 'Recently added hides it.');
+        Assert.isFalse(new Set<String>(slugs(recent)).contains('brand-ghost-child'));
+        Assert.isTrue(deepLinkHidden, 'A deep link into a deactivated category reads as not found.');
+    }
+
+    @isTest
+    static void reactivatingTheCategoryBringsItsResourcesBack() {
+        Id hiddenId = categoryId('hidden');
+        insert new Resource__c(
+            Name = 'Brand Ghost', Slug__c = 'brand-ghost', Category__c = hiddenId,
+            Resource_Type__c = 'PDF', Is_Active__c = true, Display_Order__c = 0);
+        Test.setFixedSearchResults(new List<Id>{ resourceId('brand-ghost') });
+
+        Test.startTest();
+        Assert.areEqual(0, ResourceCenterService.searchResources('brand', null).size(), 'Hidden while inactive.');
+        update new Resource_Category__c(Id = hiddenId, Is_Active__c = true);
+        ResourceCenterService.resetReaderVisibility();
+        Assert.areEqual(new List<String>{ 'brand-ghost' }, slugs(ResourceCenterService.searchResources('brand', null)),
+            'Visible again once the category is active — nothing about the resource changed.');
+        Test.stopTest();
     }
 
     @isTest
