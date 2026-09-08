@@ -4,7 +4,7 @@ public without sharing class Financial_Account_TriggerHandler{
     /*TODO: Decide between Public and Private Methods in Triggers*/
     
     public void isBeforeInsert(List<Financial_Account__c> newList){
-        setOwnerOnWizardFinancialAccount(newList, null);
+        //setOwnerOnWizardFinancialAccount(newList, null);
         setDMSOnHousehold(newList, null);
         setHousehold(newList);
         setFinancialAccountName(newList);
@@ -14,7 +14,7 @@ public without sharing class Financial_Account_TriggerHandler{
     }
     
     public void isBeforeUpdate(Map<Id, Financial_Account__c> newMap, Map<Id, Financial_Account__c> oldMap){
-        setOwnerOnWizardFinancialAccount(newMap.values(), oldMap);
+        //setOwnerOnWizardFinancialAccount(newMap.values(), oldMap);
         setDMSOnHousehold(newMap.values(), oldMap);
         setReportAcctNumber_Before(newMap.values(), oldMap);
         setMaestroAccountType(newMap.values(), oldMap);

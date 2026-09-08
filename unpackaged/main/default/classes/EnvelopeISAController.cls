@@ -57,7 +57,7 @@ public with sharing class EnvelopeISAController {
             if (String.isBlank(accountNickname) || envelopeId == null) {
                 throw new AuraHandledException('Account Nickname and Envelope ID are required.');
             }
-            try {
+            //try {
                 // Get the envelope's Household-record-type content row. Filtering to the Household
                 // record type (not just any linked Account) keeps Household__c pointing at the
                 // household rather than a member account added earlier in the flow.
@@ -188,9 +188,9 @@ public with sharing class EnvelopeISAController {
                     return finAccount.Id;
                 }
                 
-            } catch (Exception e) {
-                throw new AuraHandledException('Error creating/updating Financial Account: ' + e.getMessage());
-            }
+            //} catch (Exception e) {
+                //throw new AuraHandledException('Error creating/updating Financial Account: ' + e.getMessage());
+            //}
         }
     
     @AuraEnabled
