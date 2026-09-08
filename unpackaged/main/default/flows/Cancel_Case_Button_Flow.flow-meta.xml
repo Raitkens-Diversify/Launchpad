@@ -171,6 +171,12 @@
             </value>
         </inputAssignments>
         <inputAssignments>
+            <field>Current_Task_Status__c</field>
+            <value>
+                <stringValue>Canceled</stringValue>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
             <field>Status</field>
             <value>
                 <stringValue>Canceled</stringValue>

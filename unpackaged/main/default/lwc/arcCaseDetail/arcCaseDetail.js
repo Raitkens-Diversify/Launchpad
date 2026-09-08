@@ -25,6 +25,21 @@ import getTaskLinksForCaseComments from "@salesforce/apex/TaskCommentController.
 import getCaseFieldSections from "@salesforce/apex/ArcCaseDetailController.getCaseFieldSections";
 import getRelatedHouseholdCases from "@salesforce/apex/ArcCaseDetailController.getRelatedHouseholdCases";
 
+/* All Tasks table: every task on the case, restored on request (2026-09-08)
+   after 922fd5a3 dropped it along with three other sections. */
+const TASK_COLUMNS = [
+  {
+    label: "Subject",
+    fieldName: "subject",
+    isLink: true,
+    linkObjectApiName: "Task"
+  },
+  { label: "Status", fieldName: "status" },
+  { label: "Owner", fieldName: "ownerName" },
+  { label: "Due Date", fieldName: "dueDate", type: "date" },
+  { label: "Completed", fieldName: "completedDate", type: "date" }
+];
+
 // The right rail's 7 c-arc-related-list cards, batched into one Apex call
 // instead of each card independently fetching its own (7 round trips ->
 // 1). Field paths mirror each card's own `columns` attribute in the
@@ -196,6 +211,7 @@ const TYPES_SERVICES = new Set([
 ]);
 
 export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
+  taskColumns = TASK_COLUMNS;
   relatedCaseColumns = RELATED_CASE_COLUMNS;
 
   detail;
@@ -681,6 +697,15 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
   /** A case with no tasks has nothing to be "currently on". */
   get hasAnyTasks() {
     return this.tasks.length > 0;
+  }
+
+  /** All Tasks table, restored 2026-09-08 -- see TASK_COLUMNS. */
+  get hasTasks() {
+    return this.tasks.length > 0;
+  }
+
+  get allTasksLabel() {
+    return `Tasks (${this.tasks.length})`;
   }
 
   /**
