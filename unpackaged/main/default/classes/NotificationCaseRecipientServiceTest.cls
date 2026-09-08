@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-07-27
+ * Date: 2026-09-08
  */
 @IsTest
 private class NotificationCaseRecipientServiceTest {
@@ -53,15 +53,18 @@ private class NotificationCaseRecipientServiceTest {
   static void resolveRecipientsIncludesCaseOwnerWithEligibleProfile() {
     NotificationCaseRecipientService.testRecipientOverrides = null;
 
-    User currentUser = [
-      SELECT Id, Profile.Name
-      FROM User
-      WHERE Id = :UserInfo.getUserId()
+    Profile nexsProfile = [
+      SELECT Id
+      FROM Profile
+      WHERE Name = :UserInfoUtils.PROFILE_NEXS
       LIMIT 1
     ];
 
-    if (!UserInfoUtils.isCurrentUserNotificationEligible()) {
-      System.assert(true, 'Current user profile is outside notification scope.');
+    User ownerUser;
+    try {
+      ownerUser = createUser(nexsProfile.Id, 'caseown');
+    } catch (DmlException ex) {
+      System.assert(true, 'Org automation prevented NexS user insert.');
       return;
     }
 
@@ -69,7 +72,7 @@ private class NotificationCaseRecipientServiceTest {
       Subject = 'Owned Case',
       Status = 'New',
       Origin = 'Phone',
-      OwnerId = currentUser.Id
+      OwnerId = ownerUser.Id
     );
     NotificationTestDataFactory.insertRecord(caseRecord);
 
@@ -78,7 +81,11 @@ private class NotificationCaseRecipientServiceTest {
       null
     );
 
-    System.assert(recipientIds.contains(currentUser.Id));
+    System.assert(recipientIds.contains(ownerUser.Id));
+    System.assert(
+      !recipientIds.contains(UserInfo.getUserId()),
+      'Case creator should not receive a Case notification.'
+    );
   }
 
   @IsTest
@@ -238,6 +245,7 @@ private class NotificationCaseRecipientServiceTest {
       WHERE
         Profile.Name = :UserInfoUtils.PROFILE_SYSTEM_ADMINISTRATOR
         AND IsActive = TRUE
+        AND Id != :UserInfo.getUserId()
       LIMIT 1
     ];
     return systemAdministrators.isEmpty() ? null : systemAdministrators[0];
@@ -391,6 +399,26 @@ private class NotificationCaseRecipientServiceTest {
       LIMIT 1
     ];
 
+    Profile nexsProfile = [
+      SELECT Id
+      FROM Profile
+      WHERE Name = :UserInfoUtils.PROFILE_NEXS
+      LIMIT 1
+    ];
+
+    User queueMember;
+    try {
+      queueMember = createUser(nexsProfile.Id, 'qmember');
+    } catch (DmlException ex) {
+      System.assert(true, 'Org automation prevented NexS user insert.');
+      return;
+    }
+
+    insert new GroupMember(
+      GroupId = serviceQueue.Id,
+      UserOrGroupId = queueMember.Id
+    );
+
     if (existingMembers.isEmpty()) {
       insert new GroupMember(
         GroupId = serviceQueue.Id,
@@ -412,8 +440,12 @@ private class NotificationCaseRecipientServiceTest {
     );
 
     System.assert(
-      recipientIds.contains(currentUser.Id),
+      recipientIds.contains(queueMember.Id),
       'Queue member should be eligible when assigned to a queue-owned case.'
+    );
+    System.assert(
+      !recipientIds.contains(currentUser.Id),
+      'Case creator should not receive a Case notification as a queue member.'
     );
   }
 
@@ -476,6 +508,117 @@ private class NotificationCaseRecipientServiceTest {
     System.assert(
       recipientIds.contains(nexsUser.Id),
       'Primary advisor should resolve when FA team is loaded from household.'
+    );
+  }
+
+  @IsTest
+  static void resolveRecipientsIncludesNonPrimaryFaTeamMember() {
+    NotificationCaseRecipientService.testRecipientOverrides = null;
+
+    Profile nexsProfile = [
+      SELECT Id
+      FROM Profile
+      WHERE Name = :UserInfoUtils.PROFILE_NEXS
+      LIMIT 1
+    ];
+
+    User primaryAdvisor;
+    User teamMember;
+    try {
+      primaryAdvisor = createUser(nexsProfile.Id, 'primadv');
+      teamMember = createUser(nexsProfile.Id, 'teammbr');
+    } catch (DmlException ex) {
+      System.assert(true, 'Org automation prevented NexS user insert.');
+      return;
+    }
+
+    Financial_Advisor_Team__c faTeam = new Financial_Advisor_Team__c(
+      Name = 'All Members Team',
+      Related_Advisors__c = 'AllMembers' + System.currentTimeMillis()
+    );
+    NotificationTestDataFactory.insertRecord(faTeam);
+
+    Account household = new Account(
+      Name = 'All Members Household',
+      Financial_Advisor_Team__c = faTeam.Id
+    );
+    NotificationTestDataFactory.insertRecord(household);
+
+    try {
+      NotificationTestDataFactory.insertRecord(
+        new Financial_Advisor_Team_Member__c(
+          Financial_Advisor_Team__c = faTeam.Id,
+          User__c = primaryAdvisor.Id,
+          Primary__c = true,
+          Active__c = true
+        )
+      );
+      NotificationTestDataFactory.insertRecord(
+        new Financial_Advisor_Team_Member__c(
+          Financial_Advisor_Team__c = faTeam.Id,
+          User__c = teamMember.Id,
+          Primary__c = false,
+          Active__c = true
+        )
+      );
+    } catch (DmlException ex) {
+      System.assert(true, 'Org FA Team automation prevented member insert.');
+      return;
+    }
+
+    Case caseRecord = new Case(
+      Subject = 'All FA Team Members Case',
+      AccountId = household.Id,
+      Financial_Advisor_Team__c = faTeam.Id,
+      Status = 'New',
+      Origin = 'Phone'
+    );
+    NotificationTestDataFactory.insertRecord(caseRecord);
+
+    List<Id> recipientIds = new NotificationCaseRecipientService().resolveRecipients(
+      caseRecord,
+      household.Id
+    );
+
+    System.assert(
+      recipientIds.contains(primaryAdvisor.Id),
+      'Primary advisor should receive a Case notification.'
+    );
+    System.assert(
+      recipientIds.contains(teamMember.Id),
+      'Non-primary FA team member should receive a Case notification.'
+    );
+    System.assert(
+      !recipientIds.contains(UserInfo.getUserId()),
+      'Case creator should not receive a Case notification.'
+    );
+  }
+
+  @IsTest
+  static void resolveRecipientsExcludesCaseCreatorEvenWhenOwner() {
+    NotificationCaseRecipientService.testRecipientOverrides = null;
+
+    if (!UserInfoUtils.isCurrentUserNotificationEligible()) {
+      System.assert(true, 'Current user profile is outside notification scope.');
+      return;
+    }
+
+    Case caseRecord = new Case(
+      Subject = 'Creator Owned Case',
+      Status = 'New',
+      Origin = 'Phone',
+      OwnerId = UserInfo.getUserId()
+    );
+    NotificationTestDataFactory.insertRecord(caseRecord);
+
+    List<Id> recipientIds = new NotificationCaseRecipientService().resolveRecipients(
+      caseRecord,
+      null
+    );
+
+    System.assert(
+      !recipientIds.contains(UserInfo.getUserId()),
+      'Case creator should not receive a Case notification even when they own the Case.'
     );
   }
 

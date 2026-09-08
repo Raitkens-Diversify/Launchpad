@@ -45,6 +45,7 @@ export default class NotificationCenterDashboard extends NavigationMixin(
   get kpiCards() {
     const queuedCount = this.dashboardStats.queuedCount || 0;
     const nextDigestRunLabel = this.dashboardStats.nextDigestRunLabel;
+    const digestTimezoneLabel = this.dashboardStats.digestTimezoneLabel || "";
     let queuedSub = "none queued";
 
     if (queuedCount > 0 && nextDigestRunLabel) {

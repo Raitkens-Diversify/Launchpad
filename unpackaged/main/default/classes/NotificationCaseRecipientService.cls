@@ -1,22 +1,24 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-07-27
+ * Date: 2026-09-08
  *
  * Resolves Case notification recipients by profile-specific ownership eligibility.
  *
- * This service answers who may receive a Case notification (NexS, Advisor, Home Office,
- * and System Administrator ownership, queue membership, and primary-advisor paths).
- * It does not read or
- * evaluate Notification_Rule__c records. After a user passes eligibility here,
- * NotificationPreferenceService resolves their active Case rule for channel,
- * frequency, and digest cadence before NotificationRuleLogService creates logs.
+ * Branch and System Administrator users receive Case notifications when they own
+ * the Case, are members of the owning queue, or are active FA team members on
+ * the household team. Home Office users receive only as owner or queue member.
+ * The Case creator never receives a Case notification.
+ *
+ * This service does not read Notification_Rule__c records. After eligibility,
+ * NotificationPreferenceService resolves the active Case rule before
+ * NotificationRuleLogService creates logs.
  */
 public without sharing class NotificationCaseRecipientService {
   @TestVisible
   private static Map<Id, List<Id>> testRecipientOverrides;
 
   private final Map<Id, Id> householdIdToTeamId = new Map<Id, Id>();
-  private final Map<Id, Set<Id>> teamIdToPrimaryAdvisorUserIds = new Map<Id, Set<Id>>();
+  private final Map<Id, Set<Id>> teamIdToMemberUserIds = new Map<Id, Set<Id>>();
   private final Map<Id, Set<Id>> queueIdToMemberUserIds = new Map<Id, Set<Id>>();
 
   public List<Id> resolveRecipients(Case caseRecord, Id householdId) {
@@ -63,7 +65,7 @@ public without sharing class NotificationCaseRecipientService {
       }
     }
 
-    return eligibleRecipientIds;
+    return excludeCreator(caseRecord, eligibleRecipientIds);
   }
 
   private CaseRecipientContext buildContext(Case caseRecord, Id householdId) {
@@ -86,7 +88,7 @@ public without sharing class NotificationCaseRecipientService {
     }
 
     if (context.financialAdvisorTeamId != null) {
-      context.primaryAdvisorUserIds = selectPrimaryAdvisorUserIds(
+      context.faTeamMemberUserIds = selectFaTeamMemberUserIds(
         context.financialAdvisorTeamId
       );
     }
@@ -119,34 +121,16 @@ public without sharing class NotificationCaseRecipientService {
     return teamId;
   }
 
-  private Set<Id> selectPrimaryAdvisorUserIds(Id teamId) {
-    if (teamIdToPrimaryAdvisorUserIds.containsKey(teamId)) {
-      return teamIdToPrimaryAdvisorUserIds.get(teamId);
+  private Set<Id> selectFaTeamMemberUserIds(Id teamId) {
+    if (teamIdToMemberUserIds.containsKey(teamId)) {
+      return teamIdToMemberUserIds.get(teamId);
     }
 
-    Set<Id> primaryAdvisorUserIds = new Set<Id>();
-
-    Set<String> eligibleProfileNames = UserInfoUtils.notificationEligibleProfileNames();
-    String standardUserType = UserInfoUtils.USER_TYPE_STANDARD;
-
-    for (Financial_Advisor_Team_Member__c teamMember : [
-      SELECT User__c
-      FROM Financial_Advisor_Team_Member__c
-      WHERE
-        Financial_Advisor_Team__c = :teamId
-        AND Primary__c = TRUE
-        AND Active__c = TRUE
-        AND User__c != NULL
-        AND (
-          User__r.Profile.Name IN :eligibleProfileNames
-          OR User__r.UserType != :standardUserType
-        )
-    ]) {
-      primaryAdvisorUserIds.add(teamMember.User__c);
-    }
-
-    teamIdToPrimaryAdvisorUserIds.put(teamId, primaryAdvisorUserIds);
-    return primaryAdvisorUserIds;
+    Set<Id> memberUserIds = NotificationRecipientUserRepository.selectEligibleActiveMemberUserIds(
+      teamId
+    );
+    teamIdToMemberUserIds.put(teamId, memberUserIds);
+    return memberUserIds;
   }
 
   private Set<Id> selectQueueMemberUserIds(Id queueId) {
@@ -181,8 +165,8 @@ public without sharing class NotificationCaseRecipientService {
       candidateUserIds.addAll(context.queueMemberUserIds);
     }
 
-    if (context.primaryAdvisorUserIds != null) {
-      candidateUserIds.addAll(context.primaryAdvisorUserIds);
+    if (context.faTeamMemberUserIds != null) {
+      candidateUserIds.addAll(context.faTeamMemberUserIds);
     }
 
     return candidateUserIds;
@@ -197,9 +181,8 @@ public without sharing class NotificationCaseRecipientService {
     Boolean isOwner = context.ownerUserId == userId;
     Boolean isQueueMember = context.queueMemberUserIds != null &&
       context.queueMemberUserIds.contains(userId);
-    Boolean isPrimaryAdvisor = context.primaryAdvisorUserIds != null &&
-      context.primaryAdvisorUserIds.contains(userId) &&
-      context.householdId != null;
+    Boolean isFaTeamMember = context.faTeamMemberUserIds != null &&
+      context.faTeamMemberUserIds.contains(userId);
 
     if (UserInfoUtils.isHomeOfficeProfile(profileName)) {
       return isOwner || isQueueMember;
@@ -209,10 +192,57 @@ public without sharing class NotificationCaseRecipientService {
       UserInfoUtils.isBranchUser(profileName, userType) ||
       UserInfoUtils.isSystemAdministratorProfile(profileName)
     ) {
-      return isOwner || isQueueMember || isPrimaryAdvisor;
+      return isOwner || isQueueMember || isFaTeamMember;
     }
 
     return false;
+  }
+
+  @TestVisible
+  private static List<Id> excludeCreator(Case caseRecord, List<Id> recipientIds) {
+    if (recipientIds == null || recipientIds.isEmpty()) {
+      return new List<Id>();
+    }
+
+    Id creatorUserId = resolveCreatorUserId(caseRecord);
+    if (creatorUserId == null) {
+      return recipientIds;
+    }
+
+    List<Id> recipientIdsExcludingCreator = new List<Id>();
+    for (Id recipientId : recipientIds) {
+      if (recipientId != creatorUserId) {
+        recipientIdsExcludingCreator.add(recipientId);
+      }
+    }
+
+    return recipientIdsExcludingCreator;
+  }
+
+  private static Id resolveCreatorUserId(Case caseRecord) {
+    if (caseRecord == null) {
+      return null;
+    }
+
+    if (isUserId(caseRecord.CreatedById)) {
+      return caseRecord.CreatedById;
+    }
+
+    if (caseRecord.Id == null) {
+      return UserInfo.getUserId();
+    }
+
+    List<Case> createdByCases = [
+      SELECT CreatedById
+      FROM Case
+      WHERE Id = :caseRecord.Id
+      LIMIT 1
+    ];
+    if (createdByCases.isEmpty() || !isUserId(createdByCases[0].CreatedById)) {
+      return UserInfo.getUserId();
+    }
+
+    return createdByCases[0].CreatedById;
   }
 
   @TestVisible
@@ -233,6 +263,6 @@ public without sharing class NotificationCaseRecipientService {
     public Boolean ownerIsQueue;
     public Id ownerUserId;
     public Set<Id> queueMemberUserIds;
-    public Set<Id> primaryAdvisorUserIds;
+    public Set<Id> faTeamMemberUserIds;
   }
 }

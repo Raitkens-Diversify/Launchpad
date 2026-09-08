@@ -19,10 +19,6 @@ public class Task_TriggerHandler {
     
     public void isAfterInsert(Map<Id, Task> newMap){
         setIsSystemAssignedField(newMap.values());
-        NotificationChangePublisher.publishInserts(
-            NotificationConstants.OBJECT_TYPE_TASK,
-            newMap.values()
-        );
         //CaseTaskAutomationService.processAfterInsert(newMap);
     }
     
@@ -34,11 +30,6 @@ public class Task_TriggerHandler {
         updateCaseStatus(newMap.values(), oldMap);
         setIsSystemAssignedField(newMap.values());
         updateCaseGroupOwnerField(newMap,oldMap);
-        NotificationChangePublisher.publishUpdates(
-            NotificationConstants.OBJECT_TYPE_TASK,
-            newMap,
-            oldMap
-        );
         //createCaseFeed(newMap.values(), oldMap);
         //CaseTaskAutomationService.processAfterUpdate(newMap, oldMap);
     }
