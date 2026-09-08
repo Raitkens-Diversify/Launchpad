@@ -15,7 +15,10 @@ import getResourceDownloadUrl from '@salesforce/apex/ResourceCenterService.getRe
  *
  * View-first: rows link to the resource's detail page on the Resource Center
  * (preview + tracked download live there). Only when no Resource Center page
- * is available does a file row fall back to a direct download.
+ * is available does a file row fall back to a direct download — and only that
+ * row carries the `download` attribute (the template renders two anchors for
+ * it: a `download={false}` binding is still an attribute, and made the core
+ * app save the detail page as an .htm — 2026-09-08).
  *
  * @api articleId — the Knowledge__kav version Id (from the browser)
  */

@@ -1,3 +1,40 @@
+/*
+ * Fonts (2026-09-08): match arcCaseDetail and the rail cards. This tile used
+ * the SLDS heading classes for its header, and on the Arc LWR site those
+ * resolve to the site branding's HEADING font -- a serif no other card on the
+ * page uses (arcCaseDetail sets the base sans explicitly). Same var() chain as
+ * .arc-case-detail, so Lightning keeps Salesforce Sans and Arc gets its sans.
+ */
+:host {
+    font-family: var(
+        --lwc-fontFamily,
+        -apple-system,
+        "system-ui",
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif
+    );
+}
+
+/* Header: eyebrow + title in arcCaseDetail's own sizes (12/18 and 18/24). */
+.cct__eyebrow {
+    margin: 0;
+    font-size: 12px;
+    line-height: 18px;
+    font-weight: 700;
+    color: var(--lwc-colorTextWeak, #444444);
+}
+
+.cct__title {
+    margin: 0;
+    font-size: 18px;
+    line-height: 24px;
+    font-weight: 700;
+    color: var(--lwc-colorTextDefault, #181818);
+}
+
 .lookup-dropdown {
     position: absolute;
     z-index: 10000;

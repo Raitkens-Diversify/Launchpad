@@ -13,12 +13,27 @@
                             </svg>
                         </span>
                         <span class="ar-row__name">{row.name}</span>
+                        <!-- Two anchors, not one with download={row.download}: LWC
+                             renders a false binding as download="false", and ANY
+                             download attribute makes the browser save the target —
+                             in the core app that saved the Resource Center tab's
+                             page as an .htm (2026-09-08). Only the direct-download
+                             fallback row carries the attribute. -->
                         <template if:true={row.href}>
-                            <a class="ar-row__link" href={row.href} target={row.target}
-                               download={row.download} data-id={row.id} data-track={row.trackClick}
-                               data-slug={row.slug} data-detail={row.isDetail}
-                               data-content-document-id={row.contentDocumentId}
-                               onclick={handleLinkClick}>{row.action}</a>
+                            <template if:true={row.download}>
+                                <a class="ar-row__link" href={row.href} target={row.target}
+                                   download data-id={row.id} data-track={row.trackClick}
+                                   data-slug={row.slug} data-detail={row.isDetail}
+                                   data-content-document-id={row.contentDocumentId}
+                                   onclick={handleLinkClick}>{row.action}</a>
+                            </template>
+                            <template if:false={row.download}>
+                                <a class="ar-row__link" href={row.href} target={row.target}
+                                   data-id={row.id} data-track={row.trackClick}
+                                   data-slug={row.slug} data-detail={row.isDetail}
+                                   data-content-document-id={row.contentDocumentId}
+                                   onclick={handleLinkClick}>{row.action}</a>
+                            </template>
                         </template>
                     </li>
                 </template>

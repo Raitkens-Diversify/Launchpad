@@ -10,7 +10,8 @@ public with sharing class EnvelopeDpiRepresentationsService {
   private static final Map<String, String> DOC_NAME_BY_PRODUCT_TYPE = new Map<String, String>{
     'Mutual Fund' => 'Investment Representations and Agreements - Mutual Funds & 529',
     '529' => 'Investment Representations and Agreements - Mutual Funds & 529',
-    'Variable Annuity' => 'Investment Representations and Agreements - Variable Annuities'
+    'Variable Annuity' => 'Investment Representations and Agreements - Variable Annuities',
+    'Alternative Investment' => 'Investment Representations and Agreements - Alternative Investments'
   };
 
   // How an entity owner contributes signers: a business or retirement plan through its Authorized

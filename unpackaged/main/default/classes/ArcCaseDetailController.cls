@@ -199,7 +199,16 @@ public with sharing class ArcCaseDetailController {
     public List<FieldValue> fields;
   }
 
-  @AuraEnabled(cacheable=true)
+  /*
+   * Not cacheable (2026-09-08): the case header, the task gating and the field
+   * sections change while a case is worked -- by flows, by the Task trigger's
+   * async work and by other users -- and a cacheable @wire on the Arc LWR site
+   * kept serving the client cache for minutes. arcCaseDetail loads these three
+   * imperatively and re-reads on every CaseStatusUpdated message instead.
+   * getRelatedHouseholdCases and getCaseInformationFieldNames stay cacheable:
+   * low churn, and the household cards have an explicit refresh.
+   */
+  @AuraEnabled
   public static CaseDetailResult getCaseDetail(Id caseId) {
     if (caseId == null) {
       throw new AuraHandledException('Case Id is required.');
@@ -352,7 +361,8 @@ public with sharing class ArcCaseDetailController {
     return links.isEmpty() ? null : links[0].Envelope__c;
   }
 
-  @AuraEnabled(cacheable=true)
+  /** Not cacheable -- see getCaseDetail. */
+  @AuraEnabled
   public static List<TaskInfo> getCaseTasks(Id caseId) {
     List<TaskInfo> results = new List<TaskInfo>();
 
@@ -401,7 +411,8 @@ public with sharing class ArcCaseDetailController {
    * instead of the whole component failing like the wizard's own load()
    * does for an unmapped Type.
    */
-  @AuraEnabled(cacheable=true)
+  /** Not cacheable -- see getCaseDetail. */
+  @AuraEnabled
   public static List<SectionView> getCaseFieldSections(Id caseId) {
     List<SectionView> sections = new List<SectionView>();
 

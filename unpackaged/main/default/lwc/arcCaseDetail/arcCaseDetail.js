@@ -1,6 +1,12 @@
 import { LightningElement, wire } from "lwc";
 import { NavigationMixin, CurrentPageReference } from "lightning/navigation";
-import { publish, MessageContext } from "lightning/messageService";
+import {
+  publish,
+  subscribe as subscribeToMessageChannel,
+  unsubscribe as unsubscribeFromMessageChannel,
+  MessageContext,
+  APPLICATION_SCOPE
+} from "lightning/messageService";
 import CASE_STATUS_UPDATED from "@salesforce/messageChannel/CaseStatusUpdated__c";
 import { refreshApex } from "@salesforce/apex";
 import { getPicklistValues } from "lightning/uiObjectInfoApi";
@@ -51,6 +57,16 @@ const PRIORITY_CLASS_BY_VALUE = {
  * there and would silently never match.
  */
 const TERMINAL_STATUSES = ["Closed", "Canceled"];
+
+/*
+ * Re-read schedule after a CaseStatusUpdated message or a finished flow -- the
+ * same one the three track tiles use. The save that publishes the message
+ * returns before the server is finished with the case: the Task trigger's
+ * @future work, the pit stop flows and Batch_TaskUpdate stamp the next task's
+ * owner and the case's current task a beat later, so a single immediate
+ * re-read showed the old values.
+ */
+const SETTLE_DELAYS_MS = [2000, 5000, 10000];
 
 /*
  * Master record type, which is what getPicklistValues wants when the whole
@@ -192,9 +208,9 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
   _statusValues = [];
   _masterStatusValues = [];
   _pageRef;
-  _tasksResult;
-  _detailResult;
   _householdCasesResult;
+  _caseStatusSubscription = null;
+  _settleTimers = [];
   /** Disables the refresh control and shows its spinning state while in flight. */
   isRefreshingHouseholdCases = false;
 
@@ -205,31 +221,164 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
   @wire(CurrentPageReference)
   wiredPageReference(pageRef) {
     this._pageRef = pageRef;
-    this._recordId = resolveRecordIdFromPageReference(pageRef, "Case");
+    const recordId = resolveRecordIdFromPageReference(pageRef, "Case");
+    if (recordId !== this._recordId) {
+      this._recordId = recordId;
+      this.clearSettleTimers();
+      this.isInitialLoading = Boolean(recordId);
+      this.loadCase();
+    }
+  }
+
+  connectedCallback() {
+    this.subscribeToCaseStatus();
+  }
+
+  disconnectedCallback() {
+    this.unsubscribeFromCaseStatus();
+    this.clearSettleTimers();
   }
 
   /*
-   * The result is held so it can be refreshed after a flow. getCaseDetail is
-   * cacheable, so without this the status path, the progress ring and the
-   * on-track pill all kept showing the pre-flow values — the case had moved on
-   * and the top of the page had not.
+   * The case header, the task-track gating and the field sections are loaded
+   * imperatively, not through cacheable @wires (2026-09-08). On the Arc LWR
+   * site a cacheable wire kept serving the client cache for minutes, so the
+   * status path, the progress ring, the on-track pill, whether the three
+   * track tiles render at all, and the field sections all lagged the case: a
+   * task completed elsewhere, a flow's async work or another user's edit never
+   * showed until a reload. getCaseDetail / getCaseTasks / getCaseFieldSections
+   * are no longer cacheable, so every read here goes to the server. Re-read
+   * on: the record changing, a finished flow, and any CaseStatusUpdated
+   * message for this case (the current-task tile publishes it too), each with
+   * the settle schedule the track tiles use.
    */
-  @wire(getCaseDetail, { caseId: "$_recordId" })
-  wiredCaseDetail(result) {
-    this._detailResult = result;
-    this.isInitialLoading = false;
+  loadCase() {
+    this.loadCaseDetail();
+    this.loadCaseTasks();
+    this.loadFieldSections();
+  }
 
-    if (result.data) {
-      this.detail = result.data;
-      this.errorMessage = "";
+  loadCaseDetail() {
+    const caseId = this._recordId;
+    if (!caseId) {
       return;
     }
+    getCaseDetail({ caseId })
+      .then((data) => {
+        if (caseId !== this._recordId) {
+          return; // the page moved to another case while this was in flight
+        }
+        this.detail = data;
+        this.errorMessage = "";
+      })
+      .catch((error) => {
+        if (caseId !== this._recordId) {
+          return;
+        }
+        this.detail = null;
+        this.errorMessage =
+          error?.body?.message || "Unable to load this case.";
+      })
+      .finally(() => {
+        if (caseId === this._recordId) {
+          this.isInitialLoading = false;
+        }
+      });
+  }
 
-    if (result.error) {
-      this.detail = null;
-      this.errorMessage =
-        result.error?.body?.message || "Unable to load this case.";
+  loadCaseTasks() {
+    const caseId = this._recordId;
+    if (!caseId) {
+      return;
     }
+    getCaseTasks({ caseId })
+      .then((data) => {
+        if (caseId === this._recordId) {
+          this.tasks = data || [];
+        }
+      })
+      .catch(() => {
+        if (caseId === this._recordId) {
+          this.tasks = [];
+        }
+      });
+  }
+
+  loadFieldSections() {
+    const caseId = this._recordId;
+    if (!caseId) {
+      return;
+    }
+    getCaseFieldSections({ caseId })
+      .then((data) => {
+        if (caseId !== this._recordId) {
+          return;
+        }
+        this.fieldSections = (data || []).map((section, index) => ({
+          key: `${section.name}-${index}`,
+          name: section.name,
+          fields: section.fields.map((field, fieldIndex) => ({
+            key: `${section.name}-${fieldIndex}`,
+            label: field.label,
+            value: field.value
+          }))
+        }));
+      })
+      .catch(() => {
+        if (caseId === this._recordId) {
+          this.fieldSections = [];
+        }
+      });
+  }
+
+  /*
+   * CaseStatusUpdated: published by this component after a flow and by the
+   * current-task tile after Mark Complete / Assign to Me. Any publisher's
+   * message for this case re-reads the header, tasks and sections (the
+   * empApi Refresh_Detail__e path does not deliver on the LWR site).
+   */
+  subscribeToCaseStatus() {
+    if (this._caseStatusSubscription || !this.messageContext) {
+      return;
+    }
+    this._caseStatusSubscription = subscribeToMessageChannel(
+      this.messageContext,
+      CASE_STATUS_UPDATED,
+      (message) => this.handleCaseStatusMessage(message),
+      { scope: APPLICATION_SCOPE }
+    );
+  }
+
+  unsubscribeFromCaseStatus() {
+    if (this._caseStatusSubscription) {
+      unsubscribeFromMessageChannel(this._caseStatusSubscription);
+      this._caseStatusSubscription = null;
+    }
+  }
+
+  handleCaseStatusMessage(message) {
+    if (
+      !message?.recordId ||
+      String(message.recordId) !== String(this._recordId)
+    ) {
+      return;
+    }
+    this.reloadUntilSettled();
+  }
+
+  /** Reloads now and again at each SETTLE_DELAYS_MS step; see that constant. */
+  reloadUntilSettled() {
+    this.clearSettleTimers();
+    this.loadCase();
+    this._settleTimers = SETTLE_DELAYS_MS.map((delay) =>
+      // eslint-disable-next-line @lwc/lwc/no-async-operation
+      setTimeout(() => this.loadCase(), delay)
+    );
+  }
+
+  clearSettleTimers() {
+    this._settleTimers.forEach((timer) => clearTimeout(timer));
+    this._settleTimers = [];
   }
 
   /*
@@ -266,37 +415,11 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
     }
   }
 
-  @wire(getCaseTasks, { caseId: "$_recordId" })
-  wiredCaseTasks(result) {
-    this._tasksResult = result;
-    if (result.data) {
-      this.tasks = result.data;
-    } else if (result.error) {
-      this.tasks = [];
-    }
-  }
-
-  @wire(getCaseFieldSections, { caseId: "$_recordId" })
-  wiredFieldSections({ data, error }) {
-    if (data) {
-      this.fieldSections = data.map((section, index) => ({
-        key: `${section.name}-${index}`,
-        name: section.name,
-        fields: section.fields.map((field, fieldIndex) => ({
-          key: `${section.name}-${fieldIndex}`,
-          label: field.label,
-          value: field.value
-        }))
-      }));
-    } else if (error) {
-      this.fieldSections = [];
-    }
-  }
-
   /*
    * The whole result is held, not just its data. This is the function form of
    * @wire, so refreshApex has nothing to work with unless the wrapper object
-   * itself is kept -- the same reason _detailResult and _tasksResult are held.
+   * itself is kept. (Kept cacheable: the household lists change rarely and
+   * the cards have their own refresh control.)
    */
   @wire(getRelatedHouseholdCases, { caseId: "$_recordId" })
   wiredHouseholdCases(result) {
@@ -907,14 +1030,11 @@ export default class ArcCaseDetail extends NavigationMixin(LightningElement) {
   }
 
   handleFlowFinished() {
-    if (this._tasksResult) {
-      refreshApex(this._tasksResult);
-    }
-    /* The header reads from getCaseDetail, so it needs its own refresh or the
-       status path, progress ring and on-track pill stay on the old values. */
-    if (this._detailResult) {
-      refreshApex(this._detailResult);
-    }
+    /* This component's own reads (header, task gating, field sections), on the
+       settle schedule; the message below reaches the track tiles and the
+       current-task tile -- and this component's own subscription, whose
+       restart of the same schedule is harmless. */
+    this.reloadUntilSettled();
     if (this.messageContext && this.detail?.id) {
       publish(this.messageContext, CASE_STATUS_UPDATED, {
         recordId: this.detail.id

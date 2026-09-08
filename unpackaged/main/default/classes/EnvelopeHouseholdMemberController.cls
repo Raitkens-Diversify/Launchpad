@@ -594,7 +594,10 @@ public with sharing class EnvelopeHouseholdMemberController {
   // Links accounts to an envelope unless they are already linked. Related parties need this so the
   // Household Outline lists them: the outline is built from the envelope's contents, not only from
   // the household roster.
-  private static void linkAccountsToEnvelope(
+  // Public so the service-owner path (WizardEnvelopeStateService.reconcileServiceOwnerProfiles) can
+  // reuse the same envelope-linking as the account-role path: a service's Primary/Secondary owner is
+  // linked to the envelope the same way an account's owners are, so it reaches the Household Outline.
+  public static void linkAccountsToEnvelope(
     Id envelopeId,
     Set<Id> accountIds
   ) {

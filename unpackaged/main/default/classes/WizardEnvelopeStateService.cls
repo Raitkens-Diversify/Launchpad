@@ -640,10 +640,20 @@ public with sharing class WizardEnvelopeStateService {
             }
         }
 
+        Id envelopeId = envelopeForService(serviceId);
+
         if (!currentOwners.isEmpty()) {
             EnvelopeProfileDocumentService.ensureProfileDocuments(
                 currentOwners,
-                envelopeForService(serviceId)
+                envelopeId
+            );
+            // Link the owners to the envelope so each appears in the Household Outline as a
+            // client/related-party line item, mirroring the account-role path
+            // (EnvelopeHouseholdMemberController.saveAccountRoles). Without this a service's
+            // Primary/Secondary owner is set on the record but never surfaces in the outline.
+            EnvelopeHouseholdMemberController.linkAccountsToEnvelope(
+                envelopeId,
+                currentOwners
             );
         }
 
@@ -1296,7 +1306,9 @@ return result;
             System.debug('finAccts from WizardEnvelopeStateService: ' + finAccounts);
             
             List<Service__c> services = [
-                SELECT Id, Name, Type__c, Submitted__c
+                SELECT Id, Name, Type__c, Submitted__c,
+                       Primary_Owner__c, Primary_Owner__r.Name,
+                       Secondary_Owner__c, Secondary_Owner__r.Name
                 FROM Service__c
                 WHERE Household__c = :householdId OR Id IN :envelopeServiceIds
                 WITH USER_MODE

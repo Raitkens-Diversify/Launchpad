@@ -51,11 +51,13 @@ export default class HomeOfficePitStop extends NavigationMixin(LightningElement)
         this._loadTasks();
         this._subscribeToEmpApi();
         this._subscribeToLms();
+        this._subscribeToVisibility();
     }
 
     disconnectedCallback() {
         this._unsubscribeFromEmpApi();
         this._unsubscribeFromLms();
+        this._unsubscribeFromVisibility();
         this._clearSettleTimers();
     }
 
@@ -162,6 +164,37 @@ export default class HomeOfficePitStop extends NavigationMixin(LightningElement)
     _clearSettleTimers() {
         this._settleTimers.forEach((timer) => clearTimeout(timer));
         this._settleTimers = [];
+    }
+
+    /*
+     * Re-read when the reader comes back to this tab or window (2026-09-08).
+     * Nothing here is cached -- getTasks is not cacheable and the call is
+     * imperative -- but a read only happens when something asks for one, and
+     * neither refresh path above reaches a change made anywhere else:
+     * lightning/empApi does not deliver on the LWR site, and CaseStatusUpdated
+     * is only published by actions on this page. A task completed from its own
+     * record page in another tab, or by another user, showed here as "stale"
+     * until a reload.
+     */
+    _visibilityHandler = null;
+
+    _subscribeToVisibility() {
+        if (typeof document === 'undefined') {
+            return;
+        }
+        this._visibilityHandler = () => {
+            if (document.visibilityState === 'visible') {
+                this._loadTasks();
+            }
+        };
+        document.addEventListener('visibilitychange', this._visibilityHandler);
+    }
+
+    _unsubscribeFromVisibility() {
+        if (this._visibilityHandler) {
+            document.removeEventListener('visibilitychange', this._visibilityHandler);
+            this._visibilityHandler = null;
+        }
     }
 
     navigateToTask(event) {

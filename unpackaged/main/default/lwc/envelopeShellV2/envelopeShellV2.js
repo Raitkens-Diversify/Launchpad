@@ -79,6 +79,9 @@ import {
   aarRoleForKey,
   managedAarRolesFor,
   requirementKeyForAarRole,
+  serviceOwnerFieldForKey,
+  serviceOwnerKeyForField,
+  managedServiceOwnerFields,
   accountRoleForKey,
   managedAccountRolesFor,
   requirementKeyForAccountRole,
@@ -1598,6 +1601,7 @@ export default class EnvelopeShellV2 extends LightningElement {
         caseRead.values
       );
       this._seedRelatedPartiesFromRecords(memberRows, accountRows);
+      this._seedServiceOwnersFromRecords(mapped);
     } catch (error) {
       console.error("getHouseholdMembersAndAccounts failed", error);
     }
@@ -1752,6 +1756,72 @@ export default class EnvelopeShellV2 extends LightningElement {
     if (hasUnreconciled && !this._reconcile.draining) {
       this._reconcileRelatedPartiesNow();
     }
+  }
+
+  // Rebuild each service agreement's owner slots ({ [ownerKey]: [{ id, name }] }) from its saved
+  // Service__c.Primary_Owner__c / Secondary_Owner__c lookups, so the record — not the envelope-state
+  // blob, which strips related parties — is what the Related Parties section shows. The owner ids and
+  // their names come from the just-mapped Service record (the household query selects them); the name
+  // is preferred from the loaded roster (same display everywhere) and falls back to the record's own
+  // relationship name. An action with an unsaved owner edit is left alone so a pending change is not
+  // read back over, and only the owner slots are touched so any other in-progress value survives.
+  _seedServiceOwnersFromRecords(mapped) {
+    const services = this.model.serviceAgreements || [];
+    if (!services.length) {
+      return;
+    }
+    // Every loaded record's display name, keyed by id, so an owner shows the same name the outline
+    // gives it rather than a raw relationship read.
+    const nameById = new Map();
+    GROUP_IDS.forEach((groupId) => {
+      (mapped[groupId] || []).forEach((entity) => {
+        if (entity?.id) {
+          nameById.set(entity.id, entity.name);
+        }
+      });
+    });
+    // The raw Service__c record for each service, carrying the owner lookups and their names.
+    const recordById = new Map();
+    (mapped.serviceAgreements || []).forEach((svc) => {
+      recordById.set(svc.id, svc.actions?.[0]?.formData || {});
+    });
+    services.forEach((entity) => {
+      const record = recordById.get(entity.id);
+      if (!record) {
+        return;
+      }
+      const ownerValue = {};
+      managedServiceOwnerFields().forEach((field) => {
+        const ownerId = record[field];
+        if (!isRecordId(ownerId)) {
+          return;
+        }
+        const key = serviceOwnerKeyForField(field);
+        if (!key) {
+          return;
+        }
+        const relationshipName = record[field.replace("__c", "__r")]?.Name;
+        ownerValue[key] = [
+          { id: ownerId, name: nameById.get(ownerId) || relationshipName || "" }
+        ];
+      });
+      this._updateEntity(entity.id, (target) => ({
+        ...target,
+        actions: (target.actions || []).map((action) => {
+          if (this._relatedPartiesDirty[action.id]) {
+            return action;
+          }
+          const existing = action.formData?.[RELATED_PARTIES_FIELD_KEY] || {};
+          return {
+            ...action,
+            formData: {
+              ...(action.formData || {}),
+              [RELATED_PARTIES_FIELD_KEY]: { ...existing, ...ownerValue }
+            }
+          };
+        })
+      }));
+    });
   }
 
   // Group an entity's party records into the Related Parties value shape
@@ -3278,7 +3348,13 @@ export default class EnvelopeShellV2 extends LightningElement {
           : action;
       })
     }));
-    if (holdsRelatedPartyRecords(found.entity)) {
+    // A service agreement holds its owners in Service__c lookups rather than party records, so it is
+    // not a holdsRelatedPartyRecords entity — but its owner slots still persist (via saveServiceInfo
+    // in _persistRelatedParties), so an owner change must mark it dirty and reconcile like the rest.
+    if (
+      holdsRelatedPartyRecords(found.entity) ||
+      (found.entity?.groupId === "serviceAgreements" && isRecordId(found.entity.id))
+    ) {
       this._relatedPartiesDirty[actionId] = true;
       this._reconcileRelatedPartiesNow();
     }
@@ -4184,7 +4260,9 @@ export default class EnvelopeShellV2 extends LightningElement {
   // here and the object's picklist have drifted apart, which no retry can fix, so keeping the action
   // dirty would only repeat the toast on every cycle.
   async _persistRelatedParties(entity, action) {
-    if (!ownsRelatedPartyRecords(entity)) {
+    const isService =
+      entity?.groupId === "serviceAgreements" && isRecordId(entity.id);
+    if (!ownsRelatedPartyRecords(entity) && !isService) {
       return null;
     }
     try {
@@ -4192,6 +4270,38 @@ export default class EnvelopeShellV2 extends LightningElement {
         entity,
         action
       );
+      // A service agreement's owners are Service__c.Primary_Owner__c / Secondary_Owner__c lookups,
+      // not party records. Map the resolved owner slots onto those fields and save the record; the
+      // Apex reconcile (WizardEnvelopeStateService.reconcileServiceOwnerProfiles) then links each
+      // owner to the envelope so it reaches the Household Outline and cleans up any owner removed.
+      // managedServiceOwnerFields is sent cleared first so a slot the wizard emptied nulls the field.
+      if (isService) {
+        const data = { Id: entity.id };
+        managedServiceOwnerFields().forEach((field) => {
+          data[field] = null;
+        });
+        Object.keys(parties).forEach((requirementKey) => {
+          const field = serviceOwnerFieldForKey(
+            entity,
+            requirementKey,
+            action.formData || {}
+          );
+          if (!field) {
+            return;
+          }
+          const chosen = (parties[requirementKey] || []).find((party) =>
+            isRecordId(party.id)
+          );
+          if (chosen) {
+            data[field] = chosen.id;
+          }
+        });
+        await saveServiceInfo({ data });
+        if (this.householdId && this.envelopeId) {
+          await this._fetchHouseholdMembersAndAccounts();
+        }
+        return createError;
+      }
       const isAccount = holdsAccountRoleRecords(entity);
       const draft = action.formData || {};
       // Each side names the party field its own object uses, but the pairs are otherwise identical.
@@ -4343,9 +4453,10 @@ export default class EnvelopeShellV2 extends LightningElement {
       acc,
       envelopeId: this.envelopeId,
       // The entity the new person is a party of, which saveEntity reads as an Account to find the
-      // documents it must sign. Only a member entity is one: a Financial Account's id would not
-      // resolve, and its owners are made signees by saveAccountRoles instead.
-      relatedAccountId: holdsAccountRoleRecords(entity) ? null : entity.id
+      // documents it must sign. Only a member entity is one: a Financial Account's or Service's id
+      // would not resolve as an Account — an account's owners are made signees by saveAccountRoles,
+      // and a service's by EnvelopeProfileDocumentService when saveServiceInfo sets its owner.
+      relatedAccountId: holdsMemberPartyRecords(entity) ? entity.id : null
     });
     if (recordId) {
       this._createdPartyIds[memoKey] = recordId;

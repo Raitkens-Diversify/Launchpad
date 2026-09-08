@@ -2,6 +2,7 @@
 private class EnvelopeDpiRepresentationsServiceTest {
   private static final String MF_DOC_NAME = 'Investment Representations and Agreements - Mutual Funds & 529';
   private static final String VA_DOC_NAME = 'Investment Representations and Agreements - Variable Annuities';
+  private static final String AI_DOC_NAME = 'Investment Representations and Agreements - Alternative Investments';
 
   private static Id rtId(String dev) {
     return Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
@@ -159,9 +160,9 @@ private class EnvelopeDpiRepresentationsServiceTest {
     System.assertEquals(1, signeesForDpi(dpi, VA_DOC_NAME), 'The owner signs it.');
   }
 
-  // A non-qualifying product type gets no document.
+  // An Alternative Investment DPI gets its own Alternative Investments document.
   @isTest
-  static void testOtherProductTypeIgnored() {
+  static void testAlternativeInvestmentGetsOwnDoc() {
     Envelope__c env = newEnvelope();
     Account jane = newPerson('Jane', 'Doe');
     Id dpi = newDpi(env.Id, 'Alt DPI', 'Alternative Investment', true, new List<Id>{ jane.Id });
@@ -170,8 +171,24 @@ private class EnvelopeDpiRepresentationsServiceTest {
     EnvelopeDpiRepresentationsService.reconcile(env.Id);
     Test.stopTest();
 
+    System.assertEquals(1, docsForDpi(dpi, AI_DOC_NAME), 'One Alternative Investments document.');
+    System.assertEquals(1, signeesForDpi(dpi, AI_DOC_NAME), 'The owner signs it.');
+  }
+
+  // A non-qualifying product type gets no document.
+  @isTest
+  static void testOtherProductTypeIgnored() {
+    Envelope__c env = newEnvelope();
+    Account jane = newPerson('Jane', 'Doe');
+    Id dpi = newDpi(env.Id, 'VLI DPI', 'Variable Life Insurance', true, new List<Id>{ jane.Id });
+
+    Test.startTest();
+    EnvelopeDpiRepresentationsService.reconcile(env.Id);
+    Test.stopTest();
+
     System.assertEquals(0, docsForDpi(dpi, MF_DOC_NAME), 'No Mutual Funds & 529 doc.');
     System.assertEquals(0, docsForDpi(dpi, VA_DOC_NAME), 'No Variable Annuities doc.');
+    System.assertEquals(0, docsForDpi(dpi, AI_DOC_NAME), 'No Alternative Investments doc.');
   }
 
   // A Mutual Fund account that is NOT a DPI gets no document.
@@ -235,7 +252,7 @@ private class EnvelopeDpiRepresentationsServiceTest {
     System.assertEquals(2, signeesForDpi(dpi, MF_DOC_NAME), 'Both Authorized Persons sign.');
 
     // Move to a non-qualifying product type; the document is removed.
-    update new Financial_Account__c(Id = dpi, Product_Type__c = 'Alternative Investment');
+    update new Financial_Account__c(Id = dpi, Product_Type__c = 'Variable Life Insurance');
 
     Test.startTest();
     EnvelopeDpiRepresentationsService.reconcile(env.Id);

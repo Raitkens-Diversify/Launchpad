@@ -101,16 +101,38 @@ export default class ArcTaskDetail extends NavigationMixin(LightningElement) {
   wiredTaskContext(result) {
     this._taskContextResult = result;
     this.taskContext = result?.data || {};
+    this.loadQueueMembership();
   }
 
   /**
    * Whether the viewer belongs to the queue that owns this task. Only asked
-   * when the owner IS a queue -- queueOwnerId is undefined otherwise, which
-   * keeps the wire idle. Same gate the Case page's current-task tile applies.
+   * when the owner IS a queue -- queueOwnerId is undefined otherwise. Same
+   * gate the Case page's current-task tile applies.
+   *
+   * Asked imperatively, not through @wire (2026-09-08):
+   * CaseCurrentTaskController.isCurrentUserMemberOfQueue is no longer
+   * cacheable (membership read from the client cache went stale after a task
+   * changed hands), and @wire only takes cacheable Apex. Re-asked every time
+   * the task context loads -- including the refreshApex after Mark Complete
+   * and Assign to Me -- so it always reflects the current owner.
    */
-  @wire(isCurrentUserMemberOfQueue, { ownerId: "$queueOwnerId" })
-  wiredQueueMembership({ data }) {
-    this.isQueueMember = data === true;
+  loadQueueMembership() {
+    const ownerId = this.queueOwnerId;
+    if (!ownerId) {
+      this.isQueueMember = false;
+      return;
+    }
+    isCurrentUserMemberOfQueue({ ownerId })
+      .then((data) => {
+        if (ownerId === this.queueOwnerId) {
+          this.isQueueMember = data === true;
+        }
+      })
+      .catch(() => {
+        if (ownerId === this.queueOwnerId) {
+          this.isQueueMember = false;
+        }
+      });
   }
 
   @wire(getOpenActivitiesForParentCase, { taskId: "$_recordId" })

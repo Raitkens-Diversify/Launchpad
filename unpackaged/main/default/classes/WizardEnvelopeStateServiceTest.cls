@@ -1359,6 +1359,46 @@ private class WizardEnvelopeStateServiceTest {
         }
         System.assert(threw, 'A payload without an Id should be rejected.');
     }
+
+    // Setting a service's Primary/Secondary owner must link both owner accounts to the service's
+    // envelope, so each shows in the Household Outline as a client/related-party line item — the
+    // same envelope link the account-role path makes (EnvelopeHouseholdMemberController.saveAccountRoles).
+    @IsTest
+    static void saveServiceInfoLinksOwnersToEnvelope() {
+        Envelope__c env = new Envelope__c(Name = 'Owner Link Envelope');
+        insert env;
+
+        Service__c svc = new Service__c(Name = 'Owner Link Service');
+        insert svc;
+
+        // The service must be on the envelope for envelopeForService to resolve it.
+        insert new Envelope_Content__c(Envelope__c = env.Id, Service__c = svc.Id);
+
+        Account primary = new Account(Name = 'Primary Owner', Type = 'Other', Classification__c = 'Vendor;');
+        Account secondary = new Account(Name = 'Secondary Owner', Type = 'Other', Classification__c = 'Vendor;');
+        insert new List<Account>{ primary, secondary };
+
+        Test.startTest();
+        WizardEnvelopeStateService.saveServiceInfo(new Map<String, Object>{
+            'Id' => svc.Id,
+            'Primary_Owner__c' => primary.Id,
+            'Secondary_Owner__c' => secondary.Id
+        });
+        Test.stopTest();
+
+        Set<Id> linkedAccountIds = new Set<Id>();
+        for (Envelope_Content__c ec : [
+            SELECT Account__c
+            FROM Envelope_Content__c
+            WHERE Envelope__c = :env.Id AND Account__c != NULL
+        ]) {
+            linkedAccountIds.add(ec.Account__c);
+        }
+        System.assert(linkedAccountIds.contains(primary.Id),
+            'The primary owner should be linked to the service envelope.');
+        System.assert(linkedAccountIds.contains(secondary.Id),
+            'The secondary owner should be linked to the service envelope.');
+    }
     
     // ---------------------------------------------------------
     // Format validation (WizardFieldValidator backstop)
