@@ -27,7 +27,7 @@ public with sharing class EnvelopeProfileDocumentService {
     'PersonAccount' => new ProfileShape('Person__c', ' - Individual Client Consents and Disclosures', true),
     'Business' => new ProfileShape('Business__c', ' - Business Client Consents and Disclosures', false),
     'Trust' => new ProfileShape('Trust__c', ' - Trust Client Consents and Disclosures', false),
-    'Retirement Plan' => new ProfileShape('Retirement_Plan__c', ' - Retirement Plan Client Consents and Disclosures', false)
+    'Retirement_Plan' => new ProfileShape('Retirement_Plan__c', ' - Retirement Plan Client Consents and Disclosures', false)
   };
 
   // Ensures each owner has its profile document, linked to the envelope, with the owner as a signee
@@ -70,7 +70,7 @@ public with sharing class EnvelopeProfileDocumentService {
     // signee when either is missing.
     Map<Id, Id> docIdByOwner = new Map<Id, Id>();
     for (Required_Documents__c doc : [
-      SELECT Id, Person__c, Business__c, Trust__c
+      SELECT Id, Person__c, Business__c, Trust__c, Retirement_Plan__c
       FROM Required_Documents__c
       WHERE
         Person__c IN :eligibleById.keySet()
@@ -80,7 +80,9 @@ public with sharing class EnvelopeProfileDocumentService {
     ]) {
       Id ownerId = doc.Person__c != null
         ? doc.Person__c
-        : (doc.Business__c != null ? doc.Business__c : doc.Trust__c);
+        : (doc.Business__c != null
+            ? doc.Business__c
+            : (doc.Trust__c != null ? doc.Trust__c : doc.Retirement_Plan__c));
       if (ownerId != null && !docIdByOwner.containsKey(ownerId)) {
         docIdByOwner.put(ownerId, doc.Id);
       }

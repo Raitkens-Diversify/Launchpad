@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-07-27
+ * Date: 2026-09-07
  *
  * Code-defined tracked fields for notification change detection by object type.
  */
@@ -49,30 +49,6 @@ public with sharing class NotificationTrackedFieldRepository {
           'Assigned To',
           10,
           true,
-          false
-        ),
-        new NotificationChangeModels.TrackedFieldDefinition(
-          objectType,
-          'Status',
-          'Status',
-          20,
-          false,
-          false
-        ),
-        new NotificationChangeModels.TrackedFieldDefinition(
-          objectType,
-          'ActivityDate',
-          'Due Date',
-          30,
-          false,
-          false
-        ),
-        new NotificationChangeModels.TrackedFieldDefinition(
-          objectType,
-          'Priority',
-          'Priority',
-          40,
-          false,
           false
         )
       };

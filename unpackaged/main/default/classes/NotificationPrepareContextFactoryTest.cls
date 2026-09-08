@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-08-17
+ * Date: 2026-09-07
  */
 @IsTest
 private class NotificationPrepareContextFactoryTest {
@@ -179,6 +179,151 @@ private class NotificationPrepareContextFactoryTest {
       logs.size(),
       'Branch users should be suppressed on Home Office pit stop tasks.'
     );
+  }
+
+  @IsTest
+  static void buildTaskUpdateKeepsAssigneeOnlyAndSkipsPitStopExtras() {
+    NotificationTestDataFactory.clearTestOverrides();
+    NotificationTaskRecipientService.testRecipientOverrides = null;
+
+    if (!UserInfoUtils.isCurrentUserNotificationEligible()) {
+      System.assert(true, 'Current user profile is outside notification scope.');
+      return;
+    }
+
+    User actorUser = NotificationTestDataFactory.createStandardUser('prepactor');
+    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+
+    Task taskRecord = new Task(
+      Subject = 'Prepare Assignee Update Task',
+      WhatId = context.household.Id,
+      OwnerId = UserInfo.getUserId(),
+      Status = 'Not Started',
+      Priority = 'Normal',
+      Branch_Pit_Stop__c = true
+    );
+    NotificationTestDataFactory.insertRecord(taskRecord);
+
+    NotificationChangeModels.ChangeContext changeContext = new NotificationChangeModels.ChangeContext(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      NotificationConstants.CHANGE_TYPE_UPDATE
+    );
+    changeContext.changedByUserId = String.valueOf(actorUser.Id);
+    changeContext.changedFields.add(
+      new NotificationChangeModels.FieldChange(
+        'OwnerId',
+        'Assigned To',
+        String.valueOf(context.recipientUser.Id),
+        String.valueOf(UserInfo.getUserId()),
+        context.recipientUser.Id,
+        UserInfo.getUserId()
+      )
+    );
+
+    NotificationRecipientPrepareModels.SourcePrepareContext prepareContext = NotificationPrepareContextFactory.build(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      String.valueOf(taskRecord.Id),
+      changeContext.toJson()
+    );
+
+    System.assertNotEquals(null, prepareContext);
+    System.assertEquals(1, prepareContext.recipientIds.size());
+    System.assertEquals(UserInfo.getUserId(), prepareContext.recipientIds[0]);
+    System.assertEquals(true, prepareContext.pitStopBypassRecipientIds.isEmpty());
+  }
+
+  @IsTest
+  static void buildReturnsNullForBlankSource() {
+    System.assertEquals(
+      null,
+      NotificationPrepareContextFactory.build(null, 'a', null)
+    );
+    System.assertEquals(
+      null,
+      NotificationPrepareContextFactory.build(
+        NotificationConstants.OBJECT_TYPE_TASK,
+        '',
+        null
+      )
+    );
+    System.assertEquals(
+      null,
+      NotificationPrepareContextFactory.buildFromContinuation(null)
+    );
+  }
+
+  @IsTest
+  static void buildFromContinuationPreservesCorrelationKey() {
+    NotificationTestDataFactory.clearTestOverrides();
+    NotificationTaskRecipientService.testRecipientOverrides = null;
+
+    if (!UserInfoUtils.isCurrentUserNotificationEligible()) {
+      System.assert(true, 'Current user profile is outside notification scope.');
+      return;
+    }
+
+    User actorUser = NotificationTestDataFactory.createStandardUser('contactor');
+    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+
+    Task taskRecord = new Task(
+      Subject = 'Continuation Assignee Task',
+      WhatId = context.household.Id,
+      OwnerId = UserInfo.getUserId(),
+      Status = 'Not Started',
+      Priority = 'Normal'
+    );
+    NotificationTestDataFactory.insertRecord(taskRecord);
+
+    NotificationChangeModels.ChangeContext changeContext = new NotificationChangeModels.ChangeContext(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      NotificationConstants.CHANGE_TYPE_UPDATE
+    );
+    changeContext.changedByUserId = String.valueOf(actorUser.Id);
+
+    NotificationRecipientPrepareModels.ContinuationRequest continuationRequest = new NotificationRecipientPrepareModels.ContinuationRequest();
+    continuationRequest.sourceType = NotificationConstants.OBJECT_TYPE_TASK;
+    continuationRequest.sourceId = String.valueOf(taskRecord.Id);
+    continuationRequest.changeContextJson = changeContext.toJson();
+    continuationRequest.correlationKey = 'fixed-correlation-key';
+
+    NotificationRecipientPrepareModels.SourcePrepareContext prepareContext = NotificationPrepareContextFactory.buildFromContinuation(
+      continuationRequest
+    );
+
+    System.assertNotEquals(null, prepareContext);
+    System.assertEquals('fixed-correlation-key', prepareContext.correlationKey);
+    System.assertEquals(1, prepareContext.recipientIds.size());
+    System.assertEquals(UserInfo.getUserId(), prepareContext.recipientIds[0]);
+  }
+
+  @IsTest
+  static void buildTaskUpdateReturnsNullWhenActorIsAssignee() {
+    NotificationTestDataFactory.clearTestOverrides();
+
+    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+
+    Task taskRecord = new Task(
+      Subject = 'Prepare Self Assign Task',
+      WhatId = context.household.Id,
+      OwnerId = UserInfo.getUserId(),
+      Status = 'Not Started',
+      Priority = 'Normal'
+    );
+    NotificationTestDataFactory.insertRecord(taskRecord);
+
+    NotificationChangeModels.ChangeContext changeContext = new NotificationChangeModels.ChangeContext(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      NotificationConstants.CHANGE_TYPE_UPDATE
+    );
+    changeContext.changedByUserId = String.valueOf(UserInfo.getUserId());
+
+    NotificationRecipientPrepareModels.SourcePrepareContext prepareContext = NotificationPrepareContextFactory.build(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      String.valueOf(taskRecord.Id),
+      changeContext.toJson()
+    );
+
+    System.assertEquals(null, prepareContext);
   }
 
   private static User createBranchUser(String aliasPrefix) {

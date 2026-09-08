@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-07-24
+ * Date: 2026-09-07
  */
 @IsTest
 private class NotificationChangePublisherTest {
@@ -146,10 +146,102 @@ private class NotificationChangePublisherTest {
     );
 
     System.assertEquals(
-      1,
+      0,
       NotificationPublisher.testPublishedEventCount,
-      'Branch pit stop task updates use standard task notification paths.'
+      'Task status updates should not publish notifications.'
     );
+  }
+
+  @IsTest
+  static void publishUpdatesSkipsStatusChanges() {
+    NotificationPublisher.resetForTest();
+    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+
+    Task taskRecord = new Task(
+      Subject = 'Status Skip Task',
+      WhatId = context.household.Id,
+      OwnerId = context.recipientUser.Id,
+      Status = 'Not Started',
+      Priority = 'Normal'
+    );
+    NotificationTestDataFactory.insertRecord(taskRecord);
+    NotificationPublisher.resetForTest();
+
+    Task oldTask = taskRecord.clone(true, true, true, true);
+    taskRecord.Status = 'In Progress';
+
+    NotificationChangePublisher.publishUpdates(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      new Map<Id, SObject>{ taskRecord.Id => taskRecord },
+      new Map<Id, SObject>{ oldTask.Id => oldTask }
+    );
+
+    System.assertEquals(0, NotificationPublisher.testPublishedEventCount);
+  }
+
+  @IsTest
+  static void publishUpdatesSkipsSelfAssignment() {
+    NotificationPublisher.resetForTest();
+    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+
+    Task taskRecord = new Task(
+      Subject = 'Self Assign Task',
+      WhatId = context.household.Id,
+      OwnerId = context.recipientUser.Id,
+      Status = 'Not Started',
+      Priority = 'Normal'
+    );
+    NotificationTestDataFactory.insertRecord(taskRecord);
+    NotificationPublisher.resetForTest();
+
+    Task oldTask = taskRecord.clone(true, true, true, true);
+    taskRecord.OwnerId = UserInfo.getUserId();
+
+    NotificationChangePublisher.publishUpdates(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      new Map<Id, SObject>{ taskRecord.Id => taskRecord },
+      new Map<Id, SObject>{ oldTask.Id => oldTask }
+    );
+
+    System.assertEquals(0, NotificationPublisher.testPublishedEventCount);
+  }
+
+  @IsTest
+  static void publishUpdatesSkipsQueueOwner() {
+    NotificationPublisher.resetForTest();
+    List<Group> queues = [
+      SELECT Id
+      FROM Group
+      WHERE Type = 'Queue'
+      LIMIT 1
+    ];
+    if (queues.isEmpty()) {
+      System.assert(true, 'Org has no queues to validate queue-owner suppression.');
+      return;
+    }
+
+    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+
+    Task taskRecord = new Task(
+      Subject = 'Queue Owner Task',
+      WhatId = context.household.Id,
+      OwnerId = context.recipientUser.Id,
+      Status = 'Not Started',
+      Priority = 'Normal'
+    );
+    NotificationTestDataFactory.insertRecord(taskRecord);
+    NotificationPublisher.resetForTest();
+
+    Task oldTask = taskRecord.clone(true, true, true, true);
+    taskRecord.OwnerId = queues[0].Id;
+
+    NotificationChangePublisher.publishUpdates(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      new Map<Id, SObject>{ taskRecord.Id => taskRecord },
+      new Map<Id, SObject>{ oldTask.Id => oldTask }
+    );
+
+    System.assertEquals(0, NotificationPublisher.testPublishedEventCount);
   }
 
   @IsTest

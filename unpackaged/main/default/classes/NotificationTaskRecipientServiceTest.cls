@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-07-27
+ * Date: 2026-09-07
  */
 @IsTest
 private class NotificationTaskRecipientServiceTest {
@@ -49,6 +49,185 @@ private class NotificationTaskRecipientServiceTest {
       recipientIds.contains(currentUser.Id),
       'Task assignee should receive Task notifications.'
     );
+  }
+
+  @IsTest
+  static void resolveAssigneeOnlyRecipientsReturnsAssigneeAndExcludesActor() {
+    NotificationTaskRecipientService.testRecipientOverrides = null;
+
+    User currentUser = [
+      SELECT Id
+      FROM User
+      WHERE Id = :UserInfo.getUserId()
+      LIMIT 1
+    ];
+
+    if (!UserInfoUtils.isCurrentUserNotificationEligible()) {
+      System.assert(true, 'Current user profile is outside notification scope.');
+      return;
+    }
+
+    User actorUser = NotificationTestDataFactory.createStandardUser('asgnactor');
+
+    Task taskRecord = new Task(
+      Subject = 'Assignee Only Task',
+      Status = 'Not Started',
+      Priority = 'Normal',
+      OwnerId = currentUser.Id
+    );
+    NotificationTestDataFactory.insertRecord(taskRecord);
+
+    NotificationChangeModels.ChangeContext changeContext = new NotificationChangeModels.ChangeContext(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      NotificationConstants.CHANGE_TYPE_UPDATE
+    );
+    changeContext.changedByUserId = String.valueOf(actorUser.Id);
+
+    List<Id> recipientIds = new NotificationTaskRecipientService()
+      .resolveAssigneeOnlyRecipients(taskRecord, changeContext);
+
+    System.assertEquals(1, recipientIds.size());
+    System.assertEquals(currentUser.Id, recipientIds[0]);
+    System.assertEquals(false, recipientIds.contains(actorUser.Id));
+  }
+
+  @IsTest
+  static void resolveAssigneeOnlyRecipientsSkipsSelfAssignment() {
+    NotificationTaskRecipientService.testRecipientOverrides = null;
+
+    User currentUser = [
+      SELECT Id
+      FROM User
+      WHERE Id = :UserInfo.getUserId()
+      LIMIT 1
+    ];
+
+    Task taskRecord = new Task(
+      Subject = 'Self Assign Recipient Task',
+      Status = 'Not Started',
+      Priority = 'Normal',
+      OwnerId = currentUser.Id
+    );
+    NotificationTestDataFactory.insertRecord(taskRecord);
+
+    NotificationChangeModels.ChangeContext changeContext = new NotificationChangeModels.ChangeContext(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      NotificationConstants.CHANGE_TYPE_UPDATE
+    );
+    changeContext.changedByUserId = String.valueOf(currentUser.Id);
+
+    List<Id> recipientIds = new NotificationTaskRecipientService()
+      .resolveAssigneeOnlyRecipients(taskRecord, changeContext);
+
+    System.assertEquals(0, recipientIds.size());
+  }
+
+  @IsTest
+  static void resolveAssigneeOnlyRecipientsSkipsQueueOwner() {
+    NotificationTaskRecipientService.testRecipientOverrides = null;
+
+    List<Group> queues = [
+      SELECT Id
+      FROM Group
+      WHERE Type = 'Queue'
+      LIMIT 1
+    ];
+    if (queues.isEmpty()) {
+      System.assert(true, 'Org has no queues to validate queue-owner suppression.');
+      return;
+    }
+
+    Task taskRecord = new Task(
+      Subject = 'Queue Recipient Task',
+      Status = 'Not Started',
+      Priority = 'Normal'
+    );
+    NotificationTestDataFactory.insertRecord(taskRecord);
+    taskRecord.OwnerId = queues[0].Id;
+
+    NotificationChangeModels.ChangeContext changeContext = new NotificationChangeModels.ChangeContext(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      NotificationConstants.CHANGE_TYPE_UPDATE
+    );
+    changeContext.changedByUserId = String.valueOf(UserInfo.getUserId());
+
+    List<Id> recipientIds = new NotificationTaskRecipientService()
+      .resolveAssigneeOnlyRecipients(taskRecord, changeContext);
+
+    System.assertEquals(0, recipientIds.size());
+  }
+
+  @IsTest
+  static void resolveAssigneeOnlyRecipientsExcludesFaTeamMembers() {
+    NotificationTaskRecipientService.testRecipientOverrides = null;
+
+    if (!UserInfoUtils.isCurrentUserNotificationEligible()) {
+      System.assert(true, 'Current user profile is outside notification scope.');
+      return;
+    }
+
+    Profile nexsProfile = [
+      SELECT Id
+      FROM Profile
+      WHERE Name = :UserInfoUtils.PROFILE_NEXS
+      LIMIT 1
+    ];
+
+    User nexsUser;
+    try {
+      nexsUser = createUser(nexsProfile.Id, 'asgnfateam');
+    } catch (DmlException ex) {
+      System.assert(true, 'Org automation prevented NexS user insert.');
+      return;
+    }
+
+    Financial_Advisor_Team__c faTeam = new Financial_Advisor_Team__c(
+      Name = 'Assignee Only FA Team',
+      Related_Advisors__c = 'AsgnOnly' + System.currentTimeMillis()
+    );
+    NotificationTestDataFactory.insertRecord(faTeam);
+
+    Account household = new Account(
+      Name = 'Assignee Only Household',
+      Financial_Advisor_Team__c = faTeam.Id
+    );
+    NotificationTestDataFactory.insertRecord(household);
+
+    try {
+      NotificationTestDataFactory.insertRecord(
+        new Financial_Advisor_Team_Member__c(
+          Financial_Advisor_Team__c = faTeam.Id,
+          User__c = nexsUser.Id,
+          Primary__c = true,
+          Active__c = true
+        )
+      );
+    } catch (DmlException ex) {
+      System.assert(true, 'Org FA Team automation prevented member insert.');
+      return;
+    }
+
+    Task taskRecord = new Task(
+      Subject = 'Assignee Only FA Team Task',
+      WhatId = household.Id,
+      Status = 'Not Started',
+      Priority = 'Normal',
+      OwnerId = UserInfo.getUserId()
+    );
+    NotificationTestDataFactory.insertRecord(taskRecord);
+
+    NotificationChangeModels.ChangeContext changeContext = new NotificationChangeModels.ChangeContext(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      NotificationConstants.CHANGE_TYPE_UPDATE
+    );
+    changeContext.changedByUserId = String.valueOf(nexsUser.Id);
+
+    List<Id> recipientIds = new NotificationTaskRecipientService()
+      .resolveAssigneeOnlyRecipients(taskRecord, changeContext);
+
+    System.assertEquals(1, recipientIds.size());
+    System.assertEquals(UserInfo.getUserId(), recipientIds[0]);
+    System.assertEquals(false, recipientIds.contains(nexsUser.Id));
   }
 
   @IsTest

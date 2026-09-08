@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-07-27
+ * Date: 2026-09-07
  *
  * Builds source prepare context for chunked notification recipient processing.
  */
@@ -26,8 +26,20 @@ public without sharing class NotificationPrepareContextFactory {
     );
     Id householdId = recordIdToHouseholdId.get(sourceRecord.Id);
 
-    List<Id> recipientIds = new NotificationRecipientService()
-      .getRecipientsForSourceRecord(sourceType, sourceRecord, householdId);
+    NotificationChangeModels.ChangeContext changeContext = NotificationChangeModels.fromJson(
+      changeContextJson
+    );
+    Boolean isAssigneeUpdate = isTaskAssigneeUpdate(
+      sourceType,
+      sourceRecord,
+      changeContext
+    );
+
+    List<Id> recipientIds = isAssigneeUpdate
+      ? new NotificationTaskRecipientService()
+          .resolveAssigneeOnlyRecipients((Task) sourceRecord, changeContext)
+      : new NotificationRecipientService()
+          .getRecipientsForSourceRecord(sourceType, sourceRecord, householdId);
 
     if (recipientIds.isEmpty()) {
       return null;
@@ -46,7 +58,7 @@ public without sharing class NotificationPrepareContextFactory {
     );
     prepareContext.recipientIds = recipientIds;
 
-    if (sourceRecord instanceof Task) {
+    if (!isAssigneeUpdate && sourceRecord instanceof Task) {
       Task taskRecord = (Task) sourceRecord;
 
       if (NotificationTaskPitStopService.isEligiblePitStopTask(taskRecord)) {
@@ -57,6 +69,19 @@ public without sharing class NotificationPrepareContextFactory {
     }
 
     return prepareContext;
+  }
+
+  private static Boolean isTaskAssigneeUpdate(
+    String sourceType,
+    SObject sourceRecord,
+    NotificationChangeModels.ChangeContext changeContext
+  ) {
+    return sourceType == NotificationConstants.OBJECT_TYPE_TASK &&
+      sourceRecord instanceof Task &&
+      changeContext != null &&
+      NotificationConstants.CHANGE_TYPE_UPDATE.equalsIgnoreCase(
+        changeContext.triggerType
+      );
   }
 
   public static NotificationRecipientPrepareModels.SourcePrepareContext buildFromContinuation(

@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-07-27
+ * Date: 2026-09-07
  *
  * Resolves Task notification recipients by profile-specific eligibility rules.
  *
@@ -70,6 +70,39 @@ public without sharing class NotificationTaskRecipientService {
     }
 
     return eligibleRecipientIds;
+  }
+
+  public List<Id> resolveAssigneeOnlyRecipients(
+    Task taskRecord,
+    NotificationChangeModels.ChangeContext changeContext
+  ) {
+    if (taskRecord == null || !isUserId(taskRecord.OwnerId)) {
+      return new List<Id>();
+    }
+
+    Id actorUserId = resolveActorUserId(changeContext);
+    if (actorUserId != null && actorUserId == taskRecord.OwnerId) {
+      return new List<Id>();
+    }
+
+    Map<Id, User> eligibleUsersById = NotificationRecipientUserRepository.selectEligibleUsersById(
+      new Set<Id>{ taskRecord.OwnerId }
+    );
+    if (!eligibleUsersById.containsKey(taskRecord.OwnerId)) {
+      return new List<Id>();
+    }
+
+    return new List<Id>{ taskRecord.OwnerId };
+  }
+
+  private static Id resolveActorUserId(
+    NotificationChangeModels.ChangeContext changeContext
+  ) {
+    if (changeContext != null && !String.isBlank(changeContext.changedByUserId)) {
+      return (Id) changeContext.changedByUserId;
+    }
+
+    return UserInfo.getUserId();
   }
 
   private TaskRecipientContext buildContext(Task taskRecord, Id householdId) {

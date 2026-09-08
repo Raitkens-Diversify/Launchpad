@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-07-24
+ * Date: 2026-09-07
  *
  * Shared trigger helper for publishing notification center events on record changes.
  */
@@ -43,6 +43,16 @@ public with sharing class NotificationChangePublisher {
     Map<Id, NotificationChangeModels.ChangeContext> contextByRecordId = oldMap == null
       ? changeDetector.detectInserts(objectType, notificationCenterRecords)
       : changeDetector.detectUpdates(objectType, notificationCenterNewMap, oldMap);
+
+    if (
+      oldMap != null &&
+      objectType == NotificationConstants.OBJECT_TYPE_TASK
+    ) {
+      contextByRecordId = filterTaskAssigneeUpdates(
+        contextByRecordId,
+        notificationCenterNewMap
+      );
+    }
 
     if (contextByRecordId.isEmpty()) {
       return;
@@ -93,5 +103,64 @@ public with sharing class NotificationChangePublisher {
     }
 
     return notificationCenterNewMap;
+  }
+
+  @TestVisible
+  private static Map<Id, NotificationChangeModels.ChangeContext> filterTaskAssigneeUpdates(
+    Map<Id, NotificationChangeModels.ChangeContext> contextByRecordId,
+    Map<Id, SObject> newMap
+  ) {
+    Map<Id, NotificationChangeModels.ChangeContext> filteredContextByRecordId = new Map<Id, NotificationChangeModels.ChangeContext>();
+
+    if (contextByRecordId == null || contextByRecordId.isEmpty()) {
+      return filteredContextByRecordId;
+    }
+
+    Id actorUserId = UserInfo.getUserId();
+
+    for (Id recordId : contextByRecordId.keySet()) {
+      NotificationChangeModels.ChangeContext changeContext = contextByRecordId.get(
+        recordId
+      );
+      if (!hasOwnerIdChange(changeContext)) {
+        continue;
+      }
+
+      SObject record = newMap == null ? null : newMap.get(recordId);
+      if (record == null) {
+        continue;
+      }
+
+      Id ownerId = (Id) record.get('OwnerId');
+      if (!isUserId(ownerId) || ownerId == actorUserId) {
+        continue;
+      }
+
+      filteredContextByRecordId.put(recordId, changeContext);
+    }
+
+    return filteredContextByRecordId;
+  }
+
+  private static Boolean hasOwnerIdChange(
+    NotificationChangeModels.ChangeContext changeContext
+  ) {
+    if (changeContext == null || changeContext.changedFields == null) {
+      return false;
+    }
+
+    for (
+      NotificationChangeModels.FieldChange fieldChange : changeContext.changedFields
+    ) {
+      if (fieldChange != null && fieldChange.apiName == 'OwnerId') {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private static Boolean isUserId(Id recordId) {
+    return recordId != null && String.valueOf(recordId).startsWith('005');
   }
 }

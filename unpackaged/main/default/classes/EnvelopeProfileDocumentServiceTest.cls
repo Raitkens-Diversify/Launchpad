@@ -23,6 +23,48 @@ private class EnvelopeProfileDocumentServiceTest {
     return env;
   }
 
+  // A retirement plan that becomes an owner earns its own Consents and Disclosures profile — the
+  // record type key must match the account's DeveloperName ('Retirement_Plan') for this to fire.
+  @isTest
+  static void testRetirementPlanEarnsProfile() {
+    Schema.RecordTypeInfo info = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName()
+      .get('Retirement_Plan');
+    if (info == null || !info.isAvailable()) {
+      return;
+    }
+    Account plan = new Account(
+      Name = 'Acme 401k',
+      Type = 'Prospect',
+      RecordTypeId = info.getRecordTypeId()
+    );
+    insert plan;
+    Envelope__c env = newEnvelope();
+
+    Test.startTest();
+    EnvelopeProfileDocumentService.ensureProfileDocuments(
+      new Set<Id>{ plan.Id },
+      env.Id
+    );
+    // Re-running must not create a second profile (create-once must recognise the retirement plan).
+    EnvelopeProfileDocumentService.ensureProfileDocuments(
+      new Set<Id>{ plan.Id },
+      env.Id
+    );
+    Test.stopTest();
+
+    List<Required_Documents__c> docs = [
+      SELECT Id, Name
+      FROM Required_Documents__c
+      WHERE Retirement_Plan__c = :plan.Id
+    ];
+    System.assertEquals(1, docs.size(), 'One retirement plan profile, created once.');
+    System.assertEquals(
+      'Acme 401k - Retirement Plan Client Consents and Disclosures',
+      docs[0].Name,
+      'Profile named from the plan.'
+    );
+  }
+
   // Owning an account (or DPI, or service) is what earns a person its client profile: the document
   // is created, named from the person, linked to the envelope, and the person is made its signee.
   @isTest
