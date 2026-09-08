@@ -1170,6 +1170,10 @@ public with sharing class EnvelopeHouseholdMemberController {
     EnvelopeProfileDocumentService.syncFiduciarySignees(
       new Set<Id>{ entityAccountId }
     );
+
+    // An entity that owns an RIA account has one IMA per Authorized Person / Trustee, so a change to
+    // its related parties reshapes those IMAs.
+    EnvelopeIMAAgreementService.reconcile(envelopeId);
     return rejectedRoles;
   }
 
@@ -1412,6 +1416,10 @@ public with sharing class EnvelopeHouseholdMemberController {
     // Courtesy Account agreements are grouped by owner set across the whole envelope, so an ownership
     // change on any account can reshape them — reconcile the envelope's agreements.
     EnvelopeCourtesyAgreementService.reconcile(envelopeId);
+
+    // Investment Management Agreements are driven by the envelope's RIA-account owners, so an
+    // ownership change reshapes them too.
+    EnvelopeIMAAgreementService.reconcile(envelopeId);
 
     // An owner left holding no role on this account also leaves the envelope, so the Household
     // Outline stops showing it. Read back rather than diffed from the payload, for the same reason as

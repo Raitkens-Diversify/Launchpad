@@ -220,6 +220,9 @@ public with sharing class WizardEnvelopeStateService {
             // A platform change to or from 'Courtesy Account' changes which accounts need an
             // agreement, so reconcile the envelope's Courtesy Account agreements too.
             EnvelopeCourtesyAgreementService.reconcile(accountEnvelopeId);
+            // A BD/RIA change decides whether an account's owners need an Investment Management
+            // Agreement, so reconcile the envelope's IMAs too.
+            EnvelopeIMAAgreementService.reconcile(accountEnvelopeId);
         }
     }
 
@@ -835,6 +838,8 @@ return result;
         // Removing a Courtesy account can drop an owner group below a three-account boundary, so
         // reconcile the envelope's Courtesy Account agreements after the accounts are gone.
         EnvelopeCourtesyAgreementService.reconcile(envelopeId);
+        // Removing an RIA account can leave owners without an IMA, so reconcile those too.
+        EnvelopeIMAAgreementService.reconcile(envelopeId);
         return result;
     }
 
