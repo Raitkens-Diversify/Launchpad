@@ -694,7 +694,11 @@ public with sharing class ArticleAdminController {
             Keywords__c = input.keywords,
             Featured__c = input.featured == true,
             Embed_URL__c = normalizeEmbedUrl(input.embedUrl),
-            Suggested_Articles__c = joinLines(input.suggestedUrlNames)
+            Suggested_Articles__c = joinLines(input.suggestedUrlNames),
+            // Experience Cloud (Arc) users only see articles published to the Customer channel;
+            // a version without it is internal-only and every Arc topic reads "No articles here
+            // yet." (prod 2026-09-09: 21 of 21 articles). The console always publishes to it.
+            IsVisibleInCsp = true
         );
         // Explicitly-set null RecordTypeId is rejected on DML — set only when chosen
         // (unset = the org's default record type).

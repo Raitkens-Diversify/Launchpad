@@ -48,9 +48,30 @@ public with sharing class CaseCurrentTaskController {
         }
 
         completedTask.Status = 'Completed';
-        update completedTask;
+        try {
+            update completedTask;
+        } catch (DmlException e) {
+            throw new AuraHandledException(formatDmlMessage(e));
+        }
 
         reactivateNextTaskAfterPitStop(completedTask);
+    }
+
+    /**
+     * Unwraps a DmlException down to its validation-rule (or other DML) message
+     * so it reaches the client readable, the way ArcRecordDetailController's
+     * inline-edit save already does -- an uncaught DmlException out of an
+     * @AuraEnabled method is otherwise masked into a generic error by the
+     * platform, unlike AuraHandledException.
+     */
+    private static String formatDmlMessage(DmlException error) {
+        if (error == null) {
+            return 'Something went wrong while completing this task. Please try again.';
+        }
+        if (error.getNumDml() > 0) {
+            return error.getDmlMessage(0);
+        }
+        return error.getMessage();
     }
 
     /**
