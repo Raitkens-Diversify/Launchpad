@@ -64,6 +64,18 @@ private class NotificationChangePublisherTest {
     );
     System.assertEquals(NotificationConstants.CHANGE_TYPE_UPDATE, changeContext.triggerType);
     System.assertEquals(1, changeContext.changedFields.size());
+
+    NotificationChangePublisher.publishUpdates(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      new Map<Id, SObject>{ taskRecord.Id => taskRecord },
+      new Map<Id, SObject>{ oldTask.Id => oldTask }
+    );
+
+    System.assertEquals(
+      1,
+      NotificationPublisher.testPublishedEventCount,
+      'The same Assigned To change must not publish a second Notification Center event.'
+    );
   }
 
   @IsTest

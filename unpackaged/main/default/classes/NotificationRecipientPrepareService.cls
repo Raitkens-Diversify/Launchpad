@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-07-27
+ * Date: 2026-09-09
  *
  * Builds notification logs for recipient chunks with governor-limit safeguards.
  */
@@ -142,9 +142,58 @@ public without sharing class NotificationRecipientPrepareService {
       immediateLogs.addAll(processResult.immediateLogs);
     }
 
+    logsToInsert = excludeAlreadyPreparedLogs(logsToInsert);
+    immediateLogs = excludeAlreadyPreparedLogs(immediateLogs);
+
     ruleLogService.insertLogs(logsToInsert);
 
     return buildDeliveryItems(immediateLogs);
+  }
+
+  private static List<Notification_Log__c> excludeAlreadyPreparedLogs(
+    List<Notification_Log__c> logs
+  ) {
+    if (logs == null || logs.isEmpty()) {
+      return new List<Notification_Log__c>();
+    }
+
+    Set<String> correlationKeys = new Set<String>();
+    for (Notification_Log__c logRecord : logs) {
+      if (logRecord != null && !String.isBlank(logRecord.Correlation_Key__c)) {
+        correlationKeys.add(logRecord.Correlation_Key__c);
+      }
+    }
+
+    if (correlationKeys.isEmpty()) {
+      return logs;
+    }
+
+    Set<String> existingCorrelationKeys = new Set<String>();
+    for (
+      Notification_Log__c existingLog : new NotificationLogRepository()
+        .selectLogsByCorrelationKeys(correlationKeys)
+    ) {
+      if (!String.isBlank(existingLog.Correlation_Key__c)) {
+        existingCorrelationKeys.add(existingLog.Correlation_Key__c);
+      }
+    }
+
+    if (existingCorrelationKeys.isEmpty()) {
+      return logs;
+    }
+
+    List<Notification_Log__c> newLogs = new List<Notification_Log__c>();
+    for (Notification_Log__c logRecord : logs) {
+      if (
+        logRecord == null ||
+        String.isBlank(logRecord.Correlation_Key__c) ||
+        !existingCorrelationKeys.contains(logRecord.Correlation_Key__c)
+      ) {
+        newLogs.add(logRecord);
+      }
+    }
+
+    return newLogs;
   }
 
   private static List<NotificationCenterDeliveryItem> buildDeliveryItems(

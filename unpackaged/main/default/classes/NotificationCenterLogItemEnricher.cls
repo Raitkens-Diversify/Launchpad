@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-08-06
+ * Date: 2026-09-09
  *
  * Enriches notification log rows with AC1 presentation fields.
  */
@@ -257,15 +257,28 @@ public with sharing class NotificationCenterLogItemEnricher {
     NotificationCenterModels.LogItem item,
     Notification_Log__c notification
   ) {
+    String changedAtKey = item.changeDate == null
+      ? ''
+      : String.valueOf(item.changeDate.getTime());
+
+    if (!String.isBlank(item.sourceRecordId) && !String.isBlank(changedAtKey)) {
+      return String.join(
+        new List<String>{
+          item.recipientId == null ? '' : String.valueOf(item.recipientId),
+          item.sourceRecordId,
+          item.sourceType == null ? '' : item.sourceType,
+          changedAtKey,
+          item.changeMade == null ? '' : item.changeMade
+        },
+        '|'
+      );
+    }
+
     String baseCorrelationKey = resolveBaseCorrelationKey(notification);
 
     if (!String.isBlank(baseCorrelationKey)) {
       return String.valueOf(item.recipientId) + '|' + baseCorrelationKey;
     }
-
-    String changedAtKey = item.changeDate == null
-      ? ''
-      : String.valueOf(item.changeDate.getTime());
 
     return String.join(
       new List<String>{

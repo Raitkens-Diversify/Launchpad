@@ -292,4 +292,36 @@ private class NotificationLogRepositoryTest {
     System.assertEquals(1, queuedLogs.size());
     System.assertEquals(matchingLog.Id, queuedLogs[0].Id);
   }
+
+  @IsTest
+  static void selectLogsByCorrelationKeys_returnsMatchingRows() {
+    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+    Notification_Log__c matchingLog = NotificationTestDataFactory.createLogNotification(
+      context.recipientUser.Id,
+      context.household.Id,
+      NotificationConstants.OBJECT_TYPE_TASK,
+      NotificationConstants.STATUS_SENT,
+      NotificationConstants.CHANNEL_IN_APP,
+      NotificationConstants.FREQUENCY_IMMEDIATE,
+      'Matching correlation',
+      null,
+      null
+    );
+    matchingLog.Correlation_Key__c = '00T000000000001-Update|OwnerId:00G:005-In_App';
+    NotificationTestDataFactory.updateRecord(matchingLog);
+
+    List<Notification_Log__c> matchedLogs = new NotificationLogRepository()
+      .selectLogsByCorrelationKeys(
+        new Set<String>{ matchingLog.Correlation_Key__c, 'missing-key' }
+      );
+
+    System.assertEquals(1, matchedLogs.size());
+    System.assertEquals(matchingLog.Id, matchedLogs[0].Id);
+    System.assertEquals(
+      0,
+      new NotificationLogRepository()
+        .selectLogsByCorrelationKeys(new Set<String>())
+        .size()
+    );
+  }
 }

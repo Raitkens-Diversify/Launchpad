@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-09-07
+ * Date: 2026-09-09
  *
  * Builds source prepare context for chunked notification recipient processing.
  * Task insert and Assigned To updates resolve the Assigned To user only.
@@ -72,7 +72,10 @@ public without sharing class NotificationPrepareContextFactory {
     prepareContext.sourceType = sourceType;
     prepareContext.sourceId = sourceId;
     prepareContext.householdId = householdId;
-    prepareContext.correlationKey = buildCorrelationKey(sourceRecord.Id);
+    prepareContext.correlationKey = buildCorrelationKey(
+      sourceRecord.Id,
+      changeContextJson
+    );
     prepareContext.changeContextJson = changeContextJson;
     prepareContext.enrichedChangeContextJson = NotificationChangeModels.mergeAndEnrichJson(
       changeContextJson,
@@ -237,7 +240,10 @@ public without sharing class NotificationPrepareContextFactory {
     return null;
   }
 
-  private static String buildCorrelationKey(Id recordId) {
-    return recordId + '-' + String.valueOf(System.now().getTime());
+  private static String buildCorrelationKey(Id recordId, String changeContextJson) {
+    return NotificationChangeModels.buildStableCorrelationKey(
+      recordId == null ? null : String.valueOf(recordId),
+      changeContextJson
+    );
   }
 }

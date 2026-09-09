@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-09-08
+ * Date: 2026-09-09
  *
  * Models for notification change context serialized through platform events
  * and stored on Notification_Log__c.Change_Context__c.
@@ -174,6 +174,73 @@ public with sharing class NotificationChangeModels {
     }
 
     return (ChangeContext) JSON.deserialize(jsonValue, ChangeContext.class);
+  }
+
+  public static String buildChangeFingerprint(ChangeContext changeContext) {
+    if (changeContext == null) {
+      return null;
+    }
+
+    List<String> fieldParts = new List<String>();
+    if (changeContext.changedFields != null) {
+      for (FieldChange fieldChange : changeContext.changedFields) {
+        if (fieldChange == null || String.isBlank(fieldChange.apiName)) {
+          continue;
+        }
+
+        fieldParts.add(
+          fieldChange.apiName +
+            ':' +
+            nullToEmpty(fieldChange.oldValue) +
+            ':' +
+            nullToEmpty(fieldChange.newValue)
+        );
+      }
+      fieldParts.sort();
+    }
+
+    String triggerType = String.isBlank(changeContext.triggerType)
+      ? ''
+      : changeContext.triggerType;
+    if (fieldParts.isEmpty() && String.isBlank(triggerType)) {
+      return null;
+    }
+
+    return triggerType + '|' + String.join(fieldParts, '|');
+  }
+
+  public static String buildStableCorrelationKey(
+    String recordId,
+    String changeContextJson
+  ) {
+    return buildStableCorrelationKey(recordId, fromJson(changeContextJson));
+  }
+
+  public static String buildStableCorrelationKey(
+    String recordId,
+    ChangeContext changeContext
+  ) {
+    if (String.isBlank(recordId)) {
+      return null;
+    }
+
+    String fingerprint = buildChangeFingerprint(changeContext);
+    if (String.isBlank(fingerprint)) {
+      return recordId + '-' + String.valueOf(System.now().getTime());
+    }
+
+    String changedAt = changeContext == null ? '' : nullToEmpty(changeContext.changedAt);
+    String digestSource = fingerprint + (String.isBlank(changedAt) ? '' : '-' + changedAt);
+    String digest = EncodingUtil.convertToHex(
+      Crypto.generateDigest('SHA-256', Blob.valueOf(digestSource))
+    )
+      .substring(0, 16);
+
+    return recordId + '-' + digest;
+  }
+
+  private static String nullToEmpty(String value) {
+    return value == null ? '' : value;
   }
 
   public static String mergeAndEnrichJson(

@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-09-08
+ * Date: 2026-09-09
  *
  * Shared trigger helper for publishing notification center events on record changes.
  * Inserts published in the same transaction are not republished as updates, so Case
@@ -8,10 +8,12 @@
  */
 public with sharing class NotificationChangePublisher {
   private static Set<Id> publishedInsertRecordIds = new Set<Id>();
+  private static Set<String> publishedUpdateFingerprints = new Set<String>();
 
   @TestVisible
   public static void resetPublishedInsertsForTest() {
     publishedInsertRecordIds = new Set<Id>();
+    publishedUpdateFingerprints = new Set<String>();
   }
 
   public static void publishInserts(String objectType, List<SObject> records) {
@@ -57,6 +59,7 @@ public with sharing class NotificationChangePublisher {
       publishedInsertRecordIds.addAll(contextByRecordId.keySet());
     } else {
       contextByRecordId = excludePublishedInserts(contextByRecordId);
+      contextByRecordId = excludePublishedUpdateFingerprints(contextByRecordId);
     }
 
     if (objectType == NotificationConstants.OBJECT_TYPE_TASK) {
@@ -71,6 +74,10 @@ public with sharing class NotificationChangePublisher {
           notificationCenterNewMap
         );
       }
+    }
+
+    if (oldMap != null) {
+      addPublishedUpdateFingerprints(contextByRecordId);
     }
 
     if (contextByRecordId.isEmpty()) {
@@ -120,6 +127,67 @@ public with sharing class NotificationChangePublisher {
     }
 
     return filteredContextByRecordId;
+  }
+
+  @TestVisible
+  private static Map<Id, NotificationChangeModels.ChangeContext> excludePublishedUpdateFingerprints(
+    Map<Id, NotificationChangeModels.ChangeContext> contextByRecordId
+  ) {
+    Map<Id, NotificationChangeModels.ChangeContext> filteredContextByRecordId = new Map<Id, NotificationChangeModels.ChangeContext>();
+
+    if (contextByRecordId == null || contextByRecordId.isEmpty()) {
+      return filteredContextByRecordId;
+    }
+
+    for (Id recordId : contextByRecordId.keySet()) {
+      String fingerprint = buildUpdateFingerprint(
+        recordId,
+        contextByRecordId.get(recordId)
+      );
+      if (String.isBlank(fingerprint) || publishedUpdateFingerprints.contains(fingerprint)) {
+        continue;
+      }
+
+      filteredContextByRecordId.put(recordId, contextByRecordId.get(recordId));
+    }
+
+    return filteredContextByRecordId;
+  }
+
+  private static void addPublishedUpdateFingerprints(
+    Map<Id, NotificationChangeModels.ChangeContext> contextByRecordId
+  ) {
+    if (contextByRecordId == null || contextByRecordId.isEmpty()) {
+      return;
+    }
+
+    for (Id recordId : contextByRecordId.keySet()) {
+      String fingerprint = buildUpdateFingerprint(
+        recordId,
+        contextByRecordId.get(recordId)
+      );
+      if (!String.isBlank(fingerprint)) {
+        publishedUpdateFingerprints.add(fingerprint);
+      }
+    }
+  }
+
+  private static String buildUpdateFingerprint(
+    Id recordId,
+    NotificationChangeModels.ChangeContext changeContext
+  ) {
+    if (recordId == null) {
+      return null;
+    }
+
+    String changeFingerprint = NotificationChangeModels.buildChangeFingerprint(
+      changeContext
+    );
+    if (String.isBlank(changeFingerprint)) {
+      return null;
+    }
+
+    return String.valueOf(recordId) + '|' + changeFingerprint;
   }
 
   @TestVisible

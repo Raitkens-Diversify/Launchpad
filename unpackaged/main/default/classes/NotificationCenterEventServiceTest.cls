@@ -807,6 +807,90 @@ private class NotificationCenterEventServiceTest {
     }
   }
 
+  @IsTest
+  static void prepareSourceRecord_skipsDuplicateTaskOwnerChange() {
+    NotificationTestDataFactory.clearTestOverrides();
+
+    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+    NotificationTestDataFactory.createGlobalPreference(
+      NotificationConstants.OBJECT_TYPE_TASK
+    );
+
+    Task taskRecord = new Task(
+      Subject = 'Duplicate Owner Change Task',
+      WhatId = context.household.Id,
+      Status = 'Not Started',
+      Priority = 'Normal'
+    );
+    NotificationTestDataFactory.insertRecord(taskRecord);
+    NotificationTaskRecipientService.testRecipientOverrides = new Map<Id, List<Id>>{
+      taskRecord.Id => new List<Id>{ UserInfo.getUserId() }
+    };
+
+    User actorUser = NotificationTestDataFactory.createStandardUser('dupactor');
+    NotificationChangeModels.ChangeContext changeContext = new NotificationChangeModels.ChangeContext(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      NotificationConstants.CHANGE_TYPE_UPDATE
+    );
+    changeContext.changedByUserId = String.valueOf(actorUser.Id);
+    changeContext.changedAt = '2026-09-09T22:14:42Z';
+    changeContext.changedFields.add(
+      new NotificationChangeModels.FieldChange(
+        'OwnerId',
+        'Assigned To',
+        '00G000000000001',
+        String.valueOf(UserInfo.getUserId()),
+        'Unassigned',
+        UserInfo.getName()
+      )
+    );
+    String changeContextJson = changeContext.toJson();
+    String correlationKey = NotificationChangeModels.buildStableCorrelationKey(
+      String.valueOf(taskRecord.Id),
+      changeContext
+    );
+
+    String defaultChannel = NotificationChannelService.getDefaultChannelApiName();
+    Notification_Log__c existingLog = NotificationTestDataFactory.createLogNotification(
+      UserInfo.getUserId(),
+      context.household.Id,
+      NotificationConstants.OBJECT_TYPE_TASK,
+      NotificationConstants.STATUS_SENT,
+      defaultChannel,
+      NotificationConstants.FREQUENCY_IMMEDIATE,
+      'Existing owner change',
+      null,
+      null
+    );
+    existingLog.Source_Record_Id__c = String.valueOf(taskRecord.Id);
+    existingLog.Correlation_Key__c = correlationKey + '-' + defaultChannel;
+    NotificationTestDataFactory.updateRecord(existingLog);
+
+    Test.startTest();
+    List<NotificationCenterDeliveryItem> deliveryItems = new NotificationCenterEventService()
+      .prepareSourceRecord(
+        NotificationConstants.OBJECT_TYPE_TASK,
+        String.valueOf(taskRecord.Id),
+        changeContextJson
+      );
+    Test.stopTest();
+
+    System.assertEquals(
+      0,
+      deliveryItems.size(),
+      'A second prepare of the same Assigned To change must not enqueue another delivery.'
+    );
+    System.assertEquals(
+      1,
+      [
+        SELECT COUNT()
+        FROM Notification_Log__c
+        WHERE Source_Record_Id__c = :String.valueOf(taskRecord.Id)
+      ],
+      'Existing log for the same Assigned To change must not be duplicated.'
+    );
+  }
+
   private static Map<Id, Notification_Log__c> selectLogsByRecipientId(Id caseId) {
     Map<Id, Notification_Log__c> logByRecipientId = new Map<Id, Notification_Log__c>();
 

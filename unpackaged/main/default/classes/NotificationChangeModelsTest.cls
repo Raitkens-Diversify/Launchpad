@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-09-08
+ * Date: 2026-09-09
  */
 @IsTest
 private class NotificationChangeModelsTest {
@@ -323,5 +323,48 @@ private class NotificationChangeModelsTest {
     System.assertEquals(NotificationConstants.OBJECT_TYPE_TASK, trackedFieldDefinition.objectType);
     System.assertEquals(true, trackedFieldDefinition.resolveOwnerDisplay);
     System.assertEquals(false, trackedFieldDefinition.resolveLookupDisplay);
+  }
+
+  @IsTest
+  static void buildStableCorrelationKey_isDeterministicForTheSameOwnerChange() {
+    NotificationChangeModels.ChangeContext changeContext = new NotificationChangeModels.ChangeContext(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      NotificationConstants.CHANGE_TYPE_UPDATE
+    );
+    changeContext.changedAt = '2026-09-09T22:14:42Z';
+    changeContext.changedFields.add(
+      new NotificationChangeModels.FieldChange(
+        'OwnerId',
+        'Assigned To',
+        '00G000000000001',
+        '005000000000001',
+        'Unassigned',
+        'Logan Connors'
+      )
+    );
+
+    String firstKey = NotificationChangeModels.buildStableCorrelationKey(
+      '00T000000000001',
+      changeContext
+    );
+    String secondKey = NotificationChangeModels.buildStableCorrelationKey(
+      '00T000000000001',
+      changeContext.toJson()
+    );
+
+    System.assertEquals(firstKey, secondKey);
+    System.assert(
+      firstKey.startsWith('00T000000000001-'),
+      firstKey
+    );
+    System.assert(
+      firstKey.length() <= 35,
+      firstKey
+    );
+    System.assertEquals(
+      NotificationConstants.CHANGE_TYPE_UPDATE + '|OwnerId:00G000000000001:005000000000001',
+      NotificationChangeModels.buildChangeFingerprint(changeContext)
+    );
+    System.assertEquals(null, NotificationChangeModels.buildChangeFingerprint(null));
   }
 }

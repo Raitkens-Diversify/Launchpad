@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-09-08
+ * Date: 2026-09-09
  *
  * Universal data access for Notification_Log__c. Composable query criteria power
  * inbox, log, dashboard, and future screens without duplicating SOQL filters.
@@ -350,6 +350,20 @@ public without sharing class NotificationLogRepository {
 
     update as system notifications;
     return notifications.size();
+  }
+
+  public List<Notification_Log__c> selectLogsByCorrelationKeys(
+    Set<String> correlationKeys
+  ) {
+    if (correlationKeys == null || correlationKeys.isEmpty()) {
+      return new List<Notification_Log__c>();
+    }
+
+    return [
+      SELECT Id, Correlation_Key__c, Recipient__c, Channel__c, Source_Record_Id__c
+      FROM Notification_Log__c
+      WHERE Correlation_Key__c IN :correlationKeys
+    ];
   }
 
   public List<Notification_Log__c> selectLogsByIds(List<Id> logIds) {

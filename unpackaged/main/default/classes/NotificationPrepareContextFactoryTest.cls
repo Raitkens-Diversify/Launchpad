@@ -297,6 +297,65 @@ private class NotificationPrepareContextFactoryTest {
   }
 
   @IsTest
+  static void build_usesStableCorrelationKeyForTheSameOwnerChange() {
+    NotificationTestDataFactory.clearTestOverrides();
+    NotificationTaskRecipientService.testRecipientOverrides = null;
+
+    if (!UserInfoUtils.isCurrentUserNotificationEligible()) {
+      System.assert(true, 'Current user profile is outside notification scope.');
+      return;
+    }
+
+    User actorUser = NotificationTestDataFactory.createStandardUser('stablecorr');
+    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+
+    Task taskRecord = new Task(
+      Subject = 'Stable Correlation Task',
+      WhatId = context.household.Id,
+      OwnerId = UserInfo.getUserId(),
+      Status = 'Not Started',
+      Priority = 'Normal'
+    );
+    NotificationTestDataFactory.insertRecord(taskRecord);
+
+    NotificationChangeModels.ChangeContext changeContext = new NotificationChangeModels.ChangeContext(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      NotificationConstants.CHANGE_TYPE_UPDATE
+    );
+    changeContext.changedByUserId = String.valueOf(actorUser.Id);
+    changeContext.changedAt = '2026-09-09T22:14:42Z';
+    changeContext.changedFields.add(
+      new NotificationChangeModels.FieldChange(
+        'OwnerId',
+        'Assigned To',
+        '00G000000000001',
+        String.valueOf(UserInfo.getUserId()),
+        'Unassigned',
+        UserInfo.getName()
+      )
+    );
+    String changeContextJson = changeContext.toJson();
+
+    NotificationRecipientPrepareModels.SourcePrepareContext firstPrepare = NotificationPrepareContextFactory.build(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      String.valueOf(taskRecord.Id),
+      changeContextJson
+    );
+    NotificationRecipientPrepareModels.SourcePrepareContext secondPrepare = NotificationPrepareContextFactory.build(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      String.valueOf(taskRecord.Id),
+      changeContextJson
+    );
+
+    System.assertNotEquals(null, firstPrepare);
+    System.assertEquals(firstPrepare.correlationKey, secondPrepare.correlationKey);
+    System.assert(
+      firstPrepare.correlationKey.contains(String.valueOf(taskRecord.Id)),
+      firstPrepare.correlationKey
+    );
+  }
+
+  @IsTest
   static void buildTaskInsertReturnsNullWhenRecipientIsCreator() {
     NotificationTestDataFactory.clearTestOverrides();
     NotificationRecipientService.testRecipientOverrides = null;

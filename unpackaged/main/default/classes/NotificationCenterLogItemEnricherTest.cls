@@ -318,6 +318,35 @@ private class NotificationCenterLogItemEnricherTest {
   }
 
   @IsTest
+  static void buildPresentationDedupKey_collapsesDuplicatePreparesForTheSameChange() {
+    Datetime changedAt = Datetime.newInstanceGmt(2026, 9, 9, 22, 14, 42);
+    NotificationCenterModels.LogItem firstItem = new NotificationCenterModels.LogItem();
+    firstItem.recipientId = UserInfo.getUserId();
+    firstItem.sourceRecordId = '00T000000000001';
+    firstItem.sourceType = NotificationConstants.OBJECT_TYPE_TASK;
+    firstItem.changeDate = changedAt;
+    firstItem.changeMade = 'Assigned To\nOld: Unassigned\nNew: Logan Connors';
+
+    NotificationCenterModels.LogItem secondItem = new NotificationCenterModels.LogItem();
+    secondItem.recipientId = firstItem.recipientId;
+    secondItem.sourceRecordId = firstItem.sourceRecordId;
+    secondItem.sourceType = firstItem.sourceType;
+    secondItem.changeDate = changedAt;
+    secondItem.changeMade = firstItem.changeMade;
+
+    String firstKey = NotificationCenterLogItemEnricher.buildPresentationDedupKey(
+      firstItem,
+      new Notification_Log__c(Correlation_Key__c = '00T000000000001-1788992084236-In_App')
+    );
+    String secondKey = NotificationCenterLogItemEnricher.buildPresentationDedupKey(
+      secondItem,
+      new Notification_Log__c(Correlation_Key__c = '00T000000000001-1788992084511-Email')
+    );
+
+    System.assertEquals(firstKey, secondKey);
+  }
+
+  @IsTest
   static void sortBatchItemsByChannelPreference_prefersInAppOverEmail() {
     NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
 
