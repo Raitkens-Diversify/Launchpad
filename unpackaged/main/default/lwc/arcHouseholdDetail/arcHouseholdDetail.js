@@ -16,6 +16,10 @@ import getSectionLayouts from "@salesforce/apex/FieldDetailController.getSection
 import getRecordValuesForType from "@salesforce/apex/FieldDetailController.getRecordValuesForType";
 import getRelationships from "@salesforce/apex/ArcAccountRelationshipsController.getRelationships";
 import { applyInputMask, evaluateWhereStatement } from "c/envelopeFormSchema";
+import communityBasePath from "@salesforce/community/basePath";
+import getFiles from "@salesforce/apex/ArcAccountFilesController.getFiles";
+import getFileData from "@salesforce/apex/ArcFileViewerController.getFileData";
+import isDocumentsTabVisible from "@salesforce/apex/ArcDocumentsTabController.isDocumentsTabVisible";
 
 /**
  * arcHouseholdDetail
@@ -367,17 +371,31 @@ const orderSectionsByLayout = (sections, layoutGroups) => {
 };
 
 /**
- * Fixed top-level tabs: Details, Cases, Documents and Investments & Services,
- * in this order, for every record type. Relationships used to be a fifth tab
- * (gated by record type); it now renders inside Details as one of its
- * sections -- see detailBlocks -- so a household's members and a contact's
- * Trusted Contact sit with the record's fields rather than behind another
- * click.
+ * Top-level tabs: Details, Cases, Documents, Files and Investments & Services,
+ * in this order, for every record type. Documents is the one gate: it shows
+ * for everyone in a sandbox and only to System Administrators in production
+ * (ArcDocumentsTabController). Relationships used to be its own tab (gated by
+ * record type); it now renders inside Details as one of its sections -- see
+ * detailBlocks -- so a household's members and a contact's Trusted Contact sit
+ * with the record's fields rather than behind another click.
  */
 const DETAILS_TAB_KEY = "__details__";
 const CASES_TAB_KEY = "__cases__";
 const DOCUMENTS_TAB_KEY = "__documents__";
+const FILES_TAB_KEY = "__files__";
 const INVESTMENTS_TAB_KEY = "__investments__";
+
+/** Columns of the Files tab; a row opens the file (see handleFileRowNavigate). */
+const FILE_COLUMNS = [
+  {
+    label: "File",
+    fieldName: "title",
+    isLink: true,
+    linkObjectApiName: "ContentDocument"
+  },
+  { label: "Type", fieldName: "fileExtension" },
+  { label: "Updated", fieldName: "contentModifiedDate", type: "date" }
+];
 
 /** Key of the Relationships block inside the Details tab (see detailBlocks). */
 const RELATIONSHIPS_BLOCK_KEY = "__relationships__";
@@ -514,6 +532,32 @@ export default class ArcHouseholdDetail extends NavigationMixin(
   @wire(getRelationships, { accountId: "$recordId" })
   wiredRelationships({ data }) {
     this._relationshipsCategory = data?.category || "";
+  }
+
+  /** Files tab rows: the record's linked Salesforce Files, newest first. */
+  files = [];
+  fileColumns = FILE_COLUMNS;
+  fileErrorMessage = "";
+
+  @wire(getFiles, { accountId: "$recordId" })
+  wiredFiles({ data, error }) {
+    this.files = (data || []).map((file) => ({
+      ...file,
+      id: file.contentDocumentId
+    }));
+    this.fileErrorMessage = error ? "Unable to load files right now." : "";
+  }
+
+  /**
+   * Whether the Documents tab is in the strip at all. Off until the server
+   * answers, so production never flashes the tab at a user who is about to
+   * lose it; in a sandbox it appears as soon as the answer lands.
+   */
+  _documentsTabVisible = false;
+
+  @wire(isDocumentsTabVisible)
+  wiredDocumentsTabVisible({ data }) {
+    this._documentsTabVisible = data === true;
   }
 
   /** Resolved schema type for this record, or undefined if its type is unmapped. */
@@ -895,17 +939,24 @@ export default class ArcHouseholdDetail extends NavigationMixin(
   }
 
   /**
-   * Every tab in strip order, fixed regardless of record type. The single
-   * source the tablist, the selected-key fallback and the arrow-key navigation
-   * all read from, so they can never disagree on what the tabs are.
+   * Every tab in strip order, the same for every record type; only Documents
+   * comes and goes, on the server's say-so (see _documentsTabVisible). The
+   * single source the tablist, the selected-key fallback and the arrow-key
+   * navigation all read from, so they can never disagree on what the tabs are.
    */
   get allTabs() {
-    return [
+    const tabs = [
       { key: DETAILS_TAB_KEY, name: 'Details' },
-      { key: CASES_TAB_KEY, name: 'Cases' },
-      { key: DOCUMENTS_TAB_KEY, name: 'Documents' },
-      { key: INVESTMENTS_TAB_KEY, name: 'Investments & Services' }
+      { key: CASES_TAB_KEY, name: 'Cases' }
     ];
+    if (this._documentsTabVisible) {
+      tabs.push({ key: DOCUMENTS_TAB_KEY, name: 'Documents' });
+    }
+    tabs.push(
+      { key: FILES_TAB_KEY, name: 'Files' },
+      { key: INVESTMENTS_TAB_KEY, name: 'Investments & Services' }
+    );
+    return tabs;
   }
 
   /** One entry per tab for the tablist, pre-decorated with its ARIA and class
@@ -944,6 +995,58 @@ export default class ArcHouseholdDetail extends NavigationMixin(
   /** True when the Documents tab is the open one. */
   get isDocumentsActive() {
     return this.selectedTabKey === DOCUMENTS_TAB_KEY;
+  }
+
+  /** True when the Files tab is the open one. */
+  get isFilesActive() {
+    return this.selectedTabKey === FILES_TAB_KEY;
+  }
+
+  get hasFiles() {
+    return this.files.length > 0;
+  }
+
+  get showFilesEmpty() {
+    return !this.fileErrorMessage && !this.hasFiles;
+  }
+
+  /**
+   * A file row opens the document itself in a new tab: there is no
+   * ContentDocument page on this site. The bytes come through Apex and open as
+   * a blob URL via a detached anchor click -- the same path, for the same
+   * reasons (the preview host does not serve the download servlet; LWS eats
+   * window.open's return value), that arcCheckLogDetail.handleFileRowNavigate
+   * documents. Files over the server's size cap fall back to the platform
+   * download URL, which works on the published site.
+   */
+  async handleFileRowNavigate(event) {
+    event.preventDefault();
+    const contentDocumentId = event.detail?.recordId;
+    if (!contentDocumentId) {
+      return;
+    }
+
+    this.fileErrorMessage = "";
+    try {
+      const payload = await getFileData({ contentDocumentId });
+      let url;
+      if (payload.tooLarge) {
+        url = `${communityBasePath}/sfc/servlet.shepherd/document/download/${contentDocumentId}`;
+      } else {
+        const bytes = Uint8Array.from(atob(payload.base64Data), (char) =>
+          char.charCodeAt(0)
+        );
+        url = URL.createObjectURL(new Blob([bytes], { type: payload.mimeType }));
+      }
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.target = "_blank";
+      anchor.rel = "noopener";
+      anchor.click();
+    } catch (error) {
+      this.fileErrorMessage =
+        error?.body?.message || "Unable to open this file right now.";
+    }
   }
 
   /** True when the Investments & Services tab is the open one. */

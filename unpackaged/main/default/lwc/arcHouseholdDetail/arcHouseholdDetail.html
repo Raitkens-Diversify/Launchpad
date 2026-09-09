@@ -97,10 +97,37 @@
         </template>
 
         <!-- Documents: the Egnyte embed, unchanged -- moved here from its own
-             page-level placement below this component. -->
+             page-level placement below this component. The tab itself is
+             gated server-side (see allTabs): everyone in a sandbox, System
+             Administrators only in production. -->
         <template lwc:if={isDocumentsActive}>
           <div class="arc-household-detail__panel" role="tabpanel" aria-label="Documents">
             <c-egnyte-vf-embed domain={domain}></c-egnyte-vf-embed>
+          </div>
+        </template>
+
+        <!-- Files: the Salesforce Files linked to this record, newest first
+             (ArcAccountFilesController). A row opens the file itself in a new
+             tab -- see handleFileRowNavigate. -->
+        <template lwc:if={isFilesActive}>
+          <div class="arc-household-detail__panel" role="tabpanel" aria-label="Files">
+            <template lwc:if={fileErrorMessage}>
+              <p class="arc-household-detail__error" role="alert">{fileErrorMessage}</p>
+            </template>
+            <template lwc:if={hasFiles}>
+              <c-arc-data-table
+                aria-label="Files attached to this record"
+                key-field="id"
+                columns={fileColumns}
+                data={files}
+                placeholder="-"
+                enable-row-navigation
+                onrownavigate={handleFileRowNavigate}
+              ></c-arc-data-table>
+            </template>
+            <template lwc:if={showFilesEmpty}>
+              <p class="arc-household-detail__empty">No files for this record.</p>
+            </template>
           </div>
         </template>
 

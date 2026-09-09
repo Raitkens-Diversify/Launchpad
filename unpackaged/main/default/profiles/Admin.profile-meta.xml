@@ -111,6 +111,14 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>ArcAccountFilesController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>ArcAccountFilesControllerTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>ArcAccountHeaderController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -216,6 +224,14 @@
     </classAccesses>
     <classAccesses>
         <apexClass>ArcCostLineItemControllerTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>ArcDocumentsTabController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>ArcDocumentsTabControllerTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
