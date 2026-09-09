@@ -1,6 +1,6 @@
 /*
  * Author: Hoang Long Vu To
- * Date: 2026-09-01
+ * Date: 2026-09-09
  */
 import { api, track } from "lwc";
 import LightningModal from "lightning/modal";
@@ -628,7 +628,7 @@ export default class FscRelManageContactRelationshipModal extends LightningModal
 
     window.requestAnimationFrame(() => {
       const lookup = this.template.querySelector(
-        `c-fsc-rel-record-lookup[data-row-id="${rowId}"]`
+        `c-fsc-rel-record-lookup[data-row-id="${rowId}"][data-field="relatedAccount"]`
       );
       lookup?.applySelection?.(recordId, recordLabel);
     });
