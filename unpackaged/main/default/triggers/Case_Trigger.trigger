@@ -13,8 +13,11 @@ trigger Case_Trigger on Case (before insert,before update,before delete,after in
         }
     }else if(Trigger.isAfter){
         if(Trigger.isInsert){
+            NotificationChangePublisher.publishInserts(
+                NotificationConstants.OBJECT_TYPE_CASE,
+                Trigger.newMap.values()
+            );
             handler.isAfterInsert(Trigger.newMap);
-            NotificationPublisher.publishFromRecords(Trigger.newMap.values(), NotificationConstants.OBJECT_TYPE_CASE);
         }else if(Trigger.isUpdate){
             handler.isAfterUpdate(Trigger.newMap, Trigger.oldMap);
             NotificationChangePublisher.publishUpdates(

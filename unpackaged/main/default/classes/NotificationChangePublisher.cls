@@ -1,10 +1,19 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-09-07
+ * Date: 2026-09-08
  *
  * Shared trigger helper for publishing notification center events on record changes.
+ * Inserts published in the same transaction are not republished as updates, so Case
+ * automation that updates a just-created record does not send "Case Updated".
  */
 public with sharing class NotificationChangePublisher {
+  private static Set<Id> publishedInsertRecordIds = new Set<Id>();
+
+  @TestVisible
+  public static void resetPublishedInsertsForTest() {
+    publishedInsertRecordIds = new Set<Id>();
+  }
+
   public static void publishInserts(String objectType, List<SObject> records) {
     publish(objectType, records, null, null);
   }
@@ -43,6 +52,12 @@ public with sharing class NotificationChangePublisher {
     Map<Id, NotificationChangeModels.ChangeContext> contextByRecordId = oldMap == null
       ? changeDetector.detectInserts(objectType, notificationCenterRecords)
       : changeDetector.detectUpdates(objectType, notificationCenterNewMap, oldMap);
+
+    if (oldMap == null) {
+      publishedInsertRecordIds.addAll(contextByRecordId.keySet());
+    } else {
+      contextByRecordId = excludePublishedInserts(contextByRecordId);
+    }
 
     if (objectType == NotificationConstants.OBJECT_TYPE_TASK) {
       if (oldMap == null) {
@@ -87,6 +102,24 @@ public with sharing class NotificationChangePublisher {
         contextByRecordId
       );
     }
+  }
+
+  private static Map<Id, NotificationChangeModels.ChangeContext> excludePublishedInserts(
+    Map<Id, NotificationChangeModels.ChangeContext> contextByRecordId
+  ) {
+    Map<Id, NotificationChangeModels.ChangeContext> filteredContextByRecordId = new Map<Id, NotificationChangeModels.ChangeContext>();
+
+    if (contextByRecordId == null || contextByRecordId.isEmpty()) {
+      return filteredContextByRecordId;
+    }
+
+    for (Id recordId : contextByRecordId.keySet()) {
+      if (!publishedInsertRecordIds.contains(recordId)) {
+        filteredContextByRecordId.put(recordId, contextByRecordId.get(recordId));
+      }
+    }
+
+    return filteredContextByRecordId;
   }
 
   @TestVisible

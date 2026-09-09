@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-07-24
+ * Date: 2026-09-08
  */
 @IsTest
 private class NotificationCaseEmailContentServiceTest {
@@ -154,6 +154,48 @@ private class NotificationCaseEmailContentServiceTest {
           '<br/>New: ' +
           assigneeUser.Name
       )
+    );
+  }
+
+  @IsTest
+  static void buildTitleTreatsBlankTriggerTypeAsNewCase() {
+    NotificationEmailContentCache.clear();
+    Account household = new Account(Name = 'Blank Context Household');
+    NotificationTestDataFactory.insertRecord(household);
+
+    Case caseRecord = new Case(
+      Subject = 'Blank context case',
+      AccountId = household.Id,
+      Status = 'New',
+      Origin = 'Phone'
+    );
+    NotificationTestDataFactory.insertRecord(caseRecord);
+
+    Notification_Log__c blankContextLog = new Notification_Log__c(
+      Source_Type__c = NotificationConstants.OBJECT_TYPE_CASE,
+      Source_Record_Id__c = String.valueOf(caseRecord.Id),
+      Household__c = household.Id,
+      Channel__c = NotificationConstants.CHANNEL_IN_APP
+    );
+    Notification_Log__c updateLog = new Notification_Log__c(
+      Source_Type__c = NotificationConstants.OBJECT_TYPE_CASE,
+      Source_Record_Id__c = String.valueOf(caseRecord.Id),
+      Household__c = household.Id,
+      Change_Context__c = new NotificationChangeModels.ChangeContext(
+          NotificationConstants.OBJECT_TYPE_CASE,
+          NotificationConstants.CHANGE_TYPE_UPDATE
+        )
+        .toJson(),
+      Channel__c = NotificationConstants.CHANNEL_IN_APP
+    );
+
+    System.assertEquals(
+      'New case',
+      NotificationCaseEmailContentService.build(blankContextLog).title
+    );
+    System.assertEquals(
+      'Case updated',
+      NotificationCaseEmailContentService.build(updateLog).title
     );
   }
 

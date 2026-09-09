@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-06-03
+ * Date: 2026-09-08
  *
  * Publishes Notification_Center_Event__e platform events after eligible record changes.
  */
@@ -19,6 +19,7 @@ public with sharing class NotificationPublisher {
     isPublishing = false;
     testPublishedEventCount = 0;
     testPublishedEvents = null;
+    NotificationChangePublisher.resetPublishedInsertsForTest();
   }
 
   public static void publishFromRecords(List<SObject> records, String sourceType) {

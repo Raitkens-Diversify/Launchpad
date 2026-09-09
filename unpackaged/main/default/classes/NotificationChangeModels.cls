@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-07-27
+ * Date: 2026-09-08
  *
  * Models for notification change context serialized through platform events
  * and stored on Notification_Log__c.Change_Context__c.
@@ -492,6 +492,12 @@ public with sharing class NotificationChangeModels {
 
   public static Boolean isInsertTriggerType(String triggerType) {
     return NotificationConstants.CHANGE_TYPE_INSERT.equalsIgnoreCase(triggerType);
+  }
+
+  public static Boolean isInsertChange(ChangeContext changeContext) {
+    return changeContext == null ||
+      String.isBlank(changeContext.triggerType) ||
+      isInsertTriggerType(changeContext.triggerType);
   }
 
   public class FieldChange {

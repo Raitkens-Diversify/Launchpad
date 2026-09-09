@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-09-07
+ * Date: 2026-09-08
  */
 @IsTest
 private class NotificationChangePublisherTest {
@@ -305,5 +305,61 @@ private class NotificationChangePublisherTest {
       NotificationPublisher.testPublishedEventCount,
       'HO pit stop tasks still publish for non-Home Office Notification Center recipients.'
     );
+  }
+
+  @IsTest
+  static void publishUpdatesSkipsCaseUpdatedAfterInsertInSameTransaction() {
+    NotificationPublisher.resetForTest();
+    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+
+    Case caseRecord = new Case(
+      Subject = 'New Case Subject',
+      AccountId = context.household.Id,
+      Status = 'New',
+      Origin = 'Phone'
+    );
+    NotificationTestDataFactory.insertRecord(caseRecord);
+    NotificationPublisher.resetForTest();
+
+    NotificationChangePublisher.publishInserts(
+      NotificationConstants.OBJECT_TYPE_CASE,
+      new List<SObject>{ caseRecord }
+    );
+
+    System.assertEquals(1, NotificationPublisher.testPublishedEventCount);
+    System.assertEquals(
+      NotificationConstants.CHANGE_TYPE_INSERT,
+      NotificationChangeModels.fromJson(
+        NotificationPublisher.testPublishedEvents[0].Change_Context__c
+      )
+      .triggerType
+    );
+
+    Case oldCase = caseRecord.clone(true, true, true, true);
+    caseRecord.Status = 'On Hold';
+
+    NotificationChangePublisher.publishUpdates(
+      NotificationConstants.OBJECT_TYPE_CASE,
+      new Map<Id, SObject>{ caseRecord.Id => caseRecord },
+      new Map<Id, SObject>{ oldCase.Id => oldCase }
+    );
+
+    System.assertEquals(
+      1,
+      NotificationPublisher.testPublishedEventCount,
+      'Same-transaction Case updates after insert must not publish Case Updated.'
+    );
+    String emailSubject = NotificationDigestMessageBuilder.buildImmediateEmailSubject(
+      new Notification_Log__c(
+        Source_Type__c = NotificationConstants.OBJECT_TYPE_CASE,
+        Source_Record_Id__c = String.valueOf(caseRecord.Id),
+        Change_Context__c = NotificationPublisher.testPublishedEvents[0].Change_Context__c
+      )
+    );
+    System.assert(
+      emailSubject.startsWith('New Case Created'),
+      emailSubject
+    );
+    System.assert(!emailSubject.equals('Case Updated'), emailSubject);
   }
 }

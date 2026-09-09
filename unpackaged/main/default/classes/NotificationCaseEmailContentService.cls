@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-07-24
+ * Date: 2026-09-08
  *
  * Builds Case notification titles and HTML email bodies with linked records.
  */
@@ -49,9 +49,13 @@ public without sharing class NotificationCaseEmailContentService {
       return emptyResult();
     }
 
+    NotificationChangeModels.ChangeContext cacheContext = NotificationChangeModels.fromJson(
+      logRecord.Change_Context__c
+    );
     String cacheKey = NotificationEmailContentCache.buildSourceKey(
       logRecord.Source_Type__c,
-      logRecord.Source_Record_Id__c
+      logRecord.Source_Record_Id__c,
+      cacheContext == null ? null : cacheContext.triggerType
     );
     Object cachedContent = NotificationEmailContentCache.get(cacheKey);
     if (cachedContent instanceof ContentResult) {
@@ -487,11 +491,7 @@ public without sharing class NotificationCaseEmailContentService {
   private static String buildTitle(
     NotificationChangeModels.ChangeContext changeContext
   ) {
-    if (changeContext == null) {
-      return 'New case';
-    }
-
-    if (changeContext.triggerType == NotificationConstants.CHANGE_TYPE_INSERT) {
+    if (NotificationChangeModels.isInsertChange(changeContext)) {
       return 'New case';
     }
 

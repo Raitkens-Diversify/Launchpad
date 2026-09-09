@@ -325,6 +325,61 @@ private class NotificationDigestMessageBuilderTest {
   }
 
   @IsTest
+  static void buildImmediateInAppTitleUsesNewCaseForInsertAndBlankContext() {
+    System.assertEquals(
+      'New case',
+      NotificationDigestMessageBuilder.buildImmediateInAppTitle(
+        new Notification_Log__c(
+          Source_Type__c = NotificationConstants.OBJECT_TYPE_CASE,
+          Title__c = 'Case updated',
+          Change_Context__c = new NotificationChangeModels.ChangeContext(
+              NotificationConstants.OBJECT_TYPE_CASE,
+              NotificationConstants.CHANGE_TYPE_INSERT
+            )
+            .toJson()
+        )
+      )
+    );
+    System.assertEquals(
+      'New case',
+      NotificationDigestMessageBuilder.buildImmediateInAppTitle(
+        new Notification_Log__c(
+          Source_Type__c = NotificationConstants.OBJECT_TYPE_CASE,
+          Title__c = 'Case updated'
+        )
+      )
+    );
+    System.assertEquals(
+      'Case assignment changed',
+      NotificationDigestMessageBuilder.buildImmediateInAppTitle(
+        new Notification_Log__c(
+          Source_Type__c = NotificationConstants.OBJECT_TYPE_CASE,
+          Title__c = 'Case assignment changed',
+          Change_Context__c = new NotificationChangeModels.ChangeContext(
+              NotificationConstants.OBJECT_TYPE_CASE,
+              NotificationConstants.CHANGE_TYPE_UPDATE
+            )
+            .toJson()
+        )
+      )
+    );
+    System.assertEquals(
+      'Case updated',
+      NotificationDigestMessageBuilder.buildImmediateInAppTitle(
+        new Notification_Log__c(
+          Source_Type__c = NotificationConstants.OBJECT_TYPE_CASE,
+          Title__c = 'Case updated',
+          Change_Context__c = new NotificationChangeModels.ChangeContext(
+              NotificationConstants.OBJECT_TYPE_CASE,
+              NotificationConstants.CHANGE_TYPE_UPDATE
+            )
+            .toJson()
+        )
+      )
+    );
+  }
+
+  @IsTest
   static void buildPlainTextResolvesSourceDetailWhenBodyMissing() {
     NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
     Case caseRecord = new Case(

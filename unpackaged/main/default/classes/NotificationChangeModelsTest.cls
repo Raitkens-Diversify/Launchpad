@@ -1,9 +1,41 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-07-27
+ * Date: 2026-09-08
  */
 @IsTest
 private class NotificationChangeModelsTest {
+  @IsTest
+  static void isInsertChangeTreatsBlankAndInsertAsInsert() {
+    System.assertEquals(true, NotificationChangeModels.isInsertChange(null));
+    System.assertEquals(
+      true,
+      NotificationChangeModels.isInsertChange(
+        new NotificationChangeModels.ChangeContext(
+          NotificationConstants.OBJECT_TYPE_CASE,
+          null
+        )
+      )
+    );
+    System.assertEquals(
+      true,
+      NotificationChangeModels.isInsertChange(
+        new NotificationChangeModels.ChangeContext(
+          NotificationConstants.OBJECT_TYPE_CASE,
+          NotificationConstants.CHANGE_TYPE_INSERT
+        )
+      )
+    );
+    System.assertEquals(
+      false,
+      NotificationChangeModels.isInsertChange(
+        new NotificationChangeModels.ChangeContext(
+          NotificationConstants.OBJECT_TYPE_CASE,
+          NotificationConstants.CHANGE_TYPE_UPDATE
+        )
+      )
+    );
+  }
+
   @IsTest
   static void formatChangedAtDisplayUsesIsoValueWhenPresent() {
     Datetime changedAt = Datetime.newInstanceGmt(2026, 7, 27, 18, 30, 0);

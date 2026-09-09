@@ -102,10 +102,7 @@ public with sharing class NotificationDigestMessageBuilder {
       ? null
       : NotificationChangeModels.fromJson(logRecord.Change_Context__c);
 
-    Boolean isInsert =
-      changeContext == null ||
-      String.isBlank(changeContext.triggerType) ||
-      NotificationChangeModels.isInsertTriggerType(changeContext.triggerType);
+    Boolean isInsert = NotificationChangeModels.isInsertChange(changeContext);
 
     if (!isInsert) {
       return typeLabel + ' Updated';
@@ -130,6 +127,44 @@ public with sharing class NotificationDigestMessageBuilder {
     return String.isBlank(detail)
       ? 'New ' + typeLabel
       : 'New ' + typeLabel + ': ' + detail;
+  }
+
+  public static String buildImmediateInAppTitle(Notification_Log__c logRecord) {
+    NotificationChangeModels.ChangeContext changeContext = logRecord == null
+      ? null
+      : NotificationChangeModels.fromJson(logRecord.Change_Context__c);
+
+    if (NotificationChangeModels.isInsertChange(changeContext)) {
+      return resolveImmediateInAppInsertTitle(logRecord);
+    }
+
+    if (logRecord != null && !String.isBlank(logRecord.Title__c)) {
+      return logRecord.Title__c;
+    }
+
+    return normalizeSourceType(logRecord == null ? null : logRecord.Source_Type__c) +
+      ' updated';
+  }
+
+  private static String resolveImmediateInAppInsertTitle(
+    Notification_Log__c logRecord
+  ) {
+    String sourceType = logRecord == null ? null : logRecord.Source_Type__c;
+
+    if (sourceType == NotificationConstants.OBJECT_TYPE_CASE) {
+      return 'New case';
+    }
+
+    if (sourceType == NotificationConstants.OBJECT_TYPE_TASK) {
+      return 'New task';
+    }
+
+    if (sourceType == NotificationConstants.OBJECT_TYPE_EVENT) {
+      return 'New event';
+    }
+
+    String typeLabel = normalizeSourceType(sourceType);
+    return typeLabel == 'Notification' ? typeLabel : 'New ' + typeLabel.toLowerCase();
   }
 
   private static String buildTitle(

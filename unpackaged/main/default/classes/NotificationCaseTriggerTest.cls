@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-08-13
+ * Date: 2026-09-08
  */
 @IsTest
 private class NotificationCaseTriggerTest {
@@ -59,8 +59,16 @@ private class NotificationCaseTriggerTest {
     Test.stopTest();
 
     System.assert(
-      NotificationPublisher.testPublishedEventCount >= 0,
-      'Case insert should invoke notification publisher through Case_Trigger.'
+      NotificationPublisher.testPublishedEventCount >= 1,
+      'Case insert should publish a Notification Center event through Case_Trigger.'
+    );
+    NotificationChangeModels.ChangeContext changeContext = NotificationChangeModels.fromJson(
+      NotificationPublisher.testPublishedEvents[0].Change_Context__c
+    );
+    System.assertEquals(
+      NotificationConstants.CHANGE_TYPE_INSERT,
+      changeContext.triggerType,
+      'New Case notifications must use Insert, not Update.'
     );
   }
 
