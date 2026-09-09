@@ -2,6 +2,7 @@
 public class Advertising_Item_TriggerHandlerTest {
     
     @testSetup
+    
     private static void setup(){
         List<Advertising_Item__c> adItems = new List<Advertising_Item__c>();
         List<Advertising_Item__c> adItemsList = new List<Advertising_Item__c>();
@@ -29,6 +30,23 @@ public class Advertising_Item_TriggerHandlerTest {
                                                 VersionData = Blob.valueOf('Test Content'), IsMajorVersion = true,
                                                 Advertising_Type__c = 'Event', Flow_Interview_ID__c = '123456');
         insert cv;
+    }
+    @isTest
+	private static void test_CreateShareRecord() {
+        //Advisor_Group__c testgroup = new Advisor_Group__c( Name = 'Test Advisor Group' );
+		//Insert testgroup;
+
+    
+        Financial_Advisor_Team__c team1 = new Financial_Advisor_Team__c(Name = 'Team 1'/*, Advisor_Group__c  = testGroup.Id*/);
+        Financial_Advisor_Team__c team2 = new Financial_Advisor_Team__c(Name = 'Team 2'/*, Advisor_Group__c  = testGroup.Id*/);
+        insert new List<Financial_Advisor_Team__c>{team1, team2};
+        Advertising_Item__c adItem  = new Advertising_Item__c(Name = 'Test Ad Item', Advertising_Type__c = 'Event',
+                                                              Flow_Interview_ID__c = '123456',Financial_Advisor_Team__c = team2.Id);
+        
+        Test.startTest();
+        insert adItem;  
+        Test.stopTest();
+    
     }
     
     @isTest

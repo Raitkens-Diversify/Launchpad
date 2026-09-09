@@ -2,7 +2,6 @@ public class Advertising_Item_TriggerHandler {
     
     public void isBeforeInsert(List<Advertising_Item__c> newList){
         updateSocialMediaProfile(newList);
-        
     }
     
     public void isBeforeUpdate(Map<Id, Advertising_Item__c> newMap, Map<Id, Advertising_Item__c> oldMap){
@@ -14,6 +13,7 @@ public class Advertising_Item_TriggerHandler {
     }
     
     public void isAfterInsert(Map<Id, Advertising_Item__c> newMap){
+        createShareRecord(newMap, null);
         createCaseForNullEvent(newMap); 
         reparentContentDocuments(newMap);
         findEventCostLineItems(newMap);
@@ -23,7 +23,7 @@ public class Advertising_Item_TriggerHandler {
     }
     
     public void isAfterUpdate(Map<Id, Advertising_Item__c> newMap, Map<Id, Advertising_Item__c> oldMap){
-        
+		createShareRecord(newMap, oldMap);
     }
     
     public void isAfterDelete(Map<Id, Advertising_Item__c> oldMap){
