@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-06-01
+ * Date: 2026-09-09
  *
  * Service layer for FSC Relationship Tree reads and writes.
  */
@@ -1532,6 +1532,7 @@ public with sharing class FscRelHouseholdService {
     Savepoint savepoint = Database.setSavepoint();
     try {
       Integer successCount = 0;
+      Set<Id> relatedAccountIdsForHouseholdSync = new Set<Id>();
       for (Integer index = 0; index < relationships.size(); index++) {
         FscRelHouseholdModels.TreeMemberAccountRelationshipInput relationship = relationships[
           index
@@ -1561,8 +1562,18 @@ public with sharing class FscRelHouseholdService {
 
         rowResult.relationId = persistResult.relationId;
         rowResult.relatedAccountId = persistResult.relatedAccountId;
+        if (String.isNotBlank(persistResult.relatedAccountId)) {
+          relatedAccountIdsForHouseholdSync.add(
+            Id.valueOf(persistResult.relatedAccountId)
+          );
+        }
         successCount++;
       }
+
+      syncHouseholdMembershipForRelatedAccounts(
+        memberAccountId,
+        relatedAccountIdsForHouseholdSync
+      );
 
       bulkResult.successCount = successCount;
       bulkResult.message =
@@ -1577,6 +1588,47 @@ public with sharing class FscRelHouseholdService {
         error.getMessage(),
         0
       );
+    }
+  }
+
+  private void syncHouseholdMembershipForRelatedAccounts(
+    Id memberAccountId,
+    Set<Id> relatedAccountIds
+  ) {
+    if (memberAccountId == null || relatedAccountIds == null || relatedAccountIds.isEmpty()) {
+      return;
+    }
+
+    Account memberAccount = accountRepository.selectById(memberAccountId);
+    if (memberAccount == null) {
+      return;
+    }
+
+    Id householdId = memberAccount.Household__c;
+    if (householdId == null) {
+      householdId = accountRepository.selectHouseholdIdByMemberAccountId(
+        memberAccountId
+      );
+    }
+
+    if (householdId == null) {
+      return;
+    }
+
+    for (
+      Account relatedAccount : accountRepository.selectAccountsByIdsWithClassifications(
+        relatedAccountIds
+      )
+    ) {
+      if (FscRelAccountRepository.isPersonAccountRecord(relatedAccount)) {
+        continue;
+      }
+
+      if (relatedAccount.Household__c != householdId) {
+        continue;
+      }
+
+      upsertHouseholdMembershipRelation(householdId, relatedAccount.Id);
     }
   }
 

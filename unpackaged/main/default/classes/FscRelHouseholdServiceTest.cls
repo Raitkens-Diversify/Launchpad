@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-07-22
+ * Date: 2026-09-09
  */
 @IsTest
 private class FscRelHouseholdServiceTest {
@@ -1018,6 +1018,90 @@ private class FscRelHouseholdServiceTest {
   }
 
   @IsTest
+  static void saveMemberAccountRelationships_linksNewBusinessToHouseholdMapNodes() {
+    FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
+    String recordTypeDeveloperName = FscRelRecordTypeUtils.BUSINESS_RECORD_TYPE;
+    Id recordTypeId = FscRelRecordTypeUtils.selectAccountRelationRecordTypeId(
+      recordTypeDeveloperName
+    );
+    Id householdMembershipRecordTypeId = FscRelRecordTypeUtils.selectAccountRelationRecordTypeId(
+      FscRelRecordTypeUtils.HOUSEHOLD_AAR_RECORD_TYPE
+    );
+    if (recordTypeId == null || householdMembershipRecordTypeId == null) {
+      return;
+    }
+
+    Account newBusinessAccount = FscDataTestDataFactory.hasClassificationField()
+      ? FscDataTestDataFactory.createClassifiedBusinessAccount(
+          'New Rel Map Business',
+          FscRelClassificationUtils.UNCLASSIFIED
+        )
+      : FscDataTestDataFactory.createRootAccount('New Rel Map Business');
+    newBusinessAccount.Household__c = scenario.rootAccount.Id;
+    update newBusinessAccount;
+
+    Reciprocal_Role__c employeeRole = FscDataTestDataFactory.createReciprocalRoleForMemberRelationship(
+      recordTypeDeveloperName,
+      'Map Employee',
+      'Map Employer'
+    );
+    Reciprocal_Role__c employerRole = [
+      SELECT Id, Role__c
+      FROM Reciprocal_Role__c
+      WHERE Role__c = 'Map Employer'
+      LIMIT 1
+    ];
+    FscRelHouseholdModels.TreeMemberAccountRelationshipInput input = FscDataTestDataFactory.buildMemberAccountRelationshipInput(
+      newBusinessAccount,
+      employeeRole,
+      employerRole,
+      true,
+      'row-new-business-map'
+    );
+    FscRelHouseholdService service = new FscRelHouseholdService();
+
+    Test.startTest();
+    FscRelHouseholdModels.MemberAccountRelationshipsSaveResult saveResult = service.saveMemberAccountRelationships(
+      scenario.linkedPersonAccount.Id,
+      recordTypeDeveloperName,
+      new List<FscRelHouseholdModels.TreeMemberAccountRelationshipInput>{ input }
+    );
+    FscRelHouseholdModels.RelationshipTreeData treeData = service.getRelationshipTree(
+      scenario.rootAccount.Id
+    );
+    Test.stopTest();
+
+    System.assertEquals(true, saveResult.success, saveResult.message);
+    System.assertEquals(
+      1,
+      [
+        SELECT COUNT()
+        FROM Account_Account_Relationship__c
+        WHERE
+          Account__c = :scenario.rootAccount.Id
+          AND Related_Account__c = :newBusinessAccount.Id
+          AND RecordTypeId = :householdMembershipRecordTypeId
+      ],
+      'New business accounts created from a relationship should get a household membership row immediately.'
+    );
+
+    Boolean foundInRelated = containsTreeAccount(
+      treeData.relatedAccounts,
+      newBusinessAccount.Id
+    );
+    Boolean foundInClassified = containsTreeAccount(
+      treeData.classifiedAccounts,
+      newBusinessAccount.Id
+    );
+
+    System.assertEquals(
+      true,
+      foundInRelated || foundInClassified,
+      'New related business should appear on household Type or Classification nodes without a page refresh.'
+    );
+  }
+
+  @IsTest
   static void getRelationshipTree_showsRelatedAccountRoleOnBusinessMap() {
     FscDataTestDataFactory.TreeScenario scenario = FscDataTestDataFactory.loadTreeScenario();
     String recordTypeDeveloperName = FscRelRecordTypeUtils.BUSINESS_RECORD_TYPE;
@@ -1288,6 +1372,24 @@ private class FscRelHouseholdServiceTest {
       relatedAccount.roles,
       'Business map should expose association type when reciprocal roles are missing.'
     );
+  }
+
+  private static Boolean containsTreeAccount(
+    List<FscRelHouseholdModels.TreeAccount> treeAccounts,
+    Id accountId
+  ) {
+    if (treeAccounts == null || accountId == null) {
+      return false;
+    }
+
+    String accountIdValue = String.valueOf(accountId);
+    for (FscRelHouseholdModels.TreeAccount treeAccount : treeAccounts) {
+      if (treeAccount?.accountId == accountIdValue) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   private static String resolveAssociationTypeValue(

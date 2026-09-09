@@ -886,6 +886,78 @@ function resolveOperand(token, draft, context) {
     return draft[token];
 }
 
+// Running-user Relationship_to_Firm__c -> the BD_or_RIA__c value it implies for a user who never sees
+// the field. BD_or_RIA__c is shown only to a Dual user ($User.Relationship_to_Firm__c = 'Dual', see
+// Envelope_Field.ISA_BD_or_RIA), yet other fields' Shown/Required WHERE (ISA_Account_Number,
+// ISA_Advisory_Fee, ISA_Managed_Account_Platform) and Custodian__c's option list (optionsFor) all read
+// BD_or_RIA__c from the draft — so for a BD/RIA/Hybrid user, who leaves it hidden and blank, none of
+// those resolve. Dual is intentionally absent: that user picks the value themselves, so nothing is
+// seeded over their choice. Hybrid follows BD, matching the legacy Wizard's grouped "BD or Hybrid"
+// decision branch (Wizard_Beginning_BD_or_RIA).
+const BD_OR_RIA_DEFAULT_BY_RELATIONSHIP = {
+    BD: 'BD',
+    RIA: 'RIA',
+    Hybrid: 'BD'
+};
+
+/**
+ * Seed the running user's implied BD_or_RIA__c into a draft so the fields it gates resolve for a user
+ * who never sees it (see BD_OR_RIA_DEFAULT_BY_RELATIONSHIP). Must be applied at the type level —
+ * `fields` is every field across the type's sections, not one section's — because a field gated by
+ * BD_or_RIA__c can sit in a different section than BD_or_RIA__c itself, and its Shown WHERE is
+ * evaluated against the whole draft. Seeds only when the type declares BD_or_RIA__c and the draft has
+ * no value for it yet, so a Dual user's own pick (no mapping) and any saved or in-progress value are
+ * both left untouched. Returns the same draft reference when nothing is seeded, so callers can compare
+ * by identity to avoid a needless reassignment.
+ * @param {Array} fields  raw Envelope_Field__mdt field shapes across the whole type (flat)
+ * @param {object} draft  field apiName -> value
+ * @param {object} userContext  $User.<Field> -> running-user value
+ * @returns {object} the draft, with BD_or_RIA__c seeded when applicable
+ */
+function seedUserFieldDefaults(fields, draft = {}, userContext = {}) {
+    if (!isEmptyValue(draft[BD_OR_RIA_FIELD])) {
+        return draft;
+    }
+    if (!(fields || []).some((field) => field.fieldPath === BD_OR_RIA_FIELD)) {
+        return draft;
+    }
+    const relationship = caseInsensitiveGet(userContext, 'Relationship_to_Firm__c');
+    const seeded =
+        relationship == null ? undefined : BD_OR_RIA_DEFAULT_BY_RELATIONSHIP[relationship];
+    if (!seeded) {
+        return draft;
+    }
+    return { ...draft, [BD_OR_RIA_FIELD]: seeded };
+}
+
+// Seed running-user field defaults across a whole schema's sections (see seedUserFieldDefaults),
+// flattening to the type-wide field list a Shown WHERE is evaluated against. Shared by the schema
+// entry points that hold a section list rather than a flat field list.
+function seedSectionDefaults(sections, draft, userContext) {
+    return seedUserFieldDefaults(
+        (sections || []).flatMap((section) => section.fields || []),
+        draft,
+        userContext
+    );
+}
+
+// The field paths whose value the running user's context implies for a type (see
+// seedUserFieldDefaults) — derived defaults, not answers to a hidden question. clearHiddenAnswers
+// protects these so clearing a hidden Key Point's dependents never strips the default out from under
+// the fields it gates (which would cascade-hide and wipe them).
+function userDefaultedPaths(fields, userContext = {}) {
+    const relationship = caseInsensitiveGet(userContext, 'Relationship_to_Firm__c');
+    const impliesBdOrRia =
+        relationship != null && BD_OR_RIA_DEFAULT_BY_RELATIONSHIP[relationship] != null;
+    if (
+        impliesBdOrRia &&
+        (fields || []).some((field) => field.fieldPath === BD_OR_RIA_FIELD)
+    ) {
+        return new Set([BD_OR_RIA_FIELD]);
+    }
+    return new Set();
+}
+
 // Convert a SQL LIKE pattern to a case-insensitive anchored RegExp: `%` matches any run of
 // characters, `_` matches a single character, and every other character is matched literally.
 // LIKE is case-insensitive.
@@ -1473,7 +1545,11 @@ function shapeVisibleFields(fields, draft = {}, userContext = {}) {
  */
 function clearHiddenAnswers(fields, draft = {}, userContext = {}) {
     const all = fields || [];
-    const next = { ...draft };
+    // Seed the running-user defaults and protect their paths: a derived default (e.g. BD_or_RIA__c for
+    // a non-Dual user) is not an answer to a hidden question. Left unprotected it would be cleared as a
+    // hidden field, which would cascade-hide and wipe every field it gates on the next pass.
+    const protectedPaths = userDefaultedPaths(all, userContext);
+    const next = { ...seedUserFieldDefaults(all, draft, userContext) };
     let cleared = true;
 
     while (cleared) {
@@ -1494,7 +1570,11 @@ function clearHiddenAnswers(fields, draft = {}, userContext = {}) {
             // The effective value, seeded the same way shapeVisibleFields seeds it — a draft the user
             // has not touched yet still displays (and would still save) the field's own value.
             const value = next[apiName] ?? field.value;
-            if (isEmptyValue(value) || visiblePaths.has(apiName)) {
+            if (
+                isEmptyValue(value) ||
+                visiblePaths.has(apiName) ||
+                protectedPaths.has(apiName)
+            ) {
                 continue;
             }
             next[apiName] = emptyValueForField(field);
@@ -2564,19 +2644,25 @@ function actionCompletion(
     userContext = {},
     registrationAttributes = {}
 ) {
+    // Seed the running-user field defaults before counting so a field a non-Dual user never sees
+    // (e.g. BD_or_RIA__c) resolves the Shown/Required WHERE of the fields it gates — otherwise those
+    // fields stay hidden and their required inputs go uncounted for that user. Also feeds the
+    // landing-list "N inputs missing" badge (sumMissingInputs), which counts against the DB's saved
+    // formData rather than a seeded interview draft.
+    const seededDraft = seedSectionDefaults(sections, draft, userContext);
     const requirements = resolveRelatedPartyRequirements(
         entity,
-        draft,
+        seededDraft,
         registrationAttributes
     );
     const count =
-        countMissingInputs(sections, draft, userContext) +
+        countMissingInputs(sections, seededDraft, userContext) +
         countMissingRelatedParties(
             requirements,
-            draft[RELATED_PARTIES_FIELD_KEY],
-            waivedRelatedPartyKeys(requirements, draft)
+            seededDraft[RELATED_PARTIES_FIELD_KEY],
+            waivedRelatedPartyKeys(requirements, seededDraft)
         );
-    const hasPlus = hasUnfilledKeyPointDependents(sections, draft, userContext);
+    const hasPlus = hasUnfilledKeyPointDependents(sections, seededDraft, userContext);
     const isComplete = (sections || []).length > 0 && count === 0 && !hasPlus;
     return { count, hasPlus, isComplete };
 }
@@ -2597,10 +2683,15 @@ function actionCompletion(
  * @returns {Array<{name: string, fields: Array}>}
  */
 function selectMissingSections(sections, draft = {}, userContext = {}) {
+    // Seed the running-user field defaults (e.g. BD_or_RIA__c for a non-Dual user) so the fields it
+    // gates are selected as missing rather than staying hidden — the same reason actionCompletion
+    // seeds before counting. Idempotent when the caller already seeded (the shell does, so the value
+    // it passes the Review screen matches this reduced set).
+    const seededDraft = seedSectionDefaults(sections, draft, userContext);
     const included = new Set();
     const emptyKeyPointNames = [];
     (sections || []).forEach((section) => {
-        shapeVisibleFields(section.fields, draft, userContext).forEach((field) => {
+        shapeVisibleFields(section.fields, seededDraft, userContext).forEach((field) => {
             if (field.addRecord) {
                 return;
             }
@@ -2630,7 +2721,7 @@ function selectMissingSections(sections, draft = {}, userContext = {}) {
                     field.addRecord ||
                     included.has(field.fieldPath) ||
                     !(field.required || field.requiredWhereStatement || field.keyDecision) ||
-                    evaluateWhereStatement(field.shownWhereStatement, draft, userContext)
+                    evaluateWhereStatement(field.shownWhereStatement, seededDraft, userContext)
                 ) {
                     return;
                 }
@@ -3627,6 +3718,7 @@ export {
     filterSectionsByAccountType,
     accountValuesToProposedDraft,
     shapeVisibleFields,
+    seedUserFieldDefaults,
     clearHiddenAnswers,
     clearDependentCustodian,
     hasPriorAnswer,

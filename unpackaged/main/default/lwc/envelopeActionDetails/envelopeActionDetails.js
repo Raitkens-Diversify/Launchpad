@@ -5,6 +5,7 @@ import {
   ACCOUNT_GROUP_IDS,
   isDmsPlatform,
   shapeVisibleFields,
+  seedUserFieldDefaults,
   clearHiddenAnswers,
   clearDependentCustodian,
   hasPriorAnswer,
@@ -148,6 +149,11 @@ export default class EnvelopeActionDetails extends LightningElement {
   // The action id the draft was last seeded for, so a re-render (or the shell writing back this same
   // action's saved values) doesn't reseed and clobber in-progress edits.
   _seededActionId;
+
+  // The action id whose running-user field defaults (e.g. BD_or_RIA__c) have been seeded. Separate
+  // from _seededActionId because userContext is prefetched async by the shell and may still be empty
+  // when the draft is first seeded — see _seedUserDefaultsWhenContextReady.
+  _userDefaultsActionId;
 
   // A Key Point edit held back while its confirmation dialog is open: { field, value }, applied on
   // confirm and dropped on cancel.
@@ -751,6 +757,7 @@ export default class EnvelopeActionDetails extends LightningElement {
 
   renderedCallback() {
     this._seedDraftIfActionChanged();
+    this._seedUserDefaultsWhenContextReady();
     this._bindScrollSpy();
     // Once the new action's sections render, pick the first as active (seed reset it to undefined).
     if (!this.activeKey) {
@@ -769,6 +776,37 @@ export default class EnvelopeActionDetails extends LightningElement {
     this._seededActionId = actionId;
     this.draft = { ...(this.savedValues || {}) };
     this.activeKey = undefined;
+    // A fresh draft has not had its running-user defaults applied yet; let the context-ready pass
+    // (re)apply them for this action.
+    this._userDefaultsActionId = undefined;
+  }
+
+  // Seed the running user's implied field defaults (e.g. BD_or_RIA__c for a non-Dual user) into the
+  // draft once userContext has landed, so the fields it gates show and its value persists on save.
+  // userContext is prefetched async by the shell, so this can't run in _seedDraftIfActionChanged: it
+  // may still be empty there, and seeding against an empty context would wrongly conclude the user has
+  // no relationship and skip the default. Runs each render until the context is known, then once per
+  // action. seedUserFieldDefaults returns the same draft when a value is already present, so a Dual
+  // user's pick and any saved/in-progress value are left untouched.
+  _seedUserDefaultsWhenContextReady() {
+    const actionId = this.action?.actionId;
+    if (!actionId || actionId === this._userDefaultsActionId) {
+      return;
+    }
+    // Wait for the async fetch: an empty {} means not loaded yet, whereas a resolved context always
+    // carries the Relationship_to_Firm__c key (null when the user has no value).
+    if (!("Relationship_to_Firm__c" in (this.userContext || {}))) {
+      return;
+    }
+    this._userDefaultsActionId = actionId;
+    const seeded = seedUserFieldDefaults(
+      this._allFields,
+      this.draft,
+      this.userContext
+    );
+    if (seeded !== this.draft) {
+      this.draft = seeded;
+    }
   }
 
   // Move to the section at `index` in the ordered section list and scroll it into view. Suppress the

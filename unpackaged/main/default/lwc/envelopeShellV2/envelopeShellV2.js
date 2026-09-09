@@ -94,6 +94,7 @@ import {
   missingInputsLabel,
   actionCompletion,
   selectMissingSections,
+  seedUserFieldDefaults,
   sumMissingInputs,
   formatFieldDisplayValue,
   strategyTotals,
@@ -469,12 +470,7 @@ function mapHouseholdResponse(data) {
   const allAccounts = (data?.accounts || []).map((a) => ({
     id: a.Id,
     groupId: a.isDpi ? "dpisSponsor" : "accounts",
-    // The row is titled by what the advisor called the account when adding it (Account_Nickname__c),
-    // not by the record Name: Name starts out as the nickname but the Financial Account trigger
-    // rebuilds it (owner - registration type - account #) as soon as the interview captures a
-    // registration type, so before the nickname had its own field the outline silently switched
-    // to the owner's name. Records created before the field existed have no nickname and keep Name.
-    name: a.nickname || a.Name,
+    name: a.Name,
     meta: buildMeta([a.registrationType, a.custodian]),
     iconVariant: "account",
     isNew: !a.submitted,
@@ -5092,12 +5088,22 @@ export default class EnvelopeShellV2 extends LightningElement {
   // of "Other" (mirroring the interview), holding one part whose requirement blocks are keyed by
   // the requirement key — the correlation the owner dialogs use to write the pick back into formData.
   _buildMissingActionItem(entity, action, schema, layout) {
-    const formData = action.formData || {};
     const schemaSections = applyLookupOptions(schema || [], this._lookupOptions);
+    // Seed the running-user field defaults (e.g. BD_or_RIA__c for a non-Dual user) into the saved
+    // values up front so every consumer below agrees: the reduced `missingSections`, the per-field
+    // seeded `value`, and the `values` draft the Review screen re-evaluates its own Shown WHERE
+    // against. Without this the screen would hide the fields BD_or_RIA__c gates that selectMissingSections
+    // just included. Keyed off the whole type's fields, since a gated field can live in another section.
+    const context = this._contextForAction(action.formData || {});
+    const formData = seedUserFieldDefaults(
+      schemaSections.flatMap((section) => section.fields || []),
+      action.formData || {},
+      context
+    );
     const missingSections = selectMissingSections(
       schemaSections,
       formData,
-      this._contextForAction(formData)
+      context
     );
     const partByName = new Map();
     const partsInOrder = missingSections.map((section, index) => {

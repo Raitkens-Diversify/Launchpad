@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-06-01
+ * Date: 2026-09-09
  *
  * Repository for Account reads used by the FSC Relationship Tree.
  */
@@ -378,7 +378,8 @@ public with sharing class FscRelAccountRepository {
         PersonContactId,
         RecordType.DeveloperName,
         RecordType.Name,
-        Classification__c
+        Classification__c,
+        Household__c
       FROM Account
       WHERE Id IN :accountIds
       ORDER BY Name
