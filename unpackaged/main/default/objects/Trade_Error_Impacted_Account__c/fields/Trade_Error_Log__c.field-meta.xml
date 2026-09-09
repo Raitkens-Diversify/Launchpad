@@ -5,7 +5,7 @@
     <referenceTo>Trade_Error_Log__c</referenceTo>
     <relationshipLabel>Trade Error Impacted Accounts</relationshipLabel>
     <relationshipName>Trade_Error_Impacted_Accounts</relationshipName>
-    <relationshipOrder>1</relationshipOrder>
+    <relationshipOrder>0</relationshipOrder>
     <reparentableMasterDetail>false</reparentableMasterDetail>
     <trackHistory>true</trackHistory>
     <trackTrending>false</trackTrending>

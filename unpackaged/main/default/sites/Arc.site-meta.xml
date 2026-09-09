@@ -41,6 +41,9 @@
     <siteIframeWhiteListUrls>
         <url>https://dfpginvestments--launchpad.sandbox.my.site.com</url>
     </siteIframeWhiteListUrls>
+    <siteIframeWhiteListUrls>
+        <url>https://arc.diversify.com</url>
+    </siteIframeWhiteListUrls>
     <siteType>ChatterNetwork</siteType>
     <subdomain>diversifyadvisornetwork</subdomain>
     <urlPathPrefix>NexSvforcesite</urlPathPrefix>

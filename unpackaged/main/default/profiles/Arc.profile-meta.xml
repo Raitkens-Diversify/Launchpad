@@ -2907,6 +2907,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <pageAccesses>
+        <apexPage>Egnyte_integration_page</apexPage>
+        <enabled>true</enabled>
+    </pageAccesses>
+    <pageAccesses>
         <apexPage>Egnyte_record_page</apexPage>
         <enabled>true</enabled>
     </pageAccesses>
@@ -7687,6 +7691,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Third_Party_Administrator__c.Status__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Trade_Error_Impacted_Account__c.Financial_Account__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

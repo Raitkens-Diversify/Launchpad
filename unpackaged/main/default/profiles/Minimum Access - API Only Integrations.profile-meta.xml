@@ -1199,6 +1199,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Trade_Error_Impacted_Account__c.Financial_Account__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Trade_Error_Log__c.Case__c</field>
         <readable>true</readable>
     </fieldPermissions>
