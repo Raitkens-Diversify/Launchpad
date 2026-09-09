@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-09-07
+ * Date: 2026-09-08
  *
  * Tests for unified notification delivery.
  */
@@ -717,6 +717,71 @@ private class NotificationDeliveryServiceTest {
     }
 
     System.assertEquals(1, NotificationDeliveryDispatcher.testEnqueuedJobCount);
+  }
+
+  @IsTest
+  static void digestGroupsByObjectTypeAndKeepsHouseholdsInTheSameObjectGroup() {
+    Id recipientId = UserInfo.getUserId();
+    Id firstHouseholdId = NotificationTestDataFactory.createHouseholdWithRecipient()
+      .household.Id;
+    Account secondHousehold = FscDataTestDataFactory.createHouseholdAccount(
+      'Second Object Group Household'
+    );
+
+    List<Notification_Log__c> logs = new List<Notification_Log__c>{
+      new Notification_Log__c(
+        Recipient__c = recipientId,
+        Channel__c = NotificationConstants.CHANNEL_EMAIL,
+        Source_Type__c = NotificationConstants.OBJECT_TYPE_CASE,
+        Household__c = firstHouseholdId
+      ),
+      new Notification_Log__c(
+        Recipient__c = recipientId,
+        Channel__c = NotificationConstants.CHANNEL_EMAIL,
+        Source_Type__c = NotificationConstants.OBJECT_TYPE_CASE,
+        Household__c = secondHousehold.Id
+      ),
+      new Notification_Log__c(
+        Recipient__c = recipientId,
+        Channel__c = NotificationConstants.CHANNEL_EMAIL,
+        Source_Type__c = NotificationConstants.OBJECT_TYPE_TASK,
+        Household__c = firstHouseholdId
+      )
+    };
+
+    Map<String, List<Notification_Log__c>> groupedLogs = NotificationDeliveryGroupingService.groupLogsByDeliveryKey(
+      logs
+    );
+
+    System.assertEquals(2, groupedLogs.size(), 'Digest emails group by object, not household.');
+
+    String caseKey = NotificationDeliveryGroupingService.buildGroupKey(
+      recipientId,
+      NotificationConstants.CHANNEL_EMAIL,
+      NotificationConstants.OBJECT_TYPE_CASE
+    );
+    String taskKey = NotificationDeliveryGroupingService.buildGroupKey(
+      recipientId,
+      NotificationConstants.CHANNEL_EMAIL,
+      NotificationConstants.OBJECT_TYPE_TASK
+    );
+
+    System.assertEquals(2, groupedLogs.get(caseKey).size());
+    System.assertEquals(1, groupedLogs.get(taskKey).size());
+    System.assertEquals(
+      'My Case Digest - ' + Date.today().format(),
+      NotificationDigestMessageBuilder.buildEmailSubject(
+        NotificationConstants.OBJECT_TYPE_CASE,
+        groupedLogs.get(caseKey)
+      )
+    );
+    System.assert(
+      NotificationDigestMessageBuilder.buildEmailSubject(
+        NotificationConstants.OBJECT_TYPE_TASK,
+        groupedLogs.get(taskKey)
+      )
+      .contains('My Task Digest — ')
+    );
   }
 
   private static Notification_Rule__c createDigestRule(

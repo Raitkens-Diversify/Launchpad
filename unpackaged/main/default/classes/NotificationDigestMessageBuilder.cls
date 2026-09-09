@@ -246,7 +246,7 @@ public with sharing class NotificationDigestMessageBuilder {
   }
 
   private static String resolveSingleHouseholdName(List<Notification_Log__c> logs) {
-    Set<Id> householdIds = collectHouseholdIds(logs);
+    Set<Id> householdIds = collectSingleHouseholdIds(logs);
 
     if (householdIds.size() != 1) {
       return null;
@@ -266,7 +266,7 @@ public with sharing class NotificationDigestMessageBuilder {
     return households[0].Name.trim();
   }
 
-  private static Set<Id> collectHouseholdIds(List<Notification_Log__c> logs) {
+  private static Set<Id> collectSingleHouseholdIds(List<Notification_Log__c> logs) {
     Set<Id> householdIds = new Set<Id>();
 
     if (logs == null || logs.isEmpty()) {
@@ -274,9 +274,11 @@ public with sharing class NotificationDigestMessageBuilder {
     }
 
     for (Notification_Log__c logRecord : logs) {
-      if (logRecord != null && logRecord.Household__c != null) {
-        householdIds.add(logRecord.Household__c);
+      if (logRecord == null || logRecord.Household__c == null) {
+        return new Set<Id>();
       }
+
+      householdIds.add(logRecord.Household__c);
     }
 
     return householdIds;

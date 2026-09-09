@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-06-16
+ * Date: 2026-09-08
  *
  * Universal data access for Notification_Log__c. Composable query criteria power
  * inbox, log, dashboard, and future screens without duplicating SOQL filters.
@@ -533,7 +533,6 @@ public without sharing class NotificationLogRepository {
       seedLog.Channel__c,
       null
     );
-    Id householdFilter = seedLog.Household__c;
     List<Notification_Log__c> queuedLogs;
 
     if (String.isBlank(digestCadence)) {
@@ -597,27 +596,7 @@ public without sharing class NotificationLogRepository {
       ];
     }
 
-    return filterQueuedLogsToHousehold(queuedLogs, householdFilter);
-  }
-
-  @TestVisible
-  private static List<Notification_Log__c> filterQueuedLogsToHousehold(
-    List<Notification_Log__c> queuedLogs,
-    Id householdId
-  ) {
-    if (householdId == null || queuedLogs == null || queuedLogs.isEmpty()) {
-      return queuedLogs;
-    }
-
-    List<Notification_Log__c> scopedLogs = new List<Notification_Log__c>();
-
-    for (Notification_Log__c logRecord : queuedLogs) {
-      if (logRecord.Household__c == householdId) {
-        scopedLogs.add(logRecord);
-      }
-    }
-
-    return scopedLogs;
+    return queuedLogs;
   }
 
   public List<Notification_Log__c> selectLogsForRetry(List<Id> logIds) {

@@ -1,8 +1,10 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-09-07
+ * Date: 2026-09-08
  *
- * Groups queued digest logs into delivery requests by recipient, channel, and source type.
+ * Groups queued digest logs into one delivery request per recipient, channel, and
+ * object type (Case, Task, Event). Household is not a grouping key; the subject
+ * includes the household name only when every log in that object group shares one.
  * Immediate logs are also split by channel so email failures cannot roll back in-app sends.
  */
 public without sharing class NotificationDeliveryGroupingService {

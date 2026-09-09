@@ -192,6 +192,22 @@ private class NotificationDigestMessageBuilderTest {
   }
 
   @IsTest
+  static void buildEmailSubjectOmitsHouseholdWhenAnyLogHasNoHousehold() {
+    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+
+    String subject = NotificationDigestMessageBuilder.buildEmailSubject(
+      NotificationConstants.OBJECT_TYPE_TASK,
+      new List<Notification_Log__c>{
+        new Notification_Log__c(Household__c = context.household.Id),
+        new Notification_Log__c(Household__c = null)
+      }
+    );
+
+    System.assertEquals('My Task Digest - ' + Date.today().format(), subject);
+    System.assert(!subject.contains(context.household.Name));
+  }
+
+  @IsTest
   static void buildImmediateEmailSubjectUsesNewAndUpdatedFormats() {
     NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
     Case caseRecord = new Case(
