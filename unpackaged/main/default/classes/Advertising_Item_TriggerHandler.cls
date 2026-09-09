@@ -94,7 +94,7 @@ public class Advertising_Item_TriggerHandler {
         for(Case c:caseList){
             caseMapAdItem.put(c.Advertising_Item__c,c.Id);
         }
-        for(Advertising_Item__c adI:[select Id,	Review_Case__c from Advertising_Item__c where Id IN:caseMapAdItem.keySet()]){
+        for(Advertising_Item__c adI:[select Id, Review_Case__c from Advertising_Item__c where Id IN:caseMapAdItem.keySet()]){
             adI.Review_Case__c=caseMapAdItem.get(adI.Id);
             adItemsToUpdate.add(adI);
         }
@@ -205,7 +205,7 @@ public class Advertising_Item_TriggerHandler {
         }
     }
 
-	public void findRadioCostLineItems(Map<Id,Advertising_Item__c> newMap){
+    public void findRadioCostLineItems(Map<Id,Advertising_Item__c> newMap){
         Map<String,Id> flowIdToRadio = new Map<String,Id>();
         for(Advertising_Item__c a : newMap.values()){
             if(a.Advertising_Type__c  == 'Radio/TV Ad' && a.Flow_Interview_Id__c != null){
@@ -247,6 +247,71 @@ public class Advertising_Item_TriggerHandler {
         for(Advertising_Item__c newAdItem : newMap.values()){
             if(newAdItem.Status__c == 'Approved' && oldMap.get(newAdItem.Id).Status__c != 'Approved'){
                 newAdItem.Record_Locked__c = true;
+            }
+        }
+    }
+    
+     /*Method to create share record between record and related FAT's public group*/
+    public void createShareRecord(Map<Id, Advertising_Item__c> newMap, Map<Id, Advertising_Item__c> oldMap){
+        Set<Id> fAccTeamIdSet = new Set<Id>();
+        for(Advertising_Item__c record : newMap.values()){
+            if(oldMap==null){
+                if(record.Financial_Advisor_Team__c != null)
+                    fAccTeamIdSet.add(record.Financial_Advisor_Team__c);
+            } else if(oldMap.get(record.Id).Financial_Advisor_Team__c!=record.Financial_Advisor_Team__c || oldMap.get(record.Id).OwnerId != record.OwnerId){
+                if(record.Financial_Advisor_Team__c != null)
+                    fAccTeamIdSet.add(record.Financial_Advisor_Team__c);
+                if(oldMap.get(record.Id).Financial_Advisor_Team__c != null){
+                    fAccTeamIdSet.add(oldMap.get(record.Id).Financial_Advisor_Team__c);
+                }
+            }
+        }
+        if(!fAccTeamIdSet.isEmpty()){
+            Map<Id, Financial_Advisor_Team__c> fATeamMap = new Map<Id, Financial_Advisor_Team__c>([Select Id, Public_Group_Id__c From Financial_Advisor_Team__c Where Id IN : fAccTeamIdSet]);
+            if(fATeamMap.size() > 0){
+                List<Advertising_Item__Share> shareRecordList = new List<Advertising_Item__Share>();
+
+                //For revoke Share
+                Set<Id> groupIdSet = new Set<Id>();
+                Set<Id> parentIdSet = new Set<Id>();
+                for(Advertising_Item__c record : newMap.values()){
+                    Advertising_Item__Share shareRec = new Advertising_Item__Share();
+                    if(fATeamMap.get(record.Financial_Advisor_Team__c)!=null){
+                        shareRec.ParentId = record.Id;
+                        if(record.Financial_Advisor_Team__c != null){
+                            shareRec.UserOrGroupId = fATeamMap.get(record.Financial_Advisor_Team__c).Public_Group_Id__c;
+                        }
+                        shareRec.AccessLevel = 'Edit';
+                        shareRec.RowCause = Schema.Advertising_Item__Share.RowCause.Manual;
+                        if(oldMap == null){
+                            if(record.Financial_Advisor_Team__c != null){
+                                shareRecordList.add(shareRec);
+                            }
+                        } else if(oldMap != null && (oldMap.get(record.Id).Financial_Advisor_Team__c != record.Financial_Advisor_Team__c || oldMap.get(record.Id).OwnerId != record.OwnerId)){
+                            if(oldMap.get(record.Id).Financial_Advisor_Team__c != null && fATeamMap.get(oldMap.get(record.Id).Financial_Advisor_Team__c) != null){
+                                groupIdSet.add(fATeamMap.get(oldMap.get(record.Id).Financial_Advisor_Team__c).Public_Group_Id__c);
+                                parentIdSet.add(record.Id);
+                            }
+                            if(record.Financial_Advisor_Team__c != null){
+                                shareRecordList.add(shareRec);
+                            }
+                        }
+                    }
+                }
+                if(groupIdSet.size() > 0 && parentIdSet.size() > 0){
+                    List<Advertising_Item__Share> removeShareList = new List<Advertising_Item__Share>();
+                    for(Advertising_Item__Share shareRec: [SELECT id, ParentId, UserOrGroupId FROM Advertising_Item__Share WHERE ParentId IN: parentIdSet and UserOrGroupId IN: groupIdSet]){
+                        if(groupIdSet.Contains(shareRec.UserOrGroupId) && parentIdSet.contains(shareRec.ParentId)){
+                            removeShareList.add(shareRec);
+                        }
+                    }
+                    if(removeShareList.size() > 0){
+                        Database.delete(removeShareList,false);
+                    }
+                }
+                if(shareRecordList.size() > 0){
+                    Database.insert(shareRecordList,false);
+                }
             }
         }
     }
