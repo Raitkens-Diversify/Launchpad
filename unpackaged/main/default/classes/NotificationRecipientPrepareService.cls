@@ -168,17 +168,24 @@ public without sharing class NotificationRecipientPrepareService {
       return logs;
     }
 
-    Set<String> existingCorrelationKeys = new Set<String>();
+    Set<String> existingLogKeys = new Set<String>();
     for (
       Notification_Log__c existingLog : new NotificationLogRepository()
         .selectLogsByCorrelationKeys(correlationKeys)
     ) {
-      if (!String.isBlank(existingLog.Correlation_Key__c)) {
-        existingCorrelationKeys.add(existingLog.Correlation_Key__c);
+      if (
+        existingLog == null ||
+        String.isBlank(existingLog.Correlation_Key__c)
+      ) {
+        continue;
       }
+
+      existingLogKeys.add(
+        buildPreparedLogKey(existingLog.Recipient__c, existingLog.Correlation_Key__c)
+      );
     }
 
-    if (existingCorrelationKeys.isEmpty()) {
+    if (existingLogKeys.isEmpty()) {
       return logs;
     }
 
@@ -187,13 +194,19 @@ public without sharing class NotificationRecipientPrepareService {
       if (
         logRecord == null ||
         String.isBlank(logRecord.Correlation_Key__c) ||
-        !existingCorrelationKeys.contains(logRecord.Correlation_Key__c)
+        !existingLogKeys.contains(
+          buildPreparedLogKey(logRecord.Recipient__c, logRecord.Correlation_Key__c)
+        )
       ) {
         newLogs.add(logRecord);
       }
     }
 
     return newLogs;
+  }
+
+  private static String buildPreparedLogKey(Id recipientId, String correlationKey) {
+    return String.valueOf(recipientId) + '|' + correlationKey;
   }
 
   private static List<NotificationCenterDeliveryItem> buildDeliveryItems(

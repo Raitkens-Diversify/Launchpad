@@ -220,6 +220,12 @@
         <valueField>User__c</valueField>
     </dynamicChoiceSets>
     <environments>Default</environments>
+    <formulas>
+        <name>Description_Length</name>
+        <dataType>Number</dataType>
+        <expression>LEN({!Description})</expression>
+        <scale>0</scale>
+    </formulas>
     <interviewLabel>Task Creator Branch Pit Stop {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Task Creator Branch Pit Stop</label>
     <loops>
@@ -478,6 +484,10 @@
                     <stringValue>12</stringValue>
                 </width>
             </styleProperties>
+            <validationRule>
+                <errorMessage>&lt;p&gt;&lt;span style=&quot;background-color: rgb(255, 255, 255);&quot;&gt;The Description must be less than 256 characters. It is currently {!Description_Length} characters long.&lt;/span&gt;&lt;/p&gt;</errorMessage>
+                <formulaExpression>LEN({!Description}) &lt; 256</formulaExpression>
+            </validationRule>
         </fields>
         <fields>
             <name>Due_Date</name>

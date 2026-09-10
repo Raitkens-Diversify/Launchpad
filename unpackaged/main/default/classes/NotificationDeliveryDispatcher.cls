@@ -206,6 +206,14 @@ public without sharing class NotificationDeliveryDispatcher {
   private static void deliverOverflowInline(
     List<NotificationDeliveryModels.DeliveryRequest> requests
   ) {
+    if (requests == null || requests.isEmpty()) {
+      return;
+    }
+
+    if (Test.isRunningTest()) {
+      testEnqueuedJobCount++;
+    }
+
     NotificationDeliveryService deliveryService = new NotificationDeliveryService();
     NotificationEmailDeliveryService.beginBatch();
 

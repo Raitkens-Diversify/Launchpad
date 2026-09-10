@@ -56,7 +56,6 @@ private class NotificationCaseTriggerTest {
       Origin = 'Phone'
     );
     NotificationTestDataFactory.insertRecord(caseRecord);
-    Test.stopTest();
 
     System.assert(
       NotificationPublisher.testPublishedEventCount >= 1,
@@ -70,6 +69,7 @@ private class NotificationCaseTriggerTest {
       changeContext.triggerType,
       'New Case notifications must use Insert, not Update.'
     );
+    Test.stopTest();
   }
 
   @IsTest

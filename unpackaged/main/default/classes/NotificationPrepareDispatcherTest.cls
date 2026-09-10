@@ -16,9 +16,27 @@ private class NotificationPrepareDispatcherTest {
     NotificationTestDataFactory.createGlobalPreference(
       NotificationConstants.OBJECT_TYPE_CASE
     );
+    NotificationTestDataFactory.createUserPreference(
+      NotificationConstants.OBJECT_TYPE_CASE,
+      context.recipientUser.Id,
+      NotificationConstants.CHANNEL_IN_APP,
+      NotificationConstants.FREQUENCY_IMMEDIATE
+    );
 
     User secondRecipient = NotificationTestDataFactory.createStandardUser('notifrcpt2');
     User thirdRecipient = NotificationTestDataFactory.createStandardUser('notifrcpt3');
+    NotificationTestDataFactory.createUserPreference(
+      NotificationConstants.OBJECT_TYPE_CASE,
+      secondRecipient.Id,
+      NotificationConstants.CHANNEL_IN_APP,
+      NotificationConstants.FREQUENCY_IMMEDIATE
+    );
+    NotificationTestDataFactory.createUserPreference(
+      NotificationConstants.OBJECT_TYPE_CASE,
+      thirdRecipient.Id,
+      NotificationConstants.CHANNEL_IN_APP,
+      NotificationConstants.FREQUENCY_IMMEDIATE
+    );
 
     NotificationRecipientService.testRecipientOverrides = new Map<Id, List<Id>>{
       context.household.Id => new List<Id>{
@@ -34,27 +52,27 @@ private class NotificationPrepareDispatcherTest {
     );
     NotificationTestDataFactory.insertRecord(caseRecord);
 
-    NotificationCaseRecipientService.testRecipientOverrides = new Map<Id, List<Id>>{
-      caseRecord.Id => new List<Id>{
-        context.recipientUser.Id,
-        secondRecipient.Id,
-        thirdRecipient.Id
-      }
+    NotificationRecipientPrepareModels.SourcePrepareContext prepareContext = new NotificationRecipientPrepareModels.SourcePrepareContext();
+    prepareContext.sourceType = NotificationConstants.OBJECT_TYPE_CASE;
+    prepareContext.sourceId = String.valueOf(caseRecord.Id);
+    prepareContext.householdId = context.household.Id;
+    prepareContext.correlationKey =
+      String.valueOf(caseRecord.Id) +
+      '-chunk-test';
+    prepareContext.recipientIds = new List<Id>{
+      context.recipientUser.Id,
+      secondRecipient.Id,
+      thirdRecipient.Id
     };
 
-    Test.startTest();
-    List<NotificationCenterDeliveryItem> deliveryItems;
-    System.runAs(NotificationTestDataFactory.runningUser()) {
-      deliveryItems = new NotificationCenterEventService().prepareSourceRecord(
-        NotificationConstants.OBJECT_TYPE_CASE,
-        String.valueOf(caseRecord.Id)
-      );
-    }
-    Test.stopTest();
+    List<NotificationCenterDeliveryItem> deliveryItems = NotificationRecipientPrepareDispatcher.processRecipients(
+      prepareContext
+    );
+    Integer syncChunksProcessed = NotificationRecipientPrepareDispatcher.syncChunksProcessed;
+    Integer enqueuedContinuationCount = NotificationRecipientPrepareDispatcher.testEnqueuedContinuationCount;
 
     System.assert(
-      NotificationRecipientPrepareDispatcher.testEnqueuedContinuationCount >= 1 ||
-        NotificationRecipientPrepareDispatcher.syncChunksProcessed >= 1,
+      enqueuedContinuationCount >= 1 || syncChunksProcessed >= 1,
       'Expected chunked recipient preparation to process recipients in capped sync batches.'
     );
 

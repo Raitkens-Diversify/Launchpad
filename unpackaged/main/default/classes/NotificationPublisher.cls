@@ -51,19 +51,19 @@ public with sharing class NotificationPublisher {
       return;
     }
 
+    List<Notification_Center_Event__e> events = buildEvents(
+      records,
+      sourceType,
+      contextByRecordId
+    );
+    if (events.isEmpty()) {
+      return;
+    }
+
     isPublishing = true;
     testPublishedEventCount = 0;
     testPublishedEvents = new List<Notification_Center_Event__e>();
     try {
-      List<Notification_Center_Event__e> events = buildEvents(
-        records,
-        sourceType,
-        contextByRecordId
-      );
-      if (events.isEmpty()) {
-        return;
-      }
-
       testPublishedEventCount = events.size();
       testPublishedEvents = events;
       EventBus.publish(events);

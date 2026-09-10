@@ -28,6 +28,7 @@ private class NotificationEventChangePublisherTest {
   static void publishUpdatesPublishesStartAndEndDateTimeChanges() {
     NotificationPublisher.resetForTest();
     Event eventRecord = insertHouseholdEvent('Publisher Start End Event');
+    NotificationPublisher.resetForTest();
     Event oldEvent = eventRecord.clone(true, true, true, true);
 
     eventRecord.StartDateTime = eventRecord.StartDateTime.addHours(1);
@@ -57,6 +58,7 @@ private class NotificationEventChangePublisherTest {
   static void publishUpdatesPublishesAssignedToChange() {
     NotificationPublisher.resetForTest();
     Event eventRecord = insertHouseholdEvent('Publisher Assigned To Event');
+    NotificationPublisher.resetForTest();
     User alternateOwner = selectAlternateOwner(eventRecord.OwnerId);
     Event oldEvent = eventRecord.clone(true, true, true, true);
 
@@ -95,6 +97,7 @@ private class NotificationEventChangePublisherTest {
   static void publishUpdatesPublishesDescriptionChange() {
     NotificationPublisher.resetForTest();
     Event eventRecord = insertHouseholdEvent('Publisher Description Event');
+    NotificationPublisher.resetForTest();
     Event oldEvent = eventRecord.clone(true, true, true, true);
 
     eventRecord.Description = 'Updated event description body.';

@@ -433,24 +433,17 @@ private class NotificationDeliveryDispatcherTest {
   @IsTest
   static void enqueueLogIds_andLogIdStrings_delegateToDeliveryPipeline() {
     NotificationDeliveryDispatcher.testEnqueuedJobCount = 0;
-    NotificationCustomNotificationService.testSkipSend = true;
     NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
-    Notification_Rule__c rule = NotificationTestDataFactory.createUserPreference(
-      NotificationConstants.OBJECT_TYPE_CASE,
-      context.recipientUser.Id,
-      NotificationConstants.CHANNEL_IN_APP,
-      NotificationConstants.FREQUENCY_IMMEDIATE
-    );
-    Case caseRecord = createOwnedCase(context);
+    Notification_Rule__c rule = createDigestRule(context, NotificationConstants.CHANNEL_EMAIL);
     Notification_Log__c logRecord = NotificationTestDataFactory.createLogNotification(
       context.recipientUser.Id,
       context.household.Id,
       NotificationConstants.OBJECT_TYPE_CASE,
-      NotificationConstants.STATUS_PENDING,
-      NotificationConstants.CHANNEL_IN_APP,
-      NotificationConstants.FREQUENCY_IMMEDIATE,
+      NotificationConstants.STATUS_QUEUED,
+      NotificationConstants.CHANNEL_EMAIL,
+      NotificationConstants.FREQUENCY_DIGEST,
       'Log id enqueue item',
-      String.valueOf(caseRecord.Id),
+      null,
       rule.Id
     );
 
