@@ -6,6 +6,10 @@ import ToastContainer from "lightning/toastContainer";
 import envelopeWizardStyles from "@salesforce/resourceUrl/envelopeWizardStyles";
 import getWizEnvelopes from "@salesforce/apex/EnvelopeLandingApex.getWizEnvelopes";
 import getWizEnvelopeById from "@salesforce/apex/EnvelopeLandingApex.getWizEnvelopeById";
+import {
+  registerNavigationGuard,
+  unregisterNavigationGuard
+} from "c/arcNavigationGuard";
 
 export default class EnvelopeApp extends LightningElement {
   /** Hides the top bar's Diversify logo for sites/pages with their own header/branding. */
@@ -94,6 +98,17 @@ export default class EnvelopeApp extends LightningElement {
     // toasts in the session keep their default styling.
     document.documentElement.classList.add("env-wizard-toast");
     this._openEnvelopeFromUrl();
+    // Lets ARC's sidebar nav (Cases, Tasks, anything else) prompt via the shell's
+    // confirmExit()/unsaved-changes modal too, not just the wizard's own controls. A no-op
+    // wherever this component isn't mounted (arcNavigationGuard resolves true immediately with
+    // nothing registered). confirmExit() itself always resolves true or false; `!== false` only
+    // covers this.refs.shellV2 being undefined (the plain list view, no shell mounted yet),
+    // treating "nothing to confirm" the same as an explicit true.
+    this._navigationGuard = async () => {
+      const result = await this.refs.shellV2?.confirmExit();
+      return result !== false;
+    };
+    registerNavigationGuard(this._navigationGuard);
   }
 
   // Deep-link support: row links elsewhere in the app (e.g. the Home dashboard's Envelopes
@@ -160,6 +175,7 @@ export default class EnvelopeApp extends LightningElement {
 
   disconnectedCallback() {
     document.documentElement.classList.remove("env-wizard-toast");
+    unregisterNavigationGuard(this._navigationGuard);
   }
 
   @wire(EnclosingTabId)

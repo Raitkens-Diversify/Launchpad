@@ -688,6 +688,24 @@ function isDmsPlatform(value) {
     return value === 'DMS' || value === 'DMS (Wrap)';
 }
 
+// The Type of Request values on an Update DMS Instructions interview that carry no sleeve
+// allocation — cash raises, systematic-withdrawal changes and free-form requests — so the Trade
+// Instructions section is hidden and files nothing for them. Keyed by the form's draft field
+// (Envelope_Field Manage_DMS_Instructions_Options → Order_Ticket__c.Type_of_Request__c), read
+// case-insensitively like every other draft token. Single source for this set: the section gate
+// (envelopeActionDetails) and the trade-source gate (envelopeShellV2) both call it.
+const DMS_REQUEST_TYPE_FIELD = 'Type_of_Request__c';
+const DMS_REQUEST_TYPES_WITHOUT_TRADE = new Set([
+    'Raise Cash',
+    'Add Systematic Withdrawal',
+    'Remove Systematic Withdrawal',
+    'Add/Remove Systematic Withdrawals',
+    'Other'
+]);
+function dmsRequestCarriesTradeInstructions(formData) {
+    return !DMS_REQUEST_TYPES_WITHOUT_TRADE.has(caseInsensitiveGet(formData, DMS_REQUEST_TYPE_FIELD));
+}
+
 function canPurchaseAlts(value) {
     return value === 'BD Exclusion' || value === 'AltMS' || value === 'DMS' || value === 'DMS (Wrap)';
 }
@@ -852,8 +870,9 @@ function schemaCacheKey(key) {
 
 // The left-hand token of a WHERE clause may reference the running user instead of the form draft:
 // a `$User.<Field>` token (e.g. `$User.Relationship_to_Firm__c`) resolves against userContext, any
-// other token against the draft. The user field name is matched case-insensitively, since the
-// metadata casing (`Relationship_to_Firm__c`) can differ from the org field's (`Relationship_to_firm__c`).
+// other token against the draft. Every field name is matched case-insensitively, since the
+// metadata casing (`Relationship_to_Firm__c`, `Type_Of_Request__c`) can differ from the org field's
+// (`Relationship_to_firm__c`, `Type_of_Request__c`) — the draft is keyed by the org's casing.
 const USER_TOKEN = /^\$User\.(\w+)$/i;
 // A `$Party.<roleKey>.<Field>` token resolves against the related party occupying <roleKey> — the
 // requirementKey (rule.key from RELATED_PARTY_RULES) the party was selected into — read from the
@@ -883,7 +902,10 @@ function resolveOperand(token, draft, context) {
         const role = caseInsensitiveGet(context && context.$party, partyMatch[1]);
         return caseInsensitiveGet(role, partyMatch[2]);
     }
-    return draft[token];
+    // Exact key first (the common case), then the same case-insensitive read the $User and $Party
+    // branches use: a WHERE statement written as `Type_Of_Request__c = 'Other'` must still find the
+    // draft's `Type_of_Request__c` answer.
+    return draft && token in draft ? draft[token] : caseInsensitiveGet(draft, token);
 }
 
 // Running-user Relationship_to_Firm__c -> the BD_or_RIA__c value it implies for a user who never sees
@@ -2558,7 +2580,8 @@ function countMissingInputs(sections, draft = {}, userContext = {}) {
 
 /**
  * Whether a field's Shown/Required WHERE statement references a given field API name (word-boundary
- * match, so 'Employer__c' doesn't match 'Employer_City__c').
+ * match, so 'Employer__c' doesn't match 'Employer_City__c'; case-insensitive, matching how
+ * evaluateWhereStatement resolves the token).
  * @param {string} statement
  * @param {string} apiName
  * @returns {boolean}
@@ -2567,7 +2590,7 @@ function referencesField(statement, apiName) {
     if (!statement || !apiName) {
         return false;
     }
-    return new RegExp(`\\b${apiName}\\b`).test(statement);
+    return new RegExp(`\\b${apiName}\\b`, 'i').test(statement);
 }
 
 /**
@@ -3706,6 +3729,7 @@ export {
     MEMBER_ACTION_TO_CASE_TYPE,
     PROPOSED_CHANGES_MDT,
     isDmsPlatform,
+    dmsRequestCarriesTradeInstructions,
     resolveSchemaKey,
     resolveActionCatalog,
     accountActionTypeFor,
@@ -3764,6 +3788,7 @@ export {
     splitAddRecordFields,
     countMissingInputs,
     hasUnfilledKeyPointDependents,
+    referencesField,
     missingInputsCountLabel,
     missingInputsLabel,
     actionCompletion,

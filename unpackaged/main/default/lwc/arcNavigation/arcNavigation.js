@@ -9,6 +9,7 @@ import {
   bootstrapSidebarCollapsedState,
   SIDEBAR_COLLAPSE_CHANGE_EVENT
 } from "c/arcNavSidebarState";
+import { confirmNavigationAllowed } from "c/arcNavigationGuard";
 import {
   STATIC_NAV_ITEMS,
   NAV_PATH_CHANGE_EVENT,
@@ -397,6 +398,18 @@ export default class ArcNavigation extends NavigationMixin(LightningElement) {
     event.preventDefault();
     event.stopPropagation();
 
+    // Lets a page-specific component (currently only the envelope wizard, see
+    // arcNavigationGuard) prompt before this nav item is actually followed, when it has
+    // unsaved changes. Resolves true immediately — no extra tick, no prompt — on every other
+    // page, since nothing is registered there.
+    confirmNavigationAllowed().then((allowed) => {
+      if (allowed) {
+        this.completeNavigation(navTarget, type, target);
+      }
+    });
+  }
+
+  completeNavigation(navTarget, type, target) {
     if (navTarget) {
       recordNavSelection({
         id: navTarget.id,

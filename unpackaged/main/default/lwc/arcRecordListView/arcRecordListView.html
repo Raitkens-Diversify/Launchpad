@@ -251,12 +251,6 @@
               <span>Chart</span>
             </button>
           </div>
-
-          <template lwc:if={hasUnconfirmedServerSearch}>
-            <span class="arc-record-list-view__server-search-hint">
-              {serverSearchHintMessage}
-            </span>
-          </template>
         </div>
 
         <div class="arc-record-list-view__actions-right">
@@ -462,6 +456,21 @@
           </template>
         </div>
       </div>
+
+      <!-- Own full-width row, deliberately outside .arc-record-list-view__actions:
+           this used to live inside __view-mode-group, sharing that flex item's
+           width with the Table/Chart toggle. Once it appeared (as soon as a
+           server-side search became ambiguous, i.e. on the very first
+           keystroke), it inflated that item enough to push the sibling
+           __actions-right cluster (Search + Group + Filter) onto its own line
+           via __actions' flex-wrap -- at any viewport width, not just narrow
+           ones. Rendering it after __actions entirely means it can only ever
+           add a line below the whole toolbar, never reflow it. -->
+      <template lwc:if={hasUnconfirmedServerSearch}>
+        <p class="arc-record-list-view__server-search-hint">
+          {serverSearchHintMessage}
+        </p>
+      </template>
 
       <!-- Filter chips + Clear Filters (Figma 532:42759) -->
       <template lwc:if={hasActiveFilters}>

@@ -55,6 +55,7 @@ import {
   MEMBER_ACTION_TYPES,
   PROPOSED_CHANGES_MDT,
   isDmsPlatform,
+  dmsRequestCarriesTradeInstructions,
   TRADE_DRAFTS_KEY,
   collectTradeDrafts,
   withTradeDraft,
@@ -108,8 +109,9 @@ import {
 // Style moves the account onto a managed platform and so establishes an account value (funded);
 // editing existing instructions has no funded amount available, so nothing may be derived from one
 // there. Mirrors the section gate in envelopeActionDetails.
+const DMS_UPDATE_CASE_TYPE = "updateDmsInstructions";
 const TRADE_CASE_REQUEST_TYPES = {
-  updateDmsInstructions: {
+  [DMS_UPDATE_CASE_TYPE]: {
     typeOfRequest: "Update DMS Instructions",
     funded: false
   },
@@ -2942,7 +2944,15 @@ export default class EnvelopeShellV2 extends LightningElement {
     }
     if (entity.groupId === "cases") {
       const caseType = TRADE_CASE_REQUEST_TYPES[entity.type];
-      if (!caseType || !this._isRecordId(entity.financialAccountId)) {
+      // An Update DMS Instructions request that is a cash raise, a systematic-withdrawal change or
+      // "Other" carries no allocation: no source, so nothing to complete, block, review or file —
+      // mirroring the section gate in envelopeActionDetails.
+      if (
+        !caseType ||
+        !this._isRecordId(entity.financialAccountId) ||
+        (entity.type === DMS_UPDATE_CASE_TYPE &&
+          !dmsRequestCarriesTradeInstructions(formData))
+      ) {
         return null;
       }
       return {

@@ -906,9 +906,14 @@
   color: var(--slds-g-color-on-surface-2, #6b7280);
 }
 
+/* Now a sibling of __actions rather than living inside __view-mode-group (see
+   the HTML comment above its lwc:if) -- it's a direct child of __content's
+   own flex column, so margin:0 keeps the <p> from stacking its default
+   margin on top of __content's 16px gap instead of just using that gap. */
 .arc-record-list-view__server-search-hint {
   display: inline-flex;
   align-items: center;
+  margin: 0;
   padding: 6px 10px;
   border-radius: var(--slds-g-radius-border-2, 8px);
   background: #fffbeb;

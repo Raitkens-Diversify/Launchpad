@@ -4,6 +4,7 @@ import {
   waivedRelatedPartyKeys,
   ACCOUNT_GROUP_IDS,
   isDmsPlatform,
+  dmsRequestCarriesTradeInstructions,
   shapeVisibleFields,
   seedUserFieldDefaults,
   clearHiddenAnswers,
@@ -400,9 +401,12 @@ export default class EnvelopeActionDetails extends LightningElement {
   // The Trade Instructions section, shown in three interviews: a Financial Account (the Accounts and
   // DPI/Sponsor groups) whose Managed Account Platform selected in the form is a DMS platform (DMS or
   // DMS (Wrap)) — New Account setup; the Update Management Style case — Change Management style; and
-  // the Update DMS Instructions case — editing existing instructions. Its whole value comes from the
-  // draft (default until edited), and it's complete when every sleeve carries a strategy and a
-  // positive value and the model allocations total 100%.
+  // the Update DMS Instructions case — editing existing instructions. That last one is further
+  // gated on its Type of Request: a cash raise, a systematic-withdrawal add/remove or an "Other"
+  // request carries no allocation (see dmsRequestCarriesTradeInstructions), so the section drops
+  // out — live, as the picklist changes — and returns, prior rows intact, if the advisor switches
+  // back. Its whole value comes from the draft (default until edited), and it's complete when
+  // every sleeve carries a strategy and a positive value and the model allocations total 100%.
   //
   // All three capture an Expected Account Value, because each allocation row is shown as both a
   // target weight and a dollar figure and neither can be calculated without a denominator. Where the
@@ -415,7 +419,10 @@ export default class EnvelopeActionDetails extends LightningElement {
       ACCOUNT_GROUP_IDS.has(groupId) &&
       isDmsPlatform(draft[MANAGED_ACCOUNT_PLATFORM_FIELD]);
     const isCase = groupId === "cases";
-    const isDmsUpdateCase = isCase && entityType === DMS_UPDATE_CASE_TYPE;
+    const isDmsUpdateCase =
+      isCase &&
+      entityType === DMS_UPDATE_CASE_TYPE &&
+      dmsRequestCarriesTradeInstructions(draft);
     const isManagementStyleCase = isCase && entityType === MANAGEMENT_STYLE_CASE_TYPE;
     if (!isDmsAccount && !isDmsUpdateCase && !isManagementStyleCase) {
       return null;

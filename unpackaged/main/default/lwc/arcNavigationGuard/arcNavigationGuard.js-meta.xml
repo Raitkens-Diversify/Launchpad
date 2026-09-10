@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>64.0</apiVersion>
+    <isExposed>false</isExposed>
+    <masterLabel>Arc Navigation Guard</masterLabel>
+    <description>Lets a page-specific component (the envelope wizard) block arcNavigation&#39;s in-app navigation when it has unsaved changes.</description>
+</LightningComponentBundle>
