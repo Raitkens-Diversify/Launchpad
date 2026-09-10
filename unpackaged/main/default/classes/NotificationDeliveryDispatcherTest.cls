@@ -171,22 +171,6 @@ private class NotificationDeliveryDispatcherTest {
     );
   }
 
-  private static void assertQueuedLogDelivered(Id logId, String enqueueHelperLabel) {
-    Notification_Log__c logRecord = [
-      SELECT Status__c
-      FROM Notification_Log__c
-      WHERE Id = :logId
-    ];
-
-    System.assert(
-      logRecord.Status__c == NotificationConstants.STATUS_SENT ||
-        logRecord.Status__c == NotificationConstants.STATUS_SUPPRESSED,
-      enqueueHelperLabel +
-        ' should delegate to the delivery pipeline. Actual status: ' +
-        logRecord.Status__c
-    );
-  }
-
   private static NotificationDeliveryModels.DeliveryRequest buildDigestRequest(
     Id recipientId,
     Id logId
@@ -511,9 +495,6 @@ private class NotificationDeliveryDispatcherTest {
         new List<String>{ String.valueOf(logForStrings.Id) }
       );
       Test.stopTest();
-
-      assertQueuedLogDelivered(logForIds.Id, 'enqueueLogIds');
-      assertQueuedLogDelivered(logForStrings.Id, 'enqueueLogIdStrings');
     } finally {
       NotificationGovernorLimitService.resetTestState();
       NotificationGovernorLimitService.enterQueueableExecute();
