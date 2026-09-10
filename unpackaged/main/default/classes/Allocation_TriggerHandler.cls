@@ -154,20 +154,20 @@ public class Allocation_TriggerHandler {
         Map<Id,Allocation__c> finIdToAllocation = new Map<Id,Allocation__c>();
         List<Allocation__c> allocationsToUpdate = new List<Allocation__c>();
         for(Allocation__c a : newMap.values()){
-            finAcctIds.add(a.Financial_Account__c);
+            finAcctIds.add(a.Wizard_Financial_Account__c);
         }
         
         List<Allocation__c> oldAllocs = [SELECT Id, Request_Allocation_Inactivated_From__c, Current_Allocation__c, Date_Inactivated__c, 
-                                                   Financial_Account__c FROM Allocation__c WHERE Current_Allocation__c = TRUE AND Financial_Account__c in: finAcctIds
+                                                   Wizard_Financial_Account__c FROM Allocation__c WHERE Current_Allocation__c = TRUE AND Wizard_Financial_Account__c in: finAcctIds
                                                   AND Id NOT IN: newMap.keyset()];
         
         for(Allocation__c a : oldAllocs){
-            finIdToAllocation.put(a.Financial_Account__c, a);
+            finIdToAllocation.put(a.Wizard_Financial_Account__c, a);
         }
         
         for(Allocation__c a : newMap.values()){
-            if(finIdToAllocation.get(a.Financial_Account__c) != null){
-                Allocation__c oldAllocation = finIdToAllocation.get(a.Financial_Account__c);
+            if(finIdToAllocation.get(a.Wizard_Financial_Account__c) != null){
+                Allocation__c oldAllocation = finIdToAllocation.get(a.Wizard_Financial_Account__c);
                 oldAllocation.Request_Allocation_Inactivated_From__c = a.Request_Allocation_Originated_From__c;
                 oldAllocation.Current_Allocation__c = false;
                 oldAllocation.Date_Inactivated__c = a.Date_Implemented__c;
