@@ -77,13 +77,13 @@ public class Order_Ticket_TriggerHandler {
             Order_Ticket__c oldOT = oldMap.get(newOT.Id);
             System.debug('newOT.of_Orders__c: ' + newOT.of_Orders__c);
             if(newOT.Status__c == 'Completed' && oldOT.Status__c != 'Completed' && newOT.of_Orders__c > 0){
-                finAcctIds.add(newOT.Financial_Account__c);
+                finAcctIds.add(newOT.Wizard_Financial_Account__c);
                 System.debug('finAcctId added');
         	}
         }
         
         if(!finAcctIds.isEmpty()){
-            Map<Id,FinServ__FinancialAccount__c> finAccts = new Map<Id,FinServ__FinancialAccount__c>([SELECT Id, Financial_Advisor_Team__c FROM FinServ__FinancialAccount__c WHERE Id in: finAcctIds]);
+            Map<Id,Financial_Account__c> finAccts = new Map<Id,Financial_Account__c>([SELECT Id, Financial_Advisor_Team__c FROM Financial_Account__c WHERE Id in: finAcctIds]);
             for(Order_Ticket__c newOT : newMap.values()){
                 Order_Ticket__c oldOT = oldMap.get(newOT.Id);
                 if(newOT.Status__c == 'Completed' && oldOT.Status__c != 'Completed'){
@@ -94,7 +94,7 @@ public class Order_Ticket_TriggerHandler {
                     a.Financial_Account__c = newOT.Financial_Account__c;
                     a.Wizard_Financial_Account__c = newOT.Wizard_Financial_Account__c;
                     a.Advisor_Notes__c = newOT.Advisor_Notes__c;
-                    a.Financial_Advisor_Team__c = finAccts.get(newOT.Financial_Account__c).Financial_Advisor_Team__c;
+                    a.Financial_Advisor_Team__c = finAccts.get(newOT.Wizard_Financial_Account__c).Financial_Advisor_Team__c;
                     allocationsToInsert.add(a);
                 }
             }
