@@ -103,6 +103,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>Allocation_TriggerHandlerTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>ArcAccountCasesController</apexClass>
         <enabled>true</enabled>
     </classAccesses>

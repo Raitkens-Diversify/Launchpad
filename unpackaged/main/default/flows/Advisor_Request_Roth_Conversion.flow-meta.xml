@@ -172,7 +172,7 @@
         <locationY>350</locationY>
         <assignmentItems>
             <assignToReference>varFromFinAcctCustom.Id</assignToReference>
-            <operator>Assign</operator>
+            <operator>Add</operator>
             <value>
                 <elementReference>forSelectedFinancialAccount</elementReference>
             </value>
@@ -386,8 +386,8 @@ false)</expression>
         <name>forWithholdingsPopulatedOnFA</name>
         <dataType>Boolean</dataType>
         <expression>IF(
-    NOT(ISBLANK({!varFromFinAcctCustom.State_Withholding__c})) || 
-    NOT(ISBLANK({!varFromFinAcctCustom.Federal_Withholding__c})),
+    NOT(ISBLANK({!Get_Financial_Account_FromAccount.State_Withholding__c})) || 
+    NOT(ISBLANK({!Get_Financial_Account_FromAccount.Federal_Withholding__c})),
     true,
     false
 )</expression>
@@ -434,7 +434,7 @@ false)</expression>
             <field>Id</field>
             <operator>EqualTo</operator>
             <value>
-                <elementReference>varFromFinAcctCustom.Primary_Owner__r.PersonContactId</elementReference>
+                <elementReference>Get_Financial_Account_FromAccount.Primary_Owner__r.PersonContactId</elementReference>
             </value>
         </filters>
         <getFirstRecordOnly>true</getFirstRecordOnly>
@@ -727,7 +727,7 @@ false)</expression>
                     <inputParameters>
                         <name>defaultValue</name>
                         <value>
-                            <elementReference>varFromFinAcctCustom.Name</elementReference>
+                            <elementReference>Get_Financial_Account_FromAccount.Name</elementReference>
                         </value>
                     </inputParameters>
                     <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
@@ -874,7 +874,7 @@ false)</expression>
                     <inputParameters>
                         <name>defaultValue</name>
                         <value>
-                            <elementReference>varFromFinancialAccount.Name</elementReference>
+                            <elementReference>Get_Financial_Account_FromAccount.Name</elementReference>
                         </value>
                     </inputParameters>
                     <inputParameters>
@@ -902,7 +902,7 @@ false)</expression>
                     <inputParameters>
                         <name>defaultValue</name>
                         <value>
-                            <elementReference>varToFinancialAccount.Name</elementReference>
+                            <elementReference>Get_Financial_Account_ToAccount.Name</elementReference>
                         </value>
                     </inputParameters>
                     <inputParameters>
@@ -1005,7 +1005,7 @@ false)</expression>
                     <name>State_Withholding_FA</name>
                     <dataType>Number</dataType>
                     <defaultValue>
-                        <elementReference>varFromFinAcctCustom.State_Withholding__c</elementReference>
+                        <elementReference>Get_Financial_Account_FromAccount.State_Withholding__c</elementReference>
                     </defaultValue>
                     <fieldText>State % Withholding from FA:</fieldText>
                     <fieldType>InputField</fieldType>
@@ -1042,7 +1042,7 @@ false)</expression>
                     <name>Federal_Withholding_FA</name>
                     <dataType>Number</dataType>
                     <defaultValue>
-                        <elementReference>varFromFinAcctCustom.Federal_Withholding__c</elementReference>
+                        <elementReference>Get_Financial_Account_FromAccount.Federal_Withholding__c</elementReference>
                     </defaultValue>
                     <fieldText>Federal % Withholding from FA:</fieldText>
                     <fieldType>InputField</fieldType>
@@ -1254,7 +1254,7 @@ false)</expression>
             <targetReference>FA_Selection_From_FA</targetReference>
         </connector>
     </start>
-    <status>Active</status>
+    <status>Draft</status>
     <variables>
         <name>varCase</name>
         <dataType>SObject</dataType>
@@ -1271,7 +1271,7 @@ false)</expression>
         <isOutput>false</isOutput>
         <scale>2</scale>
         <value>
-            <elementReference>varFromFinAcctCustom.Federal_Withholding__c</elementReference>
+            <elementReference>Get_Financial_Account_FromAccount.Federal_Withholding__c</elementReference>
         </value>
     </variables>
     <variables>
@@ -1322,7 +1322,7 @@ false)</expression>
         <isOutput>false</isOutput>
         <scale>2</scale>
         <value>
-            <elementReference>varFromFinAcctCustom.State_Withholding__c</elementReference>
+            <elementReference>Get_Financial_Account_FromAccount.State_Withholding__c</elementReference>
         </value>
     </variables>
     <variables>

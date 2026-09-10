@@ -97,31 +97,43 @@ public class Allocation_TriggerHandler {
         }
     }
     
-    
+
+    /**
+     * Copy the originating order ticket's orders onto the new allocation as strategies.
+     * An allocation with no originating ticket, or whose ticket has no orders, simply gets no
+     * strategies (the earlier code dereferenced a null list and failed the whole insert).
+     */
     public void setAllocationStrategies(Map<Id,Allocation__c> newMap){
         List<Allocation_Strategy__c> stratsToInsert = new List<Allocation_Strategy__c>();
         Set<Id> orderTicketIds = new Set<Id>();
         Map<Id,List<Order__c>> orderTicketToOrders = new Map<Id,List<Order__c>>();
         for(Allocation__c a : newMap.values()){
-            orderTicketIds.add(a.Request_Allocation_Originated_From__c);
-        }
-        Map<Id,Order__c> ordersMap = new Map<Id,Order__c>([SELECT Id, Excluded_From_Allocation__c, Funding_Basis__c, Initial_Funding_Amount__c, Initial_Funding_Percentage__c, Order_Ticket__c, Order_Type__c,
-                                                           Principal_Amount__c, Share_Price__c, Share_Quantity__c, Strategy_Code__c, Strategy__c,
-                                                           Total_Initial_Funding_Amount__c FROM Order__c WHERE Order_Ticket__c in: orderTicketIds]);
-        for(Order__c o : ordersMap.values()){
-            if(orderTicketToOrders.get(o.Order_Ticket__c) == null){
-                List<Order__c> tempList = new List<Order__c>();
-                tempList.add(o);
-                orderTicketToOrders.put(o.Order_Ticket__c, tempList);
-            } else {
-                List<Order__c> tempList = orderTicketToOrders.get(o.Order_Ticket__c);
-                tempList.add(o);
-                orderTicketToOrders.put(o.Order_Ticket__c, tempList);
+            if(a.Request_Allocation_Originated_From__c != null){
+                orderTicketIds.add(a.Request_Allocation_Originated_From__c);
             }
         }
-        
+        if(orderTicketIds.isEmpty()){
+            return;
+        }
+        // Funding_Basis__c stays on its own line here and below: manifest/order-ticket-allocation
+        // derives the prod build (prod has no Funding_Basis__c yet) by dropping those lines.
+        List<Order__c> orders = [SELECT Id, Excluded_From_Allocation__c,
+                                        Funding_Basis__c,
+                                        Initial_Funding_Amount__c, Initial_Funding_Percentage__c, Order_Ticket__c, Order_Type__c,
+                                        Principal_Amount__c, Share_Price__c, Share_Quantity__c, Strategy_Code__c, Strategy__c,
+                                        Total_Initial_Funding_Amount__c FROM Order__c WHERE Order_Ticket__c IN :orderTicketIds];
+        for(Order__c o : orders){
+            if(!orderTicketToOrders.containsKey(o.Order_Ticket__c)){
+                orderTicketToOrders.put(o.Order_Ticket__c, new List<Order__c>());
+            }
+            orderTicketToOrders.get(o.Order_Ticket__c).add(o);
+        }
+
         for(Allocation__c a : newMap.values()){
             List<Order__c> orderList = orderTicketToOrders.get(a.Request_Allocation_Originated_From__c);
+            if(orderList == null){
+                continue;
+            }
             for(Order__c o : orderList){
                 Allocation_Strategy__c astrat = new Allocation_Strategy__c();
                 astrat.Allocation__c = a.Id;
@@ -143,40 +155,58 @@ public class Allocation_TriggerHandler {
                 stratsToInsert.add(astrat);
             }
         }
-        
+
         if(!stratsToInsert.isEmpty()){
             insert stratsToInsert;
         }
     }
-    
+
+    /**
+     * A new allocation replaces every other current allocation on the same wizard Financial
+     * Account: those are flagged inactive, stamped with the ticket that superseded them and the
+     * new allocation's implemented date. Keyed on Wizard_Financial_Account__c (the wizard writes
+     * that on every ticket); an allocation without one has nothing to supersede.
+     */
     public void markOldAllocationInactive(Map<Id,Allocation__c> newMap){
         Set<Id> finAcctIds = new Set<Id>();
-        Map<Id,Allocation__c> finIdToAllocation = new Map<Id,Allocation__c>();
-        List<Allocation__c> allocationsToUpdate = new List<Allocation__c>();
         for(Allocation__c a : newMap.values()){
-            finAcctIds.add(a.Wizard_Financial_Account__c);
+            if(a.Wizard_Financial_Account__c != null){
+                finAcctIds.add(a.Wizard_Financial_Account__c);
+            }
         }
-        
-        List<Allocation__c> oldAllocs = [SELECT Id, Request_Allocation_Inactivated_From__c, Current_Allocation__c, Date_Inactivated__c, 
-                                                   Wizard_Financial_Account__c FROM Allocation__c WHERE Current_Allocation__c = TRUE AND Wizard_Financial_Account__c in: finAcctIds
-                                                  AND Id NOT IN: newMap.keyset()];
-        
-        for(Allocation__c a : oldAllocs){
-            finIdToAllocation.put(a.Wizard_Financial_Account__c, a);
+        if(finAcctIds.isEmpty()){
+            return;
         }
-        
+
+        Map<Id,List<Allocation__c>> finIdToOldAllocations = new Map<Id,List<Allocation__c>>();
+        for(Allocation__c old : [SELECT Id, Request_Allocation_Inactivated_From__c, Current_Allocation__c, Date_Inactivated__c,
+                                        Wizard_Financial_Account__c FROM Allocation__c
+                                 WHERE Current_Allocation__c = TRUE AND Wizard_Financial_Account__c IN :finAcctIds
+                                 AND Id NOT IN :newMap.keySet()]){
+            if(!finIdToOldAllocations.containsKey(old.Wizard_Financial_Account__c)){
+                finIdToOldAllocations.put(old.Wizard_Financial_Account__c, new List<Allocation__c>());
+            }
+            finIdToOldAllocations.get(old.Wizard_Financial_Account__c).add(old);
+        }
+
+        // Keyed by Id so two new allocations for the same account in one batch retire each
+        // predecessor once instead of listing it twice in the update.
+        Map<Id,Allocation__c> allocationsToUpdate = new Map<Id,Allocation__c>();
         for(Allocation__c a : newMap.values()){
-            if(finIdToAllocation.get(a.Wizard_Financial_Account__c) != null){
-                Allocation__c oldAllocation = finIdToAllocation.get(a.Wizard_Financial_Account__c);
+            List<Allocation__c> oldAllocations = finIdToOldAllocations.get(a.Wizard_Financial_Account__c);
+            if(oldAllocations == null){
+                continue;
+            }
+            for(Allocation__c oldAllocation : oldAllocations){
                 oldAllocation.Request_Allocation_Inactivated_From__c = a.Request_Allocation_Originated_From__c;
                 oldAllocation.Current_Allocation__c = false;
                 oldAllocation.Date_Inactivated__c = a.Date_Implemented__c;
-                allocationsToUpdate.add(oldAllocation);
+                allocationsToUpdate.put(oldAllocation.Id, oldAllocation);
             }
         }
-        
+
         if(!allocationsToUpdate.isEmpty()){
-            update allocationsToUpdate;
+            update allocationsToUpdate.values();
         }
     }
 }
