@@ -89,6 +89,13 @@
                 <elementReference>CaseMilestoneId</elementReference>
             </value>
         </filters>
+        <filters>
+            <field>IsCompleted</field>
+            <operator>NotEqualTo</operator>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </filters>
         <inputAssignments>
             <field>CompletionDate</field>
             <value>

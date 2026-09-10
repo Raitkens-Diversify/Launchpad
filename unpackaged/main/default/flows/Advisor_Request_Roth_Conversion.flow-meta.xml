@@ -81,7 +81,7 @@
             <assignToReference>varCase.Subject</assignToReference>
             <operator>Assign</operator>
             <value>
-                <stringValue>Roth Conversion for {!varFromFinancialAccount.Name}</stringValue>
+                <elementReference>varSubject</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
@@ -92,14 +92,14 @@
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>varCase.From_Account__c</assignToReference>
+            <assignToReference>varCase.From_Financial_Account__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>varFromFinAcctCustom.Id</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>varCase.To_Account__c</assignToReference>
+            <assignToReference>varCase.To_Financial_Account__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>varToFinAcctCustom.Id</elementReference>
@@ -286,16 +286,16 @@
     <dynamicChoiceSets>
         <name>PartialConversionType_Picklist_ChoiceSet</name>
         <dataType>Picklist</dataType>
-        <displayField xsi:nil="true"/>
-        <object xsi:nil="true"/>
+        <displayField xsi:nil="true" />
+        <object xsi:nil="true" />
         <picklistField>Partial_Conversion_Type__c</picklistField>
         <picklistObject>Case</picklistObject>
     </dynamicChoiceSets>
     <dynamicChoiceSets>
         <name>SignatureType_Picklist_ChoiceSet</name>
         <dataType>Picklist</dataType>
-        <displayField xsi:nil="true"/>
-        <object xsi:nil="true"/>
+        <displayField xsi:nil="true" />
+        <object xsi:nil="true" />
         <picklistField>Signature_Type__c</picklistField>
         <picklistObject>Case</picklistObject>
     </dynamicChoiceSets>
@@ -346,8 +346,8 @@
     <dynamicChoiceSets>
         <name>TypeOfConversion_Picklist_ChoiceSet</name>
         <dataType>Picklist</dataType>
-        <displayField xsi:nil="true"/>
-        <object xsi:nil="true"/>
+        <displayField xsi:nil="true" />
+        <object xsi:nil="true" />
         <picklistField>Type_of_Conversion__c</picklistField>
         <picklistObject>Case</picklistObject>
     </dynamicChoiceSets>
@@ -391,6 +391,11 @@ false)</expression>
     true,
     false
 )</expression>
+    </formulas>
+    <formulas>
+        <name>varSubject</name>
+        <dataType>String</dataType>
+        <expression>&#39;Roth Conversion for &#39; + {!Get_Financial_Account_FromAccount.Name}</expression>
     </formulas>
     <interviewLabel>Advisor Request - Roth Conversion {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Advisor Request - Roth Conversion</label>
@@ -1254,7 +1259,7 @@ false)</expression>
             <targetReference>FA_Selection_From_FA</targetReference>
         </connector>
     </start>
-    <status>Draft</status>
+    <status>Active</status>
     <variables>
         <name>varCase</name>
         <dataType>SObject</dataType>

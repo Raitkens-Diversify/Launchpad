@@ -1143,8 +1143,27 @@ export default class EnvelopeShellV2 extends LightningElement {
   _saveRetryCount = 0;
   _saveFailureAlertShown = false;
 
+  // Unsaved-changes confirmation shown by confirmExit() when a caller tries to leave the interview,
+  // Review Missing Items or Review & Submit while a save is pending/in-flight. _pendingExitResolve
+  // settles the promise confirmExit() handed back once the modal's choice (or cancel) is known.
+  showUnsavedChangesModal = false;
+  unsavedChangesModalBusy = false;
+  unsavedChangesModalError = null;
+  _pendingExitPromise = null;
+  _pendingExitResolve = null;
+
   get isActionView() {
     return this.selectedAction !== null;
+  }
+
+  // De-facto dirty flag: a save is pending (debounced, waiting on the inactivity window) or already
+  // in flight. Read by confirmExit() and exposed for the top bar's Save & Exit button/host checks.
+  @api
+  get hasUnsavedChanges() {
+    return (
+      this.saveStatus === SAVE_STATUS.PENDING ||
+      this.saveStatus === SAVE_STATUS.SAVING
+    );
   }
 
   // The saved form values for the open action, prefilled into the interview form.
@@ -2692,10 +2711,17 @@ export default class EnvelopeShellV2 extends LightningElement {
   }
 
   // Return from a content sub-view (Manage Documents, Review Missing Items, Review & Submit)
-  // to the action-items view and clear its breadcrumb/header. Flush first so a pending
-  // Review-Missing-Items edit isn't lost on the way out (no-ops when nothing is pending).
+  // to the action-items view and clear its breadcrumb/header. Guarded the same way as the
+  // interview: a pending Review Missing Items edit prompts before it's lost on the way out.
   handleSubViewBack() {
-    this._flushPendingSave();
+    this.confirmExit().then((proceed) => {
+      if (proceed) {
+        this._completeSubViewBack();
+      }
+    });
+  }
+
+  _completeSubViewBack() {
     this.isMissingItemsLoading = false;
     Promise.resolve().then(() => {
       this.activeView = "items";
@@ -3431,17 +3457,22 @@ export default class EnvelopeShellV2 extends LightningElement {
       });
   }
 
-  // Back from the interview. When the interview was opened from Review & Submit (activeView is
-  // still 'review'), return there via openReview(), which flushes the pending edit, rebuilds the
-  // summary from the updated model, and restores the focused top bar. (The envelope breadcrumb
-  // therefore steps back one level per click: interview → review → workspace.) Otherwise flush
-  // any pending edit into the model, restore the workspace, and clear the breadcrumb crumb.
+  // Back from the interview (also reached via closeSubView() for the top bar's Close button and
+  // the breadcrumb's current-crumb click). Gated by confirmExit(): prompts to save or discard when
+  // the interview holds unsaved edits, otherwise proceeds straight to _completeActionBack().
   handleActionBack() {
+    this.confirmExit().then((proceed) => {
+      if (proceed) {
+        this._completeActionBack();
+      }
+    });
+  }
+
+  _completeActionBack() {
     if (this.activeView === "review") {
       this.openReview();
       return;
     }
-    this._flushPendingSave();
     this.selectedAction = null;
     this._rawActionSchema = [];
     this._dispatchCrumb(null);
@@ -4502,16 +4533,13 @@ export default class EnvelopeShellV2 extends LightningElement {
     return !draftValuesEqual(before || {}, after || {});
   }
 
-  // Flush a pending/in-flight edit immediately (e.g. before leaving the interview) so nothing is
-  // lost, then stop all timers and reset the indicator. Leaving the Review Missing Items screen
-  // also runs the Apex persists right away — its debounced cycle may never fire again once the
-  // view unmounts, unlike the interview, whose account fields persist on the next cycle.
-  _flushPendingSave() {
-    // Commit the open screen's buffered keystrokes before deciding whether anything is pending. The
-    // Trade Instructions section and text-family Key Point fields hold a typed value until blur or a
-    // short idle window, and an edit that has not committed yet has not armed the save cycle either —
-    // so reading saveStatus first would conclude there was nothing to flush and lose the last thing
-    // the user typed.
+  // Commit the open screen's buffered keystrokes, merge the draft into the model and reset the
+  // save-status/timers — the synchronous half shared by both the fire-and-forget flush and the
+  // blocking one. The Trade Instructions section and text-family Key Point fields hold a typed
+  // value until blur or a short idle window, and an edit that has not committed yet has not armed
+  // the save cycle either — so reading saveStatus first would conclude there was nothing to flush
+  // and lose the last thing the user typed.
+  _prepareFlush() {
     this.refs.actionDetails?.flushPendingEdits?.();
     this.refs.missingItems?.flushPendingEdits?.();
     const hadPending =
@@ -4532,17 +4560,121 @@ export default class EnvelopeShellV2 extends LightningElement {
     this._clearAllSaveTimers();
     this.isSaving = false;
     this.saveStatus = SAVE_STATUS.IDLE;
+    return { hadPending, wasSaving, openActionId };
+  }
+
+  // Flush a pending/in-flight edit immediately (e.g. before leaving the interview) so nothing is
+  // lost, then stop all timers and reset the indicator. Leaving the Review Missing Items screen
+  // also runs the Apex persists right away — its debounced cycle may never fire again once the
+  // view unmounts, unlike the interview, whose account fields persist on the next cycle. Fire-and-
+  // forget: the caller doesn't wait for (or learn) the outcome — see _flushAndPersist for the
+  // blocking variant used by Save & Exit and the unsaved-changes modal.
+  _flushPendingSave() {
+    const { hadPending, wasSaving, openActionId } = this._prepareFlush();
     if (hadPending && !wasSaving) {
       this._persistFlushedState(openActionId);
     }
   }
 
-  // Persist the just-flushed model in the background while the view is torn down: the same
-  // envelope-state write the autosave cycle runs, plus the selective entity update for whatever was
-  // being edited — the open interview's record when leaving an interview, else the Review Missing
-  // Items entities. Runs without the status indicator (there is no screen left to show it), and
-  // reads from the model rather than the (now unmounting) interview DOM. Failures log without a
-  // toast, but still count toward the recurrent-failure escalation.
+  // Blocking variant of _flushPendingSave: awaits the same persist chain and resolves to whether it
+  // actually succeeded, so a caller can hold its UI (a busy button, a modal's confirm action) until
+  // the save has genuinely landed instead of firing it and moving on. Resolves true when there was
+  // nothing to save (a no-op save trivially "succeeds").
+  async _flushAndPersist() {
+    const { hadPending, wasSaving, openActionId } = this._prepareFlush();
+    if (!hadPending || wasSaving) {
+      return true;
+    }
+    return this._persistFlushedState(openActionId);
+  }
+
+  // Gate for every path that leaves the interview, Review Missing Items or Review & Submit (the
+  // interview's own Back button, the top bar's Close button and the breadcrumb's current-crumb
+  // click, all of which route through handleActionBack/handleSubViewBack; also called by the app
+  // for the top-level "Envelopes" crumb, which tears the whole shell down). Resolves true when it's
+  // safe to proceed: immediately when nothing is unsaved, or once the unsaved-changes modal's choice
+  // (save-and-exit succeeded, or exit-without-saving) is known. Resolves false on Cancel. Re-entrant:
+  // a second call while the modal is already open returns the same pending promise.
+  @api
+  confirmExit() {
+    if (this._pendingExitPromise) {
+      return this._pendingExitPromise;
+    }
+    this.refs.actionDetails?.flushPendingEdits?.();
+    this.refs.missingItems?.flushPendingEdits?.();
+    if (!this.hasUnsavedChanges) {
+      return Promise.resolve(true);
+    }
+    this._pendingExitPromise = new Promise((resolve) => {
+      this._pendingExitResolve = (result) => {
+        this._pendingExitPromise = null;
+        resolve(result);
+      };
+    });
+    this.unsavedChangesModalError = null;
+    this.showUnsavedChangesModal = true;
+    return this._pendingExitPromise;
+  }
+
+  // The top bar's "Save & Exit" action (only shown while the interview is open): a deliberate,
+  // explicit save — always blocking, unlike the silent autosave/flush-on-navigate cycles. On
+  // failure, surfaces a toast immediately regardless of the recurrent-failure threshold, since the
+  // user is actively waiting on this one rather than editing in the background.
+  @api
+  async saveAndExit() {
+    const ok = await this._flushAndPersist();
+    if (ok) {
+      this._completeActionBack();
+    } else {
+      this._showToast(
+        "Save failed",
+        "We couldn't save your changes. Please try again.",
+        "error"
+      );
+    }
+    return ok;
+  }
+
+  // "Save & Exit"/"Exit without saving" chosen in the unsaved-changes modal.
+  async handleUnsavedChangesConfirm(event) {
+    const choice = event?.detail?.choice;
+    if (choice === "saveAndExit") {
+      this.unsavedChangesModalBusy = true;
+      this.unsavedChangesModalError = null;
+      const ok = await this._flushAndPersist();
+      this.unsavedChangesModalBusy = false;
+      if (!ok) {
+        this.unsavedChangesModalError =
+          "We couldn't save your changes. Please try again, or exit without saving.";
+        return;
+      }
+      this._settleExitPrompt(true);
+    } else if (choice === "exitWithoutSaving") {
+      this._resetSaveStatus();
+      this._settleExitPrompt(true);
+    }
+  }
+
+  // Cancel, backdrop click or Escape — stay on the current screen, nothing exits.
+  handleUnsavedChangesClose() {
+    this._settleExitPrompt(false);
+  }
+
+  _settleExitPrompt(result) {
+    this.showUnsavedChangesModal = false;
+    this.unsavedChangesModalError = null;
+    const resolve = this._pendingExitResolve;
+    this._pendingExitResolve = null;
+    resolve?.(result);
+  }
+
+  // Persist the just-flushed model: the same envelope-state write the autosave cycle runs, plus the
+  // selective entity update for whatever was being edited — the open interview's record when
+  // leaving an interview, else the Review Missing Items entities. Reads from the model rather than
+  // the (possibly now unmounting) interview DOM. Returns whether it succeeded so a blocking caller
+  // (_flushAndPersist) can react; the fire-and-forget caller (_flushPendingSave) ignores the return
+  // value exactly as before. Failures log without a toast here, but still count toward the
+  // recurrent-failure escalation — a blocking caller adds its own immediate feedback on failure.
   async _persistFlushedState(openActionId) {
     try {
       const missingItems = this._missingItemsTotalForSave();
@@ -4570,9 +4702,11 @@ export default class EnvelopeShellV2 extends LightningElement {
       // related-party reconcile, which an interview can arm too.
       await this._queueReconcile();
       this._recordSaveSuccess();
+      return true;
     } catch (error) {
       console.error(error);
       this._recordSaveFailure();
+      return false;
     }
   }
 
@@ -4945,9 +5079,11 @@ export default class EnvelopeShellV2 extends LightningElement {
   // Notify the app of the active sub-view's breadcrumb crumb (a label while open, null on back).
   // `header` optionally describes a focused top-bar variant (e.g. Review Missing Items); when
   // omitted, the sub-view keeps the default logo + breadcrumb bar (action interview, documents).
-  _dispatchCrumb(crumb, header = null) {
+  // `isActionView` tells the app specifically that the interview (not Manage Documents, which also
+  // keeps the default bar) is open, so it can show the top bar's Save & Exit action.
+  _dispatchCrumb(crumb, header = null, { isActionView = false } = {}) {
     this.dispatchEvent(
-      new CustomEvent("subviewchange", { detail: { crumb, header } })
+      new CustomEvent("subviewchange", { detail: { crumb, header, isActionView } })
     );
   }
 
@@ -5395,7 +5531,9 @@ export default class EnvelopeShellV2 extends LightningElement {
     this._loadActionSchema(entity);
     this._resetSaveStatus();
     this._dispatchCrumb(
-      [entity.name, action.title].filter(Boolean).join(" - ")
+      [entity.name, action.title].filter(Boolean).join(" - "),
+      null,
+      { isActionView: true }
     );
   }
 

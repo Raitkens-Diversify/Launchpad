@@ -3408,6 +3408,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Case.From_Financial_Account__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Case.Maestro_Duplicate_Created__c</field>
         <readable>true</readable>
     </fieldPermissions>

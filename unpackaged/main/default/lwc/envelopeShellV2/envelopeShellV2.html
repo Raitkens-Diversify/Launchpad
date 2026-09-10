@@ -212,4 +212,16 @@
     onclose={handleCreateMemberClose}
   >
   </c-envelope-create-pending-member-modal>
+
+  <!-- Unsaved-changes prompt shown by confirmExit() when leaving the interview, Review Missing
+         Items or Review & Submit with a save pending/in-flight. Reactive (not imperative refs)
+         since the host toggles busy/error-message while it stays open. -->
+  <c-envelope-unsaved-changes-modal
+    is-open={showUnsavedChangesModal}
+    busy={unsavedChangesModalBusy}
+    error-message={unsavedChangesModalError}
+    onconfirm={handleUnsavedChangesConfirm}
+    onclose={handleUnsavedChangesClose}
+  >
+  </c-envelope-unsaved-changes-modal>
 </template>
