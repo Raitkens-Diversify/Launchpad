@@ -109,6 +109,106 @@
   padding-top: 0.875rem;
 }
 
+/* ---- panel action row (Files: Add Files) ---- */
+
+.arc-household-detail__panel-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.75rem;
+}
+
+.arc-household-detail__action {
+  padding: 4px 10px;
+  border: 1px solid var(--lwc-colorBorder, #c9c9c9);
+  border-radius: var(--lwc-borderRadiusMedium, 4px);
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--lwc-colorTextDefault, #181818);
+  cursor: pointer;
+}
+
+.arc-household-detail__action:hover {
+  background: var(--lwc-colorBackgroundRowHover, #f3f3f3);
+}
+
+/* ---- Add Files popup (same shape as arcAdvertisingItemDetail's) ---- */
+
+.arc-household-detail__modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(107, 114, 128, 0.5);
+}
+
+.arc-household-detail__modal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow: hidden;
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+  border-radius: var(--lwc-borderRadiusMedium, 8px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+.arc-household-detail__modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--lwc-colorBorder, #c9c9c9);
+}
+
+.arc-household-detail__modal-title {
+  margin: 0;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 700;
+  color: var(--lwc-colorTextDefault, #181818);
+}
+
+.arc-household-detail__modal-close {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--lwc-colorTextWeak, #444444);
+}
+
+.arc-household-detail__modal-body {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.arc-household-detail__modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--lwc-colorBorder, #c9c9c9);
+}
+
+.arc-household-detail__modal-button {
+  padding: 8px 16px;
+  border: 1px solid var(--lwc-colorBorder, #c9c9c9);
+  border-radius: var(--lwc-borderRadiusMedium, 6px);
+  background: var(--lwc-colorBackgroundAlt, #ffffff);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--lwc-colorTextDefault, #181818);
+  cursor: pointer;
+}
+
 /* ---- Details: stacked sections ---- */
 
 .arc-household-detail__section + .arc-household-detail__section {

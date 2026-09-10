@@ -111,6 +111,15 @@
              tab -- see handleFileRowNavigate. -->
         <template lwc:if={isFilesActive}>
           <div class="arc-household-detail__panel" role="tabpanel" aria-label="Files">
+            <div class="arc-household-detail__panel-actions">
+              <button
+                class="arc-household-detail__action"
+                type="button"
+                onclick={handleAddFilesClick}
+              >
+                Add Files
+              </button>
+            </div>
             <template lwc:if={fileErrorMessage}>
               <p class="arc-household-detail__error" role="alert">{fileErrorMessage}</p>
             </template>
@@ -142,6 +151,52 @@
             <c-arc-account-investments-list></c-arc-account-investments-list>
           </div>
         </template>
+      </div>
+    </template>
+
+    <!-- Add Files: lightning-file-upload in a popup, the way the Advertising
+         Item page uploads. The platform dialog creates the files and links
+         them to this record (record-id); the list re-reads when it finishes. -->
+    <template lwc:if={isAddFilesModalOpen}>
+      <div class="arc-household-detail__modal-backdrop">
+        <section
+          class="arc-household-detail__modal"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Add Files"
+        >
+          <header class="arc-household-detail__modal-header">
+            <h2 class="arc-household-detail__modal-title">Add Files</h2>
+            <button
+              class="arc-household-detail__modal-close"
+              type="button"
+              aria-label="Close"
+              onclick={handleAddFilesModalClose}
+            >
+              &times;
+            </button>
+          </header>
+
+          <div class="arc-household-detail__modal-body">
+            <lightning-file-upload
+              label="Upload Files"
+              name="accountFileUploader"
+              record-id={recordId}
+              onuploadfinished={handleFilesUploadFinished}
+              multiple
+            ></lightning-file-upload>
+          </div>
+
+          <footer class="arc-household-detail__modal-footer">
+            <button
+              class="arc-household-detail__modal-button"
+              type="button"
+              onclick={handleAddFilesModalClose}
+            >
+              Done
+            </button>
+          </footer>
+        </section>
       </div>
     </template>
   </div>

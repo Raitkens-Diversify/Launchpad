@@ -11,6 +11,7 @@ import {
   recordNavSelectionById
 } from "c/arcNavTrailState";
 import { getRecord, getFieldValue } from "lightning/uiRecordApi";
+import { refreshApex } from "@salesforce/apex";
 import getFormSchema from "@salesforce/apex/FieldDetailController.getFormSchema";
 import getSectionLayouts from "@salesforce/apex/FieldDetailController.getSectionLayouts";
 import getRecordValuesForType from "@salesforce/apex/FieldDetailController.getRecordValuesForType";
@@ -539,8 +540,13 @@ export default class ArcHouseholdDetail extends NavigationMixin(
   fileColumns = FILE_COLUMNS;
   fileErrorMessage = "";
 
+  /** The wire's own result, kept so an upload can refreshApex the list. */
+  _filesResult;
+
   @wire(getFiles, { accountId: "$recordId" })
-  wiredFiles({ data, error }) {
+  wiredFiles(result) {
+    this._filesResult = result;
+    const { data, error } = result;
     this.files = (data || []).map((file) => ({
       ...file,
       id: file.contentDocumentId
@@ -1047,6 +1053,28 @@ export default class ArcHouseholdDetail extends NavigationMixin(
       this.fileErrorMessage =
         error?.body?.message || "Unable to open this file right now.";
     }
+  }
+
+  // ---- Add Files (popup) --------------------------------------------------
+
+  isAddFilesModalOpen = false;
+
+  handleAddFilesClick() {
+    this.isAddFilesModalOpen = true;
+  }
+
+  handleAddFilesModalClose() {
+    this.isAddFilesModalOpen = false;
+  }
+
+  /**
+   * By the time this fires the platform dialog has created the files and
+   * linked them to this record, so the only work left is re-reading the
+   * cached list.
+   */
+  handleFilesUploadFinished() {
+    this.handleAddFilesModalClose();
+    refreshApex(this._filesResult);
   }
 
   /** True when the Investments & Services tab is the open one. */
