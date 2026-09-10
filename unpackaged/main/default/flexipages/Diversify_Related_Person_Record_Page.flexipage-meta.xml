@@ -1101,7 +1101,7 @@
             <fieldInstance>
                 <fieldInstanceProperties>
                     <name>uiBehavior</name>
-                    <value>required</value>
+                    <value>none</value>
                 </fieldInstanceProperties>
                 <fieldItem>Record.Financial_Advisor_Team__c</fieldItem>
                 <identifier>RecordFinancial_Advisor_Team_cField</identifier>
