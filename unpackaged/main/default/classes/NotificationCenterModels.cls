@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-06-16
+ * Date: 2026-09-09
  *
  * DTOs for notification center reads and writes.
  */
@@ -182,6 +182,8 @@ public with sharing class NotificationCenterModels {
     @AuraEnabled
     public String channel { get; set; }
     @AuraEnabled
+    public List<String> channels { get; set; }
+    @AuraEnabled
     public String status { get; set; }
     @AuraEnabled
     public String suppressionReason { get; set; }
@@ -217,6 +219,7 @@ public with sharing class NotificationCenterModels {
     public String branchAffiliations { get; set; }
 
     public LogItem() {
+      this.channels = new List<String>();
     }
   }
 

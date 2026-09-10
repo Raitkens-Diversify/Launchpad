@@ -347,6 +347,27 @@ private class NotificationCenterLogItemEnricherTest {
   }
 
   @IsTest
+  static void mergePresentationChannels_collectsDistinctChannelsInOrder() {
+    NotificationCenterModels.LogItem target = new NotificationCenterModels.LogItem();
+    target.channel = NotificationConstants.CHANNEL_EMAIL;
+    NotificationCenterLogItemEnricher.addPresentationChannel(
+      target,
+      NotificationConstants.CHANNEL_EMAIL
+    );
+
+    NotificationCenterModels.LogItem source = new NotificationCenterModels.LogItem();
+    source.channel = NotificationConstants.CHANNEL_IN_APP;
+    source.channels.add(NotificationConstants.CHANNEL_IN_APP);
+    source.channels.add(NotificationConstants.CHANNEL_EMAIL);
+
+    NotificationCenterLogItemEnricher.mergePresentationChannels(target, source);
+
+    System.assertEquals(2, target.channels.size());
+    System.assertEquals(NotificationConstants.CHANNEL_IN_APP, target.channels[0]);
+    System.assertEquals(NotificationConstants.CHANNEL_EMAIL, target.channels[1]);
+  }
+
+  @IsTest
   static void sortBatchItemsByChannelPreference_prefersInAppOverEmail() {
     NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
 

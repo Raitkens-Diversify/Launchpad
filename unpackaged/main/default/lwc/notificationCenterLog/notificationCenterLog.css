@@ -1,4 +1,4 @@
-/* Author: Hoang Long Vu To | Date: 2026-08-06 */
+/* Author: Hoang Long Vu To | Date: 2026-09-09 */
 
 .log-view__filter-row {
   display: flex;
@@ -102,4 +102,11 @@
 .log-table__multiline {
   display: block;
   white-space: pre-line;
+}
+
+.log-table__channel-pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
 }

@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-06-16
+ * Date: 2026-09-09
  *
  * Service layer for notification center reads and writes. Accepts an explicit
  * recipient id so dashboard, log, inbox, and future screens can share the same
@@ -212,17 +212,31 @@ public with sharing class NotificationCenterService {
           notificationById
         );
 
+        Map<String, NotificationCenterModels.LogItem> presentationItemByKey = new Map<String, NotificationCenterModels.LogItem>();
+        for (NotificationCenterModels.LogItem filteredItem : filteredItems) {
+          String existingKey = NotificationCenterLogItemEnricher.buildPresentationDedupKey(
+            filteredItem,
+            null
+          );
+          presentationItemByKey.put(existingKey, filteredItem);
+        }
+
         for (NotificationCenterModels.LogItem batchItem : batchItems) {
           String dedupKey = NotificationCenterLogItemEnricher.buildPresentationDedupKey(
             batchItem,
             notificationById.get(batchItem.id)
           );
 
-          if (seenPresentationKeys.contains(dedupKey)) {
+          if (presentationItemByKey.containsKey(dedupKey)) {
+            NotificationCenterLogItemEnricher.mergePresentationChannels(
+              presentationItemByKey.get(dedupKey),
+              batchItem
+            );
             continue;
           }
 
           seenPresentationKeys.add(dedupKey);
+          presentationItemByKey.put(dedupKey, batchItem);
 
           if (filteredItems.size() < pageSize) {
             filteredItems.add(batchItem);
@@ -733,6 +747,7 @@ public with sharing class NotificationCenterService {
     item.targetRecordId = notification.Target_Record_Id__c;
     item.frequency = notification.Frequency__c;
     item.channel = notification.Channel__c;
+    NotificationCenterLogItemEnricher.addPresentationChannel(item, notification.Channel__c);
     item.status = notification.Status__c;
     item.suppressionReason = notification.Suppression_Reason__c;
     item.errorMessage = notification.Error_Message__c;

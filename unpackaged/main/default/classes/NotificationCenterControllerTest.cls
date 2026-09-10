@@ -464,6 +464,13 @@ private class NotificationCenterControllerTest {
         result.filteredTotalCount,
         'Presentation log total should deduplicate multi-channel rows'
       );
+      System.assertEquals(2, result.items[0].channels.size());
+      System.assert(
+        result.items[0].channels.contains(NotificationConstants.CHANNEL_IN_APP)
+      );
+      System.assert(
+        result.items[0].channels.contains(NotificationConstants.CHANNEL_EMAIL)
+      );
     }
   }
 

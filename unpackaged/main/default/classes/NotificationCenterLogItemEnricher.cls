@@ -292,6 +292,67 @@ public with sharing class NotificationCenterLogItemEnricher {
     );
   }
 
+  public static void mergePresentationChannels(
+    NotificationCenterModels.LogItem target,
+    NotificationCenterModels.LogItem source
+  ) {
+    if (target == null || source == null) {
+      return;
+    }
+
+    addPresentationChannel(target, source.channel);
+    if (source.channels == null) {
+      return;
+    }
+
+    for (String channelName : source.channels) {
+      addPresentationChannel(target, channelName);
+    }
+  }
+
+  public static void addPresentationChannel(
+    NotificationCenterModels.LogItem item,
+    String channelName
+  ) {
+    if (item == null || String.isBlank(channelName)) {
+      return;
+    }
+
+    if (item.channels == null) {
+      item.channels = new List<String>();
+    }
+
+    for (String existingChannel : item.channels) {
+      if (existingChannel == channelName) {
+        return;
+      }
+    }
+
+    item.channels.add(channelName);
+    sortPresentationChannels(item);
+  }
+
+  private static void sortPresentationChannels(NotificationCenterModels.LogItem item) {
+    if (item == null || item.channels == null || item.channels.size() < 2) {
+      return;
+    }
+
+    List<String> sortedChannels = new List<String>();
+    for (String channelName : NotificationConstants.CHANNEL_ORDER) {
+      if (item.channels.contains(channelName)) {
+        sortedChannels.add(channelName);
+      }
+    }
+
+    for (String channelName : item.channels) {
+      if (!sortedChannels.contains(channelName)) {
+        sortedChannels.add(channelName);
+      }
+    }
+
+    item.channels = sortedChannels;
+  }
+
   public static void sortBatchItemsByChannelPreference(
     List<NotificationCenterModels.LogItem> items,
     Map<Id, Notification_Log__c> notificationById

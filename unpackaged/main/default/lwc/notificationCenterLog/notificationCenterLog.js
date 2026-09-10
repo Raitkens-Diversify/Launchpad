@@ -1,6 +1,6 @@
 /**
  * Author: Hoang Long Vu To
- * Date: 2026-08-06
+ * Date: 2026-09-09
  *
  * User-facing notification log grouped by day with AC1-AC5 filters.
  */
@@ -15,6 +15,7 @@ import {
   ICON,
   LOG_RECORD_TYPE_FILTER_OPTIONS,
   LOG_STATUS_FILTER,
+  buildChannelPills,
   buildDivFilterOptionClass,
   buildSourceTypeDisplay,
   formatLogDayLabelFromTimestamp,
@@ -28,6 +29,7 @@ const PAGE_SIZE = 50;
 const LOG_TABLE_COLUMNS = Object.freeze([
   { label: "Subject", fieldName: "subject" },
   { label: "Type", fieldName: "sourceType" },
+  { label: "Channel", fieldName: "channel" },
   { label: "Change Made", fieldName: "changeMade" },
   { label: "Assigned To", fieldName: "assignedTo" },
   { label: "Change Date", fieldName: "changeDateLabel" },
@@ -373,6 +375,9 @@ export default class NotificationCenterLog extends NavigationMixin(
     );
     const changeDayKey = this.buildChangeDayKey(changeTimestamp);
     const sourceTypeDisplay = buildSourceTypeDisplay(item.sourceType);
+    const channelPills = buildChannelPills(
+      item.channels?.length ? item.channels : item.channel ? [item.channel] : []
+    );
 
     return {
       ...item,
@@ -381,6 +386,11 @@ export default class NotificationCenterLog extends NavigationMixin(
       changeDayLabel: formatLogDayLabelFromTimestamp(changeTimestamp),
       subjectLabel: item.subject || item.title || DISPLAY_NOT_APPLICABLE,
       sourceTypeLabel: sourceTypeDisplay.label,
+      channelPills,
+      hasChannelPills: channelPills.length > 0,
+      channelSummaryLabel: channelPills.length
+        ? `Channels: ${channelPills.map((pill) => pill.label).join(", ")}`
+        : DISPLAY_NOT_APPLICABLE,
       changeMadeLabel: item.changeMade || DISPLAY_NOT_APPLICABLE,
       assignedToLabel: item.assignedTo || DISPLAY_NOT_APPLICABLE,
       householdLabel: item.householdName || DISPLAY_NOT_APPLICABLE,

@@ -1,4 +1,4 @@
-<!-- Author: Hoang Long Vu To | Date: 2026-08-06 -->
+<!-- Author: Hoang Long Vu To | Date: 2026-09-09 -->
 <template>
   <template lwc:if={showInitialViewSkeleton}></template>
 
@@ -190,6 +190,25 @@
                       </template>
                     </td>
                     <td>{row.sourceTypeLabel}</td>
+                    <td>
+                      <template lwc:if={row.hasChannelPills}>
+                        <div
+                          class="log-table__channel-pills"
+                          aria-label={row.channelSummaryLabel}
+                        >
+                          <template for:each={row.channelPills} for:item="pill">
+                            <span key={pill.id} class={pill.cssClass}
+                              >{pill.label}</span
+                            >
+                          </template>
+                        </div>
+                      </template>
+                      <template lwc:else>
+                        <span class="div-table-cell__text"
+                          >{row.channelSummaryLabel}</span
+                        >
+                      </template>
+                    </td>
                     <td>
                       <span class="log-table__multiline"
                         >{row.changeMadeLabel}</span
