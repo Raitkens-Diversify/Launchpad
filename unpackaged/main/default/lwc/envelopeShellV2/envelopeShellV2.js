@@ -1157,13 +1157,28 @@ export default class EnvelopeShellV2 extends LightningElement {
   }
 
   // De-facto dirty flag: a save is pending (debounced, waiting on the inactivity window) or already
-  // in flight. Read by confirmExit() and exposed for the top bar's Save & Exit button/host checks.
+  // in flight. Read by confirmExit() and exposed for the top bar's Save button/host checks.
   @api
   get hasUnsavedChanges() {
     return (
       this.saveStatus === SAVE_STATUS.PENDING ||
       this.saveStatus === SAVE_STATUS.SAVING
     );
+  }
+
+  // Single choke point for every saveStatus transition: fires `dirtychange` when
+  // hasUnsavedChanges actually flips, so the app can mirror it into the top bar's Save button
+  // (disabled while clean) without polling. Every `this.saveStatus = SAVE_STATUS.X` assignment
+  // elsewhere in this file goes through this instead.
+  _setSaveStatus(status) {
+    const wasDirty = this.hasUnsavedChanges;
+    this.saveStatus = status;
+    const isDirty = this.hasUnsavedChanges;
+    if (isDirty !== wasDirty) {
+      this.dispatchEvent(
+        new CustomEvent("dirtychange", { detail: { hasUnsavedChanges: isDirty } })
+      );
+    }
   }
 
   // The saved form values for the open action, prefilled into the interview form.
@@ -1530,7 +1545,7 @@ export default class EnvelopeShellV2 extends LightningElement {
     // the value waits in memory for an unrelated edit to carry it, and an interview opened and
     // closed again would leave the record without the only rep code it could have had.
     this._clearSavedHideTimer();
-    this.saveStatus = SAVE_STATUS.PENDING;
+    this._setSaveStatus(SAVE_STATUS.PENDING);
     this._resetAutoSaveTimer();
     // And write it now rather than waiting out the idle window. Backing out of an interview flushes
     // the draft into the model but does not run the record-persist cycle — that hangs off the timer
@@ -3497,7 +3512,7 @@ export default class EnvelopeShellV2 extends LightningElement {
       return;
     }
     this._clearSavedHideTimer();
-    this.saveStatus = SAVE_STATUS.PENDING;
+    this._setSaveStatus(SAVE_STATUS.PENDING);
     this._resetAutoSaveTimer();
     if (this.isMissingItemsView) {
       this._refreshMissingItemsCrumb();
@@ -3601,7 +3616,7 @@ export default class EnvelopeShellV2 extends LightningElement {
       return;
     }
     this.isSaving = true;
-    this.saveStatus = SAVE_STATUS.SAVING;
+    this._setSaveStatus(SAVE_STATUS.SAVING);
     try {
       this._saveNow();
       const missingItems = this._missingItemsTotalForSave();
@@ -3646,7 +3661,7 @@ export default class EnvelopeShellV2 extends LightningElement {
       if (failures.length) {
         throw failures[0];
       }
-      this.saveStatus = SAVE_STATUS.SAVED;
+      this._setSaveStatus(SAVE_STATUS.SAVED);
       this._recordSaveSuccess();
     } catch (error) {
       console.error(error);
@@ -3658,12 +3673,12 @@ export default class EnvelopeShellV2 extends LightningElement {
         // Re-arm the cycle for an automatic retry: the edit is still in the model, so the same
         // save can be re-attempted without user input. PENDING satisfies the entry guard above.
         this._saveRetryCount += 1;
-        this.saveStatus = SAVE_STATUS.PENDING;
+        this._setSaveStatus(SAVE_STATUS.PENDING);
         this._resetAutoSaveTimer(SAVE_RETRY_DELAY_MS);
       } else {
         // Retry budget spent: hide the TOC indicator rather than leaving it on "pending". The
         // edit remains in the model, so the next field change arms a fresh save cycle.
-        this.saveStatus = SAVE_STATUS.IDLE;
+        this._setSaveStatus(SAVE_STATUS.IDLE);
       }
     } finally {
       this.isSaving = false;
@@ -3672,7 +3687,7 @@ export default class EnvelopeShellV2 extends LightningElement {
     this._savedHideTimerId = setTimeout(() => {
       this._savedHideTimerId = null;
       if (this.saveStatus === SAVE_STATUS.SAVED) {
-        this.saveStatus = SAVE_STATUS.IDLE;
+        this._setSaveStatus(SAVE_STATUS.IDLE);
       }
     }, SAVED_VISIBLE_MS);
   }
@@ -4559,7 +4574,7 @@ export default class EnvelopeShellV2 extends LightningElement {
     }
     this._clearAllSaveTimers();
     this.isSaving = false;
-    this.saveStatus = SAVE_STATUS.IDLE;
+    this._setSaveStatus(SAVE_STATUS.IDLE);
     return { hadPending, wasSaving, openActionId };
   }
 
@@ -4605,6 +4620,11 @@ export default class EnvelopeShellV2 extends LightningElement {
     if (!this.hasUnsavedChanges) {
       return Promise.resolve(true);
     }
+    // Freeze the debounced autosave while the modal is up: it keeps ticking toward its own
+    // _performAutoSave() otherwise, and a slow decision risks that cycle firing mid-prompt and
+    // silently saving the very edit "Exit without saving" is about to discard. Re-armed on
+    // Cancel (handleUnsavedChangesClose); superseded by the explicit save/discard choices.
+    this._clearAutoSaveTimer();
     this._pendingExitPromise = new Promise((resolve) => {
       this._pendingExitResolve = (result) => {
         this._pendingExitPromise = null;
@@ -4616,16 +4636,15 @@ export default class EnvelopeShellV2 extends LightningElement {
     return this._pendingExitPromise;
   }
 
-  // The top bar's "Save & Exit" action (only shown while the interview is open): a deliberate,
-  // explicit save — always blocking, unlike the silent autosave/flush-on-navigate cycles. On
-  // failure, surfaces a toast immediately regardless of the recurrent-failure threshold, since the
-  // user is actively waiting on this one rather than editing in the background.
+  // The top bar's "Save" action (only shown, and only enabled, while the interview holds unsaved
+  // edits): a deliberate, explicit save that stays on the interview — always blocking, unlike the
+  // silent autosave cycle. On failure, surfaces a toast immediately regardless of the recurrent-
+  // failure threshold, since the user is actively waiting on this one rather than editing in the
+  // background.
   @api
-  async saveAndExit() {
+  async save() {
     const ok = await this._flushAndPersist();
-    if (ok) {
-      this._completeActionBack();
-    } else {
+    if (!ok) {
       this._showToast(
         "Save failed",
         "We couldn't save your changes. Please try again.",
@@ -4655,9 +4674,14 @@ export default class EnvelopeShellV2 extends LightningElement {
     }
   }
 
-  // Cancel, backdrop click or Escape — stay on the current screen, nothing exits.
+  // Cancel, backdrop click or Escape — stay on the current screen, nothing exits. Re-arm the
+  // autosave timer confirmExit() froze: the edit is still pending and wasn't discarded, so give
+  // it a fresh inactivity window instead of leaving it stranded with nothing left to save it.
   handleUnsavedChangesClose() {
     this._settleExitPrompt(false);
+    if (this.hasUnsavedChanges) {
+      this._resetAutoSaveTimer();
+    }
   }
 
   _settleExitPrompt(result) {
@@ -4789,7 +4813,7 @@ export default class EnvelopeShellV2 extends LightningElement {
   _resetSaveStatus() {
     this._clearAllSaveTimers();
     this.isSaving = false;
-    this.saveStatus = SAVE_STATUS.IDLE;
+    this._setSaveStatus(SAVE_STATUS.IDLE);
   }
 
   _clearAutoSaveTimer() {

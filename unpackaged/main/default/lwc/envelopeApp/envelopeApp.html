@@ -12,9 +12,13 @@
         show-review={topBarShowReview}
         review-disabled={topBarReviewDisabled}
         show-close={topBarShowClose}
+        show-save={topBarShowSave}
+        save-disabled={topBarSaveDisabled}
+        save-busy={topBarSaveBusy}
         onnavigate={handleShellNavigate}
         onreview={handleTopBarReview}
         onclose={handleTopBarClose}
+        onsave={handleTopBarSave}
       >
       </c-envelope-top-bar-v2>
     </template>
@@ -36,6 +40,7 @@
           onenvelopesubmitted={handleEnvelopeSubmitted}
           onsubviewchange={handleSubViewChange}
           onreviewablechange={handleReviewableChange}
+          ondirtychange={handleShellDirtyChange}
         >
         </c-envelope-shell-v2>
       </template>

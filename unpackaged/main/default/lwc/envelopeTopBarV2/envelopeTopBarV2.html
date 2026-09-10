@@ -25,14 +25,36 @@
                 </template>
             </div>
 
-            <template if:true={showReview}>
-                <lightning-button
-                    class="topbar__review"
-                    variant="brand"
-                    label="Review and Submit"
-                    disabled={reviewDisabled}
-                    onclick={handleReview}>
-                </lightning-button>
+            <template if:true={hasDefaultActions}>
+                <div class="topbar__actions">
+                    <template if:true={showSave}>
+                        <div class="env-busy-button">
+                            <lightning-button
+                                class="topbar__save"
+                                variant="neutral"
+                                label="Save"
+                                disabled={isSaveDisabled}
+                                onclick={handleSave}>
+                            </lightning-button>
+                            <template lwc:if={saveBusy}>
+                                <lightning-spinner
+                                    size="small"
+                                    variant="brand"
+                                    alternative-text="Saving">
+                                </lightning-spinner>
+                            </template>
+                        </div>
+                    </template>
+                    <template if:true={showReview}>
+                        <lightning-button
+                            class="topbar__review"
+                            variant="brand"
+                            label="Review and Submit"
+                            disabled={reviewDisabled}
+                            onclick={handleReview}>
+                        </lightning-button>
+                    </template>
+                </div>
             </template>
         </template>
 

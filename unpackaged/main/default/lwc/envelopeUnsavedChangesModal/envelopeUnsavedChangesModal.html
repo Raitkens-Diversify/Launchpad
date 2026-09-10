@@ -1,0 +1,56 @@
+<template>
+    <c-ds-modal-v2
+        is-open={isOpen}
+        title={title}
+        size={size}
+        disable-backdrop-close={busy}
+        onclose={handleClose}>
+        <div slot="header" class="unsaved-changes__heading">
+            <div class="unsaved-changes__title-row">
+                <lightning-icon
+                    icon-name="utility:warning"
+                    size="small"
+                    class="unsaved-changes__title-icon"
+                    alternative-text="Warning">
+                </lightning-icon>
+                <h2 class="unsaved-changes__title">{title}</h2>
+            </div>
+        </div>
+
+        <p class="unsaved-changes__message">{messageBefore}</p>
+
+        <template lwc:if={hasError}>
+            <p class="unsaved-changes__error" role="alert">{errorMessage}</p>
+        </template>
+
+        <div slot="footer" class="unsaved-changes__footer">
+            <lightning-button
+                variant="neutral"
+                label="Cancel"
+                disabled={busy}
+                onclick={handleCancel}
+            ></lightning-button>
+            <lightning-button
+                variant="neutral"
+                label="Exit without saving"
+                disabled={busy}
+                onclick={handleExitWithoutSaving}
+            ></lightning-button>
+            <div class="env-busy-button">
+                <lightning-button
+                    variant="brand"
+                    label="Save & Exit"
+                    disabled={busy}
+                    onclick={handleSaveAndExit}
+                ></lightning-button>
+                <template lwc:if={busy}>
+                    <lightning-spinner
+                        size="small"
+                        variant="brand"
+                        alternative-text="Saving">
+                    </lightning-spinner>
+                </template>
+            </div>
+        </div>
+    </c-ds-modal-v2>
+</template>

@@ -45,6 +45,14 @@ export default class EnvelopeApp extends LightningElement {
   // Submit" enablement.
   shellReviewable = false;
 
+  // Whether the shell's active sub-view is specifically the interview (not Manage Documents,
+  // which shares the same breadcrumb-crumb shape); set from the shell's `subviewchange` and
+  // drives the top bar's Save button. Busy while a Save is in flight; enabled tracks the shell's
+  // live dirty state via `dirtychange`, so Save is disabled whenever there's nothing to save.
+  _isActionSubView = false;
+  topBarSaveBusy = false;
+  _shellHasUnsavedChanges = false;
+
   /**
    * True inside an Experience Cloud site, false in the core app. LWR page references are typed
    * comm__*, the same test resourceCenter uses; not @salesforce/community/basePath, which
@@ -230,6 +238,7 @@ export default class EnvelopeApp extends LightningElement {
     this.subViewCrumb = detail.crumb || null;
     // A focused review view also carries a header descriptor; clear it when the crumb does.
     this._focusedHeader = detail.crumb ? detail.header || null : null;
+    this._isActionSubView = Boolean(detail.isActionView);
   }
 
   // Clear the chrome the shell drives: the breadcrumb sub-view, the focused top-bar variant and
@@ -241,6 +250,14 @@ export default class EnvelopeApp extends LightningElement {
     this.subViewCrumb = null;
     this._focusedHeader = null;
     this.shellReviewable = false;
+    this._isActionSubView = false;
+    this._shellHasUnsavedChanges = false;
+  }
+
+  // The shell's live dirty state, announced via `dirtychange` on every saveStatus transition that
+  // actually flips it — drives the top bar's Save button (disabled while there's nothing to save).
+  handleShellDirtyChange(event) {
+    this._shellHasUnsavedChanges = Boolean(event?.detail?.hasUnsavedChanges);
   }
 
   get topBarMode() {
@@ -273,6 +290,17 @@ export default class EnvelopeApp extends LightningElement {
     return !this.shellReviewable;
   }
 
+  // Save only makes sense while the interview itself is open, not on the plain workspace,
+  // Manage Documents, or the focused review views (which already show Review and Submit / Close).
+  get topBarShowSave() {
+    return this._isActionSubView;
+  }
+
+  // Disabled whenever there's nothing to save — mirrors the shell's live dirty state.
+  get topBarSaveDisabled() {
+    return !this._shellHasUnsavedChanges;
+  }
+
   handleReviewableChange(event) {
     this.shellReviewable = Boolean(event?.detail?.reviewable);
   }
@@ -284,6 +312,17 @@ export default class EnvelopeApp extends LightningElement {
 
   handleTopBarClose() {
     this.refs.shellV2?.closeSubView();
+  }
+
+  // The top bar's "Save" action (interview only, enabled only while dirty): always a blocking
+  // save, unlike the silent autosave cycle it sits alongside. Stays on the interview either way.
+  async handleTopBarSave() {
+    this.topBarSaveBusy = true;
+    try {
+      await this.refs.shellV2?.save();
+    } finally {
+      this.topBarSaveBusy = false;
+    }
   }
 
   // Fired by envelopeListV2 once the New-envelope modal has created the
@@ -332,16 +371,28 @@ export default class EnvelopeApp extends LightningElement {
   handleShellNavigate(event) {
     const key = event?.detail?.key;
     if (key === "envelopes") {
-      this.currentView = "list";
-      this.createdEnvelopeId = null;
-      this.createdEnvelopeTitle = "";
-      this.createdHouseholdName = "";
-      this.createdHouseholdId = null;
-      this._resetShellChrome();
+      this._navigateToList();
     } else if (key === "current") {
       // The envelope crumb is a link only while a sub-view is open; clicking it
       // returns to the workspace.
       this.refs.shellV2?.closeSubView();
     }
+  }
+
+  // The "Envelopes" crumb tears the whole shell down, so — unlike "current" (handled by the
+  // shell's own guarded closeSubView()) — the app has to ask the shell itself whether it's safe
+  // to proceed before unmounting it. `!== false` treats a missing ref (shellV2 not mounted) the
+  // same as "nothing to confirm", matching the unguarded behavior this replaces.
+  async _navigateToList() {
+    const proceed = (await this.refs.shellV2?.confirmExit()) !== false;
+    if (!proceed) {
+      return;
+    }
+    this.currentView = "list";
+    this.createdEnvelopeId = null;
+    this.createdEnvelopeTitle = "";
+    this.createdHouseholdName = "";
+    this.createdHouseholdId = null;
+    this._resetShellChrome();
   }
 }

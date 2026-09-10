@@ -19,6 +19,12 @@ export default class EnvelopeTopBarV2 extends LightningElement {
     @api showClose = false;
     /** Greys the Review button until the envelope is submittable. */
     @api reviewDisabled = false;
+    /** Show the "Save" action (default-mode variant only, while the interview is open). */
+    @api showSave = false;
+    /** Greys Save out; the host sets this while the interview has nothing unsaved. */
+    @api saveDisabled = false;
+    /** Shows a spinner over Save and disables it while the save is in flight. */
+    @api saveBusy = false;
 
     /** Hides the Diversify logo for hosts that already have their own header/branding. */
     _hideBranding = false;
@@ -52,6 +58,18 @@ export default class EnvelopeTopBarV2 extends LightningElement {
         return this.breadcrumbItems.length > 0;
     }
 
+    // Wraps Save / Review and Submit in one flex group (topbar__actions), the same way the
+    // focused variant groups Review/Close — so a single Save still sits flush right instead of
+    // justify-content: space-between spacing it away from topbar__left on its own.
+    get hasDefaultActions() {
+        return this.showSave || this.showReview;
+    }
+
+    // Disabled while there's nothing to save, or while a save is already in flight.
+    get isSaveDisabled() {
+        return this.saveDisabled || this.saveBusy;
+    }
+
     get breadcrumbItems() {
         const items = Array.isArray(this.breadcrumb) ? this.breadcrumb : [];
         return items.map((item, index) => ({
@@ -71,5 +89,9 @@ export default class EnvelopeTopBarV2 extends LightningElement {
 
     handleClose() {
         this.dispatchEvent(new CustomEvent('close'));
+    }
+
+    handleSave() {
+        this.dispatchEvent(new CustomEvent('save'));
     }
 }
