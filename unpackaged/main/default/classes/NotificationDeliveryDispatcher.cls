@@ -210,10 +210,6 @@ public without sharing class NotificationDeliveryDispatcher {
       return;
     }
 
-    if (Test.isRunningTest()) {
-      testEnqueuedJobCount++;
-    }
-
     NotificationDeliveryService deliveryService = new NotificationDeliveryService();
     NotificationEmailDeliveryService.beginBatch();
 

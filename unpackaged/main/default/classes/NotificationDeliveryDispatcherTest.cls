@@ -4,6 +4,12 @@
  */
 @IsTest
 private class NotificationDeliveryDispatcherTest {
+  @TestSetup
+  static void setupSharedDeliveryTestState() {
+    NotificationGovernorLimitService.resetTestState();
+    NotificationGovernorLimitService.enterQueueableExecute();
+  }
+
   @IsTest
   static void syncEnqueueStillProcessesMultipleRequestsDirectly() {
     NotificationDeliveryDispatcher.testEnqueuedJobCount = 0;
@@ -138,6 +144,47 @@ private class NotificationDeliveryDispatcherTest {
     );
     NotificationTestDataFactory.insertRecord(caseRecord);
     return caseRecord;
+  }
+
+  private static void resetDeliveryDispatcherTestState() {
+    NotificationGovernorLimitService.resetTestState();
+    NotificationGovernorLimitService.enterQueueableExecute();
+    NotificationDeliveryDispatcher.testEnqueuedJobCount = 0;
+    NotificationCustomNotificationService.testSkipSend = true;
+  }
+
+  private static Notification_Log__c createEnqueuePipelineDigestLog(
+    NotificationTestDataFactory.NotificationTestContext context,
+    Notification_Rule__c rule,
+    String title
+  ) {
+    return NotificationTestDataFactory.createLogNotification(
+      context.recipientUser.Id,
+      context.household.Id,
+      NotificationConstants.OBJECT_TYPE_CASE,
+      NotificationConstants.STATUS_QUEUED,
+      rule.Channel__c,
+      NotificationConstants.FREQUENCY_DIGEST,
+      title,
+      null,
+      rule.Id
+    );
+  }
+
+  private static void assertQueuedLogDelivered(Id logId, String enqueueHelperLabel) {
+    Notification_Log__c logRecord = [
+      SELECT Status__c
+      FROM Notification_Log__c
+      WHERE Id = :logId
+    ];
+
+    System.assert(
+      logRecord.Status__c == NotificationConstants.STATUS_SENT ||
+        logRecord.Status__c == NotificationConstants.STATUS_SUPPRESSED,
+      enqueueHelperLabel +
+        ' should delegate to the delivery pipeline. Actual status: ' +
+        logRecord.Status__c
+    );
   }
 
   private static NotificationDeliveryModels.DeliveryRequest buildDigestRequest(
@@ -432,32 +479,45 @@ private class NotificationDeliveryDispatcherTest {
 
   @IsTest
   static void enqueueLogIds_andLogIdStrings_delegateToDeliveryPipeline() {
-    NotificationDeliveryDispatcher.testEnqueuedJobCount = 0;
-    NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
-    Notification_Rule__c rule = createDigestRule(context, NotificationConstants.CHANNEL_EMAIL);
-    Notification_Log__c logRecord = NotificationTestDataFactory.createLogNotification(
-      context.recipientUser.Id,
-      context.household.Id,
-      NotificationConstants.OBJECT_TYPE_CASE,
-      NotificationConstants.STATUS_QUEUED,
-      NotificationConstants.CHANNEL_EMAIL,
-      NotificationConstants.FREQUENCY_DIGEST,
-      'Log id enqueue item',
-      null,
-      rule.Id
-    );
+    try {
+      resetDeliveryDispatcherTestState();
+      NotificationTestDataFactory.NotificationTestContext context = NotificationTestDataFactory.createHouseholdWithRecipient();
+      Notification_Rule__c rule = createDigestRule(
+        context,
+        NotificationConstants.CHANNEL_IN_APP
+      );
+      Notification_Log__c logForIds = createEnqueuePipelineDigestLog(
+        context,
+        rule,
+        'Log id enqueue item'
+      );
+      Notification_Log__c logForStrings = createEnqueuePipelineDigestLog(
+        context,
+        rule,
+        'Log id string enqueue item'
+      );
 
-    Test.startTest();
-    NotificationDeliveryDispatcher.enqueueLogIds(new List<Id>{ logRecord.Id });
-    NotificationDeliveryDispatcher.enqueueLogIdStrings(
-      new List<String>{ String.valueOf(logRecord.Id) }
-    );
-    Test.stopTest();
+      System.assert(
+        !NotificationDeliveryRequestBuilder.fromLogIds(
+            new List<Id>{ logForIds.Id }
+          )
+          .isEmpty(),
+        'Expected queued digest log to build at least one delivery request.'
+      );
 
-    System.assert(
-      NotificationDeliveryDispatcher.testEnqueuedJobCount >= 1,
-      'Expected log-id enqueue helpers to start delivery jobs.'
-    );
+      Test.startTest();
+      NotificationDeliveryDispatcher.enqueueLogIds(new List<Id>{ logForIds.Id });
+      NotificationDeliveryDispatcher.enqueueLogIdStrings(
+        new List<String>{ String.valueOf(logForStrings.Id) }
+      );
+      Test.stopTest();
+
+      assertQueuedLogDelivered(logForIds.Id, 'enqueueLogIds');
+      assertQueuedLogDelivered(logForStrings.Id, 'enqueueLogIdStrings');
+    } finally {
+      NotificationGovernorLimitService.resetTestState();
+      NotificationGovernorLimitService.enterQueueableExecute();
+    }
   }
 
   @IsTest
