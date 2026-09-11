@@ -8,8 +8,7 @@ import {
     TYPE_EXTERNAL_LINK,
     TYPE_WEBINAR,
     rcRootCrumbs,
-    CRUMB_HELP_HOME,
-    CRUMB_RC_HOME
+    CRUMB_HELP_HOME
 } from 'c/rcConstants';
 import { linkContext, articleHref, fileHref } from 'c/contextNav';
 import { isScribeUrl } from 'c/scribeUrlUtil';
@@ -37,7 +36,7 @@ import { sanitizeHtml } from 'c/richTextUtil';
  * card (renditions can lag right after upload). The Download href takes the
  * same path so a custom-domain site never saves a login page as an .htm.
  *
- * Emits (composed): `rchome`, `categoryselect { slug }`. Downloads are tracked
+ * Emits (composed): `categoryselect { slug }`. Downloads are tracked
  * directly via trackDownload when the Download button is clicked.
  */
 const MAX_PREVIEW_PAGES = 25;
@@ -242,10 +241,6 @@ export default class ResourceDetail extends LightningElement {
 
     // ---- Events -----------------------------------------------------------------
 
-    handleHome() {
-        this.dispatchEvent(new CustomEvent('rchome', { bubbles: true, composed: true }));
-    }
-
     /** The unified home is another page; the shell routes it via c/contextNav. */
     handleHelpHome() {
         this.dispatchEvent(new CustomEvent('helphome', { bubbles: true, composed: true }));
@@ -271,8 +266,6 @@ export default class ResourceDetail extends LightningElement {
         const key = event.detail.key;
         if (key === CRUMB_HELP_HOME) {
             this.handleHelpHome();
-        } else if (key === CRUMB_RC_HOME) {
-            this.handleHome();
         } else {
             this.dispatchEvent(new CustomEvent('categoryselect', {
                 detail: { slug: key }, bubbles: true, composed: true

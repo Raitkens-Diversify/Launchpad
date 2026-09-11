@@ -16,20 +16,21 @@ import { typeMeta } from 'c/resourceTypeIcons';
  */
 
 /**
- * The unified home's user-facing name (the Help & Resources app / the
- * unifiedLanding page) and the two crumbs every Resource Center trail starts
- * with: Help & Resources › Resource Center › … . `help` routes to the unified
- * home (resourceCenter's `helphome` → c/contextNav.goToHome), `home` to the
- * Resource Center front door (`rchome`).
+ * The unified home's user-facing name (the Help & Resource Center app / the
+ * unifiedLanding page) and the ONE crumb every Help Center and Resource Center
+ * trail starts with: Help & Resource Center › … . `help` routes to the unified
+ * home (resourceCenter's `helphome` → c/contextNav.goToHome).
+ *
+ * There used to be a second root crumb, "Resource Center" (key `home`, event
+ * `rchome`). It was dropped 2026-09-10: it named a front door the unified app
+ * no longer has, and clicking it was a no-op — `rchome` put resourceCenter in
+ * `view = 'home'`, which renders the same slugless c-resource-category-page
+ * that falls back to the first sidebar topic, i.e. the page already on screen.
  */
-export const HELP_HOME_LABEL = 'Help & Resources';
+export const HELP_HOME_LABEL = 'Help & Resource Center';
 export const CRUMB_HELP_HOME = 'help';
-export const CRUMB_RC_HOME = 'home';
 export function rcRootCrumbs() {
-    return [
-        { label: HELP_HOME_LABEL, key: CRUMB_HELP_HOME },
-        { label: 'Resource Center', key: CRUMB_RC_HOME }
-    ];
+    return [{ label: HELP_HOME_LABEL, key: CRUMB_HELP_HOME }];
 }
 
 /** Resource_Type__c values, in the canonical display order. */

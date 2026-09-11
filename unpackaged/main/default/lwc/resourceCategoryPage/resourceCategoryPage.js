@@ -1,6 +1,6 @@
 import { LightningElement, api, wire } from 'lwc';
 import { iconPath } from 'c/rcIcons';
-import { toContentItem, rcRootCrumbs, CRUMB_HELP_HOME, CRUMB_RC_HOME } from 'c/rcConstants';
+import { toContentItem, rcRootCrumbs, CRUMB_HELP_HOME } from 'c/rcConstants';
 import { typeMeta } from 'c/resourceTypeIcons';
 import {
     indexTree, findNode, ancestorsOf, rootOf, pruneEmpty, filterRows, inSubtree, pathTag, pluralize
@@ -51,7 +51,7 @@ const TYPE_ALL = 'all';
  * subtopic still shows as a disabled pill; the sidebar gets the pruned copy
  * it always had.
  *
- * Emits (composed) `categoryselect { slug }`, `rchome`, and
+ * Emits (composed) `categoryselect { slug }` and
  * `resourceselect { slug }` — translated from c-ds-content-card's
  * `contentselect { kind, routeKey, id }` so the orchestrator's contract is
  * unchanged.
@@ -345,8 +345,6 @@ export default class ResourceCategoryPage extends LightningElement {
         const key = event.detail.key;
         if (key === CRUMB_HELP_HOME) {
             this.handleHelpHome();
-        } else if (key === CRUMB_RC_HOME) {
-            this.handleHome();
         } else {
             this.fireCategorySelect(key);
         }
@@ -365,10 +363,6 @@ export default class ResourceCategoryPage extends LightningElement {
         this.dispatchEvent(new CustomEvent('resourceselect', {
             detail: { slug: event.detail.routeKey }, bubbles: true, composed: true
         }));
-    }
-
-    handleHome() {
-        this.dispatchEvent(new CustomEvent('rchome', { bubbles: true, composed: true }));
     }
 
     /** The unified home is another page; the shell routes it via c/contextNav. */

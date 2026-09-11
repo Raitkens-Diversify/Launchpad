@@ -357,10 +357,14 @@ export const STATIC_NAV_ITEMS = [
     ]
   },
   {
+    // The combined Help & Resource Center landing (Help_Surface.ARC
+    // Home_Path__c = "help-center", the c:unifiedLanding route). It used to
+    // point at /learning, the Resource-Center-only hub, which skipped past the
+    // unified home the crumb trail now names.
     id: "arc-nav-learning",
     label: "Resource",
     type: "InternalLink",
-    target: "/learning",
+    target: "/help-center",
     icon: "learning.svg"
   },
   {

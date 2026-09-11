@@ -17,6 +17,9 @@ import { createSearchLogger, logResultClick, APP_HELP_CENTER } from 'c/searchLog
 import {
     indexTree, findNode, ancestorsOf, rootOf, filterRows, inSubtree, pathTag, pluralize
 } from 'c/treeUtil';
+// The unified app's name — the root crumb is the same one the Resource Center
+// and the events page start with, so the trails read alike on every surface.
+import { HELP_HOME_LABEL } from 'c/rcConstants';
 
 const TOPIC_CRUMB = 'topic:';
 /** The Type facet's "everything" value (chip values are record-type labels). */
@@ -323,11 +326,14 @@ export default class NexsArticleBrowser extends LightningElement {
         return `No ${this.typeFilter} articles${where}.`;
     }
 
-    /** Crumb trail for the shared c-ds-breadcrumbs — Help Center › ancestors…
-        › topic, then three states: list view (current heading), viewer while
-        the title loads (clickable heading, no leaf), viewer with title. */
+    /** Crumb trail for the shared c-ds-breadcrumbs — Help & Resource Center
+        › ancestors… › topic, then three states: list view (current heading),
+        viewer while the title loads (clickable heading, no leaf), viewer with
+        title. The root crumb's `home` event is routed by the host: under
+        helpArticlePage it goes to the unified landing, which is what the label
+        now names. */
     get crumbItems() {
-        const crumbs = [{ label: 'Help Center', key: 'home' }];
+        const crumbs = [{ label: HELP_HOME_LABEL, key: 'home' }];
         if (this.mode === 'category' && this.selectedCategory) {
             ancestorsOf(this._tree, this.selectedCategory).forEach((a) => {
                 crumbs.push({ label: a.label, key: TOPIC_CRUMB + a.id });

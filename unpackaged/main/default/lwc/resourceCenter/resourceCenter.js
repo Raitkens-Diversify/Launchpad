@@ -6,7 +6,7 @@ import typeahead from '@salesforce/apex/ResourceCenterService.typeahead';
 import { createSuggestionFetcher } from 'c/dsSearchBar';
 import { createSearchLogger, logSearchEntry, APP_RESOURCE_CENTER } from 'c/searchLogUtil';
 import { linkContext, readParams, isSiteRef, goToHome, goToArticle } from 'c/contextNav';
-import { rcRootCrumbs, CRUMB_HELP_HOME, CRUMB_RC_HOME } from 'c/rcConstants';
+import { rcRootCrumbs, CRUMB_HELP_HOME } from 'c/rcConstants';
 
 /** "Get Help" (the guided help_guide) is parked for now (2026-09-07): flip to
     restore the chrome action. The guide view, its ?rcview=guide deep link,
@@ -140,7 +140,7 @@ export default class ResourceCenter extends NavigationMixin(LightningElement) {
 
     handleHome() { this.setState('home'); }
     handleGuideOpen() { this.setState('guide'); }
-    /** Help & Resources › Resource Center › Get Help */
+    /** Help & Resource Center › Get Help */
     get guideCrumbs() {
         return [...rcRootCrumbs(), { label: 'Get Help' }];
     }
@@ -148,8 +148,6 @@ export default class ResourceCenter extends NavigationMixin(LightningElement) {
         const key = event.detail.key;
         if (key === CRUMB_HELP_HOME) {
             this.handleHelpCenter();
-        } else if (key === CRUMB_RC_HOME) {
-            this.setState('home');
         }
     }
     handleCategorySelect(event) { this.setState('category', event.detail.slug); }
