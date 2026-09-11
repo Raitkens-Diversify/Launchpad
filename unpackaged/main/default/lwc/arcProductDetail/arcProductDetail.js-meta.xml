@@ -14,7 +14,7 @@
             <property
                 name="egnyteDomain"
                 type="String"
-                default="https://arc.diversify.com"
+                default="https://arc-launchpad.diversify.com"
                 label="Egnyte Domain"
                 description="Published Experience site domain, forwarded to the Files card's Egnyte embed."
             />

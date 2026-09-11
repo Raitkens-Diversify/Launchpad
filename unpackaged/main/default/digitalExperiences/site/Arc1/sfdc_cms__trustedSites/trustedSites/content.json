@@ -12,7 +12,7 @@
       "sourceName" : "launchpad"
     }, {
       "isActive" : true,
-      "source" : "https://arc.diversify.com",
+      "source" : "https://arc-launchpad.diversify.com",
       "sourceName" : "ARC Egnyte"
     } ]
   },

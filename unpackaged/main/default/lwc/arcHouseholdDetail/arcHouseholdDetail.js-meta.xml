@@ -36,7 +36,7 @@
         name="domain"
         type="String"
         label="Egnyte Domain"
-        default="https://arc.diversify.com"
+        default="https://arc-launchpad.diversify.com"
         description="Published Experience site domain, forwarded to the Documents tab's Egnyte embed."
       />
         </targetConfig>
