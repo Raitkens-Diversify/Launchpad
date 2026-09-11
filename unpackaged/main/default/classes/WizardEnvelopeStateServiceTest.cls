@@ -2187,4 +2187,88 @@ private class WizardEnvelopeStateServiceTest {
             'A DPI with no Product Type leaves the Case type untouched.');
     }
 
+    // ---------------------------------------------------------
+    // saveRelatedProduct / saveActionRelatedProduct - BD or RIA
+    // ---------------------------------------------------------
+
+    // Inserted as a brokerage account with an account number to steer around a known bug in
+    // Financial_Account_TriggerHandler.setReportAcctNumber_AfterInsert, which writes to a read-only
+    // Trigger.new record and so makes any BD account insert throw unless those two fields are set.
+    // Neither field has anything to do with BD or RIA propagation.
+    private static Financial_Account__c accountWithBdOrRia(String name, String bdOrRia) {
+        Financial_Account__c fa = new Financial_Account__c(
+            Name = name,
+            BD_or_RIA__c = bdOrRia,
+            Brokerage__c = true,
+            Account_Number__c = 'BDRIA-TEST'
+        );
+        insert fa;
+        return fa;
+    }
+
+    private static Id newProductId() {
+        Product__c product = new Product__c();
+        insert product;
+        return product.Id;
+    }
+
+    private static Financial_Account_Related_Product__c relatedProductOf(Id financialAccountId) {
+        return [
+            SELECT Id, Product__c, BD_or_RIA__c
+            FROM Financial_Account_Related_Product__c
+            WHERE Wizard_Financial_Account__c = :financialAccountId
+            ORDER BY CreatedDate ASC
+            LIMIT 1
+        ];
+    }
+
+    @IsTest
+    static void relatedProductCarriesTheAccountsBdOrRia() {
+        Financial_Account__c fa = accountWithBdOrRia('Product BD FA', 'BD');
+
+        WizardEnvelopeStateService.saveRelatedProduct(newProductId(), fa.Id);
+
+        Assert.areEqual('BD', relatedProductOf(fa.Id).BD_or_RIA__c,
+            'A product row is stamped with the account\'s BD or RIA answer when it is created.');
+    }
+
+    @IsTest
+    static void relatedProductIsLeftBlankWhenTheAccountHasNoAnswer() {
+        Financial_Account__c fa = accountWithBdOrRia('Product Blank FA', null);
+
+        WizardEnvelopeStateService.saveRelatedProduct(newProductId(), fa.Id);
+
+        Assert.areEqual(null, relatedProductOf(fa.Id).BD_or_RIA__c,
+            'An unanswered account leaves the row blank rather than guessing a value.');
+    }
+
+    // The row is inserted directly rather than through the wizard so the account is never updated,
+    // which keeps Financial_Account_TriggerHandler's own sync out of the way and leaves this test
+    // measuring the service's update branch alone.
+    @IsTest
+    static void savingAgainBackfillsAnExistingBlankRelatedProduct() {
+        Financial_Account__c fa = accountWithBdOrRia('Product Backfill FA', 'RIA');
+        Id productId = newProductId();
+        insert new Financial_Account_Related_Product__c(
+            Product__c = productId,
+            Wizard_Financial_Account__c = fa.Id
+        );
+
+        WizardEnvelopeStateService.saveRelatedProduct(productId, fa.Id);
+
+        Assert.areEqual('RIA', relatedProductOf(fa.Id).BD_or_RIA__c,
+            'A row created blank picks the answer up the next time the product is saved.');
+    }
+
+    @IsTest
+    static void actionRelatedProductCarriesTheAccountsBdOrRia() {
+        Financial_Account__c fa = accountWithBdOrRia('Action Product FA', 'BD');
+        Case actionCase = new Case(Subject = 'Purchase Alternative Investment');
+        insert actionCase;
+
+        WizardEnvelopeStateService.saveActionRelatedProduct(newProductId(), fa.Id, actionCase.Id);
+
+        Assert.areEqual('BD', relatedProductOf(fa.Id).BD_or_RIA__c,
+            'An action item\'s product row is stamped the same way the account opening one is.');
+    }
 }

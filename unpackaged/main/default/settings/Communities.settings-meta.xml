@@ -5,7 +5,7 @@
     <canModerateAllFeedPosts>false</canModerateAllFeedPosts>
     <embeddedVisualforcePages>false</embeddedVisualforcePages>
     <enableCommunityWorkspaces>true</enableCommunityWorkspaces>
-    <enableCspContactVisibilityPref>false</enableCspContactVisibilityPref>
+    <enableCspContactVisibilityPref>true</enableCspContactVisibilityPref>
     <enableCspNotesOnAccConPref>true</enableCspNotesOnAccConPref>
     <enableExternalAccHierPref>false</enableExternalAccHierPref>
     <enableGuestPermDisOptOutCruc>false</enableGuestPermDisOptOutCruc>

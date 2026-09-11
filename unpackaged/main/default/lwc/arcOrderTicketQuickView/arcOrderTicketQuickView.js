@@ -155,6 +155,20 @@ function formatPercentCell(value) {
   }).format(numeric / 100);
 }
 
+/**
+ * The stored value of one funding cell as a finite number, or null when it is
+ * blank / non-numeric. getRelatedRecords hands cells over as strings ("" for an
+ * empty field), so a bare Number() would turn "" into 0 -- this keeps "not
+ * stored" distinct from a real 0 so a blank side can be recognised and derived.
+ */
+function toFiniteNumber(value) {
+  if (value === "" || value === undefined || value === null) {
+    return null;
+  }
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
 const FIELDS = [
   `${OBJECT_API_NAME}.Name`,
   `${OBJECT_API_NAME}.Financial_Account__c`,
@@ -384,19 +398,57 @@ export default class ArcOrderTicketQuickView extends NavigationMixin(
     return this.isOpen && !this._ordersResult && !this.ordersErrorMessage;
   }
 
+  /**
+   * The figure a percent-based order's dollars are a share of (and, inversely,
+   * that a dollar-based order's percentage is computed against): the ticket's
+   * Expected Account Value. This is the same basis the envelope wizard converts
+   * against (TradeInstructionController's expectedAccountValue), and it is the
+   * value shown in this same modal -- so a derived amount always equals the
+   * displayed percentage times the displayed Expected Account Value, with no
+   * hidden third number. null (blank/non-numeric) leaves both sides as stored.
+   */
+  get fundingBasis() {
+    if (!this._record) {
+      return null;
+    }
+    return toFiniteNumber(
+      getFieldValue(this._record, `${OBJECT_API_NAME}.Expected_Account_Value__c`)
+    );
+  }
+
   get orderRows() {
     const currencyCode = this._ordersResult?.currencyCode || "USD";
+    const basis = this.fundingBasis;
     return (this._ordersResult?.rows || []).map((row) => {
       const [name, strategyName, fundingPercentage, fundingAmount, strategyId] =
         row.cells || [];
+
+      // Each row stores only one side by design (a Dollar order stamps the
+      // amount, a Percent order the percentage -- see TradeInstructionController).
+      // When the basis is known, fill the blank side from the stored one so both
+      // columns populate; if the basis is missing, or a row stores both/neither,
+      // each side just renders whatever it holds (blank -> em dash, as before).
+      const storedPercent = toFiniteNumber(fundingPercentage);
+      const storedAmount = toFiniteNumber(fundingAmount);
+      let percentCell = fundingPercentage;
+      let amountCell = fundingAmount;
+      if (basis !== null) {
+        if (storedAmount === null && storedPercent !== null) {
+          amountCell = (storedPercent / 100) * basis;
+        }
+        if (storedPercent === null && storedAmount !== null && basis !== 0) {
+          percentCell = (storedAmount / basis) * 100;
+        }
+      }
+
       return {
         id: row.id,
         name: name || "—",
         strategyId: strategyId || "",
         strategyName: strategyName || "—",
         hasStrategy: Boolean(strategyId),
-        fundingPercentage: formatPercentCell(fundingPercentage),
-        fundingAmount: formatCurrencyCell(fundingAmount, currencyCode)
+        fundingPercentage: formatPercentCell(percentCell),
+        fundingAmount: formatCurrencyCell(amountCell, currencyCode)
       };
     });
   }

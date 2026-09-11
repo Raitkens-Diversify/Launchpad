@@ -36,6 +36,7 @@ public without sharing class Financial_Account_TriggerHandler{
     public void isAfterUpdate(Map<Id, Financial_Account__c> newMap, Map<Id, Financial_Account__c> oldMap){
         createShareRecord(newMap, oldMap);
         updateRelatedCase(newMap, oldMap);
+        syncBdOrRiaToRelatedProducts(newMap, oldMap);
     }
     
     public void isAfterDelete(Map<Id, Financial_Account__c> oldMap){
@@ -588,5 +589,60 @@ update ridersToUpdate;
             update casesToUpdate;
         }
     }
-    
+
+    /**
+     * Copies this account's BD or RIA answer onto its Related Products whenever the answer changes.
+     *
+     * BD or RIA is an account-level fact and each Related Product carries a copy of it, so the copy has
+     * to follow an edit. This also settles the ordering problem the wizard cannot: the wizard stamps the
+     * value when it creates the product row (WizardEnvelopeStateService.saveRelatedProduct), but a
+     * product chosen before the BD or RIA question is answered is created blank, and only this fills it
+     * in. Legacy Wizard flows create their product rows without the value at all, so an account they
+     * later touch is repaired here too.
+     *
+     * A cleared answer is never propagated. An account momentarily losing its value must not blank a row
+     * that already carries one, the same rule saveRelatedProduct applies to Amount__c.
+     */
+    private void syncBdOrRiaToRelatedProducts(
+        Map<Id, Financial_Account__c> newMap,
+        Map<Id, Financial_Account__c> oldMap
+    ) {
+        Map<Id, String> answeredAccounts = new Map<Id, String>();
+
+        for (Financial_Account__c fa : newMap.values()) {
+            Financial_Account__c oldFA = oldMap == null ? null : oldMap.get(fa.Id);
+            Boolean answerChanged = oldFA == null || oldFA.BD_or_RIA__c != fa.BD_or_RIA__c;
+
+            if (fa.BD_or_RIA__c != null && answerChanged) {
+                answeredAccounts.put(fa.Id, fa.BD_or_RIA__c);
+            }
+        }
+
+        if (answeredAccounts.isEmpty()) {
+            return;
+        }
+
+        List<Financial_Account_Related_Product__c> productsToUpdate =
+            new List<Financial_Account_Related_Product__c>();
+
+        for (Financial_Account_Related_Product__c product : [
+            SELECT Id, BD_or_RIA__c, Wizard_Financial_Account__c
+            FROM Financial_Account_Related_Product__c
+            WHERE Wizard_Financial_Account__c IN :answeredAccounts.keySet()
+        ]) {
+            String answer = answeredAccounts.get(product.Wizard_Financial_Account__c);
+
+            // Skip rows that already agree, so an unrelated account edit never writes to them.
+            if (product.BD_or_RIA__c == answer) {
+                continue;
+            }
+
+            product.BD_or_RIA__c = answer;
+            productsToUpdate.add(product);
+        }
+
+        if (!productsToUpdate.isEmpty()) {
+            update productsToUpdate;
+        }
+    }
 }

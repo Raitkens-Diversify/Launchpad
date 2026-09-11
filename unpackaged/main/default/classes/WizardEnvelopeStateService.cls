@@ -422,7 +422,7 @@ public with sharing class WizardEnvelopeStateService {
         }
 
         List<Financial_Account_Related_Product__c> existing = [
-            SELECT Id, Product__c, Case__c, Amount__c
+            SELECT Id, Product__c, Case__c, Amount__c, BD_or_RIA__c
             FROM Financial_Account_Related_Product__c
             WHERE Wizard_Financial_Account__c = :financialAccountId
             ORDER BY CreatedDate ASC
@@ -444,6 +444,13 @@ public with sharing class WizardEnvelopeStateService {
         Id caseId = wizardCases.isEmpty() ? null : wizardCases[0].Id;
         Decimal caseAmount = wizardCases.isEmpty() ? null : wizardCases[0].Amount__c;
 
+        // The account's own BD/RIA answer, which the product row carries a copy of. Read here rather
+        // than left to the caller because the answer is an account-level fact the row must agree with,
+        // and saveAccountInfo has already written the account by this point in every call site.
+        // Null while the question is unanswered - the row is then left blank, and
+        // Financial_Account_TriggerHandler fills it in when the answer arrives.
+        String accountBdOrRia = bdOrRiaForAccount(financialAccountId);
+
         try {
             if (productId == null) {
                 if (!existing.isEmpty()) {
@@ -457,7 +464,8 @@ public with sharing class WizardEnvelopeStateService {
                     Product__c = productId,
                     Wizard_Financial_Account__c = financialAccountId,
                     Case__c = caseId,
-                    Amount__c = caseAmount
+                    Amount__c = caseAmount,
+                    BD_or_RIA__c = accountBdOrRia
                 );
                 return;
             }
@@ -472,6 +480,10 @@ public with sharing class WizardEnvelopeStateService {
             // Keep the amount in step with the Case's, but only while a Case is resolved, so a momentary
             // empty Case lookup never wipes an amount the row already carries.
             Boolean amountChanged = caseId != null && existing[0].Amount__c != caseAmount;
+            // Keep BD/RIA in step with the account for the same reason as the amount, under the same
+            // guard: an unanswered account must never blank a row that already carries a value.
+            Boolean bdOrRiaChanged =
+                accountBdOrRia != null && existing[0].BD_or_RIA__c != accountBdOrRia;
             if (productChanged) {
                 existing[0].Product__c = productId;
             }
@@ -481,7 +493,10 @@ public with sharing class WizardEnvelopeStateService {
             if (amountChanged) {
                 existing[0].Amount__c = caseAmount;
             }
-            if (productChanged || needsCaseBackfill || amountChanged) {
+            if (bdOrRiaChanged) {
+                existing[0].BD_or_RIA__c = accountBdOrRia;
+            }
+            if (productChanged || needsCaseBackfill || amountChanged || bdOrRiaChanged) {
                 update existing[0];
             }
         } catch (DmlException e) {
@@ -515,7 +530,7 @@ public with sharing class WizardEnvelopeStateService {
         // Scoped by Case, so the action's row is independent of the account-opening row (which carries
         // a different Case, or none).
         List<Financial_Account_Related_Product__c> existing = [
-            SELECT Id, Product__c, Case__c, Amount__c
+            SELECT Id, Product__c, Case__c, Amount__c, BD_or_RIA__c
             FROM Financial_Account_Related_Product__c
             WHERE Wizard_Financial_Account__c = :financialAccountId
             AND Case__c = :caseId
@@ -530,6 +545,9 @@ public with sharing class WizardEnvelopeStateService {
         ];
         Decimal caseAmount = actionCases.isEmpty() ? null : actionCases[0].Amount__c;
 
+        // The account's BD/RIA answer, copied onto the row exactly as saveRelatedProduct does.
+        String accountBdOrRia = bdOrRiaForAccount(financialAccountId);
+
         try {
             if (productId == null) {
                 if (!existing.isEmpty()) {
@@ -543,7 +561,8 @@ public with sharing class WizardEnvelopeStateService {
                     Product__c = productId,
                     Wizard_Financial_Account__c = financialAccountId,
                     Case__c = caseId,
-                    Amount__c = caseAmount
+                    Amount__c = caseAmount,
+                    BD_or_RIA__c = accountBdOrRia
                 );
                 return;
             }
@@ -551,18 +570,40 @@ public with sharing class WizardEnvelopeStateService {
             // Repoint the row rather than replacing it (history-tracked, announced downstream by id).
             Boolean productChanged = existing[0].Product__c != productId;
             Boolean amountChanged = existing[0].Amount__c != caseAmount;
+            Boolean bdOrRiaChanged =
+                accountBdOrRia != null && existing[0].BD_or_RIA__c != accountBdOrRia;
             if (productChanged) {
                 existing[0].Product__c = productId;
             }
             if (amountChanged) {
                 existing[0].Amount__c = caseAmount;
             }
-            if (productChanged || amountChanged) {
+            if (bdOrRiaChanged) {
+                existing[0].BD_or_RIA__c = accountBdOrRia;
+            }
+            if (productChanged || amountChanged || bdOrRiaChanged) {
                 update existing[0];
             }
         } catch (DmlException e) {
             throw new AuraHandledException('Save failed: ' + e.getDmlMessage(0));
         }
+    }
+
+    /**
+     * The BD/RIA answer a product row should carry, read from the account it belongs to.
+     *
+     * The wizard shows the question only to a Dual user and derives it from the running user's
+     * Relationship_to_Firm__c for everyone else, so the account is the one place the answer is settled
+     * for every user. Null when the account has no answer yet, which callers read as "leave the row
+     * alone", never as "blank the row".
+     */
+    private static String bdOrRiaForAccount(Id financialAccountId) {
+        for (Financial_Account__c account : [
+            SELECT BD_or_RIA__c FROM Financial_Account__c WHERE Id = :financialAccountId LIMIT 1
+        ]) {
+            return account.BD_or_RIA__c;
+        }
+        return null;
     }
 
 

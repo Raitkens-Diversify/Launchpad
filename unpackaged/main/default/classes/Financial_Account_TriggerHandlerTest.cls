@@ -333,4 +333,101 @@ private class Financial_Account_TriggerHandlerTest {
             [SELECT Maestro_Account_Type__c FROM Financial_Account__c WHERE Id = :fa.Id].Maestro_Account_Type__c,
             'The Maestro Account Type is looked up from Registration_Type__mdt by label and BD/RIA.');
     }
+
+    // ---------------------------------------------------------
+    // syncBdOrRiaToRelatedProducts
+    // ---------------------------------------------------------
+
+    // These tests deliberately avoid Test.startTest()/stopTest(). FARP_Trigger is active in the
+    // sandboxes and publishes a Find_Related_Record__e on every Related Product write; that event is
+    // delivered at Test.stopTest(), and its consumer (FindRelatedRecords_Trigger) reads
+    // FinServ__FinancialAccount__c as a single-row assignment, which throws for the synthetic accounts
+    // built here. Without stopTest() the event is never delivered, so the test measures this handler
+    // and nothing downstream of it. Prod has no trigger on the object at all.
+    // Every account built here is inserted as a brokerage account with an account number, because of
+    // the production bug noted above: setReportAcctNumber_AfterInsert writes to a read-only
+    // Trigger.new record, and its branch fires for any BD account where Brokerage__c is false or the
+    // account number is blank, which makes the insert itself throw. Those two fields are irrelevant to
+    // BD or RIA propagation; they are set only to steer around that branch.
+    private static Financial_Account__c insertAccount(String name, String bdOrRia) {
+        Financial_Account__c fa = new Financial_Account__c(
+            Name = name,
+            BD_or_RIA__c = bdOrRia,
+            Brokerage__c = true,
+            Account_Number__c = 'BDRIA-TEST'
+        );
+        insert fa;
+        return fa;
+    }
+
+    private static Financial_Account_Related_Product__c relatedProductFor(
+        Financial_Account__c account, String bdOrRia
+    ) {
+        Product__c product = new Product__c();
+        insert product;
+
+        Financial_Account_Related_Product__c relatedProduct = new Financial_Account_Related_Product__c(
+            Product__c = product.Id,
+            Wizard_Financial_Account__c = account.Id,
+            BD_or_RIA__c = bdOrRia
+        );
+        insert relatedProduct;
+        return relatedProduct;
+    }
+
+    private static String bdOrRiaOf(Financial_Account_Related_Product__c relatedProduct) {
+        return [
+            SELECT BD_or_RIA__c
+            FROM Financial_Account_Related_Product__c
+            WHERE Id = :relatedProduct.Id
+        ].BD_or_RIA__c;
+    }
+
+    @IsTest
+    static void answeringBdOrRiaFillsABlankRelatedProduct() {
+        Financial_Account__c fa = insertAccount('BD/RIA Fill FA', null);
+        Financial_Account_Related_Product__c relatedProduct = relatedProductFor(fa, null);
+
+        fa.BD_or_RIA__c = 'BD';
+        update fa;
+
+        Assert.areEqual('BD', bdOrRiaOf(relatedProduct),
+            'A product chosen before the BD or RIA question was answered is filled in when it is.');
+    }
+
+    @IsTest
+    static void correctingBdOrRiaCorrectsTheRelatedProduct() {
+        Financial_Account__c fa = insertAccount('BD/RIA Correct FA', 'BD');
+        Financial_Account_Related_Product__c relatedProduct = relatedProductFor(fa, 'BD');
+
+        fa.BD_or_RIA__c = 'RIA';
+        update fa;
+
+        Assert.areEqual('RIA', bdOrRiaOf(relatedProduct),
+            'A corrected answer replaces the copy the product row carries.');
+    }
+
+    @IsTest
+    static void clearingBdOrRiaLeavesTheRelatedProductAlone() {
+        Financial_Account__c fa = insertAccount('BD/RIA Clear FA', 'BD');
+        Financial_Account_Related_Product__c relatedProduct = relatedProductFor(fa, 'BD');
+
+        fa.BD_or_RIA__c = null;
+        update fa;
+
+        Assert.areEqual('BD', bdOrRiaOf(relatedProduct),
+            'An account losing its answer must never blank a row that already carries one.');
+    }
+
+    @IsTest
+    static void anUnrelatedAccountEditLeavesTheRelatedProductAlone() {
+        Financial_Account__c fa = insertAccount('BD/RIA Untouched FA', 'BD');
+        Financial_Account_Related_Product__c relatedProduct = relatedProductFor(fa, 'RIA');
+
+        fa.Name = 'BD/RIA Untouched FA renamed';
+        update fa;
+
+        Assert.areEqual('RIA', bdOrRiaOf(relatedProduct),
+            'Only a change to the answer itself propagates, so an unrelated edit writes nothing.');
+    }
 }

@@ -10,5 +10,15 @@
     <columns>CASES.CREATED_DATE</columns>
     <columns>Financial_Advisor_Team__c</columns>
     <filterScope>Everything</filterScope>
+    <filters>
+        <field>Financial_Advisor_Team__c</field>
+        <operation>contains</operation>
+        <value>Test Advisor</value>
+    </filters>
+    <filters>
+        <field>Order_Tickets__c</field>
+        <operation>equals</operation>
+        <value>1</value>
+    </filters>
     <label>All Cases</label>
 </ListView>
