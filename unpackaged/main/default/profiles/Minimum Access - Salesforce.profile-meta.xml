@@ -999,6 +999,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Financial_Advisor_Team_Member__c.Suppress_Notifications__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Incident.BusinessHoursId</field>
         <readable>true</readable>
     </fieldPermissions>

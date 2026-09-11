@@ -88,6 +88,12 @@
                 <identifier>RecordEmployment_Status_cField</identifier>
             </fieldInstance>
         </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldItem>Record.Suppress_Notifications__c</fieldItem>
+                <identifier>RecordSuppress_Notifications__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
         <name>Facet-28533ced-277a-46d2-ac19-8ec6a2cddb82</name>
         <type>Facet</type>
     </flexiPageRegions>

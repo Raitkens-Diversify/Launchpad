@@ -1004,9 +1004,9 @@
         </connector>
         <flowName>Advisor_Request_Cancel_Recurring_Move_Money</flowName>
         <inputAssignments>
-            <name>varFinancialAccount</name>
+            <name>varFinAcctCustom</name>
             <value>
-                <elementReference>varFinancialAccount</elementReference>
+                <elementReference>varFinancialAccountCustom</elementReference>
             </value>
         </inputAssignments>
         <inputAssignments>

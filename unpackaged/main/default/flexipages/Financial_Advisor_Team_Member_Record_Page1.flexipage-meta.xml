@@ -74,6 +74,12 @@
                 <identifier>RecordRole_cField</identifier>
             </fieldInstance>
         </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldItem>Record.Suppress_Notifications__c</fieldItem>
+                <identifier>RecordSuppress_Notifications__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
         <name>Facet-3a117591-f34e-4879-9dca-2474a4ab58b8</name>
         <type>Facet</type>
     </flexiPageRegions>

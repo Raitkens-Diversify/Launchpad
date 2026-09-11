@@ -22,10 +22,10 @@
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>varCase.FinServ__FinancialAccount__c</assignToReference>
+            <assignToReference>varCase.Wizard_Financial_Account__c</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>Get_Financial_Account.Id</elementReference>
+                <elementReference>varSelectedFinancialAccount</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
@@ -85,7 +85,7 @@
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference>varCase.FinServ__Household__c</assignToReference>
+            <assignToReference>varCase.Household__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>varHousehold.Id</elementReference>
@@ -127,7 +127,7 @@
             <assignToReference>varSelectedFinancialAccount</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>varFinancialAccount.Id</elementReference>
+                <elementReference>varFinAcctCustom.Id</elementReference>
             </value>
         </assignmentItems>
         <connector>
@@ -147,7 +147,7 @@
             <name>HH</name>
             <conditionLogic>and</conditionLogic>
             <conditions>
-                <leftValueReference>varFinancialAccount.Id</leftValueReference>
+                <leftValueReference>varFinAcctCustom.Id</leftValueReference>
                 <operator>IsNull</operator>
                 <rightValue>
                     <booleanValue>true</booleanValue>
@@ -160,6 +160,21 @@
         </rules>
     </decisions>
     <description>Replaced the FinServ Financial Account to DFPG Financial Account</description>
+    <dynamicChoiceSets>
+        <name>Financial_Account_Custom_Choices</name>
+        <dataType>String</dataType>
+        <displayField>Name</displayField>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Household__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>varHousehold.Id</elementReference>
+            </value>
+        </filters>
+        <object>Financial_Account__c</object>
+        <valueField>Id</valueField>
+    </dynamicChoiceSets>
     <dynamicChoiceSets>
         <name>Financial_Account_Record_ChoiceSet</name>
         <dataType>String</dataType>
@@ -411,7 +426,7 @@
                     <inputParameters>
                         <name>defaultValue</name>
                         <value>
-                            <elementReference>varFinancialAccount.Name</elementReference>
+                            <elementReference>varFinAcctCustom.Name</elementReference>
                         </value>
                     </inputParameters>
                     <inputParameters>
@@ -434,7 +449,7 @@
                     <visibilityRule>
                         <conditionLogic>and</conditionLogic>
                         <conditions>
-                            <leftValueReference>varFinancialAccount.Id</leftValueReference>
+                            <leftValueReference>varFinAcctCustom.Id</leftValueReference>
                             <operator>IsNull</operator>
                             <rightValue>
                                 <booleanValue>false</booleanValue>
@@ -444,7 +459,7 @@
                 </fields>
                 <fields>
                     <name>FinancialAccount_Lookup</name>
-                    <choiceReferences>Financial_Account_Record_ChoiceSet</choiceReferences>
+                    <choiceReferences>Financial_Account_Custom_Choices</choiceReferences>
                     <extensionName>flowruntime:choiceLookup</extensionName>
                     <fieldText>Financial Account:</fieldText>
                     <fieldType>ComponentChoice</fieldType>
@@ -468,7 +483,7 @@
                     <visibilityRule>
                         <conditionLogic>or</conditionLogic>
                         <conditions>
-                            <leftValueReference>varFinancialAccount.Id</leftValueReference>
+                            <leftValueReference>varFinAcctCustom.Id</leftValueReference>
                             <operator>IsNull</operator>
                             <rightValue>
                                 <booleanValue>true</booleanValue>
@@ -572,6 +587,14 @@
         <isInput>false</isInput>
         <isOutput>true</isOutput>
         <objectType>Case</objectType>
+    </variables>
+    <variables>
+        <name>varFinAcctCustom</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Financial_Account__c</objectType>
     </variables>
     <variables>
         <name>varFinancialAccount</name>

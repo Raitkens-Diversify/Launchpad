@@ -674,6 +674,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Financial_Advisor_Team_Member__c.Suppress_Notifications__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Knowledge__kav.Content__c</field>
         <readable>true</readable>
     </fieldPermissions>

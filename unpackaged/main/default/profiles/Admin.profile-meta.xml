@@ -4724,6 +4724,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>true</editable>
+        <field>Financial_Advisor_Team_Member__c.Suppress_Notifications__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>false</editable>
         <field>Financial_Advisor_Team_Member__c.User_is_Active__c</field>
         <readable>true</readable>
