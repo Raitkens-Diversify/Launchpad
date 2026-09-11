@@ -19,6 +19,22 @@ public with sharing class WizardEnvelopeStateService {
     public static final String WIZARD_CASE_ORIGIN = 'Wizard';
     public static final String ACCOUNT_OPENING_CASE_TYPE = 'Account Opening';
 
+    // A DPI's Product Type decides the kind of work its Case represents. The wizard Case opens
+    // generically as 'Account Opening' (EnvelopeISAController); at envelope submit (submitEnvelope) a
+    // DPI's Case is retyped from the settled product: a Variable Annuity becomes a VA purchase, and
+    // every other (non-blank) product type is a purchase of an alternative investment. A regular
+    // account or a DPI with no product type keeps the type the Case opened with.
+    //
+    // Case.Type is an unrestricted picklist (the wizard already writes free-text types like
+    // 'Account Opening' that are not defined picklist values), so these values need not be added in
+    // Setup — but adding them keeps reports and filters tidy. 'Purchase Alternative Investment' also
+    // matches one of EnvelopeActionCaseController's account actions: the outline tells the two apart
+    // by the Case's Financial Account being an envelope account/DPI entity, not by Type, so a retyped
+    // DPI Case is not mistaken for an action item — see readActionCases above.
+    private static final String VARIABLE_ANNUITY_PRODUCT_TYPE = 'Variable Annuity';
+    private static final String VA_PURCHASE_CASE_TYPE = 'Purchase a Variable Annuity';
+    private static final String ALT_INVESTMENT_PURCHASE_CASE_TYPE = 'Purchase Alternative Investment';
+
     // The related-product row a wizard Financial Account's product answer lives on. Its own record is
     // the answer, so the criteria that resolve it live in one place: the write below and
     // FieldDetailController.getRelatedProductValuesForAccounts must always resolve the same row.
@@ -2107,7 +2123,9 @@ return result;
         List<Case> casesToUpdate = new List<Case>();
         List<Service__c> servicesToUpdate = new List<Service__c>();
         List<Envelope_Content__c> envelopeContentRecords = [SELECT Id, Account__c, Account__r.Submitted__c, Case__c, Case__r.Submitted__c,
-                                                            Required_Document__c, 
+                                                            Case__r.Wizard_Financial_Account__c,
+                                                            Case__r.Wizard_Financial_Account__r.DPI__c, Case__r.Wizard_Financial_Account__r.Product_Type__c,
+                                                            Required_Document__c,
                                                             Wizard_Financial_Account__c, Wizard_Financial_Account__r.Submitted__c, Service__c, Service__r.Submitted__c,
                                                             Envelope__r.Status__c FROM Envelope_Content__c WHERE Envelope__c =: envelopeId ];
         for(Envelope_Content__c e : envelopeContentRecords){
@@ -2116,6 +2134,17 @@ return result;
                 accToUpdate.add(newAcc);
             } else if(e.Case__c != null && !e.Case__r.Submitted__c){
                 Case newCase = new Case(Id = e.Case__c, Submitted__c = true);
+                // Retype a DPI's Case from its settled Product Type as the envelope submits (see the
+                // constant block above). Guard on the Financial Account lookup before dereferencing it:
+                // a Case with no wizard Financial Account keeps its type, as does a non-DPI or a DPI
+                // with no product type.
+                if (e.Case__r.Wizard_Financial_Account__c != null
+                        && e.Case__r.Wizard_Financial_Account__r.DPI__c == true
+                        && e.Case__r.Wizard_Financial_Account__r.Product_Type__c != null) {
+                    newCase.Type = e.Case__r.Wizard_Financial_Account__r.Product_Type__c == VARIABLE_ANNUITY_PRODUCT_TYPE
+                        ? VA_PURCHASE_CASE_TYPE
+                        : ALT_INVESTMENT_PURCHASE_CASE_TYPE;
+                }
                 casesToUpdate.add(newCase);
             } else if(e.Wizard_Financial_Account__c != null){
                 Financial_Account__c newFin = new Financial_Account__c(Id = e.Wizard_Financial_Account__c, Submitted__c = true);

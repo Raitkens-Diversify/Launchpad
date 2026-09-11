@@ -2093,4 +2093,98 @@ private class WizardEnvelopeStateServiceTest {
         System.assertEquals('FA 1', projected.Name, 'The record Name still comes through beside it.');
     }
 
+    // ---------------------------------------------------------
+    // submitEnvelope — DPI Case retyped from its Product Type
+    // ---------------------------------------------------------
+
+    // Builds what submitEnvelope walks: an envelope, a wizard Financial Account, its 'Account Opening'
+    // wizard Case, and the two Envelope_Content rows that link both to the envelope. isDpi/productType
+    // drive the retype under test.
+    private static Id setupEnvelopeWithDpiCase(String productType, Boolean isDpi) {
+        Envelope__c envelope = new Envelope__c(Status__c = 'In Progress');
+        insert envelope;
+
+        Financial_Account__c fa = new Financial_Account__c(
+            Name = 'Wizard FA',
+            Submitted__c = false,
+            DPI__c = isDpi,
+            Product_Type__c = productType
+        );
+        insert fa;
+
+        Case wizardCase = new Case(
+            Subject = 'New Financial Account',
+            Origin = 'Wizard',
+            Type = 'Account Opening',
+            Status = 'New',
+            Wizard_Financial_Account__c = fa.Id,
+            Submitted__c = false
+        );
+        insert wizardCase;
+
+        insert new List<Envelope_Content__c>{
+            new Envelope_Content__c(Envelope__c = envelope.Id, Wizard_Financial_Account__c = fa.Id),
+            new Envelope_Content__c(Envelope__c = envelope.Id, Case__c = wizardCase.Id)
+        };
+
+        return envelope.Id;
+    }
+
+    private static String caseTypeForEnvelope(Id envelopeId) {
+        return [
+            SELECT Type FROM Case
+            WHERE Id IN (SELECT Case__c FROM Envelope_Content__c WHERE Envelope__c = :envelopeId)
+            LIMIT 1
+        ].Type;
+    }
+
+    @IsTest
+    static void submitEnvelopeRetypesVariableAnnuityDpiCase() {
+        Id envelopeId = setupEnvelopeWithDpiCase('Variable Annuity', true);
+
+        Test.startTest();
+        WizardEnvelopeStateService.submitEnvelope(envelopeId);
+        Test.stopTest();
+
+        Assert.areEqual('Purchase a Variable Annuity', caseTypeForEnvelope(envelopeId),
+            'A submitted DPI with Product Type Variable Annuity retypes its Case to the VA purchase.');
+    }
+
+    @IsTest
+    static void submitEnvelopeRetypesNonVariableAnnuityDpiCaseToAltInvestment() {
+        Id envelopeId = setupEnvelopeWithDpiCase('Mutual Fund', true);
+
+        Test.startTest();
+        WizardEnvelopeStateService.submitEnvelope(envelopeId);
+        Test.stopTest();
+
+        Assert.areEqual('Purchase Alternative Investment', caseTypeForEnvelope(envelopeId),
+            'A submitted DPI whose Product Type is not Variable Annuity retypes its Case to ' +
+            'Purchase Alternative Investment.');
+    }
+
+    @IsTest
+    static void submitEnvelopeLeavesNonDpiCaseAsAccountOpening() {
+        Id envelopeId = setupEnvelopeWithDpiCase('Variable Annuity', false);
+
+        Test.startTest();
+        WizardEnvelopeStateService.submitEnvelope(envelopeId);
+        Test.stopTest();
+
+        Assert.areEqual('Account Opening', caseTypeForEnvelope(envelopeId),
+            'The retype is DPI-only; a regular account keeps the type it opened with.');
+    }
+
+    @IsTest
+    static void submitEnvelopeLeavesBlankProductTypeDpiCaseAsAccountOpening() {
+        Id envelopeId = setupEnvelopeWithDpiCase(null, true);
+
+        Test.startTest();
+        WizardEnvelopeStateService.submitEnvelope(envelopeId);
+        Test.stopTest();
+
+        Assert.areEqual('Account Opening', caseTypeForEnvelope(envelopeId),
+            'A DPI with no Product Type leaves the Case type untouched.');
+    }
+
 }

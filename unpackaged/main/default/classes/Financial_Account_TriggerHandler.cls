@@ -444,25 +444,6 @@ update ridersToUpdate;
 }*/
     }
     
-    // A DPI's Product Type decides the kind of work its Case represents, so the wizard Case opens
-    // generically as 'Account Opening' (EnvelopeISAController) and is retyped here, at submit, once
-    // the interview has settled the product. Add a product type by adding a row — no code change.
-    // Only product types listed here retype the Case; anything else keeps the 'Account Opening' type.
-    //
-    // Keyed by Financial_Account__c.Product_Type__c. Case.Type is an unrestricted picklist (the wizard
-    // already writes free-text types like 'Account Opening' that are not defined picklist values), so a
-    // value here need not be added in Setup — but adding it keeps reports and filters tidy.
-    //
-    // A value here MAY match an account-action Case Type (e.g. 'Purchase Alternative Investment', which
-    // is also one of EnvelopeActionCaseController's account actions): the outline tells the two apart
-    // by the Case's Financial Account being an envelope account/DPI entity, not by Type, so a retyped
-    // DPI Case is not mistaken for an action item — see WizardEnvelopeStateService.readActionCases.
-    private static final Map<String, String> DPI_PRODUCT_TYPE_TO_CASE_TYPE =
-        new Map<String, String>{
-            'Variable Annuity' => 'Purchase a Variable Annuity',
-            'Alternative Investment' => 'Purchase Alternative Investment'
-        };
-
     private void updateRelatedCase(
         Map<Id, Financial_Account__c> newMap,
         Map<Id, Financial_Account__c> oldMap
@@ -597,16 +578,6 @@ update ridersToUpdate;
                 	
                 System.debug('value: ' + value);
                 System.debug('fieldApiName: ' + fieldApiName);
-            }
-
-            // Retype a DPI's Case from its Product Type. Only DPIs carry a product-driven Case type;
-            // a regular account keeps whatever type it opened with. A product type not in the map (or
-            // a blank one) leaves the Case type untouched rather than clearing it.
-            if (fa.DPI__c == true && fa.Product_Type__c != null) {
-                String mappedCaseType = DPI_PRODUCT_TYPE_TO_CASE_TYPE.get(fa.Product_Type__c);
-                if (mappedCaseType != null) {
-                    c.Type = mappedCaseType;
-                }
             }
 
           	c.Recalculate_Case_Template__c = true;

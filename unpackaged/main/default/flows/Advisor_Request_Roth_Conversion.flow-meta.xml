@@ -168,6 +168,13 @@
                 <booleanValue>true</booleanValue>
             </value>
         </assignmentItems>
+        <assignmentItems>
+            <assignToReference>varCase.Previous_Management_Style__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Get_Financial_Account_ToAccount.Managed_Account_Platform__c</elementReference>
+            </value>
+        </assignmentItems>
         <connector>
             <targetReference>Create_Case_MMOneTime</targetReference>
         </connector>

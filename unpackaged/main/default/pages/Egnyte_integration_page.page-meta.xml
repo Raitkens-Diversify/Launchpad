@@ -4,4 +4,9 @@
     <availableInTouch>true</availableInTouch>
     <confirmationTokenRequired>false</confirmationTokenRequired>
     <label>Egnyte Integration Page</label>
+    <packageVersions>
+        <majorNumber>3</majorNumber>
+        <minorNumber>8</minorNumber>
+        <namespace>efs</namespace>
+    </packageVersions>
 </ApexPage>
