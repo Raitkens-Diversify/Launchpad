@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Require_Financial_Advisor_Team</fullName>
+    <active>false</active>
+    <description>Financial Advisor Team is required on a new task</description>
+    <errorConditionFormula>AND(
+  ISNEW(),
+  ISBLANK( Financial_Advisor_Team__c )
+)</errorConditionFormula>
+    <errorDisplayField>Financial_Advisor_Team__c</errorDisplayField>
+    <errorMessage>Financial Advisor Team is required.</errorMessage>
+</ValidationRule>
