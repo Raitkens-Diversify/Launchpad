@@ -17,7 +17,7 @@
   padding: var(--slds-g-spacing-4);
   z-index: var(--env-z-modal, 9000);
   font-family: var(--ds-modal-font-family, var(--slds-g-font-family-base));
-  color: var(--slds-g-color-on-surface-1);
+  color: var(--slds-g-color-on-surface-1, #4b5563);
 }
 
 .ds-modal-v2__container {
@@ -107,7 +107,7 @@
   font-size: var(--slds-g-font-scale-1);
   font-weight: 400;
   line-height: 1.4;
-  color: var(--slds-g-color-on-surface-1);
+  color: var(--slds-g-color-on-surface-1, #4b5563);
 }
 
 .ds-modal-v2__close {
@@ -123,7 +123,7 @@
   cursor: pointer;
   padding: 0.35rem;
   border-radius: var(--ds-modal-radius, var(--slds-g-radius-border-2, 0.5rem));
-  color: var(--slds-g-color-on-surface-1);
+  color: var(--slds-g-color-on-surface-1, #4b5563);
   line-height: 0;
   transition: background var(--env-transition-fast, 0.15s ease);
 }
@@ -142,7 +142,7 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow: auto;
-  color: var(--ds-modal-body-color, var(--slds-g-color-on-surface-1));
+  color: var(--ds-modal-body-color, var(--slds-g-color-on-surface-1, #4b5563));
 }
 
 .ds-modal-v2__body--allow-overflow {

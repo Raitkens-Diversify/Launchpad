@@ -1,4 +1,7 @@
 <template>
+    <!-- The page frame is c-ds-page (column): the same reading column the hub
+         and the events page use; .rd owns nothing but its content. -->
+    <c-ds-page column>
     <div class="rd">
         <template if:true={loading}>
             <div class="rd__status">
@@ -57,9 +60,8 @@
                         </p>
                     </div>
                 </template>
-                <a class="rd__btn" href={downloadHref} download onclick={handleDownload}>
-                    {downloadLabel}
-                </a>
+                <c-ds-button class="rd__btn" label={downloadLabel} href={downloadHref} download
+                             size="lg" onclick={handleDownload}></c-ds-button>
             </template>
 
             <!-- Video: responsive 16:9 embed -->
@@ -82,8 +84,8 @@
 
             <!-- Any other external link -->
             <template if:true={isPlainExternal}>
-                <a class="rd__btn" href={detail.externalUrl} target="_blank"
-                   rel="noopener noreferrer">Open link</a>
+                <c-ds-button class="rd__btn" label="Open link" href={detail.externalUrl}
+                             target="_blank" size="lg"></c-ds-button>
             </template>
 
             <template if:true={hasRelated}>
@@ -109,4 +111,5 @@
             <p class="rd__status">{error}</p>
         </template>
     </div>
+    </c-ds-page>
 </template>

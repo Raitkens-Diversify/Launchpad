@@ -32,13 +32,22 @@
     font-size: 1rem;
     font-weight: 700;
 }
-.ds-il__group-link {
+/* Anchor guard (dsButton.js) on every link: element + class + pseudo so the
+   LWR sites' global a:link rule cannot recolour or underline them. */
+.ds-il__group-link,
+a.ds-il__group-link:link,
+a.ds-il__group-link:visited {
     color: var(--slds-g-color-on-surface-3, #09243f);
+    background-color: transparent;
     text-decoration: none;
 }
 .ds-il__group-link:hover,
-.ds-il__group-link:focus-visible {
+.ds-il__group-link:focus-visible,
+a.ds-il__group-link:hover,
+a.ds-il__group-link:focus,
+a.ds-il__group-link:active {
     color: var(--slds-g-color-accent-1, #0f406f);
+    background-color: transparent;
     text-decoration: underline;
 }
 .ds-il__group-count {
@@ -78,13 +87,22 @@
     gap: 4px;
     min-width: 0;
 }
-.ds-il__link {
+.ds-il__link,
+a.ds-il__link:link,
+a.ds-il__link:visited {
     color: var(--ds-medium-blue, #1a76bb);
+    background-color: transparent;
     font-size: 0.9375rem;
+    font-weight: 400;
     text-decoration: none;
 }
 .ds-il__link:hover,
-.ds-il__link:focus-visible {
+.ds-il__link:focus-visible,
+a.ds-il__link:hover,
+a.ds-il__link:focus,
+a.ds-il__link:active {
+    color: var(--ds-medium-blue, #1a76bb);
+    background-color: transparent;
     text-decoration: underline;
 }
 
@@ -95,16 +113,24 @@
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
 }
 
-.ds-il__more {
+.ds-il__more,
+a.ds-il__more:link,
+a.ds-il__more:visited {
     display: inline-block;
     margin-top: var(--slds-g-spacing-2, 8px);
     font-size: 0.875rem;
     font-weight: 600;
     color: var(--slds-g-color-accent-1, #0f406f);
+    background-color: transparent;
     text-decoration: none;
 }
 .ds-il__more:hover,
-.ds-il__more:focus-visible {
+.ds-il__more:focus-visible,
+a.ds-il__more:hover,
+a.ds-il__more:focus,
+a.ds-il__more:active {
+    color: var(--slds-g-color-accent-1, #0f406f);
+    background-color: transparent;
     text-decoration: underline;
 }
 

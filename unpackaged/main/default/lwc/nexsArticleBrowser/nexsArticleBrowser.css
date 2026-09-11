@@ -77,31 +77,26 @@
        either set; declared once here and on nexsLanding, consumed by
        nexsArticleViewer). Widened so text fills the wider Hulu-like card. */
     --nexs-article-measure: 82ch;
-    /* Centered content columns (also declared on nexsLanding): inner pages
-       use the wide one, per the Hulu reference. */
-    --nexs-content-max: 1040px;
-    --nexs-content-wide: 1440px;
+
+    /* Site body branding (ARC: weight 300) must not inherit into the page. */
+    font-weight: 400;
+    line-height: 1.5;
 }
 
+/* Width, gutters and vertical padding belong to c-ds-page (the same frame on
+   the topic, search and article views, so switching never moves the edges). */
 .nexs {
     display: flex;
     gap: var(--slds-g-spacing-5, 24px);
-    max-width: var(--nexs-content-wide, 1440px);
-    margin: 0 auto;
-    padding: var(--ds-space-2xl, 32px) var(--slds-g-spacing-5, 24px) var(--slds-g-spacing-5, 24px);
     font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
     /* Leave room for the sticky brand header when we scroll here on open. */
     scroll-margin-top: 80px;
 }
 
-/* Article view: a touch more top breathing room, and the breadcrumb is inset
-   to line up under the article card's content (Hulu-style) rather than hugging
-   the card's outer edge. Scoped to the article view so the list view's
-   breadcrumb still aligns with the section cards. */
-.nexs--article {
-    padding-top: var(--ds-space-3xl, 48px);
-}
-
+/* Article view: the breadcrumb is inset to line up under the article card's
+   content (Hulu-style) rather than hugging the card's outer edge. Scoped to
+   the article view so the list view's breadcrumb still aligns with the
+   section cards. */
 .nexs--article c-ds-breadcrumbs {
     padding-left: var(--ds-space-2xl, 32px);
 }
@@ -337,13 +332,24 @@
     background: var(--slds-g-color-surface-container-2, #f3f4f6);
 }
 
-.nexs__row-link {
+/* Anchor guard (dsButton.js): element + class + pseudo so the LWR sites'
+   global a:link rule cannot recolour the article links. */
+.nexs__row-link,
+a.nexs__row-link:link,
+a.nexs__row-link:visited {
     color: var(--ds-medium-blue, #1a76bb);
+    background-color: transparent;
     font-size: 0.9375rem;
+    font-weight: 400;
     text-decoration: none;
 }
 
-.nexs__row-link:hover {
+.nexs__row-link:hover,
+a.nexs__row-link:hover,
+a.nexs__row-link:focus,
+a.nexs__row-link:active {
+    color: var(--ds-medium-blue, #1a76bb);
+    background-color: transparent;
     text-decoration: underline;
 }
 
@@ -424,8 +430,14 @@ c-subtopic-filter-rows {
     color: var(--slds-g-color-on-surface-1, #4b5563);
 }
 
-.nexs__fuzzy-link {
+.nexs__fuzzy-link,
+a.nexs__fuzzy-link:link,
+a.nexs__fuzzy-link:visited,
+a.nexs__fuzzy-link:hover,
+a.nexs__fuzzy-link:focus,
+a.nexs__fuzzy-link:active {
     color: var(--slds-g-color-accent-1, #0f406f);
+    background-color: transparent;
     font-weight: 600;
     text-decoration: underline;
     cursor: pointer;
@@ -476,12 +488,4 @@ c-subtopic-filter-rows {
     padding: 0;
 }
 
-.nexs__zero-cta {
-    display: inline-block;
-    padding: var(--slds-g-spacing-2, 0.5rem) var(--slds-g-spacing-4, 1rem);
-    background: var(--slds-g-color-accent-1, #0f406f);
-    color: var(--slds-g-color-on-accent-1, #ffffff);
-    border-radius: var(--slds-g-radius-border-2, 0.5rem);
-    font-weight: 600;
-    text-decoration: none;
-}
+/* The contact CTA is c-ds-button (brand/md). */

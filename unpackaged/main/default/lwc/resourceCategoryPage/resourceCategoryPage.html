@@ -1,4 +1,7 @@
 <template>
+    <!-- The page frame is c-ds-page (full width: sidebar + content); the help
+         band below stays a full-bleed sibling. -->
+    <c-ds-page>
     <div class="rc-cat">
         <!-- Phone widths only (CSS): the sidebar becomes a drawer behind this button. -->
         <button type="button" class="rc-cat__nav-toggle"
@@ -88,5 +91,6 @@
             </template>
         </main>
     </div>
+    </c-ds-page>
     <c-resource-help-band></c-resource-help-band>
 </template>

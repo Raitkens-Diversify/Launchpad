@@ -10,11 +10,12 @@
                 <p class="ds-agenda__note">{safeItem.note}</p>
             </template>
             <template if:true={hasHref}>
-                <a class="ds-agenda__btn" href={ctaHref}
-                   target="_blank" rel="noopener noreferrer">{ctaLabel}</a>
+                <c-ds-button class="ds-agenda__btn" label={ctaLabel} href={ctaHref}
+                             target="_blank" size="sm"></c-ds-button>
             </template>
             <template if:true={isButton}>
-                <button type="button" class="ds-agenda__btn" onclick={handleSelect}>{ctaLabel}</button>
+                <c-ds-button class="ds-agenda__btn" label={ctaLabel} size="sm"
+                             onclick={handleSelect}></c-ds-button>
             </template>
         </div>
     </div>

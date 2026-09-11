@@ -1,9 +1,14 @@
+/* Shared shell. Self-declared tokens (ui-standards §1, 2026-09-10): the LWR
+   sites inject their own --slds-g-* values at :root (Arc's accent is
+   #1b96ff), so the strip pins the ones it paints with. */
 :host {
     display: block;
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-accent-1: #0f406f;
 }
-
-/* Shared shell: inherits the --slds-g-* tokens from its declaring root with
-   literal fallbacks (ds* convention — no self-declared token block). */
 
 .ds-chrome {
     display: flex;

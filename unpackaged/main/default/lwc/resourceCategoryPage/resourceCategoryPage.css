@@ -1,14 +1,20 @@
+/* Self-declared tokens (ui-standards §1, 2026-09-10): the LWR sites inject
+   their own --slds-g-* values at :root. */
 :host {
     display: block;
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --ds-medium-blue: #1a76bb;
 }
 /* Two-column browse layout mirroring the Help Center's .nexs shell:
-   fixed 340px sidebar with a right border, fluid content. */
+   fixed 340px sidebar with a right border, fluid content. Width, gutters and
+   vertical padding belong to c-ds-page. */
 .rc-cat {
     display: flex;
     gap: var(--ds-space-xl, 24px);
-    max-width: var(--rc-content-wide, 1440px);
-    margin: 0 auto;
-    padding: var(--ds-space-2xl, 32px) var(--ds-space-xl, 24px) var(--ds-space-xl, 24px);
 }
 .rc-cat__nav {
     flex: 0 0 340px;

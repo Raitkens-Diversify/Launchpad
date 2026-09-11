@@ -107,11 +107,12 @@
                 </template>
 
                 <template if:true={hasCtaLink}>
-                    <a class="evd__btn" href={ctaHref} target="_blank"
-                       rel="noopener noreferrer">{ctaLabel}</a>
+                    <c-ds-button class="evd__btn" label={ctaLabel} href={ctaHref} target="_blank"
+                                 size="lg" full-width></c-ds-button>
                 </template>
                 <template if:true={ctaIsWatch}>
-                    <button type="button" class="evd__btn" onclick={handleWatch}>{ctaLabel}</button>
+                    <c-ds-button class="evd__btn" label={ctaLabel} size="lg" full-width
+                                 onclick={handleWatch}></c-ds-button>
                 </template>
                 <template if:true={isEnded}>
                     <p class="evd__ended">This event has ended</p>
@@ -119,8 +120,9 @@
 
                 <template if:true={downloadHref}>
                     <p class="evd__calendar">
-                        <a class="evd__link" href={downloadHref} download
-                           onclick={handleDownload}>Download recording</a>
+                        <c-ds-button class="evd__link" variant="link" label="Download recording"
+                                     href={downloadHref} download
+                                     onclick={handleDownload}></c-ds-button>
                     </p>
                 </template>
             </aside>

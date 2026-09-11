@@ -1,7 +1,9 @@
-/* Tokens inherit from the host page's :host block (docs/ui-standards.md §1);
-   every var() carries the canonical literal fallback — no :host redeclaration. */
+/* Self-declared tokens (ui-standards §1, 2026-09-10): the LWR sites inject
+   their own --slds-g-* values at :root, so the row pins the ones it uses. */
 :host {
     display: block;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-3: #09243f;
 }
 .ds-agenda {
     display: flex;
@@ -35,25 +37,8 @@
     font-style: italic;
     color: var(--slds-g-color-on-surface-1, #4b5563);
 }
+/* The CTA is c-ds-button (brand/sm); only its placement lives here. */
 .ds-agenda__btn {
     align-self: flex-start;
     margin-top: var(--ds-space-xs, 4px);
-    display: inline-block;
-    font-family: inherit;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--slds-g-color-on-accent-1, #ffffff);
-    background: var(--slds-g-color-accent-1, #0f406f);
-    border: none;
-    border-radius: var(--ds-radius-md, 8px);
-    padding: 6px 14px;
-    text-decoration: none;
-    cursor: pointer;
-}
-.ds-agenda__btn:hover {
-    background: var(--slds-g-color-accent-2, #0b2f51);
-}
-.ds-agenda__btn:focus-visible {
-    outline: 2px solid var(--ds-medium-blue, #1a76bb);
-    outline-offset: 2px;
 }

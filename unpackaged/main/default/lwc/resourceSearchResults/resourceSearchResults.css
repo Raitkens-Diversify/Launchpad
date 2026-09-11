@@ -18,10 +18,10 @@
     --slds-g-color-on-accent-1: #ffffff;
     --ds-medium-blue: #1a76bb;
 }
+/* The page frame (width, gutters, padding) is the host's c-ds-page — this
+   view renders inside resourceCenter's and unifiedLanding's frames alike. */
 .rsr {
-    max-width: var(--rc-content-wide, 1440px);
-    margin: 0 auto;
-    padding: var(--ds-space-2xl, 32px) var(--ds-space-lg, 16px);
+    display: block;
 }
 .rsr__title {
     margin: 0 0 var(--ds-space-lg, 16px);

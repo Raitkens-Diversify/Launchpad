@@ -41,6 +41,10 @@
                 </template>
             </c-ds-hero>
 
+            <!-- The page frame (c-ds-page column): the hero above and the help
+                 band below stay full-bleed siblings; the banner and the body
+                 share the frame's 1040px column. -->
+            <c-ds-page column>
             <c-event-banner event={nextEvent}></c-event-banner>
 
             <div class="landing-body">
@@ -72,8 +76,9 @@
                     </template>
                 </div>
             </div>
+            </c-ds-page>
 
-            <!-- Outside .landing-body on purpose: the band paints its own
+            <!-- Outside the frame on purpose: the band paints its own
                  full-bleed gray background. -->
             <div data-tour-id="landing-help">
                 <c-resource-help-band></c-resource-help-band>
@@ -81,10 +86,12 @@
         </template>
 
         <template if:true={isResults}>
-            <div class="landing-body" onresourceselect={handleResourceSelect}
-                 onarticleselect={handleArticleSelect}>
+            <!-- Results use the full frame (facet rail + grid), as they do on
+                 the Resource Center route. -->
+            <c-ds-page onresourceselect={handleResourceSelect}
+                       onarticleselect={handleArticleSelect}>
                 <c-resource-search-results term={term}></c-resource-search-results>
-            </div>
+            </c-ds-page>
         </template>
 
         <c-tour-launcher tour-key="unified_landing"></c-tour-launcher>

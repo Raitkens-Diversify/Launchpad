@@ -1,0 +1,27 @@
+<template>
+    <template lwc:if={isLink}>
+        <!-- Two anchors, not one with download={download}: LWC renders a false
+             binding as download="false" and ANY download attribute makes the
+             browser save the target. -->
+        <template lwc:if={download}>
+            <a class={cssClass} href={href} target={target} rel={relAttr} download
+               aria-disabled={ariaDisabledAttr} tabindex={tabIndexAttr} onclick={handleClick}>
+                <template lwc:if={label}>{label}</template>
+                <template lwc:else><slot></slot></template>
+            </a>
+        </template>
+        <template lwc:else>
+            <a class={cssClass} href={href} target={target} rel={relAttr}
+               aria-disabled={ariaDisabledAttr} tabindex={tabIndexAttr} onclick={handleClick}>
+                <template lwc:if={label}>{label}</template>
+                <template lwc:else><slot></slot></template>
+            </a>
+        </template>
+    </template>
+    <template lwc:else>
+        <button type="button" class={cssClass} disabled={disabled} onclick={handleClick}>
+            <template lwc:if={label}>{label}</template>
+            <template lwc:else><slot></slot></template>
+        </button>
+    </template>
+</template>

@@ -19,13 +19,11 @@
 
         <div class="rc-card__action">
             <template if:true={isExternal}>
-                <a class="rc-card__btn" href={resource.externalUrl}
-                   target="_blank" rel="noopener noreferrer">{primaryLabel}</a>
+                <c-ds-button class="rc-card__btn" label={primaryLabel} href={resource.externalUrl}
+                             target="_blank"></c-ds-button>
             </template>
             <template if:true={isOpenInApp}>
-                <button class="rc-card__btn" type="button" onclick={handleSelect}>
-                    {primaryLabel}
-                </button>
+                <c-ds-button class="rc-card__btn" label={primaryLabel} onclick={handleSelect}></c-ds-button>
             </template>
         </div>
     </article>

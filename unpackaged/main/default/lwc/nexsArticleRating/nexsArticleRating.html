@@ -58,18 +58,10 @@
                         disabled={busy}
                     ></textarea>
                     <div class="nexs-rating__comment-actions">
-                        <button
-                            type="button"
-                            class="nexs-rating__btn nexs-rating__btn--primary"
-                            disabled={busy}
-                            onclick={handleSubmitComment}
-                        >Submit</button>
-                        <button
-                            type="button"
-                            class="nexs-rating__btn"
-                            disabled={busy}
-                            onclick={handleDismissComment}
-                        >No thanks</button>
+                        <c-ds-button class="nexs-rating__btn nexs-rating__btn--primary" label="Submit"
+                                     size="sm" disabled={busy} onclick={handleSubmitComment}></c-ds-button>
+                        <c-ds-button class="nexs-rating__btn" label="No thanks" variant="quiet"
+                                     size="sm" disabled={busy} onclick={handleDismissComment}></c-ds-button>
                     </div>
                 </div>
             </template>

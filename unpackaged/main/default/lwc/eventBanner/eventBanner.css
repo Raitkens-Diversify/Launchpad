@@ -1,17 +1,22 @@
-/* Child of unifiedLanding — consumes the host's token block via
-   var(--token, #fallback); no :host declarations of its own (ui-standards §1).
-   Centered in the same 1040px column as the landing body. */
+/* Child of unifiedLanding, inside its c-ds-page column — the frame owns the
+   width and gutters, the banner only its own box. Self-declared --slds-g-*
+   (ui-standards §1, 2026-09-10): the LWR sites inject their own values at
+   :root (Arc's accent is #1b96ff). */
 
 :host {
     display: block;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-on-accent-1: #ffffff;
+    --slds-g-color-on-surface-3: #09243f;
 }
 
 .eb {
     display: flex;
     align-items: center;
     gap: var(--ds-space-md, 12px);
-    max-width: var(--rc-content-max, 1040px);
-    margin: var(--ds-space-xl, 24px) auto 0;
+    /* First thing in the frame: no top offset, and the gap to the body is the
+       banner's, so a hidden banner leaves the frame's own padding untouched. */
+    margin: 0 0 var(--ds-space-2xl, 32px);
     padding: var(--ds-space-sm, 8px) var(--ds-space-lg, 16px);
     background: var(--ds-gray-1, #f3f4f6);
     border: var(--ds-border-light, 1px solid #e5e7eb);
@@ -49,15 +54,25 @@
     color: var(--ds-gray-5, #4b5563);
 }
 
-.eb__cta {
+/* Anchor guard (dsButton.js): element + class + pseudo so the LWR sites'
+   global a:link rule cannot recolour the action. */
+.eb__cta,
+a.eb__cta:link,
+a.eb__cta:visited {
     flex: none;
     font-size: var(--slds-g-font-scale-1, 14px);
     font-weight: 600;
     color: var(--ds-medium-blue, #1a76bb);
+    background-color: transparent;
     text-decoration: none;
     white-space: nowrap;
 }
-.eb__cta:hover {
+.eb__cta:hover,
+a.eb__cta:hover,
+a.eb__cta:focus,
+a.eb__cta:active {
+    color: var(--ds-medium-blue, #1a76bb);
+    background-color: transparent;
     text-decoration: underline;
 }
 
@@ -87,13 +102,9 @@
     height: 14px;
 }
 
-/* The banner is inside the hero-to-body gap, so it keeps its own side padding
-   at narrow widths; the meta drops so the line stays single on mobile. */
+/* The meta drops so the line stays single on mobile (the frame's gutters
+   already keep the banner off the edges). */
 @media (max-width: 640px) {
-    .eb {
-        margin-left: var(--ds-space-lg, 16px);
-        margin-right: var(--ds-space-lg, 16px);
-    }
     .eb__meta {
         display: none;
     }

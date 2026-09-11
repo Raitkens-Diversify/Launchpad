@@ -63,7 +63,9 @@
     --ds-shadow-hover: 0 4px 14px rgba(15, 64, 111, 0.08);
     --ds-shadow-drop: 0 8px 24px rgba(9, 36, 63, 0.12);
 
-    --rc-content-max: 1040px;
+    /* Site body branding (ARC: weight 300) must not inherit into the page. */
+    font-weight: 400;
+    line-height: 1.5;
 }
 
 /* Full-column, tall white bar — same dsSearchBar size-hook recipe as
@@ -76,10 +78,10 @@
     --ds-search-bar-font-size: 15px;
 }
 
+/* Width, gutters and vertical padding belong to c-ds-page (column); the body
+   keeps only its section rhythm (the banner, when shown, carries the gap
+   between itself and the body). */
 .landing-body {
-    max-width: var(--rc-content-max, 1040px);
-    margin: 0 auto;
-    padding: var(--ds-space-2xl, 32px) var(--ds-space-lg, 16px) var(--ds-space-3xl, 48px);
     display: flex;
     flex-direction: column;
     gap: var(--ds-space-2xl, 32px);

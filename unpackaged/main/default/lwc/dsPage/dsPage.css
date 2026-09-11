@@ -1,0 +1,37 @@
+/* The ONE page frame + spacing token set (dsPage.js). Declared here, on the
+   frame's own :host, so every route gets the same values without each root
+   carrying a copy; --ds-* names are repo-local and never platform-injected. */
+:host {
+    display: block;
+    --ds-page-max: 1440px;
+    --ds-page-gutter: 24px;
+    --ds-page-gutter-narrow: 16px;
+    --ds-page-pad-top: 32px;
+    --ds-page-pad-bottom: 48px;
+    --ds-column-max: 1040px;
+}
+
+/* content-box on purpose: max-width is the CONTENT width (1440 / 1040), the
+   gutters sit outside it — the same way the hero's inner column is measured. */
+.ds-page {
+    box-sizing: content-box;
+    max-width: var(--ds-page-max, 1440px);
+    margin: 0 auto;
+    padding: var(--ds-page-pad-top, 32px) var(--ds-page-gutter, 24px) var(--ds-page-pad-bottom, 48px);
+}
+
+.ds-page__inner {
+    min-width: 0;
+}
+
+.ds-page__column {
+    max-width: var(--ds-column-max, 1040px);
+    margin: 0 auto;
+}
+
+@media (max-width: 640px) {
+    .ds-page {
+        padding-left: var(--ds-page-gutter-narrow, 16px);
+        padding-right: var(--ds-page-gutter-narrow, 16px);
+    }
+}

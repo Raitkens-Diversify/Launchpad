@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>61.0</apiVersion>
+    <isExposed>false</isExposed>
+    <description>Help &amp; Resource Center&#39;s one button recipe (brand / quiet / link; button or anchor). Owns the anchor-guard CSS that stops LWR sites restyling link-shaped buttons. Composed by the events, resource, card and rating bundles.</description>
+</LightningComponentBundle>

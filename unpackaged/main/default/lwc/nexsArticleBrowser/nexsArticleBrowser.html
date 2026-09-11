@@ -1,4 +1,7 @@
 <template>
+    <!-- The page frame is c-ds-page (full width: sidebar + content, and the
+         article view alike); the help band below stays a full-bleed sibling. -->
+    <c-ds-page>
     <div class={nexsClass}>
         <!-- Topics sidebar hides on the article view — the article gets its own
              page layout (breadcrumb + article + Suggested Articles), like Hulu. -->
@@ -218,13 +221,15 @@
                             </ul>
                         </template>
                         <template lwc:if={zeroCtaUrl}>
-                            <a class="nexs__zero-cta" href={zeroCtaUrl}>{contactSupportLabel}</a>
+                            <c-ds-button class="nexs__zero-cta" label={contactSupportLabel}
+                                         href={zeroCtaUrl}></c-ds-button>
                         </template>
                     </div>
                 </template>
             </template>
         </main>
     </div>
+    </c-ds-page>
 
     <!-- "Need more help?" contact band — the shared c-resource-help-band
          (targets come from Resource_Center_Setting__mdt). -->

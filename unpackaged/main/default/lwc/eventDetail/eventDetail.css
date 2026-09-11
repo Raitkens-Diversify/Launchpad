@@ -280,58 +280,20 @@
     .evd__live-dot { animation: none; }
 }
 
-/* The ONE primary button on the page — the family's navy recipe, full width. */
-.evd__btn {
-    display: block;
-    width: 100%;
-    box-sizing: border-box;
-    font-family: inherit;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    text-align: center;
-    color: var(--slds-g-color-on-accent-1, #ffffff);
-    background: var(--slds-g-color-accent-1, #0f406f);
-    border: none;
-    border-radius: var(--ds-radius-md, 8px);
-    padding: 10px 20px;
-    text-decoration: none;
-    cursor: pointer;
-}
-.evd__btn:hover {
-    background: var(--slds-g-color-accent-2, #0b2f51);
-}
-.evd__btn:focus-visible {
-    outline: 2px solid var(--ds-medium-blue, #1a76bb);
-    outline-offset: 2px;
-}
+/* The ONE primary button on the page: c-ds-button brand/lg, full width. */
 .evd__ended {
     margin: 0;
     font-size: 0.9375rem;
     font-style: italic;
     color: var(--slds-g-color-on-surface-1, #4b5563);
 }
-/* Secondary text actions in the card (the recording download). */
+/* Secondary text action in the card (the recording download): c-ds-button link. */
 .evd__calendar {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: var(--ds-space-sm, 8px);
     margin: 0;
-    font-size: 0.875rem;
-}
-.evd__link {
-    background: none;
-    border: none;
-    padding: 0;
-    font-family: inherit;
-    font-size: inherit;
-    font-weight: 600;
-    color: var(--ds-medium-blue, #1a76bb);
-    text-decoration: none;
-    cursor: pointer;
-}
-.evd__link:hover {
-    text-decoration: underline;
 }
 /* ---- More in Webinars & Events ------------------------------------------- */
 

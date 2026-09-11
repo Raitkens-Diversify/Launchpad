@@ -13,7 +13,11 @@
     --slds-g-color-accent-1: #0f406f;
 }
 
-.hrl {
+/* Anchor guard (dsButton.js): element + class + pseudo so the LWR sites'
+   global a:link rule cannot recolour or underline the pill. */
+.hrl,
+a.hrl:link,
+a.hrl:visited {
     display: inline-flex;
     align-items: center;
     gap: var(--slds-g-spacing-2, 8px);
@@ -24,14 +28,20 @@
     font-weight: 500;
     line-height: 1;
     color: var(--slds-g-color-on-surface-3, #09243f);
+    background-color: transparent;
     text-decoration: none;
     white-space: nowrap;
 }
 
 .hrl:hover,
-.hrl:focus-visible {
+.hrl:focus-visible,
+a.hrl:hover,
+a.hrl:focus,
+a.hrl:active {
     color: var(--slds-g-color-accent-1, #0f406f);
     border-color: var(--slds-g-color-accent-1, #0f406f);
+    background-color: transparent;
+    text-decoration: none;
 }
 
 .hrl:focus-visible {

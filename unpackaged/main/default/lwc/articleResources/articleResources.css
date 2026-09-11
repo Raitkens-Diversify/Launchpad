@@ -62,13 +62,23 @@
     font-size: 0.9375rem;
     color: var(--slds-g-color-on-surface-3, #09243f);
 }
-.ar-row__link {
+/* Anchor guard (dsButton.js): element + class + pseudo so the LWR sites'
+   global a:link rule cannot recolour the action. */
+.ar-row__link,
+a.ar-row__link:link,
+a.ar-row__link:visited {
     font-size: 0.875rem;
     font-weight: 600;
     color: var(--ds-medium-blue, #1a76bb);
+    background-color: transparent;
     text-decoration: none;
     flex: 0 0 auto;
 }
-.ar-row__link:hover {
+.ar-row__link:hover,
+a.ar-row__link:hover,
+a.ar-row__link:focus,
+a.ar-row__link:active {
+    color: var(--ds-medium-blue, #1a76bb);
+    background-color: transparent;
     text-decoration: underline;
 }

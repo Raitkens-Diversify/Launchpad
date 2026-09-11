@@ -1,6 +1,10 @@
 <template>
     <c-ds-chrome logo-url={logoUrl} hide-branding={hideBranding} brand-label="Event Center" onbrandclick={handleBrandHome}>
-        <div class={pageClass}>
+        <!-- One frame for both views (c-ds-page column): Calendar and Upcoming
+             share the same max-width, gutters and padding, so switching tabs
+             never moves the page edges. -->
+        <c-ds-page column>
+        <div class="ev">
             <header class="ev__head">
                 <c-ds-breadcrumbs items={crumbItems} oncrumbselect={handleCrumb}></c-ds-breadcrumbs>
                 <h1 class="ev__heading">Event Center</h1>
@@ -35,8 +39,8 @@
                                         </template>
                                         <div class="ev__actions">
                                             <template if:true={ev.cta.isSignup}>
-                                                <a class="ev__cta" href={ev.cta.primaryHref}
-                                                   target="_blank" rel="noopener noreferrer">{ev.cta.primaryLabel}</a>
+                                                <c-ds-button label={ev.cta.primaryLabel} href={ev.cta.primaryHref}
+                                                             target="_blank"></c-ds-button>
                                             </template>
                                         </div>
                                     </div>
@@ -74,9 +78,9 @@
                                         </template>
                                         <div class="ev__actions">
                                             <template if:true={ev.cta.isWatch}>
-                                                <button type="button" class="ev__cta ev__cta--button"
-                                                        data-slug={ev.slug}
-                                                        onclick={handleWatch}>{ev.cta.primaryLabel}</button>
+                                                <c-ds-button label={ev.cta.primaryLabel}
+                                                             data-slug={ev.slug}
+                                                             onclick={handleWatch}></c-ds-button>
                                             </template>
                                             <template if:true={ev.cta.note}>
                                                 <p class="ev__note">{ev.cta.note}</p>
@@ -102,6 +106,7 @@
                 </div>
             </template>
         </div>
+        </c-ds-page>
 
         <c-ds-popover is-open={popoverOpen} anchor-rect={anchorRect} label="Event details"
                       onclose={handlePopoverClose}>
@@ -117,19 +122,20 @@
                     </template>
                     <div class="ev__actions">
                         <template if:true={selectedEvent.cta.isSignup}>
-                            <a class="ev__cta" href={selectedEvent.cta.primaryHref}
-                               target="_blank" rel="noopener noreferrer">{selectedEvent.cta.primaryLabel}</a>
+                            <c-ds-button label={selectedEvent.cta.primaryLabel} href={selectedEvent.cta.primaryHref}
+                                         target="_blank"></c-ds-button>
                         </template>
                         <template if:true={selectedEvent.cta.isWatch}>
-                            <button type="button" class="ev__cta ev__cta--button"
-                                    data-slug={selectedEvent.slug}
-                                    onclick={handleWatch}>{selectedEvent.cta.primaryLabel}</button>
+                            <c-ds-button label={selectedEvent.cta.primaryLabel}
+                                         data-slug={selectedEvent.slug}
+                                         onclick={handleWatch}></c-ds-button>
                         </template>
                         <template if:true={selectedEvent.cta.note}>
                             <p class="ev__note">{selectedEvent.cta.note}</p>
                         </template>
-                        <button type="button" class="ev__link-btn" data-slug={selectedEvent.slug}
-                                onclick={handleViewDetails}>View details</button>
+                        <c-ds-button variant="link" label="View details" class="ev__view-details"
+                                     data-slug={selectedEvent.slug}
+                                     onclick={handleViewDetails}></c-ds-button>
                     </div>
                 </div>
             </template>
@@ -155,11 +161,8 @@
                     <c-event-detail detail={modalDetail} link-ctx={linkCtx} hide-title></c-event-detail>
                 </template>
             </div>
-            <div slot="footer" class="ev__modal-footer">
-                <button type="button" class="ev__link-btn" onclick={handleOpenFullPage}>Open full page</button>
-                <button type="button" class="ev__cta ev__cta--button ev__cta--quiet"
-                        onclick={handleModalClose}>Close</button>
-            </div>
+            <c-ds-button slot="footer" variant="quiet" label="Close" class="ev__modal-close"
+                         onclick={handleModalClose}></c-ds-button>
         </c-ds-modal-v2>
     </c-ds-chrome>
 </template>

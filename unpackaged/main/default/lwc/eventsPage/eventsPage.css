@@ -64,19 +64,15 @@
     --ds-shadow-drop: 0 8px 24px rgba(9, 36, 63, 0.12);
     --ds-shadow-raised: 0 -4px 12px rgba(9, 36, 63, 0.08);
 
-    /* Agenda lists read better narrower than the landing's 1040px column. */
-    --ev-content-max: 840px;
+    /* Site body branding (ARC: weight 300) must not inherit into the page. */
+    font-weight: 400;
+    line-height: 1.5;
 }
 
-/* Seven columns are cramped at agenda width; the calendar view opens up. */
-.ev--calendar {
-    --ev-content-max: 960px;
-}
-
+/* The page frame (width, gutters, vertical padding) is c-ds-page's — both
+   views share it, so nothing here sets a width. */
 .ev {
-    max-width: var(--ev-content-max, 840px);
-    margin: 0 auto;
-    padding: var(--ds-space-2xl, 32px) var(--ds-space-lg, 16px) var(--ds-space-3xl, 48px);
+    display: block;
 }
 
 .ev__head {
@@ -95,16 +91,22 @@
     color: var(--ds-gray-5, #4b5563);
 }
 
+/* The strip owns the gap to the first block, so Calendar and Upcoming start
+   at the same offset below it. */
 .ev__tabs {
     display: block;
     margin-top: var(--ds-space-xl, 24px);
+    margin-bottom: var(--ds-space-xl, 24px);
 }
 
 .ev__calendar {
-    margin-top: var(--ds-space-xl, 24px);
+    margin-top: 0;
 }
 
 .ev__month {
+    margin-top: 0;
+}
+.ev__month + .ev__month {
     margin-top: var(--ds-space-2xl, 32px);
 }
 
@@ -213,56 +215,8 @@
     margin-top: var(--ds-space-md, 12px);
 }
 
-/* Primary action: the family button (ds-content-card__btn / ds-agenda__btn
-   radius), shared by the Sign up anchor and the Watch recording button. */
-.ev__cta {
-    display: inline-flex;
-    align-items: center;
-    padding: var(--ds-space-sm, 8px) var(--ds-space-lg, 16px);
-    border-radius: var(--ds-radius-md, 8px);
-    background: var(--slds-g-color-accent-1, #0f406f);
-    color: var(--slds-g-color-on-accent-1, #ffffff);
-    font-size: var(--slds-g-font-scale-1, 14px);
-    font-weight: 600;
-    line-height: 1.25;
-    text-decoration: none;
-    transition: background-color 0.15s ease;
-}
-.ev__cta:hover {
-    background: var(--slds-g-color-accent-2, #0b2f51);
-}
-.ev__cta:focus-visible {
-    outline: 2px solid var(--ds-medium-blue, #1a76bb);
-    outline-offset: 2px;
-}
-.ev__cta--button {
-    border: none;
-    cursor: pointer;
-    font-family: inherit;
-}
-/* The modal's Close: the family's quiet button. */
-.ev__cta--quiet {
-    background: var(--slds-g-color-surface-container-1, #ffffff);
-    color: var(--slds-g-color-on-surface-3, #09243f);
-    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
-}
-.ev__cta--quiet:hover {
-    background: var(--slds-g-color-surface-container-2, #f3f4f6);
-}
-/* Text actions: "View details" in the popover, "Open full page" in the modal. */
-.ev__link-btn {
-    background: none;
-    border: none;
-    padding: 0;
-    font-family: inherit;
-    font-size: var(--slds-g-font-scale-1, 14px);
-    font-weight: 600;
-    color: var(--ds-medium-blue, #1a76bb);
-    cursor: pointer;
-}
-.ev__link-btn:hover {
-    text-decoration: underline;
-}
+/* Every action (Sign up, Watch recording, View details, Close) is a
+   c-ds-button — brand / link / quiet — so the recipe lives in one place. */
 
 /* No action yet (past, unrecorded) — a note, never a dead button. */
 .ev__note {
@@ -273,7 +227,7 @@
 
 /* Empty state is a card too — a grey fill would vanish into the page. */
 .ev__empty {
-    margin: var(--ds-space-2xl, 32px) 0 0;
+    margin: 0;
     padding: var(--ds-space-xl, 24px);
     background: var(--slds-g-color-surface-container-1, #ffffff);
     border: 1px solid var(--slds-g-color-border-1, #d1d5db);
@@ -316,14 +270,6 @@
     text-align: center;
     color: var(--slds-g-color-on-surface-1, #4b5563);
 }
-.ev__modal-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--ds-space-lg, 16px);
-    width: 100%;
-}
-
 @media (max-width: 640px) {
     .ev__row {
         padding: var(--ds-space-md, 12px);
@@ -332,8 +278,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .ev__row,
-    .ev__cta {
+    .ev__row {
         transition-duration: 0.01ms;
     }
 }

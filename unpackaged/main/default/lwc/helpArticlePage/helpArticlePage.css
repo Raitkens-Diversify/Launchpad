@@ -62,8 +62,10 @@
     --ds-shadow-drop: 0 8px 24px rgba(9, 36, 63, 0.12);
 
     --nexs-article-measure: 82ch;
-    --nexs-content-max: 1040px;
-    --nexs-content-wide: 1440px;
+
+    /* Site body branding (ARC: weight 300) must not inherit into the page. */
+    font-weight: 400;
+    line-height: 1.5;
 }
 
 /* Cross-app link to the Resource Center (chrome actions slot). */

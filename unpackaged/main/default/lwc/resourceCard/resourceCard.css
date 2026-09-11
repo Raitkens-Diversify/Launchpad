@@ -1,6 +1,16 @@
+/* Self-declared tokens (ui-standards §1): the LWR sites inject their own
+   --slds-g-* values at :root (Arc's accent is #1b96ff), and a card can be
+   dropped as a builder-region sibling of its declaring root. */
 :host {
     display: block;
     height: 100%;
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-on-accent-1: #ffffff;
 }
 
 .rc-card {
@@ -67,19 +77,4 @@
     margin-top: auto;
     padding-top: var(--ds-space-sm, 8px);
 }
-.rc-card__btn {
-    display: inline-block;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--slds-g-color-on-accent-1, #ffffff);
-    background: var(--slds-g-color-accent-1, #0f406f);
-    border: none;
-    border-radius: var(--ds-radius-md, 8px);
-    padding: 8px 16px;
-    text-decoration: none;
-    cursor: pointer;
-    transition: background 0.15s ease;
-}
-.rc-card__btn:hover {
-    background: var(--slds-g-color-accent-2, #0b2f51);
-}
+/* The action is c-ds-button (brand/md). */

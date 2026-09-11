@@ -28,6 +28,9 @@
         calc(var(--ds-space-3xl, 48px) + var(--ds-space-lg, 16px));
     text-align: center;
     font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+    /* Site body branding (ARC: weight 300) must not inherit into the band. */
+    font-weight: 400;
+    line-height: 1.5;
 }
 
 .rc-help__title {
@@ -53,24 +56,42 @@
     margin: 0 auto;
 }
 
-.rc-help__card {
+/* The cards are anchors (mailto: / the request URL). Anchor guard (see
+   dsButton.js): on the LWR sites a global a:link rule at (0,2,2) restyles
+   every anchor — colour, background, decoration — so each state is written
+   as element + class + pseudo and sets all three explicitly. This is what
+   kept the "Get in touch" card white on Lightning but transparent on ARC. */
+.rc-help__card,
+a.rc-help__card:link,
+a.rc-help__card:visited {
     flex: 1 1 480px;
     max-width: 620px;
     display: flex;
     align-items: center;
     gap: var(--slds-g-spacing-5, 24px);
     padding: var(--ds-space-2xl, 32px);
-    background: var(--slds-g-color-surface-container-1, #ffffff);
+    background-color: var(--slds-g-color-surface-container-1, #ffffff);
     border: 1px solid var(--slds-g-color-border-1, #d1d5db);
     border-radius: var(--ds-radius-lg, 10px);
+    color: var(--slds-g-color-on-surface-1, #4b5563);
     text-decoration: none;
     text-align: left;
     transition: border-color 120ms ease, box-shadow 120ms ease;
 }
 
-.rc-help__card:hover {
+.rc-help__card:hover,
+a.rc-help__card:hover,
+a.rc-help__card:focus,
+a.rc-help__card:active {
+    background-color: var(--slds-g-color-surface-container-1, #ffffff);
     border-color: var(--slds-g-color-accent-1, #0f406f);
     box-shadow: var(--ds-shadow-hover, 0 4px 14px rgba(15, 64, 111, 0.08));
+    color: var(--slds-g-color-on-surface-1, #4b5563);
+    text-decoration: none;
+}
+a.rc-help__card:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
 }
 
 .rc-help__card-icon {

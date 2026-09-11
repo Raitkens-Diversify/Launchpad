@@ -43,12 +43,9 @@
     --ds-search-bar-font-size: 15px;
 }
 
-/* ---- Body sections ---- */
+/* ---- Body sections: the frame (width, gutters, padding) is c-ds-page. ---- */
 .home-body {
-    max-width: calc(var(--nexs-content-max, 1040px) + 2 * var(--slds-g-spacing-5, 24px));
-    margin: 0 auto;
-    padding: var(--ds-space-2xl, 32px) var(--slds-g-spacing-5, 24px) var(--ds-space-3xl, 48px);
-    box-sizing: border-box;
+    display: block;
 }
 
 .home-section + .home-section {
@@ -75,15 +72,25 @@
     margin: 0;
 }
 
-.home-section__link {
+/* Anchor guard (dsButton.js) on the two link shapes below: element + class +
+   pseudo so the LWR sites' global a:link rule cannot recolour them. */
+.home-section__link,
+a.home-section__link:link,
+a.home-section__link:visited {
     font-size: 0.9375rem;
     font-weight: 600;
     color: var(--ds-medium-blue, #1a76bb);
+    background-color: transparent;
     text-decoration: none;
     white-space: nowrap;
 }
 
-.home-section__link:hover {
+.home-section__link:hover,
+a.home-section__link:hover,
+a.home-section__link:focus,
+a.home-section__link:active {
+    color: var(--ds-medium-blue, #1a76bb);
+    background-color: transparent;
     text-decoration: underline;
 }
 
@@ -109,18 +116,27 @@
     border-top: 1px solid var(--slds-g-color-border-1, #d1d5db);
 }
 
-.home-popular__row {
+.home-popular__row,
+a.home-popular__row:link,
+a.home-popular__row:visited {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--slds-g-spacing-3, 12px);
     padding: var(--slds-g-spacing-4, 16px) var(--slds-g-spacing-5, 24px);
+    background-color: transparent;
+    color: var(--slds-g-color-on-surface-3, #09243f);
     text-decoration: none;
     transition: background-color 120ms ease;
 }
 
-.home-popular__row:hover {
-    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+.home-popular__row:hover,
+a.home-popular__row:hover,
+a.home-popular__row:focus,
+a.home-popular__row:active {
+    background-color: var(--slds-g-color-surface-container-2, #f3f4f6);
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    text-decoration: none;
 }
 
 .home-popular__title {

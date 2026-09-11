@@ -1,12 +1,17 @@
+/* Shared primitive. Self-declared colour tokens (ui-standards §1, 2026-09-10):
+   the LWR sites inject their own --slds-g-* values at :root (Arc's accent is
+   #1b96ff), so the colours the bar paints with are pinned here; spacing and
+   type still inherit from the declaring root with literal fallbacks. */
 :host {
     display: block;
     position: relative;
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-accent-1: #0f406f;
 }
-
-/* Shared primitive: inherits the --slds-g-* tokens from its declaring root
-   (nexsLanding / resourceCenter / adminConsole per ui-standards §1) with
-   literal fallbacks so it stays safe standalone. Deliberately NO self-declared
-   token block — same rationale as dsTopicNav. */
 
 .ds-search {
     position: relative;

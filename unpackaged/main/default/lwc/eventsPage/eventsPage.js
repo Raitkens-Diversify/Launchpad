@@ -7,7 +7,7 @@ import trackDownload from '@salesforce/apex/ResourceCenterService.trackDownload'
 import { messageFrom } from 'c/messageUtil';
 import { formatTime, formatDateTime, formatMonthYear, localDateKey } from 'c/dsDateBlock';
 import { eventCta, formatDurationMinutes, HELP_HOME_LABEL, CRUMB_HELP_HOME } from 'c/rcConstants';
-import { linkContext, readParams, isSiteRef, goToResource, goToHome } from 'c/contextNav';
+import { linkContext, readParams, isSiteRef, goToHome } from 'c/contextNav';
 
 /**
  * eventsPage — the /help/events route host, in two views behind a tab strip:
@@ -33,8 +33,14 @@ import { linkContext, readParams, isSiteRef, goToResource, goToHome } from 'c/co
  * "Watch recording" (the player is inside, so nobody leaves the page). The
  * modal loads ResourceCenterService.getResourceBySlug imperatively on open
  * (rich-text agenda, audience, recording file — the feed rows carry none of
- * that); a sibling card inside it swaps the modal to that event; the footer's
- * "Open full page" goes to the Resource Center route through c/contextNav.
+ * that); a sibling card inside it swaps the modal to that event; the footer is
+ * just Close ("Open full page" was removed 2026-09-10 — the modal IS the
+ * full page now).
+ *
+ * Layout (2026-09-10): both views sit in one c-ds-page column frame, so the
+ * Calendar and Upcoming tabs share identical width, gutters and padding; every
+ * action is a c-ds-button (the one recipe that survives the LWR sites' global
+ * anchor rule — see dsButton.js).
  *
  * URL contract: the default Calendar view carries ?month=YYYY-MM (no view
  * param); the list is ?view=upcoming. The pre-2026-09-02 ?view=calendar form
@@ -264,10 +270,6 @@ export default class EventsPage extends NavigationMixin(LightningElement) {
         ];
     }
 
-    get pageClass() {
-        return this.isCalendarView ? 'ev ev--calendar' : 'ev';
-    }
-
     get crumbItems() {
         return [{ label: HELP_HOME_LABEL, key: CRUMB_HELP_HOME }, { label: 'Event Center' }];
     }
@@ -487,11 +489,5 @@ export default class EventsPage extends NavigationMixin(LightningElement) {
         if (event.detail && event.detail.id) {
             trackDownload({ resourceId: event.detail.id }).catch(() => {});
         }
-    }
-
-    handleOpenFullPage() {
-        const slug = this.modalSlug;
-        this.handleModalClose();
-        goToResource(this, this.linkCtx, { slug });
     }
 }

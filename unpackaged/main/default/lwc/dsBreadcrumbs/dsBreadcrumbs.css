@@ -1,9 +1,20 @@
 /* Visuals ported verbatim from nexsArticleBrowser's .nexs__crumb* rules —
    class names are local to this shadow tree; pixel parity is what matters. */
+/* Self-declared tokens (ui-standards §1, 2026-09-10): the LWR sites inject
+   their own --slds-g-* values at :root (Arc's accent is #1b96ff). */
 :host {
     display: flex;
     margin-bottom: var(--slds-g-spacing-4, 16px);
     min-width: 0;
+    font-weight: 400;
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-1: #4b5563;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-border-2: #b6bcc5;
+    --slds-g-color-accent-1: #0f406f;
 }
 .crumbs {
     display: flex;
@@ -26,13 +37,23 @@
     gap: var(--slds-g-spacing-2, 8px);
     min-width: 0;
 }
-.crumbs__link {
+/* Anchor guard (dsButton.js): element + class + pseudo so the LWR sites'
+   global a:link rule cannot recolour the crumbs. */
+.crumbs__link,
+a.crumbs__link:link,
+a.crumbs__link:visited {
     color: var(--slds-g-color-on-surface-1, #4b5563);
+    background-color: transparent;
+    font-weight: 400;
     text-decoration: none;
     white-space: nowrap;
 }
-.crumbs__link:hover {
+.crumbs__link:hover,
+a.crumbs__link:hover,
+a.crumbs__link:focus,
+a.crumbs__link:active {
     color: var(--slds-g-color-accent-1, #0f406f);
+    background-color: transparent;
     text-decoration: underline;
 }
 .crumbs__sep {
@@ -86,16 +107,23 @@
     box-shadow: var(--ds-shadow-drop, 0 8px 24px rgba(9, 36, 63, 0.12));
 }
 .crumbs__menu-link,
+a.crumbs__menu-link:link,
+a.crumbs__menu-link:visited,
 .crumbs__menu-text {
     display: block;
     padding: 8px 12px;
     white-space: nowrap;
+    background-color: transparent;
     color: var(--slds-g-color-on-surface-2, #374151);
     text-decoration: none;
 }
 .crumbs__menu-link:hover,
-.crumbs__menu-link:focus-visible {
-    background: var(--slds-g-color-surface-container-2, #f3f4f6);
+.crumbs__menu-link:focus-visible,
+a.crumbs__menu-link:hover,
+a.crumbs__menu-link:focus,
+a.crumbs__menu-link:active {
+    background-color: var(--slds-g-color-surface-container-2, #f3f4f6);
     color: var(--slds-g-color-accent-1, #0f406f);
+    text-decoration: none;
     outline: none;
 }

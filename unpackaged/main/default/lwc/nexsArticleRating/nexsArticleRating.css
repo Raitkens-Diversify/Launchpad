@@ -142,37 +142,7 @@
     margin-top: var(--slds-g-spacing-3, 12px);
 }
 
-.nexs-rating__btn {
-    padding: var(--slds-g-spacing-2, 8px) var(--slds-g-spacing-4, 16px);
-    background: var(--slds-g-color-surface-container-1, #ffffff);
-    border: 1px solid var(--slds-g-color-border-1, #d1d5db);
-    border-radius: var(--ds-radius-md, 8px);
-    font-family: inherit;
-    font-size: var(--slds-g-font-scale-2, 0.875rem);
-    font-weight: 600;
-    color: var(--slds-g-color-on-surface-2, #374151);
-    cursor: pointer;
-}
-
-.nexs-rating__btn:hover:not(:disabled) {
-    background: var(--slds-g-color-surface-container-2, #f3f4f6);
-}
-
-.nexs-rating__btn--primary {
-    background: var(--slds-g-color-accent-1, #0f406f);
-    border-color: var(--slds-g-color-accent-1, #0f406f);
-    color: var(--slds-g-color-on-accent-1, #ffffff);
-}
-
-.nexs-rating__btn--primary:hover:not(:disabled) {
-    background: var(--slds-g-color-accent-2, #0b2f51);
-    border-color: var(--slds-g-color-accent-2, #0b2f51);
-}
-
-.nexs-rating__btn:disabled {
-    opacity: 0.6;
-    cursor: default;
-}
+/* Submit / No thanks are c-ds-button (brand / quiet, sm). */
 
 .nexs-rating__error {
     margin: var(--slds-g-spacing-3, 12px) 0 0;

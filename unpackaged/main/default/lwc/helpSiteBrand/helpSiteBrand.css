@@ -14,10 +14,18 @@
 }
 
 /* Mirrors dsChrome's brand strip so the header reads the same as before. */
-.hsb {
+/* Anchor guard (dsButton.js): element + class + pseudo so the LWR sites'
+   global a:link rule cannot recolour or underline the brand link. */
+.hsb,
+a.hsb:link,
+a.hsb:visited,
+a.hsb:hover,
+a.hsb:focus,
+a.hsb:active {
     display: inline-flex;
     align-items: center;
     gap: var(--slds-g-spacing-3, 12px);
+    background-color: transparent;
     text-decoration: none;
     color: var(--slds-g-color-on-surface-3, #09243f);
 }

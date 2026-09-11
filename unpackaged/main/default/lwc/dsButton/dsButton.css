@@ -1,0 +1,151 @@
+/* The ONE button recipe (see dsButton.js for the anchor-guard rationale).
+   Self-declared tokens (ui-standards §1): the LWR sites inject their own
+   --slds-g-* values at :root (Arc's accent is #1b96ff), so the colours the
+   button relies on are pinned here. Every colour keeps its canonical fallback. */
+:host {
+    display: inline-block;
+    max-width: 100%;
+    vertical-align: middle;
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-border-2: #b6bcc5;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-accent-3: #071c31;
+    --slds-g-color-on-accent-1: #ffffff;
+    --ds-medium-blue: #1a76bb;
+    --ds-radius-md: 8px;
+}
+:host(.ds-btn-host--full) {
+    display: block;
+}
+
+/* ---- Base (both element forms) --------------------------------------------- */
+.ds-btn,
+a.ds-btn:link,
+a.ds-btn:visited {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-sizing: border-box;
+    max-width: 100%;
+    margin: 0;
+    border: 1px solid transparent;
+    border-radius: var(--ds-radius-md, 8px);
+    font-family: inherit;
+    font-weight: 600;
+    line-height: 1.25;
+    text-align: center;
+    text-decoration: none;
+    text-shadow: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.ds-btn--full {
+    display: flex;
+    width: 100%;
+}
+
+/* ---- Sizes (px: identical on a 14px and a 16px root) ---------------------- */
+.ds-btn--sm { padding: 5px 13px; font-size: 13px; }
+.ds-btn--md { padding: 7px 15px; font-size: 14px; }
+.ds-btn--lg { padding: 9px 19px; font-size: 15px; }
+
+/* ---- brand: navy fill ------------------------------------------------------- */
+.ds-btn--brand,
+a.ds-btn--brand:link,
+a.ds-btn--brand:visited {
+    background-color: var(--slds-g-color-accent-1, #0f406f);
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+}
+.ds-btn--brand:hover,
+a.ds-btn--brand:hover,
+a.ds-btn--brand:focus {
+    background-color: var(--slds-g-color-accent-2, #0b2f51);
+    border-color: var(--slds-g-color-accent-2, #0b2f51);
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+    text-decoration: none;
+}
+.ds-btn--brand:active,
+a.ds-btn--brand:active {
+    background-color: var(--slds-g-color-accent-3, #071c31);
+    border-color: var(--slds-g-color-accent-3, #071c31);
+    color: var(--slds-g-color-on-accent-1, #ffffff);
+    text-decoration: none;
+}
+
+/* ---- quiet: white fill, hairline ------------------------------------------- */
+.ds-btn--quiet,
+a.ds-btn--quiet:link,
+a.ds-btn--quiet:visited {
+    background-color: var(--slds-g-color-surface-container-1, #ffffff);
+    border-color: var(--slds-g-color-border-1, #d1d5db);
+    color: var(--slds-g-color-on-surface-3, #09243f);
+}
+.ds-btn--quiet:hover,
+a.ds-btn--quiet:hover,
+a.ds-btn--quiet:focus {
+    background-color: var(--slds-g-color-surface-container-2, #f3f4f6);
+    border-color: var(--slds-g-color-border-2, #b6bcc5);
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    text-decoration: none;
+}
+.ds-btn--quiet:active,
+a.ds-btn--quiet:active {
+    background-color: var(--slds-g-color-surface-container-2, #f3f4f6);
+    border-color: var(--slds-g-color-accent-1, #0f406f);
+    color: var(--slds-g-color-on-surface-3, #09243f);
+    text-decoration: none;
+}
+
+/* ---- link: text action ----------------------------------------------------- */
+.ds-btn--link,
+a.ds-btn--link:link,
+a.ds-btn--link:visited {
+    padding: 0;
+    border: none;
+    border-radius: 2px;
+    background-color: transparent;
+    color: var(--ds-medium-blue, #1a76bb);
+    white-space: normal;
+}
+.ds-btn--link:hover,
+a.ds-btn--link:hover,
+a.ds-btn--link:focus {
+    background-color: transparent;
+    color: var(--ds-medium-blue, #1a76bb);
+    text-decoration: underline;
+}
+.ds-btn--link:active,
+a.ds-btn--link:active {
+    background-color: transparent;
+    color: var(--slds-g-color-accent-1, #0f406f);
+    text-decoration: underline;
+}
+
+/* ---- Focus ring (keyboard only), disabled ----------------------------------- */
+.ds-btn:focus-visible,
+a.ds-btn:focus-visible {
+    outline: 2px solid var(--ds-medium-blue, #1a76bb);
+    outline-offset: 2px;
+}
+.ds-btn:disabled,
+.ds-btn--disabled,
+a.ds-btn--disabled:link,
+a.ds-btn--disabled:visited {
+    opacity: 0.6;
+    cursor: default;
+    pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ds-btn,
+    a.ds-btn:link {
+        transition: none;
+    }
+}

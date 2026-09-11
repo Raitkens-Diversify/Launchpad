@@ -24,13 +24,12 @@
 
         <div class="ds-content-card__action">
             <template if:true={hasHref}>
-                <a class="ds-content-card__btn" href={item.href}
-                   target="_blank" rel="noopener noreferrer">{primaryLabel}</a>
+                <c-ds-button class="ds-content-card__btn" label={primaryLabel} href={item.href}
+                             target="_blank"></c-ds-button>
             </template>
             <template if:true={isButtonAction}>
-                <button class="ds-content-card__btn" type="button" onclick={handleSelect}>
-                    {primaryLabel}
-                </button>
+                <c-ds-button class="ds-content-card__btn" label={primaryLabel}
+                             onclick={handleSelect}></c-ds-button>
             </template>
         </div>
     </article>

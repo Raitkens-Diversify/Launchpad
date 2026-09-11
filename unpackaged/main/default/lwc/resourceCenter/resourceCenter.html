@@ -56,11 +56,17 @@
                 <template if:true={isDetail}>
                     <c-resource-detail slug={slug} help-center-base-url={helpCenterBaseUrl}></c-resource-detail>
                 </template>
+                <!-- Search and the guide take the shared page frame here (the
+                     category and detail views compose c-ds-page themselves,
+                     because the help band must stay outside it). -->
                 <template if:true={isSearch}>
-                    <c-resource-search-results term={term} scope={scope}
-                        help-center-base-url={helpCenterBaseUrl}></c-resource-search-results>
+                    <c-ds-page>
+                        <c-resource-search-results term={term} scope={scope}
+                            help-center-base-url={helpCenterBaseUrl}></c-resource-search-results>
+                    </c-ds-page>
                 </template>
                 <template if:true={isGuide}>
+                    <c-ds-page column>
                     <section class="rc-guide">
                         <c-ds-breadcrumbs items={guideCrumbs}
                                           oncrumbselect={handleGuideCrumb}></c-ds-breadcrumbs>
@@ -73,6 +79,7 @@
                         <!-- case target defaults from Resource_Center_Setting__mdt -->
                         <c-help-guide guide-key="get_help"></c-help-guide>
                     </section>
+                    </c-ds-page>
                 </template>
             </main>
         </c-ds-chrome>

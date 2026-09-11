@@ -15,6 +15,9 @@
         </div>
     </c-ds-hero>
 
+    <!-- The page frame (c-ds-page column): the hero above and the help band
+         below stay full-bleed siblings. -->
+    <c-ds-page column>
     <div class="home-body">
         <template if:true={showWelcome}>
             <section class="home-section">
@@ -94,6 +97,7 @@
             </section>
         </template>
     </div>
+    </c-ds-page>
 
     <!-- "Need more help?" contact band — the shared c-resource-help-band
          (targets come from Resource_Center_Setting__mdt). The wrapper div

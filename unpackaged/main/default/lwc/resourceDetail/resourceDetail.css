@@ -18,10 +18,9 @@
     --slds-g-color-on-accent-1: #ffffff;
     --ds-medium-blue: #1a76bb;
 }
+/* Width, gutters and vertical padding belong to c-ds-page (column). */
 .rd {
-    max-width: var(--rc-content-max, 1040px);
-    margin: 0 auto;
-    padding: var(--ds-space-2xl, 32px) var(--ds-space-lg, 16px);
+    display: block;
 }
 /* Breadcrumb visuals live in the shared c-ds-breadcrumbs component. */
 
@@ -128,19 +127,7 @@
 }
 
 
-.rd__btn {
-    display: inline-block;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--slds-g-color-on-accent-1, #ffffff);
-    background: var(--slds-g-color-accent-1, #0f406f);
-    border: none;
-    border-radius: var(--ds-radius-md, 8px);
-    padding: 10px 20px;
-    text-decoration: none;
-    cursor: pointer;
-}
-.rd__btn:hover { background: var(--slds-g-color-accent-2, #0b2f51); }
+/* Download / Open link: c-ds-button brand/lg. */
 
 .rd__related {
     margin-top: var(--ds-space-2xl, 32px);
@@ -158,11 +145,27 @@
     padding-left: 1.1rem;
     line-height: 1.9;
 }
-.rd__related-list a {
+/* Anchor guard (dsButton.js): element + class + pseudo beats the LWR sites'
+   global a:link rule; every state sets colour, background and decoration. */
+.rd__related-list a,
+.rd__related-list a:link,
+.rd__related-list a:visited {
     color: var(--ds-medium-blue, #1a76bb);
+    background-color: transparent;
     text-decoration: none;
 }
-.rd__related-list a:hover { text-decoration: underline; }
+.rd__related-list a:hover,
+.rd__related-list a:focus,
+.rd__related-list a:active {
+    color: var(--ds-medium-blue, #1a76bb);
+    background-color: transparent;
+    text-decoration: underline;
+}
+.rd__desc a:link,
+.rd__desc a:visited {
+    color: var(--ds-medium-blue, #1a76bb);
+    background-color: transparent;
+}
 
 .rd__status {
     padding: var(--ds-space-xl, 24px);

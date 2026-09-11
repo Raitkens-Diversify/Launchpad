@@ -1,6 +1,20 @@
 /* Visuals ported verbatim from nexsArticleBrowser's .nexs__nav-* rules —
    class names are local to this shadow tree; pixel parity is what matters.
-   Rows became real <button>s, so each carries a full button reset. */
+   Rows became real <button>s, so each carries a full button reset.
+   Self-declared tokens (ui-standards §1, 2026-09-10): the LWR sites inject
+   their own --slds-g-* values at :root (Arc's accent is #1b96ff), which
+   would repaint the active row. */
+:host {
+    --slds-g-color-surface-container-1: #ffffff;
+    --slds-g-color-surface-container-2: #f3f4f6;
+    --slds-g-color-on-surface-2: #374151;
+    --slds-g-color-on-surface-3: #09243f;
+    --slds-g-color-border-1: #d1d5db;
+    --slds-g-color-border-3: #9aa1ad;
+    --slds-g-color-accent-1: #0f406f;
+    --slds-g-color-accent-2: #0b2f51;
+    --slds-g-color-on-accent-1: #ffffff;
+}
 .tnav__title {
     margin: 0 0 var(--slds-g-spacing-4, 16px);
     font-family: var(--ds-font-heading, "Libre Baskerville", Georgia, serif);

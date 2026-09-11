@@ -63,11 +63,12 @@
     --ds-shadow-hover: 0 4px 14px rgba(15, 64, 111, 0.08);
     --ds-shadow-drop: 0 8px 24px rgba(9, 36, 63, 0.12);
 
-    --nexs-content-max: 1040px;
-    --nexs-content-wide: 1440px;
     --nexs-hero-display: 2.5rem;
 
     font-family: var(--slds-g-font-family-base, "Inter", sans-serif);
+    /* Site body branding (ARC: weight 300) must not inherit into the page. */
+    font-weight: 400;
+    line-height: 1.5;
     color: var(--slds-g-color-on-surface-2, #374151);
     background: var(--slds-g-color-surface-container-1, #ffffff);
 }
@@ -81,6 +82,8 @@
 /* Cross-link to the Help Center, slotted into c-ds-chrome's actions region
    (placement is the chrome's job; styling stays here — slotted elements are
    styled by the host's stylesheet). */
+/* Same recipe as the other roots' chrome actions (nexsLanding .nexs-chrome__rc-link,
+   helpArticlePage .hap__rc-link, unifiedLanding .landing__events-link). */
 .rc-chrome__link {
     background: none;
     border: none;
@@ -88,23 +91,22 @@
     cursor: pointer;
     font-family: inherit;
     font-size: var(--slds-g-font-scale-1, 14px);
-    font-weight: 600;
-    color: var(--ds-medium-blue, #1a76bb);
+    font-weight: 500;
+    color: var(--slds-g-color-on-surface-3, #09243f);
     white-space: nowrap;
 }
 .rc-chrome__link:hover {
-    text-decoration: underline;
+    color: var(--slds-g-color-accent-1, #0f406f);
 }
 
 .rc-main {
     flex: 1 1 auto;
 }
 
-/* --- Get Help guide view (crumbs: the shared c-ds-breadcrumbs) --- */
+/* --- Get Help guide view (crumbs: the shared c-ds-breadcrumbs); the frame
+   is c-ds-page (column). --- */
 .rc-guide {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: var(--ds-space-xl, 24px) var(--ds-space-lg, 16px);
+    display: block;
 }
 .rc-guide__title {
     margin: 0;
