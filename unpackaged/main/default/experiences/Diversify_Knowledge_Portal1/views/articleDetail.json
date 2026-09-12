@@ -2,10 +2,10 @@
   "appPageId" : "d5e3c47c-ae25-4c7a-848f-ab2b98f65f4d",
   "componentName" : "siteforce:sldsTwoCol84SidebarFeaturedLayout",
   "dataProviders" : [ ],
-  "id" : "061572f2-eec0-4521-9f38-aab8b14d9117",
+  "id" : "155f7fb9-04bf-4107-93a4-fa890f1ae2dd",
   "label" : "Article Detail",
   "regions" : [ {
-    "id" : "e60a4da4-a2c1-47cd-80f2-e28daa5e24e0",
+    "id" : "21883518-003c-4452-a5de-19d4e53f7610",
     "regionName" : "header",
     "type" : "region"
   }, {
@@ -14,7 +14,7 @@
         "uniqueNameOrId" : "{!urlName}"
       },
       "componentName" : "forceCommunity:breadcrumbs",
-      "id" : "b062af0f-a642-4efa-9a9a-127e4c393ac8",
+      "id" : "bdc4662b-0c23-439e-8092-3967ac186b76",
       "renderPriority" : "NEUTRAL",
       "renditionMap" : { },
       "type" : "component"
@@ -30,12 +30,12 @@
         "urlName" : "{!urlName}"
       },
       "componentName" : "selfService:singleArticleView",
-      "id" : "f24a1844-ca00-40f6-ae3c-0751ff34516c",
+      "id" : "0ae54f4a-dc2e-4954-bc31-947ec47e7d98",
       "renderPriority" : "NEUTRAL",
       "renditionMap" : { },
       "type" : "component"
     } ],
-    "id" : "94af0bb2-9d01-4599-886a-cf424ef2906f",
+    "id" : "5cc6ee63-6c75-48d2-bfee-0ecc244ed9e4",
     "regionName" : "content",
     "type" : "region"
   }, {
@@ -46,7 +46,7 @@
         "title" : "Related Articles"
       },
       "componentName" : "selfService:similarArticles42",
-      "id" : "f0ae238f-007a-4819-a223-8a21be2af154",
+      "id" : "d021cecd-e9f2-485d-bd55-892be1901984",
       "renderPriority" : "NEUTRAL",
       "renditionMap" : { },
       "type" : "component"
@@ -57,7 +57,7 @@
         "topicId" : "{!topicId}"
       },
       "componentName" : "selfService:topicTrendingArticles42",
-      "id" : "ce27c70c-5b85-492a-9651-e20054a0c4f2",
+      "id" : "e90f2def-2cdc-4910-b4a5-0fe4dca3bfa3",
       "renderPriority" : "NEUTRAL",
       "renditionMap" : { },
       "type" : "component"
@@ -74,12 +74,12 @@
         "label" : "Contact Support"
       },
       "componentName" : "forceCommunity:contactSupportButton",
-      "id" : "99b8feae-8f40-4886-98d3-3ef38b8558a2",
+      "id" : "b0f7a098-2a98-49e1-8394-6549b76828f3",
       "renderPriority" : "NEUTRAL",
       "renditionMap" : { },
       "type" : "component"
     } ],
-    "id" : "9cd3f80e-bdd2-4a0a-8ce7-32b4c73f5195",
+    "id" : "85b82533-cf51-4976-884e-9f998910ea8d",
     "regionName" : "sidebar",
     "type" : "region"
   }, {
@@ -90,11 +90,11 @@
         "title" : "{!Record._Title}"
       },
       "componentName" : "forceCommunity:seoAssistant",
-      "id" : "0f0bff30-3984-45fd-83d3-a5d7adc5698b",
+      "id" : "254ae0e7-8bcf-4966-bd7f-e26fb388d6b9",
       "renditionMap" : { },
       "type" : "component"
     } ],
-    "id" : "afe44e14-c199-46b5-90eb-8babe38bd8cb",
+    "id" : "6509ae7d-13ea-40a2-8ec6-5f02fcd65eaf",
     "regionName" : "sfdcHiddenRegion",
     "type" : "region"
   } ],
